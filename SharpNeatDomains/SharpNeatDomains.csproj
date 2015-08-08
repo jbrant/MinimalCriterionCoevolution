@@ -107,6 +107,7 @@
     <Compile Include="FunctionRegression\ParameterSamplingInfo.cs" />
     <Compile Include="FunctionRegression\FunctionRegressionExperiment.cs" />
     <Compile Include="INeatExperiment.cs" />
+    <Compile Include="MazeNavigation\MazeNavigationEvaluator.cs" />
     <Compile Include="NeatGenomeView.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -165,7 +166,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="ClassDiagram1.cd" />
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
