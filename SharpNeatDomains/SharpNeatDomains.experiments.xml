@@ -537,5 +537,23 @@ A single evaluation consists of 75 test cases with the two boxes randomly positi
 The problem domain view allows the performance of the best genome to be observed. The view also allows the HyperNEAT genome to be decoded using a range of visual field pixel resolutions beyond the 11x11 resolution that genomes are trained with. The ability to do this is a feature of HyperNEAT - the evolved genomes are Compositional Pattern Producing Networks (CPPNs). A CPPN defines the connection strength between nodes positioned in some euclidean space and therefore we can use a CPPN to produce neural networks with more nodes by increasing the number and density of nodes.
       </Description>
     </Config>
-  </Experiment>  
+  </Experiment>
+
+  <Experiment name="Maze Navigation - Fitness (NEAT)">
+    <AssemblyPath>SharpNeatDomains.dll</AssemblyPath>
+    <ClassName>SharpNeat.Domains.BoxesVisualDiscrimination.BoxesVisualDiscriminationExperiment</ClassName>
+    <Config>
+      <PopulationSize>150</PopulationSize>
+      <SpecieCount>10</SpecieCount>
+      <Activation>
+        <Scheme>CyclicFixedIters</Scheme>
+        <Iters>2</Iters>
+      </Activation>
+      <ComplexityRegulationStrategy>Absolute</ComplexityRegulationStrategy>
+      <ComplexityThreshold>50</ComplexityThreshold>
+      <Description>
+        This is a start to getting the maze navigation experiment implemented.
+      </Description>
+    </Config>
+  </Experiment>
 </Experiments>

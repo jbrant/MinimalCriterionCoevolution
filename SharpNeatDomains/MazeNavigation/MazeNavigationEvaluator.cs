@@ -1,43 +1,40 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using SharpNeat.Core;
+﻿using SharpNeat.Core;
 using SharpNeat.Phenomes;
 
 namespace SharpNeat.Domains.MazeNavigation
 {
-    class MazeNavigationEvaluator : IPhenomeEvaluator<IBlackBox>
+    internal class MazeNavigationEvaluator : IPhenomeEvaluator<IBlackBox>
     {
-        #region Class Variables
+        /// <summary>
+        ///     Gets the total number of evaluations that have been performed.
+        /// </summary>
+        public ulong EvaluationCount { get; private set; }
 
-        // Evaluator state
-        private ulong _evaluationCount;
-        
-        #endregion
-
-        public ulong EvaluationCount
-        {
-            get { return _evaluationCount; }
-        }
-
-        public bool StopConditionSatisfied
-        {
-            get { throw new NotImplementedException(); }
-        }
+        /// <summary>
+        ///     Gets a value indicating whether some goal fitness has been achieved and that the evolutionary algorithm/search
+        ///     should stop.  This property's value can remain false to allow the algorithm to run indefinitely.
+        /// </summary>
+        public bool StopConditionSatisfied { get; }
 
         public FitnessInfo Evaluate(IBlackBox phenome)
         {
-
             // Increment eval count
-            _evaluationCount++;
+            EvaluationCount++;
 
-            throw new NotImplementedException();
+            return new FitnessInfo();
         }
 
+        /// <summary>
+        ///     Resets the internal state of the evaluation scheme.  This may not be needed for the maze navigation task.
+        /// </summary>
         public void Reset()
         {
-            throw new NotImplementedException();
         }
+
+        #region Class Variables
+
+        // Evaluator state
+
+        #endregion
     }
 }

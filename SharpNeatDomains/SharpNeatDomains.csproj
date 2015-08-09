@@ -108,6 +108,7 @@
     <Compile Include="FunctionRegression\FunctionRegressionExperiment.cs" />
     <Compile Include="INeatExperiment.cs" />
     <Compile Include="MazeNavigation\MazeNavigationEvaluator.cs" />
+    <Compile Include="MazeNavigation\MazeNavigationExperiment.cs" />
     <Compile Include="NeatGenomeView.cs">
       <SubType>UserControl</SubType>
     </Compile>
