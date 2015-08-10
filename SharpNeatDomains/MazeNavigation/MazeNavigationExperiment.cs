@@ -202,7 +202,7 @@ namespace SharpNeat.Domains.MazeNavigation
         /// <returns></returns>
         public AbstractDomainView CreateDomainView()
         {
-            return null;
+            return new MazeNavigationView();
         }
     }
 }

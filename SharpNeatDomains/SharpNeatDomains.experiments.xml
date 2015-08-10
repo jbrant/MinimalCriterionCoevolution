@@ -541,7 +541,7 @@ The problem domain view allows the performance of the best genome to be observed
 
   <Experiment name="Maze Navigation - Fitness (NEAT)">
     <AssemblyPath>SharpNeatDomains.dll</AssemblyPath>
-    <ClassName>SharpNeat.Domains.BoxesVisualDiscrimination.BoxesVisualDiscriminationExperiment</ClassName>
+    <ClassName>SharpNeat.Domains.MazeNavigation.MazeNavigationExperiment</ClassName>
     <Config>
       <PopulationSize>150</PopulationSize>
       <SpecieCount>10</SpecieCount>

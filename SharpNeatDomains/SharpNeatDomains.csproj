@@ -109,6 +109,13 @@
     <Compile Include="INeatExperiment.cs" />
     <Compile Include="MazeNavigation\MazeNavigationEvaluator.cs" />
     <Compile Include="MazeNavigation\MazeNavigationExperiment.cs" />
+    <Compile Include="MazeNavigation\MazeNavigationView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MazeNavigation\MazeNavigationView.Designer.cs">
+      <DependentUpon>MazeNavigationView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MazeNavigation\MazeNavigationWorld.cs" />
     <Compile Include="NeatGenomeView.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -152,6 +159,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FunctionRegression\FunctionRegressionView2D.resx">
       <DependentUpon>FunctionRegressionView2D.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MazeNavigation\MazeNavigationView.resx">
+      <DependentUpon>MazeNavigationView.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="NeatGenomeView.resx">
       <DependentUpon>NeatGenomeView.cs</DependentUpon>

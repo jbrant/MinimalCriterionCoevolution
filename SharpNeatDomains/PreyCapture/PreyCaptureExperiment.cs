@@ -266,7 +266,7 @@ namespace SharpNeat.Domains.PreyCapture
         /// </summary>
         public AbstractDomainView CreateDomainView()
         {
-            return new PreyCaptureView(new NeatGenomeDecoder(_activationScheme),
+            return new PreyCapture.PreyCaptureView(new NeatGenomeDecoder(_activationScheme),
                                        new PreyCaptureWorld(_gridSize, _preyInitMoves, _preySpeed, _sensorRange, _maxTimesteps));
         }
 
