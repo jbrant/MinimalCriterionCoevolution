@@ -108,6 +108,11 @@
     <Compile Include="FunctionRegression\FunctionRegressionExperiment.cs" />
     <Compile Include="INeatExperiment.cs" />
     <Compile Include="MazeNavigation\Components\BasicShapes.cs" />
+    <Compile Include="MazeNavigation\Components\MazeNavigator.cs" />
+    <Compile Include="MazeNavigation\Components\MazeVariant.cs" />
+    <Compile Include="MazeNavigation\Components\PieSliceSensorArray.cs" />
+    <Compile Include="MazeNavigation\Components\Radar.cs" />
+    <Compile Include="MazeNavigation\Components\RangeFinder.cs" />
     <Compile Include="MazeNavigation\MazeNavigationEvaluator.cs" />
     <Compile Include="MazeNavigation\MazeNavigationExperiment.cs" />
     <Compile Include="MazeNavigation\MazeNavigationView.cs">
