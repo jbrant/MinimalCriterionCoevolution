@@ -107,6 +107,7 @@
     <Compile Include="FunctionRegression\ParameterSamplingInfo.cs" />
     <Compile Include="FunctionRegression\FunctionRegressionExperiment.cs" />
     <Compile Include="INeatExperiment.cs" />
+    <Compile Include="MathUtils.cs" />
     <Compile Include="MazeNavigation\Components\BasicShapes.cs" />
     <Compile Include="MazeNavigation\Components\MazeNavigator.cs" />
     <Compile Include="MazeNavigation\Components\MazeVariant.cs" />

@@ -6,26 +6,28 @@ namespace SharpNeat.Domains.MazeNavigation
 {
     internal class MazeNavigationWorld
     {
-        #region Static fields
-
-        private static readonly int MIN_SUCCESS_DISTANCE = 5;
-        private static readonly int MAX_DISTANCE_TO_TARGET = 300;
-
-        #endregion
-
-        #region Instance fields
+        private static readonly int MinSuccessDistance = 5;
+        private static readonly int MaxDistanceToTarget = 300;
 
         /// <summary>
         ///     Location of the goal.
         /// </summary>
         private Point2D _goalLocation;
 
-        #endregion
+        private bool _isGoalReached;
 
-        #region Constructor
+        private int _maxTimesteps;
 
-        public MazeNavigationWorld(MazeVariant mazeVariant)
+        private MazeNavigator _navigator;
+
+        public MazeNavigationWorld(MazeVariant mazeVariant, int maxTimeSteps = 400)
         {
+
+            _maxTimesteps = maxTimeSteps;
+
+            // Initialize goal reached status to false
+            _isGoalReached = false;
+
             if (mazeVariant == MazeVariant.MEDIUM_MAZE)
             {
                 //TODO: Implement navigator with initial location and heading in the medium maze
@@ -40,17 +42,39 @@ namespace SharpNeat.Domains.MazeNavigation
             }
         }
 
-        #endregion
-
-        #region Instance properties
-
         public List<Line2D> Walls { get; private set; }
-
-        #endregion
 
         public bool RunTrial(IBlackBox agent)
         {
-            //TODO: Needs to actually be implemented.
+            
+            // Reset neural network
+            agent.ResetState();
+
+            // Run for the given number of timesteps or until the goal is reached
+            for (int curTimestep = 0; curTimestep < _maxTimesteps; curTimestep++)
+            {
+                //TODO: Activate the network here
+
+                // Reset the ANN input array
+                agent.InputSignalArray.Reset();
+
+                // Get the ANN input values
+                double[] annInputs = _navigator.GetAnnInputs();
+
+                // Set the inputs on the input signal array
+                for (int annInputIndex = 0; annInputIndex < annInputs.Length; annInputIndex++)
+                {
+                    agent.InputSignalArray[annInputIndex] = annInputs[annInputIndex];
+                }
+
+                // Activate the network
+                agent.Activate();
+
+                //TODO: Decode the network outputs here
+
+                //TODO: Move the navigator here
+            }
+
             return false;
         }
     }
