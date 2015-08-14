@@ -554,7 +554,7 @@ The problem domain view allows the performance of the best genome to be observed
       <MaxTimesteps>400</MaxTimesteps>
       <MinSuccessDistance>5</MinSuccessDistance>
       <MaxDistanceToTarget>300</MaxDistanceToTarget>
-      <MazeVariant>MEDIUM</MazeVariant>
+      <MazeVariant>MEDIUM_MAZE</MazeVariant>
       <Description>
         This is a start to getting the maze navigation experiment implemented.
       </Description>

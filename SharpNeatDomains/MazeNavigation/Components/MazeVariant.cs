@@ -12,7 +12,7 @@ namespace SharpNeat.Domains.MazeNavigation.Components
     public static class MazeVariantUtl
     {
         public static MazeVariant convertStringToMazeVariant(String strMazeVariant)
-        {
+        {            
             if (MazeVariant.MEDIUM_MAZE.ToString().Equals(strMazeVariant, StringComparison.InvariantCultureIgnoreCase))
             {
                 return MazeVariant.MEDIUM_MAZE;
