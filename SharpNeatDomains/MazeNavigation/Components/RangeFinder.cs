@@ -61,7 +61,7 @@ namespace SharpNeat.Domains.MazeNavigation.Components
             }
 
             // Update the range finder range to be the adjusted range
-            Range = adjustedRange;
+            Output = adjustedRange;
         }
     }
 }

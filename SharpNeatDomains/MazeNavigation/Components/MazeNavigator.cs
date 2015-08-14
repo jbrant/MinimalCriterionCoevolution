@@ -70,7 +70,7 @@ namespace SharpNeat.Domains.MazeNavigation.Components
             // result in a wall collision
             if (IsCollision(newLocation, walls) == false)
             {
-                Location = new Point2D(Location.x, Location.y);
+                Location = new Point2D(newLocation.x, newLocation.y);
             }
 
             // Update range finders and radar array

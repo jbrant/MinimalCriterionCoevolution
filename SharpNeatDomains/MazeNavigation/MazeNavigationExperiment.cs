@@ -188,7 +188,7 @@ namespace SharpNeat.Domains.MazeNavigation
             var genomeDecoder = CreateGenomeDecoder();
 
             //TODO: Remove this when finished debugging
-            _parallOptions.MaxDegreeOfParallelism = 1;
+            //_parallOptions.MaxDegreeOfParallelism = 1;
 
             // Create a genome list evaluator. This packages up the genome decoder with the genome evaluator.
             IGenomeListEvaluator<NeatGenome> listEvaluator =
