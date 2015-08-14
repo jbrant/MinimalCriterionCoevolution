@@ -551,6 +551,10 @@ The problem domain view allows the performance of the best genome to be observed
       </Activation>
       <ComplexityRegulationStrategy>Absolute</ComplexityRegulationStrategy>
       <ComplexityThreshold>50</ComplexityThreshold>
+      <MaxTimesteps>400</MaxTimesteps>
+      <MinSuccessDistance>5</MinSuccessDistance>
+      <MaxDistanceToTarget>300</MaxDistanceToTarget>
+      <MazeVariant>MEDIUM</MazeVariant>
       <Description>
         This is a start to getting the maze navigation experiment implemented.
       </Description>

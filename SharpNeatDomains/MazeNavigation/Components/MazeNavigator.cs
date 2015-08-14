@@ -22,12 +22,12 @@ namespace SharpNeat.Domains.MazeNavigation.Components
 
             RangeFinders = new List<RangeFinder>(6)
             {
-                new RangeFinder(-180, 100, 0),
-                new RangeFinder(-90, 100, 0),
-                new RangeFinder(-45, 100, 0),
-                new RangeFinder(0, 100, 0),
-                new RangeFinder(45, 100, 0),
-                new RangeFinder(90, 100, 0)
+                new RangeFinder(100, -180, 0),
+                new RangeFinder(100, -90, 0),
+                new RangeFinder(100, -45, 0),
+                new RangeFinder(100, 0, 0),
+                new RangeFinder(100, 45, 0),
+                new RangeFinder(100, 90, 0)
             };
 
             RadarArray = new PieSliceSensorArray();

@@ -5,6 +5,7 @@ using SharpNeat.Core;
 using SharpNeat.Decoders;
 using SharpNeat.Decoders.Neat;
 using SharpNeat.DistanceMetrics;
+using SharpNeat.Domains.MazeNavigation.Components;
 using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Phenomes;
@@ -17,6 +18,10 @@ namespace SharpNeat.Domains.MazeNavigation
         private NetworkActivationScheme _activationScheme;
         private string _complexityRegulationStrategy;
         private int? _complexitythreshold;
+        private int? _maxDistanceToTarget;
+        private int? _maxTimesteps;
+        private MazeVariant _mazeVariant;
+        private int? _minSuccessDistance;
         private ParallelOptions _parallOptions;
 
         /// <summary>
@@ -32,12 +37,12 @@ namespace SharpNeat.Domains.MazeNavigation
         /// <summary>
         ///     The neureal network input count.
         /// </summary>
-        public int InputCount { get; private set; }
+        public int InputCount => 11;
 
         /// <summary>
         ///     The neural network output count.
         /// </summary>
-        public int OutputCount { get; private set; }
+        public int OutputCount => 2;
 
         /// <summary>
         ///     The default population size for the experiment.
@@ -76,6 +81,13 @@ namespace SharpNeat.Domains.MazeNavigation
             NeatEvolutionAlgorithmParameters = new NeatEvolutionAlgorithmParameters();
             NeatEvolutionAlgorithmParameters.SpecieCount = XmlUtils.GetValueAsInt(xmlConfig, "SpecieCount");
             NeatGenomeParameters = new NeatGenomeParameters();
+
+            // Set experiment-specific parameters
+            _maxTimesteps = XmlUtils.TryGetValueAsInt(xmlConfig, "MaxTimesteps");
+            _minSuccessDistance = XmlUtils.TryGetValueAsInt(xmlConfig, "MinSuccessDistance");
+            _maxDistanceToTarget = XmlUtils.TryGetValueAsInt(xmlConfig, "MaxDistanceToTarget");
+            _mazeVariant =
+                MazeVariantUtl.convertStringToMazeVariant(XmlUtils.TryGetValueAsString(xmlConfig, "MazeVariant"));
         }
 
         /// <summary>
@@ -169,10 +181,14 @@ namespace SharpNeat.Domains.MazeNavigation
                 complexityRegulationStrategy);
 
             // Create IBlackBox evaluator.
-            var mazeNavigationEvaluator = new MazeNavigationEvaluator();
+            var mazeNavigationEvaluator = new MazeNavigationEvaluator(_maxDistanceToTarget, _maxTimesteps, _mazeVariant,
+                _minSuccessDistance);
 
             // Create genome decoder.
             var genomeDecoder = CreateGenomeDecoder();
+
+            //TODO: Remove this when finished debugging
+            _parallOptions.MaxDegreeOfParallelism = 1;
 
             // Create a genome list evaluator. This packages up the genome decoder with the genome evaluator.
             IGenomeListEvaluator<NeatGenome> listEvaluator =

@@ -129,6 +129,12 @@ namespace SharpNeat.Domains.MazeNavigation.Components
             p2 = b;
         }
 
+        public Line2D(int x1, int y1, int x2, int y2)
+        {
+            p1 = new Point2D(x1, y1);
+            p2 = new Point2D(x2, y2);
+        }
+
         public Line2D(Line2D other)
         {
             p1 = other.p1;
