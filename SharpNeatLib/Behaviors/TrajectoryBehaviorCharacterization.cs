@@ -4,14 +4,14 @@ using SharpNeat.Core;
 namespace SharpNeat.Behaviors
 {
     /// <summary>
-    ///     Defines a behavior characterization based on the end-point of an agent.  As such, the behavior is simply defined as
-    ///     a coordinate in n-dimensional space.
+    ///     Defines a behavior characterization based on the trajectory of an agent.  This reduces to capturing the position of
+    ///     the agent in n-dimensional space at every time step.
     /// </summary>
-    internal class EndPointBehaviorCharacterization : IBehaviorCharacterization
+    internal class TrajectoryBehaviorCharacterization : IBehaviorCharacterization
     {
         /// <summary>
-        ///     The double array of behaviors.  Since this is an end-point characterization, it should only contain the number of
-        ///     elements equivalent to the dimensionality of the state space.
+        ///     The double array of behaviors.  Since this is a trajectory characterization, it will contain the position of the
+        ///     agent for each time step.
         /// </summary>
         public List<double> Behaviors { get; private set; }
 
@@ -20,14 +20,12 @@ namespace SharpNeat.Behaviors
         /// </summary>
         /// <param name="bcToCompare">
         ///     The behavior characterization against which to calculate the distance.  Note that this
-        ///     behavior characterization needs to be an end-point characterization in order to compare them.
+        ///     behavior characterization needs to be an trajectory characterization in order to compare them.
         /// </param>
-        /// <returns>The distance between the behavior characterizations.</returns>
+        /// <returns></returns>
         public double CalculateDistance(IBehaviorCharacterization bcToCompare)
         {
-            // If the behavior characterization to compare is not the same, it doesn't
-            // make sense to compare them
-            if (!(bcToCompare is EndPointBehaviorCharacterization))
+            if (!(bcToCompare is TrajectoryBehaviorCharacterization))
             {
                 // TODO: Probably throw an exception here since it doesn't make sense to compare behavior characterizations that are not of the same type
             }
@@ -45,14 +43,13 @@ namespace SharpNeat.Behaviors
         }
 
         /// <summary>
-        ///     Updates the behavior array.  This equates to simply replacing the behavior array with the coordinates of the new
-        ///     end point.
+        ///     Updates the behavior array.  This equates to appending the the end point to the existing behavior array, thus
+        ///     establishing a measure of trajectory.
         /// </summary>
-        /// <param name="newBehaviors">The new end point with which to characterize the behavior state.</param>
+        /// <param name="newBehaviors">The new end point to append to the existing behavior state.</param>
         public void UpdateBehaviors(List<double> newBehaviors)
         {
-            // Overwrite the existing behavior array with the current location
-            Behaviors = newBehaviors;
+            Behaviors.AddRange(newBehaviors);
         }
     }
 }

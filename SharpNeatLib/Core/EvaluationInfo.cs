@@ -37,6 +37,7 @@ namespace SharpNeat.Core
     {
         readonly DoubleCircularBufferWithStats _fitnessHistory;
         readonly int _fitnessHistoryLength;
+        private readonly IBehaviorCharacterization _behaviorCharacterization;
 
         double _fitness;
         bool _isEvaluated;
