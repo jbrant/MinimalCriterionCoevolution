@@ -170,14 +170,14 @@ namespace SharpNeat.Domains.PreyCapture
         public void InitPositions()
         {
             // Random pos at least 4 units away from any wall.
-            _preyPos._x = 4 + _rng.Next(_gridSize - 8);
-            _preyPos._y = 4 + _rng.Next(_gridSize - 8);
+            _preyPos.X = 4 + _rng.Next(_gridSize - 8);
+            _preyPos.Y = 4 + _rng.Next(_gridSize - 8);
 
             // Agent position. Within range of the prey.
             double t = 2.0 * Math.PI * _rng.NextDouble();   // Random angle.
             double r = 2.0 + _rng.NextDouble() * 2.0;       // Distance between 2 and 4.
-            _agentPos._x = _preyPos._x + (int)Math.Floor(Math.Cos(t) * r);
-            _agentPos._y = _preyPos._y + (int)Math.Floor(Math.Sin(t) * r);
+            _agentPos.X = _preyPos.X + (int)Math.Floor(Math.Cos(t) * r);
+            _agentPos.Y = _preyPos.Y + (int)Math.Floor(Math.Sin(t) * r);
         }
 
         /// <summary>
@@ -211,18 +211,18 @@ namespace SharpNeat.Domains.PreyCapture
 
             // Wall detectors - N,E,S,W.
             // North.
-            int d = (_gridSize-1) - _agentPos._y;
+            int d = (_gridSize-1) - _agentPos.Y;
             if(d < 4) { agent.InputSignalArray[9] = (4-d) / 4.0; }
 
             // East.
-            d = (_gridSize-1) - _agentPos._x;
+            d = (_gridSize-1) - _agentPos.X;
             if(d < 4) { agent.InputSignalArray[10] = (4-d) / 4.0; }
 
             // South.
-            if(_agentPos._y < 4) { agent.InputSignalArray[11] = (4 - _agentPos._y) / 4.0; }
+            if(_agentPos.Y < 4) { agent.InputSignalArray[11] = (4 - _agentPos.Y) / 4.0; }
 
             // West.
-            if(_agentPos._x < 4) { agent.InputSignalArray[12] = (4 - _agentPos._x) / 4.0; }
+            if(_agentPos.X < 4) { agent.InputSignalArray[12] = (4 - _agentPos.X) / 4.0; }
 
             // Activate agent.
             agent.Activate();
@@ -258,16 +258,16 @@ namespace SharpNeat.Domains.PreyCapture
             switch(maxSigIdx)
             {
                 case 0: // Move north.
-                    _agentPos._y = Math.Min(_agentPos._y + 1, _gridSize - 1);
+                    _agentPos.Y = Math.Min(_agentPos.Y + 1, _gridSize - 1);
                     break;
                 case 1: // Move east.
-                    _agentPos._x = Math.Min(_agentPos._x + 1, _gridSize - 1);
+                    _agentPos.X = Math.Min(_agentPos.X + 1, _gridSize - 1);
                     break;
                 case 2: // Move south.
-                    _agentPos._y = Math.Max(_agentPos._y - 1, 0);
+                    _agentPos.Y = Math.Max(_agentPos.Y - 1, 0);
                     break;
                 case 3: // Move west (is the best?)
-                    _agentPos._x = Math.Max(_agentPos._x - 1, 0);
+                    _agentPos.X = Math.Max(_agentPos.X - 1, 0);
                     break;
             }
         }
@@ -303,16 +303,16 @@ namespace SharpNeat.Domains.PreyCapture
             switch(action)
             {
                  case 0: // Move north.
-                    _preyPos._y = Math.Min(_preyPos._y + 1, _gridSize - 1);
+                    _preyPos.Y = Math.Min(_preyPos.Y + 1, _gridSize - 1);
                     break;
                 case 1: // Move east.
-                    _preyPos._x = Math.Min(_preyPos._x + 1, _gridSize - 1);
+                    _preyPos.X = Math.Min(_preyPos.X + 1, _gridSize - 1);
                     break;
                 case 2: // Move south.
-                    _preyPos._y = Math.Max(_preyPos._y - 1, 0);
+                    _preyPos.Y = Math.Max(_preyPos.Y - 1, 0);
                     break;
                 case 3: // Move west (is the best?)
-                    _preyPos._x = Math.Max(_preyPos._x - 1, 0);
+                    _preyPos.X = Math.Max(_preyPos.X - 1, 0);
                     break;
             }
         }

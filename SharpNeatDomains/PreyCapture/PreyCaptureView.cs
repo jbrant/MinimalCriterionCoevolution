@@ -257,7 +257,7 @@ namespace SharpNeat.Domains.PreyCapture
                 for(int x=0; x<_world.GridSize; x++, xg += visualFieldPixelSize)
                 {
                     // Calc distance of sqaure from agent.
-                    if(IntPoint.CalculateDistance(_world.AgentPosition, x, y) <= _world.SensorRange) {
+                    if(IntPoint.CalculateEuclideanDistance(_world.AgentPosition, x, y) <= _world.SensorRange) {
                         g.FillRectangle(sensorBrush, xg+1, yg+1, visualFieldPixelSize-2, visualFieldPixelSize-2);
                     }
                 }
@@ -266,8 +266,8 @@ namespace SharpNeat.Domains.PreyCapture
             // Paint agent and prey squares.
             IntPoint a = _world.AgentPosition;
             IntPoint p = _world.PreyPosition;
-            g.FillRectangle(_brushAgent, GridLeft+(a._x * visualFieldPixelSize)+1, GridTop+(a._y * visualFieldPixelSize)+1, visualFieldPixelSize-2, visualFieldPixelSize-2);
-            g.FillRectangle(_brushPrey, GridLeft+(p._x * visualFieldPixelSize)+1, GridTop+(p._y * visualFieldPixelSize)+1, visualFieldPixelSize-2, visualFieldPixelSize-2);
+            g.FillRectangle(_brushAgent, GridLeft+(a.X * visualFieldPixelSize)+1, GridTop+(a.Y * visualFieldPixelSize)+1, visualFieldPixelSize-2, visualFieldPixelSize-2);
+            g.FillRectangle(_brushPrey, GridLeft+(p.X * visualFieldPixelSize)+1, GridTop+(p.Y * visualFieldPixelSize)+1, visualFieldPixelSize-2, visualFieldPixelSize-2);
 
             Refresh();
         }

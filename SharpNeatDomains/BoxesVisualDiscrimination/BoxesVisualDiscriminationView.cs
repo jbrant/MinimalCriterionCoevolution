@@ -212,8 +212,8 @@ namespace SharpNeat.Domains
                     if(output > maxActivation)
                     {
                         maxActivation = output;
-                        maxActivationPoint._x = j;
-                        maxActivationPoint._y = i;
+                        maxActivationPoint.X = j;
+                        maxActivationPoint.Y = i;
                     }
 
                     Color color = GetResponseColor((output-low)*colorScaleFactor);
@@ -226,20 +226,20 @@ namespace SharpNeat.Domains
             // Small box.
             int testFieldPixelSize = (_visualFieldResolution / TestCaseField.TestFieldResolution) * visualFieldPixelSize;
             g.DrawRectangle(__penBoxOutline,
-                            GridLeft + (_testCaseField.SmallBoxTopLeft._x * testFieldPixelSize),
-                            GridTop + (_testCaseField.SmallBoxTopLeft._y * testFieldPixelSize),
+                            GridLeft + (_testCaseField.SmallBoxTopLeft.X * testFieldPixelSize),
+                            GridTop + (_testCaseField.SmallBoxTopLeft.Y * testFieldPixelSize),
                             testFieldPixelSize, testFieldPixelSize);
 
             // Large box.
             g.DrawRectangle(__penBoxOutline,
-                            GridLeft + (_testCaseField.LargeBoxTopLeft._x * testFieldPixelSize),
-                            GridTop + (_testCaseField.LargeBoxTopLeft._y * testFieldPixelSize),
+                            GridLeft + (_testCaseField.LargeBoxTopLeft.X * testFieldPixelSize),
+                            GridTop + (_testCaseField.LargeBoxTopLeft.Y * testFieldPixelSize),
                             testFieldPixelSize*3, testFieldPixelSize*3);
             
             // Draw red line around pixel with highest activation.
             g.DrawRectangle(__penSelectedPixel,
-                            GridLeft + (maxActivationPoint._x * visualFieldPixelSize),
-                            GridTop + (maxActivationPoint._y * visualFieldPixelSize),
+                            GridLeft + (maxActivationPoint.X * visualFieldPixelSize),
+                            GridTop + (maxActivationPoint.Y * visualFieldPixelSize),
                             visualFieldPixelSize, visualFieldPixelSize);
 
             Refresh();

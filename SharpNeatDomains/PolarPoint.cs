@@ -61,8 +61,8 @@ namespace SharpNeat.Domains
         /// </summary>
         public static PolarPoint FromCartesian(IntPoint p)
         {
-            double r = Math.Sqrt((p._x * p._x) + (p._y * p._y));
-            double t = Math.Atan2(p._x, p._y);
+            double r = Math.Sqrt((p.X * p.X) + (p.Y * p.Y));
+            double t = Math.Atan2(p.X, p.Y);
             if(t<0.0) {
                 t += 2*Math.PI;
             }

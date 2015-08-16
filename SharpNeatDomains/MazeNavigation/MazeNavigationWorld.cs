@@ -10,15 +10,15 @@ namespace SharpNeat.Domains.MazeNavigation
         /// <summary>
         ///     Location of the goal.
         /// </summary>
-        private readonly Point2D _goalLocation;
+        private readonly DoublePoint _goalLocation;
 
         private readonly int? _maxDistanceToTarget;
         private readonly int? _maxTimesteps;
         private readonly int? _minSuccessDistance;
         private readonly MazeNavigator _navigator;
-        private readonly List<Line2D> _walls;
+        private readonly List<DoubleLine> _walls;
 
-        public MazeNavigationWorld(MazeVariant mazeVariant = MazeVariant.MEDIUM_MAZE, int? minSuccessDistance = 5,
+        public MazeNavigationWorld(MazeVariant mazeVariant = MazeVariant.MediumMaze, int? minSuccessDistance = 5,
             int? maxDistanceToTarget = 300,
             int? maxTimeSteps = 400)
         {
@@ -29,54 +29,54 @@ namespace SharpNeat.Domains.MazeNavigation
             switch (mazeVariant)
             {
                 // Setup appropriate parameters for medium maze
-                case MazeVariant.MEDIUM_MAZE:
+                case MazeVariant.MediumMaze:
                     // Initialize the navigator at the appropriate starting location
-                    _navigator = new MazeNavigator(new Point2D(30, 22));
+                    _navigator = new MazeNavigator(new DoublePoint(30, 22));
 
                     // Initialize the goal location
-                    _goalLocation = new Point2D(270, 100);
+                    _goalLocation = new DoublePoint(270, 100);
 
                     // Define all of the maze walls
-                    _walls = new List<Line2D>(11)
+                    _walls = new List<DoubleLine>(11)
                     {
-                        new Line2D(293, 7, 289, 130),
-                        new Line2D(289, 130, 6, 134),
-                        new Line2D(6, 134, 8, 5),
-                        new Line2D(8, 5, 292, 7),
-                        new Line2D(241, 130, 58, 65),
-                        new Line2D(114, 7, 73, 42),
-                        new Line2D(130, 91, 107, 46),
-                        new Line2D(196, 8, 139, 51),
-                        new Line2D(219, 122, 182, 63),
-                        new Line2D(267, 9, 214, 63),
-                        new Line2D(271, 129, 237, 88)
+                        new DoubleLine(293, 7, 289, 130),
+                        new DoubleLine(289, 130, 6, 134),
+                        new DoubleLine(6, 134, 8, 5),
+                        new DoubleLine(8, 5, 292, 7),
+                        new DoubleLine(241, 130, 58, 65),
+                        new DoubleLine(114, 7, 73, 42),
+                        new DoubleLine(130, 91, 107, 46),
+                        new DoubleLine(196, 8, 139, 51),
+                        new DoubleLine(219, 122, 182, 63),
+                        new DoubleLine(267, 9, 214, 63),
+                        new DoubleLine(271, 129, 237, 88)
                     };
                     break;
 
                 // Setup appropriate parameters for hard maze
-                case MazeVariant.HARD_MAZE:
+                case MazeVariant.HardMaze:
                     // Initialize the navigator at the appropriate starting location
-                    _navigator = new MazeNavigator(new Point2D(36, 184));
+                    _navigator = new MazeNavigator(new DoublePoint(36, 184));
 
                     // Initialize the goal location
-                    _goalLocation = new Point2D(31, 20);
+                    _goalLocation = new DoublePoint(31, 20);
 
                     // Define all of the maze walls
-                    _walls = new List<Line2D>(13)
+                    _walls = new List<DoubleLine>(13)
                     {
-                        new Line2D(41, 5, 3, 8),
-                        new Line2D(3, 8, 4, 49),
-                        new Line2D(4, 49, 57, 53),
-                        new Line2D(4, 49, 7, 202),
-                        new Line2D(7, 202, 195, 198),
-                        new Line2D(195, 198, 186, 8),
-                        new Line2D(186, 8, 39, 5),
-                        new Line2D(56, 54, 56, 157),
-                        new Line2D(57, 106, 158, 162),
-                        new Line2D(77, 201, 108, 164),
-                        new Line2D(6, 80, 33, 121),
-                        new Line2D(192, 146, 87, 91),
-                        new Line2D(56, 55, 133, 30)
+                        new DoubleLine(41, 5, 3, 8),
+                        new DoubleLine(3, 8, 4, 49),
+                        new DoubleLine(4, 49, 57, 53),
+                        new DoubleLine(4, 49, 7, 202),
+                        new DoubleLine(7, 202, 195, 198),
+                        new DoubleLine(195, 198, 186, 8),
+                        new DoubleLine(186, 8, 39, 5),
+                        new DoubleLine(56, 54, 56, 157),
+                        new DoubleLine(57, 106, 158, 162),
+                        new DoubleLine(77, 201, 108, 164),
+                        new DoubleLine(6, 80, 33, 121),
+                        new DoubleLine(192, 146, 87, 91),
+                        new DoubleLine(56, 55, 133, 30)
                     };
                     break;
             }
@@ -131,7 +131,7 @@ namespace SharpNeat.Domains.MazeNavigation
         private double GetDistanceToTarget()
         {
             // Get the distance to the target based on the navigator's current location
-            return _navigator.Location.distance(_goalLocation);
+            return DoublePoint.CalculateEuclideanDistance(_navigator.Location, _goalLocation);
         }
     }
 }

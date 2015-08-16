@@ -265,8 +265,8 @@ namespace SharpNeat.Domains.BoxesVisualDiscrimination
         private double CalcRealDistanceSquared(IntPoint a, IntPoint b)
         {
             // We can skip calculating abs(val) because we square the values.
-            double xdelta = (a._x - b._x) * _visualPixelSize;
-            double ydelta = (a._y - b._y) * _visualPixelSize;
+            double xdelta = (a.X - b.X) * _visualPixelSize;
+            double ydelta = (a.Y - b.Y) * _visualPixelSize;
             return xdelta*xdelta + ydelta*ydelta;
         }
 

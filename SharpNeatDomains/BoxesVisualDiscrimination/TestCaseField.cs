@@ -61,8 +61,8 @@ namespace SharpNeat.Domains.BoxesVisualDiscrimination
             IntPoint[] boxPosArr = GenerateRandomTestCase(largeBoxRelativePos);
             _smallBoxTopLeft = boxPosArr[0];
             _largeBoxTopLeft = boxPosArr[1];
-            _largeBoxTopLeft._x--;
-            _largeBoxTopLeft._y--;
+            _largeBoxTopLeft.X--;
+            _largeBoxTopLeft.Y--;
             return boxPosArr[1];
         }
 
@@ -76,13 +76,13 @@ namespace SharpNeat.Domains.BoxesVisualDiscrimination
             int pixelY = (int)(((y + 1.0) * TestFieldResolution) / 2.0);
 
             // Test for intersection with small box pixel.
-            if(_smallBoxTopLeft._x == pixelX && _smallBoxTopLeft._y == pixelY) {
+            if(_smallBoxTopLeft.X == pixelX && _smallBoxTopLeft.Y == pixelY) {
                 return 1.0;
             }
 
             // Test for intersection with large box pixel.
-            int deltaX = pixelX - _largeBoxTopLeft._x;
-            int deltaY = pixelY - _largeBoxTopLeft._y;
+            int deltaX = pixelX - _largeBoxTopLeft.X;
+            int deltaY = pixelY - _largeBoxTopLeft.Y;
             return (deltaX > -1 && deltaX < 3 && deltaY > -1 && deltaY < 3) ? 1.0 : 0.0;
         }
 
@@ -122,62 +122,62 @@ namespace SharpNeat.Domains.BoxesVisualDiscrimination
             switch(largeBoxRelativePos)
             {
                 case 0: // Right
-                    largeBoxPos._x += 5;
+                    largeBoxPos.X += 5;
                     break;
                 case 1: // Down
-                    largeBoxPos._y += 5;
+                    largeBoxPos.Y += 5;
                     break;
                 case 2: // Diagonal
                     // Two alternate position get us to exactly 5 pixels distant from the small box.
                     if(_rng.NextBool())
                     {
-                        largeBoxPos._x += 3;
-                        largeBoxPos._y += 4;
+                        largeBoxPos.X += 3;
+                        largeBoxPos.Y += 4;
                     }
                     else
                     {
-                        largeBoxPos._x += 4;
-                        largeBoxPos._y += 3;
+                        largeBoxPos.X += 4;
+                        largeBoxPos.Y += 3;
                     }
                     break;
             }
 
             // Handle cases where the large box is outside the visual field or overlapping the edge.
-            if(largeBoxPos._x > CoordBoundIdx) 
+            if(largeBoxPos.X > CoordBoundIdx) 
             {   // Wrap around.
-                largeBoxPos._x -= TestFieldResolution;
+                largeBoxPos.X -= TestFieldResolution;
 
-                if(0 == largeBoxPos._x)
+                if(0 == largeBoxPos.X)
                 {   // Move box fully into the visual field.
-                    largeBoxPos._x++;
+                    largeBoxPos.X++;
                 }
             }
-            else if(CoordBoundIdx == largeBoxPos._x)
+            else if(CoordBoundIdx == largeBoxPos.X)
             {   // Move box fully into the visual field.
-                largeBoxPos._x--;
+                largeBoxPos.X--;
             }
-            else if(0 == largeBoxPos._x)
+            else if(0 == largeBoxPos.X)
             {   // Move box fully into the visual field.
-                largeBoxPos._x++;
+                largeBoxPos.X++;
             }
 
 
-            if(largeBoxPos._y > CoordBoundIdx) 
+            if(largeBoxPos.Y > CoordBoundIdx) 
             {   // Wrap around.
-                largeBoxPos._y -= TestFieldResolution;
+                largeBoxPos.Y -= TestFieldResolution;
 
-                if(0 == largeBoxPos._y)
+                if(0 == largeBoxPos.Y)
                 {   // Move box fully into the visual field.
-                    largeBoxPos._y++;
+                    largeBoxPos.Y++;
                 }
             }
-            else if(CoordBoundIdx == largeBoxPos._y)
+            else if(CoordBoundIdx == largeBoxPos.Y)
             {   // Move box fully into the visual field.
-                largeBoxPos._y--;
+                largeBoxPos.Y--;
             }
-            else if(0 == largeBoxPos._y)
+            else if(0 == largeBoxPos.Y)
             {   // Move box fully into the visual field.
-                largeBoxPos._y++;
+                largeBoxPos.Y++;
             }
             return new IntPoint[] {smallBoxPos, largeBoxPos};
         }
