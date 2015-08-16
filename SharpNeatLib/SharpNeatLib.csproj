@@ -71,6 +71,7 @@
     <Compile Include="Core\CoordinateVector.cs" />
     <Compile Include="Core\FitnessInfo.cs" />
     <Compile Include="Core\GenomeFitnessComparer.cs" />
+    <Compile Include="Core\IBehaviorCharacterization.cs" />
     <Compile Include="Core\IDistanceMetric.cs" />
     <Compile Include="Core\EvaluationInfo.cs" />
     <Compile Include="Core\IEvolutionAlgorithm.cs" />
