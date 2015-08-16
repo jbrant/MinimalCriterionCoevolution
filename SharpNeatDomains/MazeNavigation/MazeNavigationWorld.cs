@@ -12,12 +12,38 @@ namespace SharpNeat.Domains.MazeNavigation
         /// </summary>
         private readonly DoublePoint _goalLocation;
 
+        /// <summary>
+        ///     Maximum distance to the target (i.e. goal location).
+        /// </summary>
         private readonly int? _maxDistanceToTarget;
+
+        /// <summary>
+        ///     Maximum timesteps for the trial to run.
+        /// </summary>
         private readonly int? _maxTimesteps;
+
+        /// <summary>
+        ///     Minimum distance from the target for the evaluation to be considered a success.
+        /// </summary>
         private readonly int? _minSuccessDistance;
+
+        /// <summary>
+        ///     Reference to the navigator robot.
+        /// </summary>
         private readonly MazeNavigator _navigator;
+
+        /// <summary>
+        ///     List of walls in the environment.
+        /// </summary>
         private readonly List<DoubleLine> _walls;
 
+        /// <summary>
+        ///     Creates the maze navigation world (environment) given the experiment parameters.
+        /// </summary>
+        /// <param name="mazeVariant">The maze variant to utilize (i.e. medium maze, hard maze, etc.).</param>
+        /// <param name="minSuccessDistance">The minimum distance from the target for the trial to be considered a success.</param>
+        /// <param name="maxDistanceToTarget">The maximum distance from the target possible.</param>
+        /// <param name="maxTimeSteps">The maximum number of time steps to run a given trial.</param>
         public MazeNavigationWorld(MazeVariant mazeVariant = MazeVariant.MediumMaze, int? minSuccessDistance = 5,
             int? maxDistanceToTarget = 300,
             int? maxTimeSteps = 400)
@@ -82,6 +108,16 @@ namespace SharpNeat.Domains.MazeNavigation
             }
         }
 
+        /// <summary>
+        ///     Runs a maze navigation trial.  This involves, for every timestep, activating the network with the radar/sensor
+        ///     inputs, updating the navigator with the network output (i.e. changing the angular velocity and speed), moving the
+        ///     navigator to the next position based on those updates, and finally returning the fitness for the trial.
+        /// </summary>
+        /// <param name="agent">
+        ///     The black box (neural network) that takes in the navigator sensors controls the navigator by
+        ///     outputting the angular velocity and speed differentials based on those inputs.
+        /// </param>
+        /// <returns>The fitness score, which is the distance from the target at the end of the evaluation.</returns>
         public double RunTrial(IBlackBox agent)
         {
             // Reset neural network
@@ -128,6 +164,10 @@ namespace SharpNeat.Domains.MazeNavigation
             return (double) _maxDistanceToTarget - GetDistanceToTarget();
         }
 
+        /// <summary>
+        ///     Calculates the distance between the navigator's location and the goal location.
+        /// </summary>
+        /// <returns>The distance between the navigator and the goal.</returns>
         private double GetDistanceToTarget()
         {
             // Get the distance to the target based on the navigator's current location
