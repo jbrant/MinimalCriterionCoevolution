@@ -25,7 +25,7 @@ namespace SharpNeat.DomainsExtra.WalkerBox2d
     /// <summary>
     /// Evaluator for the Walker 2D task.
     /// </summary>
-    public class WalkerBox2dEvaluator : IPhenomeEvaluator<IBlackBox>
+    public class WalkerBox2dEvaluator : IPhenomeEvaluator<IBlackBox, FitnessInfo>
     {
         #region Instance Fields
 

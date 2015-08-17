@@ -28,7 +28,7 @@ namespace SharpNeat.Domains.BinaryElevenMultiplexer
     /// further 8 inputs (eleven inputs in total). The correct response is the selected input's
     /// input signal (0 or 1).
     /// </summary>
-    public class BinaryElevenMultiplexerEvaluator : IPhenomeEvaluator<IBlackBox>
+    public class BinaryElevenMultiplexerEvaluator : IPhenomeEvaluator<IBlackBox, FitnessInfo>
     {
         const double StopFitness = 10000.0;
         ulong _evalCount;

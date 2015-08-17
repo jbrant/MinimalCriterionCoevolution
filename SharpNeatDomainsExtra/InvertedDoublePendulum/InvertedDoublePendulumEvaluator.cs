@@ -25,7 +25,7 @@ namespace SharpNeat.DomainsExtra.InvertedDoublePendulum
     /// <summary>
     /// Evaluator for the single pole balancing task.
     /// </summary>
-    public class InvertedDoublePendulumEvaluator : IPhenomeEvaluator<IBlackBox>
+    public class InvertedDoublePendulumEvaluator : IPhenomeEvaluator<IBlackBox, FitnessInfo>
     {
         #region Constants
 

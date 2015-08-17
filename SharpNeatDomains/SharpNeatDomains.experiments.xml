@@ -541,7 +541,7 @@ The problem domain view allows the performance of the best genome to be observed
 
   <Experiment name="Maze Navigation - Fitness (NEAT)">
     <AssemblyPath>SharpNeatDomains.dll</AssemblyPath>
-    <ClassName>SharpNeat.Domains.MazeNavigation.MazeNavigationExperiment</ClassName>
+    <ClassName>SharpNeat.Domains.MazeNavigation.FitnessExperiment.MazeNavigationFitnessExperiment</ClassName>
     <Config>
       <PopulationSize>150</PopulationSize>
       <SpecieCount>10</SpecieCount>
@@ -551,12 +551,35 @@ The problem domain view allows the performance of the best genome to be observed
       </Activation>
       <ComplexityRegulationStrategy>Absolute</ComplexityRegulationStrategy>
       <ComplexityThreshold>50</ComplexityThreshold>
+      <MaxDegreeOfParallelism>1</MaxDegreeOfParallelism>
       <MaxTimesteps>400</MaxTimesteps>
       <MinSuccessDistance>5</MinSuccessDistance>
       <MaxDistanceToTarget>300</MaxDistanceToTarget>
       <MazeVariant>HARD_MAZE</MazeVariant>
       <Description>
-        This is a start to getting the maze navigation experiment implemented.
+        This is the maze navigation experiment used in the original novelty search papers (citation needed).
+      </Description>
+    </Config>
+  </Experiment>
+  <Experiment name="Maze Navigation - Novelty (NEAT)">
+    <AssemblyPath>SharpNeatDomains.dll</AssemblyPath>
+    <ClassName>SharpNeat.Domains.MazeNavigation.NoveltyExperiment.MazeNavigationNoveltyExperiment</ClassName>
+    <Config>
+      <PopulationSize>150</PopulationSize>
+      <SpecieCount>10</SpecieCount>
+      <Activation>
+        <Scheme>CyclicFixedIters</Scheme>
+        <Iters>2</Iters>
+      </Activation>
+      <ComplexityRegulationStrategy>Absolute</ComplexityRegulationStrategy>
+      <ComplexityThreshold>50</ComplexityThreshold>
+      <MaxDegreeOfParallelism>1</MaxDegreeOfParallelism>
+      <MaxTimesteps>400</MaxTimesteps>
+      <MinSuccessDistance>5</MinSuccessDistance>
+      <MaxDistanceToTarget>300</MaxDistanceToTarget>
+      <MazeVariant>HARD_MAZE</MazeVariant>
+      <Description>
+        This is the maze navigation experiment used in the original novelty search papers (citation needed).
       </Description>
     </Config>
   </Experiment>

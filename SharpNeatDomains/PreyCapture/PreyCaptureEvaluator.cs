@@ -24,7 +24,7 @@ namespace SharpNeat.Domains.PreyCapture
     /// <summary>
     /// Evaulator for the prey capture task.
     /// </summary>
-    public class PreyCaptureEvaluator : IPhenomeEvaluator<IBlackBox>
+    public class PreyCaptureEvaluator : IPhenomeEvaluator<IBlackBox, FitnessInfo>
     {
         readonly int _trialsPerEvaluation;
 

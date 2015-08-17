@@ -4,14 +4,14 @@ using SharpNeat.Phenomes;
 
 namespace SharpNeat.Domains.MazeNavigation
 {
-    internal class MazeNavigationEvaluator : IPhenomeEvaluator<IBlackBox>
+    internal class MazeNavigationFitnessEvaluator : IPhenomeEvaluator<IBlackBox, FitnessInfo>
     {
         private readonly int? _maxDistanceToTarget;
         private readonly int? _maxTimesteps;
         private readonly MazeVariant _mazeVariant;
         private readonly int? _minSuccessDistance;
 
-        internal MazeNavigationEvaluator(int? maxDistanceToTarget, int? maxTimesteps, MazeVariant mazeVariant,
+        internal MazeNavigationFitnessEvaluator(int? maxDistanceToTarget, int? maxTimesteps, MazeVariant mazeVariant,
             int? minSuccessDistance)
         {
             _maxDistanceToTarget = maxDistanceToTarget;
@@ -37,12 +37,11 @@ namespace SharpNeat.Domains.MazeNavigation
             EvaluationCount++;
 
             // Instantiate the maze world
-            var world = new MazeNavigationWorld(_mazeVariant, _minSuccessDistance, _maxDistanceToTarget, _maxTimesteps);
+            var world = new MazeNavigationWorld<FitnessInfo>(_mazeVariant, _minSuccessDistance, _maxDistanceToTarget,
+                _maxTimesteps);
 
             // Run a single trial
-            double fitness = world.RunTrial(phenome);
-
-            return new FitnessInfo(fitness, fitness);
+            return world.RunTrial(phenome, EvaluationType.Fitness);
         }
 
         /// <summary>

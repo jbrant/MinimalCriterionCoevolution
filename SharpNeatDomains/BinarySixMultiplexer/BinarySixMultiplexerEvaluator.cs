@@ -28,7 +28,7 @@ namespace SharpNeat.Domains.BinarySixMultiplexer
     /// further 4 inputs (six inputs in total). The correct response is the selected input's
     /// input signal (0 or 1).
     /// </summary>
-    public class BinarySixMultiplexerEvaluator : IPhenomeEvaluator<IBlackBox>
+    public class BinarySixMultiplexerEvaluator : IPhenomeEvaluator<IBlackBox, FitnessInfo>
     {
         const double StopFitness = 1000.0;
         ulong _evalCount;

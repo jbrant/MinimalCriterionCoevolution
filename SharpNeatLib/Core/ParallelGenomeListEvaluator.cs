@@ -33,7 +33,7 @@ namespace SharpNeat.Core
         where TPhenome : class
     {
         readonly IGenomeDecoder<TGenome,TPhenome> _genomeDecoder;
-        readonly IPhenomeEvaluator<TPhenome> _phenomeEvaluator;
+        readonly IPhenomeEvaluator<TPhenome, FitnessInfo> _phenomeEvaluator;
         readonly ParallelOptions _parallelOptions;
         readonly bool _enablePhenomeCaching;
         readonly EvaluationMethod _evalMethod;
@@ -48,7 +48,7 @@ namespace SharpNeat.Core
         /// The number of parallel threads defaults to Environment.ProcessorCount.
         /// </summary>
         public ParallelGenomeListEvaluator(IGenomeDecoder<TGenome,TPhenome> genomeDecoder,
-                                           IPhenomeEvaluator<TPhenome> phenomeEvaluator)
+                                           IPhenomeEvaluator<TPhenome, FitnessInfo> phenomeEvaluator)
             : this(genomeDecoder, phenomeEvaluator, new ParallelOptions(), true)
         { 
         }
@@ -59,7 +59,7 @@ namespace SharpNeat.Core
         /// The number of parallel threads defaults to Environment.ProcessorCount.
         /// </summary>
         public ParallelGenomeListEvaluator(IGenomeDecoder<TGenome,TPhenome> genomeDecoder,
-                                           IPhenomeEvaluator<TPhenome> phenomeEvaluator,
+                                           IPhenomeEvaluator<TPhenome, FitnessInfo> phenomeEvaluator,
                                            ParallelOptions options)
             : this(genomeDecoder, phenomeEvaluator, options, true)
         { 
@@ -69,7 +69,7 @@ namespace SharpNeat.Core
         /// Construct with the provided IGenomeDecoder, IPhenomeEvaluator, ParalleOptions and enablePhenomeCaching flag.
         /// </summary>
         public ParallelGenomeListEvaluator(IGenomeDecoder<TGenome,TPhenome> genomeDecoder,
-                                           IPhenomeEvaluator<TPhenome> phenomeEvaluator,
+                                           IPhenomeEvaluator<TPhenome, FitnessInfo> phenomeEvaluator,
                                            ParallelOptions options,
                                            bool enablePhenomeCaching)
         {

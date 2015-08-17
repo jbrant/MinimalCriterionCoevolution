@@ -51,7 +51,7 @@ namespace SharpNeat.Domains
     /// improve the correct box's output difference from threshold value gradually, while the box with 3 correct
     /// responses may actually be in the wrong area of the fitness space alltogether - in the wrong 'ballpark'.
     /// </summary>
-    public class XorBlackBoxEvaluator : IPhenomeEvaluator<IBlackBox>
+    public class XorBlackBoxEvaluator : IPhenomeEvaluator<IBlackBox, FitnessInfo>
     {
         const double StopFitness = 10.0;
         ulong _evalCount;

@@ -26,7 +26,7 @@ namespace SharpNeat.Domains.FunctionRegression
     /// Function regression task.
     /// The function to be regressed is read from the config data. There is always one output.
     /// </summary>
-    public class FunctionRegressionEvaluator : IPhenomeEvaluator<IBlackBox>
+    public class FunctionRegressionEvaluator : IPhenomeEvaluator<IBlackBox, FitnessInfo>
     {
         /// <summary>
         /// The maximum error for the evaluator. The output at each sample point is in the range 0 to 1. Thus the error at each point has a maximum of 1.0.

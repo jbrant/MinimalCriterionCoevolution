@@ -26,7 +26,7 @@ namespace SharpNeat.DomainsExtra.SinglePoleBalancingSwingUp
     /// <summary>
     /// Evaluator for the single pole balancing task.
     /// </summary>
-    public class SinglePoleBalancingSwingUpEvaluator : IPhenomeEvaluator<IBlackBox>
+    public class SinglePoleBalancingSwingUpEvaluator : IPhenomeEvaluator<IBlackBox, FitnessInfo>
     {
         #region Constants
 

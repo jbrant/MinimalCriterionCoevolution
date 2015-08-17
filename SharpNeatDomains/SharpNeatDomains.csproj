@@ -111,14 +111,14 @@
     <Compile Include="FunctionRegression\FunctionRegressionExperiment.cs" />
     <Compile Include="INeatExperiment.cs" />
     <Compile Include="MathUtils.cs" />
-    <Compile Include="MazeNavigation\Components\BasicShapes.cs" />
     <Compile Include="MazeNavigation\Components\MazeNavigator.cs" />
     <Compile Include="MazeNavigation\Components\MazeVariant.cs" />
     <Compile Include="MazeNavigation\Components\PieSliceSensorArray.cs" />
     <Compile Include="MazeNavigation\Components\Radar.cs" />
     <Compile Include="MazeNavigation\Components\RangeFinder.cs" />
-    <Compile Include="MazeNavigation\MazeNavigationEvaluator.cs" />
-    <Compile Include="MazeNavigation\MazeNavigationExperiment.cs" />
+    <Compile Include="MazeNavigation\FitnessExperiment\MazeNavigationFitnessExperiment.cs" />
+    <Compile Include="MazeNavigation\FitnessExperiment\MazeNavigationFitnessEvaluator.cs" />
+    <Compile Include="MazeNavigation\BaseMazeNavigationExperiment.cs" />
     <Compile Include="MazeNavigation\MazeNavigationView.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -126,6 +126,8 @@
       <DependentUpon>MazeNavigationView.cs</DependentUpon>
     </Compile>
     <Compile Include="MazeNavigation\MazeNavigationWorld.cs" />
+    <Compile Include="MazeNavigation\NoveltyExperiment\MazeNavigationNoveltyExperiment.cs" />
+    <Compile Include="MazeNavigation\NoveltyExperiment\MazeNavigationNoveltyEvaluator.cs" />
     <Compile Include="NeatGenomeView.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -190,6 +192,7 @@
   <ItemGroup>
     <None Include="ClassDiagram1.cd" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -22,7 +22,7 @@ namespace SharpNeat.Core
     /// <summary>
     /// Wrapper struct for fitness values.
     /// </summary>
-    public struct FitnessInfo
+    public struct FitnessInfo : ITrialInfo
     {
         /// <summary>
         /// Precosntructed FitnessInfo for commen case of representing zero fitness.

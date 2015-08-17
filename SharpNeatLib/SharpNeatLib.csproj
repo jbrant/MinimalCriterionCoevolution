@@ -68,9 +68,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Behaviors\EndPointBehaviorCharacterization.cs" />
+    <Compile Include="Behaviors\NullBehaviorCharacterization.cs" />
     <Compile Include="Behaviors\TrajectoryBehaviorCharacterization.cs" />
     <Compile Include="Core\AuxFitnessInfo.cs" />
+    <Compile Include="Core\BehaviorInfo.cs" />
     <Compile Include="Core\CoordinateVector.cs" />
+    <Compile Include="Core\EvaluationType.cs" />
     <Compile Include="Core\FitnessInfo.cs" />
     <Compile Include="Core\GenomeFitnessComparer.cs" />
     <Compile Include="Core\IBehaviorCharacterization.cs" />
@@ -83,7 +86,9 @@
     <Compile Include="Core\IGenomeListEvaluator.cs" />
     <None Include="Core\ParallelGenomeListEvaluatorV1.cs" />
     <Compile Include="Core\ParallelGenomeListEvaluator.cs" />
+    <Compile Include="Core\ITrialInfo.cs" />
     <Compile Include="Core\SelectiveGenomeListEvaluator.cs" />
+    <Compile Include="Core\SerialGenomeListBehaviorEvaluator.cs" />
     <Compile Include="Core\SerialGenomeListEvaluator.cs" />
     <Compile Include="Core\IPhenomeEvaluator.cs" />
     <None Include="DeadCode\Population.cs" />

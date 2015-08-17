@@ -37,7 +37,6 @@ namespace SharpNeat.Core
     {
         readonly DoubleCircularBufferWithStats _fitnessHistory;
         readonly int _fitnessHistoryLength;
-        private readonly IBehaviorCharacterization _behaviorCharacterization;
 
         double _fitness;
         bool _isEvaluated;
@@ -106,6 +105,11 @@ namespace SharpNeat.Core
             set { _auxFitnessArr = value; }
         }
 
+        /// <summary>
+        /// Gets or sets the behavior characterization for the evaluation.
+        /// </summary>
+        public IBehaviorCharacterization BehaviorCharacterization { get; set; }
+        
         /// <summary>
         /// Gets a value indicating whether a genome has been evaluated at least once.
         /// </summary>

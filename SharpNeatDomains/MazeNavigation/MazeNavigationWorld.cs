@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using SharpNeat.Core;
 using SharpNeat.Domains.MazeNavigation.Components;
 using SharpNeat.Phenomes;
 
 namespace SharpNeat.Domains.MazeNavigation
 {
-    internal class MazeNavigationWorld
+    internal class MazeNavigationWorld<TTrialInfo>
     {
         /// <summary>
         ///     Location of the goal.
@@ -111,57 +112,86 @@ namespace SharpNeat.Domains.MazeNavigation
         /// <summary>
         ///     Runs a maze navigation trial.  This involves, for every timestep, activating the network with the radar/sensor
         ///     inputs, updating the navigator with the network output (i.e. changing the angular velocity and speed), moving the
-        ///     navigator to the next position based on those updates, and finally returning the fitness for the trial.
+        ///     navigator to the next position based on those updates, and finally returning the trial information, whether that be
+        ///     fitness-based or behavior-based.
         /// </summary>
         /// <param name="agent">
         ///     The black box (neural network) that takes in the navigator sensors controls the navigator by
         ///     outputting the angular velocity and speed differentials based on those inputs.
         /// </param>
-        /// <returns>The fitness score, which is the distance from the target at the end of the evaluation.</returns>
-        public double RunTrial(IBlackBox agent)
+        /// <param name="evaluationType">The type of evaluation to perform (i.e. fitness, novelty, etc.).</param>
+        /// <returns>The trial results (which will either be a fitness value or a behavior).</returns>
+        public TTrialInfo RunTrial(IBlackBox agent, EvaluationType evaluationType)
         {
+            ITrialInfo trialInfo;
+
             // Reset neural network
             agent.ResetState();
 
             // Run for the given number of timesteps or until the goal is reached
             for (var curTimestep = 0; curTimestep < _maxTimesteps; curTimestep++)
             {
-                // Reset the ANN input array
-                agent.InputSignalArray.Reset();
-
-                // Get the ANN input values
-                var annInputs = _navigator.GetAnnInputs();
-
-                // Set the inputs on the input signal array
-                for (var annInputIndex = 0; annInputIndex < annInputs.Length; annInputIndex++)
-                {
-                    agent.InputSignalArray[annInputIndex] = annInputs[annInputIndex];
-                }
-
-                // Activate the network
-                agent.Activate();
-
-                // Decode the ANN output and update agent state
-                _navigator.TranslateAndApplyAnnOutputs(agent.OutputSignalArray[0], agent.OutputSignalArray[1]);
-
-                // Move the navigator to the new position (i.e. execute a single timestep)
-                _navigator.Move(_walls);
-
-                // Compute the new distance to the target (if the distance is less than 1,
-                // we've solved the maze anyways but don't want to divide by 0 or
-                // artificially inflate the fitness)
-                var distanceToTarget = Math.Max(GetDistanceToTarget(), 1);
-
-                // If the goal has been reached, break out of the loop
-                if (distanceToTarget < _minSuccessDistance)
-                {
-                    break;
-                }
+                RunTimestep(agent);
             }
 
-            // Return the fitness score as the difference between the maximum target distance
-            // and the ending distance to the target
-            return (double) _maxDistanceToTarget - GetDistanceToTarget();
+            // If this is a fitness evaluation, return the fitness score as the 
+            // difference between the maximum target distance and the ending distance 
+            // to the target
+            if (evaluationType.Equals(EvaluationType.Fitness))
+            {
+                var fitness = (double) _maxDistanceToTarget - GetDistanceToTarget();
+                trialInfo = new FitnessInfo(fitness, fitness);
+            }
+            // Otherwise, this is a behavioral evaluation, so return the ending 
+            // location of the navigator
+            else
+            {
+                // TODO: This needs to be modified to also support characterizing the trajectory
+                trialInfo = new BehaviorInfo(new[] {_navigator.Location.X, _navigator.Location.Y});
+            }
+
+            return (TTrialInfo) trialInfo;
+        }
+
+        /// <summary>
+        ///     Runs a single time step of the maze navigator.
+        /// </summary>
+        /// <param name="agent">
+        ///     The black box (neural network) that takes in the navigator sensors controls the navigator by
+        ///     outputting the angular velocity and speed differentials based on those inputs.
+        /// </param>
+        private void RunTimestep(IBlackBox agent)
+        {
+            // Reset the ANN input array
+            agent.InputSignalArray.Reset();
+
+            // Get the ANN input values
+            var annInputs = _navigator.GetAnnInputs();
+
+            // Set the inputs on the input signal array
+            for (var annInputIndex = 0; annInputIndex < annInputs.Length; annInputIndex++)
+            {
+                agent.InputSignalArray[annInputIndex] = annInputs[annInputIndex];
+            }
+
+            // Activate the network
+            agent.Activate();
+
+            // Decode the ANN output and update agent state
+            _navigator.TranslateAndApplyAnnOutputs(agent.OutputSignalArray[0], agent.OutputSignalArray[1]);
+
+            // Move the navigator to the new position (i.e. execute a single timestep)
+            _navigator.Move(_walls);
+
+            // Compute the new distance to the target (if the distance is less than 1,
+            // we've solved the maze anyways but don't want to divide by 0 or
+            // artificially inflate the fitness)
+            var distanceToTarget = Math.Max(GetDistanceToTarget(), 1);
+
+            // If the goal has been reached, break out of the loop
+            if (distanceToTarget < _minSuccessDistance)
+            {
+            }
         }
 
         /// <summary>

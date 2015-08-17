@@ -22,7 +22,7 @@ namespace SharpNeat.Core
     /// Generic interface for phenome evaluation classes.
     /// Evaluates and assigns a fitness to individual TPhenome's.
     /// </summary>
-    public interface IPhenomeEvaluator<TPhenome>
+    public interface IPhenomeEvaluator<in TPhenome, out TTrialInfo>
     {
         /// <summary>
         /// Gets the total number of individual genome evaluations that have been performed by this evaluator.
@@ -39,7 +39,7 @@ namespace SharpNeat.Core
         /// <summary>
         /// Evaluate the provided phenome and return its fitness score.
         /// </summary>
-        FitnessInfo Evaluate(TPhenome phenome);
+        TTrialInfo Evaluate(TPhenome phenome);
 
         /// <summary>
         /// Reset the internal state of the evaluation scheme if any exists.

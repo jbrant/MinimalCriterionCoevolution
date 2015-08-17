@@ -36,8 +36,8 @@ namespace SharpNeat.Core
         where TPhenome: class
     {
         readonly EvaluationMethod _evaluationMethod;
-        readonly IGenomeDecoder<TGenome,TPhenome> _genomeDecoder;
-        readonly IPhenomeEvaluator<TPhenome> _phenomeEvaluator;
+        protected readonly IGenomeDecoder<TGenome,TPhenome> _genomeDecoder;
+        readonly IPhenomeEvaluator<TPhenome, FitnessInfo> _phenomeEvaluator;
         readonly bool _enablePhenomeCaching;
 
         delegate void EvaluationMethod(IList<TGenome> genomeList);
@@ -49,7 +49,7 @@ namespace SharpNeat.Core
         /// Phenome caching is enabled by default.
         /// </summary>
         public SerialGenomeListEvaluator(IGenomeDecoder<TGenome,TPhenome> genomeDecoder,
-                                         IPhenomeEvaluator<TPhenome> phenomeEvaluator)
+                                         IPhenomeEvaluator<TPhenome, FitnessInfo> phenomeEvaluator)
         {
             _genomeDecoder = genomeDecoder;
             _phenomeEvaluator = phenomeEvaluator;
@@ -61,7 +61,7 @@ namespace SharpNeat.Core
         /// Construct with the provided IGenomeDecoder, IPhenomeEvaluator and enablePhenomeCaching flag.
         /// </summary>
         public SerialGenomeListEvaluator(IGenomeDecoder<TGenome,TPhenome> genomeDecoder,
-                                         IPhenomeEvaluator<TPhenome> phenomeEvaluator,
+                                         IPhenomeEvaluator<TPhenome, FitnessInfo> phenomeEvaluator,
                                          bool enablePhenomeCaching)
         {
             _genomeDecoder = genomeDecoder;

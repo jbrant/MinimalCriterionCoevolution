@@ -25,7 +25,7 @@ namespace SharpNeat.Domains.BoxesVisualDiscrimination
     /// <summary>
     /// Boxes Visual Discrimination Task.
     /// </summary>
-    public class BoxesVisualDiscriminationEvaluator : IPhenomeEvaluator<IBlackBox>
+    public class BoxesVisualDiscriminationEvaluator : IPhenomeEvaluator<IBlackBox, FitnessInfo>
     {
         /// <summary>
         /// Width and length of the visual field in the 'real' coordinate system that 

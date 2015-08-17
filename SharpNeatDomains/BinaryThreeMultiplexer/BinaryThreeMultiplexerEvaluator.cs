@@ -26,7 +26,7 @@ namespace SharpNeat.Domains.BinaryThreeMultiplexer
     /// Binary 3-Multiplexer task.
     /// One binary input selects which of two other binary inputs to output. 
     /// </summary>
-    public class BinaryThreeMultiplexerEvaluator : IPhenomeEvaluator<IBlackBox>
+    public class BinaryThreeMultiplexerEvaluator : IPhenomeEvaluator<IBlackBox, FitnessInfo>
     {
         const double StopFitness = 100.0;
         ulong _evalCount;
