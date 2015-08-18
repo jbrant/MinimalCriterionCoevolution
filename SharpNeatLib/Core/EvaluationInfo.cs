@@ -108,7 +108,7 @@ namespace SharpNeat.Core
         /// <summary>
         /// Gets or sets the behavior characterization for the evaluation.
         /// </summary>
-        public IBehaviorCharacterization BehaviorCharacterization { get; set; }
+        public double[] BehaviorCharacterization { get; set; }
         
         /// <summary>
         /// Gets a value indicating whether a genome has been evaluated at least once.

@@ -99,17 +99,21 @@ namespace SharpNeat.Core
                     // Non-viable genome.
                     genome.EvaluationInfo.SetFitness(0.0);
                     genome.EvaluationInfo.AuxFitnessArr = null;
-                    genome.EvaluationInfo.BehaviorCharacterization = new NullBehaviorCharacterization();
+                    genome.EvaluationInfo.BehaviorCharacterization = new double[0];
                 }
                 else
                 {
                     // Evaluate the behavior and update the genome's behavior characterization
                     BehaviorInfo behaviorInfo = _phenomeEvaluator.Evaluate(phenome);
-                    genome.EvaluationInfo.BehaviorCharacterization.UpdateBehaviors(behaviorInfo.Behaviors.ToList());
+                    genome.EvaluationInfo.BehaviorCharacterization = behaviorInfo.Behaviors;
                 }
             }
 
             // TODO: Here is where the distance calculation to assign the final fitness should occur
+            foreach (var genome in genomeList)
+            {
+
+            }
         }
 
         private void Evaluate_Caching(IList<TGenome> genomeList)
@@ -129,13 +133,13 @@ namespace SharpNeat.Core
                     // Non-viable genome.
                     genome.EvaluationInfo.SetFitness(0.0);
                     genome.EvaluationInfo.AuxFitnessArr = null;
-                    genome.EvaluationInfo.BehaviorCharacterization = new NullBehaviorCharacterization();
+                    genome.EvaluationInfo.BehaviorCharacterization = new double[0];
                 }
                 else
                 {
                     // Evaluate the behavior and update the genome's behavior characterization
                     BehaviorInfo behaviorInfo = _phenomeEvaluator.Evaluate(phenome);
-                    genome.EvaluationInfo.BehaviorCharacterization.UpdateBehaviors(behaviorInfo.Behaviors.ToList());
+                    genome.EvaluationInfo.BehaviorCharacterization = behaviorInfo.Behaviors;
                 }
             }
 

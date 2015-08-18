@@ -37,12 +37,22 @@
                 // TODO: Probably throw an exception here since it doesn't make sense to compare behaviors whose characterization differs
             }
 
+            return CalculateDistance(behavior1.Behaviors, behavior2.Behaviors);
+        }
+
+        public static double CalculateDistance(double[] behavior1, double[] behavior2)
+        {
+            if (behavior1.Length != behavior2.Length)
+            {
+                // TODO: Probably throw an exception here since it doesn't make sense to compare behaviors whose characterization differs
+            }
+
             double distance = 0;
 
-            for (var position = 0; position < behavior1.Behaviors.Length; position++)
+            for (var position = 0; position < behavior1.Length; position++)
             {
-                var delta = behavior1.Behaviors[position] - behavior2.Behaviors[position];
-                distance += delta*delta;
+                var delta = behavior1[position] - behavior2[position];
+                distance += delta * delta;
             }
 
             return distance;

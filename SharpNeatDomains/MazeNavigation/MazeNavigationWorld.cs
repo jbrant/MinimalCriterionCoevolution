@@ -128,7 +128,7 @@ namespace SharpNeat.Domains.MazeNavigation
         /// </param>
         /// <param name="evaluationType">The type of evaluation to perform (i.e. fitness, novelty, etc.).</param>
         /// <returns>The trial results (which will either be a fitness value or a behavior).</returns>
-        public TTrialInfo RunTrial(IBlackBox agent, EvaluationType evaluationType, IBehaviorCharacterization behaviorCharacterization = null)
+        public TTrialInfo RunTrial(IBlackBox agent, EvaluationType evaluationType)
         {
             ITrialInfo trialInfo;
 
@@ -153,17 +153,15 @@ namespace SharpNeat.Domains.MazeNavigation
             // location of the navigator
             else
             {
-                // TODO: Need to assert behaviorCharacterization for null here
-
                 // Run for the given number of timesteps or until the goal is reached
                 for (var curTimestep = 0; curTimestep < _maxTimesteps; curTimestep++)
                 {
                     RunTimestep(agent);
-                    behaviorCharacterization.UpdateBehaviors(new List<double>() { _navigator.Location.X, _navigator.Location.Y });
+                    _behaviorCharacterization.UpdateBehaviors(new List<double>() { _navigator.Location.X, _navigator.Location.Y });
                 }
 
                 // TODO: This needs to be modified to also support characterizing the trajectory
-                trialInfo = new BehaviorInfo(behaviorCharacterization.Behaviors.ToArray());
+                trialInfo = new BehaviorInfo(_behaviorCharacterization.Behaviors.ToArray());
             }
 
             return (TTrialInfo) trialInfo;
