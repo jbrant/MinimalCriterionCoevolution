@@ -7,7 +7,7 @@ namespace SharpNeat.Behaviors
     ///     Defines a behavior characterization based on the trajectory of an agent.  This reduces to capturing the position of
     ///     the agent in n-dimensional space at every time step.
     /// </summary>
-    internal class TrajectoryBehaviorCharacterization : IBehaviorCharacterization
+    public class TrajectoryBehaviorCharacterization : IBehaviorCharacterization
     {
         /// <summary>
         ///     The double array of behaviors.  Since this is a trajectory characterization, it will contain the position of the

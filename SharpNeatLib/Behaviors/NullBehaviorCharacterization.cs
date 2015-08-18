@@ -6,7 +6,7 @@ namespace SharpNeat.Behaviors
     /// <summary>
     ///     Defines an empty/null behavior characterization.
     /// </summary>
-    internal class NullBehaviorCharacterization : IBehaviorCharacterization
+    public class NullBehaviorCharacterization : IBehaviorCharacterization
     {
         /// <summary>
         ///     Null array of behaviors.

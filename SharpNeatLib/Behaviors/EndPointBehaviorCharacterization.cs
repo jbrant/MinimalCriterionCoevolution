@@ -7,7 +7,7 @@ namespace SharpNeat.Behaviors
     ///     Defines a behavior characterization based on the end-point of an agent.  As such, the behavior is simply defined as
     ///     a coordinate in n-dimensional space.
     /// </summary>
-    internal class EndPointBehaviorCharacterization : IBehaviorCharacterization
+    public class EndPointBehaviorCharacterization : IBehaviorCharacterization
     {
         /// <summary>
         ///     The double array of behaviors.  Since this is an end-point characterization, it should only contain the number of

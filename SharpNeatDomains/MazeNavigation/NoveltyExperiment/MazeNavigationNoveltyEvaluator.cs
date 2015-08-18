@@ -10,14 +10,16 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
         private readonly int? _maxTimesteps;
         private readonly MazeVariant _mazeVariant;
         private readonly int? _minSuccessDistance;
+        private readonly IBehaviorCharacterization _behaviorCharacterization;
 
         internal MazeNavigationNoveltyEvaluator(int? maxDistanceToTarget, int? maxTimesteps, MazeVariant mazeVariant,
-            int? minSuccessDistance)
+            int? minSuccessDistance, IBehaviorCharacterization behaviorCharacterization)
         {
             _maxDistanceToTarget = maxDistanceToTarget;
             _maxTimesteps = maxTimesteps;
             _mazeVariant = mazeVariant;
             _minSuccessDistance = minSuccessDistance;
+            _behaviorCharacterization = behaviorCharacterization;
         }
 
         /// <summary>
@@ -38,7 +40,7 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
 
             // Instantiate the maze world
             var world = new MazeNavigationWorld<BehaviorInfo>(_mazeVariant, _minSuccessDistance, _maxDistanceToTarget,
-                _maxTimesteps);
+                _maxTimesteps, _behaviorCharacterization);
 
             // Run a single trial
             return world.RunTrial(phenome, EvaluationType.NoveltySearch);

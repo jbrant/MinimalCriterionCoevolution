@@ -55,6 +55,7 @@
     <Compile Include="AbstractGenomeView.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="BehaviorCharacterizationType.cs" />
     <Compile Include="BinaryElevenMultiplexer\RbfBinaryElevenMultiplexerExperiment.cs" />
     <Compile Include="BinarySixMultiplexer\BinarySixMultiplexerEvaluator.cs" />
     <Compile Include="AbstractDomainView.cs">

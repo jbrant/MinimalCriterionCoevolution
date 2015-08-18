@@ -62,7 +62,7 @@ namespace SharpNeat.Domains.MazeNavigation
         /// </summary>
         /// <param name="name">The name of the experiment</param>
         /// <param name="xmlConfig">The parent XML configuration element</param>
-        public void Initialize(string name, XmlElement xmlConfig)
+        public virtual void Initialize(string name, XmlElement xmlConfig)
         {
             // Set all properties
             Name = name;

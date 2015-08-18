@@ -3,8 +3,8 @@
 namespace SharpNeat.Domains.MazeNavigation.Components
 {
     /// <summary>
-    ///     Defines the variant of maze environments to use (hard, medium, etc.).  Each of these variants entail a certain
-    ///     environment configuration.
+    ///     Defines the variant of maze environments to use (hard, medium, etc.) for a given maze navigation experiment.  Each
+    ///     of these variants entail a certain environment configuration.
     /// </summary>
     public enum MazeVariant
     {
@@ -28,7 +28,7 @@ namespace SharpNeat.Domains.MazeNavigation.Components
         ///     Determines the appropriate maze variant based on the given string value.
         /// </summary>
         /// <param name="strMazeVariant">The string-valued maze variant.</param>
-        /// <returns>The appropriate maze variant.</returns>
+        /// <returns>The maze variant domain type.</returns>
         public static MazeVariant convertStringToMazeVariant(String strMazeVariant)
         {
             if (MazeVariant.MediumMaze.ToString().Equals(strMazeVariant, StringComparison.InvariantCultureIgnoreCase))

@@ -39,19 +39,26 @@ namespace SharpNeat.Domains.MazeNavigation
         private readonly List<DoubleLine> _walls;
 
         /// <summary>
+        /// Characterization to use for capturing navigator behavior.
+        /// </summary>
+        private readonly IBehaviorCharacterization _behaviorCharacterization;
+
+        /// <summary>
         ///     Creates the maze navigation world (environment) given the experiment parameters.
         /// </summary>
         /// <param name="mazeVariant">The maze variant to utilize (i.e. medium maze, hard maze, etc.).</param>
         /// <param name="minSuccessDistance">The minimum distance from the target for the trial to be considered a success.</param>
         /// <param name="maxDistanceToTarget">The maximum distance from the target possible.</param>
         /// <param name="maxTimeSteps">The maximum number of time steps to run a given trial.</param>
+        /// <param name="behaviorCharacterization">The behavior characterization for a navigator.</param>
         public MazeNavigationWorld(MazeVariant mazeVariant = MazeVariant.MediumMaze, int? minSuccessDistance = 5,
             int? maxDistanceToTarget = 300,
-            int? maxTimeSteps = 400)
+            int? maxTimeSteps = 400, IBehaviorCharacterization behaviorCharacterization = null)
         {
             _minSuccessDistance = minSuccessDistance;
             _maxDistanceToTarget = maxDistanceToTarget;
             _maxTimesteps = maxTimeSteps;
+            _behaviorCharacterization = behaviorCharacterization;
 
             switch (mazeVariant)
             {
@@ -121,24 +128,24 @@ namespace SharpNeat.Domains.MazeNavigation
         /// </param>
         /// <param name="evaluationType">The type of evaluation to perform (i.e. fitness, novelty, etc.).</param>
         /// <returns>The trial results (which will either be a fitness value or a behavior).</returns>
-        public TTrialInfo RunTrial(IBlackBox agent, EvaluationType evaluationType)
+        public TTrialInfo RunTrial(IBlackBox agent, EvaluationType evaluationType, IBehaviorCharacterization behaviorCharacterization = null)
         {
             ITrialInfo trialInfo;
 
             // Reset neural network
             agent.ResetState();
-
-            // Run for the given number of timesteps or until the goal is reached
-            for (var curTimestep = 0; curTimestep < _maxTimesteps; curTimestep++)
-            {
-                RunTimestep(agent);
-            }
-
+            
             // If this is a fitness evaluation, return the fitness score as the 
             // difference between the maximum target distance and the ending distance 
             // to the target
             if (evaluationType.Equals(EvaluationType.Fitness))
             {
+                // Run for the given number of timesteps or until the goal is reached
+                for (var curTimestep = 0; curTimestep < _maxTimesteps; curTimestep++)
+                {
+                    RunTimestep(agent);
+                }
+
                 var fitness = (double) _maxDistanceToTarget - GetDistanceToTarget();
                 trialInfo = new FitnessInfo(fitness, fitness);
             }
@@ -146,8 +153,17 @@ namespace SharpNeat.Domains.MazeNavigation
             // location of the navigator
             else
             {
+                // TODO: Need to assert behaviorCharacterization for null here
+
+                // Run for the given number of timesteps or until the goal is reached
+                for (var curTimestep = 0; curTimestep < _maxTimesteps; curTimestep++)
+                {
+                    RunTimestep(agent);
+                    behaviorCharacterization.UpdateBehaviors(new List<double>() { _navigator.Location.X, _navigator.Location.Y });
+                }
+
                 // TODO: This needs to be modified to also support characterizing the trajectory
-                trialInfo = new BehaviorInfo(new[] {_navigator.Location.X, _navigator.Location.Y});
+                trialInfo = new BehaviorInfo(behaviorCharacterization.Behaviors.ToArray());
             }
 
             return (TTrialInfo) trialInfo;

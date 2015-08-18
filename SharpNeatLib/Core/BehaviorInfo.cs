@@ -22,6 +22,30 @@
         /// <summary>
         ///     The numeric behavior representation.
         /// </summary>
-        public double[] Behaviors { get; private set; }
+        public double[] Behaviors { get; }
+
+        /// <summary>
+        ///     Calculates the distance between two behaviors.
+        /// </summary>
+        /// <param name="behavior1">The first behavior in the distance calculation.</param>
+        /// <param name="behavior2">The second behavior in the distance calculation.</param>
+        /// <returns>A measure of the behavioral distance.</returns>
+        public static double CalculateDistance(BehaviorInfo behavior1, BehaviorInfo behavior2)
+        {
+            if (behavior1.Behaviors.Length != behavior2.Behaviors.Length)
+            {
+                // TODO: Probably throw an exception here since it doesn't make sense to compare behaviors whose characterization differs
+            }
+
+            double distance = 0;
+
+            for (var position = 0; position < behavior1.Behaviors.Length; position++)
+            {
+                var delta = behavior1.Behaviors[position] - behavior2.Behaviors[position];
+                distance += delta*delta;
+            }
+
+            return distance;
+        }
     }
 }

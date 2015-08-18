@@ -578,6 +578,7 @@ The problem domain view allows the performance of the best genome to be observed
       <MinSuccessDistance>5</MinSuccessDistance>
       <MaxDistanceToTarget>300</MaxDistanceToTarget>
       <MazeVariant>HARD_MAZE</MazeVariant>
+      <BehaviorCharacterization>EndPoint</BehaviorCharacterization>
       <Description>
         This is the maze navigation experiment used in the original novelty search papers (citation needed).
       </Description>

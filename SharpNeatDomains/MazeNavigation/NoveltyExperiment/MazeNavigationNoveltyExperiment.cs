@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Xml;
 using SharpNeat.Core;
 using SharpNeat.DistanceMetrics;
 using SharpNeat.EvolutionAlgorithms;
@@ -10,6 +11,19 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
 {
     internal class MazeNavigationNoveltyExperiment : BaseMazeNavigationExperiment
     {
+        private IBehaviorCharacterization _behaviorCharacterization;
+
+        public override void Initialize(string name, XmlElement xmlConfig)
+        {
+            base.Initialize(name, xmlConfig);
+
+            // Read in the behavior characterization
+            _behaviorCharacterization =
+                BehaviorCharacterizationUtil.GenerateBehaviorCharacterization(
+                    BehaviorCharacterizationUtil.ConvertStringToBehavioralCharacterization(
+                        XmlUtils.TryGetValueAsString(xmlConfig, "BehaviorCharacterization")));            
+        }
+
         /// <summary>
         ///     Create and return a NeatEvolutionAlgorithm object (specific to fitness-based evaluations) ready for running the
         ///     NEAT algorithm/search based on the given genome factory and genome list.  Various sub-parts of the algorithm are
@@ -37,7 +51,7 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
 
             // Create IBlackBox evaluator.
             var mazeNavigationEvaluator = new MazeNavigationNoveltyEvaluator(MaxDistanceToTarget, MaxTimesteps, MazeVariant,
-                MinSuccessDistance);
+                MinSuccessDistance, _behaviorCharacterization);
 
             // Create genome decoder.
             var genomeDecoder = CreateGenomeDecoder();
