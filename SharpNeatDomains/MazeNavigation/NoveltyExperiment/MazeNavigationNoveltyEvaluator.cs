@@ -6,11 +6,11 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
 {
     internal class MazeNavigationNoveltyEvaluator : IPhenomeEvaluator<IBlackBox, BehaviorInfo>
     {
+        private readonly IBehaviorCharacterization _behaviorCharacterization;
         private readonly int? _maxDistanceToTarget;
         private readonly int? _maxTimesteps;
         private readonly MazeVariant _mazeVariant;
         private readonly int? _minSuccessDistance;
-        private readonly IBehaviorCharacterization _behaviorCharacterization;
 
         internal MazeNavigationNoveltyEvaluator(int? maxDistanceToTarget, int? maxTimesteps, MazeVariant mazeVariant,
             int? minSuccessDistance, IBehaviorCharacterization behaviorCharacterization)
@@ -32,7 +32,7 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
         ///     should stop.  This property's value can remain false to allow the algorithm to run indefinitely.
         /// </summary>
         public bool StopConditionSatisfied => false;
-        
+
         public BehaviorInfo Evaluate(IBlackBox phenome)
         {
             // Increment evaluation count
@@ -51,6 +51,6 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
         /// </summary>
         public void Reset()
         {
-        }        
+        }
     }
 }

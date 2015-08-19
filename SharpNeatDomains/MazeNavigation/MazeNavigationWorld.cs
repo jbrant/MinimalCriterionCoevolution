@@ -160,7 +160,7 @@ namespace SharpNeat.Domains.MazeNavigation
                     _behaviorCharacterization.UpdateBehaviors(new List<double>() { _navigator.Location.X, _navigator.Location.Y });
                 }
 
-                // TODO: This needs to be modified to also support characterizing the trajectory
+                // Extract the behavior info object
                 trialInfo = new BehaviorInfo(_behaviorCharacterization.Behaviors.ToArray());
             }
 

@@ -234,6 +234,7 @@
     <Compile Include="SpeciationStrategies\SpeciationUtils.cs" />
     <Compile Include="Utility\BoxMullerGaussianSampler.cs" />
     <Compile Include="Utility\CircularBuffer.cs" />
+    <Compile Include="Utility\NoveltyUtils.cs" />
     <Compile Include="Utility\ZigguratGaussianSampler.cs" />
     <Compile Include="Utility\FrequencyDistributionData.cs" />
     <Compile Include="Utility\DoubleCircularBufferWithStats.cs" />

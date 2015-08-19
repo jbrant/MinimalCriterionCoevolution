@@ -1,22 +1,20 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using SharpNeat.Behaviors;
+using SharpNeat.Utility;
 
 namespace SharpNeat.Core
 {
     public class SerialGenomeListBehaviorEvaluator<TGenome, TPhenome> : IGenomeListEvaluator<TGenome>
         where TGenome : class, IGenome<TGenome>
         where TPhenome : class
-    {        
+    {
+        private readonly bool _enablePhenomeCaching;
         private readonly EvaluationMethod _evaluationMethod;
-        readonly IGenomeDecoder<TGenome, TPhenome> _genomeDecoder;
-        readonly IPhenomeEvaluator<TPhenome, BehaviorInfo> _phenomeEvaluator;
-        readonly bool _enablePhenomeCaching;
-
-        delegate void EvaluationMethod(IList<TGenome> genomeList);
+        private readonly IGenomeDecoder<TGenome, TPhenome> _genomeDecoder;
+        private readonly IPhenomeEvaluator<TPhenome, BehaviorInfo> _phenomeEvaluator;
 
         /// <summary>
-        /// Constructs serial genome list behavior evaluator, customizing only the phenome behavior evaluator and the evaluation method.
+        ///     Constructs serial genome list behavior evaluator, customizing only the phenome behavior evaluator and the
+        ///     evaluation method.
         /// </summary>
         /// <param name="genomeDecoder">The genome decoder to use.</param>
         /// <param name="phenomeEvaluator">The phenome evaluator.</param>
@@ -30,7 +28,8 @@ namespace SharpNeat.Core
         }
 
         /// <summary>
-        /// Constructs serial genome list behavior evaluator, customizing only the phenome behavior evaluator and setting the caching method.
+        ///     Constructs serial genome list behavior evaluator, customizing only the phenome behavior evaluator and setting the
+        ///     caching method.
         /// </summary>
         /// <param name="genomeDecoder">The genome decoder to use.</param>
         /// <param name="phenomeEvaluator">The phenome evaluator.</param>
@@ -54,7 +53,7 @@ namespace SharpNeat.Core
         }
 
         /// <summary>
-        /// Gets the total number of individual genome evaluations that have been performed by this evaluator.
+        ///     Gets the total number of individual genome evaluations that have been performed by this evaluator.
         /// </summary>
         public ulong EvaluationCount
         {
@@ -62,9 +61,9 @@ namespace SharpNeat.Core
         }
 
         /// <summary>
-        /// Gets a value indicating whether some goal fitness has been achieved and that
-        /// the the evolutionary algorithm/search should stop. This property's value can remain false
-        /// to allow the algorithm to run indefinitely.
+        ///     Gets a value indicating whether some goal fitness has been achieved and that
+        ///     the the evolutionary algorithm/search should stop. This property's value can remain false
+        ///     to allow the algorithm to run indefinitely.
         /// </summary>
         public bool StopConditionSatisfied
         {
@@ -72,8 +71,8 @@ namespace SharpNeat.Core
         }
 
         /// <summary>
-        /// Evaluates a list of genomes. Here we decode each genome in series using the contained
-        /// IGenomeDecoder and evaluate the resulting TPhenome using the contained IPhenomeEvaluator.
+        ///     Evaluates a list of genomes. Here we decode each genome in series using the contained
+        ///     IGenomeDecoder and evaluate the resulting TPhenome using the contained IPhenomeEvaluator.
         /// </summary>
         public void Evaluate(IList<TGenome> genomeList)
         {
@@ -81,7 +80,7 @@ namespace SharpNeat.Core
         }
 
         /// <summary>
-        /// Reset the internal state of the evaluation scheme if any exists.
+        ///     Reset the internal state of the evaluation scheme if any exists.
         /// </summary>
         public void Reset()
         {
@@ -104,7 +103,7 @@ namespace SharpNeat.Core
                 else
                 {
                     // Evaluate the behavior and update the genome's behavior characterization
-                    BehaviorInfo behaviorInfo = _phenomeEvaluator.Evaluate(phenome);
+                    var behaviorInfo = _phenomeEvaluator.Evaluate(phenome);
                     genome.EvaluationInfo.BehaviorCharacterization = behaviorInfo.Behaviors;
                 }
             }
@@ -112,7 +111,6 @@ namespace SharpNeat.Core
             // TODO: Here is where the distance calculation to assign the final fitness should occur
             foreach (var genome in genomeList)
             {
-
             }
         }
 
@@ -123,11 +121,12 @@ namespace SharpNeat.Core
             {
                 var phenome = _genomeDecoder.Decode(genome);
                 if (null == phenome)
-                {   // Decode the phenome and store a ref against the genome.
+                {
+                    // Decode the phenome and store a ref against the genome.
                     phenome = _genomeDecoder.Decode(genome);
                     genome.CachedPhenome = phenome;
                 }
-                
+
                 if (null == phenome)
                 {
                     // Non-viable genome.
@@ -138,12 +137,24 @@ namespace SharpNeat.Core
                 else
                 {
                     // Evaluate the behavior and update the genome's behavior characterization
-                    BehaviorInfo behaviorInfo = _phenomeEvaluator.Evaluate(phenome);
+                    var behaviorInfo = _phenomeEvaluator.Evaluate(phenome);
                     genome.EvaluationInfo.BehaviorCharacterization = behaviorInfo.Behaviors;
                 }
             }
 
             // TODO: Here is where the distance calculation to assign the final fitness should occur
+            foreach (var genome in genomeList)
+            {
+                var genome1 = genome;
+                var fitness = NoveltyUtils<TGenome>.CalculateNovelty(genome.EvaluationInfo.BehaviorCharacterization,
+                    genomeList, 15);
+
+                var fitnessInfo = new FitnessInfo(fitness, fitness);
+                genome.EvaluationInfo.SetFitness(fitnessInfo._fitness);
+                genome.EvaluationInfo.AuxFitnessArr = fitnessInfo._auxFitnessArr;
+            }
         }
+
+        private delegate void EvaluationMethod(IList<TGenome> genomeList);
     }
 }
