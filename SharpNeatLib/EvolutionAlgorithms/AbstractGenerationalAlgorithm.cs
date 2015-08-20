@@ -45,8 +45,9 @@ namespace SharpNeat.EvolutionAlgorithms
         protected List<TGenome> _genomeList;
         protected int _populationSize;
         protected TGenome _currentBestGenome;
+        protected EliteArchive<TGenome> _EliteArchive;
 
-        // Algorithm state data.
+            // Algorithm state data.
         RunState _runState = RunState.NotReady;
         protected uint _currentGeneration;
 
@@ -77,12 +78,7 @@ namespace SharpNeat.EvolutionAlgorithms
         #endregion
 
         #region Properties
-
-        /// <summary>
-        /// Stores and gets/sets the cross-generational archive of high-performing genomes.
-        /// </summary>
-        public List<TGenome> EliteArchive { get; internal set; }
-
+        
         /// <summary>
         /// Gets the current generation.
         /// </summary>
@@ -135,17 +131,20 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <param name="genomeListEvaluator">The genome evaluation scheme for the evolution algorithm.</param>
         /// <param name="genomeFactory">The factory that was used to create the genomeList and which is therefore referenced by the genomes.</param>
         /// <param name="genomeList">An initial genome population.</param>
+        /// <param name="eliteArchive">The cross-generational archive of high-performing genomes (optional).</param>
         public virtual void Initialize(IGenomeListEvaluator<TGenome> genomeListEvaluator,
                                        IGenomeFactory<TGenome> genomeFactory,
-                                       List<TGenome> genomeList)
+                                       List<TGenome> genomeList,
+                                       EliteArchive<TGenome> eliteArchive = null)
         {
             _currentGeneration = 0;
             _genomeListEvaluator = genomeListEvaluator;
             _genomeFactory = genomeFactory;
             _genomeList = genomeList;
+            _EliteArchive = eliteArchive;
             _populationSize = _genomeList.Count;
             _runState = RunState.Ready;
-            _updateScheme = new UpdateScheme(new TimeSpan(0, 0, 1));
+            _updateScheme = new UpdateScheme(new TimeSpan(0, 0, 1));            
         }
 
         /// <summary>
@@ -155,15 +154,18 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <param name="genomeListEvaluator">The genome evaluation scheme for the evolution algorithm.</param>
         /// <param name="genomeFactory">The factory that was used to create the genomeList and which is therefore referenced by the genomes.</param>
         /// <param name="populationSize">The number of genomes to create for the initial population.</param>
+        /// <param name="eliteArchive">The cross-generational archive of high-performing genomes (optional).</param>
         public virtual void Initialize(IGenomeListEvaluator<TGenome> genomeListEvaluator,
                                        IGenomeFactory<TGenome> genomeFactory,
-                                       int populationSize)
+                                       int populationSize,
+                                       EliteArchive<TGenome> eliteArchive = null)
         {
             _currentGeneration = 0;
             _genomeListEvaluator = genomeListEvaluator;
             _genomeFactory = genomeFactory;
             _genomeList = genomeFactory.CreateGenomeList(populationSize, _currentGeneration);
             _populationSize = populationSize;
+            _EliteArchive = eliteArchive;
             _runState = RunState.Ready;
             _updateScheme = new UpdateScheme(new TimeSpan(0, 0, 1));
         }

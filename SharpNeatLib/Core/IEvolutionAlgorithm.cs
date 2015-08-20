@@ -58,7 +58,8 @@ namespace SharpNeat.Core
         /// </summary>
         void Initialize(IGenomeListEvaluator<TGenome> genomeListEvaluator,
                         IGenomeFactory<TGenome> genomeFactory,
-                        List<TGenome> genomeList);
+                        List<TGenome> genomeList,
+                        EliteArchive<TGenome> eliteArchive);
 
         /// <summary>
         /// Initializes the evolution algorithm with the provided IGenomeListEvaluator
@@ -66,7 +67,8 @@ namespace SharpNeat.Core
         /// </summary>
         void Initialize(IGenomeListEvaluator<TGenome> genomeListEvaluator,
                         IGenomeFactory<TGenome> genomeFactory,
-                        int populationSize);
+                        int populationSize,
+                        EliteArchive<TGenome> eliteArchive);
 
         /// <summary>
         /// Starts the algorithm running. The algorithm will switch to the Running state from either

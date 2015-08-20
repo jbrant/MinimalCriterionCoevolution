@@ -136,11 +136,13 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <param name="genomeListEvaluator">The genome evaluation scheme for the evolution algorithm.</param>
         /// <param name="genomeFactory">The factory that was used to create the genomeList and which is therefore referenced by the genomes.</param>
         /// <param name="genomeList">An initial genome population.</param>
+        /// <param name="eliteArchive">The cross-generational archive of high-performing genomes (optional).</param>
         public override void Initialize(IGenomeListEvaluator<TGenome> genomeListEvaluator,
                                         IGenomeFactory<TGenome> genomeFactory,
-                                        List<TGenome> genomeList)
+                                        List<TGenome> genomeList,
+                                        EliteArchive<TGenome> eliteArchive = null)
         {
-            base.Initialize(genomeListEvaluator, genomeFactory, genomeList);
+            base.Initialize(genomeListEvaluator, genomeFactory, genomeList, eliteArchive);
             Initialize();
         }
 
@@ -151,11 +153,13 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <param name="genomeListEvaluator">The genome evaluation scheme for the evolution algorithm.</param>
         /// <param name="genomeFactory">The factory that was used to create the genomeList and which is therefore referenced by the genomes.</param>
         /// <param name="populationSize">The number of genomes to create for the initial population.</param>
+        /// <param name="eliteArchive">The cross-generational archive of high-performing genomes (optional).</param>
         public override void Initialize(IGenomeListEvaluator<TGenome> genomeListEvaluator,
                                         IGenomeFactory<TGenome> genomeFactory,
-                                        int populationSize)
+                                        int populationSize,
+                                        EliteArchive<TGenome> eliteArchive = null)
         {
-            base.Initialize(genomeListEvaluator, genomeFactory, populationSize);
+            base.Initialize(genomeListEvaluator, genomeFactory, populationSize, eliteArchive);
             Initialize();
         }
 
@@ -235,6 +239,10 @@ namespace SharpNeat.EvolutionAlgorithms
             UpdateStats();
 
             // TODO: Update the archive if elitism archive parameter is set
+            if (_EliteArchive != null)
+            {
+                
+            }
 
             // Determine the complexity regulation mode and switch over to the appropriate set of evolution
             // algorithm parameters. Also notify the genome factory to allow it to modify how it creates genomes
@@ -827,7 +835,7 @@ namespace SharpNeat.EvolutionAlgorithms
 
             // Add current population and elite archive
             combinedGenomes.AddRange(_genomeList);
-            combinedGenomes.AddRange(EliteArchive);
+            combinedGenomes.AddRange(_EliteArchive.Archive);
 
             return combinedGenomes;
         } 
