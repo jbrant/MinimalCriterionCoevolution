@@ -205,9 +205,9 @@ namespace SharpNeat.EvolutionAlgorithms
             // (otherwise we could just evaluate offspringList).
             _genomeList.AddRange(offspringList);
 
-            // Evaluate genomes.
-            _genomeListEvaluator.Evaluate(_genomeList);
-
+            // Evaluate genomes.            
+            _genomeListEvaluator.Evaluate(GetCombinedPopulationAndArchive());
+            
             // Integrate offspring into species.
             if(emptySpeciesFlag)
             {   
@@ -233,6 +233,8 @@ namespace SharpNeat.EvolutionAlgorithms
             // Update stats and store reference to best genome.
             UpdateBestGenome();
             UpdateStats();
+
+            // TODO: Update the archive if elitism archive parameter is set
 
             // Determine the complexity regulation mode and switch over to the appropriate set of evolution
             // algorithm parameters. Also notify the genome factory to allow it to modify how it creates genomes
@@ -813,6 +815,22 @@ namespace SharpNeat.EvolutionAlgorithms
             }
             return emptySpeciesFlag;
         }
+
+        /// <summary>
+        /// Builds a list of genomes that includes both the current population 
+        /// and the archive of elites.
+        /// </summary>
+        /// <returns>List containing the current population and elite archive.</returns>
+        private List<TGenome> GetCombinedPopulationAndArchive()
+        {
+            List<TGenome> combinedGenomes = new List<TGenome>();
+
+            // Add current population and elite archive
+            combinedGenomes.AddRange(_genomeList);
+            combinedGenomes.AddRange(EliteArchive);
+
+            return combinedGenomes;
+        } 
 
         #endregion
 

@@ -79,6 +79,11 @@ namespace SharpNeat.EvolutionAlgorithms
         #region Properties
 
         /// <summary>
+        /// Stores and gets/sets the cross-generational archive of high-performing genomes.
+        /// </summary>
+        public List<TGenome> EliteArchive { get; internal set; }
+
+        /// <summary>
         /// Gets the current generation.
         /// </summary>
         public uint CurrentGeneration
