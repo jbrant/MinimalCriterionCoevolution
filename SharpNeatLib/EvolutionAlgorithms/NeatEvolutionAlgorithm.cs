@@ -238,11 +238,8 @@ namespace SharpNeat.EvolutionAlgorithms
             UpdateBestGenome();
             UpdateStats();
 
-            // TODO: Update the archive if elitism archive parameter is set
-            if (_EliteArchive != null)
-            {
-                
-            }
+            // Update the elite archive parameters and reset for next generation
+            _EliteArchive?.UpdateArchiveParameters();
 
             // Determine the complexity regulation mode and switch over to the appropriate set of evolution
             // algorithm parameters. Also notify the genome factory to allow it to modify how it creates genomes
