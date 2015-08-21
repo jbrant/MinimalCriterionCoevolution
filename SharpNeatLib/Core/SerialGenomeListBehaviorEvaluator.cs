@@ -7,9 +7,11 @@ namespace SharpNeat.Core
         where TGenome : class, IGenome<TGenome>
         where TPhenome : class
     {
+        private readonly EliteArchive<TGenome> _eliteArchive;
         private readonly bool _enablePhenomeCaching;
         private readonly EvaluationMethod _evaluationMethod;
         private readonly IGenomeDecoder<TGenome, TPhenome> _genomeDecoder;
+        private readonly int _nearestNeighbors;
         private readonly IPhenomeEvaluator<TPhenome, BehaviorInfo> _phenomeEvaluator;
 
         /// <summary>
@@ -18,7 +20,7 @@ namespace SharpNeat.Core
         /// </summary>
         /// <param name="genomeDecoder">The genome decoder to use.</param>
         /// <param name="phenomeEvaluator">The phenome evaluator.</param>
-        public SerialGenomeListBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
+        private SerialGenomeListBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
             IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator)
         {
             _genomeDecoder = genomeDecoder;
@@ -34,7 +36,7 @@ namespace SharpNeat.Core
         /// <param name="genomeDecoder">The genome decoder to use.</param>
         /// <param name="phenomeEvaluator">The phenome evaluator.</param>
         /// <param name="enablePhenomeCaching">Whether or not to enable phenome caching.</param>
-        public SerialGenomeListBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
+        private SerialGenomeListBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
             IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator,
             bool enablePhenomeCaching)
         {
@@ -50,6 +52,41 @@ namespace SharpNeat.Core
             {
                 _evaluationMethod = Evaluate_NonCaching;
             }
+        }
+
+        /// <summary>
+        ///     Constructs serial genome list behavior evaluator, customizing only the phenome behavior evaluator and the
+        ///     evaluation method.  Also sets the number of nearest neighbors to utilize in behavior distance calculations and
+        ///     accepts an optional elite archive.
+        /// </summary>
+        /// <param name="genomeDecoder">The genome decoder to use.</param>
+        /// <param name="phenomeEvaluator">The phenome evaluator.</param>
+        /// <param name="nearestNeighbors">The number of nearest neighbors to use in behavior distance calculations.</param>
+        /// <param name="archive">A reference to the elite archive (optional).</param>
+        public SerialGenomeListBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
+            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, int nearestNeighbors,
+            EliteArchive<TGenome> archive = null) : this(genomeDecoder, phenomeEvaluator)
+        {
+            _nearestNeighbors = nearestNeighbors;
+            _eliteArchive = archive;
+        }
+
+        /// <summary>
+        ///     Constructs serial genome list behavior evaluator, customizing only the phenome behavior evaluator and setting the
+        ///     caching method.  Also sets the number of nearest neighbors to utilize in behavior distance calculations and accepts
+        ///     an optional elite archive.
+        /// </summary>
+        /// <param name="genomeDecoder">The genome decoder to use.</param>
+        /// <param name="phenomeEvaluator">The phenome evaluator.</param>
+        /// <param name="enablePhenomeCaching">Whether or not to enable phenome caching.</param>
+        /// <param name="nearestNeighbors">The number of nearest neighbors to use in behavior distance calculations.</param>
+        /// <param name="archive">A reference to the elite archive (optional).</param>
+        public SerialGenomeListBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
+            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator,
+            bool enablePhenomeCaching, int nearestNeighbors, EliteArchive<TGenome> archive = null)
+        {
+            _nearestNeighbors = nearestNeighbors;
+            _eliteArchive = archive;
         }
 
         /// <summary>
@@ -145,13 +182,16 @@ namespace SharpNeat.Core
             // TODO: Here is where the distance calculation to assign the final fitness should occur
             foreach (var genome in genomeList)
             {
-                var genome1 = genome;
-                var fitness = NoveltyUtils<TGenome>.CalculateNovelty(genome.EvaluationInfo.BehaviorCharacterization,
-                    genomeList, 15);
+                var fitness =
+                    BehaviorUtils<TGenome>.CalculateBehavioralDistance(genome.EvaluationInfo.BehaviorCharacterization,
+                        genomeList, _nearestNeighbors, _eliteArchive);
 
                 var fitnessInfo = new FitnessInfo(fitness, fitness);
                 genome.EvaluationInfo.SetFitness(fitnessInfo._fitness);
                 genome.EvaluationInfo.AuxFitnessArr = fitnessInfo._auxFitnessArr;
+
+                // Add the genome to the archive if it qualifies
+                _eliteArchive?.TestAndAddCandidateToArchive(genome);
             }
         }
 

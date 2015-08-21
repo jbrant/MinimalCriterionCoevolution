@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using SharpNeat.Core;
 using SharpNeat.Domains.MazeNavigation.Components;
 using SharpNeat.Phenomes;
@@ -8,6 +7,11 @@ namespace SharpNeat.Domains.MazeNavigation
 {
     internal class MazeNavigationWorld<TTrialInfo>
     {
+        /// <summary>
+        ///     Characterization to use for capturing navigator behavior.
+        /// </summary>
+        private readonly IBehaviorCharacterization _behaviorCharacterization;
+
         /// <summary>
         ///     Location of the goal.
         /// </summary>
@@ -37,11 +41,6 @@ namespace SharpNeat.Domains.MazeNavigation
         ///     List of walls in the environment.
         /// </summary>
         private readonly List<DoubleLine> _walls;
-
-        /// <summary>
-        /// Characterization to use for capturing navigator behavior.
-        /// </summary>
-        private readonly IBehaviorCharacterization _behaviorCharacterization;
 
         /// <summary>
         ///     Creates the maze navigation world (environment) given the experiment parameters.
@@ -128,13 +127,16 @@ namespace SharpNeat.Domains.MazeNavigation
         /// </param>
         /// <param name="evaluationType">The type of evaluation to perform (i.e. fitness, novelty, etc.).</param>
         /// <returns>The trial results (which will either be a fitness value or a behavior).</returns>
-        public TTrialInfo RunTrial(IBlackBox agent, EvaluationType evaluationType)
+        public TTrialInfo RunTrial(IBlackBox agent, EvaluationType evaluationType, out bool goalReached)
         {
             ITrialInfo trialInfo;
 
+            // Default the goal reached parameter to false
+            goalReached = false;
+
             // Reset neural network
             agent.ResetState();
-            
+
             // If this is a fitness evaluation, return the fitness score as the 
             // difference between the maximum target distance and the ending distance 
             // to the target
@@ -144,6 +146,13 @@ namespace SharpNeat.Domains.MazeNavigation
                 for (var curTimestep = 0; curTimestep < _maxTimesteps; curTimestep++)
                 {
                     RunTimestep(agent);
+
+                    // If the goal has been reached, break out of the loop
+                    if (GetDistanceToTarget() < _minSuccessDistance)
+                    {
+                        goalReached = true;
+                        break;
+                    }
                 }
 
                 var fitness = (double) _maxDistanceToTarget - GetDistanceToTarget();
@@ -157,7 +166,18 @@ namespace SharpNeat.Domains.MazeNavigation
                 for (var curTimestep = 0; curTimestep < _maxTimesteps; curTimestep++)
                 {
                     RunTimestep(agent);
-                    _behaviorCharacterization.UpdateBehaviors(new List<double>() { _navigator.Location.X, _navigator.Location.Y });
+                    _behaviorCharacterization.UpdateBehaviors(new List<double>
+                    {
+                        _navigator.Location.X,
+                        _navigator.Location.Y
+                    });
+
+                    // If the goal has been reached, break out of the loop
+                    if (GetDistanceToTarget() < _minSuccessDistance)
+                    {
+                        goalReached = true;
+                        break;
+                    }
                 }
 
                 // Extract the behavior info object
@@ -196,16 +216,6 @@ namespace SharpNeat.Domains.MazeNavigation
 
             // Move the navigator to the new position (i.e. execute a single timestep)
             _navigator.Move(_walls);
-
-            // Compute the new distance to the target (if the distance is less than 1,
-            // we've solved the maze anyways but don't want to divide by 0 or
-            // artificially inflate the fitness)
-            var distanceToTarget = Math.Max(GetDistanceToTarget(), 1);
-
-            // If the goal has been reached, break out of the loop
-            if (distanceToTarget < _minSuccessDistance)
-            {
-            }
         }
 
         /// <summary>

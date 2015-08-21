@@ -10,6 +10,7 @@ namespace SharpNeat.Domains.MazeNavigation
         private readonly int? _maxTimesteps;
         private readonly MazeVariant _mazeVariant;
         private readonly int? _minSuccessDistance;
+        private bool _stopConditionSatisfied;
 
         internal MazeNavigationFitnessEvaluator(int? maxDistanceToTarget, int? maxTimesteps, MazeVariant mazeVariant,
             int? minSuccessDistance)
@@ -29,19 +30,26 @@ namespace SharpNeat.Domains.MazeNavigation
         ///     Gets a value indicating whether some goal fitness has been achieved and that the evolutionary algorithm/search
         ///     should stop.  This property's value can remain false to allow the algorithm to run indefinitely.
         /// </summary>
-        public bool StopConditionSatisfied => false;
+        public bool StopConditionSatisfied
+        {
+            get { return _stopConditionSatisfied; }
+            set { _stopConditionSatisfied = value; }
+        }
 
         public FitnessInfo Evaluate(IBlackBox phenome)
         {
             // Increment eval count
             EvaluationCount++;
 
+            // Default the stop condition satisfied to false
+            _stopConditionSatisfied = false;
+
             // Instantiate the maze world
             var world = new MazeNavigationWorld<FitnessInfo>(_mazeVariant, _minSuccessDistance, _maxDistanceToTarget,
                 _maxTimesteps);
 
             // Run a single trial
-            return world.RunTrial(phenome, EvaluationType.Fitness);
+            return world.RunTrial(phenome, EvaluationType.Fitness, out _stopConditionSatisfied);
         }
 
         /// <summary>

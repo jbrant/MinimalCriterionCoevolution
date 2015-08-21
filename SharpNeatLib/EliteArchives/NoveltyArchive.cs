@@ -2,6 +2,10 @@
 
 namespace SharpNeat.EliteArchives
 {
+    /// <summary>
+    ///     Encapsulates the state of the archive of behaviorally organisms.
+    /// </summary>
+    /// <typeparam name="TGenome">The genotype to store and evaluate.</typeparam>
     public class NoveltyArchive<TGenome> : EliteArchive<TGenome>
         where TGenome : class, IGenome<TGenome>
     {
