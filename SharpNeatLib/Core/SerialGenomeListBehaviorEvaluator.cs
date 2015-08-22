@@ -3,6 +3,15 @@ using SharpNeat.Utility;
 
 namespace SharpNeat.Core
 {
+    /// <summary>
+    ///     A concrete implementation of IGenomeListEvaluator that evaulates genome's phenotypic behaviors independently of
+    ///     each other and in series on a single thread.
+    ///     Genome decoding is performed by a provided IGenomeDecoder.
+    ///     Phenome evaluation is performed by a provided IPhenomeEvaluator.
+    ///     This class evaluates on a single thread only, and therefore is a good choice when debugging code.
+    /// </summary>
+    /// <typeparam name="TGenome">The genome type that is decoded.</typeparam>
+    /// <typeparam name="TPhenome">The phenome type that is decoded to and then evaluated.</typeparam>
     public class SerialGenomeListBehaviorEvaluator<TGenome, TPhenome> : IGenomeListEvaluator<TGenome>
         where TGenome : class, IGenome<TGenome>
         where TPhenome : class

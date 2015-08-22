@@ -565,8 +565,8 @@ The problem domain view allows the performance of the best genome to be observed
     <AssemblyPath>SharpNeatDomains.dll</AssemblyPath>
     <ClassName>SharpNeat.Domains.MazeNavigation.NoveltyExperiment.MazeNavigationNoveltyExperiment</ClassName>
     <Config>
-      <PopulationSize>150</PopulationSize>
-      <SpecieCount>10</SpecieCount>
+      <PopulationSize>250</PopulationSize>
+      <SpecieCount>15</SpecieCount>
       <Activation>
         <Scheme>CyclicFixedIters</Scheme>
         <Iters>2</Iters>
@@ -577,10 +577,10 @@ The problem domain view allows the performance of the best genome to be observed
       <MaxTimesteps>400</MaxTimesteps>
       <MinSuccessDistance>5</MinSuccessDistance>
       <MaxDistanceToTarget>300</MaxDistanceToTarget>
-      <MazeVariant>HARD_MAZE</MazeVariant>
+      <MazeVariant>MEDIUM_MAZE</MazeVariant>
       <BehaviorCharacterization>EndPoint</BehaviorCharacterization>
       <NearestNeighbors>15</NearestNeighbors>
-      <ArchiveAdditionThreshold>1</ArchiveAdditionThreshold>
+      <ArchiveAdditionThreshold>6</ArchiveAdditionThreshold>
       <ArchiveThresholdDecreaseMultiplier>0.95</ArchiveThresholdDecreaseMultiplier>
       <ArchiveThresholdIncreaseMultiplier>1.3</ArchiveThresholdIncreaseMultiplier>
       <MaxGenerationalArchiveAddition>5</MaxGenerationalArchiveAddition>

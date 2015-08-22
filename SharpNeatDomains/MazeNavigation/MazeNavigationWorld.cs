@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using SharpNeat.Core;
 using SharpNeat.Domains.MazeNavigation.Components;
 using SharpNeat.Phenomes;
@@ -182,6 +184,13 @@ namespace SharpNeat.Domains.MazeNavigation
 
                 // Extract the behavior info object
                 trialInfo = new BehaviorInfo(_behaviorCharacterization.Behaviors.ToArray());
+            }
+
+            // TODO: Remove this
+            double tempDistance = GetDistanceToTarget();
+            if (tempDistance <= 50)
+            {
+                Debug.WriteLine("Distance to goal: {0}", tempDistance);
             }
 
             return (TTrialInfo) trialInfo;

@@ -85,7 +85,7 @@
     <Compile Include="Core\IGenomeDecoder.cs" />
     <Compile Include="Core\IGenomeFactory.cs" />
     <Compile Include="Core\IGenomeListEvaluator.cs" />
-    <None Include="Core\ParallelGenomeListEvaluatorV1.cs" />
+    <Compile Include="Core\ParallelGenomeListBehaviorEvaluator.cs" />
     <Compile Include="Core\ParallelGenomeListEvaluator.cs" />
     <Compile Include="Core\ITrialInfo.cs" />
     <Compile Include="Core\SelectiveGenomeListEvaluator.cs" />
