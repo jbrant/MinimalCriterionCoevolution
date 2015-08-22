@@ -17,8 +17,10 @@
  * along with SharpNEAT.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using SharpNeat.Utility;
 
 namespace SharpNeat.Core
 {
@@ -32,16 +34,17 @@ namespace SharpNeat.Core
         where TGenome : class, IGenome<TGenome>
         where TPhenome : class
     {
+        private readonly EliteArchive<TGenome> _eliteArchive;
         private readonly bool _enablePhenomeCaching;
         private readonly EvaluationMethod _evalMethod;
         private readonly IGenomeDecoder<TGenome, TPhenome> _genomeDecoder;
+        private readonly int _nearestNeighbors;
         private readonly ParallelOptions _parallelOptions;
         private readonly IPhenomeEvaluator<TPhenome, BehaviorInfo> _phenomeEvaluator;
-        private readonly int _nearestNeighbors;
-
-        private EliteArchive<TGenome> _eliteArchive;
 
         private delegate void EvaluationMethod(IList<TGenome> genomeList);
+
+        private Object _archiveEvaluationLock = new object();
 
         #region Constructors
 
@@ -50,9 +53,10 @@ namespace SharpNeat.Core
         ///     Phenome caching is enabled by default.
         ///     The number of parallel threads defaults to Environment.ProcessorCount.
         /// </summary>
-        private ParallelGenomeListBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
-            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator)
-            : this(genomeDecoder, phenomeEvaluator, new ParallelOptions(), true)
+        public ParallelGenomeListBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
+            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, int nearestNeighbors,
+            EliteArchive<TGenome> archive = null)
+            : this(genomeDecoder, phenomeEvaluator, new ParallelOptions(), true, nearestNeighbors, archive)
         {
         }
 
@@ -61,25 +65,27 @@ namespace SharpNeat.Core
         ///     Phenome caching is enabled by default.
         ///     The number of parallel threads defaults to Environment.ProcessorCount.
         /// </summary>
-        private ParallelGenomeListBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
+        public ParallelGenomeListBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
             IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator,
-            ParallelOptions options)
-            : this(genomeDecoder, phenomeEvaluator, options, true)
+            ParallelOptions options, int nearestNeighbors, EliteArchive<TGenome> archive = null)
+            : this(genomeDecoder, phenomeEvaluator, options, true, nearestNeighbors, archive)
         {
         }
 
         /// <summary>
         ///     Construct with the provided IGenomeDecoder, IPhenomeEvaluator, ParalleOptions and enablePhenomeCaching flag.
         /// </summary>
-        public ParallelGenomeListBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
+        private ParallelGenomeListBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
             IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator,
-            ParallelOptions options,
-            bool enablePhenomeCaching)
+            ParallelOptions options, bool enablePhenomeCaching, int nearestNeighbors,
+            EliteArchive<TGenome> archive = null)
         {
             _genomeDecoder = genomeDecoder;
             _phenomeEvaluator = phenomeEvaluator;
             _parallelOptions = options;
             _enablePhenomeCaching = enablePhenomeCaching;
+            _nearestNeighbors = nearestNeighbors;
+            _eliteArchive = archive;
 
             // Determine the appropriate evaluation method.
             if (_enablePhenomeCaching)
@@ -148,12 +154,35 @@ namespace SharpNeat.Core
                     // Non-viable genome.
                     genome.EvaluationInfo.SetFitness(0.0);
                     genome.EvaluationInfo.AuxFitnessArr = null;
+                    genome.EvaluationInfo.BehaviorCharacterization = new double[0];
                 }
                 else
                 {
-                    var fitnessInfo = _phenomeEvaluator.Evaluate(phenome);
-                    genome.EvaluationInfo.SetFitness(fitnessInfo._fitness);
-                    genome.EvaluationInfo.AuxFitnessArr = fitnessInfo._auxFitnessArr;
+                    // Evaluate the behavior and update the genome's behavior characterization
+                    var behaviorInfo = _phenomeEvaluator.Evaluate(phenome);
+                    genome.EvaluationInfo.BehaviorCharacterization = behaviorInfo.Behaviors;
+                }
+            });
+
+            // After the behavior of each genome in the current population has been evaluated,
+            // iterate again through each genome and compare its behavioral novelty (distance)
+            // to its k-nearest neighbors in behavior space (and the archive if applicable)
+            Parallel.ForEach(genomeList, _parallelOptions, delegate(TGenome genome)
+            {
+                // Compare the current genome's behavior to its k-nearest neighbors in behavior space
+                var fitness =
+                    BehaviorUtils<TGenome>.CalculateBehavioralDistance(genome.EvaluationInfo.BehaviorCharacterization,
+                        genomeList, _nearestNeighbors, _eliteArchive);
+
+                // Update the fitness as the behavioral novelty
+                var fitnessInfo = new FitnessInfo(fitness, fitness);
+                genome.EvaluationInfo.SetFitness(fitnessInfo._fitness);
+                genome.EvaluationInfo.AuxFitnessArr = fitnessInfo._auxFitnessArr;
+
+                // Add the genome to the archive if it qualifies
+                lock (_archiveEvaluationLock)
+                {
+                    _eliteArchive?.TestAndAddCandidateToArchive(genome);
                 }
             });
         }
@@ -179,13 +208,36 @@ namespace SharpNeat.Core
                     // Non-viable genome.
                     genome.EvaluationInfo.SetFitness(0.0);
                     genome.EvaluationInfo.AuxFitnessArr = null;
+                    genome.EvaluationInfo.BehaviorCharacterization = new double[0];
                 }
                 else
                 {
-                    var fitnessInfo = _phenomeEvaluator.Evaluate(phenome);
-                    genome.EvaluationInfo.SetFitness(fitnessInfo._fitness);
-                    genome.EvaluationInfo.AuxFitnessArr = fitnessInfo._auxFitnessArr;
+                    // Evaluate the behavior and update the genome's behavior characterization
+                    var behaviorInfo = _phenomeEvaluator.Evaluate(phenome);
+                    genome.EvaluationInfo.BehaviorCharacterization = behaviorInfo.Behaviors;
                 }
+            });
+
+            // After the behavior of each genome in the current population has been evaluated,
+            // iterate again through each genome and compare its behavioral novelty (distance)
+            // to its k-nearest neighbors in behavior space (and the archive if applicable)
+            Parallel.ForEach(genomeList, _parallelOptions, delegate(TGenome genome)
+            {
+                // Compare the current genome's behavior to its k-nearest neighbors in behavior space
+                var fitness =
+                    BehaviorUtils<TGenome>.CalculateBehavioralDistance(genome.EvaluationInfo.BehaviorCharacterization,
+                        genomeList, _nearestNeighbors, _eliteArchive);
+
+                // Update the fitness as the behavioral novelty
+                var fitnessInfo = new FitnessInfo(fitness, fitness);
+                genome.EvaluationInfo.SetFitness(fitnessInfo._fitness);
+                genome.EvaluationInfo.AuxFitnessArr = fitnessInfo._auxFitnessArr;
+
+                // Add the genome to the archive if it qualifies
+                lock (_archiveEvaluationLock)
+                {
+                    _eliteArchive?.TestAndAddCandidateToArchive(genome);
+                }              
             });
         }
 

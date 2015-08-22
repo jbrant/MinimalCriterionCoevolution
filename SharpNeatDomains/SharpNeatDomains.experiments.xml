@@ -573,7 +573,7 @@ The problem domain view allows the performance of the best genome to be observed
       </Activation>
       <ComplexityRegulationStrategy>Absolute</ComplexityRegulationStrategy>
       <ComplexityThreshold>50</ComplexityThreshold>
-      <MaxDegreeOfParallelism>1</MaxDegreeOfParallelism>
+      <!--<MaxDegreeOfParallelism>1</MaxDegreeOfParallelism>-->
       <MaxTimesteps>400</MaxTimesteps>
       <MinSuccessDistance>5</MinSuccessDistance>
       <MaxDistanceToTarget>300</MaxDistanceToTarget>

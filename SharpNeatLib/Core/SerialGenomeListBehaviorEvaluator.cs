@@ -25,46 +25,6 @@ namespace SharpNeat.Core
 
         /// <summary>
         ///     Constructs serial genome list behavior evaluator, customizing only the phenome behavior evaluator and the
-        ///     evaluation method.
-        /// </summary>
-        /// <param name="genomeDecoder">The genome decoder to use.</param>
-        /// <param name="phenomeEvaluator">The phenome evaluator.</param>
-        private SerialGenomeListBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
-            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator)
-        {
-            _genomeDecoder = genomeDecoder;
-            _phenomeEvaluator = phenomeEvaluator;
-            _enablePhenomeCaching = true;
-            _evaluationMethod = Evaluate_Caching;
-        }
-
-        /// <summary>
-        ///     Constructs serial genome list behavior evaluator, customizing only the phenome behavior evaluator and setting the
-        ///     caching method.
-        /// </summary>
-        /// <param name="genomeDecoder">The genome decoder to use.</param>
-        /// <param name="phenomeEvaluator">The phenome evaluator.</param>
-        /// <param name="enablePhenomeCaching">Whether or not to enable phenome caching.</param>
-        private SerialGenomeListBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
-            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator,
-            bool enablePhenomeCaching)
-        {
-            _genomeDecoder = genomeDecoder;
-            _phenomeEvaluator = phenomeEvaluator;
-            _enablePhenomeCaching = enablePhenomeCaching;
-
-            if (_enablePhenomeCaching)
-            {
-                _evaluationMethod = Evaluate_Caching;
-            }
-            else
-            {
-                _evaluationMethod = Evaluate_NonCaching;
-            }
-        }
-
-        /// <summary>
-        ///     Constructs serial genome list behavior evaluator, customizing only the phenome behavior evaluator and the
         ///     evaluation method.  Also sets the number of nearest neighbors to utilize in behavior distance calculations and
         ///     accepts an optional elite archive.
         /// </summary>
@@ -74,8 +34,12 @@ namespace SharpNeat.Core
         /// <param name="archive">A reference to the elite archive (optional).</param>
         public SerialGenomeListBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
             IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, int nearestNeighbors,
-            EliteArchive<TGenome> archive = null) : this(genomeDecoder, phenomeEvaluator)
+            EliteArchive<TGenome> archive = null)
         {
+            _genomeDecoder = genomeDecoder;
+            _phenomeEvaluator = phenomeEvaluator;
+            _enablePhenomeCaching = true;
+            _evaluationMethod = Evaluate_Caching;
             _nearestNeighbors = nearestNeighbors;
             _eliteArchive = archive;
         }
@@ -94,8 +58,20 @@ namespace SharpNeat.Core
             IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator,
             bool enablePhenomeCaching, int nearestNeighbors, EliteArchive<TGenome> archive = null)
         {
+            _genomeDecoder = genomeDecoder;
+            _phenomeEvaluator = phenomeEvaluator;
+            _enablePhenomeCaching = enablePhenomeCaching;
             _nearestNeighbors = nearestNeighbors;
             _eliteArchive = archive;
+
+            if (_enablePhenomeCaching)
+            {
+                _evaluationMethod = Evaluate_Caching;
+            }
+            else
+            {
+                _evaluationMethod = Evaluate_NonCaching;
+            }
         }
 
         /// <summary>
@@ -154,9 +130,23 @@ namespace SharpNeat.Core
                 }
             }
 
-            // TODO: Here is where the distance calculation to assign the final fitness should occur
+            // After the behavior of each genome in the current population has been evaluated,
+            // iterate again through each genome and compare its behavioral novelty (distance)
+            // to its k-nearest neighbors in behavior space (and the archive if applicable)
             foreach (var genome in genomeList)
             {
+                // Compare the current genome's behavior to its k-nearest neighbors in behavior space
+                var fitness =
+                    BehaviorUtils<TGenome>.CalculateBehavioralDistance(genome.EvaluationInfo.BehaviorCharacterization,
+                        genomeList, _nearestNeighbors, _eliteArchive);
+
+                // Update the fitness as the behavioral novelty
+                var fitnessInfo = new FitnessInfo(fitness, fitness);
+                genome.EvaluationInfo.SetFitness(fitnessInfo._fitness);
+                genome.EvaluationInfo.AuxFitnessArr = fitnessInfo._auxFitnessArr;
+
+                // Add the genome to the archive if it qualifies
+                _eliteArchive?.TestAndAddCandidateToArchive(genome);
             }
         }
 
@@ -188,13 +178,17 @@ namespace SharpNeat.Core
                 }
             }
 
-            // TODO: Here is where the distance calculation to assign the final fitness should occur
+            // After the behavior of each genome in the current population has been evaluated,
+            // iterate again through each genome and compare its behavioral novelty (distance)
+            // to its k-nearest neighbors in behavior space (and the archive if applicable)
             foreach (var genome in genomeList)
             {
+                // Compare the current genome's behavior to its k-nearest neighbors in behavior space
                 var fitness =
                     BehaviorUtils<TGenome>.CalculateBehavioralDistance(genome.EvaluationInfo.BehaviorCharacterization,
                         genomeList, _nearestNeighbors, _eliteArchive);
 
+                // Update the fitness as the behavioral novelty
                 var fitnessInfo = new FitnessInfo(fitness, fitness);
                 genome.EvaluationInfo.SetFitness(fitnessInfo._fitness);
                 genome.EvaluationInfo.AuxFitnessArr = fitnessInfo._auxFitnessArr;

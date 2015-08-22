@@ -1,7 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
 
 namespace SharpNeat.Core
 {
+    /// <summary>
+    ///     Encapsulates the state of the archive of "elite" organisms, with respect to some domain-specific measure of
+    ///     elitism.
+    /// </summary>
+    /// <typeparam name="TGenome">The genotype to store and evaluate.</typeparam>
     public abstract class EliteArchive<TGenome>
         where TGenome : class, IGenome<TGenome>
     {
@@ -70,13 +75,14 @@ namespace SharpNeat.Core
 
             _numGenomesAddedThisGeneration = 0;
 
-            Archive = new List<TGenome>();
+            //_archive = new List<TGenome>();
+            Archive = new ConcurrentBag<TGenome>();
         }
 
         /// <summary>
         ///     The cross-generational list of elite genomes.
         /// </summary>
-        public IList<TGenome> Archive { get; private set; }
+        public ConcurrentBag<TGenome> Archive { get; private set; }
 
         /// <summary>
         ///     Updates the archive parameters, such as the addition threshold and the count of organisms added for the current
