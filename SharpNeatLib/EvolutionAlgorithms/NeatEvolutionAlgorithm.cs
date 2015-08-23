@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using SharpNeat.Core;
 using SharpNeat.DistanceMetrics;
 using SharpNeat.EvolutionAlgorithms.ComplexityRegulation;
@@ -51,7 +52,7 @@ namespace SharpNeat.EvolutionAlgorithms
 
         ComplexityRegulationMode _complexityRegulationMode;
         readonly IComplexityRegulationStrategy _complexityRegulationStrategy;
-
+        
         #region Constructors
 
         /// <summary>
@@ -68,6 +69,12 @@ namespace SharpNeat.EvolutionAlgorithms
 
             _complexityRegulationMode = ComplexityRegulationMode.Complexifying;
             _complexityRegulationStrategy = new NullComplexityRegulationStrategy();
+
+            // Instantiate the log file writers
+            GenerationStatisticsWriter = new StreamWriter("MazeStatistics.csv", true);
+            GenerationStatisticsWriter.WriteLine("Generation,NumArchiveAdditions,ArchiveSize,ArchiveThreshold");
+            NavigatorLocationsWriter = new StreamWriter("NavigatorLocations.csv");
+            NavigatorLocationsWriter.WriteLine("Generation,X_Location,Y_Location,Novelty");
         }
 
         /// <summary>
@@ -85,6 +92,12 @@ namespace SharpNeat.EvolutionAlgorithms
 
             _complexityRegulationMode = ComplexityRegulationMode.Complexifying;
             _complexityRegulationStrategy = complexityRegulationStrategy;
+
+            // Instantiate the log file writers
+            GenerationStatisticsWriter = new StreamWriter("MazeStatistics.csv", true);
+            GenerationStatisticsWriter.WriteLine("Generation,NumArchiveAdditions,ArchiveSize");
+            NavigatorLocationsWriter = new StreamWriter("NavigatorLocations.csv");
+            NavigatorLocationsWriter.WriteLine("Generation,X_Location,Y_Location");
         }
 
         #endregion
@@ -241,6 +254,15 @@ namespace SharpNeat.EvolutionAlgorithms
 
             // Update the elite archive parameters and reset for next generation
             _EliteArchive?.UpdateArchiveParameters();
+
+            // TODO: This code is experiment-specific and will need to be refactored
+//            GenerationStatisticsWriter.WriteLine("{0},{1},{2},{3}", _currentGeneration,
+//                _EliteArchive?._numGenomesAddedThisGeneration, _EliteArchive?.Archive.Count, _EliteArchive.ArchiveAdditionThreshold);
+//            foreach (var genome in _genomeList)
+//            {
+//                NavigatorLocationsWriter.WriteLine("{0},{1},{2},{3}", _currentGeneration,
+//                    genome.EvaluationInfo.BehaviorCharacterization[0], genome.EvaluationInfo.BehaviorCharacterization[1], genome.EvaluationInfo.Fitness);
+//            }            
 
             // Determine the complexity regulation mode and switch over to the appropriate set of evolution
             // algorithm parameters. Also notify the genome factory to allow it to modify how it creates genomes

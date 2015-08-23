@@ -577,10 +577,10 @@ The problem domain view allows the performance of the best genome to be observed
       <MaxTimesteps>400</MaxTimesteps>
       <MinSuccessDistance>5</MinSuccessDistance>
       <MaxDistanceToTarget>300</MaxDistanceToTarget>
-      <MazeVariant>HARD_MAZE</MazeVariant>
+      <MazeVariant>MEDIUM_MAZE</MazeVariant>
       <BehaviorCharacterization>EndPoint</BehaviorCharacterization>
-      <NearestNeighbors>15</NearestNeighbors>
-      <ArchiveAdditionThreshold>6</ArchiveAdditionThreshold>
+      <NearestNeighbors>5</NearestNeighbors>
+      <ArchiveAdditionThreshold>10</ArchiveAdditionThreshold>
       <ArchiveThresholdDecreaseMultiplier>0.95</ArchiveThresholdDecreaseMultiplier>
       <ArchiveThresholdIncreaseMultiplier>1.3</ArchiveThresholdIncreaseMultiplier>
       <MaxGenerationalArchiveAddition>5</MaxGenerationalArchiveAddition>

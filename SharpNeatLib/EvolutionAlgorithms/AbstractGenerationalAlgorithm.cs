@@ -19,6 +19,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using log4net;
 using SharpNeat.Core;
@@ -61,6 +62,10 @@ namespace SharpNeat.EvolutionAlgorithms
         bool _pauseRequestFlag;
         readonly AutoResetEvent _awaitPauseEvent = new AutoResetEvent(false);
         readonly AutoResetEvent _awaitRestartEvent = new AutoResetEvent(false);
+
+        // TODO: These are temporary and need to be removed
+        protected StreamWriter GenerationStatisticsWriter;
+        protected StreamWriter NavigatorLocationsWriter;
 
         #endregion
 
@@ -321,7 +326,11 @@ namespace SharpNeat.EvolutionAlgorithms
 
         private void OnPausedEvent()
         {
-            if(null != PausedEvent)
+            // TODO: Need to remove this
+            GenerationStatisticsWriter.Close();
+            NavigatorLocationsWriter.Close();
+
+            if (null != PausedEvent)
             {
                 // Catch exceptions thrown by even listeners. This prevents listener exceptions from terminating the algorithm thread.
                 try {

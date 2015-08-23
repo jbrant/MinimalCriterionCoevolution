@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using System.Xml;
 using SharpNeat.Core;
@@ -21,7 +22,7 @@ namespace SharpNeat.Domains.MazeNavigation
         protected MazeVariant MazeVariant;
         protected int? MinSuccessDistance;
         protected ParallelOptions ParallelOptions;
-
+        
         /// <summary>
         ///     Name of the experiment.
         /// </summary>
@@ -85,7 +86,7 @@ namespace SharpNeat.Domains.MazeNavigation
             MinSuccessDistance = XmlUtils.TryGetValueAsInt(xmlConfig, "MinSuccessDistance");
             MaxDistanceToTarget = XmlUtils.TryGetValueAsInt(xmlConfig, "MaxDistanceToTarget");
             MazeVariant =
-                MazeVariantUtl.convertStringToMazeVariant(XmlUtils.TryGetValueAsString(xmlConfig, "MazeVariant"));
+                MazeVariantUtl.convertStringToMazeVariant(XmlUtils.TryGetValueAsString(xmlConfig, "MazeVariant"));         
         }
 
         /// <summary>

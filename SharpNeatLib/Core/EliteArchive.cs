@@ -36,12 +36,12 @@ namespace SharpNeat.Core
         ///     Tracks the number of genomes that have been added to the archive for the current generation.  This is used for
         ///     determining how to modify the archive threshold.
         /// </summary>
-        protected int _numGenomesAddedThisGeneration;
+        public int _numGenomesAddedThisGeneration;
 
         /// <summary>
         ///     The real-valued threshold constituting above which a genome will be added to the archive.
         /// </summary>
-        protected double ArchiveAdditionThreshold;
+        public double ArchiveAdditionThreshold;
 
         /// <summary>
         ///     Elite archive constructor.
