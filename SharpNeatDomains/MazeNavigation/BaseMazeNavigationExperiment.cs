@@ -182,7 +182,8 @@ namespace SharpNeat.Domains.MazeNavigation
         /// <returns></returns>
         public AbstractDomainView CreateDomainView()
         {
-            return new MazeNavigationView();
+            return new MazeNavigationView(new NeatGenomeDecoder(_activationScheme),
+                new MazeNavigationWorld<ITrialInfo>(MazeVariant, MinSuccessDistance, MaxDistanceToTarget, MaxTimesteps));
         }
     }
 }

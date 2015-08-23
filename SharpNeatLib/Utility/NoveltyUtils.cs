@@ -17,8 +17,7 @@ namespace SharpNeat.Utility
                 var distance = BehaviorInfo.CalculateDistance(genomeBehaviors,
                     genome.EvaluationInfo.BehaviorCharacterization);
 
-                distances.Add(BehaviorInfo.CalculateDistance(genomeBehaviors,
-                    genome.EvaluationInfo.BehaviorCharacterization));
+                distances.Add(distance);
             }
 
             if (archive != null)
@@ -43,7 +42,7 @@ namespace SharpNeat.Utility
                 totalDistance += distances[neighbor];
             }
 
-            return totalDistance;
+            return totalDistance / nearestNeighbors;
         }
     }
 }

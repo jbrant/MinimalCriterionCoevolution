@@ -7,7 +7,7 @@ using SharpNeat.Phenomes;
 
 namespace SharpNeat.Domains.MazeNavigation
 {
-    internal class MazeNavigationWorld<TTrialInfo>
+    public class MazeNavigationWorld<TTrialInfo>
     {
         /// <summary>
         ///     Characterization to use for capturing navigator behavior.

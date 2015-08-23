@@ -210,10 +210,11 @@ namespace SharpNeat.EvolutionAlgorithms
             _genomeList.AddRange(offspringList);
 
             // Evaluate genomes.            
-            _genomeListEvaluator.Evaluate(GetCombinedPopulationAndArchive());
-            
+            //_genomeListEvaluator.Evaluate(GetCombinedPopulationAndArchive());
+            _genomeListEvaluator.Evaluate(_genomeList);
+
             // Integrate offspring into species.
-            if(emptySpeciesFlag)
+            if (emptySpeciesFlag)
             {   
                 // We have one or more terminated species. Therefore we need to fully re-speciate all genomes to divide them
                 // evenly between the required number of species.

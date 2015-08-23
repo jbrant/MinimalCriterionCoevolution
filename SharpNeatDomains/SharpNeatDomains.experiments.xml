@@ -571,13 +571,13 @@ The problem domain view allows the performance of the best genome to be observed
         <Scheme>CyclicFixedIters</Scheme>
         <Iters>2</Iters>
       </Activation>
-      <ComplexityRegulationStrategy>Absolute</ComplexityRegulationStrategy>
+      <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>
       <ComplexityThreshold>50</ComplexityThreshold>
-      <!--<MaxDegreeOfParallelism>1</MaxDegreeOfParallelism>-->
+      <!-- <MaxDegreeOfParallelism>1</MaxDegreeOfParallelism> -->
       <MaxTimesteps>400</MaxTimesteps>
       <MinSuccessDistance>5</MinSuccessDistance>
       <MaxDistanceToTarget>300</MaxDistanceToTarget>
-      <MazeVariant>MEDIUM_MAZE</MazeVariant>
+      <MazeVariant>HARD_MAZE</MazeVariant>
       <BehaviorCharacterization>EndPoint</BehaviorCharacterization>
       <NearestNeighbors>15</NearestNeighbors>
       <ArchiveAdditionThreshold>6</ArchiveAdditionThreshold>
