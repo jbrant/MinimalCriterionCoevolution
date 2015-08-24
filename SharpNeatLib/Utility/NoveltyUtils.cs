@@ -19,7 +19,7 @@ namespace SharpNeat.Utility
 
                 distances.Add(distance);
             }
-
+            
             if (archive != null)
             {
                 foreach (var genome in archive.Archive)

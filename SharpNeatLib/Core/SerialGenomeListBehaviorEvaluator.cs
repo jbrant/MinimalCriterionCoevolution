@@ -182,7 +182,7 @@ namespace SharpNeat.Core
             // iterate again through each genome and compare its behavioral novelty (distance)
             // to its k-nearest neighbors in behavior space (and the archive if applicable)
             foreach (var genome in genomeList)
-            {
+            {                
                 // Compare the current genome's behavior to its k-nearest neighbors in behavior space
                 var fitness =
                     BehaviorUtils<TGenome>.CalculateBehavioralDistance(genome.EvaluationInfo.BehaviorCharacterization,

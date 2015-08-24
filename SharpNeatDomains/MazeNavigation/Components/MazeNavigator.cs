@@ -182,10 +182,11 @@ namespace SharpNeat.Domains.MazeNavigation.Components
 
             // Create ANN input array with a separate input for each range finder and
             // radar, as well as an additional input for the bias
-            var annInputs = new double[RangeFinders.Count + RadarArray.NumRadars + 1];
+            var annInputs = new double[RangeFinders.Count + RadarArray.NumRadars];
 
+            // TODO: This can probably be removed as it appears SharpNEAT is supplying the bias
             // Set the bias
-            annInputs[annInputCnt++] = 1;
+            //annInputs[annInputCnt++] = 1;
 
             // Get the output of every range finder
             foreach (var rangeFinder in RangeFinders)
