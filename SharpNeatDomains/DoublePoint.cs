@@ -45,6 +45,19 @@ namespace SharpNeat.Domains
         /// <param name="point">The point about which to rotate.</param>
         public void RotatePoint(double angle, DoublePoint point)
         {
+            X -= point.X;
+            Y -= point.Y;
+
+            double ox = X;
+            double oy = Y;
+
+            X = Math.Cos(angle) * ox - Math.Sin(angle) * oy;
+            Y = Math.Sin(angle) * ox + Math.Cos(angle) * oy;
+
+            X += point.X;
+            Y += point.Y;
+
+            /*
             // Decrement this point by the given point about which to rotate
             this -= point;
 
@@ -54,6 +67,7 @@ namespace SharpNeat.Domains
 
             // Add the coordinates that had been offset back in
             this += point;
+            */
         }
 
         #endregion
@@ -149,6 +163,20 @@ namespace SharpNeat.Domains
         /// <returns>The angle (in radians) that the given point makes with the origin.</returns>
         public static double CalculateAngleFromOrigin(DoublePoint a)
         {
+            if (a.X == 0.0)
+            {
+                if (a.Y > 0)
+                    return 3.14 / 2.0;
+                else
+                    return 3.14 * 3.0 / 2.0;
+            }
+            double ang = Math.Atan(a.Y / a.X);
+            if (a.X > 0)
+                return ang;
+
+            return ang + 3.14;
+
+            /*
             // If we're both X and Y are zero, the point is at the origin, but consider 
             // this to be 90 degrees (pi/2 radians)
             if (a.X == 0)
@@ -173,6 +201,7 @@ namespace SharpNeat.Domains
 
             // Otherwise, return the angle plus 180 degrees (pi radians)
             return angle + Math.PI;
+            */
         }
 
         /// <summary>

@@ -78,13 +78,20 @@ namespace SharpNeat.Domains.MazeNavigation
                         new DoubleLine(289, 130, 6, 134),
                         new DoubleLine(6, 134, 8, 5),
                         new DoubleLine(8, 5, 292, 7),
-//                        new DoubleLine(241, 130, 58, 65),
-//                        new DoubleLine(114, 7, 73, 42),
-//                        new DoubleLine(130, 91, 107, 46),
-//                        new DoubleLine(196, 8, 139, 51),
-//                        new DoubleLine(219, 122, 182, 63),
-//                        new DoubleLine(267, 9, 214, 63),
-//                        new DoubleLine(271, 129, 237, 88)
+                        new DoubleLine(241, 130, 58, 65),
+                        //new DoubleLine(114, 7, 73, 42),
+                        new DoubleLine(114, 7, 83, 32),
+                        //new DoubleLine(130, 91, 107, 46),
+                        new DoubleLine(130, 91, 117, 56),
+                        //new DoubleLine(196, 8, 139, 51),
+                        new DoubleLine(196, 8, 149, 41),
+                        //new DoubleLine(219, 122, 182, 63),
+                        new DoubleLine(219, 122, 192, 73),
+                        //new DoubleLine(267, 9, 214, 63),
+                        //new DoubleLine(267, 9, 214, 63),
+                        new DoubleLine(267, 9, 224, 53),
+                        //new DoubleLine(271, 129, 237, 88)
+                        new DoubleLine(271, 129, 247, 98)
                     };
                     break;
 

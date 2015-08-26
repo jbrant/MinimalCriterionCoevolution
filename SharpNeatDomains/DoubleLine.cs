@@ -150,6 +150,39 @@ namespace SharpNeat.Domains
         /// <returns>The point of intersection between the two given line segments.</returns>
         public static DoublePoint CalculateIntersection(DoubleLine a, DoubleLine b, out bool intersectionFound)
         {
+            DoublePoint pt = new DoublePoint(0.0, 0.0);
+            DoublePoint A = a.Start;
+            DoublePoint B = a.End;
+            DoublePoint C = b.Start;
+            DoublePoint D = b.End;
+
+            double rTop = (A.Y - C.Y) * (D.X - C.X) - (A.X - C.X) * (D.Y - C.Y);
+            double rBot = (B.X - A.X) * (D.Y - C.Y) - (B.Y - A.Y) * (D.X - C.X);
+
+            double sTop = (A.Y - C.Y) * (B.X - A.X) - (A.X - C.X) * (B.Y - A.Y);
+            double sBot = (B.X - A.X) * (D.Y - C.Y) - (B.Y - A.Y) * (D.X - C.X);
+
+            if ((rBot == 0 || sBot == 0))
+            {
+                intersectionFound = false;
+                return pt;
+            }
+            double r = rTop / rBot;
+            double s = sTop / sBot;
+            if ((r > 0) && (r < 1) && (s > 0) && (s < 1))
+            {
+                pt.X = A.X + r * (B.X - A.X);
+                pt.Y = A.Y + r * (B.Y - A.Y);
+                intersectionFound = true;
+                return pt;
+            }
+            else
+            {
+                intersectionFound = false;
+                return pt;
+            }
+
+            /*
             // Calculate the determinant's denominator
             var denominator = (a.Start.X - a.End.X)*(b.Start.Y - b.End.Y) - (a.Start.Y - a.End.Y)*(b.Start.X - b.End.X);
 
@@ -173,7 +206,7 @@ namespace SharpNeat.Domains
             // If the denominator came out to 0 or the point isn't within both 
             // line segments, then the lines don't intersect
             intersectionFound = false;
-            return new DoublePoint(0, 0);
+            return new DoublePoint(0, 0);*/
         }
 
         /// <summary>
