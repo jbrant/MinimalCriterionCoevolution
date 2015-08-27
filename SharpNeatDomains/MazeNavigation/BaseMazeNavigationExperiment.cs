@@ -36,7 +36,7 @@ namespace SharpNeat.Domains.MazeNavigation
         /// <summary>
         ///     The neureal network input count (excluding the bias).
         /// </summary>
-        public int InputCount => 11;
+        public int InputCount => 10;
 
         /// <summary>
         ///     The neural network output count.

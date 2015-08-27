@@ -99,8 +99,8 @@ namespace SharpNeat.Domains.MazeNavigation.Components
         internal void Move(List<DoubleLine> walls)
         {
             // Compute angular velocity components
-            var angularVelocityX = Math.Cos(MathUtils.toRadians(Heading)*Speed);
-            var angularVelocityY = Math.Sin(MathUtils.toRadians(Heading)*Speed);
+            var angularVelocityX = Math.Cos(MathUtils.toRadians(Heading))*Speed;
+            var angularVelocityY = Math.Sin(MathUtils.toRadians(Heading))*Speed;
 
             // Set the new heading by incrementing by the angular velocity
             Heading += AngularVelocity;
