@@ -82,11 +82,11 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
                 _maxGenerationalArchiveAddition, _minGenerationalArchiveAddition);
 
             // Create a genome list evaluator. This packages up the genome decoder with the genome evaluator.
-            IGenomeListEvaluator<NeatGenome> listEvaluator =
-                new SerialGenomeListBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator, _nearestNeighbors, archive);
 //            IGenomeListEvaluator<NeatGenome> listEvaluator =
-//                new ParallelGenomeListBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
-//                    ParallelOptions, _nearestNeighbors, archive);
+//                new SerialGenomeListBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator, _nearestNeighbors, archive);
+            IGenomeListEvaluator<NeatGenome> listEvaluator =
+                new ParallelGenomeListBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
+                    ParallelOptions, _nearestNeighbors, archive);
 
             // Initialize the evolution algorithm.
             ea.Initialize(listEvaluator, genomeFactory, genomeList, archive);

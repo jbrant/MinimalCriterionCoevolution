@@ -32,11 +32,7 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
         ///     Gets a value indicating whether some goal fitness has been achieved and that the evolutionary algorithm/search
         ///     should stop.  This property's value can remain false to allow the algorithm to run indefinitely.
         /// </summary>
-        public bool StopConditionSatisfied
-        {
-            get { return _stopConditionSatisfied; }
-            set { _stopConditionSatisfied = value; }
-        }
+        public bool StopConditionSatisfied { get; private set; }
 
         public BehaviorInfo Evaluate(IBlackBox phenome)
         {
@@ -44,14 +40,18 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
             EvaluationCount++;
 
             // Default the stop condition satisfied to false
-            _stopConditionSatisfied = false;
+            bool stopConditionSatisfied = false;
 
             // Instantiate the maze world
             var world = new MazeNavigationWorld<BehaviorInfo>(_mazeVariant, _minSuccessDistance, _maxDistanceToTarget,
                 _maxTimesteps, _behaviorCharacterization);
 
             // Run a single trial
-            var trialInfo = world.RunTrial(phenome, EvaluationType.NoveltySearch, out _stopConditionSatisfied);
+            var trialInfo = world.RunTrial(phenome, EvaluationType.NoveltySearch, out stopConditionSatisfied);
+
+            // If the navigator reached the goal, stop the experiment
+            if (stopConditionSatisfied)
+                StopConditionSatisfied = true;
 
             return trialInfo;
         }

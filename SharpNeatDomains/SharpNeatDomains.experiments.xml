@@ -572,8 +572,15 @@ The problem domain view allows the performance of the best genome to be observed
         <Scheme>CyclicFixedIters</Scheme>
         <Iters>2</Iters>
       </Activation>
-      <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>
+      <ComplexityRegulationStrategy>Absolute</ComplexityRegulationStrategy>
       <ComplexityThreshold>50</ComplexityThreshold>
+      <GenomeConfig>
+        <InitialConnectionProportion>1</InitialConnectionProportion>
+        <WeightMutationProbability>0.6</WeightMutationProbability>
+        <AddConnnectionProbability>0.1</AddConnnectionProbability>
+        <AddNodeProbability>0.005</AddNodeProbability>
+        <InterspeciesMatingProbability>0.001</InterspeciesMatingProbability>
+      </GenomeConfig>
       <!-- <MaxDegreeOfParallelism>1</MaxDegreeOfParallelism> -->
       <MaxTimesteps>400</MaxTimesteps>
       <MinSuccessDistance>5</MinSuccessDistance>
