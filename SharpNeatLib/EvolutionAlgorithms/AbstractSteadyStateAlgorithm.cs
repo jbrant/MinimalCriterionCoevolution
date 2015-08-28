@@ -65,7 +65,7 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     genomes.
         /// </param>
         /// <param name="genomeList">An initial genome population.</param>
-        /// <param name="eliteArchive">The cross-generational archive of high-performing genomes (optional).</param>
+        /// <param name="eliteArchive">The cross-evaluation archive of high-performing genomes (optional).</param>
         public void Initialize(IGenomeListEvaluator<TGenome> genomeListEvaluator, IGenomeFactory<TGenome> genomeFactory,
             List<TGenome> genomeList,
             EliteArchive<TGenome> eliteArchive)
@@ -90,7 +90,7 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     genomes.
         /// </param>
         /// <param name="populationSize">The number of genomes to create for the initial population.</param>
-        /// <param name="eliteArchive">The cross-generational archive of high-performing genomes (optional).</param>
+        /// <param name="eliteArchive">The cross-evaluation archive of high-performing genomes (optional).</param>
         public void Initialize(IGenomeListEvaluator<TGenome> genomeListEvaluator, IGenomeFactory<TGenome> genomeFactory,
             int populationSize,
             EliteArchive<TGenome> eliteArchive)
