@@ -543,8 +543,9 @@ The problem domain view allows the performance of the best genome to be observed
     <AssemblyPath>SharpNeatDomains.dll</AssemblyPath>
     <ClassName>SharpNeat.Domains.MazeNavigation.FitnessExperiment.MazeNavigationFitnessExperiment</ClassName>
     <Config>
-      <PopulationSize>150</PopulationSize>
-      <SpecieCount>10</SpecieCount>
+      <PopulationSize>250</PopulationSize>
+      <SpecieCount>15</SpecieCount>
+      <InterspeciesMatingProbability>0.001</InterspeciesMatingProbability>
       <Activation>
         <Scheme>CyclicFixedIters</Scheme>
         <Iters>2</Iters>
@@ -568,6 +569,7 @@ The problem domain view allows the performance of the best genome to be observed
     <Config>
       <PopulationSize>250</PopulationSize>
       <SpecieCount>15</SpecieCount>
+      <InterspeciesMatingProbability>0.001</InterspeciesMatingProbability>
       <Activation>
         <Scheme>CyclicFixedIters</Scheme>
         <Iters>2</Iters>
@@ -578,14 +580,13 @@ The problem domain view allows the performance of the best genome to be observed
         <InitialConnectionProportion>1</InitialConnectionProportion>
         <WeightMutationProbability>0.6</WeightMutationProbability>
         <AddConnnectionProbability>0.1</AddConnnectionProbability>
-        <AddNodeProbability>0.005</AddNodeProbability>
-        <InterspeciesMatingProbability>0.001</InterspeciesMatingProbability>
+        <AddNodeProbability>0.005</AddNodeProbability>        
       </GenomeConfig>
       <!-- <MaxDegreeOfParallelism>1</MaxDegreeOfParallelism> -->
       <MaxTimesteps>400</MaxTimesteps>
       <MinSuccessDistance>5</MinSuccessDistance>
       <MaxDistanceToTarget>300</MaxDistanceToTarget>
-      <MazeVariant>MediumMaze</MazeVariant>
+      <MazeVariant>HardMaze</MazeVariant>
       <BehaviorCharacterization>EndPoint</BehaviorCharacterization>
       <NearestNeighbors>15</NearestNeighbors>
       <ArchiveAdditionThreshold>6</ArchiveAdditionThreshold>

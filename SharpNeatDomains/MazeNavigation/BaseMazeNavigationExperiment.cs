@@ -77,9 +77,13 @@ namespace SharpNeat.Domains.MazeNavigation
             ParallelOptions = ExperimentUtils.ReadParallelOptions(xmlConfig);
 
             // Set evolution/genome parameters
-            NeatEvolutionAlgorithmParameters = new NeatEvolutionAlgorithmParameters();
-            NeatEvolutionAlgorithmParameters.SpecieCount = XmlUtils.GetValueAsInt(xmlConfig, "SpecieCount");
-            NeatGenomeParameters = new NeatGenomeParameters();
+            NeatEvolutionAlgorithmParameters = new NeatEvolutionAlgorithmParameters
+            {
+                SpecieCount = XmlUtils.GetValueAsInt(xmlConfig, "SpecieCount"),
+                InterspeciesMatingProportion = XmlUtils.GetValueAsDouble(xmlConfig,
+                    "InterspeciesMatingProbability")
+            };
+            NeatGenomeParameters = ExperimentUtils.ReadNeatGenomeParameters(xmlConfig);
 
             // Set experiment-specific parameters
             MaxTimesteps = XmlUtils.TryGetValueAsInt(xmlConfig, "MaxTimesteps");

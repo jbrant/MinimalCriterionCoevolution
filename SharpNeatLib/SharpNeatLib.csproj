@@ -116,6 +116,7 @@
     <Compile Include="DistanceMetrics\ManhattanDistanceMetric.cs" />
     <Compile Include="DistanceMetrics\EuclideanDistanceMetric.cs" />
     <Compile Include="EliteArchives\NoveltyArchive.cs" />
+    <Compile Include="EvolutionAlgorithms\AbstractSteadyStateAlgorithm.cs" />
     <Compile Include="EvolutionAlgorithms\ComplexityRegulation\ComplexityCeilingType.cs" />
     <Compile Include="EvolutionAlgorithms\ComplexityRegulation\DefaultComplexityRegulationStrategy.cs" />
     <Compile Include="EvolutionAlgorithms\ComplexityRegulation\IComplexityRegulationStrategy.cs" />

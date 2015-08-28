@@ -16,20 +16,28 @@
  * You should have received a copy of the GNU General Public License
  * along with SharpNEAT.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 namespace SharpNeat.Core
 {
     /// <summary>
-    /// An enumeration of update schemes, e.g. Fire an update event the per some time duration or some number of generations.
+    ///     An enumeration of update schemes, e.g. Fire an update event the per some time duration or some number of
+    ///     generations.
     /// </summary>
     public enum UpdateMode
     {
         /// <summary>
-        /// Raise an update event at regular time intervals.
+        ///     Raise an update event at regular time intervals.
         /// </summary>
         Timespan,
+
         /// <summary>
-        /// Raise an update event at regular generation intervals. (Every N generations).
+        ///     Raise an update event at regular generation intervals. (Every N generations).
         /// </summary>
-        Generational
+        Generational,
+
+        /// <summary>
+        ///     Raises an update event at regular evaluation intervals. (Every N evaluations of an individual).
+        /// </summary>
+        SteadyState
     }
 }

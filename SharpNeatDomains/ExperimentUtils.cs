@@ -21,6 +21,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using SharpNeat.Decoders;
 using SharpNeat.EvolutionAlgorithms.ComplexityRegulation;
+using SharpNeat.Genomes.Neat;
 
 namespace SharpNeat.Domains
 {
@@ -114,6 +115,57 @@ namespace SharpNeat.Domains
 
             mutationSigmaCenter = center.Value;
             mutationSigmaRadius = radius.Value;
+        }
+
+        /// <summary>
+        ///     Read NEAT genome parameter settings from the configuration file.
+        /// </summary>
+        /// <param name="xmlConfig">The reference to the XML configuration file.</param>
+        /// <returns>An initialized NEAT genome parameters object.</returns>
+        public static NeatGenomeParameters ReadNeatGenomeParameters(XmlElement xmlConfig)
+        {
+            // Create new NEAT genome parameters with default values
+            var genomeParameters = new NeatGenomeParameters();
+
+            // Get root of neat genome configuration section
+            var nodeList = xmlConfig.GetElementsByTagName("GenomeConfig", "");
+
+            if (nodeList.Count == 1)
+            {
+                // Convert to an XML element
+                var xmlNeatGenomeConfig = nodeList[0] as XmlElement;
+
+                // Read all of the applicable parameters in
+                var initialConnectionProportion = XmlUtils.TryGetValueAsDouble(xmlNeatGenomeConfig,
+                    "InitialConnectionProportion");
+                var weightMutationProbability = XmlUtils.TryGetValueAsDouble(xmlNeatGenomeConfig,
+                    "WeightMutationProbability");
+                var addConnectionProbability = XmlUtils.TryGetValueAsDouble(xmlNeatGenomeConfig,
+                    "AddConnnectionProbability");
+                var addNodeProbability = XmlUtils.TryGetValueAsDouble(xmlNeatGenomeConfig, "AddNodeProbability");
+                var interspeciesMatingProbability = XmlUtils.TryGetValueAsDouble(xmlNeatGenomeConfig,
+                    "InterspeciesMatingProbability");
+
+                // Set each if it's specified in the configuration (otherwise, accept the default)
+                if (initialConnectionProportion != null)
+                {
+                    genomeParameters.InitialInterconnectionsProportion = initialConnectionProportion ?? default(double);
+                }
+                if (weightMutationProbability != null)
+                {
+                    genomeParameters.ConnectionWeightMutationProbability = weightMutationProbability ?? default(double);
+                }
+                if (addConnectionProbability != null)
+                {
+                    genomeParameters.AddConnectionMutationProbability = addConnectionProbability ?? default(double);
+                }
+                if (addNodeProbability != null)
+                {
+                    genomeParameters.AddNodeMutationProbability = addNodeProbability ?? default(double);
+                }
+            }
+
+            return genomeParameters;
         }
     }
 }
