@@ -142,8 +142,21 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </summary>
         protected override void PerformOneEvaluation()
         {
-            TGenome child = GenomeList[0].CreateOffspring(CurrentEvaluation);
-            
+            // TODO: Calculate specie stats (but without offspring count)
+
+            // TODO: Randomly sample population and select fittest
+
+            // TODO: Randomly sample population and remove non-fittest
+
+            // TODO: Generate child asexually (reference NeatEvolutionAlgorithm lines 550 - 588)
+
+            // TODO: Run child trial
+
+            // TODO: Re-speciate the whole population
+
+            // TODO: Sort species and update best genome/stats
+
+            // TODO: Update archive
         }
 
         /// <summary>
