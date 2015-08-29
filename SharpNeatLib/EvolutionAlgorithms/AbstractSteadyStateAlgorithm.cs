@@ -48,7 +48,7 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <summary>
         ///     Gets the population's current champion genome.
         /// </summary>
-        public TGenome CurrentChampGenome { get; private set; }
+        public TGenome CurrentChampGenome { get; protected set; }
 
         /// <summary>
         ///     Gets a value indicating whether some goal fitness has been achieved and that the algorithm has therefore stopped.
@@ -66,7 +66,8 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </param>
         /// <param name="genomeList">An initial genome population.</param>
         /// <param name="eliteArchive">The cross-evaluation archive of high-performing genomes (optional).</param>
-        public void Initialize(IGenomeListEvaluator<TGenome> genomeListEvaluator, IGenomeFactory<TGenome> genomeFactory,
+        public virtual void Initialize(IGenomeListEvaluator<TGenome> genomeListEvaluator,
+            IGenomeFactory<TGenome> genomeFactory,
             List<TGenome> genomeList,
             EliteArchive<TGenome> eliteArchive)
         {
@@ -91,7 +92,8 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </param>
         /// <param name="populationSize">The number of genomes to create for the initial population.</param>
         /// <param name="eliteArchive">The cross-evaluation archive of high-performing genomes (optional).</param>
-        public void Initialize(IGenomeListEvaluator<TGenome> genomeListEvaluator, IGenomeFactory<TGenome> genomeFactory,
+        public virtual void Initialize(IGenomeListEvaluator<TGenome> genomeListEvaluator,
+            IGenomeFactory<TGenome> genomeFactory,
             int populationSize,
             EliteArchive<TGenome> eliteArchive)
         {
@@ -177,7 +179,7 @@ namespace SharpNeat.EvolutionAlgorithms
 
                     // Check if a pause has been requested. 
                     // Access to the flag is not thread synchronized, but it doesn't really matter if
-                    // we miss it being set and perform one other generation before pausing.
+                    // we miss it being set and perform one other evaluation before pausing.
                     if (_pauseRequestFlag || GenomeListEvaluator.StopConditionSatisfied)
                     {
                         // Signal to any waiting thread that we are pausing

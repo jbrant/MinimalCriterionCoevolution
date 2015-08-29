@@ -136,6 +136,7 @@
     <Compile Include="EvolutionAlgorithms\ComplexityRegulation\ComplexityRegulationMode.cs" />
     <None Include="DeadCode\PhasedSearchStats.cs" />
     <None Include="DeadCode\PhasedSearch\Triggers\SimplificationStallClockTimeTrigger.cs" />
+    <Compile Include="EvolutionAlgorithms\SteadyStateNeatEvolutionAlgorithm.cs" />
     <Compile Include="Genomes\Neat\NeatGenomeXmlIO.cs" />
     <Compile Include="Genomes\RbfNeat\RbfGenomeFactory.cs" />
     <Compile Include="Network\ActivationFunctions\ActivationFunctionInfo.cs" />

@@ -223,7 +223,6 @@ namespace SharpNeat.EvolutionAlgorithms
             _genomeList.AddRange(offspringList);
 
             // Evaluate genomes.            
-            //_genomeListEvaluator.Evaluate(GetCombinedPopulationAndArchive());
             _genomeListEvaluator.Evaluate(_genomeList);
 
             // Integrate offspring into species.
