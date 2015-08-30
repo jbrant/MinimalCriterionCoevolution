@@ -121,6 +121,7 @@
     <Compile Include="EvolutionAlgorithms\ComplexityRegulation\DefaultComplexityRegulationStrategy.cs" />
     <Compile Include="EvolutionAlgorithms\ComplexityRegulation\IComplexityRegulationStrategy.cs" />
     <Compile Include="EvolutionAlgorithms\ComplexityRegulation\NullComplexityRegulationStrategy.cs" />
+    <Compile Include="Core\INeatEvolutionAlgorithm.cs" />
     <Compile Include="EvolutionAlgorithms\NeatAlgorithmStats.cs" />
     <None Include="DeadCode\PhasedSearch\Triggers\AbsoluteMeanComplexityCeilingTrigger.cs" />
     <None Include="DeadCode\PhasedSearch\Triggers\SimplificationStallGenerationsTrigger.cs" />
@@ -130,7 +131,7 @@
     <None Include="DeadCode\PhasedSearch\Triggers\FitnessStallGenerationsTrigger.cs" />
     <None Include="DeadCode\PhasedSearch\Triggers\MovingMeanComplexityCeilingTrigger.cs" />
     <None Include="DeadCode\PhasedSearch\Triggers\IPhaseTransitionTrigger.cs" />
-    <Compile Include="EvolutionAlgorithms\NeatEvolutionAlgorithm.cs" />
+    <Compile Include="EvolutionAlgorithms\NeatGenerationalEvolutionAlgorithm.cs" />
     <Compile Include="EvolutionAlgorithms\AbstractGenerationalAlgorithm.cs" />
     <Compile Include="EvolutionAlgorithms\NeatEvolutionAlgorithmParameters.cs" />
     <Compile Include="EvolutionAlgorithms\ComplexityRegulation\ComplexityRegulationMode.cs" />

@@ -28,9 +28,19 @@ namespace SharpNeat.Core
         where TGenome : class, IGenome<TGenome>
     {
         /// <summary>
+        /// Gets the current generation.
+        /// </summary>
+        uint CurrentGeneration { get; }
+
+        /// <summary>
         /// Notifies listeners that some state change has occured.
         /// </summary>
         event EventHandler UpdateEvent;
+
+        /// <summary>
+        /// Notifies listeners that the algorithm has paused.
+        /// </summary>
+        event EventHandler PausedEvent;
 
         /// <summary>
         /// Gets or sets the algorithm's update scheme.
@@ -90,6 +100,6 @@ namespace SharpNeat.Core
         /// to call this method from a GUI thread that also has code that may be called by the
         /// UpdateEvent - doing so will result in deadlocked threads.
         /// </summary>
-        void RequestPauseAndWait();
+        void RequestPauseAndWait();        
     }
 }

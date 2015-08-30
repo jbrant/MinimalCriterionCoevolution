@@ -11,14 +11,14 @@ namespace SharpNeat.Domains.MazeNavigation.FitnessExperiment
     internal class MazeNavigationFitnessExperiment : BaseMazeNavigationExperiment
     {
         /// <summary>
-        ///     Create and return a NeatEvolutionAlgorithm object (specific to fitness-based evaluations) ready for running the
+        ///     Create and return a NeatGenerationalEvolutionAlgorithm object (specific to fitness-based evaluations) ready for running the
         ///     NEAT algorithm/search based on the given genome factory and genome list.  Various sub-parts of the algorithm are
         ///     also constructed and connected up.
         /// </summary>
         /// <param name="genomeFactory">The genome factory from which to generate new genomes</param>
         /// <param name="genomeList">The current genome population</param>
         /// <returns>Constructed evolutionary algorithm</returns>
-        public override NeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(
+        public override INeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(
             IGenomeFactory<NeatGenome> genomeFactory,
             List<NeatGenome> genomeList)
         {
@@ -32,7 +32,7 @@ namespace SharpNeat.Domains.MazeNavigation.FitnessExperiment
                 ExperimentUtils.CreateComplexityRegulationStrategy(ComplexityRegulationStrategy, Complexitythreshold);
 
             // Create the evolution algorithm.
-            var ea = new NeatEvolutionAlgorithm<NeatGenome>(NeatEvolutionAlgorithmParameters, speciationStrategy,
+            var ea = new NeatGenerationalEvolutionAlgorithm<NeatGenome>(NeatEvolutionAlgorithmParameters, speciationStrategy,
                 complexityRegulationStrategy);
 
             // Create IBlackBox evaluator.

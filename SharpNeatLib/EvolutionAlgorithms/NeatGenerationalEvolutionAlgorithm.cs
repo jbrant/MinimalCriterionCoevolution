@@ -36,7 +36,7 @@ namespace SharpNeat.EvolutionAlgorithms
     ///     - Creating offspring via both sexual and asexual reproduction.
     /// </summary>
     /// <typeparam name="TGenome">The genome type that the algorithm will operate on.</typeparam>
-    public class NeatEvolutionAlgorithm<TGenome> : AbstractGenerationalAlgorithm<TGenome>
+    public class NeatGenerationalEvolutionAlgorithm<TGenome> : AbstractGenerationalAlgorithm<TGenome>, INeatEvolutionAlgorithm<TGenome> 
         where TGenome : class, IGenome<TGenome>
     {
         NeatEvolutionAlgorithmParameters _eaParams;
@@ -59,7 +59,7 @@ namespace SharpNeat.EvolutionAlgorithms
         /// Constructs with the default NeatEvolutionAlgorithmParameters and speciation strategy 
         /// (KMeansClusteringStrategy with ManhattanDistanceMetric).
         /// </summary>
-        public NeatEvolutionAlgorithm()
+        public NeatGenerationalEvolutionAlgorithm()
         {
             _eaParams = new NeatEvolutionAlgorithmParameters();
             _eaParamsComplexifying = _eaParams;
@@ -80,7 +80,7 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <summary>
         /// Constructs with the provided NeatEvolutionAlgorithmParameters and ISpeciationStrategy.
         /// </summary>
-        public NeatEvolutionAlgorithm(NeatEvolutionAlgorithmParameters eaParams,
+        public NeatGenerationalEvolutionAlgorithm(NeatEvolutionAlgorithmParameters eaParams,
                                       ISpeciationStrategy<TGenome> speciationStrategy,
                                       IComplexityRegulationStrategy complexityRegulationStrategy)
         {

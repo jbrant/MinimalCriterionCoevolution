@@ -1,18 +1,21 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 using System.Xml;
 using SharpNeat.Core;
 using SharpNeat.Decoders;
 using SharpNeat.Decoders.Neat;
+using SharpNeat.DistanceMetrics;
 using SharpNeat.Domains.MazeNavigation.Components;
+using SharpNeat.Domains.MazeNavigation.NoveltyExperiment;
+using SharpNeat.EliteArchives;
 using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Phenomes;
+using SharpNeat.SpeciationStrategies;
 
-namespace SharpNeat.Domains.MazeNavigation
+namespace SharpNeat.Domains.MazeNavigation.SteadyStateNoveltyExperiment
 {
-    internal abstract class BaseMazeNavigationExperiment : IGuiNeatExperiment
+    internal class MazeNavigationNoveltySSExperiment : IGuiNeatExperiment
     {
         private NetworkActivationScheme _activationScheme;
         protected string ComplexityRegulationStrategy;
@@ -22,7 +25,7 @@ namespace SharpNeat.Domains.MazeNavigation
         protected MazeVariant MazeVariant;
         protected int? MinSuccessDistance;
         protected ParallelOptions ParallelOptions;
-        
+
         /// <summary>
         ///     Name of the experiment.
         /// </summary>
@@ -90,7 +93,7 @@ namespace SharpNeat.Domains.MazeNavigation
             MinSuccessDistance = XmlUtils.TryGetValueAsInt(xmlConfig, "MinSuccessDistance");
             MaxDistanceToTarget = XmlUtils.TryGetValueAsInt(xmlConfig, "MaxDistanceToTarget");
             MazeVariant =
-                MazeVariantUtl.convertStringToMazeVariant(XmlUtils.TryGetValueAsString(xmlConfig, "MazeVariant"));         
+                MazeVariantUtl.convertStringToMazeVariant(XmlUtils.TryGetValueAsString(xmlConfig, "MazeVariant"));
         }
 
         /// <summary>
@@ -167,9 +170,12 @@ namespace SharpNeat.Domains.MazeNavigation
         /// <param name="genomeFactory">The genome factory from which to generate new genomes</param>
         /// <param name="genomeList">The current genome population</param>
         /// <returns>Constructed evolutionary algorithm</returns>
-        public abstract INeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(
+        public INeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(
             IGenomeFactory<NeatGenome> genomeFactory,
-            List<NeatGenome> genomeList);
+            List<NeatGenome> genomeList)
+        {
+            return null;
+        }
 
         /// <summary>
         ///     Create a System.Windows.Forms derived object for displaying genomes.

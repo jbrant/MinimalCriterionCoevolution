@@ -26,9 +26,9 @@ namespace SharpNeat.EvolutionAlgorithms
         protected int PopulationSize;
 
         /// <summary>
-        ///     Gets the current number of evaluations.
+        /// Gets the current generation.
         /// </summary>
-        public uint CurrentEvaluation { get; private set; }
+        public uint CurrentGeneration { get; private set; }
 
         /// <summary>
         ///     Notifies listeners that some state change has occured.
@@ -71,7 +71,7 @@ namespace SharpNeat.EvolutionAlgorithms
             List<TGenome> genomeList,
             EliteArchive<TGenome> eliteArchive)
         {
-            CurrentEvaluation = 0;
+            CurrentGeneration = 0;
             GenomeListEvaluator = genomeListEvaluator;
             GenomeFactory = genomeFactory;
             GenomeList = genomeList;
@@ -97,10 +97,10 @@ namespace SharpNeat.EvolutionAlgorithms
             int populationSize,
             EliteArchive<TGenome> eliteArchive)
         {
-            CurrentEvaluation = 0;
+            CurrentGeneration = 0;
             GenomeListEvaluator = genomeListEvaluator;
             GenomeFactory = genomeFactory;
-            GenomeList = genomeFactory.CreateGenomeList(populationSize, CurrentEvaluation);
+            GenomeList = genomeFactory.CreateGenomeList(populationSize, CurrentGeneration);
             PopulationSize = populationSize;
             EliteArchive = eliteArchive;
             RunState = RunState.Ready;
@@ -167,12 +167,12 @@ namespace SharpNeat.EvolutionAlgorithms
 
                 for (;;)
                 {
-                    CurrentEvaluation++;
+                    CurrentGeneration++;
                     PerformOneEvaluation();
 
                     if (UpdateTest())
                     {
-                        _prevUpdateEvaluation = CurrentEvaluation;
+                        _prevUpdateEvaluation = CurrentGeneration;
                         _prevUpdateTimeTick = DateTime.Now.Ticks;
                         OnUpdateEvent();
                     }
@@ -209,7 +209,7 @@ namespace SharpNeat.EvolutionAlgorithms
         {
             if (UpdateMode.SteadyState == UpdateScheme.UpdateMode)
             {
-                return (CurrentEvaluation - _prevUpdateEvaluation) >= UpdateScheme.Evaluations;
+                return (CurrentGeneration - _prevUpdateEvaluation) >= UpdateScheme.Evaluations;
             }
 
             return (DateTime.Now.Ticks - _prevUpdateTimeTick) >= UpdateScheme.TimeSpan.Ticks;

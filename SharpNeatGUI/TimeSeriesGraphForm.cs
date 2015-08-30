@@ -18,6 +18,7 @@
  */
 using System;
 using System.Windows.Forms;
+using SharpNeat.Core;
 using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Utility;
@@ -30,7 +31,7 @@ namespace SharpNeatGUI
     /// </summary>
     public partial class TimeSeriesGraphForm : Form
     {
-        AbstractGenerationalAlgorithm<NeatGenome> _ea;
+        IEvolutionAlgorithm<NeatGenome> _ea;
         TimeSeriesDataSource[] _dataSourceArray;
         RollingPointPairList[] _pointPlotArray;
         GraphPane _graphPane;
@@ -41,7 +42,7 @@ namespace SharpNeatGUI
         /// Construct the form with the provided details and data sources.
         /// </summary>
         public TimeSeriesGraphForm(string title, string xAxisTitle, string y1AxisTitle, string y2AxisTitle,
-                         TimeSeriesDataSource[] dataSourceArray, AbstractGenerationalAlgorithm<NeatGenome> ea)
+                         TimeSeriesDataSource[] dataSourceArray, IEvolutionAlgorithm<NeatGenome> ea)
         {
             InitializeComponent();
 
@@ -63,7 +64,7 @@ namespace SharpNeatGUI
         /// Called when a new evolution algorithm is initialized. Clean up any existing event listeners and
         /// connect up to the new evolution algorithm.
         /// </summary>
-        public void Reconnect(AbstractGenerationalAlgorithm<NeatGenome> ea)
+        public void Reconnect(IEvolutionAlgorithm<NeatGenome> ea)
         {
             // Clean up.
             if(null != _ea) {

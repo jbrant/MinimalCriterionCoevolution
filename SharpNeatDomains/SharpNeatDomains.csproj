@@ -129,6 +129,7 @@
     <Compile Include="MazeNavigation\MazeNavigationWorld.cs" />
     <Compile Include="MazeNavigation\NoveltyExperiment\MazeNavigationNoveltyExperiment.cs" />
     <Compile Include="MazeNavigation\NoveltyExperiment\MazeNavigationNoveltyEvaluator.cs" />
+    <Compile Include="MazeNavigation\SteadyStateNoveltyExperiment\MazeNavigationNoveltySSExperiment.cs" />
     <Compile Include="NeatGenomeView.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -193,9 +194,7 @@
   <ItemGroup>
     <None Include="ClassDiagram1.cd" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="MazeNavigation\SteadyStateNoveltyExperiment\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

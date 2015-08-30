@@ -32,7 +32,7 @@ namespace SharpNeatConsole
     {
         static IGenomeFactory<NeatGenome> _genomeFactory;
         static List<NeatGenome> _genomeList;
-        static NeatEvolutionAlgorithm<NeatGenome> _ea;
+        static INeatEvolutionAlgorithm<NeatGenome> _ea;
 
         static void Main(string[] args)
         {

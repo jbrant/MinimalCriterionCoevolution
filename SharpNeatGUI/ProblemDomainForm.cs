@@ -19,6 +19,7 @@
 
 using System;
 using System.Windows.Forms;
+using SharpNeat.Core;
 using SharpNeat.Domains;
 using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.Genomes.Neat;
@@ -31,7 +32,7 @@ namespace SharpNeatGUI
     public partial class ProblemDomainForm : Form
     {
         AbstractDomainView _domainViewControl;
-        AbstractGenerationalAlgorithm<NeatGenome> _ea;
+        IEvolutionAlgorithm<NeatGenome> _ea;
 
         #region Constructor
 
@@ -39,7 +40,7 @@ namespace SharpNeatGUI
         /// Construct with the provided form title, genome view/renderer and evolution algorithm. We listen to update events
         /// from the evolution algorithm and cleanly detach from it when this form closes.
         /// </summary>
-        public ProblemDomainForm(string title, AbstractDomainView domainViewControl, AbstractGenerationalAlgorithm<NeatGenome> ea)
+        public ProblemDomainForm(string title, AbstractDomainView domainViewControl, IEvolutionAlgorithm<NeatGenome> ea)
         {
             InitializeComponent();
             this.Text = title;
@@ -63,7 +64,7 @@ namespace SharpNeatGUI
         /// Called when a new evolution algorithm is initialized. Clean up any existing event listeners and
         /// connect up to the new evolution algorithm.
         /// </summary>
-        public void Reconnect(AbstractGenerationalAlgorithm<NeatGenome> ea)
+        public void Reconnect(IEvolutionAlgorithm<NeatGenome> ea)
         {
             // Clean up.
             if(null != _ea) {
