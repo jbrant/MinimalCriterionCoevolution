@@ -62,7 +62,7 @@ namespace SharpNeat.SpeciationStrategies
         /// </summary>
         public void SpeciateGenomes(IList<TGenome> genomeList, IList<Specie<TGenome>> specieList)
         {
-            Debug.Assert(SpeciationUtils.TestEmptySpecies(specieList), "SpeciateGenomes(IList<TGenome>,IList<Species<TGenome>>) called with non-empty species");
+            Debug.Assert(SpeciationUtils<TGenome>.TestEmptySpecies(specieList), "SpeciateGenomes(IList<TGenome>,IList<Species<TGenome>>) called with non-empty species");
             Debug.Assert(genomeList.Count >= specieList.Count, string.Format("SpeciateGenomes(IList<TGenome>,IList<Species<TGenome>>). Species count [{0}] is greater than genome count [{1}].", specieList.Count, genomeList.Count));
 
             // Make a copy of genomeList and shuffle the items.
@@ -102,7 +102,7 @@ namespace SharpNeat.SpeciationStrategies
                 specieList[specieIdx].GenomeList.Add(gList[genomeIdx]);
             }
 
-            Debug.Assert(SpeciationUtils.PerformIntegrityCheck(specieList));
+            Debug.Assert(SpeciationUtils<TGenome>.PerformIntegrityCheck(specieList));
         }
 
         /// <summary>
@@ -116,7 +116,7 @@ namespace SharpNeat.SpeciationStrategies
         {
             // Each specie should contain at least one genome. We need at least one existing genome per specie to act
             // as a specie centroid in order to define where the specie is within the encoding space.
-            Debug.Assert(SpeciationUtils.TestPopulatedSpecies(specieList), "SpeciateOffspring(IList<TGenome>,IList<Species<TGenome>>) called with an empty specie.");
+            Debug.Assert(SpeciationUtils<TGenome>.TestPopulatedSpecies(specieList), "SpeciateOffspring(IList<TGenome>,IList<Species<TGenome>>) called with an empty specie.");
 
             // Make a copy of genomeList and shuffle the items.
             List<TGenome> gList = new List<TGenome>(genomeList);
@@ -190,7 +190,7 @@ namespace SharpNeat.SpeciationStrategies
                 specieList[specieIdx].GenomeList.Add(gList[genomeIdx]);
             }
 
-            Debug.Assert(SpeciationUtils.PerformIntegrityCheck(specieList));
+            Debug.Assert(SpeciationUtils<TGenome>.PerformIntegrityCheck(specieList));
         }
     }
 }

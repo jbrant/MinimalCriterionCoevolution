@@ -96,7 +96,7 @@ namespace SharpNeat.SpeciationStrategies
         /// </summary>
         public void SpeciateGenomes(IList<TGenome> genomeList, IList<Specie<TGenome>> specieList)
         {
-            Debug.Assert(SpeciationUtils.TestEmptySpecies(specieList), "SpeciateGenomes(IList<TGenome>,IList<Species<TGenome>>) called with non-empty species");
+            Debug.Assert(SpeciationUtils<TGenome>.TestEmptySpecies(specieList), "SpeciateGenomes(IList<TGenome>,IList<Species<TGenome>>) called with non-empty species");
             Debug.Assert(genomeList.Count >= specieList.Count, string.Format("SpeciateGenomes(IList<TGenome>,IList<Species<TGenome>>). Species count [{0}] is greater than genome count [{1}].", specieList.Count, genomeList.Count));
 
             // Randomly allocate the first k genomes to their own specie. Because there is only one genome in these
@@ -137,7 +137,7 @@ namespace SharpNeat.SpeciationStrategies
             // Perform the main k-means loop until convergence.
             SpeciateUntilConvergence(genomeList, specieList);
 
-            Debug.Assert(SpeciationUtils.PerformIntegrityCheck(specieList));
+            Debug.Assert(SpeciationUtils<TGenome>.PerformIntegrityCheck(specieList));
         }
 
         /// <summary>
@@ -151,7 +151,7 @@ namespace SharpNeat.SpeciationStrategies
         {
             // Each specie should contain at least one genome. We need at least one existing genome per specie to act
             // as a specie centroid in order to define where the specie is within the encoding space.
-            Debug.Assert(SpeciationUtils.TestPopulatedSpecies(specieList), "SpeciateOffspring(IList<TGenome>,IList<Species<TGenome>>) called with an empty specie.");
+            Debug.Assert(SpeciationUtils<TGenome>.TestPopulatedSpecies(specieList), "SpeciateOffspring(IList<TGenome>,IList<Species<TGenome>>) called with an empty specie.");
 
             // Update the centroid of each specie. If we're adding offspring this means that old genomes 
             // have been removed from the population and therefore the centroids are out-of-date.
@@ -189,7 +189,7 @@ namespace SharpNeat.SpeciationStrategies
             // Perform the main k-means loop until convergence.
             SpeciateUntilConvergence(genomeList, specieList);
 
-            Debug.Assert(SpeciationUtils.PerformIntegrityCheck(specieList));
+            Debug.Assert(SpeciationUtils<TGenome>.PerformIntegrityCheck(specieList));
         }
 
         #endregion
