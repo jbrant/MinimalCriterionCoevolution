@@ -21,20 +21,19 @@ namespace SharpNeat.EliteArchives
         ///     The fraction by which to increase the archive addition threshold (default is
         ///     0.3).
         /// </param>
-        /// <param name="maxGenerationalArchiveAddition">
+        /// <param name="maxGenerationArchiveAddition">
         ///     The maximum number of organisms that can be added during a given
         ///     generation without precipitating a reduction of the archive addition threshold.
         /// </param>
-        /// <param name="minGenerationalArchiveAddition">
-        ///     The minimum number of organisms that can be added during a given
-        ///     generation without precipitating a reduction of the archive addition threshold.
+        /// <param name="maxGenerationsWithoutAddition">
+        ///     The maximum number of generations that can elapse without adding an organism to the archive.
         /// </param>
         public NoveltyArchive(double initialArchiveAdditionThreshold, double thresholdDecreaseMultiplier = 0.95,
-            double thresholdIncreaseMultiplier = 0.3, int maxGenerationalArchiveAddition = 5,
-            int minGenerationalArchiveAddition = 1)
+            double thresholdIncreaseMultiplier = 1.3, int maxGenerationArchiveAddition = 5,
+            int maxGenerationsWithoutAddition = 10)
             : base(
                 initialArchiveAdditionThreshold, thresholdDecreaseMultiplier, thresholdIncreaseMultiplier,
-                maxGenerationalArchiveAddition, minGenerationalArchiveAddition)
+                maxGenerationArchiveAddition, maxGenerationsWithoutAddition)
         {
         }
 

@@ -11,16 +11,15 @@ namespace SharpNeat.Core
         where TGenome : class, IGenome<TGenome>
     {
         /// <summary>
-        ///     The maximum number of organisms that can be added during a given generation without precipitating a reduction of
+        ///     The maximum number of organisms that can be added during a given generation without precipitating an increase of
         ///     the archive addition threshold.
         /// </summary>
-        private readonly int _maxGenerationalArchiveAddition;
+        private readonly int _maxGenerationArchiveAddition;
 
         /// <summary>
-        ///     The minimum number of organisms that can be added during a given generation without precipitating a reduction of
-        ///     the archive addition threshold.
+        /// The maximum number of generations that can elapse without adding an organism to the archive.
         /// </summary>
-        private readonly int _minGenerationalArchiveAddition;
+        private readonly int _maxGenerationsWithoutArchiveAddition;
 
         /// <summary>
         ///     The fraction by which to decrease the archive addition threshold.
@@ -31,12 +30,14 @@ namespace SharpNeat.Core
         ///     The fraction by which to increase the archive addition threshold.
         /// </summary>
         private readonly double _thresholdIncreaseMultiplier;
-
+        
         /// <summary>
         ///     Tracks the number of genomes that have been added to the archive for the current generation.  This is used for
         ///     determining how to modify the archive threshold.
         /// </summary>
         public int _numGenomesAddedThisGeneration;
+
+        private int _numGenerationsWithoutAdditions;
 
         /// <summary>
         ///     The real-valued threshold constituting above which a genome will be added to the archive.
@@ -55,25 +56,25 @@ namespace SharpNeat.Core
         ///     The fraction by which to increase the archive addition threshold (default is
         ///     0.3).
         /// </param>
-        /// <param name="maxGenerationalArchiveAddition">
+        /// <param name="maxGenerationArchiveAddition">
         ///     The maximum number of organisms that can be added during a given
         ///     generation without precipitating a reduction of the archive addition threshold.
         /// </param>
-        /// <param name="minGenerationalArchiveAddition">
-        ///     The minimum number of organisms that can be added during a given
-        ///     generation without precipitating a reduction of the archive addition threshold.
+        /// <param name="maxGenerationsWithoutAddition">
+        ///     The maximum number of generations that can elapse without adding an organism to the archive.
         /// </param>
-        public EliteArchive(double initialArchiveAdditionThreshold, double thresholdDecreaseMultiplier = 0.95,
-            double thresholdIncreaseMultiplier = 0.3, int maxGenerationalArchiveAddition = 5,
-            int minGenerationalArchiveAddition = 1)
+        protected EliteArchive(double initialArchiveAdditionThreshold, double thresholdDecreaseMultiplier = 0.95,
+            double thresholdIncreaseMultiplier = 1.3, int maxGenerationArchiveAddition = 4,
+            int maxGenerationsWithoutAddition = 10)
         {
             ArchiveAdditionThreshold = initialArchiveAdditionThreshold;
             _thresholdDecreaseMultiplier = thresholdDecreaseMultiplier;
             _thresholdIncreaseMultiplier = thresholdIncreaseMultiplier;
-            _maxGenerationalArchiveAddition = maxGenerationalArchiveAddition;
-            _minGenerationalArchiveAddition = minGenerationalArchiveAddition;
+            _maxGenerationArchiveAddition = maxGenerationArchiveAddition;
+            _maxGenerationsWithoutArchiveAddition = maxGenerationsWithoutAddition;
 
             _numGenomesAddedThisGeneration = 0;
+            _numGenerationsWithoutAdditions = 0;
 
             //_archive = new List<TGenome>();
             Archive = new ConcurrentBag<TGenome>();
@@ -90,16 +91,32 @@ namespace SharpNeat.Core
         /// </summary>
         public void UpdateArchiveParameters()
         {
+            // Adjust the archive based on the number of genomes added this generation
+            // or the number of generations elapsed without any archive additions
+            if (_numGenomesAddedThisGeneration > _maxGenerationArchiveAddition)
+            {
+                ArchiveAdditionThreshold *= _thresholdIncreaseMultiplier;
+            }
+            else if (_numGenerationsWithoutAdditions == _maxGenerationArchiveAddition)
+            {
+                ArchiveAdditionThreshold *= _thresholdDecreaseMultiplier;
+
+                // Reset number of generations without addition
+                _numGenerationsWithoutAdditions = 0;
+            }
+
+            /*
             // Adjust the archive threshold based on the number of organisms
             // added to the archive during the current generation
             if (_numGenomesAddedThisGeneration < _minGenerationalArchiveAddition)
             {
                 ArchiveAdditionThreshold *= _thresholdDecreaseMultiplier;
             }
-            else if (_numGenomesAddedThisGeneration > _maxGenerationalArchiveAddition)
+            else if (_numGenomesAddedThisGeneration > _maxGenerationArchiveAddition)
             {
                 ArchiveAdditionThreshold *= _thresholdIncreaseMultiplier;
             }
+            */
 
             // Reset the count of organisms added for the next generation
             _numGenomesAddedThisGeneration = 0;
