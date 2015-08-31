@@ -56,7 +56,7 @@ namespace SharpNeat.EvolutionAlgorithms
 
             // TODO: Run child trial
 
-            GenomeListEvaluator.Evaluate(GenomeList);
+            GenomeEvaluator.Evaluate(childGenome, GenomeList);
 
             // TODO: Re-speciate the whole population
 

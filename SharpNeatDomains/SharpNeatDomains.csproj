@@ -127,9 +127,9 @@
       <DependentUpon>MazeNavigationView.cs</DependentUpon>
     </Compile>
     <Compile Include="MazeNavigation\MazeNavigationWorld.cs" />
-    <Compile Include="MazeNavigation\NoveltyExperiment\MazeNavigationNoveltyExperiment.cs" />
+    <Compile Include="MazeNavigation\NoveltyExperiment\GenerationalMazeNavigationNoveltyExperiment.cs" />
     <Compile Include="MazeNavigation\NoveltyExperiment\MazeNavigationNoveltyEvaluator.cs" />
-    <Compile Include="MazeNavigation\SteadyStateNoveltyExperiment\MazeNavigationNoveltySSExperiment.cs" />
+    <Compile Include="MazeNavigation\NoveltyExperiment\SteadyStateMazeNavigationNoveltyExperiment.cs" />
     <Compile Include="NeatGenomeView.cs">
       <SubType>UserControl</SubType>
     </Compile>

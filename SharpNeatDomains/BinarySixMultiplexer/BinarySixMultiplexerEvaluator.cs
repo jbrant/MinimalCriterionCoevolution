@@ -55,7 +55,7 @@ namespace SharpNeat.Domains.BinarySixMultiplexer
         }
 
         /// <summary>
-        /// Evaluate the provided IBlackBox against the Binary 6-Multiplexer problem domain and return
+        /// EvaluateFitness the provided IBlackBox against the Binary 6-Multiplexer problem domain and return
         /// its fitness score.
         /// </summary>
         public FitnessInfo Evaluate(IBlackBox box)

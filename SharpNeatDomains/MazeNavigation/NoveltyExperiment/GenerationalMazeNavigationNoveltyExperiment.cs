@@ -10,7 +10,7 @@ using SharpNeat.SpeciationStrategies;
 
 namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
 {
-    internal class MazeNavigationNoveltyExperiment : BaseMazeNavigationExperiment
+    internal class GenerationalMazeNavigationNoveltyExperiment : BaseMazeNavigationExperiment
     {
         private double _archiveAdditionThreshold;
         private double _archiveThresholdDecreaseMultiplier;
@@ -82,14 +82,14 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
                 _maxGenerationalArchiveAddition, _minGenerationalArchiveAddition);
 
             // Create a genome list evaluator. This packages up the genome decoder with the genome evaluator.
-//            IGenomeListEvaluator<NeatGenome> listEvaluator =
-//                new SerialGenomeListBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator, _nearestNeighbors, archive);
-            IGenomeListEvaluator<NeatGenome> listEvaluator =
-                new ParallelGenomeListBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
+            //            IGenomeFitnessEvaluator<NeatGenome> fitnessEvaluator =
+            //                new SerialGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator, _nearestNeighbors, archive);
+            IGenomeEvaluator<NeatGenome> fitnessEvaluator =
+                new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
                     ParallelOptions, _nearestNeighbors, archive);
 
             // Initialize the evolution algorithm.
-            ea.Initialize(listEvaluator, genomeFactory, genomeList, archive);
+            ea.Initialize(fitnessEvaluator, genomeFactory, genomeList, archive);
 
             // Finished. Return the evolution algorithm
             return ea;

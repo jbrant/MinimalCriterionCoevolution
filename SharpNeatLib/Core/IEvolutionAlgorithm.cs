@@ -69,19 +69,19 @@ namespace SharpNeat.Core
         bool StopConditionSatisfied { get; }
 
         /// <summary>
-        /// Initializes the evolution algorithm with the provided IGenomeListEvaluator, IGenomeFactory
+        /// Initializes the evolution algorithm with the provided IGenomeFitnessEvaluator, IGenomeFactory
         /// and an initial population of genomes.
         /// </summary>
-        void Initialize(IGenomeListEvaluator<TGenome> genomeListEvaluator,
+        void Initialize(IGenomeEvaluator<TGenome> genomeFitnessEvaluator,
                         IGenomeFactory<TGenome> genomeFactory,
                         List<TGenome> genomeList,
                         EliteArchive<TGenome> eliteArchive);
 
         /// <summary>
-        /// Initializes the evolution algorithm with the provided IGenomeListEvaluator
+        /// Initializes the evolution algorithm with the provided IGenomeFitnessEvaluator
         /// and an IGenomeFactory that can be used to create an initial population of genomes.
         /// </summary>
-        void Initialize(IGenomeListEvaluator<TGenome> genomeListEvaluator,
+        void Initialize(IGenomeEvaluator<TGenome> genomeFitnessEvaluator,
                         IGenomeFactory<TGenome> genomeFactory,
                         int populationSize,
                         EliteArchive<TGenome> eliteArchive);

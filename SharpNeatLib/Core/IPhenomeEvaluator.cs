@@ -37,7 +37,7 @@ namespace SharpNeat.Core
         bool StopConditionSatisfied { get; }
 
         /// <summary>
-        /// Evaluate the provided phenome and return its fitness score.
+        /// EvaluateFitness the provided phenome and return its fitness score.
         /// </summary>
         TTrialInfo Evaluate(TPhenome phenome);
 

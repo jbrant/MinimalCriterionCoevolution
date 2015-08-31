@@ -21,7 +21,7 @@ using System.Collections.Generic;
 namespace SharpNeat.Core
 {
     /// <summary>
-    /// A concrete implementation of IGenomeListEvaluator that evaulates genomes independently of each other
+    /// A concrete implementation of IGenomeFitnessEvaluator that evaulates genomes independently of each other
     /// and in series on a single thread. 
     /// 
     /// Genome decoding is performed by a provided IGenomeDecoder.
@@ -31,7 +31,7 @@ namespace SharpNeat.Core
     /// </summary>
     /// <typeparam name="TGenome">The genome type that is decoded.</typeparam>
     /// <typeparam name="TPhenome">The phenome type that is decoded to and then evaluated.</typeparam>
-    public class SerialGenomeListEvaluator<TGenome,TPhenome> : IGenomeListEvaluator<TGenome>
+    public class SerialGenomeFitnessEvaluator<TGenome,TPhenome> : IGenomeEvaluator<TGenome>
         where TGenome : class, IGenome<TGenome>
         where TPhenome: class
     {
@@ -48,7 +48,7 @@ namespace SharpNeat.Core
         /// Construct with the provided IGenomeDecoder and IPhenomeEvaluator.
         /// Phenome caching is enabled by default.
         /// </summary>
-        public SerialGenomeListEvaluator(IGenomeDecoder<TGenome,TPhenome> genomeDecoder,
+        public SerialGenomeFitnessEvaluator(IGenomeDecoder<TGenome,TPhenome> genomeDecoder,
                                          IPhenomeEvaluator<TPhenome, FitnessInfo> phenomeEvaluator)
         {
             _genomeDecoder = genomeDecoder;
@@ -60,7 +60,7 @@ namespace SharpNeat.Core
         /// <summary>
         /// Construct with the provided IGenomeDecoder, IPhenomeEvaluator and enablePhenomeCaching flag.
         /// </summary>
-        public SerialGenomeListEvaluator(IGenomeDecoder<TGenome,TPhenome> genomeDecoder,
+        public SerialGenomeFitnessEvaluator(IGenomeDecoder<TGenome,TPhenome> genomeDecoder,
                                          IPhenomeEvaluator<TPhenome, FitnessInfo> phenomeEvaluator,
                                          bool enablePhenomeCaching)
         {
@@ -77,7 +77,7 @@ namespace SharpNeat.Core
 
         #endregion
 
-        #region IGenomeListEvaluator<TGenome> Members
+        #region IGenomeFitnessEvaluator<TGenome> Members
 
         /// <summary>
         /// Gets the total number of individual genome evaluations that have been performed by this evaluator.
@@ -101,9 +101,21 @@ namespace SharpNeat.Core
         /// Evaluates a list of genomes. Here we decode each genome in series using the contained
         /// IGenomeDecoder and evaluate the resulting TPhenome using the contained IPhenomeEvaluator.
         /// </summary>
+        /// <param name="genomeList">The list of genomes under evaluation.</param>
         public void Evaluate(IList<TGenome> genomeList)
         {
             _evaluationMethod(genomeList);
+        }
+
+        /// <summary>
+        /// Evalutes a single genome alone and against a list of other genomes.
+        /// </summary>
+        /// <param name="genome">The genome under evaluation.</param>
+        /// <param name="genomeList">The genomes against which to evaluate.</param>
+        public void Evaluate(TGenome genome, IList<TGenome> genomeList)
+        {
+            // TODO: Need to implement this
+            throw new System.NotImplementedException();
         }
 
         /// <summary>

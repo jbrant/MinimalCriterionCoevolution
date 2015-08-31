@@ -98,7 +98,7 @@ namespace SharpNeat.EvolutionAlgorithms
         protected void UpdateStats()
         {
             Statistics._generation = CurrentGeneration;
-            Statistics._totalEvaluationCount = GenomeListEvaluator.EvaluationCount;
+            Statistics._totalEvaluationCount = GenomeEvaluator.EvaluationCount;
 
             // Evaluation per second.
             var now = DateTime.Now;
@@ -109,11 +109,11 @@ namespace SharpNeat.EvolutionAlgorithms
             if (duration.Ticks > 9999)
             {
                 var evalsSinceLastUpdate =
-                    (long) (GenomeListEvaluator.EvaluationCount - Statistics._evalsCountAtLastUpdate);
+                    (long) (GenomeEvaluator.EvaluationCount - Statistics._evalsCountAtLastUpdate);
                 Statistics._evaluationsPerSec = (int) ((evalsSinceLastUpdate*1e7)/duration.Ticks);
 
                 // Reset working variables.
-                Statistics._evalsCountAtLastUpdate = GenomeListEvaluator.EvaluationCount;
+                Statistics._evalsCountAtLastUpdate = GenomeEvaluator.EvaluationCount;
                 Statistics._evalsPerSecLastSampleTime = now;
             }
 
@@ -264,36 +264,36 @@ namespace SharpNeat.EvolutionAlgorithms
         #region Initialization Methods
 
         /// <summary>
-        /// Initializes the evolution algorithm with the provided IGenomeListEvaluator, IGenomeFactory
+        /// Initializes the evolution algorithm with the provided IGenomeFitnessEvaluator, IGenomeFactory
         /// and an initial population of genomes.
         /// </summary>
-        /// <param name="genomeListEvaluator">The genome evaluation scheme for the evolution algorithm.</param>
+        /// <param name="genomeFitnessEvaluator">The genome evaluation scheme for the evolution algorithm.</param>
         /// <param name="genomeFactory">The factory that was used to create the genomeList and which is therefore referenced by the genomes.</param>
         /// <param name="genomeList">An initial genome population.</param>
         /// <param name="eliteArchive">The cross-generational archive of high-performing genomes (optional).</param>
-        public override void Initialize(IGenomeListEvaluator<TGenome> genomeListEvaluator,
+        public override void Initialize(IGenomeEvaluator<TGenome> genomeFitnessEvaluator,
                                         IGenomeFactory<TGenome> genomeFactory,
                                         List<TGenome> genomeList,
                                         EliteArchive<TGenome> eliteArchive = null)
         {
-            base.Initialize(genomeListEvaluator, genomeFactory, genomeList, eliteArchive);
+            base.Initialize(genomeFitnessEvaluator, genomeFactory, genomeList, eliteArchive);
             Initialize();
         }
 
         /// <summary>
-        /// Initializes the evolution algorithm with the provided IGenomeListEvaluator
+        /// Initializes the evolution algorithm with the provided IGenomeFitnessEvaluator
         /// and an IGenomeFactory that can be used to create an initial population of genomes.
         /// </summary>
-        /// <param name="genomeListEvaluator">The genome evaluation scheme for the evolution algorithm.</param>
+        /// <param name="genomeFitnessEvaluator">The genome evaluation scheme for the evolution algorithm.</param>
         /// <param name="genomeFactory">The factory that was used to create the genomeList and which is therefore referenced by the genomes.</param>
         /// <param name="populationSize">The number of genomes to create for the initial population.</param>
         /// <param name="eliteArchive">The cross-generational archive of high-performing genomes (optional).</param>
-        public override void Initialize(IGenomeListEvaluator<TGenome> genomeListEvaluator,
+        public override void Initialize(IGenomeEvaluator<TGenome> genomeFitnessEvaluator,
                                         IGenomeFactory<TGenome> genomeFactory,
                                         int populationSize,
                                         EliteArchive<TGenome> eliteArchive = null)
         {
-            base.Initialize(genomeListEvaluator, genomeFactory, populationSize, eliteArchive);
+            base.Initialize(genomeFitnessEvaluator, genomeFactory, populationSize, eliteArchive);
             Initialize();
         }
 
@@ -303,7 +303,7 @@ namespace SharpNeat.EvolutionAlgorithms
         protected virtual void Initialize()
         {
             // Evaluate the genomes.
-            GenomeListEvaluator.Evaluate(GenomeList);
+            GenomeEvaluator.Evaluate(GenomeList);
 
             // Speciate the genomes.
             SpecieList = SpeciationStrategy.InitializeSpeciation(GenomeList, EaParams.SpecieCount);

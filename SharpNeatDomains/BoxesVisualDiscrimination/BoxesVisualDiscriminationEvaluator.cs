@@ -156,7 +156,7 @@ namespace SharpNeat.Domains.BoxesVisualDiscrimination
         }
 
         /// <summary>
-        /// Evaluate the provided IBlackBox against the XOR problem domain and return its fitness score.
+        /// EvaluateFitness the provided IBlackBox against the XOR problem domain and return its fitness score.
         /// 
         /// Fitness value explanation.
         /// 1) Max distance from target position in each trial is sqrt(2)*VisualFieldEdgeLength (target in one corner and selected target in 

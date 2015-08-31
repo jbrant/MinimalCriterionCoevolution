@@ -25,12 +25,12 @@ using SharpNeat.Utility;
 namespace SharpNeat.Core
 {
     /// <summary>
-    ///     A concrete implementation of IGenomeListEvaluator that evaulates genome's phenotypic behaviors independently of
+    ///     A concrete implementation of IGenomeFitnessEvaluator that evaulates genome's phenotypic behaviors independently of
     ///     each other and in parallel (on multiple execution threads).
     ///     Genome decoding is performed by a provided IGenomeDecoder.
     ///     Phenome evaluation is performed by a provided IPhenomeEvaluator.
     /// </summary>
-    public class ParallelGenomeListBehaviorEvaluator<TGenome, TPhenome> : IGenomeListEvaluator<TGenome>
+    public class ParallelGenomeBehaviorEvaluator<TGenome, TPhenome> : IGenomeEvaluator<TGenome>
         where TGenome : class, IGenome<TGenome>
         where TPhenome : class
     {
@@ -53,7 +53,7 @@ namespace SharpNeat.Core
         ///     Phenome caching is enabled by default.
         ///     The number of parallel threads defaults to Environment.ProcessorCount.
         /// </summary>
-        public ParallelGenomeListBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
+        public ParallelGenomeBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
             IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, int nearestNeighbors,
             EliteArchive<TGenome> archive = null)
             : this(genomeDecoder, phenomeEvaluator, new ParallelOptions(), true, nearestNeighbors, archive)
@@ -65,7 +65,7 @@ namespace SharpNeat.Core
         ///     Phenome caching is enabled by default.
         ///     The number of parallel threads defaults to Environment.ProcessorCount.
         /// </summary>
-        public ParallelGenomeListBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
+        public ParallelGenomeBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
             IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator,
             ParallelOptions options, int nearestNeighbors, EliteArchive<TGenome> archive = null)
             : this(genomeDecoder, phenomeEvaluator, options, true, nearestNeighbors, archive)
@@ -75,7 +75,7 @@ namespace SharpNeat.Core
         /// <summary>
         ///     Construct with the provided IGenomeDecoder, IPhenomeEvaluator, ParalleOptions and enablePhenomeCaching flag.
         /// </summary>
-        private ParallelGenomeListBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
+        private ParallelGenomeBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
             IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator,
             ParallelOptions options, bool enablePhenomeCaching, int nearestNeighbors,
             EliteArchive<TGenome> archive = null)
@@ -100,7 +100,7 @@ namespace SharpNeat.Core
 
         #endregion
 
-        #region IGenomeListEvaluator<TGenome> Members
+        #region IGenomeFitnessEvaluator<TGenome> Members
 
         /// <summary>
         ///     Gets the total number of individual genome evaluations that have been performed by this evaluator.
@@ -132,11 +132,23 @@ namespace SharpNeat.Core
         ///     Evaluates a list of genomes. Here we decode each genome in using the contained IGenomeDecoder
         ///     and evaluate the resulting TPhenome using the contained IPhenomeEvaluator.
         /// </summary>
+        /// <param name="genomeList">The list of genomes under evaluation.</param>
         public void Evaluate(IList<TGenome> genomeList)
         {
             _evalMethod(genomeList);
         }
 
+        /// <summary>
+        /// Evalutes a single genome alone and against a list of other genomes.
+        /// </summary>
+        /// <param name="genome">The genome under evaluation.</param>
+        /// <param name="genomeList">The genomes against which to evaluate.</param>
+        public void Evaluate(TGenome genome, IList<TGenome> genomeList)
+        {
+            // TODO: Need to implement this
+            throw new NotImplementedException();
+        }
+        
         #endregion
 
         #region Private Methods
@@ -158,7 +170,7 @@ namespace SharpNeat.Core
                 }
                 else
                 {
-                    // Evaluate the behavior and update the genome's behavior characterization
+                    // EvaluateFitness the behavior and update the genome's behavior characterization
                     var behaviorInfo = _phenomeEvaluator.Evaluate(phenome);
                     genome.EvaluationInfo.BehaviorCharacterization = behaviorInfo.Behaviors;
                 }
@@ -212,7 +224,7 @@ namespace SharpNeat.Core
                 }
                 else
                 {
-                    // Evaluate the behavior and update the genome's behavior characterization
+                    // EvaluateFitness the behavior and update the genome's behavior characterization
                     var behaviorInfo = _phenomeEvaluator.Evaluate(phenome);
                     genome.EvaluationInfo.BehaviorCharacterization = behaviorInfo.Behaviors;
                 }

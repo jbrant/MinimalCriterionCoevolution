@@ -51,7 +51,7 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <summary>
         ///     The genome evaluation scheme for the evolution algorithm.
         /// </summary>
-        protected IGenomeListEvaluator<TGenome> GenomeListEvaluator;
+        protected IGenomeEvaluator<TGenome> GenomeEvaluator;
 
         /// <summary>
         ///     The factory that will be used to create the genome list.
@@ -118,10 +118,10 @@ namespace SharpNeat.EvolutionAlgorithms
         public bool StopConditionSatisfied { get; protected set; }
 
         /// <summary>
-        ///     Initializes the evolution algorithm with the provided IGenomeListEvaluator, IGenomeFactory
+        ///     Initializes the evolution algorithm with the provided IGenomeFitnessEvaluator, IGenomeFactory
         ///     and an initial population of genomes.
         /// </summary>
-        /// <param name="genomeListEvaluator">The genome evaluation scheme for the evolution algorithm.</param>
+        /// <param name="genomeFitnessEvaluator">The genome evaluation scheme for the evolution algorithm.</param>
         /// <param name="genomeFactory">
         ///     The factory that was used to create the genomeList and which is therefore referenced by the
         ///     genomes.
@@ -131,12 +131,12 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     The persistent archive of genomes posessing a unique trait with respect to a behavior
         ///     characterization (optional).
         /// </param>
-        public virtual void Initialize(IGenomeListEvaluator<TGenome> genomeListEvaluator, IGenomeFactory<TGenome> genomeFactory,
+        public virtual void Initialize(IGenomeEvaluator<TGenome> genomeFitnessEvaluator, IGenomeFactory<TGenome> genomeFactory,
             List<TGenome> genomeList,
             EliteArchive<TGenome> eliteArchive)
         {
             CurrentGeneration = 0;
-            GenomeListEvaluator = genomeListEvaluator;
+            GenomeEvaluator = genomeFitnessEvaluator;
             GenomeFactory = genomeFactory;
             GenomeList = genomeList;
             EliteArchive = eliteArchive;
@@ -146,10 +146,10 @@ namespace SharpNeat.EvolutionAlgorithms
         }
 
         /// <summary>
-        ///     Initializes the evolution algorithm with the provided IGenomeListEvaluator
+        ///     Initializes the evolution algorithm with the provided IGenomeFitnessEvaluator
         ///     and an IGenomeFactory that can be used to create an initial population of genomes.
         /// </summary>
-        /// <param name="genomeListEvaluator">The genome evaluation scheme for the evolution algorithm.</param>
+        /// <param name="genomeFitnessEvaluator">The genome evaluation scheme for the evolution algorithm.</param>
         /// <param name="genomeFactory">
         ///     The factory that was used to create the genomeList and which is therefore referenced by the
         ///     genomes.
@@ -159,12 +159,12 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     The persistent archive of genomes posessing a unique trait with respect to a behavior
         ///     characterization (optional).
         /// </param>
-        public virtual void Initialize(IGenomeListEvaluator<TGenome> genomeListEvaluator, IGenomeFactory<TGenome> genomeFactory,
+        public virtual void Initialize(IGenomeEvaluator<TGenome> genomeFitnessEvaluator, IGenomeFactory<TGenome> genomeFactory,
             int populationSize,
             EliteArchive<TGenome> eliteArchive)
         {
             CurrentGeneration = 0;
-            GenomeListEvaluator = genomeListEvaluator;
+            GenomeEvaluator = genomeFitnessEvaluator;
             GenomeFactory = genomeFactory;
             GenomeList = genomeFactory.CreateGenomeList(populationSize, CurrentGeneration);
             PopulationSize = populationSize;
@@ -280,7 +280,7 @@ namespace SharpNeat.EvolutionAlgorithms
                     // Check if a pause has been requested. 
                     // Access to the flag is not thread synchronized, but it doesn't really matter if
                     // we miss it being set and perform one other generation before pausing.
-                    if (_pauseRequestFlag || GenomeListEvaluator.StopConditionSatisfied)
+                    if (_pauseRequestFlag || GenomeEvaluator.StopConditionSatisfied)
                     {
                         // Signal to any waiting thread that we are pausing
                         _awaitPauseEvent.Set();

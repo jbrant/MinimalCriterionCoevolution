@@ -118,7 +118,7 @@ namespace SharpNeat.Domains.DoublePoleBalancing
         }
 
         /// <summary>
-        /// Evaluate the provided IBlackBox.
+        /// EvaluateFitness the provided IBlackBox.
         /// </summary>
         public virtual FitnessInfo Evaluate(IBlackBox box)
         {

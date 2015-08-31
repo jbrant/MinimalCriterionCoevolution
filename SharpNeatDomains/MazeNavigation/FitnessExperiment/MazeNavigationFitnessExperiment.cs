@@ -41,14 +41,14 @@ namespace SharpNeat.Domains.MazeNavigation.FitnessExperiment
 
             // Create genome decoder.
             var genomeDecoder = CreateGenomeDecoder();
-            
+
             // Create a genome list evaluator. This packages up the genome decoder with the genome evaluator.
-            IGenomeListEvaluator<NeatGenome> listEvaluator =
-                new ParallelGenomeListEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
+            IGenomeEvaluator<NeatGenome> fitnessEvaluator =
+                new ParallelGenomeFitnessEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
                     ParallelOptions);
 
             // Initialize the evolution algorithm.
-            ea.Initialize(listEvaluator, genomeFactory, genomeList);
+            ea.Initialize(fitnessEvaluator, genomeFactory, genomeList);
 
             // Finished. Return the evolution algorithm
             return ea;

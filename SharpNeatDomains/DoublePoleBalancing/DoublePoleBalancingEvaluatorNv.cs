@@ -48,7 +48,7 @@ namespace SharpNeat.Domains.DoublePoleBalancing
         #region IPhenomeEvaluator<IBlackBox> Members
 
         /// <summary>
-        /// Evaluate the provided IBlackBox.
+        /// EvaluateFitness the provided IBlackBox.
         /// </summary>
         public override FitnessInfo Evaluate(IBlackBox box)
         {

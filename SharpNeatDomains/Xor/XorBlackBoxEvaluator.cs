@@ -78,7 +78,7 @@ namespace SharpNeat.Domains
         }
 
         /// <summary>
-        /// Evaluate the provided IBlackBox against the XOR problem domain and return its fitness score.
+        /// EvaluateFitness the provided IBlackBox against the XOR problem domain and return its fitness score.
         /// </summary>
         public FitnessInfo Evaluate(IBlackBox box)
         {

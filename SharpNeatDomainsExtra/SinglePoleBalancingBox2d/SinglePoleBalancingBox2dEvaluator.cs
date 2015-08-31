@@ -92,7 +92,7 @@ namespace SharpNeat.DomainsExtra.SinglePoleBalancingBox2d
         }
 
         /// <summary>
-        /// Evaluate the provided IBlackBox.
+        /// EvaluateFitness the provided IBlackBox.
         /// </summary>
         public FitnessInfo Evaluate(IBlackBox box)
         {

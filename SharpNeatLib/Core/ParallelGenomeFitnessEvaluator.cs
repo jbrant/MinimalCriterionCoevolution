@@ -22,13 +22,13 @@ using System.Threading.Tasks;
 namespace SharpNeat.Core
 {
     /// <summary>
-    /// A concrete implementation of IGenomeListEvaluator that evaulates genomes independently of each 
+    /// A concrete implementation of IGenomeFitnessEvaluator that evaulates genomes independently of each 
     /// other and in parallel (on multiple execution threads).
     /// 
     /// Genome decoding is performed by a provided IGenomeDecoder.
     /// Phenome evaluation is performed by a provided IPhenomeEvaluator.
     /// </summary>
-    public class ParallelGenomeListEvaluator<TGenome,TPhenome> : IGenomeListEvaluator<TGenome>
+    public class ParallelGenomeFitnessEvaluator<TGenome,TPhenome> : IGenomeEvaluator<TGenome>
         where TGenome : class, IGenome<TGenome>
         where TPhenome : class
     {
@@ -47,7 +47,7 @@ namespace SharpNeat.Core
         /// Phenome caching is enabled by default.
         /// The number of parallel threads defaults to Environment.ProcessorCount.
         /// </summary>
-        public ParallelGenomeListEvaluator(IGenomeDecoder<TGenome,TPhenome> genomeDecoder,
+        public ParallelGenomeFitnessEvaluator(IGenomeDecoder<TGenome,TPhenome> genomeDecoder,
                                            IPhenomeEvaluator<TPhenome, FitnessInfo> phenomeEvaluator)
             : this(genomeDecoder, phenomeEvaluator, new ParallelOptions(), true)
         { 
@@ -58,7 +58,7 @@ namespace SharpNeat.Core
         /// Phenome caching is enabled by default.
         /// The number of parallel threads defaults to Environment.ProcessorCount.
         /// </summary>
-        public ParallelGenomeListEvaluator(IGenomeDecoder<TGenome,TPhenome> genomeDecoder,
+        public ParallelGenomeFitnessEvaluator(IGenomeDecoder<TGenome,TPhenome> genomeDecoder,
                                            IPhenomeEvaluator<TPhenome, FitnessInfo> phenomeEvaluator,
                                            ParallelOptions options)
             : this(genomeDecoder, phenomeEvaluator, options, true)
@@ -68,7 +68,7 @@ namespace SharpNeat.Core
         /// <summary>
         /// Construct with the provided IGenomeDecoder, IPhenomeEvaluator, ParalleOptions and enablePhenomeCaching flag.
         /// </summary>
-        public ParallelGenomeListEvaluator(IGenomeDecoder<TGenome,TPhenome> genomeDecoder,
+        public ParallelGenomeFitnessEvaluator(IGenomeDecoder<TGenome,TPhenome> genomeDecoder,
                                            IPhenomeEvaluator<TPhenome, FitnessInfo> phenomeEvaluator,
                                            ParallelOptions options,
                                            bool enablePhenomeCaching)
@@ -88,7 +88,7 @@ namespace SharpNeat.Core
 
         #endregion
 
-        #region IGenomeListEvaluator<TGenome> Members
+        #region IGenomeFitnessEvaluator<TGenome> Members
 
         /// <summary>
         /// Gets the total number of individual genome evaluations that have been performed by this evaluator.
@@ -120,9 +120,21 @@ namespace SharpNeat.Core
         /// Evaluates a list of genomes. Here we decode each genome in using the contained IGenomeDecoder
         /// and evaluate the resulting TPhenome using the contained IPhenomeEvaluator.
         /// </summary>
+        /// <param name="genomeList">The list of genomes under evaluation.</param>
         public void Evaluate(IList<TGenome> genomeList)
         {
             _evalMethod(genomeList);
+        }
+
+        /// <summary>
+        /// Evalutes a single genome alone and against a list of other genomes.
+        /// </summary>
+        /// <param name="genome">The genome under evaluation.</param>
+        /// <param name="genomeList">The genomes against which to evaluate.</param>
+        public void Evaluate(TGenome genome, IList<TGenome> genomeList)
+        {
+            // TODO: Need to implement this
+            throw new System.NotImplementedException();
         }
 
         #endregion

@@ -22,22 +22,22 @@ using System.Collections.Generic;
 namespace SharpNeat.Core
 {
     /// <summary>
-    /// An IGenomeListEvaluator that wraps another IGenomeListEvaluator and filters/selects
+    /// An IGenomeFitnessEvaluator that wraps another IGenomeFitnessEvaluator and filters/selects
     /// the genomes that are to be passed to the wrapped evaluator based on some predicate/test.
     /// 
     /// This class supports evaluation schemes whereby not all genomes in a population are evaluated
     /// on each generation. E.g. if we wish to evaluate a genome that persists between generations 
     /// (i.e. elite genomes) just once (deterministic fitness score), or every N generations.
     /// 
-    /// A typical use would be to wrap SimpleGenomeListEvaulator or ParallelGenomeListEvaluator. 
+    /// A typical use would be to wrap SimpleGenomeListEvaulator or ParallelGenomeFitnessEvaluator. 
     /// 
     /// Genomes that skip evaluation have their EvaluationInfo.EvaluationPassCount property 
     /// incremented.
     /// </summary>
-    public class SelectiveGenomeListEvaluator<TGenome> : IGenomeListEvaluator<TGenome>
+    public class SelectiveGenomeFitnessEvaluator<TGenome> : IGenomeEvaluator<TGenome>
         where TGenome : class, IGenome<TGenome>
     {
-        readonly IGenomeListEvaluator<TGenome> _innerEvaluator;
+        readonly IGenomeEvaluator<TGenome> _innerFitnessEvaluator;
         readonly Predicate<TGenome> _selectionPredicate;
 
         #region Constructor
@@ -45,23 +45,23 @@ namespace SharpNeat.Core
         /// <summary>
         /// Construct with the provided IGenomeDecoder and IPhenomeEvaluator.
         /// </summary>
-        public SelectiveGenomeListEvaluator(IGenomeListEvaluator<TGenome> innerEvaluator,
+        public SelectiveGenomeFitnessEvaluator(IGenomeEvaluator<TGenome> innerFitnessEvaluator,
                                             Predicate<TGenome> selectionPredicate)
         {
-            _innerEvaluator = innerEvaluator;
+            _innerFitnessEvaluator = innerFitnessEvaluator;
             _selectionPredicate = selectionPredicate;
         }
 
         #endregion
 
-        #region IGenomeListEvaluator<TGenome> Members
+        #region IGenomeFitnessEvaluator<TGenome> Members
 
         /// <summary>
         /// Gets the total number of individual genome evaluations that have been performed by this evaluator.
         /// </summary>
         public ulong EvaluationCount
         {
-            get { return _innerEvaluator.EvaluationCount; }
+            get { return _innerFitnessEvaluator.EvaluationCount; }
         }
 
         /// <summary>
@@ -71,18 +71,27 @@ namespace SharpNeat.Core
         /// </summary>
         public bool StopConditionSatisfied
         {
-            get { return _innerEvaluator.StopConditionSatisfied; }
+            get { return _innerFitnessEvaluator.StopConditionSatisfied; }
+        }
+
+        /// <summary>
+        /// Evalutes a single genome against a list of genomes.
+        /// </summary>
+        public void Evaluate(TGenome genome, IList<TGenome> genomeList)
+        {
+            // TODO: Need to implement this
+            throw new NotImplementedException();
         }
 
         /// <summary>
         /// Evaluates a list of genomes. Here we select the genomes to be evaluated before invoking
-        /// _innerEvaluator to evaluate them.
+        /// _innerFitnessEvaluator to evaluate them.
         /// </summary>
         public void Evaluate(IList<TGenome> genomeList)
         {
             // Select the genomes to be evaluated. Place them in a temporary list of genomes to be 
             // evaluated after the genome selection loop. The selection is not performed in series
-            // so that we can wrap parallel execution versions of IGenomeListEvaluator.
+            // so that we can wrap parallel execution versions of IGenomeFitnessEvaluator.
             List<TGenome> filteredList = new List<TGenome>(genomeList.Count);
             foreach(TGenome genome in genomeList)
             {
@@ -96,8 +105,8 @@ namespace SharpNeat.Core
                 }
             }
 
-            // Evaluate selected genomes.
-            _innerEvaluator.Evaluate(filteredList);
+            // EvaluateFitness selected genomes.
+            _innerFitnessEvaluator.Evaluate(filteredList);
         }
 
         /// <summary>
@@ -105,7 +114,7 @@ namespace SharpNeat.Core
         /// </summary>
         public void Reset()
         {
-            _innerEvaluator.Reset();
+            _innerFitnessEvaluator.Reset();
         }
 
         #endregion

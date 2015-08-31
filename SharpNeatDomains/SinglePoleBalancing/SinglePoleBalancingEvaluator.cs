@@ -107,7 +107,7 @@ namespace SharpNeat.Domains.SinglePoleBalancing
         }
 
         /// <summary>
-        /// Evaluate the provided IBlackBox.
+        /// EvaluateFitness the provided IBlackBox.
         /// </summary>
         public FitnessInfo Evaluate(IBlackBox box)
         {

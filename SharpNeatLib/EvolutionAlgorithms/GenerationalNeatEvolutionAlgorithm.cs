@@ -97,12 +97,12 @@ namespace SharpNeat.EvolutionAlgorithms
             RebuildGenomeList();
 
             // Append offspring genomes to the elite genomes in _genomeList. We do this before calling the
-            // _genomeListEvaluator.Evaluate because some evaluation schemes re-evaluate the elite genomes 
+            // _genomeListEvaluator.EvaluateFitness because some evaluation schemes re-evaluate the elite genomes 
             // (otherwise we could just evaluate offspringList).
             ((List<TGenome>) GenomeList).AddRange(offspringList);
 
-            // Evaluate genomes.            
-            GenomeListEvaluator.Evaluate(GenomeList);
+            // EvaluateFitness genomes.            
+            GenomeEvaluator.Evaluate(GenomeList);
 
             // Integrate offspring into species.
             if (emptySpeciesFlag)

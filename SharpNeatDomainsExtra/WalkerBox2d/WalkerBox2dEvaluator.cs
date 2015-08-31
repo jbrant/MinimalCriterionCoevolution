@@ -76,7 +76,7 @@ namespace SharpNeat.DomainsExtra.WalkerBox2d
         }
 
         /// <summary>
-        /// Evaluate the provided IBlackBox.
+        /// EvaluateFitness the provided IBlackBox.
         /// </summary>
         public FitnessInfo Evaluate(IBlackBox box)
         {

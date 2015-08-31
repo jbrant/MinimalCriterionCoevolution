@@ -244,10 +244,10 @@ namespace SharpNeat.Domains.PreyCapture
 
             // TODO: evaulation scheme that re-evaulates existing genomes and takes average over time.
             // Create a genome list evaluator. This packages up the genome decoder with the genome evaluator.
-            IGenomeListEvaluator<NeatGenome> genomeListEvaluator = new ParallelGenomeListEvaluator<NeatGenome, IBlackBox>(genomeDecoder, evaluator, _parallelOptions);
+            IGenomeEvaluator<NeatGenome> genomeFitnessEvaluator = new ParallelGenomeFitnessEvaluator<NeatGenome, IBlackBox>(genomeDecoder, evaluator, _parallelOptions);
 
             // Initialize the evolution algorithm.
-            ea.Initialize(genomeListEvaluator, genomeFactory, genomeList);
+            ea.Initialize(genomeFitnessEvaluator, genomeFactory, genomeList);
 
             // Finished. Return the evolution algorithm
             return ea;

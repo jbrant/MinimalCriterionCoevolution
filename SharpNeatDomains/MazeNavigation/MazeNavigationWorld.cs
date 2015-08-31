@@ -194,7 +194,7 @@ namespace SharpNeat.Domains.MazeNavigation
 
             // TODO: Remove this
             double tempDistance = GetDistanceToTarget();
-            if (tempDistance < 40)
+            if (tempDistance < 100)
             {
                 Debug.WriteLine("Distance to goal: {0}", tempDistance);
             }

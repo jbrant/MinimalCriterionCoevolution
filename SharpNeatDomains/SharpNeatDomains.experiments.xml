@@ -565,7 +565,7 @@ The problem domain view allows the performance of the best genome to be observed
   
   <Experiment name="Maze Navigation - Novelty (NEAT)">
     <AssemblyPath>SharpNeatDomains.dll</AssemblyPath>
-    <ClassName>SharpNeat.Domains.MazeNavigation.NoveltyExperiment.MazeNavigationNoveltyExperiment</ClassName>
+    <ClassName>SharpNeat.Domains.MazeNavigation.NoveltyExperiment.GenerationalMazeNavigationNoveltyExperiment</ClassName>
     <Config>
       <PopulationSize>250</PopulationSize>
       <SpecieCount>15</SpecieCount>
@@ -586,7 +586,44 @@ The problem domain view allows the performance of the best genome to be observed
       <MaxTimesteps>400</MaxTimesteps>
       <MinSuccessDistance>5</MinSuccessDistance>
       <MaxDistanceToTarget>300</MaxDistanceToTarget>
-      <MazeVariant>HardMaze</MazeVariant>
+      <MazeVariant>MediumMaze</MazeVariant>
+      <BehaviorCharacterization>EndPoint</BehaviorCharacterization>
+      <NearestNeighbors>15</NearestNeighbors>
+      <ArchiveAdditionThreshold>6</ArchiveAdditionThreshold>
+      <ArchiveThresholdDecreaseMultiplier>0.95</ArchiveThresholdDecreaseMultiplier>
+      <ArchiveThresholdIncreaseMultiplier>1.3</ArchiveThresholdIncreaseMultiplier>
+      <MaxGenerationalArchiveAddition>5</MaxGenerationalArchiveAddition>
+      <MinGenerationalArchiveAddition>1</MinGenerationalArchiveAddition>
+      <Description>
+        This is the maze navigation experiment used in the original novelty search papers (citation needed).
+      </Description>
+    </Config>
+  </Experiment>
+
+  <Experiment name="Maze Navigation - Novelty (Steady State NEAT)">
+    <AssemblyPath>SharpNeatDomains.dll</AssemblyPath>
+    <ClassName>SharpNeat.Domains.MazeNavigation.NoveltyExperiment.SteadyStateMazeNavigationNoveltyExperiment</ClassName>
+    <Config>
+      <PopulationSize>250</PopulationSize>
+      <SpecieCount>15</SpecieCount>
+      <InterspeciesMatingProbability>0.001</InterspeciesMatingProbability>
+      <Activation>
+        <Scheme>CyclicFixedIters</Scheme>
+        <Iters>2</Iters>
+      </Activation>
+      <ComplexityRegulationStrategy>Absolute</ComplexityRegulationStrategy>
+      <ComplexityThreshold>50</ComplexityThreshold>
+      <GenomeConfig>
+        <InitialConnectionProportion>1</InitialConnectionProportion>
+        <WeightMutationProbability>0.6</WeightMutationProbability>
+        <AddConnnectionProbability>0.1</AddConnnectionProbability>
+        <AddNodeProbability>0.005</AddNodeProbability>
+      </GenomeConfig>
+      <!-- <MaxDegreeOfParallelism>1</MaxDegreeOfParallelism> -->
+      <MaxTimesteps>400</MaxTimesteps>
+      <MinSuccessDistance>5</MinSuccessDistance>
+      <MaxDistanceToTarget>300</MaxDistanceToTarget>
+      <MazeVariant>MediumMaze</MazeVariant>
       <BehaviorCharacterization>EndPoint</BehaviorCharacterization>
       <NearestNeighbors>15</NearestNeighbors>
       <ArchiveAdditionThreshold>6</ArchiveAdditionThreshold>
