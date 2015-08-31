@@ -58,6 +58,12 @@ namespace SharpNeat.Core
         TGenome CurrentChampGenome { get; }
 
         /// <summary>
+        /// Gets a list of all current genomes. The current population of genomes. These genomes
+        /// are also divided into the species available through the SpeciesList property.
+        /// </summary>
+        IList<TGenome> GenomeList { get; }
+
+        /// <summary>
         /// Gets a value indicating whether some goal fitness has been achieved and that the algorithm has therefore stopped.
         /// </summary>
         bool StopConditionSatisfied { get; }
@@ -100,6 +106,6 @@ namespace SharpNeat.Core
         /// to call this method from a GUI thread that also has code that may be called by the
         /// UpdateEvent - doing so will result in deadlocked threads.
         /// </summary>
-        void RequestPauseAndWait();        
+        void RequestPauseAndWait();
     }
 }

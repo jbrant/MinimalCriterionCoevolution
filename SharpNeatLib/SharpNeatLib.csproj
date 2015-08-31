@@ -116,7 +116,7 @@
     <Compile Include="DistanceMetrics\ManhattanDistanceMetric.cs" />
     <Compile Include="DistanceMetrics\EuclideanDistanceMetric.cs" />
     <Compile Include="EliteArchives\NoveltyArchive.cs" />
-    <Compile Include="EvolutionAlgorithms\AbstractSteadyStateAlgorithm.cs" />
+    <Compile Include="EvolutionAlgorithms\AbstractEvolutionAlgorithm.cs" />
     <Compile Include="EvolutionAlgorithms\ComplexityRegulation\ComplexityCeilingType.cs" />
     <Compile Include="EvolutionAlgorithms\ComplexityRegulation\DefaultComplexityRegulationStrategy.cs" />
     <Compile Include="EvolutionAlgorithms\ComplexityRegulation\IComplexityRegulationStrategy.cs" />
@@ -131,8 +131,8 @@
     <None Include="DeadCode\PhasedSearch\Triggers\FitnessStallGenerationsTrigger.cs" />
     <None Include="DeadCode\PhasedSearch\Triggers\MovingMeanComplexityCeilingTrigger.cs" />
     <None Include="DeadCode\PhasedSearch\Triggers\IPhaseTransitionTrigger.cs" />
-    <Compile Include="EvolutionAlgorithms\NeatGenerationalEvolutionAlgorithm.cs" />
-    <Compile Include="EvolutionAlgorithms\AbstractGenerationalAlgorithm.cs" />
+    <Compile Include="EvolutionAlgorithms\GenerationalNeatEvolutionAlgorithm.cs" />
+    <Compile Include="EvolutionAlgorithms\AbstractNeatEvolutionAlgorithm.cs" />
     <Compile Include="EvolutionAlgorithms\NeatEvolutionAlgorithmParameters.cs" />
     <Compile Include="EvolutionAlgorithms\ComplexityRegulation\ComplexityRegulationMode.cs" />
     <None Include="DeadCode\PhasedSearchStats.cs" />

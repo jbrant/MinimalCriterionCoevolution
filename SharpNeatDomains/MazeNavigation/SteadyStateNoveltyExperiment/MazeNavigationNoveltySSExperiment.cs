@@ -136,7 +136,7 @@ namespace SharpNeat.Domains.MazeNavigation.SteadyStateNoveltyExperiment
         }
 
         /// <summary>
-        ///     Create and return a NeatGenerationalEvolutionAlgorithm object ready for running the NEAT algorithm/search. Various sub-parts of
+        ///     Create and return a GenerationalNeatEvolutionAlgorithm object ready for running the NEAT algorithm/search. Various sub-parts of
         ///     the algorithm are also constructed and connected up.  Uses the default population size.
         /// </summary>
         /// <returns>NEAT evolutionary algorithm</returns>
@@ -146,7 +146,7 @@ namespace SharpNeat.Domains.MazeNavigation.SteadyStateNoveltyExperiment
         }
 
         /// <summary>
-        ///     Create and return a NeatGenerationalEvolutionAlgorithm object ready for running the NEAT algorithm/search based on the given
+        ///     Create and return a GenerationalNeatEvolutionAlgorithm object ready for running the NEAT algorithm/search based on the given
         ///     population size. Various sub-parts of the algorithm are also constructed and connected up.
         /// </summary>
         /// <param name="populationSize">The genome population size</param>
@@ -164,7 +164,7 @@ namespace SharpNeat.Domains.MazeNavigation.SteadyStateNoveltyExperiment
         }
 
         /// <summary>
-        ///     Create and return a NeatGenerationalEvolutionAlgorithm object ready for running the NEAT algorithm/search based on the given
+        ///     Create and return a GenerationalNeatEvolutionAlgorithm object ready for running the NEAT algorithm/search based on the given
         ///     genome factory and genome list.  Various sub-parts of the algorithm are also constructed and connected up.
         /// </summary>
         /// <param name="genomeFactory">The genome factory from which to generate new genomes</param>

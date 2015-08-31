@@ -33,11 +33,6 @@ namespace SharpNeat.Core
         /// <summary>
         ///     Raise an update event at regular generation intervals. (Every N generations).
         /// </summary>
-        Generational,
-
-        /// <summary>
-        ///     Raises an update event at regular evaluation intervals. (Every N evaluations of an individual).
-        /// </summary>
-        SteadyState
+        Generational
     }
 }

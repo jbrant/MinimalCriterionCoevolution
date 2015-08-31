@@ -97,14 +97,14 @@ namespace SharpNeat.Domains
         IGenomeFactory<NeatGenome> CreateGenomeFactory();
 
         /// <summary>
-        /// Create and return a NeatGenerationalEvolutionAlgorithm object ready for running the NEAT algorithm/search. Various sub-parts
+        /// Create and return a GenerationalNeatEvolutionAlgorithm object ready for running the NEAT algorithm/search. Various sub-parts
         /// of the algorithm are also constructed and connected up.
         /// Uses the experiments default population size defined in the experiment's config XML.
         /// </summary>
         INeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm();
 
         /// <summary>
-        /// Create and return a NeatGenerationalEvolutionAlgorithm object ready for running the NEAT algorithm/search. Various sub-parts
+        /// Create and return a GenerationalNeatEvolutionAlgorithm object ready for running the NEAT algorithm/search. Various sub-parts
         /// of the algorithm are also constructed and connected up.
         /// This overload accepts a population size parameter that specifies how many genomes to create in an initial randomly
         /// generated population.
@@ -112,7 +112,7 @@ namespace SharpNeat.Domains
         INeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(int populationSize);
 
         /// <summary>
-        /// Create and return a NeatGenerationalEvolutionAlgorithm object ready for running the NEAT algorithm/search. Various sub-parts
+        /// Create and return a GenerationalNeatEvolutionAlgorithm object ready for running the NEAT algorithm/search. Various sub-parts
         /// of the algorithm are also constructed and connected up.
         /// This overload accepts a pre-built genome population and their associated/parent genome factory.
         /// </summary>

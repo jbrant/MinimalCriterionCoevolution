@@ -179,7 +179,7 @@ namespace SharpNeat.DomainsExtra.WalkerBox2d
         }
 
         /// <summary>
-        /// Create and return a NeatGenerationalEvolutionAlgorithm object ready for running the NEAT algorithm/search. Various sub-parts
+        /// Create and return a GenerationalNeatEvolutionAlgorithm object ready for running the NEAT algorithm/search. Various sub-parts
         /// of the algorithm are also constructed and connected up.
         /// Uses the experiments default population size defined in the experiment's config XML.
         /// </summary>
@@ -189,7 +189,7 @@ namespace SharpNeat.DomainsExtra.WalkerBox2d
         }
 
         /// <summary>
-        /// Create and return a NeatGenerationalEvolutionAlgorithm object ready for running the NEAT algorithm/search. Various sub-parts
+        /// Create and return a NeatNeatEvolutionAlgorithm object ready for running the NEAT algorithm/search. Various sub-parts
         /// of the algorithm are also constructed and connected up.
         /// This overload accepts a population size parameter that specifies how many genomes to create in an initial randomly
         /// generated population.
@@ -207,7 +207,7 @@ namespace SharpNeat.DomainsExtra.WalkerBox2d
         }
 
         /// <summary>
-        /// Create and return a NeatGenerationalEvolutionAlgorithm object ready for running the NEAT algorithm/search. Various sub-parts
+        /// Create and return a GenerationalNeatEvolutionAlgorithm object ready for running the NEAT algorithm/search. Various sub-parts
         /// of the algorithm are also constructed and connected up.
         /// This overload accepts a pre-built genome population and their associated/parent genome factory.
         /// </summary>
@@ -221,7 +221,7 @@ namespace SharpNeat.DomainsExtra.WalkerBox2d
             IComplexityRegulationStrategy complexityRegulationStrategy = ExperimentUtils.CreateComplexityRegulationStrategy(_complexityRegulationStr, _complexityThreshold);
 
             // Create the evolution algorithm.
-            NeatGenerationalEvolutionAlgorithm<NeatGenome> ea = new NeatGenerationalEvolutionAlgorithm<NeatGenome>(_eaParams, speciationStrategy, complexityRegulationStrategy);
+            GenerationalNeatEvolutionAlgorithm<NeatGenome> ea = new GenerationalNeatEvolutionAlgorithm<NeatGenome>(_eaParams, speciationStrategy, complexityRegulationStrategy);
 
             // Create IBlackBox evaluator.
             WalkerBox2dEvaluator evaluator = new WalkerBox2dEvaluator();

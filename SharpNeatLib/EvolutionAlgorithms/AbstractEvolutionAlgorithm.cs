@@ -7,33 +7,95 @@ using SharpNeat.Core;
 
 namespace SharpNeat.EvolutionAlgorithms
 {
-    public abstract class AbstractSteadyStateAlgorithm<TGenome> : IEvolutionAlgorithm<TGenome>
+    /// <summary>
+    ///     Abstract class providing some common/baseline data and methods for implementions of IEvolutionAlgorithm.
+    /// </summary>
+    /// <typeparam name="TGenome">The genome type that the algorithm will operate on.</typeparam>
+    public abstract class AbstractEvolutionAlgorithm<TGenome> : IEvolutionAlgorithm<TGenome>
         where TGenome : class, IGenome<TGenome>
     {
         private static readonly ILog __log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
-        private readonly AutoResetEvent _awaitPauseEvent = new AutoResetEvent(false);
-        private readonly AutoResetEvent _awaitRestartEvent = new AutoResetEvent(false);
-        // Misc working variables.
+
+        #region Instance fields
+
+        /// <summary>
+        ///     Thread on which to run algorithm.
+        /// </summary>
         private Thread _algorithmThread;
+
+        /// <summary>
+        ///     Indicates whether user has requested a pause in algorithm execution.
+        /// </summary>
         private bool _pauseRequestFlag;
-        // Update event scheme / data.
-        private uint _prevUpdateEvaluation;
+
+        /// <summary>
+        ///     Notifies threads awaiting execution that a pause event has been requested.
+        /// </summary>
+        private readonly AutoResetEvent _awaitPauseEvent = new AutoResetEvent(false);
+
+        /// <summary>
+        ///     Notifies threads awaiting execution that a restart event has been requested.
+        /// </summary>
+        private readonly AutoResetEvent _awaitRestartEvent = new AutoResetEvent(false);
+
+        /// <summary>
+        ///     The last generation during which the display/logging was updated.
+        /// </summary>
+        private uint _prevUpdateGeneration;
+
+        /// <summary>
+        ///     Captures the clock time of the last update.
+        /// </summary>
         private long _prevUpdateTimeTick;
-        protected EliteArchive<TGenome> EliteArchive;
-        protected IGenomeFactory<TGenome> GenomeFactory;
-        protected List<TGenome> GenomeList;
+
+        /// <summary>
+        ///     The genome evaluation scheme for the evolution algorithm.
+        /// </summary>
         protected IGenomeListEvaluator<TGenome> GenomeListEvaluator;
+
+        /// <summary>
+        ///     The factory that will be used to create the genome list.
+        /// </summary>
+        protected IGenomeFactory<TGenome> GenomeFactory;
+
+        /// <summary>
+        ///     The current population of genomes.
+        /// </summary>
+        public IList<TGenome> GenomeList { get; protected set; }
+
+        /// <summary>
+        ///     The total number of genomes in the population (typically, this should remain fixed).
+        /// </summary>
         protected int PopulationSize;
 
         /// <summary>
-        /// Gets the current generation.
+        ///     An archive of genomes that are particularly performant or "unique" with respect to some characterization.
+        ///     Typically, this will persistent through multiple generations or evaluations.
         /// </summary>
-        public uint CurrentGeneration { get; private set; }
+        protected EliteArchive<TGenome> EliteArchive;
+
+        #endregion
+
+        #region Events
 
         /// <summary>
         ///     Notifies listeners that some state change has occured.
         /// </summary>
         public event EventHandler UpdateEvent;
+
+        /// <summary>
+        ///     Notifies listeners that the algorithm has paused.
+        /// </summary>
+        public event EventHandler PausedEvent;
+
+        #endregion
+
+        #region IEvolutionAlgorithm<TGenome> Members
+
+        /// <summary>
+        ///     Gets the current generation.
+        /// </summary>
+        public uint CurrentGeneration { get; protected set; }
 
         /// <summary>
         ///     Gets or sets the algorithm's update scheme.
@@ -43,7 +105,7 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <summary>
         ///     Gets the current execution/run state of the IEvolutionAlgorithm.
         /// </summary>
-        public RunState RunState { get; private set; } = RunState.NotReady;
+        public RunState RunState { get; protected set; }
 
         /// <summary>
         ///     Gets the population's current champion genome.
@@ -53,7 +115,7 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <summary>
         ///     Gets a value indicating whether some goal fitness has been achieved and that the algorithm has therefore stopped.
         /// </summary>
-        public bool StopConditionSatisfied => GenomeListEvaluator.StopConditionSatisfied;
+        public bool StopConditionSatisfied { get; protected set; }
 
         /// <summary>
         ///     Initializes the evolution algorithm with the provided IGenomeListEvaluator, IGenomeFactory
@@ -65,9 +127,11 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     genomes.
         /// </param>
         /// <param name="genomeList">An initial genome population.</param>
-        /// <param name="eliteArchive">The cross-evaluation archive of high-performing genomes (optional).</param>
-        public virtual void Initialize(IGenomeListEvaluator<TGenome> genomeListEvaluator,
-            IGenomeFactory<TGenome> genomeFactory,
+        /// <param name="eliteArchive">
+        ///     The persistent archive of genomes posessing a unique trait with respect to a behavior
+        ///     characterization (optional).
+        /// </param>
+        public virtual void Initialize(IGenomeListEvaluator<TGenome> genomeListEvaluator, IGenomeFactory<TGenome> genomeFactory,
             List<TGenome> genomeList,
             EliteArchive<TGenome> eliteArchive)
         {
@@ -91,9 +155,11 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     genomes.
         /// </param>
         /// <param name="populationSize">The number of genomes to create for the initial population.</param>
-        /// <param name="eliteArchive">The cross-evaluation archive of high-performing genomes (optional).</param>
-        public virtual void Initialize(IGenomeListEvaluator<TGenome> genomeListEvaluator,
-            IGenomeFactory<TGenome> genomeFactory,
+        /// <param name="eliteArchive">
+        ///     The persistent archive of genomes posessing a unique trait with respect to a behavior
+        ///     characterization (optional).
+        /// </param>
+        public virtual void Initialize(IGenomeListEvaluator<TGenome> genomeListEvaluator, IGenomeFactory<TGenome> genomeFactory,
             int populationSize,
             EliteArchive<TGenome> eliteArchive)
         {
@@ -143,43 +209,77 @@ namespace SharpNeat.EvolutionAlgorithms
             }
         }
 
+        /// <summary>
+        ///     Requests that the algorithm pauses but doesn't wait for the algorithm thread to stop.
+        ///     The algorithm thread will pause when it is next convenient to do so, and will notify
+        ///     listeners via an UpdateEvent.
+        /// </summary>
         public void RequestPause()
         {
-            throw new NotImplementedException();
-        }
-
-        public void RequestPauseAndWait()
-        {
-            throw new NotImplementedException();
+            if (RunState.Running == RunState)
+            {
+                _pauseRequestFlag = true;
+            }
+            else
+            {
+                __log.Warn("RequestPause() called but algorithm is not running.");
+            }
         }
 
         /// <summary>
-        ///     Notifies listeners that the algorithm has paused.
+        ///     Request that the algorithm pause and waits for the algorithm to do so. The algorithm
+        ///     thread will pause when it is next convenient to do so and notifies any UpdateEvent
+        ///     listeners prior to returning control to the caller. Therefore it's generally a bad idea
+        ///     to call this method from a GUI thread that also has code that may be called by the
+        ///     UpdateEvent - doing so will result in deadlocked threads.
         /// </summary>
-        public event EventHandler PausedEvent;
+        public void RequestPauseAndWait()
+        {
+            if (RunState.Running == RunState)
+            {
+                // Set a flag that tells the algorithm thread to enter the paused state and wait 
+                // for a signal that tells us the thread has paused.
+                _pauseRequestFlag = true;
+                _awaitPauseEvent.WaitOne();
+            }
+            else
+            {
+                __log.Warn("RequestPauseAndWait() called but algorithm is not running.");
+            }
+        }
 
+        #endregion
+
+        #region Private/Protected Methods
+
+        /// <summary>
+        ///     Main control loop for the algorithm.
+        /// </summary>
         private void AlgorithmThreadMethod()
         {
             try
             {
-                _prevUpdateEvaluation = 0;
+                // Initialize the generation counter and wall clock time
+                _prevUpdateGeneration = 0;
                 _prevUpdateTimeTick = DateTime.Now.Ticks;
 
+                // Execute continuous iterations of the algorithm until interrupt 
+                // or the stop condition is satisfied
                 for (;;)
                 {
                     CurrentGeneration++;
-                    PerformOneEvaluation();
+                    PerformOneGeneration();
 
                     if (UpdateTest())
                     {
-                        _prevUpdateEvaluation = CurrentGeneration;
+                        _prevUpdateGeneration = CurrentGeneration;
                         _prevUpdateTimeTick = DateTime.Now.Ticks;
                         OnUpdateEvent();
                     }
 
                     // Check if a pause has been requested. 
                     // Access to the flag is not thread synchronized, but it doesn't really matter if
-                    // we miss it being set and perform one other evaluation before pausing.
+                    // we miss it being set and perform one other generation before pausing.
                     if (_pauseRequestFlag || GenomeListEvaluator.StopConditionSatisfied)
                     {
                         // Signal to any waiting thread that we are pausing
@@ -207,14 +307,17 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </summary>
         private bool UpdateTest()
         {
-            if (UpdateMode.SteadyState == UpdateScheme.UpdateMode)
+            if (UpdateMode.Generational == UpdateScheme.UpdateMode)
             {
-                return (CurrentGeneration - _prevUpdateEvaluation) >= UpdateScheme.Evaluations;
+                return (CurrentGeneration - _prevUpdateGeneration) >= UpdateScheme.Generations;
             }
 
             return (DateTime.Now.Ticks - _prevUpdateTimeTick) >= UpdateScheme.TimeSpan.Ticks;
         }
 
+        /// <summary>
+        ///     Handles update events.
+        /// </summary>
         private void OnUpdateEvent()
         {
             if (null != UpdateEvent)
@@ -231,6 +334,9 @@ namespace SharpNeat.EvolutionAlgorithms
             }
         }
 
+        /// <summary>
+        ///     Handles pause events.
+        /// </summary>
         private void OnPausedEvent()
         {
             if (null != PausedEvent)
@@ -248,8 +354,10 @@ namespace SharpNeat.EvolutionAlgorithms
         }
 
         /// <summary>
-        ///     Progress forward by one evaluation. Perform one evaluation/cycle of the evolution algorithm.
+        ///     Progress forward by one generation. Perform one generation/cycle of the evolution algorithm.
         /// </summary>
-        protected abstract void PerformOneEvaluation();
+        protected abstract void PerformOneGeneration();
+
+        #endregion
     }
 }

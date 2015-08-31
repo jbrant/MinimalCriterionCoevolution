@@ -21,12 +21,6 @@ namespace SharpNeat.Core
         /// Gets a list of all current species. The genomes contained within the species are the same genomes
         /// available through the GenomeList property.
         /// </summary>
-        IList<Specie<TGenome>> SpecieList { get; }
-
-        /// <summary>
-        /// Gets a list of all current genomes. The current population of genomes. These genomes
-        /// are also divided into the species available through the SpeciesList property.
-        /// </summary>
-        IList<TGenome> GenomeList { get; }
+        IList<Specie<TGenome>> SpecieList { get; }        
     }
 }
