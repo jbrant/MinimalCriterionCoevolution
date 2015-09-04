@@ -150,6 +150,8 @@
     <Compile Include="SinglePoleBalancing\SinglePoleBalancingEvaluator.cs" />
     <Compile Include="SinglePoleBalancing\SinglePoleStateData.cs" />
     <Compile Include="SinglePoleBalancing\SinglePoleBalancingExperiment.cs" />
+    <Compile Include="ThreeParity\ThreeParityEvaluator.cs" />
+    <Compile Include="ThreeParity\ThreeParityExperiment.cs" />
     <Compile Include="XmlUtils.cs" />
     <Compile Include="Xor\XorBlackBoxEvaluator.cs" />
     <Compile Include="Xor\XorExperiment.cs" />
