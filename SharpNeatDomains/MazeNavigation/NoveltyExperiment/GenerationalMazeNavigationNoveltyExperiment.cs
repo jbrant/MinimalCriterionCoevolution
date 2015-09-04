@@ -17,7 +17,7 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
         private double _archiveThresholdIncreaseMultiplier;
         private IBehaviorCharacterization _behaviorCharacterization;
         private int _maxGenerationalArchiveAddition;
-        private int _minGenerationalArchiveAddition;
+        private int _maxGenerationsWithoutArchiveAddition;
         private int _nearestNeighbors;
 
         public override void Initialize(string name, XmlElement xmlConfig)
@@ -37,7 +37,7 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
             _archiveThresholdIncreaseMultiplier = XmlUtils.GetValueAsDouble(xmlConfig,
                 "ArchiveThresholdIncreaseMultiplier");
             _maxGenerationalArchiveAddition = XmlUtils.GetValueAsInt(xmlConfig, "MaxGenerationalArchiveAddition");
-            _minGenerationalArchiveAddition = XmlUtils.GetValueAsInt(xmlConfig, "MinGenerationalArchiveAddition");
+            _maxGenerationsWithoutArchiveAddition = XmlUtils.GetValueAsInt(xmlConfig, "MaxGenerationsWithoutArchiveAddition");
 
             // Read in nearest neighbors for behavior distance calculations
             _nearestNeighbors = XmlUtils.GetValueAsInt(xmlConfig, "NearestNeighbors");
@@ -79,7 +79,7 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
             // Create a novelty archive.
             EliteArchive<NeatGenome> archive = new NoveltyArchive<NeatGenome>(_archiveAdditionThreshold,
                 _archiveThresholdDecreaseMultiplier, _archiveThresholdIncreaseMultiplier,
-                _maxGenerationalArchiveAddition, _minGenerationalArchiveAddition);
+                _maxGenerationalArchiveAddition, _maxGenerationsWithoutArchiveAddition);
 
             // Create a genome list evaluator. This packages up the genome decoder with the genome evaluator.
             //            IGenomeFitnessEvaluator<NeatGenome> fitnessEvaluator =
