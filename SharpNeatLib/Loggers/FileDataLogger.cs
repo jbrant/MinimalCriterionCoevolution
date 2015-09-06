@@ -14,6 +14,11 @@ namespace SharpNeat.Loggers
     {
         #region Constructors
 
+        /// <summary>
+        ///     FileDataLogger constructor.
+        /// </summary>
+        /// <param name="filename">The filename (possibly including path) to log.</param>
+        /// <param name="delimiter">The delimiter character to use for separating fields.</param>
         public FileDataLogger(String filename, String delimiter = ",")
         {
             LogFileName = filename;
@@ -24,58 +29,89 @@ namespace SharpNeat.Loggers
 
         #region Logger Properties
 
+        /// <summary>
+        ///     The name of the log file.
+        /// </summary>
         public string LogFileName { get; }
 
         #endregion
 
         #region Logger Instance Fiels
 
+        /// <summary>
+        ///     The delimiter to use for record separation.
+        /// </summary>
         private readonly string rowElementDelimiter;
 
-        private StreamWriter writer;
+        /// <summary>
+        ///     The StreamWriter instance.
+        /// </summary>
+        private StreamWriter _writer;
 
         #endregion
 
         #region Logging Control Methods
 
+        /// <summary>
+        ///     Opens the StreamWriter (using the given filename) for writing.
+        /// </summary>
         public void Open()
         {
-            writer = new StreamWriter(LogFileName);
+            _writer = new StreamWriter(LogFileName);
         }
 
+        /// <summary>
+        ///     Logs the file header.
+        /// </summary>
+        /// <param name="loggableElements">The LoggableElements which include the header text.</param>
         public void LogHeader(params List<LoggableElement>[] loggableElements)
         {
             // Combine and sort the loggable elements
             List<LoggableElement> combinedElements = extractSortedCombinedList(loggableElements);
 
             // Write the header
-            writer.WriteLine(string.Join(rowElementDelimiter, extractHeaderNames(combinedElements)));
+            _writer.WriteLine(string.Join(rowElementDelimiter, extractHeaderNames(combinedElements)));
 
             // Immediatley flush to the log file
-            writer.Flush();
+            _writer.Flush();
         }
 
+        /// <summary>
+        ///     Logs a data row (observation).
+        /// </summary>
+        /// <param name="loggableElements">
+        ///     The LoggableElements which contains both the header (value description metadata) and the
+        ///     value itself.
+        /// </param>
         public void LogRow(params List<LoggableElement>[] loggableElements)
         {
             // Combine and sort the loggable elements
             List<LoggableElement> combinedElements = extractSortedCombinedList(loggableElements);
 
             // Write observation row
-            writer.WriteLine(string.Join(rowElementDelimiter, extractDataPoints(combinedElements)));
+            _writer.WriteLine(string.Join(rowElementDelimiter, extractDataPoints(combinedElements)));
 
             // Immediatley flush to the log file
-            writer.Flush();
+            _writer.Flush();
         }
 
+        /// <summary>
+        ///     Closes the StreamWriter.
+        /// </summary>
         public void Close()
         {
-            writer.Close();
+            _writer.Close();
         }
 
         #endregion
 
         #region Private Helper Methods
 
+        /// <summary>
+        ///     Combines all of the LoggableElement lists and sorts them based on header lexicographical order.
+        /// </summary>
+        /// <param name="loggableElements">The array of LoggableElement lists.</param>
+        /// <returns>Combined and sorted list of LoggableElements.</returns>
         private List<LoggableElement> extractSortedCombinedList(params List<LoggableElement>[] loggableElements)
         {
             List<LoggableElement> combinedElements = new List<LoggableElement>();
@@ -92,11 +128,21 @@ namespace SharpNeat.Loggers
             return combinedElements;
         }
 
+        /// <summary>
+        ///     Extracts the header names from a list of LoggableElements.
+        /// </summary>
+        /// <param name="loggableElements">The list of LoggableElements containing the header values.</param>
+        /// <returns>The header names from the given LoggableElements.</returns>
         private List<String> extractHeaderNames(List<LoggableElement> loggableElements)
         {
             return loggableElements.Select(loggableElement => loggableElement.Header).ToList();
         }
 
+        /// <summary>
+        ///     Extracts the values (observations) from the list of LoggableElements.
+        /// </summary>
+        /// <param name="loggableElements">The list of LoggableElements containing the observation values.</param>
+        /// <returns>The values (observations) from the given LoggableElements.</returns>
         private List<String> extractDataPoints(List<LoggableElement> loggableElements)
         {
             return loggableElements.Select(LoggableElement => LoggableElement.Value).ToList();
