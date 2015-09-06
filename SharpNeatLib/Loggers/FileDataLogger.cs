@@ -30,7 +30,7 @@ namespace SharpNeat.Loggers
 
         #region Logger Instance Fiels
 
-        private readonly String rowElementDelimiter;
+        private readonly string rowElementDelimiter;
 
         private StreamWriter writer;
 
@@ -69,7 +69,7 @@ namespace SharpNeat.Loggers
 
         public void Close()
         {
-            // This should be automatic
+            writer.Close();
         }
 
         #endregion

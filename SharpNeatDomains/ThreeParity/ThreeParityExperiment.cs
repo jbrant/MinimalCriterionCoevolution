@@ -187,6 +187,8 @@ namespace SharpNeat.Domains.ThreeParity
         public INeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(IGenomeFactory<NeatGenome> genomeFactory,
             List<NeatGenome> genomeList)
         {
+            FileDataLogger logger = null;
+
             // Create distance metric. Mismatched genes have a fixed distance of 10; for matched genes the distance is their weigth difference.
             IDistanceMetric distanceMetric = new ManhattanDistanceMetric(1.0, 0.0, 10.0);
             ISpeciationStrategy<NeatGenome> speciationStrategy =
@@ -197,8 +199,11 @@ namespace SharpNeat.Domains.ThreeParity
                 ExperimentUtils.CreateComplexityRegulationStrategy(_complexityRegulationStrategy, _complexityThreshold);
 
             // Initialize the logger
-            FileDataLogger logger =
-                new FileDataLogger(_generationalLogFile);
+            if (_generationalLogFile != null)
+            {
+                logger =
+                    new FileDataLogger(_generationalLogFile);
+            }
 
             // Create the evolution algorithm.
             GenerationalNeatEvolutionAlgorithm<NeatGenome> ea =

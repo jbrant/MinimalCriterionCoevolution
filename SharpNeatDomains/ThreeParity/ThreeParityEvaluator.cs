@@ -80,7 +80,7 @@ namespace SharpNeat.Domains.ThreeParity
                     fitness += 1.0 - ((1.0 - output) * (1.0 - output));
 
                     // Test if output is within certain margin of error
-                    if (output < 0.5)
+                    if (output < 0.9)
                     {
                         success = false;
                     }
@@ -94,7 +94,7 @@ namespace SharpNeat.Domains.ThreeParity
                     fitness += 1.0 - (output * output);
 
                     // Test if output is within certain margin of error
-                    if (output >= 0.5)
+                    if (output >= 0.1)
                     {
                         success = false;
                     }
@@ -104,17 +104,12 @@ namespace SharpNeat.Domains.ThreeParity
                 phenome.ResetState();
             }
 
-            // If teh correct answer was given in each case then add a bonus value to the fitness.
+            // If the correct answer was produced in all cases, a solution has been found
+            // so training can stop
             if (success)
             {
-                //fitness += 100.0;
                 StopConditionSatisfied = true;
             }
-
-//            if (fitness >= StopFitness)
-//            {
-//                StopConditionSatisfied = true;
-//            }
 
             return new FitnessInfo(fitness, fitness);
         }

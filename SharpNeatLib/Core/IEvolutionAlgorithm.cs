@@ -93,6 +93,12 @@ namespace SharpNeat.Core
         void StartContinue();
 
         /// <summary>
+        /// Resets the internal thread and other state of the evolution algorithm when such is 
+        /// requested from the GUI.
+        /// </summary>
+        void Reset();
+
+        /// <summary>
         /// Requests that the algorithm pauses but doesn't wait for the algorithm thread to stop.
         /// The algorithm thread will pause when it is next convenient to do so, and notifies
         /// listeners via an UpdateEvent.

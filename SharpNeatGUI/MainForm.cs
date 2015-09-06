@@ -294,7 +294,11 @@ namespace SharpNeatGUI
         {
             _genomeFactory = null;
             _genomeList = null;
+            
             // TODO: Proper cleanup of EA - e.g. main worker thread termination.
+            // Reset EA state
+            _ea.Reset();
+
             _ea = null;
             _champGenomeFitness = 0.0;
             Logger.Clear();

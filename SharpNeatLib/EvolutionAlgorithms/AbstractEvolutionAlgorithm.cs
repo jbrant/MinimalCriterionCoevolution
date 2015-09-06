@@ -210,6 +210,18 @@ namespace SharpNeat.EvolutionAlgorithms
             }
         }
 
+        public void Reset()
+        {
+            // Reset run state to terminated
+            RunState = RunState.Terminated;
+
+            // Close the evolution logger
+            EvolutionLogger.Close();
+
+            // Null out the internal thread
+            _algorithmThread = null;
+        }
+
         /// <summary>
         ///     Requests that the algorithm pauses but doesn't wait for the algorithm thread to stop.
         ///     The algorithm thread will pause when it is next convenient to do so, and will notify
