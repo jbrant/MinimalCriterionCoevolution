@@ -85,6 +85,8 @@
     <Compile Include="Core\IGenomeDecoder.cs" />
     <Compile Include="Core\IGenomeFactory.cs" />
     <Compile Include="Core\IGenomeEvaluator.cs" />
+    <Compile Include="Core\ILoggable.cs" />
+    <Compile Include="Core\IDataLogger.cs" />
     <Compile Include="Core\ParallelGenomeBehaviorEvaluator.cs" />
     <Compile Include="Core\ParallelGenomeFitnessEvaluator.cs" />
     <Compile Include="Core\ITrialInfo.cs" />
@@ -140,6 +142,8 @@
     <Compile Include="EvolutionAlgorithms\SteadyStateNeatEvolutionAlgorithm.cs" />
     <Compile Include="Genomes\Neat\NeatGenomeXmlIO.cs" />
     <Compile Include="Genomes\RbfNeat\RbfGenomeFactory.cs" />
+    <Compile Include="Loggers\FileDataLogger.cs" />
+    <Compile Include="Loggers\LoggableElement.cs" />
     <Compile Include="Network\ActivationFunctions\ActivationFunctionInfo.cs" />
     <Compile Include="Genomes\HyperNeat\CppnGenomeFactory.cs" />
     <Compile Include="Network\ActivationFunctions\RadialBasis\RbfGaussian.cs" />

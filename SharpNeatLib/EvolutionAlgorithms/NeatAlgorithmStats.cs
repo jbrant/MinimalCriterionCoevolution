@@ -17,6 +17,10 @@
  * along with SharpNEAT.  If not, see <http://www.gnu.org/licenses/>.
  */
 using System;
+using System.Collections.Generic;
+using System.Globalization;
+using SharpNeat.Core;
+using SharpNeat.Loggers;
 using SharpNeat.Utility;
 
 namespace SharpNeat.EvolutionAlgorithms
@@ -24,7 +28,7 @@ namespace SharpNeat.EvolutionAlgorithms
     /// <summary>
     /// Neat evolution algorithm statistics.
     /// </summary>
-    public class NeatAlgorithmStats
+    public class NeatAlgorithmStats : ILoggable
     {
         #region General Stats
 
@@ -164,5 +168,48 @@ namespace SharpNeat.EvolutionAlgorithms
         }
 
         #endregion
+
+        #region Logging Methods
+
+        /// <summary>
+        ///     Returns NeatAlgorithmStats LoggableElements.
+        /// </summary>
+        /// <returns>The LoggableElements for NeatAlgorithmStats.</returns>
+        public List<LoggableElement> GetLoggableElements()
+        {
+            return new List<LoggableElement>
+            {
+                new LoggableElement("NeatAlgorithmStats - Current Generation",
+                    Convert.ToString(_generation, CultureInfo.InvariantCulture)),
+                new LoggableElement("NeatAlgorithmStats - Total Evaluations",
+                    Convert.ToString(_totalEvaluationCount, CultureInfo.InvariantCulture)),
+                new LoggableElement("NeatAlgorithmStats - Evaluations per Second",
+                    Convert.ToString(_evaluationsPerSec, CultureInfo.InvariantCulture)),
+                new LoggableElement("NeatAlgorithmStats - Max Fitness",
+                    Convert.ToString(_maxFitness, CultureInfo.InvariantCulture)),
+                new LoggableElement("NeatAlgorithmStats - Mean Fitness",
+                    Convert.ToString(_meanFitness, CultureInfo.InvariantCulture)),
+                new LoggableElement("NeatAlgorithmStats - Mean Specie Champ Fitness",
+                    Convert.ToString(_meanSpecieChampFitness, CultureInfo.InvariantCulture)),
+                new LoggableElement("NeatAlgorithmStats - Max Complexity",
+                    Convert.ToString(_maxComplexity, CultureInfo.InvariantCulture)),
+                new LoggableElement("NeatAlgorithmStats - Mean Complexity",
+                    Convert.ToString(_meanComplexity, CultureInfo.InvariantCulture)),
+                new LoggableElement("NeatAlgorithmStats - Total Offspring Count",
+                    Convert.ToString(_totalOffspringCount, CultureInfo.InvariantCulture)),
+                new LoggableElement("NeatAlgorithmStats - Asexual Offspring Count",
+                    Convert.ToString(_asexualOffspringCount, CultureInfo.InvariantCulture)),
+                new LoggableElement("NeatAlgorithmStats - Sexual Offspring Count",
+                    Convert.ToString(_sexualOffspringCount, CultureInfo.InvariantCulture)),
+                new LoggableElement("NeatAlgorithmStats - Interspecies Offspring Count",
+                    Convert.ToString(_interspeciesOffspringCount, CultureInfo.InvariantCulture)),
+                new LoggableElement("NeatAlgorithmStats - Min Specie Size",
+                    Convert.ToString(_minSpecieSize, CultureInfo.InvariantCulture)),
+                new LoggableElement("NeatAlgorithmStats - Max Specie Size",
+                    Convert.ToString(_maxSpecieSize, CultureInfo.InvariantCulture))
+            };
+
+            #endregion
+        }
     }
 }

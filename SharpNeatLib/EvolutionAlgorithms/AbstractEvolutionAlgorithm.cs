@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using System.Threading;
 using log4net;
@@ -38,6 +39,8 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </summary>
         private readonly AutoResetEvent _awaitRestartEvent = new AutoResetEvent(false);
 
+        protected IDataLogger EvolutionLogger;
+
         /// <summary>
         ///     The last generation during which the display/logging was updated.
         /// </summary>
@@ -62,11 +65,11 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     The current population of genomes.
         /// </summary>
         public IList<TGenome> GenomeList { get; protected set; }
-
+        
         /// <summary>
         ///     The total number of genomes in the population (typically, this should remain fixed).
         /// </summary>
-        protected int PopulationSize;
+        protected int PopulationSize;        
 
         /// <summary>
         ///     An archive of genomes that are particularly performant or "unique" with respect to some characterization.
@@ -132,8 +135,7 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     characterization (optional).
         /// </param>
         public virtual void Initialize(IGenomeEvaluator<TGenome> genomeFitnessEvaluator, IGenomeFactory<TGenome> genomeFactory,
-            List<TGenome> genomeList,
-            EliteArchive<TGenome> eliteArchive)
+            List<TGenome> genomeList, EliteArchive<TGenome> eliteArchive)
         {
             CurrentGeneration = 0;
             GenomeEvaluator = genomeFitnessEvaluator;
@@ -160,8 +162,7 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     characterization (optional).
         /// </param>
         public virtual void Initialize(IGenomeEvaluator<TGenome> genomeFitnessEvaluator, IGenomeFactory<TGenome> genomeFactory,
-            int populationSize,
-            EliteArchive<TGenome> eliteArchive)
+            int populationSize, EliteArchive<TGenome> eliteArchive)
         {
             CurrentGeneration = 0;
             GenomeEvaluator = genomeFitnessEvaluator;
@@ -345,6 +346,9 @@ namespace SharpNeat.EvolutionAlgorithms
                 try
                 {
                     PausedEvent(this, EventArgs.Empty);
+
+                    // Close the logger
+                    EvolutionLogger?.Close();
                 }
                 catch (Exception ex)
                 {

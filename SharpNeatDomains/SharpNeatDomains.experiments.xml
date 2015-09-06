@@ -1,6 +1,23 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Experiments>
 
+  <Experiment name="3-Parity (NEAT)">
+    <AssemblyPath>SharpNeatDomains.dll</AssemblyPath>
+    <ClassName>SharpNeat.Domains.ThreeParity.ThreeParityExperiment</ClassName>
+    <Config>
+      <PopulationSize>150</PopulationSize>
+      <SpecieCount>10</SpecieCount>
+      <Activation>
+        <Scheme>Acyclic</Scheme>
+      </Activation>
+      <ComplexityRegulationStrategy>Absolute</ComplexityRegulationStrategy>
+      <ComplexityThreshold>20</ComplexityThreshold>
+      <MaxDegreeOfParallelism>1</MaxDegreeOfParallelism>
+      <GenerationalLogFile>F:\\User Data\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Courses\\CAP 6616\\ThreeParity Project\\Data\\TestLogFile.csv</GenerationalLogFile>
+      <Description></Description>
+    </Config>
+  </Experiment>
+  
   <Experiment name="Binary 3-Multiplexer (NEAT)">
     <AssemblyPath>SharpNeatDomains.dll</AssemblyPath>
     <ClassName>SharpNeat.Domains.BinaryThreeMultiplexer.BinaryThreeMultiplexerExperiment</ClassName>

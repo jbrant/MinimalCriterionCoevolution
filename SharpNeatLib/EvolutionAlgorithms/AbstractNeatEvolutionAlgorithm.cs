@@ -20,10 +20,14 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
+using System.IO;
 using System.Reflection;
 using log4net;
 using SharpNeat.Core;
 using SharpNeat.EvolutionAlgorithms.ComplexityRegulation;
+using SharpNeat.Genomes.Neat;
+using SharpNeat.Loggers;
 using SharpNeat.SpeciationStrategies;
 using SharpNeat.Utility;
 
@@ -37,7 +41,7 @@ namespace SharpNeat.EvolutionAlgorithms
     /// </summary>
     /// <typeparam name="TGenome">The genome type that the algorithm will operate on.</typeparam>
     public abstract class AbstractNeatEvolutionAlgorithm<TGenome> : AbstractEvolutionAlgorithm<TGenome>,
-        INeatEvolutionAlgorithm<TGenome>
+        INeatEvolutionAlgorithm<TGenome>, ILoggable
         where TGenome : class, IGenome<TGenome>
     {
         private static readonly ILog __log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
@@ -50,6 +54,18 @@ namespace SharpNeat.EvolutionAlgorithms
         protected AbstractNeatEvolutionAlgorithm()
         {
             EaParams = new NeatEvolutionAlgorithmParameters();
+            EaParamsComplexifying = EaParams;
+            EaParamsSimplifying = EaParams.CreateSimplifyingParameters();
+            Statistics = new NeatAlgorithmStats(EaParams);
+            ComplexityRegulationMode = ComplexityRegulationMode.Complexifying;
+        }
+
+        /// <summary>
+        /// Abstract constructor accepting custom NEAT parameters.
+        /// </summary>
+        protected AbstractNeatEvolutionAlgorithm(NeatEvolutionAlgorithmParameters eaParams)
+        {
+            EaParams = eaParams;
             EaParamsComplexifying = EaParams;
             EaParamsSimplifying = EaParams.CreateSimplifyingParameters();
             Statistics = new NeatAlgorithmStats(EaParams);
@@ -314,6 +330,30 @@ namespace SharpNeat.EvolutionAlgorithms
 
             // Store ref to best genome.
             UpdateBestGenome();
+
+            // Open the logger
+            EvolutionLogger?.Open();
+            
+            // Write out the header
+            EvolutionLogger?.LogHeader(GetLoggableElements(), Statistics.GetLoggableElements(),
+                (CurrentChampGenome as NeatGenome)?.GetLoggableElements());
+        }
+
+        #endregion
+
+        #region Logging Methods
+
+        /// <summary>
+        ///     Returns AbstractNeatEvolutionAlgorithm LoggableElements.
+        /// </summary>
+        /// <returns>The LoggableElements for AbstractNeatEvolutionAlgorithm.</returns>
+        public List<LoggableElement> GetLoggableElements()
+        {
+            return new List<LoggableElement>
+            {
+                new LoggableElement("AbstractNeatEvolutionAlgorithm - Specie Count",
+                    Convert.ToString(SpecieList.Count, CultureInfo.InvariantCulture))
+            };
         }
 
         #endregion

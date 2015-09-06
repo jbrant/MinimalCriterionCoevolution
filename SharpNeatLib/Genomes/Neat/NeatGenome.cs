@@ -20,7 +20,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using SharpNeat.Core;
+using SharpNeat.Loggers;
 using SharpNeat.Network;
 using SharpNeat.Utility;
 
@@ -41,7 +43,7 @@ namespace SharpNeat.Genomes.Neat
     /// are only stored in the same list as hidden nodes as an efficiency measure when producing offspring 
     /// and decoding genomes, otherwise it would probably make sense to store them in readonly lists.
     /// </summary>
-    public class NeatGenome : IGenome<NeatGenome>, INetworkDefinition
+    public class NeatGenome : IGenome<NeatGenome>, INetworkDefinition, ILoggable
     {
         #region Instance Variables
 
@@ -1559,6 +1561,30 @@ namespace SharpNeat.Genomes.Neat
             }
             _networkConnectivityData = new NetworkConnectivityData(nodeConnectivityDataArr, nodeConnectivityDataById);
             return _networkConnectivityData;
+        }
+
+        #endregion
+
+        #region Logging Methods        
+
+        /// <summary>
+        ///     Returns NeatGenome LoggableElements.
+        /// </summary>
+        /// <returns>The LoggableElements for NeatGenome.</returns>
+        public List<LoggableElement> GetLoggableElements()
+        {
+            return new List<LoggableElement>
+            {
+                new LoggableElement("NeatGenome - Genome ID", Convert.ToString(_id, CultureInfo.InvariantCulture)),
+                new LoggableElement("NeatGenome - Birth Generation",
+                    Convert.ToString(_birthGeneration, CultureInfo.InvariantCulture)),
+                new LoggableElement("NeatGenome - Neuron Gene Count",
+                    Convert.ToString(NeuronGeneList.Count, CultureInfo.InvariantCulture)),
+                new LoggableElement("NeatGenome - Connection Gene Count",
+                    Convert.ToString(ConnectionGeneList.Count, CultureInfo.InvariantCulture)),
+                new LoggableElement("NeatGenome - Total Gene Count",
+                    Convert.ToString(NeuronGeneList.Count + ConnectionGeneList.Count, CultureInfo.InvariantCulture))
+            };
         }
 
         #endregion
