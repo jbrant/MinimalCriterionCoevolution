@@ -105,18 +105,17 @@ namespace SharpNeat.Core
                 _numGenerationsWithoutAdditions = 0;
             }
 
-            /*
-            // Adjust the archive threshold based on the number of organisms
-            // added to the archive during the current generation
-            if (_numGenomesAddedThisGeneration < _minGenerationalArchiveAddition)
+            // If there were no genomes added this generation, increment the counter
+            if (_numGenomesAddedThisGeneration == 0)
             {
-                ArchiveAdditionThreshold *= _thresholdDecreaseMultiplier;
+                _numGenerationsWithoutAdditions++;
             }
-            else if (_numGenomesAddedThisGeneration > _maxGenerationArchiveAddition)
+            // On the other hand, if there were additions this generation, reset the num
+            // generations without additions counter
+            else if (_numGenomesAddedThisGeneration > 0)
             {
-                ArchiveAdditionThreshold *= _thresholdIncreaseMultiplier;
+                _numGenerationsWithoutAdditions = 0;
             }
-            */
 
             // Reset the count of organisms added for the next generation
             _numGenomesAddedThisGeneration = 0;

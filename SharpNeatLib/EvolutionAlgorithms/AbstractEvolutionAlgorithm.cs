@@ -216,7 +216,7 @@ namespace SharpNeat.EvolutionAlgorithms
             RunState = RunState.Terminated;
 
             // Close the evolution logger
-            EvolutionLogger.Close();
+            EvolutionLogger?.Close();
 
             // Null out the internal thread
             _algorithmThread = null;

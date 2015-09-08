@@ -1,4 +1,8 @@
-﻿using System.Collections.Generic;
+﻿#region
+
+using System.Collections.Generic;
+
+#endregion
 
 namespace SharpNeat.Core
 {
@@ -35,10 +39,10 @@ namespace SharpNeat.Core
         void Evaluate(IList<TGenome> genomeList);
 
         /// <summary>
-        /// Evalutes the fitness or behavior of a single genome and potentially against a list of other genomes.
+        ///     Evalutes the fitness or behavior of a single genome and potentially against a list of other genomes.
         /// </summary>
-        /// <param name="genome">The genome under evaluation.</param>
-        /// <param name="genomeList">The genomes against which to evaluate.</param>
-        void Evaluate(TGenome genome, IList<TGenome> genomeList);
+        /// <param name="genomesToEvaluate">The list of genomes under evaluation.</param>
+        /// <param name="population">The genomes against which to evaluate.</param>
+        void Evaluate(IList<TGenome> genomesToEvaluate, IList<TGenome> population);
     }
 }

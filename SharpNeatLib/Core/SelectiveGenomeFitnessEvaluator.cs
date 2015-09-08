@@ -77,7 +77,7 @@ namespace SharpNeat.Core
         /// <summary>
         /// Evalutes a single genome against a list of genomes.
         /// </summary>
-        public void Evaluate(TGenome genome, IList<TGenome> genomeList)
+        public void Evaluate(IList<TGenome> genomesToEvaluate, IList<TGenome> population)
         {
             // TODO: Need to implement this
             throw new NotImplementedException();

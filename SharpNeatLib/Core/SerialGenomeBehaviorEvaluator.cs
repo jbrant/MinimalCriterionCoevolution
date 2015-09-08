@@ -1,5 +1,9 @@
-﻿using System.Collections.Generic;
+﻿#region
+
+using System.Collections.Generic;
 using SharpNeat.Utility;
+
+#endregion
 
 namespace SharpNeat.Core
 {
@@ -17,13 +21,13 @@ namespace SharpNeat.Core
         where TGenome : class, IGenome<TGenome>
         where TPhenome : class
     {
+        private readonly BatchEvaluationMethod _batchEvaluationMethod;
         private readonly EliteArchive<TGenome> _eliteArchive;
         private readonly bool _enablePhenomeCaching;
         private readonly IGenomeDecoder<TGenome, TPhenome> _genomeDecoder;
-        private readonly ListEvaluationMethod _listEvaluationMethod;
         private readonly int _nearestNeighbors;
         private readonly IPhenomeEvaluator<TPhenome, BehaviorInfo> _phenomeEvaluator;
-        private readonly SingleEvaluationMethod _singleEvaluationMethod;
+        private readonly PopulationEvaluationMethod _populationEvaluationMethod;
 
         /// <summary>
         ///     Constructs serial genome list behavior evaluator, customizing only the phenome behavior evaluator and the
@@ -41,8 +45,8 @@ namespace SharpNeat.Core
             _genomeDecoder = genomeDecoder;
             _phenomeEvaluator = phenomeEvaluator;
             _enablePhenomeCaching = true;
-            _listEvaluationMethod = EvaluateAllBehaviors_Caching;
-            _singleEvaluationMethod = EvaluateSingleBehavior_Caching;
+            _populationEvaluationMethod = EvaluateAllBehaviors_Caching;
+            _batchEvaluationMethod = EvaluateBatchBehavior_Caching;
             _nearestNeighbors = nearestNeighbors;
             _eliteArchive = archive;
         }
@@ -69,13 +73,13 @@ namespace SharpNeat.Core
 
             if (_enablePhenomeCaching)
             {
-                _listEvaluationMethod = EvaluateAllBehaviors_Caching;
-                _singleEvaluationMethod = EvaluateSingleBehavior_Caching;
+                _populationEvaluationMethod = EvaluateAllBehaviors_Caching;
+                _batchEvaluationMethod = EvaluateBatchBehavior_Caching;
             }
             else
             {
-                _listEvaluationMethod = EvaluateAllBehaviors_NonCaching;
-                _singleEvaluationMethod = EvaluateSingleBehavior_NonCaching;
+                _populationEvaluationMethod = EvaluateAllBehaviors_NonCaching;
+                _batchEvaluationMethod = EvaluateBatchBehavior_NonCaching;
             }
         }
 
@@ -104,7 +108,7 @@ namespace SharpNeat.Core
         /// <param name="genomeList">The list of genomes under evaluation.</param>
         public void Evaluate(IList<TGenome> genomeList)
         {
-            _listEvaluationMethod(genomeList);
+            _populationEvaluationMethod(genomeList);
         }
 
         /// <summary>
@@ -112,11 +116,11 @@ namespace SharpNeat.Core
         ///     genome in series using the contained IGenomeDecoder and evaluate the resulting TPhenome using the contained
         ///     IPhenomeEvaluator.
         /// </summary>
-        /// <param name="genome">The genome under evaluation.</param>
-        /// <param name="genomeList">The genomes against which to evaluate.</param>
-        public void Evaluate(TGenome genome, IList<TGenome> genomeList)
+        /// <param name="genomesToEvaluate">The genomes under evaluation.</param>
+        /// <param name="population">The genomes against which to evaluate.</param>
+        public void Evaluate(IList<TGenome> genomesToEvaluate, IList<TGenome> population)
         {
-            _singleEvaluationMethod(genome, genomeList);
+            _batchEvaluationMethod(genomesToEvaluate, population);
         }
 
         /// <summary>
@@ -203,17 +207,20 @@ namespace SharpNeat.Core
             }
         }
 
-        private void EvaluateSingleBehavior_NonCaching(TGenome subjectGenome, IList<TGenome> genomeList)
+        private void EvaluateBatchBehavior_NonCaching(IList<TGenome> genomesToEvaluate, IList<TGenome> population)
         {
-            // Decode and evaluate the behavior of the given genome
-            EvaluateBehavior_NonCaching(subjectGenome);
-
-            // After the behavior of each genome in the current population has been evaluated,
-            // iterate again through each genome and compare its behavioral novelty (distance)
-            // to its k-nearest neighbors in behavior space (and the archive if applicable)
-            foreach (var genome in genomeList)
+            // Decode and evaluate the behavior of the genomes under evaluation
+            foreach (var genome in genomesToEvaluate)
             {
-                EvaluateFitness(genome, genomeList);
+                EvaluateBehavior_NonCaching(genome);
+            }
+
+            // After the behavior of each genome in the offspring batch has been evaluated,
+            // iterate through each genome and compare its behavioral novelty (distance) to its 
+            // k -nearest neighbors from the population in behavior space (and the archive if applicable)
+            foreach (var genome in genomesToEvaluate)
+            {
+                EvaluateFitness(genome, population);
 
                 // Add the genome to the archive if it qualifies
                 _eliteArchive?.TestAndAddCandidateToArchive(genome);
@@ -240,25 +247,28 @@ namespace SharpNeat.Core
             }
         }
 
-        private void EvaluateSingleBehavior_Caching(TGenome subjectGenome, IList<TGenome> genomeList)
+        private void EvaluateBatchBehavior_Caching(IList<TGenome> genomesToEvaluate, IList<TGenome> population)
         {
-            // Decode and evaluate the behavior of the given genome
-            EvaluateBehavior_Caching(subjectGenome);
-
-            // After the behavior of each genome in the current population has been evaluated,
-            // iterate again through each genome and compare its behavioral novelty (distance)
-            // to its k-nearest neighbors in behavior space (and the archive if applicable)
-            foreach (var genome in genomeList)
+            // Decode and evaluate the behavior of the genomes under evaluation
+            foreach (var genome in genomesToEvaluate)
             {
-                EvaluateFitness(genome, genomeList);
+                EvaluateBehavior_Caching(genome);
+            }
+
+            // After the behavior of each genome in the offspring batch has been evaluated,
+            // iterate through each genome and compare its behavioral novelty (distance) to its 
+            // k -nearest neighbors from the population in behavior space (and the archive if applicable)
+            foreach (var genome in genomesToEvaluate)
+            {
+                EvaluateFitness(genome, population);
 
                 // Add the genome to the archive if it qualifies
                 _eliteArchive?.TestAndAddCandidateToArchive(genome);
             }
         }
 
-        private delegate void ListEvaluationMethod(IList<TGenome> genomeList);
+        private delegate void PopulationEvaluationMethod(IList<TGenome> genomeList);
 
-        private delegate void SingleEvaluationMethod(TGenome genome, IList<TGenome> genomeList);
+        private delegate void BatchEvaluationMethod(IList<TGenome> genomesToEvaluate, IList<TGenome> population);
     }
 }

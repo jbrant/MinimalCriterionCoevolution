@@ -42,21 +42,22 @@ namespace SharpNeat.EvolutionAlgorithms
 
             // TODO: Generate child asexually (reference GenerationalNeatEvolutionAlgorithm lines 550 - 588)
 
-            // Produce a single offspring
-            TGenome childGenome = CreateSingleOffspring();
+            // Produce number of offspring equivalent to the given batch size
+            List<TGenome> childGenomes = CreateOffspring(specieStatsArr, 10);
 
-            // TODO: Randomly sample population and remove non-fittest
+            // TODO: Randomly sample population and remove least fit
 
             // Select a genome for removal
-            TGenome genomeToRemove = SelectGenomeForRemoval(3);
+            // TODO: Fix this
+//            TGenome genomeToRemove = SelectGenomesForRemoval(10);
 
             // Add new child and remove the one marked for deletion
-            GenomeList.Add(childGenome);
-            GenomeList.Remove(genomeToRemove);
+            (GenomeList as List<TGenome>)?.AddRange(childGenomes);
+//            GenomeList.Remove(genomeToRemove);
 
             // TODO: Run child trial
 
-            GenomeEvaluator.Evaluate(childGenome, GenomeList);
+//            GenomeEvaluator.Evaluate(childGenome, GenomeList);
 
             // TODO: Re-speciate the whole population
 
@@ -79,8 +80,112 @@ namespace SharpNeat.EvolutionAlgorithms
 
             Debug.Assert(GenomeList.Count == PopulationSize);
         }
-        
+
         private SpecieStats[] CalcSpecieStats()
+        {            
+            // Build stats array and get the mean fitness of each specie.
+            int specieCount = SpecieList.Count;
+            SpecieStats[] specieStatsArr = new SpecieStats[specieCount];
+            for (int i = 0; i < specieCount; i++)
+            {
+                SpecieStats inst = new SpecieStats();
+                specieStatsArr[i] = inst;
+                inst.MeanFitness = SpecieList[i].CalcMeanFitness();
+            }
+
+            return specieStatsArr;
+        }
+
+        private List<TGenome> CreateOffspring(SpecieStats[] specieStatsArr, int offspringCount)
+        {
+            List<TGenome> offspringList = new List<TGenome>(offspringCount);
+            int specieCount = SpecieList.Count;
+
+            // Probabilities for species roulette wheel selector
+            double[] specieProbabilities = new double[specieCount];
+
+            // Roulette wheel layout for genomes within species
+            RouletteWheelLayout[] genomeRwlArr = new RouletteWheelLayout[specieCount];
+
+            // Build array of probabilities based on specie mean fitness
+            for (int curSpecie = 0; curSpecie < specieCount; curSpecie++)
+            {
+                // Set probability for current species as specie mean fitness
+                specieProbabilities[curSpecie] = specieStatsArr[curSpecie].MeanFitness;
+
+                int genomeCount = SpecieList[curSpecie].GenomeList.Count;
+
+                // Decare array for specie genome probabilities
+                double[] genomeProbabilities = new double[genomeCount];
+
+                // Build probability array for genome selection within species
+                // based on genome fitness
+                for (int curGenome = 0; curGenome < genomeCount; curGenome++)
+                {
+                    genomeProbabilities[curGenome] = SpecieList[curSpecie].GenomeList[curGenome].EvaluationInfo.Fitness;
+                }
+
+                // Create the genome roulette wheel layout for the current species
+                genomeRwlArr[curSpecie] = new RouletteWheelLayout(genomeProbabilities);
+            }
+
+            // Create the specie roulette wheel layout
+            RouletteWheelLayout specieRwl = new RouletteWheelLayout(specieProbabilities);
+            
+            for (int curOffspring = 0; curOffspring < offspringCount; curOffspring++)
+            {
+                // Select specie from which to generate the next offspring
+                int specieIdx = RouletteWheel.SingleThrow(specieRwl, RandomNumGenerator);
+                
+                // If random number is equal to or less than specified asexual offspring proportion, then use
+                // asexual reproduction
+                if (RandomNumGenerator.NextDouble() <= EaParams.OffspringAsexualProportion)
+                {
+                    // Throw ball to select genome from species (essentially intra-specie fitness proportionate selection)
+                    int genomeIdx = RouletteWheel.SingleThrow(genomeRwlArr[specieIdx], RandomNumGenerator);
+
+                    // Create offspring asexually (from the above-selected parent)
+                    TGenome offspring = SpecieList[specieIdx].GenomeList[genomeIdx].CreateOffspring(CurrentGeneration);
+
+                    // Add that offspring to the genome list
+                    offspringList.Add(offspring);
+                }
+                // Otherwise, mate two parents
+                else
+                {
+                    // If random number is equal to or less than specified interspecies mating proportion, then
+                    // mate between two parent genomes from two different species
+                    if (RandomNumGenerator.NextDouble() <= EaParams.InterspeciesMatingProportion)
+                    {
+                        // TODO: Implement this (need to throw ball again to get another species)
+                    }
+                    // Otherwise, mate two parents from within the currently selected species
+                    else
+                    {
+                        // Throw ball twice to select the two parent genomes
+                        int parent1GenomeIdx = RouletteWheel.SingleThrow(genomeRwlArr[specieIdx], RandomNumGenerator);
+                        int parent2GenomeIdx = RouletteWheel.SingleThrow(genomeRwlArr[specieIdx], RandomNumGenerator);
+
+                        // If the same parent happened to be selected twice, throw ball until they differ
+                        while (parent1GenomeIdx == parent2GenomeIdx)
+                        {
+                            parent2GenomeIdx = RouletteWheel.SingleThrow(genomeRwlArr[specieIdx], RandomNumGenerator);
+                        }
+
+                        // Get the two parents out of the species genome list
+                        TGenome parent1 = SpecieList[specieIdx].GenomeList[parent1GenomeIdx];
+                        TGenome parent2 = SpecieList[specieIdx].GenomeList[parent2GenomeIdx];
+
+                        // Perform recombination
+                        TGenome offspring = parent1.CreateOffspring(parent2, CurrentGeneration);
+                    }
+                }
+            }
+
+            return offspringList;
+        }
+
+        private SpecieStats[] CalcSpecieStats_Old()
         {
             double totalMeanFitness = 0.0;
 
@@ -296,22 +401,27 @@ namespace SharpNeat.EvolutionAlgorithms
             return genome;
         }
 
-        private TGenome SelectGenomeForRemoval(int sampleSize)
+        private List<TGenome> SelectGenomesForRemoval(int numGenomesToRemove)
         {
-            TGenome genomeToRemove = null;
-            const double curLowFitness = Double.MaxValue;
+            List<TGenome> genomesToRemove = new List<TGenome>(numGenomesToRemove);
 
-            for (int cnt = 0; cnt < sampleSize; cnt++)
-            {
-                TGenome candidateGenome = GenomeList[RandomNumGenerator.Next(0, GenomeList.Count - 1)];
+            // TODO: Implement selection based on calculating the adjusted fitness for each genome compared to genomes in its species
 
-                if (candidateGenome.EvaluationInfo.Fitness < curLowFitness)
-                {
-                    genomeToRemove = candidateGenome;
-                }
-            }
+            // TODO: Need to remove this code once alternate method is implemented
+//            TGenome genomeToRemove = null;
+//            const double curLowFitness = Double.MaxValue;
+//
+//            for (int cnt = 0; cnt < sampleSize; cnt++)
+//            {
+//                TGenome candidateGenome = GenomeList[RandomNumGenerator.Next(0, GenomeList.Count - 1)];
+//
+//                if (candidateGenome.EvaluationInfo.Fitness < curLowFitness)
+//                {
+//                    genomeToRemove = candidateGenome;
+//                }
+//            }
 
-            return genomeToRemove;            
+            return genomesToRemove;            
         }
     }
 }

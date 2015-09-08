@@ -297,7 +297,7 @@ namespace SharpNeatGUI
             
             // TODO: Proper cleanup of EA - e.g. main worker thread termination.
             // Reset EA state
-            _ea.Reset();
+            _ea?.Reset();
 
             _ea = null;
             _champGenomeFitness = 0.0;
