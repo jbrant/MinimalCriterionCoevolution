@@ -46,22 +46,18 @@ namespace SharpNeat.EvolutionAlgorithms
             List<TGenome> childGenomes = CreateOffspring(specieStatsArr, 10);
 
             // TODO: Randomly sample population and remove least fit
-
-
-            // Add new children
-            (GenomeList as List<TGenome>)?.AddRange(childGenomes);
-            //            GenomeList.Remove(genomeToRemove);
-
-            // TODO: Run child trial
-
-            //            GenomeEvaluator.Evaluate(childGenome, GenomeList);
+            
+            // Evaluate the offspring batch
+            GenomeEvaluator.Evaluate(childGenomes, GenomeList);
 
             // Determine genomes to remove based on their adjusted fitness
             List<TGenome> genomesToRemove = SelectGenomesForRemoval(10);
 
-            // Remove the genomes marked for "death"
+            // Remove the worst individuals from the previous iteration
             (GenomeList as List<TGenome>)?.RemoveAll(x => genomesToRemove.Contains(x));
-            
+
+            // Add new children
+            (GenomeList as List<TGenome>)?.AddRange(childGenomes);
 
             // TODO: Re-speciate the whole population
 
@@ -157,11 +153,22 @@ namespace SharpNeat.EvolutionAlgorithms
                 // Otherwise, mate two parents
                 else
                 {
+                    TGenome parent1, parent2;
+
                     // If random number is equal to or less than specified interspecies mating proportion, then
                     // mate between two parent genomes from two different species
                     if (RandomNumGenerator.NextDouble() <= EaParams.InterspeciesMatingProportion)
                     {
-                        // TODO: Implement this (need to throw ball again to get another species)
+                        // Throw ball again to get a second species
+                        int specie2Idx = RouletteWheel.SingleThrow(specieRwl, RandomNumGenerator);
+
+                        // Throw ball twice to select the two parent genomes (one from each species)
+                        int parent1GenomeIdx = RouletteWheel.SingleThrow(genomeRwlArr[specieIdx], RandomNumGenerator);
+                        int parent2GenomeIdx = RouletteWheel.SingleThrow(genomeRwlArr[specie2Idx], RandomNumGenerator);
+
+                        // Get the two parents out of the two species genome list
+                        parent1 = SpecieList[specieIdx].GenomeList[parent1GenomeIdx];
+                        parent2 = SpecieList[specie2Idx].GenomeList[parent2GenomeIdx];                        
                     }
                     // Otherwise, mate two parents from within the currently selected species
                     else
@@ -177,12 +184,12 @@ namespace SharpNeat.EvolutionAlgorithms
                         }
 
                         // Get the two parents out of the species genome list
-                        TGenome parent1 = SpecieList[specieIdx].GenomeList[parent1GenomeIdx];
-                        TGenome parent2 = SpecieList[specieIdx].GenomeList[parent2GenomeIdx];
-
-                        // Perform recombination
-                        TGenome offspring = parent1.CreateOffspring(parent2, CurrentGeneration);
+                        parent1 = SpecieList[specieIdx].GenomeList[parent1GenomeIdx];
+                        parent2 = SpecieList[specieIdx].GenomeList[parent2GenomeIdx];                        
                     }
+
+                    // Perform recombination
+                    TGenome offspring = parent1.CreateOffspring(parent2, CurrentGeneration);
                 }
             }
 
