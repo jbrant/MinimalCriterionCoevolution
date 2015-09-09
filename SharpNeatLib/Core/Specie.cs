@@ -145,7 +145,18 @@ namespace SharpNeat.Core
         public double CalcMeanComplexity()
         {
             return CalcTotalComplexity() / (double)_genomeList.Count;
-        }  
+        }
+
+        /// <summary>
+        ///     Calculates the adjusted fitness of a given genome as that genome's fitness divided
+        ///     by the total number of genomes in the species.
+        /// </summary>
+        /// <param name="genomeIdx">The index of the genome whose adjust fitness to compute.</param>
+        /// <returns>The adjusted fitness of the given genome.</returns>
+        public double CalcGenomeAdjustedFitness(int genomeIdx)
+        {
+            return GenomeList[genomeIdx].EvaluationInfo.Fitness/GenomeList.Count;
+        }
 
         #endregion
     }

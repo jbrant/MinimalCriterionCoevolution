@@ -47,17 +47,21 @@ namespace SharpNeat.EvolutionAlgorithms
 
             // TODO: Randomly sample population and remove least fit
 
-            // Select a genome for removal
-            // TODO: Fix this
-//            TGenome genomeToRemove = SelectGenomesForRemoval(10);
 
-            // Add new child and remove the one marked for deletion
+            // Add new children
             (GenomeList as List<TGenome>)?.AddRange(childGenomes);
-//            GenomeList.Remove(genomeToRemove);
+            //            GenomeList.Remove(genomeToRemove);
 
             // TODO: Run child trial
 
-//            GenomeEvaluator.Evaluate(childGenome, GenomeList);
+            //            GenomeEvaluator.Evaluate(childGenome, GenomeList);
+
+            // Determine genomes to remove based on their adjusted fitness
+            List<TGenome> genomesToRemove = SelectGenomesForRemoval(10);
+
+            // Remove the genomes marked for "death"
+            (GenomeList as List<TGenome>)?.RemoveAll(x => genomesToRemove.Contains(x));
+            
 
             // TODO: Re-speciate the whole population
 
@@ -405,21 +409,45 @@ namespace SharpNeat.EvolutionAlgorithms
         {
             List<TGenome> genomesToRemove = new List<TGenome>(numGenomesToRemove);
 
+            //KeyValuePair<double, TGenome> adjustedFitnessMap = new KeyValuePair<double, TGenome>();
+            Dictionary<double, TGenome> adjustedFitnessMap = new Dictionary<double, TGenome>();
+
             // TODO: Implement selection based on calculating the adjusted fitness for each genome compared to genomes in its species
 
+            foreach (var specie in SpecieList)
+            {
+                for (int genomeIdx = 0; genomeIdx < specie.GenomeList.Count; genomeIdx++)
+                {
+                    // Add adjusted fitness and the genome reference to the map (dictionary)
+                    adjustedFitnessMap.Add(specie.CalcGenomeAdjustedFitness(genomeIdx), specie.GenomeList[genomeIdx]);
+                }
+            }
+
+            // Sort in ascending order (lowest adjusted fitness first)
+            //            List<KeyValuePair<double, TGenome>> sortedAdjFitnessList = adjustedFitnessMap.OrderBy(i => i.Key);
+
+            var stack = new Stack<KeyValuePair<double, TGenome>>(adjustedFitnessMap.OrderBy(i => i.Key));
+
+            for (int curRemoveIdx = 0; curRemoveIdx < numGenomesToRemove; curRemoveIdx++)
+            {
+                // Add genome to remove
+                genomesToRemove.Add(stack.Pop().Value);
+            }
+
+            
             // TODO: Need to remove this code once alternate method is implemented
-//            TGenome genomeToRemove = null;
-//            const double curLowFitness = Double.MaxValue;
-//
-//            for (int cnt = 0; cnt < sampleSize; cnt++)
-//            {
-//                TGenome candidateGenome = GenomeList[RandomNumGenerator.Next(0, GenomeList.Count - 1)];
-//
-//                if (candidateGenome.EvaluationInfo.Fitness < curLowFitness)
-//                {
-//                    genomeToRemove = candidateGenome;
-//                }
-//            }
+            //            TGenome genomeToRemove = null;
+            //            const double curLowFitness = Double.MaxValue;
+            //
+            //            for (int cnt = 0; cnt < sampleSize; cnt++)
+            //            {
+            //                TGenome candidateGenome = GenomeList[RandomNumGenerator.Next(0, GenomeList.Count - 1)];
+            //
+            //                if (candidateGenome.EvaluationInfo.Fitness < curLowFitness)
+            //                {
+            //                    genomeToRemove = candidateGenome;
+            //                }
+            //            }
 
             return genomesToRemove;            
         }
