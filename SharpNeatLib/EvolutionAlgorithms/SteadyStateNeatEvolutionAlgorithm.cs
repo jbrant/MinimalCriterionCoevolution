@@ -190,6 +190,7 @@ namespace SharpNeat.EvolutionAlgorithms
 
                     // Perform recombination
                     TGenome offspring = parent1.CreateOffspring(parent2, CurrentGeneration);
+                    offspringList.Add(offspring);
                 }
             }
 
@@ -417,7 +418,8 @@ namespace SharpNeat.EvolutionAlgorithms
             List<TGenome> genomesToRemove = new List<TGenome>(numGenomesToRemove);
 
             //KeyValuePair<double, TGenome> adjustedFitnessMap = new KeyValuePair<double, TGenome>();
-            Dictionary<double, TGenome> adjustedFitnessMap = new Dictionary<double, TGenome>();
+            //Dictionary<double, TGenome> adjustedFitnessMap = new Dictionary<double, TGenome>();
+            Dictionary<TGenome, double> adjustedFitnessMap = new Dictionary<TGenome, double>();
 
             // TODO: Implement selection based on calculating the adjusted fitness for each genome compared to genomes in its species
 
@@ -426,19 +428,20 @@ namespace SharpNeat.EvolutionAlgorithms
                 for (int genomeIdx = 0; genomeIdx < specie.GenomeList.Count; genomeIdx++)
                 {
                     // Add adjusted fitness and the genome reference to the map (dictionary)
-                    adjustedFitnessMap.Add(specie.CalcGenomeAdjustedFitness(genomeIdx), specie.GenomeList[genomeIdx]);
+                    //adjustedFitnessMap.Add(specie.CalcGenomeAdjustedFitness(genomeIdx), specie.GenomeList[genomeIdx]);
+                    adjustedFitnessMap.Add(specie.GenomeList[genomeIdx], specie.CalcGenomeAdjustedFitness(genomeIdx));
                 }
             }
 
             // Sort in ascending order (lowest adjusted fitness first)
             //            List<KeyValuePair<double, TGenome>> sortedAdjFitnessList = adjustedFitnessMap.OrderBy(i => i.Key);
 
-            var stack = new Stack<KeyValuePair<double, TGenome>>(adjustedFitnessMap.OrderBy(i => i.Key));
+            var stack = new Stack<KeyValuePair<TGenome, double>>(adjustedFitnessMap.OrderByDescending(i => i.Value));
 
             for (int curRemoveIdx = 0; curRemoveIdx < numGenomesToRemove; curRemoveIdx++)
             {
                 // Add genome to remove
-                genomesToRemove.Add(stack.Pop().Value);
+                genomesToRemove.Add(stack.Pop().Key);
             }
 
             
