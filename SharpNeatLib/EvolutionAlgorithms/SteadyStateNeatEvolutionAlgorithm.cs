@@ -33,15 +33,16 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </summary>
         protected override void PerformOneGeneration()
         {
-            // TODO: Calculate specie stats (but without offspring count)
-
+            // TODO: Need to make this a user-definable parameter
+            // Re-evaluate the novelty of the population every 25 "generations"
+            if (CurrentGeneration%100 == 0)
+            {
+                GenomeEvaluator.Evaluate(GenomeList);
+            }
+                     
             // Calculate statistics for each specie (mean fitness and target size)
             SpecieStats[] specieStatsArr = CalcSpecieStats();
-
-            // TODO: Randomly sample population and select fittest (?)
-
-            // TODO: Generate child asexually (reference GenerationalNeatEvolutionAlgorithm lines 550 - 588)
-
+            
             // Produce number of offspring equivalent to the given batch size
             List<TGenome> childGenomes = CreateOffspring(specieStatsArr, 10);
 
@@ -63,9 +64,7 @@ namespace SharpNeat.EvolutionAlgorithms
 
             ClearAllSpecies();
             SpeciationStrategy.SpeciateGenomes(GenomeList, SpecieList);
-
-            // TODO: Sort species and update best genome/stats
-
+            
             // Sort the genomes in each specie. Fittest first (secondary sort - youngest first).
             SortSpecieGenomes();
 
@@ -137,9 +136,9 @@ namespace SharpNeat.EvolutionAlgorithms
                 // Select specie from which to generate the next offspring
                 int specieIdx = RouletteWheel.SingleThrow(specieRwl, RandomNumGenerator);
                 
-                // If random number is equal to or less than specified asexual offspring proportion, then use
-                // asexual reproduction
-                if (RandomNumGenerator.NextDouble() <= EaParams.OffspringAsexualProportion)
+                // If random number is equal to or less than specified asexual offspring proportion or
+                // if there is only one genome in the species, then use asexual reproduction
+                if (RandomNumGenerator.NextDouble() <= EaParams.OffspringAsexualProportion || SpecieList[specieIdx].GenomeList.Count <= 1)
                 {
                     // Throw ball to select genome from species (essentially intra-specie fitness proportionate selection)
                     int genomeIdx = RouletteWheel.SingleThrow(genomeRwlArr[specieIdx], RandomNumGenerator);

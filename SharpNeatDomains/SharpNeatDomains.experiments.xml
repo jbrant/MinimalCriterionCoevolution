@@ -623,14 +623,14 @@ The problem domain view allows the performance of the best genome to be observed
     <ClassName>SharpNeat.Domains.MazeNavigation.NoveltyExperiment.SteadyStateMazeNavigationNoveltyExperiment</ClassName>
     <Config>
       <PopulationSize>250</PopulationSize>
-      <SpecieCount>20</SpecieCount>
+      <SpecieCount>10</SpecieCount>
       <InterspeciesMatingProbability>0.001</InterspeciesMatingProbability>
       <Activation>
         <Scheme>CyclicFixedIters</Scheme>
         <Iters>2</Iters>
       </Activation>
       <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>
-      <ComplexityThreshold>20</ComplexityThreshold>
+      <ComplexityThreshold>30</ComplexityThreshold>
       <GenomeConfig>
         <InitialConnectionProportion>1</InitialConnectionProportion>
         <WeightMutationProbability>0.6</WeightMutationProbability>
