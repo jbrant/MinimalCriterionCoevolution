@@ -77,7 +77,7 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
             var genomeDecoder = CreateGenomeDecoder();
 
             // Create a novelty archive.
-            EliteArchive<NeatGenome> archive = new NoveltyArchive<NeatGenome>(_archiveAdditionThreshold,
+            Core.AbstractNoveltyArchive<NeatGenome> archive = new EliteArchives.BehavioralNoveltyArchive<NeatGenome>(_archiveAdditionThreshold,
                 _archiveThresholdDecreaseMultiplier, _archiveThresholdIncreaseMultiplier,
                 _maxGenerationalArchiveAddition, _maxGenerationsWithoutArchiveAddition);
 

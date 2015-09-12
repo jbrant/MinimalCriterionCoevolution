@@ -17,11 +17,12 @@
  * along with SharpNEAT.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#region
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.IO;
 using System.Reflection;
 using log4net;
 using SharpNeat.Core;
@@ -30,6 +31,8 @@ using SharpNeat.Genomes.Neat;
 using SharpNeat.Loggers;
 using SharpNeat.SpeciationStrategies;
 using SharpNeat.Utility;
+
+#endregion
 
 // Disable missing comment warnings for non-private variables.
 #pragma warning disable 1591
@@ -46,10 +49,27 @@ namespace SharpNeat.EvolutionAlgorithms
     {
         private static readonly ILog __log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
+        #region Logging Methods
+
+        /// <summary>
+        ///     Returns AbstractNeatEvolutionAlgorithm LoggableElements.
+        /// </summary>
+        /// <returns>The LoggableElements for AbstractNeatEvolutionAlgorithm.</returns>
+        public List<LoggableElement> GetLoggableElements()
+        {
+            return new List<LoggableElement>
+            {
+                new LoggableElement("AbstractNeatEvolutionAlgorithm - Specie Count",
+                    Convert.ToString(SpecieList.Count, CultureInfo.InvariantCulture))
+            };
+        }
+
+        #endregion
+
         #region Base Constructor
 
         /// <summary>
-        /// Abstract paramaterless constructor.
+        ///     Abstract paramaterless constructor.
         /// </summary>
         protected AbstractNeatEvolutionAlgorithm()
         {
@@ -61,7 +81,7 @@ namespace SharpNeat.EvolutionAlgorithms
         }
 
         /// <summary>
-        /// Abstract constructor accepting custom NEAT parameters.
+        ///     Abstract constructor accepting custom NEAT parameters.
         /// </summary>
         protected AbstractNeatEvolutionAlgorithm(NeatEvolutionAlgorithmParameters eaParams)
         {
@@ -173,7 +193,7 @@ namespace SharpNeat.EvolutionAlgorithms
         }
 
         /// <summary>
-        /// Sorts the genomes within each species fittest first, secondary sorts on age.
+        ///     Sorts the genomes within each species fittest first, secondary sorts on age.
         /// </summary>
         protected void SortSpecieGenomes()
         {
@@ -194,7 +214,7 @@ namespace SharpNeat.EvolutionAlgorithms
         }
 
         /// <summary>
-        /// Clear the genome list within each specie.
+        ///     Clear the genome list within each specie.
         /// </summary>
         protected void ClearAllSpecies()
         {
@@ -205,7 +225,7 @@ namespace SharpNeat.EvolutionAlgorithms
         }
 
         /// <summary>
-        /// Rebuild _genomeList from genomes held within the species.
+        ///     Rebuild _genomeList from genomes held within the species.
         /// </summary>
         protected void RebuildGenomeList()
         {
@@ -280,41 +300,47 @@ namespace SharpNeat.EvolutionAlgorithms
         #region Initialization Methods
 
         /// <summary>
-        /// Initializes the evolution algorithm with the provided IGenomeFitnessEvaluator, IGenomeFactory
-        /// and an initial population of genomes.
+        ///     Initializes the evolution algorithm with the provided IGenomeFitnessEvaluator, IGenomeFactory
+        ///     and an initial population of genomes.
         /// </summary>
         /// <param name="genomeFitnessEvaluator">The genome evaluation scheme for the evolution algorithm.</param>
-        /// <param name="genomeFactory">The factory that was used to create the genomeList and which is therefore referenced by the genomes.</param>
+        /// <param name="genomeFactory">
+        ///     The factory that was used to create the genomeList and which is therefore referenced by the
+        ///     genomes.
+        /// </param>
         /// <param name="genomeList">An initial genome population.</param>
-        /// <param name="eliteArchive">The cross-generational archive of high-performing genomes (optional).</param>
+        /// <param name="abstractNoveltyArchive">The cross-generational archive of high-performing/novel genomes (optional).</param>
         public override void Initialize(IGenomeEvaluator<TGenome> genomeFitnessEvaluator,
-                                        IGenomeFactory<TGenome> genomeFactory,
-                                        List<TGenome> genomeList,
-                                        EliteArchive<TGenome> eliteArchive = null)
+            IGenomeFactory<TGenome> genomeFactory,
+            List<TGenome> genomeList,
+            AbstractNoveltyArchive<TGenome> abstractNoveltyArchive = null)
         {
-            base.Initialize(genomeFitnessEvaluator, genomeFactory, genomeList, eliteArchive);
+            base.Initialize(genomeFitnessEvaluator, genomeFactory, genomeList, abstractNoveltyArchive);
             Initialize();
         }
 
         /// <summary>
-        /// Initializes the evolution algorithm with the provided IGenomeFitnessEvaluator
-        /// and an IGenomeFactory that can be used to create an initial population of genomes.
+        ///     Initializes the evolution algorithm with the provided IGenomeFitnessEvaluator
+        ///     and an IGenomeFactory that can be used to create an initial population of genomes.
         /// </summary>
         /// <param name="genomeFitnessEvaluator">The genome evaluation scheme for the evolution algorithm.</param>
-        /// <param name="genomeFactory">The factory that was used to create the genomeList and which is therefore referenced by the genomes.</param>
+        /// <param name="genomeFactory">
+        ///     The factory that was used to create the genomeList and which is therefore referenced by the
+        ///     genomes.
+        /// </param>
         /// <param name="populationSize">The number of genomes to create for the initial population.</param>
-        /// <param name="eliteArchive">The cross-generational archive of high-performing genomes (optional).</param>
+        /// <param name="abstractNoveltyArchive">The cross-generational archive of high-performing/novel genomes (optional).</param>
         public override void Initialize(IGenomeEvaluator<TGenome> genomeFitnessEvaluator,
-                                        IGenomeFactory<TGenome> genomeFactory,
-                                        int populationSize,
-                                        EliteArchive<TGenome> eliteArchive = null)
+            IGenomeFactory<TGenome> genomeFactory,
+            int populationSize,
+            AbstractNoveltyArchive<TGenome> abstractNoveltyArchive = null)
         {
-            base.Initialize(genomeFitnessEvaluator, genomeFactory, populationSize, eliteArchive);
+            base.Initialize(genomeFitnessEvaluator, genomeFactory, populationSize, abstractNoveltyArchive);
             Initialize();
         }
 
         /// <summary>
-        /// Code common to both public Initialize methods.
+        ///     Code common to both public Initialize methods.
         /// </summary>
         protected virtual void Initialize()
         {
@@ -323,7 +349,8 @@ namespace SharpNeat.EvolutionAlgorithms
 
             // Speciate the genomes.
             SpecieList = SpeciationStrategy.InitializeSpeciation(GenomeList, EaParams.SpecieCount);
-            Debug.Assert(!SpeciationUtils<TGenome>.TestEmptySpecies(SpecieList), "Speciation resulted in one or more empty species.");
+            Debug.Assert(!SpeciationUtils<TGenome>.TestEmptySpecies(SpecieList),
+                "Speciation resulted in one or more empty species.");
 
             // Sort the genomes in each specie fittest first, secondary sort youngest first.
             SortSpecieGenomes();
@@ -333,27 +360,10 @@ namespace SharpNeat.EvolutionAlgorithms
 
             // Open the logger
             EvolutionLogger?.Open();
-            
+
             // Write out the header
             EvolutionLogger?.LogHeader(GetLoggableElements(), Statistics.GetLoggableElements(),
                 (CurrentChampGenome as NeatGenome)?.GetLoggableElements());
-        }
-
-        #endregion
-
-        #region Logging Methods
-
-        /// <summary>
-        ///     Returns AbstractNeatEvolutionAlgorithm LoggableElements.
-        /// </summary>
-        /// <returns>The LoggableElements for AbstractNeatEvolutionAlgorithm.</returns>
-        public List<LoggableElement> GetLoggableElements()
-        {
-            return new List<LoggableElement>
-            {
-                new LoggableElement("AbstractNeatEvolutionAlgorithm - Specie Count",
-                    Convert.ToString(SpecieList.Count, CultureInfo.InvariantCulture))
-            };
         }
 
         #endregion

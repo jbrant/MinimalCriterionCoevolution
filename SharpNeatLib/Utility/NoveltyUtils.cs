@@ -7,7 +7,7 @@ namespace SharpNeat.Utility
         where TGenome : class, IGenome<TGenome>
     {
         public static double CalculateBehavioralDistance(double[] genomeBehaviors, IList<TGenome> population,
-            int nearestNeighbors, EliteArchive<TGenome> archive = null)
+            int nearestNeighbors, AbstractNoveltyArchive<TGenome> archive = null)
         {
             double totalDistance = 0;
             var distances = new List<double>();

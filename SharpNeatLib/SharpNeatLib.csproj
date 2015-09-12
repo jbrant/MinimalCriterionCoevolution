@@ -73,7 +73,8 @@
     <Compile Include="Core\AuxFitnessInfo.cs" />
     <Compile Include="Core\BehaviorInfo.cs" />
     <Compile Include="Core\CoordinateVector.cs" />
-    <Compile Include="Core\EliteArchive.cs" />
+    <Compile Include="Core\INoveltyArchive.cs" />
+    <Compile Include="NoveltyArchives\AbstractNoveltyArchive.cs" />
     <Compile Include="Core\EvaluationType.cs" />
     <Compile Include="Core\FitnessInfo.cs" />
     <Compile Include="Core\GenomeFitnessComparer.cs" />
@@ -117,7 +118,7 @@
     <Compile Include="DistanceMetrics\DistanceMetricUtils.cs" />
     <Compile Include="DistanceMetrics\ManhattanDistanceMetric.cs" />
     <Compile Include="DistanceMetrics\EuclideanDistanceMetric.cs" />
-    <Compile Include="EliteArchives\NoveltyArchive.cs" />
+    <Compile Include="NoveltyArchives\BehavioralNoveltyArchive.cs" />
     <Compile Include="EvolutionAlgorithms\AbstractEvolutionAlgorithm.cs" />
     <Compile Include="EvolutionAlgorithms\ComplexityRegulation\ComplexityCeilingType.cs" />
     <Compile Include="EvolutionAlgorithms\ComplexityRegulation\DefaultComplexityRegulationStrategy.cs" />

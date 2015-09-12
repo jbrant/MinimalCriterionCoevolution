@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿#region
+
+using System.Collections.Generic;
 using System.Xml;
 using SharpNeat.Core;
 using SharpNeat.DistanceMetrics;
@@ -8,6 +10,8 @@ using SharpNeat.Genomes.Neat;
 using SharpNeat.Phenomes;
 using SharpNeat.SpeciationStrategies;
 
+#endregion
+
 namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
 {
     internal class SteadyStateMazeNavigationNoveltyExperiment : BaseMazeNavigationExperiment
@@ -15,10 +19,12 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
         private double _archiveAdditionThreshold;
         private double _archiveThresholdDecreaseMultiplier;
         private double _archiveThresholdIncreaseMultiplier;
+        private int _batchSize;
         private IBehaviorCharacterization _behaviorCharacterization;
         private int _maxGenerationArchiveAddition;
         private int _maxGenerationsWithoutArchiveAddition;
         private int _nearestNeighbors;
+        private int _populationEvaluationFrequency;
 
         public override void Initialize(string name, XmlElement xmlConfig)
         {
@@ -31,16 +37,16 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
                         XmlUtils.TryGetValueAsString(xmlConfig, "BehaviorCharacterization")));
 
             // Read in the novelty archive parameters
-            _archiveAdditionThreshold = XmlUtils.GetValueAsDouble(xmlConfig, "ArchiveAdditionThreshold");
-            _archiveThresholdDecreaseMultiplier = XmlUtils.GetValueAsDouble(xmlConfig,
-                "ArchiveThresholdDecreaseMultiplier");
-            _archiveThresholdIncreaseMultiplier = XmlUtils.GetValueAsDouble(xmlConfig,
-                "ArchiveThresholdIncreaseMultiplier");
-            _maxGenerationArchiveAddition = XmlUtils.GetValueAsInt(xmlConfig, "MaxGenerationalArchiveAddition");
-            _maxGenerationsWithoutArchiveAddition = XmlUtils.GetValueAsInt(xmlConfig, "MaxGenerationsWithoutArchiveAddition");
+            ExperimentUtils.ReadNoveltyParameters(xmlConfig, out _archiveAdditionThreshold,
+                out _archiveThresholdDecreaseMultiplier, out _archiveThresholdIncreaseMultiplier,
+                out _maxGenerationArchiveAddition, out _maxGenerationsWithoutArchiveAddition);
 
             // Read in nearest neighbors for behavior distance calculations
             _nearestNeighbors = XmlUtils.GetValueAsInt(xmlConfig, "NearestNeighbors");
+
+            // Read in steady-state specific parameters
+            _batchSize = XmlUtils.GetValueAsInt(xmlConfig, "OffspringBatchSize");
+            _populationEvaluationFrequency = XmlUtils.GetValueAsInt(xmlConfig, "PopulationEvaluationFrequency");
         }
 
         /// <summary>
@@ -67,7 +73,7 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
 
             // Create the evolution algorithm.
             var ea = new SteadyStateNeatEvolutionAlgorithm<NeatGenome>(NeatEvolutionAlgorithmParameters,
-                speciationStrategy, complexityRegulationStrategy);
+                speciationStrategy, complexityRegulationStrategy, _batchSize, _populationEvaluationFrequency);
 
             // Create IBlackBox evaluator.
             var mazeNavigationEvaluator = new MazeNavigationNoveltyEvaluator(MaxDistanceToTarget, MaxTimesteps,
@@ -78,9 +84,10 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
             var genomeDecoder = CreateGenomeDecoder();
 
             // Create a novelty archive.
-            EliteArchive<NeatGenome> archive = new NoveltyArchive<NeatGenome>(_archiveAdditionThreshold,
-                _archiveThresholdDecreaseMultiplier, _archiveThresholdIncreaseMultiplier,
-                _maxGenerationArchiveAddition, _maxGenerationsWithoutArchiveAddition);
+            AbstractNoveltyArchive<NeatGenome> archive =
+                new BehavioralNoveltyArchive<NeatGenome>(_archiveAdditionThreshold,
+                    _archiveThresholdDecreaseMultiplier, _archiveThresholdIncreaseMultiplier,
+                    _maxGenerationArchiveAddition, _maxGenerationsWithoutArchiveAddition);
 
             IGenomeEvaluator<NeatGenome> fitnessEvaluator =
                 new SerialGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,

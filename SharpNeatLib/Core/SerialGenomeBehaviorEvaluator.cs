@@ -22,7 +22,7 @@ namespace SharpNeat.Core
         where TPhenome : class
     {
         private readonly BatchEvaluationMethod _batchEvaluationMethod;
-        private readonly EliteArchive<TGenome> _eliteArchive;
+        private readonly AbstractNoveltyArchive<TGenome> _abstractNoveltyArchive;
         private readonly bool _enablePhenomeCaching;
         private readonly IGenomeDecoder<TGenome, TPhenome> _genomeDecoder;
         private readonly int _nearestNeighbors;
@@ -40,7 +40,7 @@ namespace SharpNeat.Core
         /// <param name="archive">A reference to the elite archive (optional).</param>
         public SerialGenomeBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
             IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, int nearestNeighbors,
-            EliteArchive<TGenome> archive = null)
+            AbstractNoveltyArchive<TGenome> archive = null)
         {
             _genomeDecoder = genomeDecoder;
             _phenomeEvaluator = phenomeEvaluator;
@@ -48,7 +48,7 @@ namespace SharpNeat.Core
             _populationEvaluationMethod = EvaluateAllBehaviors_Caching;
             _batchEvaluationMethod = EvaluateBatchBehavior_Caching;
             _nearestNeighbors = nearestNeighbors;
-            _eliteArchive = archive;
+            _abstractNoveltyArchive = archive;
         }
 
         /// <summary>
@@ -63,13 +63,13 @@ namespace SharpNeat.Core
         /// <param name="archive">A reference to the elite archive (optional).</param>
         public SerialGenomeBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
             IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator,
-            bool enablePhenomeCaching, int nearestNeighbors, EliteArchive<TGenome> archive = null)
+            bool enablePhenomeCaching, int nearestNeighbors, AbstractNoveltyArchive<TGenome> archive = null)
         {
             _genomeDecoder = genomeDecoder;
             _phenomeEvaluator = phenomeEvaluator;
             _enablePhenomeCaching = enablePhenomeCaching;
             _nearestNeighbors = nearestNeighbors;
-            _eliteArchive = archive;
+            _abstractNoveltyArchive = archive;
 
             if (_enablePhenomeCaching)
             {
@@ -179,7 +179,7 @@ namespace SharpNeat.Core
             // Compare the current genome's behavior to its k-nearest neighbors in behavior space
             var fitness =
                 BehaviorUtils<TGenome>.CalculateBehavioralDistance(genome.EvaluationInfo.BehaviorCharacterization,
-                    genomeList, _nearestNeighbors, _eliteArchive);
+                    genomeList, _nearestNeighbors, _abstractNoveltyArchive);
 
             // Update the fitness as the behavioral novelty
             var fitnessInfo = new FitnessInfo(fitness, fitness);
@@ -203,7 +203,7 @@ namespace SharpNeat.Core
                 EvaluateFitness(genome, genomeList);
 
                 // Add the genome to the archive if it qualifies
-                _eliteArchive?.TestAndAddCandidateToArchive(genome);
+                _abstractNoveltyArchive?.TestAndAddCandidateToArchive(genome);
             }
         }
 
@@ -223,7 +223,7 @@ namespace SharpNeat.Core
                 EvaluateFitness(genome, population);
 
                 // Add the genome to the archive if it qualifies
-                _eliteArchive?.TestAndAddCandidateToArchive(genome);
+                _abstractNoveltyArchive?.TestAndAddCandidateToArchive(genome);
             }
         }
 
@@ -243,7 +243,7 @@ namespace SharpNeat.Core
                 EvaluateFitness(genome, genomeList);
 
                 // Add the genome to the archive if it qualifies
-                _eliteArchive?.TestAndAddCandidateToArchive(genome);
+                _abstractNoveltyArchive?.TestAndAddCandidateToArchive(genome);
             }
         }
 
@@ -263,7 +263,7 @@ namespace SharpNeat.Core
                 EvaluateFitness(genome, population);
 
                 // Add the genome to the archive if it qualifies
-                _eliteArchive?.TestAndAddCandidateToArchive(genome);
+                _abstractNoveltyArchive?.TestAndAddCandidateToArchive(genome);
             }
         }
 

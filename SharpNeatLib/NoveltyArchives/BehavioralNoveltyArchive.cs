@@ -6,7 +6,7 @@ namespace SharpNeat.EliteArchives
     ///     Encapsulates the state of the archive of behaviorally novel organisms.
     /// </summary>
     /// <typeparam name="TGenome">The genotype to store and evaluate.</typeparam>
-    public class NoveltyArchive<TGenome> : EliteArchive<TGenome>
+    public class BehavioralNoveltyArchive<TGenome> : Core.AbstractNoveltyArchive<TGenome>
         where TGenome : class, IGenome<TGenome>
     {
         /// <summary>
@@ -28,7 +28,7 @@ namespace SharpNeat.EliteArchives
         /// <param name="maxGenerationsWithoutAddition">
         ///     The maximum number of generations that can elapse without adding an organism to the archive.
         /// </param>
-        public NoveltyArchive(double initialArchiveAdditionThreshold, double thresholdDecreaseMultiplier = 0.95,
+        public BehavioralNoveltyArchive(double initialArchiveAdditionThreshold, double thresholdDecreaseMultiplier = 0.95,
             double thresholdIncreaseMultiplier = 1.3, int maxGenerationArchiveAddition = 5,
             int maxGenerationsWithoutAddition = 10)
             : base(
@@ -60,10 +60,10 @@ namespace SharpNeat.EliteArchives
 
             // If the genome's behavioral novelty was sparse enough such that it was above the archive addition
             // threshold compared to every existing archive member, then add it to the archive
-            Archive.Add(genomeUnderEvaluation);
+            Archive.TryAdd(genomeUnderEvaluation);
 
             // Increment the number of genomes added to archive for the current generation
-            _numGenomesAddedThisGeneration++;
+            NumGenomesAddedThisGeneration++;
         }
     }
 }

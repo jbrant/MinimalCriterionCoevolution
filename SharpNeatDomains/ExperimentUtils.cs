@@ -16,35 +16,42 @@
  * You should have received a copy of the GNU General Public License
  * along with SharpNEAT.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+#region
+
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Xml;
 using SharpNeat.Decoders;
 using SharpNeat.EvolutionAlgorithms.ComplexityRegulation;
 using SharpNeat.Genomes.Neat;
 
+#endregion
+
 namespace SharpNeat.Domains
 {
     /// <summary>
-    /// Static helper methods for experiment initialization.
+    ///     Static helper methods for experiment initialization.
     /// </summary>
     public static class ExperimentUtils
     {
         /// <summary>
-        /// Create a network activation scheme from the scheme setting in the provided config XML.
+        ///     Create a network activation scheme from the scheme setting in the provided config XML.
         /// </summary>
         /// <returns></returns>
         public static NetworkActivationScheme CreateActivationScheme(XmlElement xmlConfig, string activationElemName)
         {
             // Get root activation element.
             XmlNodeList nodeList = xmlConfig.GetElementsByTagName(activationElemName, "");
-            if(nodeList.Count != 1) {
+            if (nodeList.Count != 1)
+            {
                 throw new ArgumentException("Missing or invalid activation XML config setting.");
             }
 
             XmlElement xmlActivation = nodeList[0] as XmlElement;
             string schemeStr = XmlUtils.TryGetValueAsString(xmlActivation, "Scheme");
-            switch(schemeStr)
+            switch (schemeStr)
             {
                 case "Acyclic":
                     return NetworkActivationScheme.CreateAcyclicScheme();
@@ -56,28 +63,34 @@ namespace SharpNeat.Domains
                     int maxIters = XmlUtils.GetValueAsInt(xmlActivation, "MaxIters");
                     return NetworkActivationScheme.CreateCyclicRelaxingActivationScheme(deltaThreshold, maxIters);
             }
-            throw new ArgumentException(string.Format("Invalid or missing ActivationScheme XML config setting [{0}]", schemeStr));
+            throw new ArgumentException(string.Format("Invalid or missing ActivationScheme XML config setting [{0}]",
+                schemeStr));
         }
 
         /// <summary>
-        /// Create a complexity regulation strategy based on the provided XML config values.
+        ///     Create a complexity regulation strategy based on the provided XML config values.
         /// </summary>
-        public static IComplexityRegulationStrategy CreateComplexityRegulationStrategy(string strategyTypeStr, int? threshold)
+        public static IComplexityRegulationStrategy CreateComplexityRegulationStrategy(string strategyTypeStr,
+            int? threshold)
         {
             ComplexityCeilingType ceilingType;
-            if(!Enum.TryParse<ComplexityCeilingType>(strategyTypeStr, out ceilingType)) {
+            if (!Enum.TryParse(strategyTypeStr, out ceilingType))
+            {
                 return new NullComplexityRegulationStrategy();
             }
 
-            if(null == threshold) {
-                throw new ArgumentNullException("threshold", string.Format("threshold must be provided for complexity regulation strategy type [{0}]", ceilingType));
+            if (null == threshold)
+            {
+                throw new ArgumentNullException("threshold",
+                    string.Format("threshold must be provided for complexity regulation strategy type [{0}]",
+                        ceilingType));
             }
 
             return new DefaultComplexityRegulationStrategy(ceilingType, threshold.Value);
         }
 
         /// <summary>
-        /// Read Parallel Extensions options from config XML.
+        ///     Read Parallel Extensions options from config XML.
         /// </summary>
         /// <param name="xmlConfig"></param>
         /// <returns></returns>
@@ -86,29 +99,34 @@ namespace SharpNeat.Domains
             // Get parallel options.
             ParallelOptions parallelOptions;
             int? maxDegreeOfParallelism = XmlUtils.TryGetValueAsInt(xmlConfig, "MaxDegreeOfParallelism");
-            if(null != maxDegreeOfParallelism) {
-                parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = maxDegreeOfParallelism.Value };
-            } else {
+            if (null != maxDegreeOfParallelism)
+            {
+                parallelOptions = new ParallelOptions {MaxDegreeOfParallelism = maxDegreeOfParallelism.Value};
+            }
+            else
+            {
                 parallelOptions = new ParallelOptions();
             }
             return parallelOptions;
         }
 
         /// <summary>
-        /// Read Radial Basis Function settings from config XML.
+        ///     Read Radial Basis Function settings from config XML.
         /// </summary>
-        public static void ReadRbfAuxArgMutationConfig(XmlElement xmlConfig, out double mutationSigmaCenter, out double mutationSigmaRadius)
+        public static void ReadRbfAuxArgMutationConfig(XmlElement xmlConfig, out double mutationSigmaCenter,
+            out double mutationSigmaRadius)
         {
             // Get root activation element.
             XmlNodeList nodeList = xmlConfig.GetElementsByTagName("RbfAuxArgMutationConfig", "");
-            if(nodeList.Count != 1) {
+            if (nodeList.Count != 1)
+            {
                 throw new ArgumentException("Missing or invalid RbfAuxArgMutationConfig XML config settings.");
             }
 
             XmlElement xmlRbfConfig = nodeList[0] as XmlElement;
             double? center = XmlUtils.TryGetValueAsDouble(xmlRbfConfig, "MutationSigmaCenter");
             double? radius = XmlUtils.TryGetValueAsDouble(xmlRbfConfig, "MutationSigmaRadius");
-            if(null == center || null == radius)
+            if (null == center || null == radius)
             {
                 throw new ArgumentException("Missing or invalid RbfAuxArgMutationConfig XML config settings.");
             }
@@ -166,6 +184,45 @@ namespace SharpNeat.Domains
             }
 
             return genomeParameters;
+        }
+
+        /// <summary>
+        ///     Reads novelty parameter settings from the configuration file.
+        /// </summary>
+        /// <param name="xmlConfig">The reference to the XML configuration file.</param>
+        /// <param name="archiveAdditionThreshold">The specified archive addition threshold.</param>
+        /// <param name="archiveThresholdDecreaseMultiplier">The specified archive threshold decrease multiplier.</param>
+        /// <param name="archiveThresholdIncreaseMultiplier">The specified archive threshold increase multiplier.</param>
+        /// <param name="maxGenerationalArchiveAddition">
+        ///     The specified maximum number of genomes added to the archive within a
+        ///     generation.
+        /// </param>
+        /// <param name="maxGenerationsWithoutArchiveAddition">
+        ///     The specified maximum number of generations without an archive
+        ///     addition.
+        /// </param>
+        public static void ReadNoveltyParameters(XmlElement xmlConfig,
+            out double archiveAdditionThreshold,
+            out double archiveThresholdDecreaseMultiplier, out double archiveThresholdIncreaseMultiplier,
+            out int maxGenerationalArchiveAddition, out int maxGenerationsWithoutArchiveAddition)
+        {
+            // Get root of neat genome configuration section
+            var nodeList = xmlConfig.GetElementsByTagName("NoveltyConfig", "");
+
+            Debug.Assert(nodeList.Count == 1);
+
+            // Convert to an XML element
+            var xmlNoveltyConfig = nodeList[0] as XmlElement;
+
+            archiveAdditionThreshold = XmlUtils.GetValueAsDouble(xmlNoveltyConfig, "ArchiveAdditionThreshold");
+            archiveThresholdDecreaseMultiplier = XmlUtils.GetValueAsDouble(xmlNoveltyConfig,
+                "ArchiveThresholdDecreaseMultiplier");
+            archiveThresholdIncreaseMultiplier = XmlUtils.GetValueAsDouble(xmlNoveltyConfig,
+                "ArchiveThresholdIncreaseMultiplier");
+            maxGenerationalArchiveAddition = XmlUtils.GetValueAsInt(xmlNoveltyConfig,
+                "MaxGenerationalArchiveAddition");
+            maxGenerationsWithoutArchiveAddition = XmlUtils.GetValueAsInt(xmlNoveltyConfig,
+                "MaxGenerationsWithoutArchiveAddition");
         }
     }
 }

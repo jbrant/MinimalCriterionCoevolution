@@ -81,7 +81,8 @@ namespace SharpNeat.Domains.MazeNavigation
             {
                 SpecieCount = XmlUtils.GetValueAsInt(xmlConfig, "SpecieCount"),
                 InterspeciesMatingProportion = XmlUtils.GetValueAsDouble(xmlConfig,
-                    "InterspeciesMatingProbability")
+                    "InterspeciesMatingProbability"),
+                MinTimeAlive = XmlUtils.GetValueAsInt(xmlConfig, "MinTimeAlive")
             };
             NeatGenomeParameters = ExperimentUtils.ReadNeatGenomeParameters(xmlConfig);
 

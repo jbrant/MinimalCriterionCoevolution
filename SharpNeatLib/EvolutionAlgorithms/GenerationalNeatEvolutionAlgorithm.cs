@@ -34,7 +34,7 @@ using SharpNeat.Utility;
 namespace SharpNeat.EvolutionAlgorithms
 {
     /// <summary>
-    ///     Implementation of the NEAT evolution algorithm.
+    ///     Implementation of the generational NEAT evolution algorithm.
     ///     Incorporates:
     ///     - Speciation with fitness sharing.
     ///     - Creating offspring via both sexual and asexual reproduction.
@@ -98,8 +98,8 @@ namespace SharpNeat.EvolutionAlgorithms
             UpdateBestGenome();
             UpdateStats();
 
-            // Update the elite archive parameters and reset for next generation
-            EliteArchive?.UpdateArchiveParameters();
+            // Update the novelty archive parameters (if exists) and reset for next generation
+            AbstractNoveltyArchive?.UpdateArchiveParameters();
 
             // Determine the complexity regulation mode and switch over to the appropriate set of evolution
             // algorithm parameters. Also notify the genome factory to allow it to modify how it creates genomes

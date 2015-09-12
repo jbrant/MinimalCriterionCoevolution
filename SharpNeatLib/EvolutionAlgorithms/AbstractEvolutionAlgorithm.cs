@@ -75,7 +75,7 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     An archive of genomes that are particularly performant or "unique" with respect to some characterization.
         ///     Typically, this will persistent through multiple generations or evaluations.
         /// </summary>
-        protected EliteArchive<TGenome> EliteArchive;
+        protected AbstractNoveltyArchive<TGenome> AbstractNoveltyArchive;
 
         #endregion
 
@@ -130,18 +130,18 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     genomes.
         /// </param>
         /// <param name="genomeList">An initial genome population.</param>
-        /// <param name="eliteArchive">
+        /// <param name="abstractNoveltyArchive">
         ///     The persistent archive of genomes posessing a unique trait with respect to a behavior
         ///     characterization (optional).
         /// </param>
         public virtual void Initialize(IGenomeEvaluator<TGenome> genomeFitnessEvaluator, IGenomeFactory<TGenome> genomeFactory,
-            List<TGenome> genomeList, EliteArchive<TGenome> eliteArchive)
+            List<TGenome> genomeList, AbstractNoveltyArchive<TGenome> abstractNoveltyArchive)
         {
             CurrentGeneration = 0;
             GenomeEvaluator = genomeFitnessEvaluator;
             GenomeFactory = genomeFactory;
             GenomeList = genomeList;
-            EliteArchive = eliteArchive;
+            AbstractNoveltyArchive = abstractNoveltyArchive;
             PopulationSize = GenomeList.Count;
             RunState = RunState.Ready;
             UpdateScheme = new UpdateScheme(new TimeSpan(0, 0, 1));
@@ -157,19 +157,19 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     genomes.
         /// </param>
         /// <param name="populationSize">The number of genomes to create for the initial population.</param>
-        /// <param name="eliteArchive">
+        /// <param name="abstractNoveltyArchive">
         ///     The persistent archive of genomes posessing a unique trait with respect to a behavior
         ///     characterization (optional).
         /// </param>
         public virtual void Initialize(IGenomeEvaluator<TGenome> genomeFitnessEvaluator, IGenomeFactory<TGenome> genomeFactory,
-            int populationSize, EliteArchive<TGenome> eliteArchive)
+            int populationSize, AbstractNoveltyArchive<TGenome> abstractNoveltyArchive)
         {
             CurrentGeneration = 0;
             GenomeEvaluator = genomeFitnessEvaluator;
             GenomeFactory = genomeFactory;
             GenomeList = genomeFactory.CreateGenomeList(populationSize, CurrentGeneration);
             PopulationSize = populationSize;
-            EliteArchive = eliteArchive;
+            AbstractNoveltyArchive = abstractNoveltyArchive;
             RunState = RunState.Ready;
             UpdateScheme = new UpdateScheme(new TimeSpan(0, 0, 1));
         }
