@@ -243,6 +243,7 @@
     <Compile Include="SpeciationStrategies\RandomClusteringStrategy.cs" />
     <Compile Include="SpeciationStrategies\SpeciationUtils.cs" />
     <Compile Include="SpeciationStrategies\SpecieStats.cs" />
+    <Compile Include="Utility\EvaluationUtils.cs" />
     <Compile Include="Utility\BoxMullerGaussianSampler.cs" />
     <Compile Include="Utility\CircularBuffer.cs" />
     <Compile Include="Utility\NoveltyUtils.cs" />

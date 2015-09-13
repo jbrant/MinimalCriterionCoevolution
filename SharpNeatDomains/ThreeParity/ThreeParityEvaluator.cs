@@ -80,7 +80,7 @@ namespace SharpNeat.Domains.ThreeParity
                     fitness += 1.0 - ((1.0 - output) * (1.0 - output));
 
                     // Test if output is within certain margin of error
-                    if (output < 0.9)
+                    if (output < 0.5)
                     {
                         success = false;
                     }
@@ -94,7 +94,7 @@ namespace SharpNeat.Domains.ThreeParity
                     fitness += 1.0 - (output * output);
 
                     // Test if output is within certain margin of error
-                    if (output >= 0.1)
+                    if (output >= 0.5)
                     {
                         success = false;
                     }

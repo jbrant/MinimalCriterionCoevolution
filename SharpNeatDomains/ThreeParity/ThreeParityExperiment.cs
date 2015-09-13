@@ -11,6 +11,7 @@ using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.EvolutionAlgorithms.ComplexityRegulation;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Loggers;
+using SharpNeat.Network;
 using SharpNeat.Phenomes;
 using SharpNeat.SpeciationStrategies;
 
@@ -109,6 +110,7 @@ namespace SharpNeat.Domains.ThreeParity
             NeatEvolutionAlgorithmParameters.SpecieCount = _specieCount;
             NeatGenomeParameters = new NeatGenomeParameters();
             NeatGenomeParameters.FeedforwardOnly = _activationScheme.AcyclicNetwork;
+            NeatGenomeParameters.ActivationFn = PlainSigmoid.__DefaultInstance;
         }
 
         /// <summary>
