@@ -634,14 +634,13 @@ The problem domain view allows the performance of the best genome to be observed
       <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>
       <ComplexityThreshold>30</ComplexityThreshold>
       <OffspringBatchSize>10</OffspringBatchSize>
-      <PopulationEvaluationFrequency>100</PopulationEvaluationFrequency>
+      <PopulationEvaluationFrequency>20</PopulationEvaluationFrequency>
       <GenomeConfig>
         <InitialConnectionProportion>1</InitialConnectionProportion>
         <WeightMutationProbability>0.6</WeightMutationProbability>
         <AddConnnectionProbability>0.1</AddConnnectionProbability>
         <AddNodeProbability>0.005</AddNodeProbability>
       </GenomeConfig>
-      <!-- <MaxDegreeOfParallelism>1</MaxDegreeOfParallelism> -->
       <BehaviorCharacterization>EndPoint</BehaviorCharacterization>
       <NearestNeighbors>15</NearestNeighbors>
       <NoveltyConfig>                
@@ -649,12 +648,13 @@ The problem domain view allows the performance of the best genome to be observed
         <ArchiveThresholdDecreaseMultiplier>0.95</ArchiveThresholdDecreaseMultiplier>
         <ArchiveThresholdIncreaseMultiplier>1.3</ArchiveThresholdIncreaseMultiplier>
         <MaxGenerationalArchiveAddition>5</MaxGenerationalArchiveAddition>
-        <MaxGenerationsWithoutArchiveAddition>7</MaxGenerationsWithoutArchiveAddition>
+        <MaxGenerationsWithoutArchiveAddition>10</MaxGenerationsWithoutArchiveAddition>
       </NoveltyConfig>
       <MaxTimesteps>400</MaxTimesteps>
       <MinSuccessDistance>5</MinSuccessDistance>
       <MaxDistanceToTarget>300</MaxDistanceToTarget>
-      <MazeVariant>MediumMaze</MazeVariant>      
+      <MazeVariant>MediumMaze</MazeVariant>
+      <GenerationalLogFile>F:\\User Data\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Novelty Search\\Experiments\\EvolutionData.csv</GenerationalLogFile>
       <Description>
         This is the maze navigation experiment used in the original novelty search papers (citation needed).
       </Description>

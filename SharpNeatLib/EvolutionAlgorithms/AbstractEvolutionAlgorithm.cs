@@ -1,10 +1,13 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Reflection;
 using System.Threading;
 using log4net;
 using SharpNeat.Core;
+
+#endregion
 
 namespace SharpNeat.EvolutionAlgorithms
 {
@@ -39,6 +42,9 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </summary>
         private readonly AutoResetEvent _awaitRestartEvent = new AutoResetEvent(false);
 
+        /// <summary>
+        ///     Logs evolution data from classes that implement ILoggable.
+        /// </summary>
         protected IDataLogger EvolutionLogger;
 
         /// <summary>
@@ -65,11 +71,11 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     The current population of genomes.
         /// </summary>
         public IList<TGenome> GenomeList { get; protected set; }
-        
+
         /// <summary>
         ///     The total number of genomes in the population (typically, this should remain fixed).
         /// </summary>
-        protected int PopulationSize;        
+        protected int PopulationSize;
 
         /// <summary>
         ///     An archive of genomes that are particularly performant or "unique" with respect to some characterization.
@@ -134,7 +140,8 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     The persistent archive of genomes posessing a unique trait with respect to a behavior
         ///     characterization (optional).
         /// </param>
-        public virtual void Initialize(IGenomeEvaluator<TGenome> genomeFitnessEvaluator, IGenomeFactory<TGenome> genomeFactory,
+        public virtual void Initialize(IGenomeEvaluator<TGenome> genomeFitnessEvaluator,
+            IGenomeFactory<TGenome> genomeFactory,
             List<TGenome> genomeList, AbstractNoveltyArchive<TGenome> abstractNoveltyArchive)
         {
             CurrentGeneration = 0;
@@ -161,7 +168,8 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     The persistent archive of genomes posessing a unique trait with respect to a behavior
         ///     characterization (optional).
         /// </param>
-        public virtual void Initialize(IGenomeEvaluator<TGenome> genomeFitnessEvaluator, IGenomeFactory<TGenome> genomeFactory,
+        public virtual void Initialize(IGenomeEvaluator<TGenome> genomeFitnessEvaluator,
+            IGenomeFactory<TGenome> genomeFactory,
             int populationSize, AbstractNoveltyArchive<TGenome> abstractNoveltyArchive)
         {
             CurrentGeneration = 0;
@@ -359,7 +367,7 @@ namespace SharpNeat.EvolutionAlgorithms
                 {
                     PausedEvent(this, EventArgs.Empty);
 
-                    // Close the logger
+                    // Close the evolution logger
                     EvolutionLogger?.Close();
                 }
                 catch (Exception ex)

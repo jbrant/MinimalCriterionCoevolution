@@ -1,13 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Config>
-  <PopulationSize>150</PopulationSize>
+  <PopulationSize>250</PopulationSize>
   <SpecieCount>10</SpecieCount>
   <Activation>
     <Scheme>Acyclic</Scheme>
-    <Iters>2</Iters>
   </Activation>
   <ComplexityRegulationStrategy>Absolute</ComplexityRegulationStrategy>
   <ComplexityThreshold>10</ComplexityThreshold>
+  <GenerationalLogFile>F:\\User Data\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Courses\\CAP 6616\\ThreeParity Project\\Data\\TestLogFile.csv</GenerationalLogFile>
   <Description>
     Logical XOR. The goal is to reproduce the following logic truth table:
     In1 | In2 | Out

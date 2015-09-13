@@ -7,6 +7,7 @@ using SharpNeat.DistanceMetrics;
 using SharpNeat.EliteArchives;
 using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.Genomes.Neat;
+using SharpNeat.Loggers;
 using SharpNeat.Phenomes;
 using SharpNeat.SpeciationStrategies;
 
@@ -25,6 +26,11 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
         private int _maxGenerationsWithoutArchiveAddition;
         private int _nearestNeighbors;
         private int _populationEvaluationFrequency;
+
+        /// <summary>
+        ///     Path/File to which to write generational data log.
+        /// </summary>
+        private string _generationalLogFile;
 
         public override void Initialize(string name, XmlElement xmlConfig)
         {
@@ -47,6 +53,9 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
             // Read in steady-state specific parameters
             _batchSize = XmlUtils.GetValueAsInt(xmlConfig, "OffspringBatchSize");
             _populationEvaluationFrequency = XmlUtils.GetValueAsInt(xmlConfig, "PopulationEvaluationFrequency");
+
+            // Read in log file path/name
+            _generationalLogFile = XmlUtils.TryGetValueAsString(xmlConfig, "GenerationalLogFile");
         }
 
         /// <summary>
@@ -62,6 +71,8 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
             IGenomeFactory<NeatGenome> genomeFactory,
             List<NeatGenome> genomeList)
         {
+            FileDataLogger logger = null;
+
             // Create distance metric. Mismatched genes have a fixed distance of 10; for matched genes the distance is their weigth difference.
             IDistanceMetric distanceMetric = new ManhattanDistanceMetric(1.0, 0.0, 10.0);
             ISpeciationStrategy<NeatGenome> speciationStrategy =
@@ -71,9 +82,16 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
             var complexityRegulationStrategy =
                 ExperimentUtils.CreateComplexityRegulationStrategy(ComplexityRegulationStrategy, Complexitythreshold);
 
+            // Initialize the logger
+            if (_generationalLogFile != null)
+            {
+                logger =
+                    new FileDataLogger(_generationalLogFile);
+            }
+
             // Create the evolution algorithm.
             var ea = new SteadyStateNeatEvolutionAlgorithm<NeatGenome>(NeatEvolutionAlgorithmParameters,
-                speciationStrategy, complexityRegulationStrategy, _batchSize, _populationEvaluationFrequency);
+                speciationStrategy, complexityRegulationStrategy, _batchSize, _populationEvaluationFrequency, logger);
 
             // Create IBlackBox evaluator.
             var mazeNavigationEvaluator = new MazeNavigationNoveltyEvaluator(MaxDistanceToTarget, MaxTimesteps,

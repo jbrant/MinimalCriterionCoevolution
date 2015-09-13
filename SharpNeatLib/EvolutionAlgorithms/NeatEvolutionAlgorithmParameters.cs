@@ -97,6 +97,8 @@ namespace SharpNeat.EvolutionAlgorithms
             MeanSpecieChampFitnessMovingAverageHistoryLength = DefgaultMeanSpecieChampFitnessMovingAverageHistoryLength;
             ComplexityMovingAverageHistoryLength = DefaultComplexityMovingAverageHistoryLength;
 
+            MinTimeAlive = DefaultMinTimeAlive;
+
             NormalizeProportions();
         }
 
@@ -116,6 +118,8 @@ namespace SharpNeat.EvolutionAlgorithms
             BestFitnessMovingAverageHistoryLength = copyFrom.BestFitnessMovingAverageHistoryLength;
             MeanSpecieChampFitnessMovingAverageHistoryLength = copyFrom.MeanSpecieChampFitnessMovingAverageHistoryLength;
             ComplexityMovingAverageHistoryLength = copyFrom.ComplexityMovingAverageHistoryLength;
+
+            MinTimeAlive = copyFrom.MinTimeAlive;
         }
 
         #endregion

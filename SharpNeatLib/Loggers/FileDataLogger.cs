@@ -22,7 +22,7 @@ namespace SharpNeat.Loggers
         public FileDataLogger(String filename, String delimiter = ",")
         {
             LogFileName = filename;
-            rowElementDelimiter = delimiter;
+            _rowElementDelimiter = delimiter;
         }
 
         #endregion
@@ -41,7 +41,7 @@ namespace SharpNeat.Loggers
         /// <summary>
         ///     The delimiter to use for record separation.
         /// </summary>
-        private readonly string rowElementDelimiter;
+        private readonly string _rowElementDelimiter;
 
         /// <summary>
         ///     The StreamWriter instance.
@@ -70,7 +70,7 @@ namespace SharpNeat.Loggers
             List<LoggableElement> combinedElements = extractSortedCombinedList(loggableElements);
 
             // Write the header
-            _writer.WriteLine(string.Join(rowElementDelimiter, extractHeaderNames(combinedElements)));
+            _writer.WriteLine(string.Join(_rowElementDelimiter, extractHeaderNames(combinedElements)));
 
             // Immediatley flush to the log file
             _writer.Flush();
@@ -89,7 +89,7 @@ namespace SharpNeat.Loggers
             List<LoggableElement> combinedElements = extractSortedCombinedList(loggableElements);
 
             // Write observation row
-            _writer.WriteLine(string.Join(rowElementDelimiter, extractDataPoints(combinedElements)));
+            _writer.WriteLine(string.Join(_rowElementDelimiter, extractDataPoints(combinedElements)));
 
             // Immediatley flush to the log file
             _writer.Flush();

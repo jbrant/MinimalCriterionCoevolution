@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using SharpNeat.Core;
 using SharpNeat.Loggers;
 using SharpNeat.Network;
@@ -1573,7 +1574,8 @@ namespace SharpNeat.Genomes.Neat
         /// <returns>The LoggableElements for NeatGenome.</returns>
         public List<LoggableElement> GetLoggableElements()
         {
-            return new List<LoggableElement>
+            // Add all loggable elements except for behavior characterization
+            List<LoggableElement> loggableElements = new List<LoggableElement>
             {
                 new LoggableElement("NeatGenome - Genome ID", Convert.ToString(_id, CultureInfo.InvariantCulture)),
                 new LoggableElement("NeatGenome - Birth Generation",
@@ -1583,8 +1585,24 @@ namespace SharpNeat.Genomes.Neat
                 new LoggableElement("NeatGenome - Connection Gene Count",
                     Convert.ToString(ConnectionGeneList.Count, CultureInfo.InvariantCulture)),
                 new LoggableElement("NeatGenome - Total Gene Count",
-                    Convert.ToString(NeuronGeneList.Count + ConnectionGeneList.Count, CultureInfo.InvariantCulture))
+                    Convert.ToString(NeuronGeneList.Count + ConnectionGeneList.Count, CultureInfo.InvariantCulture)),
+                new LoggableElement("NeatGenome - Fitness",
+                    Convert.ToString(EvaluationInfo.Fitness, CultureInfo.InvariantCulture)),
+                new LoggableElement("NeatGenome - Evaluation Count",
+                    Convert.ToString(EvaluationInfo.EvaluationCount, CultureInfo.InvariantCulture))
             };
+
+            // Add all behavior characteriazation elements as a separate column
+            if (EvaluationInfo.BehaviorCharacterization != null)
+            {
+                loggableElements.AddRange(
+                    EvaluationInfo.BehaviorCharacterization.Select(
+                        (t, cnt) =>
+                            new LoggableElement(string.Format("NeatGenome - Behavior {0}", cnt),
+                                Convert.ToString(t, CultureInfo.InvariantCulture))));
+            }
+
+            return loggableElements;
         }
 
         #endregion

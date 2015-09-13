@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Xml;
 using log4net.Config;
 using SharpNeat.Core;
@@ -31,11 +32,11 @@ namespace SharpNeatConsole
     /// <summary>
     /// Minimal console application that hardwaires the setting up on a evolution algorithm and start it running.
     /// </summary>
-    class Program
+    class ProgramExample
     {
         static IGenomeFactory<NeatGenome> _genomeFactory;
         static List<NeatGenome> _genomeList;
-        static NeatEvolutionAlgorithm<NeatGenome> _ea;
+        static INeatEvolutionAlgorithm<NeatGenome> _ea;
 
         static void Main(string[] args)
         {
@@ -47,7 +48,7 @@ namespace SharpNeatConsole
 
             // Load config XML.
             XmlDocument xmlConfig = new XmlDocument();
-            xmlConfig.Load("xor.config.xml");
+            xmlConfig.Load("xor_logging.config.xml");
             experiment.Initialize("XOR", xmlConfig.DocumentElement);
 
             // Create a genome factory with our neat genome parameters object and the appropriate number of input and output neuron genes.
@@ -63,8 +64,13 @@ namespace SharpNeatConsole
             // Start algorithm (it will run on a background thread).
             _ea.StartContinue();
 
+            while (RunState.Terminated != _ea.RunState && RunState.Paused != _ea.RunState)
+            {
+                Thread.Sleep(2000);
+            }
+
             // Hit return to quit.
-            Console.ReadLine();
+            //Console.ReadLine();
         }
 
         static void ea_UpdateEvent(object sender, EventArgs e)
