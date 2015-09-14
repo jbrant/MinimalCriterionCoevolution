@@ -85,6 +85,9 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </summary>
         private readonly int _batchSize;
 
+        /// <summary>
+        ///     The number of generations after to which to re-evaluate the entire population.
+        /// </summary>
         private readonly int _populationEvaluationFrequency;
 
         #endregion

@@ -660,4 +660,36 @@ The problem domain view allows the performance of the best genome to be observed
       </Description>
     </Config>
   </Experiment>
+
+  <Experiment name="Maze Navigation - Random (Steady State NEAT)">
+    <AssemblyPath>SharpNeatDomains.dll</AssemblyPath>
+    <ClassName>SharpNeat.Domains.MazeNavigation.NoveltyExperiment.SteadyStateMazeNavigationRandomExperiment</ClassName>
+    <Config>
+      <PopulationSize>250</PopulationSize>
+      <SpecieCount>10</SpecieCount>
+      <InterspeciesMatingProbability>0.001</InterspeciesMatingProbability>
+      <MinTimeAlive>5</MinTimeAlive>
+      <Activation>
+        <Scheme>CyclicFixedIters</Scheme>
+        <Iters>2</Iters>
+      </Activation>
+      <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>
+      <ComplexityThreshold>30</ComplexityThreshold>
+      <OffspringBatchSize>10</OffspringBatchSize>
+      <PopulationEvaluationFrequency>20</PopulationEvaluationFrequency>
+      <GenomeConfig>
+        <InitialConnectionProportion>1</InitialConnectionProportion>
+        <WeightMutationProbability>0.6</WeightMutationProbability>
+        <AddConnnectionProbability>0.1</AddConnnectionProbability>
+        <AddNodeProbability>0.005</AddNodeProbability>
+      </GenomeConfig>
+      <MaxTimesteps>400</MaxTimesteps>
+      <MinSuccessDistance>5</MinSuccessDistance>
+      <MaxDistanceToTarget>300</MaxDistanceToTarget>
+      <MazeVariant>MediumMaze</MazeVariant>
+      <Description>
+        This is the maze navigation experiment used in the original novelty search papers (citation needed).
+      </Description>
+    </Config>
+  </Experiment>
 </Experiments>
