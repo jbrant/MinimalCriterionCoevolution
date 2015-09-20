@@ -23,9 +23,11 @@ using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Xml;
+using SharpNeat.Core;
 using SharpNeat.Decoders;
 using SharpNeat.EvolutionAlgorithms.ComplexityRegulation;
 using SharpNeat.Genomes.Neat;
+using SharpNeat.MinimalCriterias;
 
 #endregion
 
@@ -206,7 +208,7 @@ namespace SharpNeat.Domains
             out double archiveThresholdDecreaseMultiplier, out double archiveThresholdIncreaseMultiplier,
             out int maxGenerationalArchiveAddition, out int maxGenerationsWithoutArchiveAddition)
         {
-            // Get root of neat genome configuration section
+            // Get root of novelty configuration section
             var nodeList = xmlConfig.GetElementsByTagName("NoveltyConfig", "");
 
             Debug.Assert(nodeList.Count == 1);
@@ -223,6 +225,57 @@ namespace SharpNeat.Domains
                 "MaxGenerationalArchiveAddition");
             maxGenerationsWithoutArchiveAddition = XmlUtils.GetValueAsInt(xmlNoveltyConfig,
                 "MaxGenerationsWithoutArchiveAddition");
+        }
+
+        public static IBehaviorCharacterization ReadBehaviorCharacterization(XmlElement xmlConfig)
+        {
+            // Get root of behavior configuration section
+            XmlNodeList behaviorNodeList = xmlConfig.GetElementsByTagName("BehaviorConfig", "");
+
+            // Ensure that the behavior node list was found
+            if (behaviorNodeList.Count != 1)
+            {
+                throw new ArgumentException("Missing or invalid BehaviorConfig XML config settings.");
+            }
+
+            XmlElement xmlBehaviorConfig = behaviorNodeList[0] as XmlElement;
+
+            // Parse and generate the appropriate behavior characterization
+            IBehaviorCharacterization behaviorCharacterization = BehaviorCharacterizationUtil
+                .GenerateBehaviorCharacterization(
+                    XmlUtils.TryGetValueAsString(xmlBehaviorConfig, "BehaviorCharacterization"));
+
+            // Try to get the child minimal criteria configuration
+            XmlNodeList minimalCriteriaNodeList = xmlBehaviorConfig.GetElementsByTagName("MinimalCriteriaConfig", "");
+
+            // If a minimal criteria is specified, read in its configuration and add it to the behavior characterization
+            if (minimalCriteriaNodeList.Count == 1)
+            {
+                XmlElement xmlMinimalCriteriaConfig = minimalCriteriaNodeList[0] as XmlElement;
+
+                // Extract the minimal criteria constraint name
+                string minimalCriteriaConstraint = XmlUtils.TryGetValueAsString(xmlMinimalCriteriaConfig,
+                    "MinimalCriteriaConstraint");
+
+                // Get the appropriate minimal criteria type
+                MinimalCriteriaType mcType =
+                    BehaviorCharacterizationUtil.ConvertStringToMinimalCriteria(minimalCriteriaConstraint);
+
+                // TODO: Need to have a switch statement here when more MC types are added
+                if (MinimalCriteriaType.EuclideanLocation.Equals(mcType))
+                {
+                    // Read in the min/max location bounds
+                    double xMin = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "XMin");
+                    double xMax = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "XMax");
+                    double yMin = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "YMin");
+                    double yMax = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "YMax");
+
+                    // Set the minimal criteria on the behavior characterization
+                    behaviorCharacterization.MinimalCriteria = new EuclideanLocationCriteria(xMin, xMax, yMin, yMax);
+                }
+            }
+
+            return behaviorCharacterization;
         }
     }
 }

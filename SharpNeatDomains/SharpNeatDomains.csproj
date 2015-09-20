@@ -55,7 +55,7 @@
     <Compile Include="AbstractGenomeView.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="BehaviorCharacterizationType.cs" />
+    <Compile Include="BehaviorCharacterizationUtils.cs" />
     <Compile Include="BinaryElevenMultiplexer\RbfBinaryElevenMultiplexerExperiment.cs" />
     <Compile Include="BinarySixMultiplexer\BinarySixMultiplexerEvaluator.cs" />
     <Compile Include="AbstractDomainView.cs">
@@ -198,7 +198,9 @@
   <ItemGroup>
     <None Include="ClassDiagram1.cd" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="MazeNavigation\MCNSExperiment\" />
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

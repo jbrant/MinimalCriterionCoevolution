@@ -17,12 +17,18 @@
         public BehaviorInfo(double[] behaviors)
         {
             Behaviors = behaviors;
+            DoesBehaviorSatisfyMinimalCriteria = true;
         }
 
         /// <summary>
         ///     The numeric behavior representation.
         /// </summary>
         public double[] Behaviors { get; }
+
+        /// <summary>
+        ///     Flag indicating whether the behaviors satisfy the minimal criteria.  This flag is set after evaluation.
+        /// </summary>
+        public bool DoesBehaviorSatisfyMinimalCriteria { get; set; }
 
         /// <summary>
         ///     Calculates the distance between two behaviors.
@@ -34,7 +40,8 @@
         {
             if (behavior1.Behaviors.Length != behavior2.Behaviors.Length)
             {
-                // TODO: Probably throw an exception here since it doesn't make sense to compare behaviors whose characterization differs
+                throw new SharpNeatException(
+                    "Cannot compare behavior characterizations because behavior length differs.");
             }
 
             // Calculate the difference between the behavior double-precision arrays
@@ -51,7 +58,8 @@
         {
             if (behavior1.Length != behavior2.Length)
             {
-                // TODO: Probably throw an exception here since it doesn't make sense to compare behaviors whose characterization differs
+                throw new SharpNeatException(
+                    "Cannot compare behavior characterizations because behavior length differs.");
             }
 
             double distance = 0;

@@ -37,10 +37,7 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
             base.Initialize(name, xmlConfig);
 
             // Read in the behavior characterization
-            _behaviorCharacterization =
-                BehaviorCharacterizationUtil.GenerateBehaviorCharacterization(
-                    BehaviorCharacterizationUtil.ConvertStringToBehavioralCharacterization(
-                        XmlUtils.TryGetValueAsString(xmlConfig, "BehaviorCharacterization")));
+            _behaviorCharacterization = ExperimentUtils.ReadBehaviorCharacterization(xmlConfig);
 
             // Read in the novelty archive parameters
             ExperimentUtils.ReadNoveltyParameters(xmlConfig, out _archiveAdditionThreshold,

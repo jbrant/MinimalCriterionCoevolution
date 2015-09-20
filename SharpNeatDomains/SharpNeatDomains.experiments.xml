@@ -12,7 +12,7 @@
       </Activation>
       <ComplexityRegulationStrategy>Absolute</ComplexityRegulationStrategy>
       <ComplexityThreshold>20</ComplexityThreshold>
-      <!-- <MaxDegreeOfParallelism>1</MaxDegreeOfParallelism> -->
+      <MaxDegreeOfParallelism>1</MaxDegreeOfParallelism>
       <GenerationalLogFile>F:\\User Data\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Courses\\CAP 6616\\ThreeParity Project\\Data\\TestLogFile.csv</GenerationalLogFile>
       <Description></Description>
     </Config>
@@ -641,7 +641,16 @@ The problem domain view allows the performance of the best genome to be observed
         <AddConnnectionProbability>0.1</AddConnnectionProbability>
         <AddNodeProbability>0.005</AddNodeProbability>
       </GenomeConfig>
-      <BehaviorCharacterization>EndPoint</BehaviorCharacterization>
+      <BehaviorConfig>
+        <BehaviorCharacterization>EndPoint</BehaviorCharacterization>
+        <MinimalCriteriaConfig>
+          <MinimalCriteriaConstraint>EuclideanLocation</MinimalCriteriaConstraint>
+          <XMin>0</XMin>
+          <XMax>300</XMax>
+          <YMin>0</YMin>
+          <YMax>300</YMax>
+        </MinimalCriteriaConfig>
+      </BehaviorConfig>
       <NearestNeighbors>15</NearestNeighbors>
       <NoveltyConfig>                
         <ArchiveAdditionThreshold>6</ArchiveAdditionThreshold>

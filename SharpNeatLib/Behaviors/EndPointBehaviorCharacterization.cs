@@ -1,5 +1,9 @@
-﻿using System.Collections.Generic;
+﻿#region
+
+using System.Collections.Generic;
 using SharpNeat.Core;
+
+#endregion
 
 namespace SharpNeat.Behaviors
 {
@@ -10,39 +14,31 @@ namespace SharpNeat.Behaviors
     public class EndPointBehaviorCharacterization : IBehaviorCharacterization
     {
         /// <summary>
+        ///     Default end-point behavior characterization constructor.
+        /// </summary>
+        public EndPointBehaviorCharacterization()
+        {
+        }
+
+        /// <summary>
+        ///     End-point behavior characterization constructor accepting a minimal criteria definition.
+        /// </summary>
+        /// <param name="minimalCriteria"></param>
+        public EndPointBehaviorCharacterization(IMinimalCriteria minimalCriteria)
+        {
+            MinimalCriteria = minimalCriteria;
+        }
+
+        /// <summary>
         ///     The double array of behaviors.  Since this is an end-point characterization, it should only contain the number of
         ///     elements equivalent to the dimensionality of the state space.
         /// </summary>
         public List<double> Behaviors { get; private set; }
 
         /// <summary>
-        ///     Calculates the distance between this behavior characterization and the given behavior characterization.
+        ///     The minimal criteria which the behavior must meet in order to be considered viable.
         /// </summary>
-        /// <param name="bcToCompare">
-        ///     The behavior characterization against which to calculate the distance.  Note that this
-        ///     behavior characterization needs to be an end-point characterization in order to compare them.
-        /// </param>
-        /// <returns>The distance between the behavior characterizations.</returns>
-        public double CalculateDistance(IBehaviorCharacterization bcToCompare)
-        {
-            // If the behavior characterization to compare is not the same, it doesn't
-            // make sense to compare them
-            if (!(bcToCompare is EndPointBehaviorCharacterization))
-            {
-                // TODO: Probably throw an exception here since it doesn't make sense to compare behavior characterizations that are not of the same type
-            }
-
-            double distance = 0;
-
-            // Compare the behavior arrays in an element-wise fashion
-            for (var position = 0; position < Behaviors.Count; position++)
-            {
-                var delta = Behaviors[position] - bcToCompare.Behaviors[position];
-                distance += delta*delta;
-            }
-
-            return distance;
-        }
+        public IMinimalCriteria MinimalCriteria { get; set; }
 
         /// <summary>
         ///     Updates the behavior array.  This equates to simply replacing the behavior array with the coordinates of the new
@@ -53,6 +49,20 @@ namespace SharpNeat.Behaviors
         {
             // Overwrite the existing behavior array with the current location
             Behaviors = newBehaviors;
+        }
+
+        /// <summary>
+        ///     Evaluates whether the given behavior info meets the minimal criteria for this behavior characterization.
+        /// </summary>
+        /// <param name="behaviorInfo">The behavior info to evaluate.</param>
+        /// <returns>
+        ///     Boolean value indicating whether the given behavior info meets the minimal criteria for this behavior
+        ///     characterization.
+        /// </returns>
+        public bool IsMinimalCriteriaSatisfied(BehaviorInfo behaviorInfo)
+        {
+            // If there is no minimal criteria, then by definition it has been met
+            return MinimalCriteria?.DoesCharacterizationSatisfyMinimalCriteria(behaviorInfo) ?? true;
         }
     }
 }

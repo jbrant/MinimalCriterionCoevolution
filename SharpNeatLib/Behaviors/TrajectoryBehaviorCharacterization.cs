@@ -1,5 +1,10 @@
-﻿using System.Collections.Generic;
+﻿#region
+
+using System;
+using System.Collections.Generic;
 using SharpNeat.Core;
+
+#endregion
 
 namespace SharpNeat.Behaviors
 {
@@ -16,31 +21,9 @@ namespace SharpNeat.Behaviors
         public List<double> Behaviors { get; private set; }
 
         /// <summary>
-        ///     Calculates the distance between this behavior characterization and the given behavior characterization.
+        ///     The minimal criteria which the behavior must meet in order to be considered viable.
         /// </summary>
-        /// <param name="bcToCompare">
-        ///     The behavior characterization against which to calculate the distance.  Note that this
-        ///     behavior characterization needs to be an trajectory characterization in order to compare them.
-        /// </param>
-        /// <returns></returns>
-        public double CalculateDistance(IBehaviorCharacterization bcToCompare)
-        {
-            if (!(bcToCompare is TrajectoryBehaviorCharacterization))
-            {
-                // TODO: Probably throw an exception here since it doesn't make sense to compare behavior characterizations that are not of the same type
-            }
-
-            double distance = 0;
-
-            // Compare the behavior arrays in an element-wise fashion
-            for (var position = 0; position < Behaviors.Count; position++)
-            {
-                var delta = Behaviors[position] - bcToCompare.Behaviors[position];
-                distance += delta*delta;
-            }
-
-            return distance;
-        }
+        public IMinimalCriteria MinimalCriteria { get; set; }
 
         /// <summary>
         ///     Updates the behavior array.  This equates to appending the the end point to the existing behavior array, thus
@@ -50,6 +33,19 @@ namespace SharpNeat.Behaviors
         public void UpdateBehaviors(List<double> newBehaviors)
         {
             Behaviors.AddRange(newBehaviors);
+        }
+
+        /// <summary>
+        ///     Evaluates whether the given behavior info meets the minimal criteria for this behavior characterization.
+        /// </summary>
+        /// <param name="behaviorInfo">The behavior info to evaluate.</param>
+        /// <returns>
+        ///     Boolean value indicating whether the given behavior info meets the minimal criteria for this behavior
+        ///     characterization.
+        /// </returns>
+        public bool IsMinimalCriteriaSatisfied(BehaviorInfo behaviorInfo)
+        {
+            throw new NotImplementedException();
         }
     }
 }

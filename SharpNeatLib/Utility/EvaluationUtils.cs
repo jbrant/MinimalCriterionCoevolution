@@ -37,9 +37,11 @@ namespace SharpNeat.Utility
             }
             else
             {
-                // EvaluateFitness the behavior and update the genome's behavior characterization
+                // EvaluateFitness the behavior, update the genome's behavior characterization, 
+                // and indicate if the genome is viable based on whether the minimal criteria was satisfied
                 var behaviorInfo = phenomeEvaluator.Evaluate(phenome);
                 genome.EvaluationInfo.BehaviorCharacterization = behaviorInfo.Behaviors;
+                genome.EvaluationInfo.IsViable = behaviorInfo.DoesBehaviorSatisfyMinimalCriteria;
             }
         }
 
@@ -70,9 +72,68 @@ namespace SharpNeat.Utility
             }
             else
             {
-                // EvaluateFitness the behavior and update the genome's behavior characterization
+                // EvaluateFitness the behavior, update the genome's behavior characterization, 
+                // and indicate if the genome is viable based on whether the minimal criteria was satisfied
                 var behaviorInfo = phenomeEvaluator.Evaluate(phenome);
                 genome.EvaluationInfo.BehaviorCharacterization = behaviorInfo.Behaviors;
+                genome.EvaluationInfo.IsViable = behaviorInfo.DoesBehaviorSatisfyMinimalCriteria;
+            }
+        }
+
+        /// <summary>
+        ///     Evaluates the fitness of a given genome, decoding to its phenotypic representation on every invocation.
+        /// </summary>
+        /// <param name="genome">The genome to evaluate.</param>
+        /// <param name="genomeDecoder">The decoder for decoding the genotype to its phenotypic representation.</param>
+        /// <param name="phenomeEvaluator">The phenome evaluator.</param>
+        public static void EvaluateFitness_NonCaching(TGenome genome, IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
+            IPhenomeEvaluator<TPhenome, FitnessInfo> phenomeEvaluator)
+        {
+            TPhenome phenome = genomeDecoder.Decode(genome);
+            if (null == phenome)
+            {
+                // Non-viable genome.
+                genome.EvaluationInfo.SetFitness(0.0);
+                genome.EvaluationInfo.AuxFitnessArr = null;
+            }
+            else
+            {
+                // Run evaluation and set fitness/auxiliary fitness
+                FitnessInfo fitnessInfo = phenomeEvaluator.Evaluate(phenome);
+                genome.EvaluationInfo.SetFitness(fitnessInfo._fitness);
+                genome.EvaluationInfo.AuxFitnessArr = fitnessInfo._auxFitnessArr;
+            }
+        }
+
+        /// <summary>
+        ///     Evaluates the fitness of a given genome, checking first for a cached copy of its phenotype before decoding to its
+        ///     phenotypic representation.
+        /// </summary>
+        /// <param name="genome">The genome to evaluate.</param>
+        /// <param name="genomeDecoder">The decoder for decoding the genotype to its phenotypic representation.</param>
+        /// <param name="phenomeEvaluator">The phenome evaluator.</param>
+        public static void EvaluateFitness_Caching(TGenome genome, IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
+            IPhenomeEvaluator<TPhenome, FitnessInfo> phenomeEvaluator)
+        {
+            TPhenome phenome = (TPhenome) genome.CachedPhenome;
+            if (null == phenome)
+            {
+                // Decode the phenome and store a ref against the genome.
+                phenome = genomeDecoder.Decode(genome);
+                genome.CachedPhenome = phenome;
+            }
+
+            if (null == phenome)
+            {
+                // Non-viable genome.
+                genome.EvaluationInfo.SetFitness(0.0);
+                genome.EvaluationInfo.AuxFitnessArr = null;
+            }
+            else
+            {
+                FitnessInfo fitnessInfo = phenomeEvaluator.Evaluate(phenome);
+                genome.EvaluationInfo.SetFitness(fitnessInfo._fitness);
+                genome.EvaluationInfo.AuxFitnessArr = fitnessInfo._auxFitnessArr;
             }
         }
 
@@ -86,13 +147,23 @@ namespace SharpNeat.Utility
         public static void EvaluateFitness(TGenome genome, IList<TGenome> genomeList, int nearestNeighbors,
             INoveltyArchive<TGenome> noveltyArchive)
         {
-            // Compare the current genome's behavior to its k-nearest neighbors in behavior space
-            var fitness =
-                BehaviorUtils<TGenome>.CalculateBehavioralDistance(genome.EvaluationInfo.BehaviorCharacterization,
-                    genomeList, nearestNeighbors, noveltyArchive);
+            FitnessInfo fitnessInfo;
+
+            // If the genome is not viable, set the fitness (i.e. behavioral novelty) to zero
+            if (genome.EvaluationInfo.IsViable == false)
+            {
+                fitnessInfo = FitnessInfo.Zero;
+            }
+            else
+            {
+                // Compare the current genome's behavior to its k-nearest neighbors in behavior space
+                double fitness =
+                    BehaviorUtils<TGenome>.CalculateBehavioralDistance(genome.EvaluationInfo.BehaviorCharacterization,
+                        genomeList, nearestNeighbors, noveltyArchive);
+                fitnessInfo = new FitnessInfo(fitness, fitness);
+            }
 
             // Update the fitness as the behavioral novelty
-            var fitnessInfo = new FitnessInfo(fitness, fitness);
             genome.EvaluationInfo.SetFitness(fitnessInfo._fitness);
             genome.EvaluationInfo.AuxFitnessArr = fitnessInfo._auxFitnessArr;
         }

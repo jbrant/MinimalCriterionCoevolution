@@ -1,6 +1,10 @@
-﻿using SharpNeat.Core;
+﻿#region
+
+using SharpNeat.Core;
 using SharpNeat.Domains.MazeNavigation.Components;
 using SharpNeat.Phenomes;
+
+#endregion
 
 namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
 {
@@ -47,7 +51,13 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
                 _maxTimesteps, _behaviorCharacterization);
 
             // Run a single trial
-            var trialInfo = world.RunTrial(phenome, EvaluationType.NoveltySearch, out stopConditionSatisfied);
+            BehaviorInfo trialInfo = world.RunTrial(phenome, EvaluationType.NoveltySearch, out stopConditionSatisfied);
+
+            // Check if the current location satisfies the minimal criteria
+            if (_behaviorCharacterization.IsMinimalCriteriaSatisfied(trialInfo) == false)
+            {
+                trialInfo.DoesBehaviorSatisfyMinimalCriteria = false;
+            }
 
             // If the navigator reached the goal, stop the experiment
             if (stopConditionSatisfied)
