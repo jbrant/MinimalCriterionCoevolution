@@ -12,9 +12,9 @@ using SharpNeat.SpeciationStrategies;
 
 #endregion
 
-namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
+namespace SharpNeat.Domains.MazeNavigation.RandomExperiment
 {
-    internal class SteadyStateMazeNavigationRandomExperiment : BaseMazeNavigationExperiment
+    public class SteadyStateMazeNavigationRandomExperiment : BaseMazeNavigationExperiment
     {
         private int _batchSize;
 

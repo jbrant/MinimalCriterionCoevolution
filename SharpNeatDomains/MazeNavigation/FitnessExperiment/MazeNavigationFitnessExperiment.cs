@@ -8,7 +8,7 @@ using SharpNeat.SpeciationStrategies;
 
 namespace SharpNeat.Domains.MazeNavigation.FitnessExperiment
 {
-    internal class MazeNavigationFitnessExperiment : BaseMazeNavigationExperiment
+    public class MazeNavigationFitnessExperiment : BaseMazeNavigationExperiment
     {
         /// <summary>
         ///     Create and return a GenerationalNeatEvolutionAlgorithm object (specific to fitness-based evaluations) ready for running the

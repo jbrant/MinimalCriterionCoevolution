@@ -1,7 +1,11 @@
 ﻿#region
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
 using SharpNeat.Core;
 using SharpNeat.Domains.MazeNavigation.Components;
+using SharpNeat.Loggers;
 using SharpNeat.Phenomes;
 
 #endregion
@@ -38,7 +42,7 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
         /// </summary>
         public bool StopConditionSatisfied { get; private set; }
 
-        public BehaviorInfo Evaluate(IBlackBox phenome)
+        public BehaviorInfo Evaluate(IBlackBox phenome, IDataLogger evaluationLogger)
         {
             // Increment evaluation count
             EvaluationCount++;
@@ -47,23 +51,39 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
             bool stopConditionSatisfied = false;
 
             // Instantiate the maze world
-            var world = new MazeNavigationWorld<BehaviorInfo>(_mazeVariant, _minSuccessDistance, _maxDistanceToTarget,
+            MazeNavigationWorld<BehaviorInfo> world = new MazeNavigationWorld<BehaviorInfo>(_mazeVariant,
+                _minSuccessDistance, _maxDistanceToTarget,
                 _maxTimesteps, _behaviorCharacterization);
 
             // Run a single trial
             BehaviorInfo trialInfo = world.RunTrial(phenome, EvaluationType.NoveltySearch, out stopConditionSatisfied);
 
-            // Check if the current location satisfies the minimal criteria
-            if (_behaviorCharacterization.IsMinimalCriteriaSatisfied(trialInfo) == false)
-            {
-                trialInfo.DoesBehaviorSatisfyMinimalCriteria = false;
-            }
-
             // If the navigator reached the goal, stop the experiment
             if (stopConditionSatisfied)
                 StopConditionSatisfied = true;
 
+            // Log trial information
+            evaluationLogger?.LogRow(new List<LoggableElement>
+            {
+                new LoggableElement("MazeNavigationNoveltyExperiment - Evaluation Count",
+                    Convert.ToString(EvaluationCount, CultureInfo.InvariantCulture)),
+                new LoggableElement("MazeNavigationNoveltyExperiment - Stop Condition Satisfied",
+                    Convert.ToString(StopConditionSatisfied, CultureInfo.InvariantCulture))
+            },
+                world.GetLoggableElements());
+
             return trialInfo;
+        }
+
+        /// <summary>
+        ///     Initializes the logger and writes header.
+        /// </summary>
+        /// <param name="evaluationLogger">The evaluation logger.</param>
+        public void Initialize(IDataLogger evaluationLogger)
+        {
+            evaluationLogger?.LogHeader(
+                new MazeNavigationWorld<FitnessInfo>(_mazeVariant, _minSuccessDistance, _maxDistanceToTarget,
+                    _maxTimesteps).GetLoggableElements());
         }
 
         /// <summary>

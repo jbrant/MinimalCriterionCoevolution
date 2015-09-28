@@ -10,7 +10,7 @@ using SharpNeat.SpeciationStrategies;
 
 namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
 {
-    internal class GenerationalMazeNavigationNoveltyExperiment : BaseMazeNavigationExperiment
+    public class GenerationalMazeNavigationNoveltyExperiment : BaseMazeNavigationExperiment
     {
         private double _archiveAdditionThreshold;
         private double _archiveThresholdDecreaseMultiplier;

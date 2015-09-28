@@ -344,6 +344,9 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </summary>
         protected virtual void Initialize()
         {
+            // Initialize the genome evalutor
+            GenomeEvaluator.Initialize();
+
             // Evaluate the genomes.
             GenomeEvaluator.Evaluate(GenomeList);
 

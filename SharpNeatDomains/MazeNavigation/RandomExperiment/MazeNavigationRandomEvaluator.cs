@@ -7,7 +7,7 @@ using SharpNeat.Utility;
 
 #endregion
 
-namespace SharpNeat.Domains.MazeNavigation
+namespace SharpNeat.Domains.MazeNavigation.RandomExperiment
 {
     internal class MazeNavigationRandomEvaluator : IPhenomeEvaluator<IBlackBox, FitnessInfo>
     {
@@ -45,7 +45,7 @@ namespace SharpNeat.Domains.MazeNavigation
             set { _stopConditionSatisfied = value; }
         }
 
-        public FitnessInfo Evaluate(IBlackBox phenome)
+        public FitnessInfo Evaluate(IBlackBox phenome, IDataLogger evaluationLogger)
         {
             // Increment eval count
             EvaluationCount++;
@@ -65,6 +65,17 @@ namespace SharpNeat.Domains.MazeNavigation
 
             // Return random value as fitness
             return new FitnessInfo(randomFitness, randomFitness);
+        }
+
+        /// <summary>
+        ///     Initializes the logger and writes header.
+        /// </summary>
+        /// <param name="evaluationLogger">The evaluation logger.</param>
+        public void Initialize(IDataLogger evaluationLogger)
+        {
+            evaluationLogger?.LogHeader(
+                new MazeNavigationWorld<FitnessInfo>(_mazeVariant, _minSuccessDistance, _maxDistanceToTarget,
+                    _maxTimesteps).GetLoggableElements());
         }
 
         /// <summary>

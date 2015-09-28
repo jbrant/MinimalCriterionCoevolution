@@ -78,7 +78,7 @@ namespace SharpNeat.DomainsExtra.WalkerBox2d
         /// <summary>
         /// EvaluateFitness the provided IBlackBox.
         /// </summary>
-        public FitnessInfo Evaluate(IBlackBox box)
+        public FitnessInfo Evaluate(IBlackBox box, IDataLogger evaluationLogger)
         {
             // Init Box2D world.
             WalkerWorld world = new WalkerWorld();
@@ -116,6 +116,13 @@ namespace SharpNeat.DomainsExtra.WalkerBox2d
             _evalCount++;
             double fitness = Math.Max(0.0, walkerIface.TorsoPosition.X);
             return new FitnessInfo(fitness, walkerIface.TorsoPosition.X);
+        }
+
+        /// <summary>
+        ///     Initializes any necessary state variables in the genome evalutor.
+        /// </summary>
+        public void Initialize(IDataLogger evaluationLogger)
+        {
         }
 
         /// <summary>

@@ -80,7 +80,7 @@ namespace SharpNeat.Domains
         /// <summary>
         /// EvaluateFitness the provided IBlackBox against the XOR problem domain and return its fitness score.
         /// </summary>
-        public FitnessInfo Evaluate(IBlackBox box)
+        public FitnessInfo Evaluate(IBlackBox box, IDataLogger evaluationLogger)
         {
             double fitness = 0;
             double output;
@@ -206,6 +206,13 @@ namespace SharpNeat.Domains
             }
 
             return new FitnessInfo(fitness, fitness);
+        }
+
+        /// <summary>
+        ///     Initializes any necessary state variables in the phenome evalutor.
+        /// </summary>
+        public void Initialize(IDataLogger evaluationLogger)
+        {
         }
 
         /// <summary>

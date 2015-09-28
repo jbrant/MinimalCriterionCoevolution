@@ -46,7 +46,7 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     Logs evolution data from classes that implement ILoggable.
         /// </summary>
         protected IDataLogger EvolutionLogger;
-
+        
         /// <summary>
         ///     The last generation during which the display/logging was updated.
         /// </summary>
@@ -226,6 +226,9 @@ namespace SharpNeat.EvolutionAlgorithms
             // Close the evolution logger
             EvolutionLogger?.Close();
 
+            // Cleanup genome evaluator
+            GenomeEvaluator.Cleanup();
+
             // Null out the internal thread
             _algorithmThread = null;
         }
@@ -369,6 +372,9 @@ namespace SharpNeat.EvolutionAlgorithms
 
                     // Close the evolution logger
                     EvolutionLogger?.Close();
+
+                    // Cleanup genome evaluator
+                    GenomeEvaluator.Cleanup();
                 }
                 catch (Exception ex)
                 {

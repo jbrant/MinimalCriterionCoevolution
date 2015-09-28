@@ -31,7 +31,7 @@ namespace SharpNeat.Domains.ThreeParity
         /// </summary>
         /// <param name="phenome">The phenome/black box (ANN) under evaluation.</param>
         /// <returns>The fitness score of the given black box optimizer.</returns>
-        public FitnessInfo Evaluate(IBlackBox phenome)
+        public FitnessInfo Evaluate(IBlackBox phenome, IDataLogger evaluationLogger)
         {
             double fitness = 0;
             bool success = true;
@@ -112,6 +112,13 @@ namespace SharpNeat.Domains.ThreeParity
             }
 
             return new FitnessInfo(fitness, fitness);
+        }
+
+        /// <summary>
+        ///     Initializes any necessary state variables in the genome evalutor.
+        /// </summary>
+        public void Initialize(IDataLogger evaluationLogger)
+        {
         }
 
         /// <summary>

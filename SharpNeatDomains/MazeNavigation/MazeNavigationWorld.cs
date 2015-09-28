@@ -1,13 +1,19 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using SharpNeat.Core;
 using SharpNeat.Domains.MazeNavigation.Components;
+using SharpNeat.Loggers;
 using SharpNeat.Phenomes;
+
+#endregion
 
 namespace SharpNeat.Domains.MazeNavigation
 {
-    public class MazeNavigationWorld<TTrialInfo>
+    public class MazeNavigationWorld<TTrialInfo> : ILoggable
     {
         /// <summary>
         ///     Characterization to use for capturing navigator behavior.
@@ -121,6 +127,23 @@ namespace SharpNeat.Domains.MazeNavigation
                     };
                     break;
             }
+        }
+
+        /// <summary>
+        ///     Returns MazeNavigationWorld LoggableElements.
+        /// </summary>
+        /// <returns>The LoggableElements for the MazeNavigationWorld.</returns>
+        public List<LoggableElement> GetLoggableElements()
+        {
+            return new List<LoggableElement>
+            {
+                new LoggableElement("MazeNavigationWorld - Navigator XLocation",
+                    Convert.ToString(_navigator.Location.X, CultureInfo.InvariantCulture)),
+                new LoggableElement("MazeNavigationWorld - Navigator YLocation",
+                    Convert.ToString(_navigator.Location.Y, CultureInfo.InvariantCulture)),
+                new LoggableElement("MazeNavigationWorld - Distance to Target",
+                    Convert.ToString(GetDistanceToTarget(), CultureInfo.InvariantCulture))
+            };
         }
 
         /// <summary>

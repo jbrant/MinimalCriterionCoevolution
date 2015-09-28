@@ -28,6 +28,7 @@ namespace SharpNeat.Core
         private readonly int _nearestNeighbors;
         private readonly IPhenomeEvaluator<TPhenome, BehaviorInfo> _phenomeEvaluator;
         private readonly PopulationEvaluationMethod _populationEvaluationMethod;
+        private readonly IDataLogger _evaluationLogger;
 
         #endregion
 
@@ -61,7 +62,7 @@ namespace SharpNeat.Core
         /// <param name="archive">A reference to the elite archive (optional).</param>
         public SerialGenomeBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
             IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, int nearestNeighbors,
-            AbstractNoveltyArchive<TGenome> archive = null)
+            AbstractNoveltyArchive<TGenome> archive = null, IDataLogger evaluationLogger = null)
         {
             _genomeDecoder = genomeDecoder;
             _phenomeEvaluator = phenomeEvaluator;
@@ -69,6 +70,7 @@ namespace SharpNeat.Core
             _batchEvaluationMethod = EvaluateBatchBehaviors_Caching;
             _nearestNeighbors = nearestNeighbors;
             _noveltyArchive = archive;
+            _evaluationLogger = evaluationLogger;
         }
 
         /// <summary>
@@ -83,12 +85,14 @@ namespace SharpNeat.Core
         /// <param name="archive">A reference to the elite archive (optional).</param>
         public SerialGenomeBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
             IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator,
-            bool enablePhenomeCaching, int nearestNeighbors, AbstractNoveltyArchive<TGenome> archive = null)
+            bool enablePhenomeCaching, int nearestNeighbors, AbstractNoveltyArchive<TGenome> archive = null,
+            IDataLogger evaluationLogger = null)
         {
             _genomeDecoder = genomeDecoder;
             _phenomeEvaluator = phenomeEvaluator;
             _nearestNeighbors = nearestNeighbors;
             _noveltyArchive = archive;
+            _evaluationLogger = evaluationLogger;
 
             if (enablePhenomeCaching)
             {
@@ -121,6 +125,27 @@ namespace SharpNeat.Core
         #endregion
 
         #region Public Evaluate and Reset methods
+
+        /// <summary>
+        ///     Initializes state variables in the genome evalutor (primarily the logger).
+        /// </summary>
+        public void Initialize()
+        {
+            // Open the logger
+            _evaluationLogger?.Open();
+
+            // Defer to phenome initialization
+            _phenomeEvaluator.Initialize(_evaluationLogger);
+        }
+
+        /// <summary>
+        ///     Cleans up evaluator state after end of execution or upon execution interruption.  In particular, this closes out
+        ///     any existing evaluation logger instance.
+        /// </summary>
+        public void Cleanup()
+        {
+            _evaluationLogger?.Close();
+        }
 
         /// <summary>
         ///     Evaluates a the behavior-based fitness of a list of genomes. Here we decode each genome in series using the
@@ -166,7 +191,8 @@ namespace SharpNeat.Core
             // Decode and evaluate the behavior of each genome in turn.
             foreach (var genome in genomeList)
             {
-                EvaluationUtils<TGenome, TPhenome>.EvaluateBehavior_NonCaching(genome, _genomeDecoder, _phenomeEvaluator);
+                EvaluationUtils<TGenome, TPhenome>.EvaluateBehavior_NonCaching(genome, _genomeDecoder, _phenomeEvaluator,
+                    _evaluationLogger);
             }
 
             // After the behavior of each genome in the current population has been evaluated,
@@ -194,7 +220,8 @@ namespace SharpNeat.Core
             // Decode and evaluate the behavior of the genomes under evaluation
             foreach (var genome in genomesToEvaluate)
             {
-                EvaluationUtils<TGenome, TPhenome>.EvaluateBehavior_NonCaching(genome, _genomeDecoder, _phenomeEvaluator);
+                EvaluationUtils<TGenome, TPhenome>.EvaluateBehavior_NonCaching(genome, _genomeDecoder, _phenomeEvaluator,
+                    _evaluationLogger);
             }
 
             // After the behavior of each genome in the offspring batch has been evaluated,
@@ -221,7 +248,8 @@ namespace SharpNeat.Core
             // Decode and evaluate the behavior of each genome in turn.
             foreach (var genome in genomeList)
             {
-                EvaluationUtils<TGenome, TPhenome>.EvaluateBehavior_Caching(genome, _genomeDecoder, _phenomeEvaluator);
+                EvaluationUtils<TGenome, TPhenome>.EvaluateBehavior_Caching(genome, _genomeDecoder, _phenomeEvaluator,
+                    _evaluationLogger);
             }
 
             // After the behavior of each genome in the current population has been evaluated,
@@ -250,7 +278,8 @@ namespace SharpNeat.Core
             // Decode and evaluate the behavior of the genomes under evaluation
             foreach (var genome in genomesToEvaluate)
             {
-                EvaluationUtils<TGenome, TPhenome>.EvaluateBehavior_Caching(genome, _genomeDecoder, _phenomeEvaluator);
+                EvaluationUtils<TGenome, TPhenome>.EvaluateBehavior_Caching(genome, _genomeDecoder, _phenomeEvaluator,
+                    _evaluationLogger);
             }
 
             // After the behavior of each genome in the offspring batch has been evaluated,

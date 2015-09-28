@@ -16,61 +16,83 @@
  * You should have received a copy of the GNU General Public License
  * along with SharpNEAT.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+#region
+
+using System;
 using System.Collections.Generic;
+
+#endregion
 
 namespace SharpNeat.Core
 {
     /// <summary>
-    /// A concrete implementation of IGenomeFitnessEvaluator that evaulates genomes independently of each other
-    /// and in series on a single thread. 
-    /// 
-    /// Genome decoding is performed by a provided IGenomeDecoder.
-    /// Phenome evaluation is performed by a provided IPhenomeEvaluator.
-    /// 
-    /// This class evaluates on a single thread only, and therefore is a good choice when debugging code.
+    ///     A concrete implementation of IGenomeFitnessEvaluator that evaulates genomes independently of each other
+    ///     and in series on a single thread.
+    ///     Genome decoding is performed by a provided IGenomeDecoder.
+    ///     Phenome evaluation is performed by a provided IPhenomeEvaluator.
+    ///     This class evaluates on a single thread only, and therefore is a good choice when debugging code.
     /// </summary>
     /// <typeparam name="TGenome">The genome type that is decoded.</typeparam>
     /// <typeparam name="TPhenome">The phenome type that is decoded to and then evaluated.</typeparam>
-    public class SerialGenomeFitnessEvaluator<TGenome,TPhenome> : IGenomeEvaluator<TGenome>
+    public class SerialGenomeFitnessEvaluator<TGenome, TPhenome> : IGenomeEvaluator<TGenome>
         where TGenome : class, IGenome<TGenome>
-        where TPhenome: class
+        where TPhenome : class
     {
-        readonly EvaluationMethod _evaluationMethod;
-        protected readonly IGenomeDecoder<TGenome,TPhenome> _genomeDecoder;
-        readonly IPhenomeEvaluator<TPhenome, FitnessInfo> _phenomeEvaluator;
-        readonly bool _enablePhenomeCaching;
+        #region Evaluation delegates
 
-        delegate void EvaluationMethod(IList<TGenome> genomeList);
+        /// <summary>
+        ///     The delegate for population evaluation.
+        /// </summary>
+        /// <param name="genomeList"></param>
+        private delegate void EvaluationMethod(IList<TGenome> genomeList);
+
+        #endregion
+
+        #region Private Instance fields
+
+        private readonly EvaluationMethod _evaluationMethod;
+        private readonly IGenomeDecoder<TGenome, TPhenome> _genomeDecoder;
+        private readonly IPhenomeEvaluator<TPhenome, FitnessInfo> _phenomeEvaluator;
+        private readonly bool _enablePhenomeCaching;
+        private readonly IDataLogger _evaluationLogger;
+
+        #endregion
 
         #region Constructor
 
         /// <summary>
-        /// Construct with the provided IGenomeDecoder and IPhenomeEvaluator.
-        /// Phenome caching is enabled by default.
+        ///     Construct with the provided IGenomeDecoder and IPhenomeEvaluator.
+        ///     Phenome caching is enabled by default.
         /// </summary>
-        public SerialGenomeFitnessEvaluator(IGenomeDecoder<TGenome,TPhenome> genomeDecoder,
-                                         IPhenomeEvaluator<TPhenome, FitnessInfo> phenomeEvaluator)
+        public SerialGenomeFitnessEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
+            IPhenomeEvaluator<TPhenome, FitnessInfo> phenomeEvaluator, IDataLogger evaluationLogger = null)
         {
             _genomeDecoder = genomeDecoder;
             _phenomeEvaluator = phenomeEvaluator;
             _enablePhenomeCaching = true;
             _evaluationMethod = Evaluate_Caching;
+            _evaluationLogger = evaluationLogger;
         }
 
         /// <summary>
-        /// Construct with the provided IGenomeDecoder, IPhenomeEvaluator and enablePhenomeCaching flag.
+        ///     Construct with the provided IGenomeDecoder, IPhenomeEvaluator and enablePhenomeCaching flag.
         /// </summary>
-        public SerialGenomeFitnessEvaluator(IGenomeDecoder<TGenome,TPhenome> genomeDecoder,
-                                         IPhenomeEvaluator<TPhenome, FitnessInfo> phenomeEvaluator,
-                                         bool enablePhenomeCaching)
+        public SerialGenomeFitnessEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
+            IPhenomeEvaluator<TPhenome, FitnessInfo> phenomeEvaluator,
+            bool enablePhenomeCaching, IDataLogger evaluationLogger = null)
         {
             _genomeDecoder = genomeDecoder;
             _phenomeEvaluator = phenomeEvaluator;
             _enablePhenomeCaching = enablePhenomeCaching;
+            _evaluationLogger = evaluationLogger;
 
-            if(_enablePhenomeCaching) {
+            if (_enablePhenomeCaching)
+            {
                 _evaluationMethod = Evaluate_Caching;
-            } else {
+            }
+            else
+            {
                 _evaluationMethod = Evaluate_NonCaching;
             }
         }
@@ -80,7 +102,7 @@ namespace SharpNeat.Core
         #region IGenomeFitnessEvaluator<TGenome> Members
 
         /// <summary>
-        /// Gets the total number of individual genome evaluations that have been performed by this evaluator.
+        ///     Gets the total number of individual genome evaluations that have been performed by this evaluator.
         /// </summary>
         public ulong EvaluationCount
         {
@@ -88,9 +110,9 @@ namespace SharpNeat.Core
         }
 
         /// <summary>
-        /// Gets a value indicating whether some goal fitness has been achieved and that
-        /// the the evolutionary algorithm/search should stop. This property's value can remain false
-        /// to allow the algorithm to run indefinitely.
+        ///     Gets a value indicating whether some goal fitness has been achieved and that
+        ///     the the evolutionary algorithm/search should stop. This property's value can remain false
+        ///     to allow the algorithm to run indefinitely.
         /// </summary>
         public bool StopConditionSatisfied
         {
@@ -98,8 +120,29 @@ namespace SharpNeat.Core
         }
 
         /// <summary>
-        /// Evaluates a list of genomes. Here we decode each genome in series using the contained
-        /// IGenomeDecoder and evaluate the resulting TPhenome using the contained IPhenomeEvaluator.
+        ///     Initializes state variables in the genome evalutor (primarily the logger).
+        /// </summary>
+        public void Initialize()
+        {
+            // Open the logger
+            _evaluationLogger?.Open();
+
+            // Defer to phenome initialization
+            _phenomeEvaluator.Initialize(_evaluationLogger);
+        }
+
+        /// <summary>
+        ///     Cleans up evaluator state after end of execution or upon execution interruption.  In particular, this closes out
+        ///     any existing evaluation logger instance.
+        /// </summary>
+        public void Cleanup()
+        {
+            _evaluationLogger?.Close();
+        }
+
+        /// <summary>
+        ///     Evaluates a list of genomes. Here we decode each genome in series using the contained
+        ///     IGenomeDecoder and evaluate the resulting TPhenome using the contained IPhenomeEvaluator.
         /// </summary>
         /// <param name="genomeList">The list of genomes under evaluation.</param>
         public void Evaluate(IList<TGenome> genomeList)
@@ -108,18 +151,18 @@ namespace SharpNeat.Core
         }
 
         /// <summary>
-        /// Evalutes a single genome alone and against a list of other genomes.
+        ///     Evalutes a single genome alone and against a list of other genomes.
         /// </summary>
         /// <param name="genomesToEvaluate">The genomes under evaluation.</param>
         /// <param name="population">The genomes against which to evaluate.</param>
         public void Evaluate(IList<TGenome> genomesToEvaluate, IList<TGenome> population)
         {
             // TODO: Need to implement this
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         /// <summary>
-        /// Reset the internal state of the evaluation scheme if any exists.
+        ///     Reset the internal state of the evaluation scheme if any exists.
         /// </summary>
         public void Reset()
         {
@@ -133,17 +176,18 @@ namespace SharpNeat.Core
         private void Evaluate_NonCaching(IList<TGenome> genomeList)
         {
             // Decode and evaluate each genome in turn.
-            foreach(TGenome genome in genomeList)
+            foreach (TGenome genome in genomeList)
             {
                 TPhenome phenome = _genomeDecoder.Decode(genome);
-                if(null == phenome)
-                {   // Non-viable genome.
+                if (null == phenome)
+                {
+                    // Non-viable genome.
                     genome.EvaluationInfo.SetFitness(0.0);
                     genome.EvaluationInfo.AuxFitnessArr = null;
                 }
                 else
-                {   
-                    FitnessInfo fitnessInfo = _phenomeEvaluator.Evaluate(phenome);
+                {
+                    FitnessInfo fitnessInfo = _phenomeEvaluator.Evaluate(phenome, _evaluationLogger);
                     genome.EvaluationInfo.SetFitness(fitnessInfo._fitness);
                     genome.EvaluationInfo.AuxFitnessArr = fitnessInfo._auxFitnessArr;
                 }
@@ -153,23 +197,25 @@ namespace SharpNeat.Core
         private void Evaluate_Caching(IList<TGenome> genomeList)
         {
             // Decode and evaluate each genome in turn.
-            foreach(TGenome genome in genomeList)
+            foreach (TGenome genome in genomeList)
             {
-                TPhenome phenome = (TPhenome)genome.CachedPhenome;
-                if(null == phenome) 
-                {   // Decode the phenome and store a ref against the genome.
+                TPhenome phenome = (TPhenome) genome.CachedPhenome;
+                if (null == phenome)
+                {
+                    // Decode the phenome and store a ref against the genome.
                     phenome = _genomeDecoder.Decode(genome);
                     genome.CachedPhenome = phenome;
                 }
 
-                if(null == phenome)
-                {   // Non-viable genome.
+                if (null == phenome)
+                {
+                    // Non-viable genome.
                     genome.EvaluationInfo.SetFitness(0.0);
                     genome.EvaluationInfo.AuxFitnessArr = null;
                 }
                 else
-                {   
-                    FitnessInfo fitnessInfo = _phenomeEvaluator.Evaluate(phenome);
+                {
+                    FitnessInfo fitnessInfo = _phenomeEvaluator.Evaluate(phenome, _evaluationLogger);
                     genome.EvaluationInfo.SetFitness(fitnessInfo._fitness);
                     genome.EvaluationInfo.AuxFitnessArr = fitnessInfo._auxFitnessArr;
                 }

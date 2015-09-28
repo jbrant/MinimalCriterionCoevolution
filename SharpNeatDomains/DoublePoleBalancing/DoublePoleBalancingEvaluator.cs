@@ -120,7 +120,7 @@ namespace SharpNeat.Domains.DoublePoleBalancing
         /// <summary>
         /// EvaluateFitness the provided IBlackBox.
         /// </summary>
-        public virtual FitnessInfo Evaluate(IBlackBox box)
+        public virtual FitnessInfo Evaluate(IBlackBox box, IDataLogger evaluationLogger)
         {
             _evalCount++;
 
@@ -169,6 +169,13 @@ namespace SharpNeat.Domains.DoublePoleBalancing
             // The controller's fitness is defined as the number of timesteps that elapse before failure.
             double fitness = timestep;
             return new FitnessInfo(fitness, fitness);
+        }
+
+        /// <summary>
+        ///     Initializes any necessary state variables in the genome evalutor.
+        /// </summary>
+        public void Initialize(IDataLogger evaluationLogger)
+        {
         }
 
         /// <summary>

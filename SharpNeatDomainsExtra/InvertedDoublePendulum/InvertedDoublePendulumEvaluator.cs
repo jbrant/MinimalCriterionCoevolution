@@ -96,7 +96,7 @@ namespace SharpNeat.DomainsExtra.InvertedDoublePendulum
         /// <summary>
         /// EvaluateFitness the provided IBlackBox.
         /// </summary>
-        public FitnessInfo Evaluate(IBlackBox box)
+        public FitnessInfo Evaluate(IBlackBox box, IDataLogger evaluationLogger)
         {
             // Init sim world. We add extra length to the track to allow cart to overshoot, we then detect overshooting by monitoring the cart's X position 
             // (this is just simpler and more robust than detecting if the cart has hit the ends of the track exactly).
@@ -155,6 +155,13 @@ namespace SharpNeat.DomainsExtra.InvertedDoublePendulum
             // The controller's fitness is defined as the number of timesteps that elapse before failure.
             double fitness= timestep;
             return new FitnessInfo(fitness, fitness);
+        }
+
+        /// <summary>
+        ///     Initializes any necessary state variables in the genome evalutor.
+        /// </summary>
+        public void Initialize(IDataLogger evaluationLogger)
+        {
         }
 
         /// <summary>

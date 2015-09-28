@@ -95,13 +95,20 @@ namespace SharpNeat.DomainsExtra.SinglePoleBalancingSwingUp
         /// <summary>
         /// EvaluateFitness the provided IBlackBox.
         /// </summary>
-        public FitnessInfo Evaluate(IBlackBox box)
+        public FitnessInfo Evaluate(IBlackBox box, IDataLogger evaluationLogger)
         {
             _evalCount++;
             double fitness1 = Evaluate_Phase1_SwingUp(box);
             //double fitness2 = Evaluate_Phase2_Balancing(box);
             //double fitness = fitness1 * fitness2;
             return new FitnessInfo(fitness1, fitness1);
+        }
+
+        /// <summary>
+        ///     Initializes any necessary state variables in the genome evalutor.
+        /// </summary>
+        public void Initialize(IDataLogger evaluationLogger)
+        {
         }
 
         /// <summary>

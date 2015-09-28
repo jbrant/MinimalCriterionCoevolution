@@ -36,7 +36,7 @@ namespace SharpNeat.Loggers
 
         #endregion
 
-        #region Logger Instance Fiels
+        #region Logger Instance Fields
 
         /// <summary>
         ///     The delimiter to use for record separation.

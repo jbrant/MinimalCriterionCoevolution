@@ -12,7 +12,7 @@ using SharpNeat.Phenomes;
 
 namespace SharpNeat.Domains.MazeNavigation
 {
-    internal abstract class BaseMazeNavigationExperiment : IGuiNeatExperiment
+    public abstract class BaseMazeNavigationExperiment : IGuiNeatExperiment
     {
         private NetworkActivationScheme _activationScheme;
         protected string ComplexityRegulationStrategy;

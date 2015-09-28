@@ -33,6 +33,16 @@ namespace SharpNeat.Core
         void Reset();
 
         /// <summary>
+        ///     Initializes state variables in the genome evalutor.
+        /// </summary>
+        void Initialize();
+
+        /// <summary>
+        ///     Cleans up genome/phenome evaluator state after end of execution or upon execution interruption.
+        /// </summary>
+        void Cleanup();
+
+        /// <summary>
         ///     Evaluates the fitness or behavior of a list of genomes.
         /// </summary>
         /// <param name="genomeList">The list of genomes under evaluation.</param>

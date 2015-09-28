@@ -35,7 +35,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>SharpNeatConsole.ProgramExample</StartupObject>
+    <StartupObject>SharpNeatConsole.NoveltyExperimentExecutor</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="log4net">
@@ -50,6 +50,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="NoveltyExperimentExecutor.cs" />
     <Compile Include="ProgramExample.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -71,8 +72,14 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="ExperimentConfigurations\Experiment2.config.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="xor.config.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\Experiment1.config.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="xor_logging.config.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
