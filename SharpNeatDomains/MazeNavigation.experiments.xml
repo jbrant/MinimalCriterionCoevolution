@@ -71,15 +71,15 @@
       <PopulationSize>250</PopulationSize>
       <SpecieCount>10</SpecieCount>
       <InterspeciesMatingProbability>0.001</InterspeciesMatingProbability>
-      <MinTimeAlive>5</MinTimeAlive>
+      <MinTimeAlive>1</MinTimeAlive>
       <Activation>
         <Scheme>CyclicFixedIters</Scheme>
         <Iters>2</Iters>
       </Activation>
       <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>
-      <ComplexityThreshold>30</ComplexityThreshold>
+      <ComplexityThreshold>20</ComplexityThreshold>
       <OffspringBatchSize>10</OffspringBatchSize>
-      <PopulationEvaluationFrequency>20</PopulationEvaluationFrequency>
+      <PopulationEvaluationFrequency>30</PopulationEvaluationFrequency>
       <GenomeConfig>
         <InitialConnectionProportion>1</InitialConnectionProportion>
         <WeightMutationProbability>0.6</WeightMutationProbability>
@@ -100,9 +100,9 @@
       <MaxTimesteps>400</MaxTimesteps>
       <MinSuccessDistance>5</MinSuccessDistance>
       <MaxDistanceToTarget>300</MaxDistanceToTarget>
-      <MazeVariant>MediumMaze</MazeVariant>
-      <EvolutionLogFile>F:\\User Data\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Novelty Search\\Experiments\\EvolutionData.csv</EvolutionLogFile>
-      <EvaluationLogFile>F:\\User Data\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Novelty Search\\Experiments\\EvaluationData.csv</EvaluationLogFile>
+      <MazeVariant>OpenEndedMediumMaze</MazeVariant>
+      <!-- <EvolutionLogFile>F:\\User Data\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Novelty Search\\Experiments\\EvolutionData.csv</EvolutionLogFile>
+      <EvaluationLogFile>F:\\User Data\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Novelty Search\\Experiments\\EvaluationData.csv</EvaluationLogFile> -->
       <Description>
         This is the maze navigation experiment used in the original novelty search papers (citation needed).
       </Description>

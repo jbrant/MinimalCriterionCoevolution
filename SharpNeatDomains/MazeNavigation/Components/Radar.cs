@@ -37,7 +37,7 @@
         ///     Updates the radar output based on whether the goal location is within its field-of-view.
         /// </summary>
         /// <param name="goalAngle">The angle of the goal location with respect to the navigator.</param>
-        internal void updateRadar(double goalAngle)
+        internal void UpdateRadar(double goalAngle)
         {
             // Initialize the radar output to 0 by default (meaning that the vector
             // formed between the target and the navigator does not fall within the

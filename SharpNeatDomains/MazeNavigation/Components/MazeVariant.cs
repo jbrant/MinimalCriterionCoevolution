@@ -1,4 +1,8 @@
-﻿using System;
+﻿#region
+
+using System;
+
+#endregion
 
 namespace SharpNeat.Domains.MazeNavigation.Components
 {
@@ -16,7 +20,17 @@ namespace SharpNeat.Domains.MazeNavigation.Components
         /// <summary>
         ///     Indicates the hard maze variant.
         /// </summary>
-        HardMaze
+        HardMaze,
+
+        /// <summary>
+        ///     Indicates an open-ended version of the medium maze.
+        /// </summary>
+        OpenEndedMediumMaze,
+
+        /// <summary>
+        ///     Indicates an open-ended version of the hard maze.
+        /// </summary>
+        OpenEndedHardMaze
     };
 
     /// <summary>
@@ -34,6 +48,16 @@ namespace SharpNeat.Domains.MazeNavigation.Components
             if (MazeVariant.MediumMaze.ToString().Equals(strMazeVariant, StringComparison.InvariantCultureIgnoreCase))
             {
                 return MazeVariant.MediumMaze;
+            }
+            if (MazeVariant.OpenEndedMediumMaze.ToString()
+                .Equals(strMazeVariant, StringComparison.InvariantCultureIgnoreCase))
+            {
+                return MazeVariant.OpenEndedMediumMaze;
+            }
+            if (MazeVariant.OpenEndedHardMaze.ToString()
+                .Equals(strMazeVariant, StringComparison.InvariantCultureIgnoreCase))
+            {
+                return MazeVariant.OpenEndedHardMaze;
             }
             return MazeVariant.HardMaze;
         }

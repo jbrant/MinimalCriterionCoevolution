@@ -1,4 +1,8 @@
-﻿using System;
+﻿#region
+
+using System;
+
+#endregion
 
 // ReSharper disable NonReadonlyMemberInGetHashCode
 
@@ -45,12 +49,15 @@ namespace SharpNeat.Domains
         /// <param name="point">The point about which to rotate.</param>
         public void RotatePoint(double angle, DoublePoint point)
         {
+            // Convert angle to radians
+            double radianAngle = MathUtils.toRadians(angle);
+
             // Decrement this point by the given point about which to rotate
             this -= point;
 
             // Perform the actual rotation
-            X = Math.Cos(angle)*X - Math.Sin(angle)*Y;
-            Y = Math.Sin(angle)*X + Math.Cos(angle)*Y;
+            X = Math.Cos(radianAngle)*X - Math.Sin(radianAngle)*Y;
+            Y = Math.Sin(radianAngle)*X + Math.Cos(radianAngle)*Y;
 
             // Add the coordinates that had been offset back in
             this += point;
@@ -146,33 +153,33 @@ namespace SharpNeat.Domains
         ///     Calculates the angle that the given point makes with the origin in radians.
         /// </summary>
         /// <param name="a">The point whose position to compare with the origin.</param>
-        /// <returns>The angle (in radians) that the given point makes with the origin.</returns>
+        /// <returns>The angle (in degrees) that the given point makes with the origin.</returns>
         public static double CalculateAngleFromOrigin(DoublePoint a)
         {
             // If we're both X and Y are zero, the point is at the origin, but consider 
-            // this to be 90 degrees (pi/2 radians)
+            // this to be 90 degrees
             if (a.X == 0)
             {
                 if (a.Y == 0)
                 {
-                    return Math.PI/2;
+                    return 90;
                 }
 
                 // If only X is 0 but Y isn't, we still can't calculate the slope so 
-                // consider this to be 270 degrees (3pi/2 radians)
-                return (Math.PI*3)/2;
+                // consider this to be 270 degrees
+                return 270;
             }
 
             // Calculate the slope (this would just be Y/X since it's compared to the 
             // origin) and take the arc tangent (which yields the angle in radians)
-            var angle = Math.Atan(a.Y/a.X);
+            var angle = MathUtils.toDegrees(Math.Atan(a.Y/a.X));
 
             // If the X coordinate is positive, just return the calculated angle
             if (a.X > 0)
                 return angle;
 
-            // Otherwise, return the angle plus 180 degrees (pi radians)
-            return angle + Math.PI;
+            // Otherwise, return the angle plus 180 degrees
+            return angle + 180;
         }
 
         /// <summary>

@@ -86,17 +86,11 @@ namespace SharpNeat.Domains.MazeNavigation
                         new DoubleLine(8, 5, 292, 7),
                         new DoubleLine(241, 130, 58, 65),
                         new DoubleLine(114, 7, 73, 42),
-                        //new DoubleLine(114, 7, 83, 32),
                         new DoubleLine(130, 91, 107, 46),
-                        //new DoubleLine(130, 91, 117, 56),
                         new DoubleLine(196, 8, 139, 51),
-                        //new DoubleLine(196, 8, 149, 41),
                         new DoubleLine(219, 122, 182, 63),
-                        //new DoubleLine(219, 122, 192, 73),
                         new DoubleLine(267, 9, 214, 63),
-                        //new DoubleLine(267, 9, 224, 53),
                         new DoubleLine(271, 129, 237, 88)
-                        //new DoubleLine(271, 129, 247, 98)
                     };
                     break;
 
@@ -125,6 +119,38 @@ namespace SharpNeat.Domains.MazeNavigation
                         new DoubleLine(192, 146, 87, 91),
                         new DoubleLine(56, 55, 133, 30)
                     };
+                    break;
+
+                // Setup appropriate parameters for open-ended medium maze
+                case MazeVariant.OpenEndedMediumMaze:
+                    // Initialize the navigator at the appropriate starting location
+                    _navigator = new MazeNavigator(new DoublePoint(30, 22));
+
+                    // Initialize the goal location
+                    _goalLocation = new DoublePoint(270, 100);
+
+                    // Define all of the maze walls
+                    _walls = new List<DoubleLine>(11)
+                    {
+                        new DoubleLine(293, 7, 289, 130),
+                        new DoubleLine(289, 130, 6, 134),
+                        
+                        // Left wall is missing here
+
+                        new DoubleLine(8, 5, 292, 7),
+                        new DoubleLine(241, 130, 58, 65),
+                        new DoubleLine(114, 7, 73, 42),
+                        new DoubleLine(130, 91, 107, 46),
+                        new DoubleLine(196, 8, 139, 51),
+                        new DoubleLine(219, 122, 182, 63),
+                        new DoubleLine(267, 9, 214, 63),
+                        new DoubleLine(271, 129, 237, 88)
+                    };
+                    break;
+
+                // Setup appropriate parameters for open-ended hard maze
+                case MazeVariant.OpenEndedHardMaze:
+                    // TODO: Need to implement this
                     break;
             }
         }
@@ -167,7 +193,7 @@ namespace SharpNeat.Domains.MazeNavigation
 
             // Reset neural network
             agent.ResetState();
-
+            
             // If this is a fitness evaluation, return the fitness score as the 
             // difference between the maximum target distance and the ending distance 
             // to the target
@@ -197,6 +223,7 @@ namespace SharpNeat.Domains.MazeNavigation
                 for (var curTimestep = 0; curTimestep < _maxTimesteps; curTimestep++)
                 {
                     RunTimestep(agent);
+
                     _behaviorCharacterization.UpdateBehaviors(new List<double>
                     {
                         _navigator.Location.X,
@@ -253,7 +280,7 @@ namespace SharpNeat.Domains.MazeNavigation
             _navigator.TranslateAndApplyAnnOutputs(agent.OutputSignalArray[0], agent.OutputSignalArray[1]);
 
             // Move the navigator to the new position (i.e. execute a single timestep)
-            _navigator.Move(_walls);
+            _navigator.Move(_walls, _goalLocation);
         }
 
         /// <summary>

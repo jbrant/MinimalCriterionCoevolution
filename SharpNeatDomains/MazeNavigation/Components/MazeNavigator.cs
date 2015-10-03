@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace SharpNeat.Domains.MazeNavigation.Components
 {
-    internal class MazeNavigator
+    public class MazeNavigator
     {
         /// <summary>
         ///     The minimum speed of the navigator.
@@ -64,39 +64,39 @@ namespace SharpNeat.Domains.MazeNavigation.Components
         /// <summary>
         ///     The directional heading of the navigator in degrees.
         /// </summary>
-        internal double Heading { get; private set; }
+        public double Heading { get; set; }
 
         /// <summary>
         ///     The Speed of the navigator (in units per timestep).
         /// </summary>
-        internal double Speed { get; private set; }
+        public double Speed { get; set; }
 
         /// <summary>
         ///     The angular velocity of the navigator.
         /// </summary>
-        internal double AngularVelocity { get; private set; }
+        public double AngularVelocity { get; set; }
 
         /// <summary>
         ///     The current location of the navigator (this is simply a cartesian coordinate).
         /// </summary>
-        internal DoublePoint Location { get; private set; }
+        public DoublePoint Location { get; private set; }
 
         /// <summary>
         ///     The list of range finder sensors attached to the navigator.
         /// </summary>
-        internal List<RangeFinder> RangeFinders { get; }
+        public List<RangeFinder> RangeFinders { get; }
 
         /// <summary>
         ///     The array of pie slice radars attached to the navigator.
         /// </summary>
-        internal PieSliceSensorArray RadarArray { get; }
+        public PieSliceSensorArray RadarArray { get; }
 
         /// <summary>
         ///     Moves the navigator to a new location based on its heading, speed, and angular velocity.  The point to which it
         ///     moves is also dictated by the presence of walls that might be obstructing its path.
         /// </summary>
         /// <param name="walls">The list of walls in the environment.</param>
-        internal void Move(List<DoubleLine> walls)
+        public void Move(List<DoubleLine> walls, DoublePoint targetLocation)
         {
             // Compute angular velocity components
             var angularVelocityX = Math.Cos(MathUtils.toRadians(Heading))*Speed;
@@ -121,7 +121,7 @@ namespace SharpNeat.Domains.MazeNavigation.Components
 
             // Determine the new location, incremented by the X and Y component velocities
             var newLocation = new DoublePoint(angularVelocityX + Location.X, angularVelocityY + Location.Y);
-
+            
             // Move the navigator to the new location only if said movement does not
             // result in a wall collision
             if (IsCollision(newLocation, walls) == false)
@@ -131,7 +131,7 @@ namespace SharpNeat.Domains.MazeNavigation.Components
 
             // Update range finders and radar array
             UpdateRangeFinders(walls);
-            RadarArray.UpdateRadarArray(Heading, Location);
+            RadarArray.UpdateRadarArray(Heading, Location, targetLocation);
         }
 
         /// <summary>

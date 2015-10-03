@@ -33,7 +33,8 @@
   <MinSuccessDistance>5</MinSuccessDistance>
   <MaxDistanceToTarget>300</MaxDistanceToTarget>
   <MazeVariant>MediumMaze</MazeVariant>
-  <GenerationalLogFile>F:\\User Data\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Novelty Search\\Experiments\\EvolutionData.csv</GenerationalLogFile>
+  <EvolutionLogFile>F:\\User Data\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Novelty Search\\Experiments\\EvolutionData.csv</EvolutionLogFile>
+  <EvaluationLogFile>F:\\User Data\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Novelty Search\\Experiments\\EvaluationData.csv</EvaluationLogFile>
   <Description>
     This is the maze navigation experiment used in the original novelty search papers (citation needed).
   </Description>

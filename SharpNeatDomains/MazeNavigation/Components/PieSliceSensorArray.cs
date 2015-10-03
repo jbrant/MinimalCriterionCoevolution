@@ -1,4 +1,8 @@
-﻿using System.Collections.Generic;
+﻿#region
+
+using System.Collections.Generic;
+
+#endregion
 
 namespace SharpNeat.Domains.MazeNavigation.Components
 {
@@ -6,7 +10,7 @@ namespace SharpNeat.Domains.MazeNavigation.Components
     ///     Encapsulates a collection of radars laid out as four parts of a circular configuration.  A radar only fires when
     ///     the goal point is within its field-of-view.
     /// </summary>
-    internal class PieSliceSensorArray
+    public class PieSliceSensorArray
     {
         /// <summary>
         ///     Creates a new array of radars with the default fields of view.
@@ -37,9 +41,10 @@ namespace SharpNeat.Domains.MazeNavigation.Components
         /// </summary>
         /// <param name="heading">The heading of the navigator to which the radar array is attached.</param>
         /// <param name="location">The location of the goal.</param>
-        internal void UpdateRadarArray(double heading, DoublePoint location)
+        /// <param name="targetLocation">The location of the target (goal).</param>
+        internal void UpdateRadarArray(double heading, DoublePoint location, DoublePoint targetLocation)
         {
-            var target = new DoublePoint(location.X, location.Y);
+            var target = targetLocation;
 
             // Rotate the target with respect to the heading of the navigator
             target.RotatePoint(-heading, location);
@@ -54,7 +59,7 @@ namespace SharpNeat.Domains.MazeNavigation.Components
             // Update every radar in the array based on target alignment
             foreach (var radar in Radars)
             {
-                radar.updateRadar(navigatorTargetAngle);
+                radar.UpdateRadar(navigatorTargetAngle);
             }
         }
 

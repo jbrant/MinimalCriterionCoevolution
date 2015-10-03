@@ -31,10 +31,30 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </summary>
         protected override void PerformOneGeneration()
         {
+//            if (CurrentGeneration%200 == 0)
+//            {
+//                List<TGenome> topNGenomes =
+//                    AbstractNoveltyArchive.GetTopNArchiveGenomes(PopulationSize <= AbstractNoveltyArchive.Archive.Count
+//                        ? PopulationSize
+//                        : AbstractNoveltyArchive.Archive.Count);
+//
+//                for (int idx = 0; idx < topNGenomes.Count; idx++)
+//                {
+//                    GenomeList[idx] = topNGenomes[idx];
+//                }
+//            }
+
             // Re-evaluate the fitness of the population after the specified number of evaluations have elapsed
             if (CurrentGeneration%_populationEvaluationFrequency == 0)
             {
                 GenomeEvaluator.Evaluate(GenomeList);
+
+                // Clear all the species and respeciate
+                ClearAllSpecies();
+                SpeciationStrategy.SpeciateGenomes(GenomeList, SpecieList);
+
+                // Sort the genomes in each specie. Fittest first (secondary sort - youngest first).
+                SortSpecieGenomes();
             }
 
             // Calculate statistics for each specie (mean fitness and target size)
@@ -235,7 +255,7 @@ namespace SharpNeat.EvolutionAlgorithms
                 // If random number is equal to or less than specified asexual offspring proportion or
                 // if there is only one genome in the species, then use asexual reproduction
                 if (RandomNumGenerator.NextDouble() <= EaParams.OffspringAsexualProportion ||
-                    SpecieList[specieIdx].GenomeList.Count <= 1)
+                    IsSpecieViableForSexualReproduction(SpecieList[specieIdx]) == false)
                 {
                     // Throw ball to select genome from species (essentially intra-specie fitness proportionate selection)
                     int genomeIdx = RouletteWheel.SingleThrow(genomeRwlArr[specieIdx], RandomNumGenerator);
@@ -271,13 +291,9 @@ namespace SharpNeat.EvolutionAlgorithms
                     {
                         // Throw ball twice to select the two parent genomes
                         int parent1GenomeIdx = RouletteWheel.SingleThrow(genomeRwlArr[specieIdx], RandomNumGenerator);
-                        int parent2GenomeIdx = RouletteWheel.SingleThrow(genomeRwlArr[specieIdx], RandomNumGenerator);
-
-                        // If the same parent happened to be selected twice, throw ball until they differ
-                        while (parent1GenomeIdx == parent2GenomeIdx)
-                        {
-                            parent2GenomeIdx = RouletteWheel.SingleThrow(genomeRwlArr[specieIdx], RandomNumGenerator);
-                        }
+                        int parent2GenomeIdx =
+                            RouletteWheel.SingleThrow(genomeRwlArr[specieIdx].RemoveOutcome(parent1GenomeIdx),
+                                RandomNumGenerator);
 
                         // Get the two parents out of the species genome list
                         parent1 = SpecieList[specieIdx].GenomeList[parent1GenomeIdx];
@@ -291,6 +307,49 @@ namespace SharpNeat.EvolutionAlgorithms
             }
 
             return offspringList;
+        }
+
+        /// <summary>
+        ///     Determines whether or not a species is viable for sexual reproduction (i.e. crossover) based on the number of
+        ///     genomes in the species as well as the fitness of its constituent genomes.
+        /// </summary>
+        /// <param name="candidateSpecie">The species being considered for sexual reproduction.</param>
+        /// <returns>Whether or not the given species is viable for sexual reproduction (i.e. crossover).</returns>
+        private bool IsSpecieViableForSexualReproduction(Specie<TGenome> candidateSpecie)
+        {
+            bool speciesReproductivelyViable = true;
+
+            // If there is only one genome in the species, the species is automatically not viable
+            // because there is no one with whom to mate
+            if (candidateSpecie.GenomeList.Count <= 1)
+            {
+                speciesReproductivelyViable = false;
+            }
+            else
+            {
+                int nonZeroFitnessCnt = 0;
+
+                // Iterate through the genomes in the species, making sure that 2 or more have non-zero fitness (this 
+                // is because the roullette will selection will cause an endless loop if not)
+                foreach (TGenome genome in GenomeList.Where(genome => genome.EvaluationInfo.Fitness > 0))
+                {
+                    nonZeroFitnessCnt++;
+
+                    // If we've already found more than one genome that has non-zero fitness, we're good
+                    if (nonZeroFitnessCnt > 1)
+                    {
+                        break;
+                    }
+                }
+
+                // If there was one or fewer genomes found with non-zero fitness, this species is not viable for crossover
+                if (nonZeroFitnessCnt <= 1)
+                {
+                    speciesReproductivelyViable = false;
+                }
+            }
+
+            return speciesReproductivelyViable;
         }
 
         /// <summary>

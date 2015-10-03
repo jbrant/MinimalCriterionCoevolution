@@ -6,7 +6,7 @@ namespace SharpNeat.Domains.MazeNavigation.Components
     /// <summary>
     ///     Defines a range finder that indicates the distance to the nearest obstacle.
     /// </summary>
-    internal class RangeFinder
+    public class RangeFinder
     {
         /// <summary>
         ///     Creates a new range finder with the given default range, angle (with respect to the navigator orientation) and

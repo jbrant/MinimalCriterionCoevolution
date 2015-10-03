@@ -2,6 +2,7 @@
 
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 
 #endregion
 
@@ -12,7 +13,7 @@ namespace SharpNeat.Core
     ///     novelty.
     /// </summary>
     /// <typeparam name="TGenome">The genotype to store and evaluate.</typeparam>
-    public abstract class AbstractNoveltyArchive<TGenome> : INoveltyArchive<TGenome> 
+    public abstract class AbstractNoveltyArchive<TGenome> : INoveltyArchive<TGenome>
         where TGenome : class, IGenome<TGenome>
     {
         #region Constructors
@@ -60,7 +61,18 @@ namespace SharpNeat.Core
         /// <summary>
         ///     The cross-generational list of novel genomes.
         /// </summary>
-        public IProducerConsumerCollection<TGenome> Archive { get; private set; }
+        public IProducerConsumerCollection<TGenome> Archive { get; }
+
+        #endregion
+
+        #region Abstract methods
+
+        /// <summary>
+        ///     Tests whether a given genome should be added to the novelty archive based on a domain-dependent feature
+        ///     characterization.
+        /// </summary>
+        /// <param name="genomeUnderEvaluation">The candidate genome to evaluate for archive addition.</param>
+        public abstract void TestAndAddCandidateToArchive(TGenome genomeUnderEvaluation);
 
         #endregion
 
@@ -102,16 +114,24 @@ namespace SharpNeat.Core
             NumGenomesAddedThisGeneration = 0;
         }
 
-        #endregion
-
-        #region Abstract methods
-
         /// <summary>
-        ///     Tests whether a given genome should be added to the novelty archive based on a domain-dependent feature
-        ///     characterization.
+        ///     Takes all the genomes from the archive, sorts them in descending order according to their fitness (which is based
+        ///     on their novelty), and returns the specified number with the highest score.
         /// </summary>
-        /// <param name="genomeUnderEvaluation">The candidate genome to evaluate for archive addition.</param>
-        public abstract void TestAndAddCandidateToArchive(TGenome genomeUnderEvaluation);
+        /// <param name="numGenomes">The number of most novel genomes to return.</param>
+        /// <returns>The N most novel genomes.</returns>
+        public List<TGenome> GetTopNArchiveGenomes(int numGenomes)
+        {
+            // Extract all of the archived genomes into an array
+            TGenome[] archivedGenomes = Archive.ToArray();
+
+            // Sort genomes in descending order by fitness and take the top N
+            IEnumerable<TGenome> sortedTopNGenomes =
+                archivedGenomes.OrderByDescending(item => item.EvaluationInfo.Fitness).Take(numGenomes);
+
+            // Convert to a list and return
+            return new List<TGenome>(sortedTopNGenomes);
+        }
 
         #endregion
 
