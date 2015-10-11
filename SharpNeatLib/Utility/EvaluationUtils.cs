@@ -38,7 +38,7 @@ namespace SharpNeat.Utility
             }
             else
             {
-                // EvaluateFitness the behavior, update the genome's behavior characterization, 
+                // Evaluate the behavior, update the genome's behavior characterization, 
                 // and indicate if the genome is viable based on whether the minimal criteria was satisfied
                 var behaviorInfo = phenomeEvaluator.Evaluate(phenome, evaluationLogger);
                 genome.EvaluationInfo.BehaviorCharacterization = behaviorInfo.Behaviors;
@@ -74,7 +74,7 @@ namespace SharpNeat.Utility
             }
             else
             {
-                // EvaluateFitness the behavior, update the genome's behavior characterization, 
+                // Evaluate the behavior, update the genome's behavior characterization, 
                 // and indicate if the genome is viable based on whether the minimal criteria was satisfied
                 var behaviorInfo = phenomeEvaluator.Evaluate(phenome, evaluationLogger);
                 genome.EvaluationInfo.BehaviorCharacterization = behaviorInfo.Behaviors;
@@ -168,6 +168,36 @@ namespace SharpNeat.Utility
             }
 
             // Update the fitness as the behavioral novelty
+            genome.EvaluationInfo.SetFitness(fitnessInfo._fitness);
+            genome.EvaluationInfo.AuxFitnessArr = fitnessInfo._auxFitnessArr;
+        }
+
+        /// <summary>
+        ///     Evalutes the fitness of the given genome as a random value, so long as it satisfies the minimal criteria.
+        /// </summary>
+        /// <param name="genome">The genome to evaluate.</param>
+        public static void EvaluateFitness(TGenome genome)
+        {
+            FitnessInfo fitnessInfo;
+
+            // Create new random number generator without a seed
+            FastRandom rng = new FastRandom();
+
+            // If the genome is not viable, set the fitness (i.e. behavioral novelty) to zero
+            if (genome.EvaluationInfo.IsViable == false)
+            {
+                fitnessInfo = FitnessInfo.Zero;
+            }
+            else
+            {
+                // Generate new random fitness value
+                double randomFitness = rng.NextDouble();
+
+                // Set random value as fitness
+                fitnessInfo = new FitnessInfo(randomFitness, randomFitness);
+            }
+
+            // Update the genome fitness as the randomly generated double
             genome.EvaluationInfo.SetFitness(fitnessInfo._fitness);
             genome.EvaluationInfo.AuxFitnessArr = fitnessInfo._auxFitnessArr;
         }

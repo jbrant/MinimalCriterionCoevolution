@@ -3,7 +3,7 @@
     /// <summary>
     ///     Wrapper struct for behavior values.
     /// </summary>
-    public struct BehaviorInfo : ITrialInfo
+    public class BehaviorInfo : ITrialInfo
     {
         /// <summary>
         ///     Preconstructed BehaviorInfo indicating "no behavior".

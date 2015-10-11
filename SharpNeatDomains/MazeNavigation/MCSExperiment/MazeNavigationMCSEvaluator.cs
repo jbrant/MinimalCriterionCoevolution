@@ -6,9 +6,9 @@ using SharpNeat.Phenomes;
 
 #endregion
 
-namespace SharpNeat.Domains.MazeNavigation.MCNSExperiment
+namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 {
-    public class MazeNavigationMCNSEvaluator : IPhenomeEvaluator<IBlackBox, BehaviorInfo>
+    public class MazeNavigationMCSEvaluator : IPhenomeEvaluator<IBlackBox, BehaviorInfo>
     {
         private readonly IBehaviorCharacterization _behaviorCharacterization;
         private readonly int? _maxDistanceToTarget;
@@ -17,7 +17,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCNSExperiment
         private readonly int? _minSuccessDistance;
         private bool _stopConditionSatisfied;
 
-        internal MazeNavigationMCNSEvaluator(int? maxDistanceToTarget, int? maxTimesteps, MazeVariant mazeVariant,
+        internal MazeNavigationMCSEvaluator(int? maxDistanceToTarget, int? maxTimesteps, MazeVariant mazeVariant,
             int? minSuccessDistance, IBehaviorCharacterization behaviorCharacterization)
         {
             _maxDistanceToTarget = maxDistanceToTarget;
@@ -51,7 +51,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCNSExperiment
                 _maxTimesteps, _behaviorCharacterization);
 
             // Run a single trial
-            BehaviorInfo trialInfo = world.RunTrial(phenome, EvaluationType.MinimalCriteriaNoveltySearch, out stopConditionSatisfied);
+            BehaviorInfo trialInfo = world.RunTrial(phenome, EvaluationType.NoveltySearch, out stopConditionSatisfied);
 
             // Check if the current location satisfies the minimal criteria
             if (_behaviorCharacterization.IsMinimalCriteriaSatisfied(trialInfo) == false)

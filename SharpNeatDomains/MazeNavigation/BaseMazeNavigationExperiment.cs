@@ -82,7 +82,6 @@ namespace SharpNeat.Domains.MazeNavigation
                 SpecieCount = XmlUtils.GetValueAsInt(xmlConfig, "SpecieCount"),
                 InterspeciesMatingProportion = XmlUtils.GetValueAsDouble(xmlConfig,
                     "InterspeciesMatingProbability"),
-                MinTimeAlive = XmlUtils.GetValueAsInt(xmlConfig, "MinTimeAlive")
             };
             NeatGenomeParameters = ExperimentUtils.ReadNeatGenomeParameters(xmlConfig);
 
@@ -91,7 +90,7 @@ namespace SharpNeat.Domains.MazeNavigation
             MinSuccessDistance = XmlUtils.TryGetValueAsInt(xmlConfig, "MinSuccessDistance");
             MaxDistanceToTarget = XmlUtils.TryGetValueAsInt(xmlConfig, "MaxDistanceToTarget");
             MazeVariant =
-                MazeVariantUtl.convertStringToMazeVariant(XmlUtils.TryGetValueAsString(xmlConfig, "MazeVariant"));         
+                MazeVariantUtil.convertStringToMazeVariant(XmlUtils.TryGetValueAsString(xmlConfig, "MazeVariant"));         
         }
 
         /// <summary>

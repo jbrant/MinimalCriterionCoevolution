@@ -111,6 +111,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCNSExperiment
 
             IGenomeEvaluator<NeatGenome> fitnessEvaluator =
                 new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
+                    EvaluationType.MinimalCriteriaNoveltySearch,
                     _nearestNeighbors, archive);
 
             // Initialize the evolution algorithm.

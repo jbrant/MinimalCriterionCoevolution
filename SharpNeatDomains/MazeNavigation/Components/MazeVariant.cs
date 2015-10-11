@@ -36,7 +36,7 @@ namespace SharpNeat.Domains.MazeNavigation.Components
     /// <summary>
     ///     Provides utility methods for maze variants.
     /// </summary>
-    public static class MazeVariantUtl
+    public static class MazeVariantUtil
     {
         /// <summary>
         ///     Determines the appropriate maze variant based on the given string value.

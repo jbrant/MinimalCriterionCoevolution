@@ -55,6 +55,7 @@ namespace SharpNeat.Core
         private readonly ParallelOptions _parallelOptions;
         private readonly IPhenomeEvaluator<TPhenome, BehaviorInfo> _phenomeEvaluator;
         private readonly IDataLogger _evaluationLogger;
+        private readonly EvaluationType _evaluationType;
 
         #endregion
 
@@ -79,14 +80,38 @@ namespace SharpNeat.Core
 
         /// <summary>
         ///     Construct with the provided IGenomeDecoder and IPhenomeEvaluator.
+        ///     Phenome caching is enabled by default and the evaluation logger is optional.
+        ///     The number of parallel threads defaults to Environment.ProcessorCount.
+        /// </summary>
+        /// <param name="genomeDecoder">The genome decoder to use.</param>
+        /// <param name="phenomeEvaluator">The phenome evaluator.</param>
+        /// <param name="evaluationType">The fitness/behavior evaluation type.</param>
+        /// <param name="evaluationLogger">A reference to the evaluation data logger (optional).</param>
+        public ParallelGenomeBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
+            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, EvaluationType evaluationType,
+            IDataLogger evaluationLogger = null)
+            : this(
+                genomeDecoder, phenomeEvaluator, evaluationType, new ParallelOptions(), true, 0, null, evaluationLogger)
+        {
+        }
+
+        /// <summary>
+        ///     Construct with the provided IGenomeDecoder and IPhenomeEvaluator.
         ///     Phenome caching is enabled by default.
         ///     The number of parallel threads defaults to Environment.ProcessorCount.
         /// </summary>
+        /// <param name="genomeDecoder">The genome decoder to use.</param>
+        /// <param name="phenomeEvaluator">The phenome evaluator.</param>
+        /// <param name="evaluationType">The fitness/behavior evaluation type.</param>
+        /// <param name="nearestNeighbors">The number of nearest neighbors to use in behavior distance calculations.</param>
+        /// <param name="archive">A reference to the elite archive (optional).</param>
+        /// <param name="evaluationLogger">A reference to the evaluation data logger (optional).</param>
         public ParallelGenomeBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
-            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, int nearestNeighbors,
+            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, EvaluationType evaluationType,
+            int nearestNeighbors,
             AbstractNoveltyArchive<TGenome> archive = null, IDataLogger evaluationLogger = null)
             : this(
-                genomeDecoder, phenomeEvaluator, new ParallelOptions(), true, nearestNeighbors, archive,
+                genomeDecoder, phenomeEvaluator, evaluationType, new ParallelOptions(), true, nearestNeighbors, archive,
                 evaluationLogger)
         {
         }
@@ -96,24 +121,42 @@ namespace SharpNeat.Core
         ///     Phenome caching is enabled by default.
         ///     The number of parallel threads defaults to Environment.ProcessorCount.
         /// </summary>
+        /// <param name="genomeDecoder">The genome decoder to use.</param>
+        /// <param name="phenomeEvaluator">The phenome evaluator.</param>
+        /// <param name="evaluationType">The fitness/behavior evaluation type.</param>
+        /// <param name="options">Controls the number of parallel evaluations.</param>
+        /// <param name="nearestNeighbors">The number of nearest neighbors to use in behavior distance calculations.</param>
+        /// <param name="archive">A reference to the elite archive (optional).</param>
+        /// <param name="evaluationLogger">A reference to the evaluation data logger (optional).</param>
         public ParallelGenomeBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
-            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator,
+            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, EvaluationType evaluationType,
             ParallelOptions options, int nearestNeighbors, AbstractNoveltyArchive<TGenome> archive = null,
             IDataLogger evaluationLogger = null)
-            : this(genomeDecoder, phenomeEvaluator, options, true, nearestNeighbors, archive, evaluationLogger)
+            : this(
+                genomeDecoder, phenomeEvaluator, evaluationType, options, true, nearestNeighbors, archive,
+                evaluationLogger)
         {
         }
 
         /// <summary>
         ///     Construct with the provided IGenomeDecoder, IPhenomeEvaluator, ParalleOptions and enablePhenomeCaching flag.
         /// </summary>
+        /// <param name="genomeDecoder">The genome decoder to use.</param>
+        /// <param name="phenomeEvaluator">The phenome evaluator.</param>
+        /// <param name="evaluationType">The fitness/behavior evaluation type.</param>
+        /// <param name="options">Controls the number of parallel evaluations.</param>
+        /// <param name="enablePhenomeCaching">Whether or not to enable phenome caching.</param>
+        /// <param name="nearestNeighbors">The number of nearest neighbors to use in behavior distance calculations.</param>
+        /// <param name="archive">A reference to the elite archive (optional).</param>
+        /// <param name="evaluationLogger">A reference to the evaluation data logger (optional).</param>
         private ParallelGenomeBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
-            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator,
+            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, EvaluationType evaluationType,
             ParallelOptions options, bool enablePhenomeCaching, int nearestNeighbors,
             AbstractNoveltyArchive<TGenome> archive = null, IDataLogger evaluationLogger = null)
         {
             _genomeDecoder = genomeDecoder;
             _phenomeEvaluator = phenomeEvaluator;
+            _evaluationType = evaluationType;
             _parallelOptions = options;
             _enablePhenomeCaching = enablePhenomeCaching;
             _nearestNeighbors = nearestNeighbors;
@@ -218,20 +261,32 @@ namespace SharpNeat.Core
                         _phenomeEvaluator, _evaluationLogger);
                 });
 
-            // After the behavior of each genome in the current population has been evaluated,
-            // iterate again through each genome and compare its behavioral novelty (distance)
-            // to its k-nearest neighbors in behavior space (and the archive if applicable)
-            Parallel.ForEach(genomeList, _parallelOptions, delegate(TGenome genome)
+            switch (_evaluationType)
             {
-                EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, genomeList, _nearestNeighbors,
-                    _noveltyArchive);
+                // If we're doing novelty search, include nearest neighbor measure and novelty archive (if applicable)
+                case EvaluationType.NoveltySearch:
+                case EvaluationType.MinimalCriteriaNoveltySearch:
+                    // After the behavior of each genome in the offspring batch has been evaluated,
+                    // iterate through each genome and compare its behavioral novelty (distance) to its 
+                    // k -nearest neighbors from the population in behavior space (and the archive if applicable)
+                    Parallel.ForEach(genomeList, _parallelOptions, delegate(TGenome genome)
+                    {
+                        EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, genomeList, _nearestNeighbors,
+                            _noveltyArchive);
 
-                // Add the genome to the archive if it qualifies
-                lock (_archiveEvaluationLock)
-                {
-                    _noveltyArchive?.TestAndAddCandidateToArchive(genome);
-                }
-            });
+                        // Add the genome to the archive if it qualifies
+                        lock (_archiveEvaluationLock)
+                        {
+                            _noveltyArchive?.TestAndAddCandidateToArchive(genome);
+                        }
+                    });
+                    break;
+                // Otherwise, this is probably MCS, so there's no explicit notion of fitness/preference
+                case EvaluationType.MinimalCriteriaSearch:
+                    Parallel.ForEach(genomeList, _parallelOptions,
+                        EvaluationUtils<TGenome, TPhenome>.EvaluateFitness);
+                    break;
+            }
         }
 
         /// <summary>
@@ -251,20 +306,32 @@ namespace SharpNeat.Core
                         _phenomeEvaluator, _evaluationLogger);
                 });
 
-            // After the behavior of each genome in the offspring batch has been evaluated,
-            // iterate through each genome and compare its behavioral novelty (distance) to its 
-            // k -nearest neighbors from the population in behavior space (and the archive if applicable)
-            Parallel.ForEach(genomesToEvaluate, _parallelOptions, delegate(TGenome genome)
+            switch (_evaluationType)
             {
-                EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, population, _nearestNeighbors,
-                    _noveltyArchive);
+                // If we're doing novelty search, include nearest neighbor measure and novelty archive (if applicable)
+                case EvaluationType.NoveltySearch:
+                case EvaluationType.MinimalCriteriaNoveltySearch:
+                    // After the behavior of each genome in the offspring batch has been evaluated,
+                    // iterate through each genome and compare its behavioral novelty (distance) to its 
+                    // k -nearest neighbors from the population in behavior space (and the archive if applicable)
+                    Parallel.ForEach(genomesToEvaluate, _parallelOptions, delegate(TGenome genome)
+                    {
+                        EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, population, _nearestNeighbors,
+                            _noveltyArchive);
 
-                // Add the genome to the archive if it qualifies
-                lock (_archiveEvaluationLock)
-                {
-                    _noveltyArchive?.TestAndAddCandidateToArchive(genome);
-                }
-            });
+                        // Add the genome to the archive if it qualifies
+                        lock (_archiveEvaluationLock)
+                        {
+                            _noveltyArchive?.TestAndAddCandidateToArchive(genome);
+                        }
+                    });
+                    break;
+                // Otherwise, this is probably MCS, so there's no explicit notion of fitness/preference
+                case EvaluationType.MinimalCriteriaSearch:
+                    Parallel.ForEach(genomesToEvaluate, _parallelOptions,
+                        EvaluationUtils<TGenome, TPhenome>.EvaluateFitness);
+                    break;
+            }
         }
 
         /// <summary>
@@ -280,20 +347,32 @@ namespace SharpNeat.Core
                         _phenomeEvaluator, _evaluationLogger);
                 });
 
-            // After the behavior of each genome in the current population has been evaluated,
-            // iterate again through each genome and compare its behavioral novelty (distance)
-            // to its k-nearest neighbors in behavior space (and the archive if applicable)
-            Parallel.ForEach(genomeList, _parallelOptions, delegate(TGenome genome)
+            switch (_evaluationType)
             {
-                EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, genomeList, _nearestNeighbors,
-                    _noveltyArchive);
+                // If we're doing novelty search, include nearest neighbor measure and novelty archive (if applicable)
+                case EvaluationType.NoveltySearch:
+                case EvaluationType.MinimalCriteriaNoveltySearch:
+                    // After the behavior of each genome in the offspring batch has been evaluated,
+                    // iterate through each genome and compare its behavioral novelty (distance) to its 
+                    // k -nearest neighbors from the population in behavior space (and the archive if applicable)
+                    Parallel.ForEach(genomeList, _parallelOptions, delegate(TGenome genome)
+                    {
+                        EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, genomeList, _nearestNeighbors,
+                            _noveltyArchive);
 
-                // Add the genome to the archive if it qualifies
-                lock (_archiveEvaluationLock)
-                {
-                    _noveltyArchive?.TestAndAddCandidateToArchive(genome);
-                }
-            });
+                        // Add the genome to the archive if it qualifies
+                        lock (_archiveEvaluationLock)
+                        {
+                            _noveltyArchive?.TestAndAddCandidateToArchive(genome);
+                        }
+                    });
+                    break;
+                // Otherwise, this is probably MCS, so there's no explicit notion of fitness/preference
+                case EvaluationType.MinimalCriteriaSearch:
+                    Parallel.ForEach(genomeList, _parallelOptions,
+                        EvaluationUtils<TGenome, TPhenome>.EvaluateFitness);
+                    break;
+            }
         }
 
         /// <summary>
@@ -314,22 +393,34 @@ namespace SharpNeat.Core
                         _phenomeEvaluator, _evaluationLogger);
                 });
 
-            // After the behavior of each genome in the offspring batch has been evaluated,
-            // iterate through each genome and compare its behavioral novelty (distance) to its 
-            // k -nearest neighbors from the population in behavior space (and the archive if applicable)
-            Parallel.ForEach(genomesToEvaluate, _parallelOptions, delegate(TGenome genome)
+            switch (_evaluationType)
             {
-                EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, population, _nearestNeighbors,
-                    _noveltyArchive);
+                // If we're doing novelty search, include nearest neighbor measure and novelty archive (if applicable)
+                case EvaluationType.NoveltySearch:
+                case EvaluationType.MinimalCriteriaNoveltySearch:
+                    // After the behavior of each genome in the offspring batch has been evaluated,
+                    // iterate through each genome and compare its behavioral novelty (distance) to its 
+                    // k -nearest neighbors from the population in behavior space (and the archive if applicable)
+                    Parallel.ForEach(genomesToEvaluate, _parallelOptions, delegate(TGenome genome)
+                    {
+                        EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, population, _nearestNeighbors,
+                            _noveltyArchive);
 
-                // Add the genome to the archive if it qualifies
-                lock (_archiveEvaluationLock)
-                {
-                    _noveltyArchive?.TestAndAddCandidateToArchive(genome);
-                }
-            });
+                        // Add the genome to the archive if it qualifies
+                        lock (_archiveEvaluationLock)
+                        {
+                            _noveltyArchive?.TestAndAddCandidateToArchive(genome);
+                        }
+                    });
+                    break;
+                // Otherwise, this is probably MCS, so there's no explicit notion of fitness/preference
+                case EvaluationType.MinimalCriteriaSearch:
+                    Parallel.ForEach(genomesToEvaluate, _parallelOptions,
+                        EvaluationUtils<TGenome, TPhenome>.EvaluateFitness);
+                    break;
+            }
+
+            #endregion
         }
-
-        #endregion
     }
 }

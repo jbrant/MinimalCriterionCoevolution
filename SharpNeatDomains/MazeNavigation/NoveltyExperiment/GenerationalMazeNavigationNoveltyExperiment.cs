@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿#region
+
+using System.Collections.Generic;
 using System.Xml;
 using SharpNeat.Core;
 using SharpNeat.DistanceMetrics;
@@ -7,6 +9,8 @@ using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Phenomes;
 using SharpNeat.SpeciationStrategies;
+
+#endregion
 
 namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
 {
@@ -37,14 +41,16 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
             _archiveThresholdIncreaseMultiplier = XmlUtils.GetValueAsDouble(xmlConfig,
                 "ArchiveThresholdIncreaseMultiplier");
             _maxGenerationalArchiveAddition = XmlUtils.GetValueAsInt(xmlConfig, "MaxGenerationalArchiveAddition");
-            _maxGenerationsWithoutArchiveAddition = XmlUtils.GetValueAsInt(xmlConfig, "MaxGenerationsWithoutArchiveAddition");
+            _maxGenerationsWithoutArchiveAddition = XmlUtils.GetValueAsInt(xmlConfig,
+                "MaxGenerationsWithoutArchiveAddition");
 
             // Read in nearest neighbors for behavior distance calculations
             _nearestNeighbors = XmlUtils.GetValueAsInt(xmlConfig, "NearestNeighbors");
         }
 
         /// <summary>
-        ///     Create and return a GenerationalNeatEvolutionAlgorithm object (specific to fitness-based evaluations) ready for running the
+        ///     Create and return a GenerationalNeatEvolutionAlgorithm object (specific to fitness-based evaluations) ready for
+        ///     running the
         ///     NEAT algorithm/search based on the given genome factory and genome list.  Various sub-parts of the algorithm are
         ///     also constructed and connected up.
         /// </summary>
@@ -65,7 +71,8 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
                 ExperimentUtils.CreateComplexityRegulationStrategy(ComplexityRegulationStrategy, Complexitythreshold);
 
             // Create the evolution algorithm.
-            var ea = new GenerationalNeatEvolutionAlgorithm<NeatGenome>(NeatEvolutionAlgorithmParameters, speciationStrategy,
+            var ea = new GenerationalNeatEvolutionAlgorithm<NeatGenome>(NeatEvolutionAlgorithmParameters,
+                speciationStrategy,
                 complexityRegulationStrategy);
 
             // Create IBlackBox evaluator.
@@ -77,15 +84,17 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
             var genomeDecoder = CreateGenomeDecoder();
 
             // Create a novelty archive.
-            Core.AbstractNoveltyArchive<NeatGenome> archive = new EliteArchives.BehavioralNoveltyArchive<NeatGenome>(_archiveAdditionThreshold,
-                _archiveThresholdDecreaseMultiplier, _archiveThresholdIncreaseMultiplier,
-                _maxGenerationalArchiveAddition, _maxGenerationsWithoutArchiveAddition);
+            AbstractNoveltyArchive<NeatGenome> archive =
+                new BehavioralNoveltyArchive<NeatGenome>(_archiveAdditionThreshold,
+                    _archiveThresholdDecreaseMultiplier, _archiveThresholdIncreaseMultiplier,
+                    _maxGenerationalArchiveAddition, _maxGenerationsWithoutArchiveAddition);
 
             // Create a genome list evaluator. This packages up the genome decoder with the genome evaluator.
             //            IGenomeFitnessEvaluator<NeatGenome> fitnessEvaluator =
             //                new SerialGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator, _nearestNeighbors, archive);
             IGenomeEvaluator<NeatGenome> fitnessEvaluator =
                 new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
+                    EvaluationType.NoveltySearch,
                     ParallelOptions, _nearestNeighbors, archive);
 
             // Initialize the evolution algorithm.

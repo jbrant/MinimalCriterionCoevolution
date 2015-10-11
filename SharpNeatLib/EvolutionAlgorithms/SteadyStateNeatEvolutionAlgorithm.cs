@@ -367,15 +367,9 @@ namespace SharpNeat.EvolutionAlgorithms
             {
                 for (int genomeIdx = 0; genomeIdx < specie.GenomeList.Count; genomeIdx++)
                 {
-                    // Only add as a removal candidate if genome is old enough (this is an attempt to refrain
-                    // from penalizing new innovations)
-                    if ((CurrentGeneration - specie.GenomeList[genomeIdx].BirthGeneration) > EaParams.MinTimeAlive ||
-                        CurrentGeneration <= EaParams.MinTimeAlive)
-                    {
-                        // Add adjusted fitness and the genome reference to the map (dictionary)
-                        removalCandidatesMap.Add(specie.GenomeList[genomeIdx],
-                            specie.CalcGenomeAdjustedFitness(genomeIdx));
-                    }
+                    // Add adjusted fitness and the genome reference to the map (dictionary)
+                    removalCandidatesMap.Add(specie.GenomeList[genomeIdx],
+                        specie.CalcGenomeAdjustedFitness(genomeIdx));
                 }
             }
 

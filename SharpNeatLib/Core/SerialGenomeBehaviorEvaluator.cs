@@ -29,6 +29,7 @@ namespace SharpNeat.Core
         private readonly IPhenomeEvaluator<TPhenome, BehaviorInfo> _phenomeEvaluator;
         private readonly PopulationEvaluationMethod _populationEvaluationMethod;
         private readonly IDataLogger _evaluationLogger;
+        private readonly EvaluationType _evaluationType;
 
         #endregion
 
@@ -58,19 +59,32 @@ namespace SharpNeat.Core
         /// </summary>
         /// <param name="genomeDecoder">The genome decoder to use.</param>
         /// <param name="phenomeEvaluator">The phenome evaluator.</param>
+        /// <param name="evaluationType">The fitness/behavior evaluation type.</param>
+        /// <param name="evaluationLogger">A reference to the evaluation data logger (optional).</param>
+        public SerialGenomeBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
+            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, EvaluationType evaluationType,
+            IDataLogger evaluationLogger = null) : this(
+                genomeDecoder, phenomeEvaluator, evaluationType, true, 0, null, evaluationLogger)
+        {
+        }
+
+        /// <summary>
+        ///     Constructs serial genome list behavior evaluator, customizing only the phenome behavior evaluator and the
+        ///     evaluation method.  Also sets the number of nearest neighbors to utilize in behavior distance calculations and
+        ///     accepts an optional elite archive.
+        /// </summary>
+        /// <param name="genomeDecoder">The genome decoder to use.</param>
+        /// <param name="phenomeEvaluator">The phenome evaluator.</param>
+        /// <param name="evaluationType">The fitness/behavior evaluation type.</param>
         /// <param name="nearestNeighbors">The number of nearest neighbors to use in behavior distance calculations.</param>
         /// <param name="archive">A reference to the elite archive (optional).</param>
+        /// <param name="evaluationLogger">A reference to the evaluation data logger (optional).</param>
         public SerialGenomeBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
-            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, int nearestNeighbors,
+            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, EvaluationType evaluationType,
+            int nearestNeighbors,
             AbstractNoveltyArchive<TGenome> archive = null, IDataLogger evaluationLogger = null)
+            : this(genomeDecoder, phenomeEvaluator, evaluationType, true, nearestNeighbors, archive, evaluationLogger)
         {
-            _genomeDecoder = genomeDecoder;
-            _phenomeEvaluator = phenomeEvaluator;
-            _populationEvaluationMethod = EvaluateAllBehaviors_Caching;
-            _batchEvaluationMethod = EvaluateBatchBehaviors_Caching;
-            _nearestNeighbors = nearestNeighbors;
-            _noveltyArchive = archive;
-            _evaluationLogger = evaluationLogger;
         }
 
         /// <summary>
@@ -80,16 +94,19 @@ namespace SharpNeat.Core
         /// </summary>
         /// <param name="genomeDecoder">The genome decoder to use.</param>
         /// <param name="phenomeEvaluator">The phenome evaluator.</param>
+        /// <param name="evaluationType">The fitness/behavior evaluation type.</param>
         /// <param name="enablePhenomeCaching">Whether or not to enable phenome caching.</param>
         /// <param name="nearestNeighbors">The number of nearest neighbors to use in behavior distance calculations.</param>
         /// <param name="archive">A reference to the elite archive (optional).</param>
+        /// <param name="evaluationLogger">A reference to the evaluation data logger (optional).</param>
         public SerialGenomeBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
-            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator,
+            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, EvaluationType evaluationType,
             bool enablePhenomeCaching, int nearestNeighbors, AbstractNoveltyArchive<TGenome> archive = null,
             IDataLogger evaluationLogger = null)
         {
             _genomeDecoder = genomeDecoder;
             _phenomeEvaluator = phenomeEvaluator;
+            _evaluationType = evaluationType;
             _nearestNeighbors = nearestNeighbors;
             _noveltyArchive = archive;
             _evaluationLogger = evaluationLogger;
@@ -195,16 +212,30 @@ namespace SharpNeat.Core
                     _evaluationLogger);
             }
 
-            // After the behavior of each genome in the current population has been evaluated,
-            // iterate again through each genome and compare its behavioral novelty (distance)
-            // to its k-nearest neighbors in behavior space (and the archive if applicable)
-            foreach (var genome in genomeList)
+            switch (_evaluationType)
             {
-                EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, genomeList, _nearestNeighbors,
-                    _noveltyArchive);
+                // If we're doing novelty search, include nearest neighbor measure and novelty archive (if applicable)
+                case EvaluationType.NoveltySearch:
+                case EvaluationType.MinimalCriteriaNoveltySearch:
+                    // After the behavior of each genome in the offspring batch has been evaluated,
+                    // iterate through each genome and compare its behavioral novelty (distance) to its 
+                    // k -nearest neighbors from the population in behavior space (and the archive if applicable)
+                    foreach (var genome in genomeList)
+                    {
+                        EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, genomeList, _nearestNeighbors,
+                            _noveltyArchive);
 
-                // Add the genome to the archive if it qualifies
-                _noveltyArchive?.TestAndAddCandidateToArchive(genome);
+                        // Add the genome to the archive if it qualifies
+                        _noveltyArchive?.TestAndAddCandidateToArchive(genome);
+                    }
+                    break;
+                // Otherwise, this is probably MCS, so there's no explicit notion of fitness/preference
+                case EvaluationType.MinimalCriteriaSearch:
+                    foreach (var genome in genomeList)
+                    {
+                        EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome);
+                    }
+                    break;
             }
         }
 
@@ -224,16 +255,30 @@ namespace SharpNeat.Core
                     _evaluationLogger);
             }
 
-            // After the behavior of each genome in the offspring batch has been evaluated,
-            // iterate through each genome and compare its behavioral novelty (distance) to its 
-            // k -nearest neighbors from the population in behavior space (and the archive if applicable)
-            foreach (var genome in genomesToEvaluate)
+            switch (_evaluationType)
             {
-                EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, population, _nearestNeighbors,
-                    _noveltyArchive);
+                // If we're doing novelty search, include nearest neighbor measure and novelty archive (if applicable)
+                case EvaluationType.NoveltySearch:
+                case EvaluationType.MinimalCriteriaNoveltySearch:
+                    // After the behavior of each genome in the offspring batch has been evaluated,
+                    // iterate through each genome and compare its behavioral novelty (distance) to its 
+                    // k -nearest neighbors from the population in behavior space (and the archive if applicable)
+                    foreach (var genome in genomesToEvaluate)
+                    {
+                        EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, population, _nearestNeighbors,
+                            _noveltyArchive);
 
-                // Add the genome to the archive if it qualifies
-                _noveltyArchive?.TestAndAddCandidateToArchive(genome);
+                        // Add the genome to the archive if it qualifies
+                        _noveltyArchive?.TestAndAddCandidateToArchive(genome);
+                    }
+                    break;
+                // Otherwise, this is probably MCS, so there's no explicit notion of fitness/preference
+                case EvaluationType.MinimalCriteriaSearch:
+                    foreach (var genome in genomesToEvaluate)
+                    {
+                        EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome);
+                    }
+                    break;
             }
         }
 
@@ -252,16 +297,30 @@ namespace SharpNeat.Core
                     _evaluationLogger);
             }
 
-            // After the behavior of each genome in the current population has been evaluated,
-            // iterate again through each genome and compare its behavioral novelty (distance)
-            // to its k-nearest neighbors in behavior space (and the archive if applicable)
-            foreach (var genome in genomeList)
+            switch (_evaluationType)
             {
-                EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, genomeList, _nearestNeighbors,
-                    _noveltyArchive);
+                // If we're doing novelty search, include nearest neighbor measure and novelty archive (if applicable)
+                case EvaluationType.NoveltySearch:
+                case EvaluationType.MinimalCriteriaNoveltySearch:
+                    // After the behavior of each genome in the offspring batch has been evaluated,
+                    // iterate through each genome and compare its behavioral novelty (distance) to its 
+                    // k -nearest neighbors from the population in behavior space (and the archive if applicable)
+                    foreach (var genome in genomeList)
+                    {
+                        EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, genomeList, _nearestNeighbors,
+                            _noveltyArchive);
 
-                // Add the genome to the archive if it qualifies
-                _noveltyArchive?.TestAndAddCandidateToArchive(genome);
+                        // Add the genome to the archive if it qualifies
+                        _noveltyArchive?.TestAndAddCandidateToArchive(genome);
+                    }
+                    break;
+                // Otherwise, this is probably MCS, so there's no explicit notion of fitness/preference
+                case EvaluationType.MinimalCriteriaSearch:
+                    foreach (var genome in genomeList)
+                    {
+                        EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome);
+                    }
+                    break;
             }
         }
 
@@ -282,16 +341,30 @@ namespace SharpNeat.Core
                     _evaluationLogger);
             }
 
-            // After the behavior of each genome in the offspring batch has been evaluated,
-            // iterate through each genome and compare its behavioral novelty (distance) to its 
-            // k -nearest neighbors from the population in behavior space (and the archive if applicable)
-            foreach (var genome in genomesToEvaluate)
+            switch (_evaluationType)
             {
-                EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, population, _nearestNeighbors,
-                    _noveltyArchive);
+                // If we're doing novelty search, include nearest neighbor measure and novelty archive (if applicable)
+                case EvaluationType.NoveltySearch:
+                case EvaluationType.MinimalCriteriaNoveltySearch:
+                    // After the behavior of each genome in the offspring batch has been evaluated,
+                    // iterate through each genome and compare its behavioral novelty (distance) to its 
+                    // k -nearest neighbors from the population in behavior space (and the archive if applicable)
+                    foreach (var genome in genomesToEvaluate)
+                    {
+                        EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, population, _nearestNeighbors,
+                            _noveltyArchive);
 
-                // Add the genome to the archive if it qualifies
-                _noveltyArchive?.TestAndAddCandidateToArchive(genome);
+                        // Add the genome to the archive if it qualifies
+                        _noveltyArchive?.TestAndAddCandidateToArchive(genome);
+                    }
+                    break;
+                // Otherwise, this is probably MCS, so there's no explicit notion of fitness/preference
+                case EvaluationType.MinimalCriteriaSearch:
+                    foreach (var genome in genomesToEvaluate)
+                    {
+                        EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome);
+                    }
+                    break;
             }
         }
 

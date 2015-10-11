@@ -1,14 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Experiments>
   
-  <Experiment name="Maze Navigation - Fitness (NEAT)">
+  <Experiment name="Maze Navigation - Fitness (Generational NEAT)">
     <AssemblyPath>SharpNeatDomains.dll</AssemblyPath>
     <ClassName>SharpNeat.Domains.MazeNavigation.FitnessExperiment.MazeNavigationFitnessExperiment</ClassName>
     <Config>
       <PopulationSize>250</PopulationSize>
       <SpecieCount>15</SpecieCount>
       <InterspeciesMatingProbability>0.001</InterspeciesMatingProbability>
-      <MinTimeAlive>1</MinTimeAlive>
       <Activation>
         <Scheme>CyclicFixedIters</Scheme>
         <Iters>2</Iters>
@@ -26,14 +25,13 @@
     </Config>
   </Experiment>
   
-  <Experiment name="Maze Navigation - Novelty (NEAT)">
+  <Experiment name="Maze Navigation - Novelty (Generational NEAT)">
     <AssemblyPath>SharpNeatDomains.dll</AssemblyPath>
     <ClassName>SharpNeat.Domains.MazeNavigation.NoveltyExperiment.GenerationalMazeNavigationNoveltyExperiment</ClassName>
     <Config>
       <PopulationSize>250</PopulationSize>
       <SpecieCount>15</SpecieCount>
       <InterspeciesMatingProbability>0.001</InterspeciesMatingProbability>
-      <MinTimeAlive>1</MinTimeAlive>
       <Activation>
         <Scheme>CyclicFixedIters</Scheme>
         <Iters>2</Iters>
@@ -46,7 +44,6 @@
         <AddConnnectionProbability>0.1</AddConnnectionProbability>
         <AddNodeProbability>0.005</AddNodeProbability>        
       </GenomeConfig>
-      <!-- <MaxDegreeOfParallelism>1</MaxDegreeOfParallelism> -->
       <MaxTimesteps>400</MaxTimesteps>
       <MinSuccessDistance>5</MinSuccessDistance>
       <MaxDistanceToTarget>300</MaxDistanceToTarget>
@@ -71,7 +68,6 @@
       <PopulationSize>250</PopulationSize>
       <SpecieCount>10</SpecieCount>
       <InterspeciesMatingProbability>0.001</InterspeciesMatingProbability>
-      <MinTimeAlive>1</MinTimeAlive>
       <Activation>
         <Scheme>CyclicFixedIters</Scheme>
         <Iters>2</Iters>
@@ -116,7 +112,6 @@
       <PopulationSize>250</PopulationSize>
       <SpecieCount>10</SpecieCount>
       <InterspeciesMatingProbability>0.001</InterspeciesMatingProbability>
-      <MinTimeAlive>5</MinTimeAlive>
       <Activation>
         <Scheme>CyclicFixedIters</Scheme>
         <Iters>2</Iters>
@@ -135,10 +130,10 @@
         <BehaviorCharacterization>EndPoint</BehaviorCharacterization>
         <MinimalCriteriaConfig>
           <MinimalCriteriaConstraint>EuclideanLocation</MinimalCriteriaConstraint>
-          <XMin>0</XMin>
-          <XMax>300</XMax>
-          <YMin>0</YMin>
-          <YMax>300</YMax>
+          <XMin>6</XMin>
+          <XMax>289</XMax>
+          <YMin>5</YMin>
+          <YMax>134</YMax>
         </MinimalCriteriaConfig>
       </BehaviorConfig>
       <NearestNeighbors>15</NearestNeighbors>
@@ -149,6 +144,50 @@
         <MaxGenerationalArchiveAddition>5</MaxGenerationalArchiveAddition>
         <MaxGenerationsWithoutArchiveAddition>10</MaxGenerationsWithoutArchiveAddition>
       </NoveltyConfig>
+      <MaxTimesteps>400</MaxTimesteps>
+      <MinSuccessDistance>5</MinSuccessDistance>
+      <MaxDistanceToTarget>300</MaxDistanceToTarget>
+      <MazeVariant>OpenEndedMediumMaze</MazeVariant>
+      <EvolutionLogFile>F:\\User Data\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Novelty Search\\Experiments\\EvolutionData.csv</EvolutionLogFile>
+      <EvaluationLogFile>F:\\User Data\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Novelty Search\\Experiments\\EvaluationData.csv</EvaluationLogFile>
+      <Description>
+        This is the maze navigation experiment used in the original novelty search papers (citation needed).
+      </Description>
+    </Config>
+  </Experiment>
+
+  <Experiment name="Maze Navigation - MCS (Steady State NEAT)">
+    <AssemblyPath>SharpNeatDomains.dll</AssemblyPath>
+    <ClassName>SharpNeat.Domains.MazeNavigation.MCSExperiment.SteadyStateMazeNavigationMCSExperiment</ClassName>
+    <Config>
+      <PopulationSize>250</PopulationSize>
+      <SpecieCount>10</SpecieCount>
+      <InterspeciesMatingProbability>0.001</InterspeciesMatingProbability>
+      <Activation>
+        <Scheme>CyclicFixedIters</Scheme>
+        <Iters>2</Iters>
+      </Activation>
+      <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>
+      <ComplexityThreshold>30</ComplexityThreshold>
+      <OffspringBatchSize>10</OffspringBatchSize>
+      <PopulationEvaluationFrequency>20</PopulationEvaluationFrequency>
+      <GenomeConfig>
+        <InitialConnectionProportion>1</InitialConnectionProportion>
+        <WeightMutationProbability>0.6</WeightMutationProbability>
+        <AddConnnectionProbability>0.1</AddConnnectionProbability>
+        <AddNodeProbability>0.005</AddNodeProbability>
+      </GenomeConfig>
+      <BehaviorConfig>
+        <BehaviorCharacterization>EndPoint</BehaviorCharacterization>
+        <MinimalCriteriaConfig>
+          <MinimalCriteriaConstraint>EuclideanLocation</MinimalCriteriaConstraint>
+          <XMin>6</XMin>
+          <XMax>289</XMax>
+          <YMin>5</YMin>
+          <YMax>134</YMax>
+        </MinimalCriteriaConfig>
+      </BehaviorConfig>
+      <NearestNeighbors>15</NearestNeighbors>
       <MaxTimesteps>400</MaxTimesteps>
       <MinSuccessDistance>5</MinSuccessDistance>
       <MaxDistanceToTarget>300</MaxDistanceToTarget>
@@ -168,7 +207,6 @@
       <PopulationSize>250</PopulationSize>
       <SpecieCount>10</SpecieCount>
       <InterspeciesMatingProbability>0.001</InterspeciesMatingProbability>
-      <MinTimeAlive>5</MinTimeAlive>
       <Activation>
         <Scheme>CyclicFixedIters</Scheme>
         <Iters>2</Iters>
