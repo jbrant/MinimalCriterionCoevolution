@@ -25,6 +25,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         private string _generationalLogFile;
 
         private int _populationEvaluationFrequency;
+        private string _mcsSelectionMethod;
 
         public override void Initialize(string name, XmlElement xmlConfig)
         {
@@ -36,6 +37,9 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             // Read in steady-state specific parameters
             _batchSize = XmlUtils.GetValueAsInt(xmlConfig, "OffspringBatchSize");
             _populationEvaluationFrequency = XmlUtils.GetValueAsInt(xmlConfig, "PopulationEvaluationFrequency");
+
+            // Read in MCS selection method
+            _mcsSelectionMethod = XmlUtils.TryGetValueAsString(xmlConfig, "McsSelectionMethod");
 
             // Read in log file path/name
             _generationalLogFile = XmlUtils.TryGetValueAsString(xmlConfig, "GenerationalLogFile");
@@ -73,8 +77,17 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             }
 
             // Create the evolution algorithm.
-            var ea = new SteadyStateNeatEvolutionAlgorithm<NeatGenome>(NeatEvolutionAlgorithmParameters,
-                speciationStrategy, complexityRegulationStrategy, _batchSize, _populationEvaluationFrequency, logger);
+            AbstractNeatEvolutionAlgorithm<NeatGenome> ea;
+            if ("Random".Equals(_mcsSelectionMethod))
+            {
+                ea = new SteadyStateNeatEvolutionAlgorithm<NeatGenome>(NeatEvolutionAlgorithmParameters,
+                    speciationStrategy, complexityRegulationStrategy, _batchSize, _populationEvaluationFrequency, logger);
+            }
+            else
+            {
+                ea = new QueueingNeatEvolutionAlgorithm<NeatGenome>(NeatEvolutionAlgorithmParameters, speciationStrategy,
+                    complexityRegulationStrategy, _batchSize, _populationEvaluationFrequency, logger);
+            }
 
             // Create IBlackBox evaluator.
             var mazeNavigationEvaluator = new MazeNavigationMCSEvaluator(MaxDistanceToTarget, MaxTimesteps,

@@ -156,7 +156,7 @@
     </Config>
   </Experiment>
 
-  <Experiment name="Maze Navigation - MCS (Steady State NEAT)">
+  <Experiment name="Maze Navigation - MCS - Random (Steady State NEAT)">
     <AssemblyPath>SharpNeatDomains.dll</AssemblyPath>
     <ClassName>SharpNeat.Domains.MazeNavigation.MCSExperiment.SteadyStateMazeNavigationMCSExperiment</ClassName>
     <Config>
@@ -171,6 +171,7 @@
       <ComplexityThreshold>30</ComplexityThreshold>
       <OffspringBatchSize>10</OffspringBatchSize>
       <PopulationEvaluationFrequency>20</PopulationEvaluationFrequency>
+      <McsSelectionMethod>Queueing</McsSelectionMethod>
       <GenomeConfig>
         <InitialConnectionProportion>1</InitialConnectionProportion>
         <WeightMutationProbability>0.6</WeightMutationProbability>

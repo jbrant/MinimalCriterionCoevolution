@@ -80,6 +80,7 @@
     <Compile Include="Core\CoordinateVector.cs" />
     <Compile Include="Core\IMinimalCriteria.cs" />
     <Compile Include="Core\INoveltyArchive.cs" />
+    <Compile Include="EvolutionAlgorithms\QueueingNeatEvolutionAlgorithm.cs" />
     <Compile Include="Loggers\EntityDataLogger.cs" />
     <Compile Include="Loggers\FieldPosition.cs" />
     <Compile Include="MinimalCriterias\EuclideanLocationCriteria.cs" />
