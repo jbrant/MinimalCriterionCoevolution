@@ -8,7 +8,6 @@ using SharpNeat.DistanceMetrics;
 using SharpNeat.EvolutionAlgorithms.ComplexityRegulation;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.SpeciationStrategies;
-using SharpNeat.Utility;
 
 #endregion
 
@@ -27,12 +26,13 @@ namespace SharpNeat.EvolutionAlgorithms
         #region Overridden Methods
 
         /// <summary>
-        /// Intercepts the call to initialize, calls the base intializer first to generate an initial population, then ensures that all individuals in the initial population satisfy the minimal criteria.
+        ///     Intercepts the call to initialize, calls the base intializer first to generate an initial population, then ensures
+        ///     that all individuals in the initial population satisfy the minimal criteria.
         /// </summary>
         protected override void Initialize()
         {
             base.Initialize();
-            
+
             // Remove all genomes from the initial population that do not satisfy the minimal criteria
             ((List<TGenome>) GenomeList).RemoveAll(genome => genome.EvaluationInfo.IsViable == false);
 
@@ -58,12 +58,11 @@ namespace SharpNeat.EvolutionAlgorithms
                     newGenomes.RemoveAll(genome => genome.EvaluationInfo.IsViable == false);
 
                     // Add the new genomes that do satisfy the minimal criteria to the population
-                    ((List<TGenome>)GenomeList).AddRange(newGenomes);
+                    ((List<TGenome>) GenomeList).AddRange(newGenomes);
 
                     // Update the count of additional genomes that need to be created
                     numGenomesToGenerate = PopulationSize - GenomeList.Count;
-
-                } while (numGenomesToGenerate > 0);                
+                } while (numGenomesToGenerate > 0);
             }
         }
 
@@ -72,20 +71,29 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </summary>
         protected override void PerformOneGeneration()
         {
-            // TODO: Select number proportional to batch size
-            // Produce number of offspring equivalent to the given batch size
-            List<TGenome> childGenomes = CreateOffspring(_batchSize);
+            int curBatchSize = _batchSize;
+            List<TGenome> childGenomes = new List<TGenome>(_batchSize);
 
-            // TODO: Evaluate select only for minimal criteria
-            // Evaluate the offspring batch
-            GenomeEvaluator.Evaluate(childGenomes, GenomeList);
+            do
+            {
+                // Produce number of offspring equivalent to the given batch size
+                List<TGenome> curChildGenomes = CreateOffspring(curBatchSize);
 
-            // TODO: Remove only the amount that satisfied minimal criteria
-            // Determine genomes to remove based on their adjusted fitness
-            List<TGenome> genomesToRemove = SelectGenomesForRemoval(_batchSize);
+                // Evaluate the offspring batch
+                GenomeEvaluator.Evaluate(curChildGenomes);
 
-            // Remove the worst individuals from the previous iteration
-            (GenomeList as List<TGenome>)?.RemoveAll(x => genomesToRemove.Contains(x));
+                // Remove child genomes that are not viable
+                curChildGenomes.RemoveAll(genome => genome.EvaluationInfo.IsViable == false);
+
+                // Add only the viable genomes to the overall list of child genomes
+                childGenomes.AddRange(curChildGenomes);
+
+                // Set the current batch size to the remaining number of child genomes to create
+                curBatchSize = _batchSize - childGenomes.Count;
+            } while (childGenomes.Count < _batchSize);
+
+            // Remove the parent genomes
+            (GenomeList as List<TGenome>)?.RemoveRange(0, _batchSize);
 
             // Add new children
             (GenomeList as List<TGenome>)?.AddRange(childGenomes);
@@ -94,15 +102,13 @@ namespace SharpNeat.EvolutionAlgorithms
             ClearAllSpecies();
             SpeciationStrategy.SpeciateGenomes(GenomeList, SpecieList);
 
+            // TODO: This shouldn't really matter since we're fitness agnostic
             // Sort the genomes in each specie. Fittest first (secondary sort - youngest first).
             SortSpecieGenomes();
 
             // Update stats and store reference to best genome.
             UpdateBestGenome();
             UpdateStats();
-
-            // Update the elite archive parameters and reset for next evaluation
-            AbstractNoveltyArchive?.UpdateArchiveParameters();
 
             Debug.Assert(GenomeList.Count == PopulationSize);
 
@@ -126,9 +132,9 @@ namespace SharpNeat.EvolutionAlgorithms
         private readonly int _populationEvaluationFrequency;
 
         /// <summary>
-        /// The queue of genomes that's used to bootstrap the global genome list.
+        ///     The queue of genomes that's used to bootstrap the global genome list.
         /// </summary>
-        private readonly Queue<TGenome> _genomeQueue; 
+        private readonly Queue<TGenome> _genomeQueue;
 
         #endregion
 
@@ -203,20 +209,21 @@ namespace SharpNeat.EvolutionAlgorithms
         #region Private Methods
 
         /// <summary>
-        ///     Creates the specified number of offspring using roulette wheel species and genomes selection (which is based on the
-        ///     fitness stats of the species in the given stats array).
+        ///     Creates the specified number of offspring asexually using the desired offspring count as a gauge for the FIFO
+        ///     parent selection (it's a one-to-one mapping).
         /// </summary>
-        /// <param name="specieStatsArr">
-        ///     The specie stats array, which is used to support specie reproduction selection based on
-        ///     specie size and mean fitness.
-        /// </param>
         /// <param name="offspringCount">The number of offspring to produce.</param>
         /// <returns>The list of offspring.</returns>
         private List<TGenome> CreateOffspring(int offspringCount)
         {
             List<TGenome> offspringList = new List<TGenome>(offspringCount);
-            
-            // TODO: Remove parent genomes and produce offspring
+
+            // Get the parent genomes
+            List<TGenome> parentList = ((List<TGenome>) GenomeList).GetRange(0, offspringCount);
+
+            // Generate an offspring asexually for each parent genome (this is not done asexually because depending on the batch size, 
+            // we may not be able to have genomes from the same species mate)
+            offspringList.AddRange(parentList.Select(parentGenome => parentGenome.CreateOffspring(CurrentGeneration)));
 
             return offspringList;
         }
