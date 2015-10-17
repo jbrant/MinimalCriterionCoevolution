@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using SharpNeat.NoveltyArchives;
 using SharpNeat.Utility;
 
 #endregion
@@ -273,18 +274,22 @@ namespace SharpNeat.Core
                     {
                         EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, genomeList, _nearestNeighbors,
                             _noveltyArchive);
-
-                        // Add the genome to the archive if it qualifies
-                        lock (_archiveEvaluationLock)
-                        {
-                            _noveltyArchive?.TestAndAddCandidateToArchive(genome);
-                        }
                     });
                     break;
-                // Otherwise, this is probably MCS, so there's no explicit notion of fitness/preference
-                case EvaluationType.MinimalCriteriaSearch:
-                    Parallel.ForEach(genomeList, _parallelOptions,
-                        EvaluationUtils<TGenome, TPhenome>.EvaluateFitness);
+                // If we're doing minimal criteria search with random fitness, generate a random value for the fitness
+                case EvaluationType.MinimalCriteriaSearchRandom:
+                    Parallel.ForEach(genomeList, _parallelOptions, delegate(TGenome genome)
+                    {
+                        EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, false);
+                    });
+                    break;
+                // If we're doing minimal criteria search with queueing, the objective distance will be assigned as the fitness
+                // (but it will ultimately have no bearing on the progression of search)
+                case EvaluationType.MinimalCriteriaSearchQueueing:
+                    Parallel.ForEach(genomeList, _parallelOptions, delegate (TGenome genome)
+                    {
+                        EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, true);
+                    });
                     break;
             }
         }
@@ -318,18 +323,22 @@ namespace SharpNeat.Core
                     {
                         EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, population, _nearestNeighbors,
                             _noveltyArchive);
-
-                        // Add the genome to the archive if it qualifies
-                        lock (_archiveEvaluationLock)
-                        {
-                            _noveltyArchive?.TestAndAddCandidateToArchive(genome);
-                        }
                     });
                     break;
-                // Otherwise, this is probably MCS, so there's no explicit notion of fitness/preference
-                case EvaluationType.MinimalCriteriaSearch:
-                    Parallel.ForEach(genomesToEvaluate, _parallelOptions,
-                        EvaluationUtils<TGenome, TPhenome>.EvaluateFitness);
+                // If we're doing minimal criteria search with random fitness, generate a random value for the fitness
+                case EvaluationType.MinimalCriteriaSearchRandom:
+                    Parallel.ForEach(genomesToEvaluate, _parallelOptions, delegate (TGenome genome)
+                    {
+                        EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, false);
+                    });
+                    break;
+                // If we're doing minimal criteria search with queueing, the objective distance will be assigned as the fitness
+                // (but it will ultimately have no bearing on the progression of search)
+                case EvaluationType.MinimalCriteriaSearchQueueing:
+                    Parallel.ForEach(genomesToEvaluate, _parallelOptions, delegate (TGenome genome)
+                    {
+                        EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, true);
+                    });
                     break;
             }
         }
@@ -359,18 +368,22 @@ namespace SharpNeat.Core
                     {
                         EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, genomeList, _nearestNeighbors,
                             _noveltyArchive);
-
-                        // Add the genome to the archive if it qualifies
-                        lock (_archiveEvaluationLock)
-                        {
-                            _noveltyArchive?.TestAndAddCandidateToArchive(genome);
-                        }
                     });
                     break;
-                // Otherwise, this is probably MCS, so there's no explicit notion of fitness/preference
-                case EvaluationType.MinimalCriteriaSearch:
-                    Parallel.ForEach(genomeList, _parallelOptions,
-                        EvaluationUtils<TGenome, TPhenome>.EvaluateFitness);
+                // If we're doing minimal criteria search with random fitness, generate a random value for the fitness
+                case EvaluationType.MinimalCriteriaSearchRandom:
+                    Parallel.ForEach(genomeList, _parallelOptions, delegate (TGenome genome)
+                    {
+                        EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, false);
+                    });
+                    break;
+                // If we're doing minimal criteria search with queueing, the objective distance will be assigned as the fitness
+                // (but it will ultimately have no bearing on the progression of search)
+                case EvaluationType.MinimalCriteriaSearchQueueing:
+                    Parallel.ForEach(genomeList, _parallelOptions, delegate (TGenome genome)
+                    {
+                        EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, true);
+                    });
                     break;
             }
         }
@@ -405,18 +418,22 @@ namespace SharpNeat.Core
                     {
                         EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, population, _nearestNeighbors,
                             _noveltyArchive);
-
-                        // Add the genome to the archive if it qualifies
-                        lock (_archiveEvaluationLock)
-                        {
-                            _noveltyArchive?.TestAndAddCandidateToArchive(genome);
-                        }
                     });
                     break;
-                // Otherwise, this is probably MCS, so there's no explicit notion of fitness/preference
-                case EvaluationType.MinimalCriteriaSearch:
-                    Parallel.ForEach(genomesToEvaluate, _parallelOptions,
-                        EvaluationUtils<TGenome, TPhenome>.EvaluateFitness);
+                // If we're doing minimal criteria search with random fitness, generate a random value for the fitness
+                case EvaluationType.MinimalCriteriaSearchRandom:
+                    Parallel.ForEach(genomesToEvaluate, _parallelOptions, delegate (TGenome genome)
+                    {
+                        EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, false);
+                    });
+                    break;
+                // If we're doing minimal criteria search with queueing, the objective distance will be assigned as the fitness
+                // (but it will ultimately have no bearing on the progression of search)
+                case EvaluationType.MinimalCriteriaSearchQueueing:
+                    Parallel.ForEach(genomesToEvaluate, _parallelOptions, delegate (TGenome genome)
+                    {
+                        EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, true);
+                    });
                     break;
             }
 

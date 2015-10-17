@@ -48,13 +48,13 @@ namespace SharpNeat.EvolutionAlgorithms
             if (CurrentGeneration%_populationEvaluationFrequency == 0)
             {
                 GenomeEvaluator.Evaluate(GenomeList);
-
+                
                 // Clear all the species and respeciate
                 ClearAllSpecies();
                 SpeciationStrategy.SpeciateGenomes(GenomeList, SpecieList);
 
                 // Sort the genomes in each specie. Fittest first (secondary sort - youngest first).
-                SortSpecieGenomes();
+                SortSpecieGenomes();                
             }
 
             // Calculate statistics for each specie (mean fitness and target size)
@@ -75,6 +75,12 @@ namespace SharpNeat.EvolutionAlgorithms
             // Add new children
             (GenomeList as List<TGenome>)?.AddRange(childGenomes);
 
+            // Add each applicable genomes to archive based on whether they qualified
+            foreach (TGenome childGenome in childGenomes)
+            {
+                AbstractNoveltyArchive?.TestAndAddCandidateToArchive(childGenome);
+            }
+
             // Clear all the species and respeciate
             ClearAllSpecies();
             SpeciationStrategy.SpeciateGenomes(GenomeList, SpecieList);
@@ -86,7 +92,7 @@ namespace SharpNeat.EvolutionAlgorithms
             UpdateBestGenome();
             UpdateStats();
 
-            // Update the elite archive parameters and reset for next evaluation
+            // Update the archive parameters and reset for next evaluation
             AbstractNoveltyArchive?.UpdateArchiveParameters();
 
             Debug.Assert(GenomeList.Count == PopulationSize);

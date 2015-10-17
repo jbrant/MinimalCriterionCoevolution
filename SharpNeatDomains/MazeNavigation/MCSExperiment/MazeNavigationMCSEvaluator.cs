@@ -53,6 +53,9 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             // Run a single trial
             BehaviorInfo trialInfo = world.RunTrial(phenome, EvaluationType.NoveltySearch, out stopConditionSatisfied);
 
+            // Set the objective distance
+            trialInfo.ObjectiveDistance = world.GetDistanceToTarget();
+
             // Check if the current location satisfies the minimal criteria
             if (_behaviorCharacterization.IsMinimalCriteriaSatisfied(trialInfo) == false)
             {

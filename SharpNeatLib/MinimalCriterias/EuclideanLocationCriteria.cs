@@ -52,7 +52,7 @@ namespace SharpNeat.MinimalCriterias
         }
 
         /// <summary>
-        ///     Evalutes whether the given (preumably euclidean) behavior characterization satisfies the minimal criteria.
+        ///     Evalutes whether the given (presumably euclidean) behavior characterization satisfies the minimal criteria.
         /// </summary>
         /// <param name="behaviorInfo">The behavior info in euclidean space.</param>
         /// <returns>Boolean value indicating whether the given behavior characterization satisfies the minimal criteria.</returns>

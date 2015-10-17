@@ -103,6 +103,11 @@ namespace SharpNeat.Core
         public double[] BehaviorCharacterization { get; set; }
 
         /// <summary>
+        ///     Gets or sets the distance to the domain-specific objective (generally based on the behavior characterization).
+        /// </summary>
+        public double ObjectiveDistance { get; set; }
+
+        /// <summary>
         ///     Indicates whether the genome is viable, per the evaluation results.
         /// </summary>
         public bool IsViable { get; set; }

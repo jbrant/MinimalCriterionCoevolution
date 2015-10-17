@@ -3,7 +3,7 @@ using SharpNeat.Core;
 
 namespace SharpNeat.Utility
 {
-    public static class BehaviorUtils<TGenome>
+    public static class NoveltyUtils<TGenome>
         where TGenome : class, IGenome<TGenome>
     {
         public static double CalculateBehavioralDistance(double[] genomeBehaviors, IList<TGenome> population,
@@ -23,10 +23,7 @@ namespace SharpNeat.Utility
             if (archive != null)
             {
                 foreach (var genome in archive.Archive)
-                {
-                    var distance = BehaviorInfo.CalculateDistance(genomeBehaviors,
-                        genome.EvaluationInfo.BehaviorCharacterization);
-
+                {                    
                     distances.Add(BehaviorInfo.CalculateDistance(genomeBehaviors,
                         genome.EvaluationInfo.BehaviorCharacterization));
                 }

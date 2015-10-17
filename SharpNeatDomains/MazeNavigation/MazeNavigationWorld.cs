@@ -97,10 +97,12 @@ namespace SharpNeat.Domains.MazeNavigation
                 // Setup appropriate parameters for hard maze
                 case MazeVariant.HardMaze:
                     // Initialize the navigator at the appropriate starting location
-                    _navigator = new MazeNavigator(new DoublePoint(36, 184));
+                    //_navigator = new MazeNavigator(new DoublePoint(36, 184));
+                    _navigator = new MazeNavigator(new DoublePoint(31, 20));
 
                     // Initialize the goal location
-                    _goalLocation = new DoublePoint(31, 20);
+                    //_goalLocation = new DoublePoint(31, 20);
+                    _goalLocation = new DoublePoint(36, 184);
 
                     // Define all of the maze walls
                     _walls = new List<DoubleLine>(13)
@@ -223,7 +225,7 @@ namespace SharpNeat.Domains.MazeNavigation
                 for (var curTimestep = 0; curTimestep < _maxTimesteps; curTimestep++)
                 {
                     RunTimestep(agent);
-
+                    
                     _behaviorCharacterization.UpdateBehaviors(new List<double>
                     {
                         _navigator.Location.X,
@@ -244,7 +246,7 @@ namespace SharpNeat.Domains.MazeNavigation
 
             // TODO: Remove this
             double tempDistance = GetDistanceToTarget();
-            if (tempDistance < 40)
+            if (tempDistance < 20)
             {
                 Debug.WriteLine("Distance to goal: {0}", tempDistance);
             }
@@ -287,7 +289,7 @@ namespace SharpNeat.Domains.MazeNavigation
         ///     Calculates the distance between the navigator's location and the goal location.
         /// </summary>
         /// <returns>The distance between the navigator and the goal.</returns>
-        private double GetDistanceToTarget()
+        public double GetDistanceToTarget()
         {
             // Get the distance to the target based on the navigator's current location
             return DoublePoint.CalculateEuclideanDistance(_navigator.Location, _goalLocation);

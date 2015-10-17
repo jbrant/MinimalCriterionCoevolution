@@ -71,6 +71,12 @@ namespace SharpNeat.EvolutionAlgorithms
             // EvaluateFitness genomes.            
             GenomeEvaluator.Evaluate(GenomeList);
 
+            // Add each applicable genomes to archive based on whether they qualified
+            foreach (TGenome childGenome in GenomeList)
+            {
+                AbstractNoveltyArchive?.TestAndAddCandidateToArchive(childGenome);
+            }
+
             // Integrate offspring into species.
             if (emptySpeciesFlag)
             {

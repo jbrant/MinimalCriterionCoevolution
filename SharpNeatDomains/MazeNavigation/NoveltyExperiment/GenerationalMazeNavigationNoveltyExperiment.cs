@@ -7,6 +7,7 @@ using SharpNeat.DistanceMetrics;
 using SharpNeat.EliteArchives;
 using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.Genomes.Neat;
+using SharpNeat.NoveltyArchives;
 using SharpNeat.Phenomes;
 using SharpNeat.SpeciationStrategies;
 

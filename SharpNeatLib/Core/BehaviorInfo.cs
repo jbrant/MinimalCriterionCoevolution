@@ -1,4 +1,6 @@
-﻿namespace SharpNeat.Core
+﻿using System;
+
+namespace SharpNeat.Core
 {
     /// <summary>
     ///     Wrapper struct for behavior values.
@@ -29,6 +31,13 @@
         ///     Flag indicating whether the behaviors satisfy the minimal criteria.  This flag is set after evaluation.
         /// </summary>
         public bool DoesBehaviorSatisfyMinimalCriteria { get; set; }
+
+        /// <summary>
+        ///     Indicates the distance (in a euclidean since or otherwise) to the objective (i.e. target).  This makes sense given
+        ///     that we're trying to realize a particular behavior that drives to a particular objective in behavior space, but the
+        ///     implementation still seems a bit clumsy.
+        /// </summary>
+        public double ObjectiveDistance { get; set; }
 
         /// <summary>
         ///     Calculates the distance between two behaviors.
@@ -71,7 +80,7 @@
                 distance += delta*delta;
             }
 
-            return distance;
+            return Math.Sqrt(distance);
         }
     }
 }

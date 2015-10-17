@@ -3,10 +3,11 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using SharpNeat.Core;
 
 #endregion
 
-namespace SharpNeat.Core
+namespace SharpNeat.NoveltyArchives
 {
     /// <summary>
     ///     Encapsulates the state of the archive of "novel" organisms, with respect to some domain-specific measure of
@@ -16,6 +17,17 @@ namespace SharpNeat.Core
     public abstract class AbstractNoveltyArchive<TGenome> : INoveltyArchive<TGenome>
         where TGenome : class, IGenome<TGenome>
     {
+        
+        #region Protected instance fields
+
+        /// <summary>
+        ///     Tracks the number of genomes that have been added to the archive for the current generation.  This is used for
+        ///     determining how to modify the archive threshold.
+        /// </summary>
+        protected int NumGenomesAddedThisGeneration;
+
+        #endregion
+
         #region Constructors
 
         /// <summary>
@@ -165,13 +177,7 @@ namespace SharpNeat.Core
 
         #endregion
 
-        #region Protected instance fields
-
-        /// <summary>
-        ///     Tracks the number of genomes that have been added to the archive for the current generation.  This is used for
-        ///     determining how to modify the archive threshold.
-        /// </summary>
-        protected int NumGenomesAddedThisGeneration;
+        #region Protected members
 
         /// <summary>
         ///     The real-valued threshold constituting above which a genome will be added to the archive.

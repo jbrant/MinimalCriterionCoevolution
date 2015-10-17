@@ -261,18 +261,35 @@ namespace SharpNeat.Domains
                 MinimalCriteriaType mcType =
                     BehaviorCharacterizationUtil.ConvertStringToMinimalCriteria(minimalCriteriaConstraint);
 
-                // TODO: Need to have a switch statement here when more MC types are added
-                if (MinimalCriteriaType.EuclideanLocation.Equals(mcType))
+                switch (mcType)
                 {
-                    // Read in the min/max location bounds
-                    double xMin = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "XMin");
-                    double xMax = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "XMax");
-                    double yMin = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "YMin");
-                    double yMax = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "YMax");
+                    case MinimalCriteriaType.EuclideanLocation:
 
-                    // Set the minimal criteria on the behavior characterization
-                    behaviorCharacterization.MinimalCriteria = new EuclideanLocationCriteria(xMin, xMax, yMin, yMax);
-                }
+                        // Read in the min/max location bounds
+                        double xMin = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "XMin");
+                        double xMax = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "XMax");
+                        double yMin = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "YMin");
+                        double yMax = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "YMax");
+
+                        // Set the euclidean location minimal criteria on the behavior characterization
+                        behaviorCharacterization.MinimalCriteria = new EuclideanLocationCriteria(xMin, xMax, yMin, yMax);
+
+                        break;
+
+                    case MinimalCriteriaType.EuclideanDistance:
+
+                        // Read in the starting coordinates and the minimum required distance traveled
+                        double xStart = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "XStart");
+                        double yStart = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "YStart");
+                        double minimumDistanceTraveled = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig,
+                            "MinimumRequiredDistance");
+
+                        // Set the euclidean distance minimal criteria on the behavior characterization
+                        behaviorCharacterization.MinimalCriteria = new EuclideanDistanceCriteria(xStart, yStart,
+                            minimumDistanceTraveled);
+
+                        break;
+                }               
             }
 
             return behaviorCharacterization;

@@ -8,6 +8,7 @@ using SharpNeat.EliteArchives;
 using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Loggers;
+using SharpNeat.NoveltyArchives;
 using SharpNeat.Phenomes;
 using SharpNeat.SpeciationStrategies;
 
@@ -121,7 +122,8 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
 
 //            IGenomeEvaluator<NeatGenome> fitnessEvaluator =
 //                new SerialGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
-//                    _nearestNeighbors, archive);
+//                    EvaluationType.NoveltySearch,
+//                    _nearestNeighbors, archive, evaluationLogger);
 
             IGenomeEvaluator<NeatGenome> fitnessEvaluator =
                 new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,

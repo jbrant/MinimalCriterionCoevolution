@@ -29,6 +29,7 @@ using SharpNeat.Core;
 using SharpNeat.EvolutionAlgorithms.ComplexityRegulation;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Loggers;
+using SharpNeat.NoveltyArchives;
 using SharpNeat.SpeciationStrategies;
 using SharpNeat.Utility;
 

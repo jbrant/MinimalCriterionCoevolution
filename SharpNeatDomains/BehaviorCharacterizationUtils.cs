@@ -32,7 +32,12 @@ namespace SharpNeat.Domains
         /// <summary>
         ///     Indicates the euclidean location minimal criteria.
         /// </summary>
-        EuclideanLocation
+        EuclideanLocation,
+
+        /// <summary>
+        ///     Indicates the euclidean distance minimal criteria.
+        /// </summary>
+        EuclideanDistance
     }
 
     /// <summary>
@@ -69,7 +74,7 @@ namespace SharpNeat.Domains
             {
                 return MinimalCriteriaType.EuclideanLocation;
             }
-            return MinimalCriteriaType.EuclideanLocation;
+            return MinimalCriteriaType.EuclideanDistance;
         }
 
         /// <summary>

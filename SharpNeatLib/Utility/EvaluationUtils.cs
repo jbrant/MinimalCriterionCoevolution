@@ -38,10 +38,11 @@ namespace SharpNeat.Utility
             }
             else
             {
-                // Evaluate the behavior, update the genome's behavior characterization, 
+                // Evaluate the behavior, update the genome's behavior characterization, calculate the distance to the domain objective,
                 // and indicate if the genome is viable based on whether the minimal criteria was satisfied
                 var behaviorInfo = phenomeEvaluator.Evaluate(phenome, evaluationLogger);
                 genome.EvaluationInfo.BehaviorCharacterization = behaviorInfo.Behaviors;
+                genome.EvaluationInfo.ObjectiveDistance = behaviorInfo.ObjectiveDistance;
                 genome.EvaluationInfo.IsViable = behaviorInfo.DoesBehaviorSatisfyMinimalCriteria;
             }
         }
@@ -74,10 +75,11 @@ namespace SharpNeat.Utility
             }
             else
             {
-                // Evaluate the behavior, update the genome's behavior characterization, 
+                // Evaluate the behavior, update the genome's behavior characterization, calculate the distance to the domain objective,
                 // and indicate if the genome is viable based on whether the minimal criteria was satisfied
                 var behaviorInfo = phenomeEvaluator.Evaluate(phenome, evaluationLogger);
                 genome.EvaluationInfo.BehaviorCharacterization = behaviorInfo.Behaviors;
+                genome.EvaluationInfo.ObjectiveDistance = behaviorInfo.ObjectiveDistance;
                 genome.EvaluationInfo.IsViable = behaviorInfo.DoesBehaviorSatisfyMinimalCriteria;
             }
         }
@@ -162,7 +164,7 @@ namespace SharpNeat.Utility
             {
                 // Compare the current genome's behavior to its k-nearest neighbors in behavior space
                 double fitness =
-                    BehaviorUtils<TGenome>.CalculateBehavioralDistance(genome.EvaluationInfo.BehaviorCharacterization,
+                    NoveltyUtils<TGenome>.CalculateBehavioralDistance(genome.EvaluationInfo.BehaviorCharacterization,
                         genomeList, nearestNeighbors, noveltyArchive);
                 fitnessInfo = new FitnessInfo(fitness, fitness);
             }
@@ -173,28 +175,45 @@ namespace SharpNeat.Utility
         }
 
         /// <summary>
-        ///     Evalutes the fitness of the given genome as a random value, so long as it satisfies the minimal criteria.
+        ///     Evalutes the fitness of the given genome as either the objective distance to the domain-specific target (depending
+        ///     on the whether the given flag is set) or to a random value, so long as it satisfies the minimal criteria.
         /// </summary>
         /// <param name="genome">The genome to evaluate.</param>
-        public static void EvaluateFitness(TGenome genome)
+        /// <param name="assignObjectiveDistanceAsFitness">
+        ///     Boolean indicator specifying whether to assign the distance to the
+        ///     objective as a proxy for fitness.
+        /// </param>
+        public static void EvaluateFitness(TGenome genome, bool assignObjectiveDistanceAsFitness)
         {
             FitnessInfo fitnessInfo;
 
-            // Create new random number generator without a seed
-            FastRandom rng = new FastRandom();
-
-            // If the genome is not viable, set the fitness (i.e. behavioral novelty) to zero
-            if (genome.EvaluationInfo.IsViable == false)
+            // If the flag is set, assign the calculated objective distance as the fitness.  
+            // This is mostly for display purposes because the methods that use this (i.e. MCS) 
+            // are not objectively driven.
+            if (assignObjectiveDistanceAsFitness)
             {
-                fitnessInfo = FitnessInfo.Zero;
+                fitnessInfo = new FitnessInfo(genome.EvaluationInfo.ObjectiveDistance,
+                    genome.EvaluationInfo.ObjectiveDistance);
             }
+            // Otherwise, we're going to assign a random fitness score (since there is no other heuristic)
             else
             {
-                // Generate new random fitness value
-                double randomFitness = rng.NextDouble();
+                // Create new random number generator without a seed
+                FastRandom rng = new FastRandom();
 
-                // Set random value as fitness
-                fitnessInfo = new FitnessInfo(randomFitness, randomFitness);
+                // If the genome is not viable, set the fitness (i.e. behavioral novelty) to zero
+                if (genome.EvaluationInfo.IsViable == false)
+                {
+                    fitnessInfo = FitnessInfo.Zero;
+                }
+                else
+                {
+                    // Generate new random fitness value
+                    double randomFitness = rng.NextDouble();
+
+                    // Set random value as fitness
+                    fitnessInfo = new FitnessInfo(randomFitness, randomFitness);
+                }
             }
 
             // Update the genome fitness as the randomly generated double
