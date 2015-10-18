@@ -29,14 +29,22 @@ namespace EntityPersistenceTest
             ne.MeanComplexity = 15.8;
             ne.MinSpecieSize = 3;
             ne.MaxSpecieSize = 30;
-            ne.TotalEvaluations = 300;
-            ne.EvaluationsPerSecond = 15;
+
+            //ne.TotalEvaluations = 300;
+            ne.TotalEvaluations = null;
+
+            //ne.EvaluationsPerSecond = 15;
+            ne.EvaluationsPerSecond = null;
+
             ne.ChampGenomeID = 1;
             ne.ChampGenomeBirthGeneration = 5;
             ne.ChampGenomeConnectionGeneCount = 12;
             ne.ChampGenomeNeuronGeneCount = 5;
             ne.ChampGenomeTotalGeneCount = 17;
-            ne.ChampGenomeEvaluationCount = 13;
+
+            //ne.ChampGenomeEvaluationCount = 13;
+            ne.ChampGenomeEvaluationCount = null;
+
             ne.ChampGenomeBehavior1 = null;
             ne.ChampGenomeBehavior2 = null;
 

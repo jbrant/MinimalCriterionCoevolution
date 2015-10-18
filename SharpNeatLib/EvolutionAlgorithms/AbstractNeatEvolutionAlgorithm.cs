@@ -22,7 +22,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.Reflection;
 using log4net;
 using SharpNeat.Core;
@@ -60,8 +59,7 @@ namespace SharpNeat.EvolutionAlgorithms
         {
             return new List<LoggableElement>
             {
-                new LoggableElement("AbstractNeatEvolutionAlgorithm - Specie Count",
-                    Convert.ToString(SpecieList.Count, CultureInfo.InvariantCulture))
+                new LoggableElement(NoveltyEvolutionFieldElements.SpecieCount, SpecieList.Count)
             };
         }
 

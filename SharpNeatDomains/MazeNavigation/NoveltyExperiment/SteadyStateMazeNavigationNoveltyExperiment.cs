@@ -59,7 +59,7 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
             _populationEvaluationFrequency = XmlUtils.GetValueAsInt(xmlConfig, "PopulationEvaluationFrequency");
 
             // Read in log file path/name
-            _evolutionLogFile = XmlUtils.TryGetValueAsString(xmlConfig, "GenerationalLogFile");
+            _evolutionLogFile = XmlUtils.TryGetValueAsString(xmlConfig, "EvolutionLogFile");
             _evaluationLogFile = XmlUtils.TryGetValueAsString(xmlConfig, "EvaluationLogFile");
         }
 
@@ -76,8 +76,8 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
             IGenomeFactory<NeatGenome> genomeFactory,
             List<NeatGenome> genomeList)
         {
-            FileDataLogger evolutionLogger = null;
-            FileDataLogger evaluationLogger = null;
+            IDataLogger evolutionLogger = null;
+            IDataLogger evaluationLogger = null;
 
             // Create distance metric. Mismatched genes have a fixed distance of 10; for matched genes the distance is their weigth difference.
             IDistanceMetric distanceMetric = new ManhattanDistanceMetric(1.0, 0.0, 10.0);
@@ -91,8 +91,9 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
             // Initialize the evolution logger
             if (_evolutionLogFile != null)
             {
-                evolutionLogger =
-                    new FileDataLogger(_evolutionLogFile);
+                /*evolutionLogger =
+                    new FileDataLogger(_evolutionLogFile);*/
+                evolutionLogger = new EntityDataLogger(1);
             }
 
             // Initialize the evaluation logger

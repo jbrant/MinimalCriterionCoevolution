@@ -1,9 +1,7 @@
 ﻿#region
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using SharpNeat.Core;
 using SharpNeat.Domains.MazeNavigation.Components;
 using SharpNeat.Loggers;
@@ -134,7 +132,7 @@ namespace SharpNeat.Domains.MazeNavigation
                     {
                         new DoubleLine(293, 7, 289, 130),
                         new DoubleLine(289, 130, 6, 134),
-                        
+
                         // Left wall is missing here
 
                         new DoubleLine(8, 5, 292, 7),
@@ -163,12 +161,9 @@ namespace SharpNeat.Domains.MazeNavigation
         {
             return new List<LoggableElement>
             {
-                new LoggableElement("MazeNavigationWorld - Navigator XLocation",
-                    Convert.ToString(_navigator.Location.X, CultureInfo.InvariantCulture)),
-                new LoggableElement("MazeNavigationWorld - Navigator YLocation",
-                    Convert.ToString(_navigator.Location.Y, CultureInfo.InvariantCulture)),
-                new LoggableElement("MazeNavigationWorld - Distance to Target",
-                    Convert.ToString(GetDistanceToTarget(), CultureInfo.InvariantCulture))
+                new LoggableElement(NoveltyEvaluationFieldElements.DistanceToTarget, GetDistanceToTarget()),
+                new LoggableElement(NoveltyEvaluationFieldElements.AgentXLocation, _navigator.Location.X),
+                new LoggableElement(NoveltyEvaluationFieldElements.AgentYLocation, _navigator.Location.Y)
             };
         }
 
@@ -193,7 +188,7 @@ namespace SharpNeat.Domains.MazeNavigation
 
             // Reset neural network
             agent.ResetState();
-            
+
             // If this is a fitness evaluation, return the fitness score as the 
             // difference between the maximum target distance and the ending distance 
             // to the target
@@ -223,7 +218,7 @@ namespace SharpNeat.Domains.MazeNavigation
                 for (var curTimestep = 0; curTimestep < _maxTimesteps; curTimestep++)
                 {
                     RunTimestep(agent);
-                    
+
                     _behaviorCharacterization.UpdateBehaviors(new List<double>
                     {
                         _navigator.Location.X,

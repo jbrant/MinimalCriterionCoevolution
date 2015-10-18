@@ -14,23 +14,23 @@ namespace SharpNeat.Loggers
         /// <summary>
         ///     LoggableElement constructor, which sets the header and value.
         /// </summary>
-        /// <param name="header">The header of the LoggableElement.</param>
-        /// <param name="value">The string-based value of the LoggableElement.</param>
-        public LoggableElement(String header, String value)
+        /// <param name="fieldElement">The position and name (and possibly other metadata) of the field to be logged.</param>
+        /// <param name="value">The value of the LoggableElement.</param>
+        public LoggableElement(FieldElement fieldElement, Object value)
         {
-            Header = header;
+            FieldMetadata = fieldElement;
             Value = value;
         }
 
         /// <summary>
-        ///     The header label of the LoggableElement.
+        ///     The position of the given field in the file/table output (used for keying into domain-specific enum map).
         /// </summary>
-        public String Header { get; }
+        public FieldElement FieldMetadata { get; }
 
         /// <summary>
-        ///     The string-value of the LoggableElement.
+        ///     The value of the LoggableElement.
         /// </summary>
-        public String Value { get; private set; }
+        public Object Value { get; private set; }
 
         /// <summary>
         ///     Compares to another (presumably) LoggableElement in order to support lexicographical sorting by the header value.
@@ -50,7 +50,7 @@ namespace SharpNeat.Loggers
             // If the cast was valid, perform the comparison
             if (otherElement != null)
             {
-                return Header.CompareTo(otherElement.Header);
+                return FieldMetadata.Position.CompareTo(otherElement.FieldMetadata.Position);
             }
 
             // Otherwise, we can't compare against a non-LoggableElement

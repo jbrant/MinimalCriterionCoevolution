@@ -82,7 +82,7 @@
     <Compile Include="Core\INoveltyArchive.cs" />
     <Compile Include="EvolutionAlgorithms\QueueingNeatEvolutionAlgorithm.cs" />
     <Compile Include="Loggers\EntityDataLogger.cs" />
-    <Compile Include="Loggers\FieldPosition.cs" />
+    <Compile Include="Loggers\FieldElement.cs" />
     <Compile Include="MinimalCriterias\EuclideanDistanceCriteria.cs" />
     <Compile Include="MinimalCriterias\EuclideanLocationCriteria.cs" />
     <Compile Include="NoveltyArchives\AbstractNoveltyArchive.cs" />

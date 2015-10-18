@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using SharpNeat.Core;
 
 #endregion
@@ -83,6 +84,7 @@ namespace SharpNeat.Loggers
         ///     The LoggableElements which contains both the header (value description metadata) and the
         ///     value itself.
         /// </param>
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public void LogRow(params List<LoggableElement>[] loggableElements)
         {
             // Combine and sort the loggable elements
@@ -135,7 +137,7 @@ namespace SharpNeat.Loggers
         /// <returns>The header names from the given LoggableElements.</returns>
         private List<String> extractHeaderNames(List<LoggableElement> loggableElements)
         {
-            return loggableElements.Select(loggableElement => loggableElement.Header).ToList();
+            return loggableElements.Select(loggableElement => loggableElement.FieldMetadata.FriendlyName).ToList();
         }
 
         /// <summary>
@@ -145,7 +147,7 @@ namespace SharpNeat.Loggers
         /// <returns>The values (observations) from the given LoggableElements.</returns>
         private List<String> extractDataPoints(List<LoggableElement> loggableElements)
         {
-            return loggableElements.Select(LoggableElement => LoggableElement.Value).ToList();
+            return loggableElements.Select(LoggableElement => Convert.ToString(LoggableElement.Value)).ToList();
         }
 
         #endregion
