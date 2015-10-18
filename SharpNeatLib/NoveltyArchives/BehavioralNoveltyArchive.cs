@@ -54,6 +54,7 @@ namespace SharpNeat.EliteArchives
             // threshold compared to every existing archive member, then add it to the archive
             if (genomeUnderEvaluation.EvaluationInfo.Fitness > ArchiveAdditionThreshold)
             {
+                // Add the genome to the archive
                 Archive.TryAdd(genomeUnderEvaluation);
 
                 // Increment the number of genomes added to archive for the current generation

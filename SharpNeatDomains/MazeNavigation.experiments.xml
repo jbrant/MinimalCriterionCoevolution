@@ -66,7 +66,7 @@
     <ClassName>SharpNeat.Domains.MazeNavigation.NoveltyExperiment.SteadyStateMazeNavigationNoveltyExperiment</ClassName>
     <Config>
       <PopulationSize>250</PopulationSize>
-      <SpecieCount>10</SpecieCount>
+      <SpecieCount>20</SpecieCount>
       <InterspeciesMatingProbability>0.001</InterspeciesMatingProbability>
       <Activation>
         <Scheme>CyclicFixedIters</Scheme>
@@ -75,7 +75,7 @@
       <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>
       <ComplexityThreshold>20</ComplexityThreshold>
       <OffspringBatchSize>20</OffspringBatchSize>
-      <PopulationEvaluationFrequency>30</PopulationEvaluationFrequency>
+      <PopulationEvaluationFrequency>100</PopulationEvaluationFrequency>
       <GenomeConfig>
         <InitialConnectionProportion>1</InitialConnectionProportion>
         <WeightMutationProbability>0.6</WeightMutationProbability>
@@ -214,8 +214,7 @@
       </Activation>
       <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>
       <ComplexityThreshold>30</ComplexityThreshold>
-      <!--<MaxDegreeOfParallelism>1</MaxDegreeOfParallelism>-->
-      <OffspringBatchSize>10</OffspringBatchSize>
+      <OffspringBatchSize>20</OffspringBatchSize>
       <PopulationEvaluationFrequency>20</PopulationEvaluationFrequency>
       <McsSelectionMethod>Queueing</McsSelectionMethod>
       <GenomeConfig>
@@ -242,7 +241,7 @@
       <MaxTimesteps>400</MaxTimesteps>
       <MinSuccessDistance>5</MinSuccessDistance>
       <MaxDistanceToTarget>300</MaxDistanceToTarget>
-      <MazeVariant>HardMaze</MazeVariant>
+      <MazeVariant>MediumMaze</MazeVariant>
       <EvolutionLogFile>F:\\User Data\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Novelty Search\\Experiments\\EvolutionData.csv</EvolutionLogFile>
       <EvaluationLogFile>F:\\User Data\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Novelty Search\\Experiments\\EvaluationData.csv</EvaluationLogFile>
       <Description>

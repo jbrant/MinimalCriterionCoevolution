@@ -51,7 +51,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                 _maxTimesteps, _behaviorCharacterization);
 
             // Run a single trial
-            BehaviorInfo trialInfo = world.RunTrial(phenome, EvaluationType.NoveltySearch, out stopConditionSatisfied);
+            BehaviorInfo trialInfo = world.RunTrial(phenome, EvaluationType.MinimalCriteriaSearchQueueing, out stopConditionSatisfied);
 
             // Set the objective distance
             trialInfo.ObjectiveDistance = world.GetDistanceToTarget();

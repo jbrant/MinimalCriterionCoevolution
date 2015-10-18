@@ -54,7 +54,10 @@ namespace SharpNeat.EvolutionAlgorithms
                 SpeciationStrategy.SpeciateGenomes(GenomeList, SpecieList);
 
                 // Sort the genomes in each specie. Fittest first (secondary sort - youngest first).
-                SortSpecieGenomes();                
+                SortSpecieGenomes();
+
+                // Update the archive parameters and reset for next evaluation
+                AbstractNoveltyArchive?.UpdateArchiveParameters();
             }
 
             // Calculate statistics for each specie (mean fitness and target size)
@@ -91,10 +94,7 @@ namespace SharpNeat.EvolutionAlgorithms
             // Update stats and store reference to best genome.
             UpdateBestGenome();
             UpdateStats();
-
-            // Update the archive parameters and reset for next evaluation
-            AbstractNoveltyArchive?.UpdateArchiveParameters();
-
+            
             Debug.Assert(GenomeList.Count == PopulationSize);
 
             // If there is a logger defined, log the generation stats

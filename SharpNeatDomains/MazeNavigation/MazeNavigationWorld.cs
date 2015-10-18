@@ -97,12 +97,10 @@ namespace SharpNeat.Domains.MazeNavigation
                 // Setup appropriate parameters for hard maze
                 case MazeVariant.HardMaze:
                     // Initialize the navigator at the appropriate starting location
-                    //_navigator = new MazeNavigator(new DoublePoint(36, 184));
-                    _navigator = new MazeNavigator(new DoublePoint(31, 20));
+                    _navigator = new MazeNavigator(new DoublePoint(36, 184));
 
                     // Initialize the goal location
-                    //_goalLocation = new DoublePoint(31, 20);
-                    _goalLocation = new DoublePoint(36, 184);
+                    _goalLocation = new DoublePoint(31, 20);
 
                     // Define all of the maze walls
                     _walls = new List<DoubleLine>(13)
