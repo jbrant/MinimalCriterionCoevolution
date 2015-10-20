@@ -52,7 +52,7 @@ namespace SharpNeat.EvolutionAlgorithms
                     List<TGenome> newGenomes = GenomeFactory.CreateGenomeList(numGenomesToGenerate, 0);
 
                     // Evaluate the genomes to determine which meet the minimal criteria
-                    GenomeEvaluator.Evaluate(newGenomes);
+                    GenomeEvaluator.Evaluate(newGenomes, CurrentGeneration);
 
                     // Remove the newly created genomes that do not meet the minimal criteria
                     newGenomes.RemoveAll(genome => genome.EvaluationInfo.IsViable == false);
@@ -80,7 +80,7 @@ namespace SharpNeat.EvolutionAlgorithms
                 List<TGenome> curChildGenomes = CreateOffspring(curBatchSize);
 
                 // Evaluate the offspring batch
-                GenomeEvaluator.Evaluate(curChildGenomes);
+                GenomeEvaluator.Evaluate(curChildGenomes, CurrentGeneration);
 
                 // Remove child genomes that are not viable
                 curChildGenomes.RemoveAll(genome => genome.EvaluationInfo.IsViable == false);

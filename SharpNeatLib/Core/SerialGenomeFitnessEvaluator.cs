@@ -44,8 +44,9 @@ namespace SharpNeat.Core
         /// <summary>
         ///     The delegate for population evaluation.
         /// </summary>
-        /// <param name="genomeList"></param>
-        private delegate void EvaluationMethod(IList<TGenome> genomeList);
+        /// <param name="genomeList">The list of genomes (population) to evaluate.</param>
+        /// <param name="currentGeneration">The current generation for which the genomes are being evaluated.</param>
+        private delegate void EvaluationMethod(IList<TGenome> genomeList, uint currentGeneration);
 
         #endregion
 
@@ -145,9 +146,10 @@ namespace SharpNeat.Core
         ///     IGenomeDecoder and evaluate the resulting TPhenome using the contained IPhenomeEvaluator.
         /// </summary>
         /// <param name="genomeList">The list of genomes under evaluation.</param>
-        public void Evaluate(IList<TGenome> genomeList)
+        /// <param name="currentGeneration">The current generation for which the genomes are being evaluated.</param>
+        public void Evaluate(IList<TGenome> genomeList, uint currentGeneration)
         {
-            _evaluationMethod(genomeList);
+            _evaluationMethod(genomeList, currentGeneration);
         }
 
         /// <summary>
@@ -155,7 +157,8 @@ namespace SharpNeat.Core
         /// </summary>
         /// <param name="genomesToEvaluate">The genomes under evaluation.</param>
         /// <param name="population">The genomes against which to evaluate.</param>
-        public void Evaluate(IList<TGenome> genomesToEvaluate, IList<TGenome> population)
+        /// <param name="currentGeneration">The current generation for which the genomes are being evaluated.</param>
+        public void Evaluate(IList<TGenome> genomesToEvaluate, IList<TGenome> population, uint currentGeneration)
         {
             // TODO: Need to implement this
             throw new NotImplementedException();
@@ -173,7 +176,7 @@ namespace SharpNeat.Core
 
         #region Private Methods
 
-        private void Evaluate_NonCaching(IList<TGenome> genomeList)
+        private void Evaluate_NonCaching(IList<TGenome> genomeList, uint currentGeneration)
         {
             // Decode and evaluate each genome in turn.
             foreach (TGenome genome in genomeList)
@@ -187,14 +190,14 @@ namespace SharpNeat.Core
                 }
                 else
                 {
-                    FitnessInfo fitnessInfo = _phenomeEvaluator.Evaluate(phenome, _evaluationLogger);
+                    FitnessInfo fitnessInfo = _phenomeEvaluator.Evaluate(phenome, currentGeneration, _evaluationLogger);
                     genome.EvaluationInfo.SetFitness(fitnessInfo._fitness);
                     genome.EvaluationInfo.AuxFitnessArr = fitnessInfo._auxFitnessArr;
                 }
             }
         }
 
-        private void Evaluate_Caching(IList<TGenome> genomeList)
+        private void Evaluate_Caching(IList<TGenome> genomeList, uint currentGeneration)
         {
             // Decode and evaluate each genome in turn.
             foreach (TGenome genome in genomeList)
@@ -215,7 +218,7 @@ namespace SharpNeat.Core
                 }
                 else
                 {
-                    FitnessInfo fitnessInfo = _phenomeEvaluator.Evaluate(phenome, _evaluationLogger);
+                    FitnessInfo fitnessInfo = _phenomeEvaluator.Evaluate(phenome, currentGeneration, _evaluationLogger);
                     genome.EvaluationInfo.SetFitness(fitnessInfo._fitness);
                     genome.EvaluationInfo.AuxFitnessArr = fitnessInfo._auxFitnessArr;
                 }

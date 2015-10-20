@@ -73,6 +73,9 @@
     <Compile Include="NoveltyExperimentEvaluationData.cs">
       <DependentUpon>ExperimentModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="NoveltyExperimentOrganismStateData.cs">
+      <DependentUpon>ExperimentModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -17,13 +17,13 @@ namespace ExperimentEntities
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public ExperimentDictionary()
         {
+            this.NoveltyExperimentOrganismStateDatas = new HashSet<NoveltyExperimentOrganismStateData>();
             this.NoveltyExperimentEvaluationDatas = new HashSet<NoveltyExperimentEvaluationData>();
         }
     
         public int ExperimentID { get; set; }
         public string ExperimentName { get; set; }
         public string ConfigurationFile { get; set; }
-        public int NumRuns { get; set; }
         public string ExperimentDomain { get; set; }
         public string ExperimentType { get; set; }
         public string AlgorithmType { get; set; }
@@ -49,6 +49,8 @@ namespace ExperimentEntities
         public double MutateDeleteConnectionProbability { get; set; }
         public int ConnectionWeightRange { get; set; }
     
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<NoveltyExperimentOrganismStateData> NoveltyExperimentOrganismStateDatas { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<NoveltyExperimentEvaluationData> NoveltyExperimentEvaluationDatas { get; set; }
     }

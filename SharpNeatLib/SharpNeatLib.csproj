@@ -81,7 +81,10 @@
     <Compile Include="Core\IMinimalCriteria.cs" />
     <Compile Include="Core\INoveltyArchive.cs" />
     <Compile Include="EvolutionAlgorithms\QueueingNeatEvolutionAlgorithm.cs" />
-    <Compile Include="Loggers\EntityDataLogger.cs" />
+    <Compile Include="Loggers\AbstractEntityDataLogger.cs" />
+    <Compile Include="Loggers\LoggingParameters.cs" />
+    <Compile Include="Loggers\NoveltyExperimentOrganismStateEntityDataLogger.cs" />
+    <Compile Include="Loggers\NoveltyExperimentEvaluationEntityDataLogger.cs" />
     <Compile Include="Loggers\FieldElement.cs" />
     <Compile Include="MinimalCriterias\EuclideanDistanceCriteria.cs" />
     <Compile Include="MinimalCriterias\EuclideanLocationCriteria.cs" />

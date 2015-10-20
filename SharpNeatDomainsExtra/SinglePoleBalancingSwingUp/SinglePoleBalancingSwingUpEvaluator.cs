@@ -95,7 +95,7 @@ namespace SharpNeat.DomainsExtra.SinglePoleBalancingSwingUp
         /// <summary>
         /// EvaluateFitness the provided IBlackBox.
         /// </summary>
-        public FitnessInfo Evaluate(IBlackBox box, IDataLogger evaluationLogger)
+        public FitnessInfo Evaluate(IBlackBox box, uint currentGeneration, IDataLogger evaluationLogger)
         {
             _evalCount++;
             double fitness1 = Evaluate_Phase1_SwingUp(box);

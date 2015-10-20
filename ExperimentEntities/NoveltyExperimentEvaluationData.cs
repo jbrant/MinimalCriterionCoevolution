@@ -15,6 +15,7 @@ namespace ExperimentEntities
     public partial class NoveltyExperimentEvaluationData
     {
         public int ExperimentID_FK { get; set; }
+        public int Run { get; set; }
         public int Generation { get; set; }
         public int SpecieCount { get; set; }
         public int AsexualOffspringCount { get; set; }

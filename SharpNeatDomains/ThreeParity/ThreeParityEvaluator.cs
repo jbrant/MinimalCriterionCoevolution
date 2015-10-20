@@ -31,7 +31,7 @@ namespace SharpNeat.Domains.ThreeParity
         /// </summary>
         /// <param name="phenome">The phenome/black box (ANN) under evaluation.</param>
         /// <returns>The fitness score of the given black box optimizer.</returns>
-        public FitnessInfo Evaluate(IBlackBox phenome, IDataLogger evaluationLogger)
+        public FitnessInfo Evaluate(IBlackBox phenome, uint currentGeneration, IDataLogger evaluationLogger)
         {
             double fitness = 0;
             bool success = true;

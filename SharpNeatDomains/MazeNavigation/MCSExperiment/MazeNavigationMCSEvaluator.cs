@@ -38,7 +38,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         /// </summary>
         public bool StopConditionSatisfied { get; private set; }
 
-        public BehaviorInfo Evaluate(IBlackBox phenome, IDataLogger evaluationLogger)
+        public BehaviorInfo Evaluate(IBlackBox phenome, uint currentGeneration, IDataLogger evaluationLogger)
         {
             // Increment evaluation count
             EvaluationCount++;

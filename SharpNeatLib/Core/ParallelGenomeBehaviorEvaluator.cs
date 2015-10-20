@@ -66,14 +66,15 @@ namespace SharpNeat.Core
         ///     Delegate for population (generational) evaluation.
         /// </summary>
         /// <param name="genomeList">The list of genomes (population) to evaluate.</param>
-        private delegate void PopulationEvaluationMethod(IList<TGenome> genomeList);
+        private delegate void PopulationEvaluationMethod(IList<TGenome> genomeList, uint currentGeneration);
 
         /// <summary>
         ///     Delegate for batch (steady-state) evaluation.
         /// </summary>
         /// <param name="genomesToEvaluate">The list of genomes (batch) to evaluate.</param>
         /// <param name="population">The population of genomes against which the batch of genomes are being evaluated.</param>
-        private delegate void BatchEvaluationMethod(IList<TGenome> genomesToEvaluate, IList<TGenome> population);
+        private delegate void BatchEvaluationMethod(
+            IList<TGenome> genomesToEvaluate, IList<TGenome> population, uint currentGeneration);
 
         #endregion
 
@@ -231,9 +232,10 @@ namespace SharpNeat.Core
         ///     and evaluate the resulting TPhenome using the contained IPhenomeEvaluator.
         /// </summary>
         /// <param name="genomeList">The list of genomes under evaluation.</param>
-        public void Evaluate(IList<TGenome> genomeList)
+        /// <param name="currentGeneration">The current generation for which the genomes are being evaluated.</param>
+        public void Evaluate(IList<TGenome> genomeList, uint currentGeneration)
         {
-            _populationEvaluationMethod(genomeList);
+            _populationEvaluationMethod(genomeList, currentGeneration);
         }
 
         /// <summary>
@@ -241,9 +243,10 @@ namespace SharpNeat.Core
         /// </summary>
         /// <param name="genomesToEvaluate">The list of genomes under evaluation.</param>
         /// <param name="population">The genomes against which to evaluate.</param>
-        public void Evaluate(IList<TGenome> genomesToEvaluate, IList<TGenome> population)
+        /// <param name="currentGeneration">The current generation for which the genomes are being evaluated.</param>
+        public void Evaluate(IList<TGenome> genomesToEvaluate, IList<TGenome> population, uint currentGeneration)
         {
-            _batchEvaluationMethod(genomesToEvaluate, population);
+            _batchEvaluationMethod(genomesToEvaluate, population, currentGeneration);
         }
 
         #endregion
@@ -253,13 +256,13 @@ namespace SharpNeat.Core
         /// <summary>
         ///     Main genome evaluation loop with no phenome caching (decode on each loop).
         /// </summary>
-        private void EvaluateAllBehaviors_NonCaching(IList<TGenome> genomeList)
+        private void EvaluateAllBehaviors_NonCaching(IList<TGenome> genomeList, uint currentGeneration)
         {
             Parallel.ForEach(genomeList, _parallelOptions,
                 delegate(TGenome genome)
                 {
                     EvaluationUtils<TGenome, TPhenome>.EvaluateBehavior_NonCaching(genome, _genomeDecoder,
-                        _phenomeEvaluator, _evaluationLogger);
+                        _phenomeEvaluator, currentGeneration, _evaluationLogger);
                 });
 
             switch (_evaluationType)
@@ -278,18 +281,14 @@ namespace SharpNeat.Core
                     break;
                 // If we're doing minimal criteria search with random fitness, generate a random value for the fitness
                 case EvaluationType.MinimalCriteriaSearchRandom:
-                    Parallel.ForEach(genomeList, _parallelOptions, delegate(TGenome genome)
-                    {
-                        EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, false);
-                    });
+                    Parallel.ForEach(genomeList, _parallelOptions,
+                        delegate(TGenome genome) { EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, false); });
                     break;
                 // If we're doing minimal criteria search with queueing, the objective distance will be assigned as the fitness
                 // (but it will ultimately have no bearing on the progression of search)
                 case EvaluationType.MinimalCriteriaSearchQueueing:
-                    Parallel.ForEach(genomeList, _parallelOptions, delegate (TGenome genome)
-                    {
-                        EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, true);
-                    });
+                    Parallel.ForEach(genomeList, _parallelOptions,
+                        delegate(TGenome genome) { EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, true); });
                     break;
             }
         }
@@ -301,14 +300,15 @@ namespace SharpNeat.Core
         /// </summary>
         /// <param name="genomesToEvaluate">The batch of genomes to evaluate.</param>
         /// <param name="population">The population of genomes against which the batch is being evaluated.</param>
-        private void EvaluateBatchBehaviors_NonCaching(IList<TGenome> genomesToEvaluate, IList<TGenome> population)
+        private void EvaluateBatchBehaviors_NonCaching(IList<TGenome> genomesToEvaluate, IList<TGenome> population,
+            uint currentGeneration)
         {
             // Decode and evaluate the behavior of the genomes under evaluation
             Parallel.ForEach(genomesToEvaluate, _parallelOptions,
                 delegate(TGenome genome)
                 {
                     EvaluationUtils<TGenome, TPhenome>.EvaluateBehavior_NonCaching(genome, _genomeDecoder,
-                        _phenomeEvaluator, _evaluationLogger);
+                        _phenomeEvaluator, currentGeneration, _evaluationLogger);
                 });
 
             switch (_evaluationType)
@@ -327,18 +327,14 @@ namespace SharpNeat.Core
                     break;
                 // If we're doing minimal criteria search with random fitness, generate a random value for the fitness
                 case EvaluationType.MinimalCriteriaSearchRandom:
-                    Parallel.ForEach(genomesToEvaluate, _parallelOptions, delegate (TGenome genome)
-                    {
-                        EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, false);
-                    });
+                    Parallel.ForEach(genomesToEvaluate, _parallelOptions,
+                        delegate(TGenome genome) { EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, false); });
                     break;
                 // If we're doing minimal criteria search with queueing, the objective distance will be assigned as the fitness
                 // (but it will ultimately have no bearing on the progression of search)
                 case EvaluationType.MinimalCriteriaSearchQueueing:
-                    Parallel.ForEach(genomesToEvaluate, _parallelOptions, delegate (TGenome genome)
-                    {
-                        EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, true);
-                    });
+                    Parallel.ForEach(genomesToEvaluate, _parallelOptions,
+                        delegate(TGenome genome) { EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, true); });
                     break;
             }
         }
@@ -347,13 +343,13 @@ namespace SharpNeat.Core
         ///     Main genome evaluation loop with phenome caching (decode only if no cached phenome is present
         ///     from a previous decode).
         /// </summary>
-        private void EvaluateAllBehaviors_Caching(IList<TGenome> genomeList)
+        private void EvaluateAllBehaviors_Caching(IList<TGenome> genomeList, uint currentGeneration)
         {
             Parallel.ForEach(genomeList, _parallelOptions,
                 delegate(TGenome genome)
                 {
                     EvaluationUtils<TGenome, TPhenome>.EvaluateBehavior_Caching(genome, _genomeDecoder,
-                        _phenomeEvaluator, _evaluationLogger);
+                        _phenomeEvaluator, currentGeneration, _evaluationLogger);
                 });
 
             switch (_evaluationType)
@@ -372,18 +368,14 @@ namespace SharpNeat.Core
                     break;
                 // If we're doing minimal criteria search with random fitness, generate a random value for the fitness
                 case EvaluationType.MinimalCriteriaSearchRandom:
-                    Parallel.ForEach(genomeList, _parallelOptions, delegate (TGenome genome)
-                    {
-                        EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, false);
-                    });
+                    Parallel.ForEach(genomeList, _parallelOptions,
+                        delegate(TGenome genome) { EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, false); });
                     break;
                 // If we're doing minimal criteria search with queueing, the objective distance will be assigned as the fitness
                 // (but it will ultimately have no bearing on the progression of search)
                 case EvaluationType.MinimalCriteriaSearchQueueing:
-                    Parallel.ForEach(genomeList, _parallelOptions, delegate (TGenome genome)
-                    {
-                        EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, true);
-                    });
+                    Parallel.ForEach(genomeList, _parallelOptions,
+                        delegate(TGenome genome) { EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, true); });
                     break;
             }
         }
@@ -396,14 +388,15 @@ namespace SharpNeat.Core
         /// </summary>
         /// <param name="genomesToEvaluate">The batch of genomes to evaluate.</param>
         /// <param name="population">The population of genomes against which the batch is being evaluated.</param>
-        private void EvaluateBatchBehaviors_Caching(IList<TGenome> genomesToEvaluate, IList<TGenome> population)
+        private void EvaluateBatchBehaviors_Caching(IList<TGenome> genomesToEvaluate, IList<TGenome> population,
+            uint currentGeneration)
         {
             // Decode and evaluate the behavior of the genomes under evaluation
             Parallel.ForEach(genomesToEvaluate, _parallelOptions,
                 delegate(TGenome genome)
                 {
                     EvaluationUtils<TGenome, TPhenome>.EvaluateBehavior_Caching(genome, _genomeDecoder,
-                        _phenomeEvaluator, _evaluationLogger);
+                        _phenomeEvaluator, currentGeneration, _evaluationLogger);
                 });
 
             switch (_evaluationType)
@@ -422,18 +415,14 @@ namespace SharpNeat.Core
                     break;
                 // If we're doing minimal criteria search with random fitness, generate a random value for the fitness
                 case EvaluationType.MinimalCriteriaSearchRandom:
-                    Parallel.ForEach(genomesToEvaluate, _parallelOptions, delegate (TGenome genome)
-                    {
-                        EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, false);
-                    });
+                    Parallel.ForEach(genomesToEvaluate, _parallelOptions,
+                        delegate(TGenome genome) { EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, false); });
                     break;
                 // If we're doing minimal criteria search with queueing, the objective distance will be assigned as the fitness
                 // (but it will ultimately have no bearing on the progression of search)
                 case EvaluationType.MinimalCriteriaSearchQueueing:
-                    Parallel.ForEach(genomesToEvaluate, _parallelOptions, delegate (TGenome genome)
-                    {
-                        EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, true);
-                    });
+                    Parallel.ForEach(genomesToEvaluate, _parallelOptions,
+                        delegate(TGenome genome) { EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, true); });
                     break;
             }
 

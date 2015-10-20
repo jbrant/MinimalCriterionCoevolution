@@ -179,7 +179,7 @@ namespace SharpNeat.Domains.BoxesVisualDiscrimination
         /// However, this gives a non-linear increase in fitness as RMSD decreases linearly, which in turns produces a 'spikier' fitness landscape
         /// which is more likely to cause genomes and species to get caught in a local maximum.
         /// </summary>
-        public FitnessInfo Evaluate(IBlackBox box, IDataLogger evaluationLogger)
+        public FitnessInfo Evaluate(IBlackBox box, uint currentGeneration, IDataLogger evaluationLogger)
         {
             _evalCount++;
 

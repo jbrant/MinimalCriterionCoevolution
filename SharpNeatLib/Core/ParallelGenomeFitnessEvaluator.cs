@@ -36,14 +36,14 @@ namespace SharpNeat.Core
     public class ParallelGenomeFitnessEvaluator<TGenome, TPhenome> : IGenomeEvaluator<TGenome>
         where TGenome : class, IGenome<TGenome>
         where TPhenome : class
-    {        
+    {
         #region Evaluation delegates
 
         /// <summary>
         ///     The delegate for population evaluation.
         /// </summary>
         /// <param name="genomeList"></param>
-        private delegate void EvaluationMethod(IList<TGenome> genomeList);
+        private delegate void EvaluationMethod(IList<TGenome> genomeList, uint currentGeneration);
 
         #endregion
 
@@ -165,9 +165,10 @@ namespace SharpNeat.Core
         ///     and evaluate the resulting TPhenome using the contained IPhenomeEvaluator.
         /// </summary>
         /// <param name="genomeList">The list of genomes under evaluation.</param>
-        public void Evaluate(IList<TGenome> genomeList)
+        /// <param name="currentGeneration">The current generation for which the genomes are being evaluated.</param>
+        public void Evaluate(IList<TGenome> genomeList, uint currentGeneration)
         {
-            _evalMethod(genomeList);
+            _evalMethod(genomeList, currentGeneration);
         }
 
         /// <summary>
@@ -175,9 +176,10 @@ namespace SharpNeat.Core
         /// </summary>
         /// <param name="genomesToEvaluate">The genomes under evaluation.</param>
         /// <param name="population">The genomes against which to evaluate.</param>
-        public void Evaluate(IList<TGenome> genomesToEvaluate, IList<TGenome> population)
+        /// <param name="currentGeneration">The current generation for which the genomes are being evaluated.</param>
+        public void Evaluate(IList<TGenome> genomesToEvaluate, IList<TGenome> population, uint currentGeneration)
         {
-            _evalMethod(genomesToEvaluate);
+            _evalMethod(genomesToEvaluate, currentGeneration);
         }
 
         #endregion
@@ -187,13 +189,13 @@ namespace SharpNeat.Core
         /// <summary>
         ///     Main genome evaluation loop with no phenome caching (decode on each loop).
         /// </summary>
-        private void Evaluate_NonCaching(IList<TGenome> genomeList)
+        private void Evaluate_NonCaching(IList<TGenome> genomeList, uint currentGeneration)
         {
             Parallel.ForEach(genomeList, _parallelOptions,
                 delegate(TGenome genome)
                 {
                     EvaluationUtils<TGenome, TPhenome>.EvaluateFitness_NonCaching(genome, _genomeDecoder,
-                        _phenomeEvaluator, _evaluationLogger);
+                        _phenomeEvaluator, currentGeneration, _evaluationLogger);
                 });
         }
 
@@ -201,12 +203,14 @@ namespace SharpNeat.Core
         ///     Main genome evaluation loop with phenome caching (decode only if no cached phenome is present
         ///     from a previous decode).
         /// </summary>
-        private void Evaluate_Caching(IList<TGenome> genomeList)
+        private void Evaluate_Caching(IList<TGenome> genomeList, uint currentGeneration)
         {
             Parallel.ForEach(genomeList, _parallelOptions,
                 delegate(TGenome genome)
                 {
-                    EvaluationUtils<TGenome, TPhenome>.EvaluateFitness_Caching(genome, _genomeDecoder, _phenomeEvaluator, _evaluationLogger);
+                    EvaluationUtils<TGenome, TPhenome>.EvaluateFitness_Caching(genome, _genomeDecoder, _phenomeEvaluator,
+                        currentGeneration,
+                        _evaluationLogger);
                 });
         }
 

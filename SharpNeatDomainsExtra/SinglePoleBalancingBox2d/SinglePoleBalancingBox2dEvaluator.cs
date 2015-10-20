@@ -94,7 +94,7 @@ namespace SharpNeat.DomainsExtra.SinglePoleBalancingBox2d
         /// <summary>
         /// EvaluateFitness the provided IBlackBox.
         /// </summary>
-        public FitnessInfo Evaluate(IBlackBox box, IDataLogger evaluationLogger)
+        public FitnessInfo Evaluate(IBlackBox box, uint currentGeneration, IDataLogger evaluationLogger)
         {
             // Init sim world. We add extra length to the track to allow cart to overshoot, we then detect overshooting by monitoring the cart's X position 
             // (this is just simpler and more robust than detecting if the cart has hit the ends of the track exactly).

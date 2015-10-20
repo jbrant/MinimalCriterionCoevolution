@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,6 +14,12 @@ namespace EntityPersistenceTest
         {
             ExperimentDataEntities dbContext = new ExperimentDataEntities();
             
+            ExperimentDictionary dictionary =
+                dbContext.ExperimentDictionaries.Single(expName => expName.ExperimentName == "Experiment 48");
+
+            int maxRun =
+                dictionary.NoveltyExperimentEvaluationDatas.Max(x => x.Run);
+
             NoveltyExperimentEvaluationData ne = new NoveltyExperimentEvaluationData();
 
             ne.ExperimentID_FK = 1;

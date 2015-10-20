@@ -73,9 +73,9 @@
         <Iters>2</Iters>
       </Activation>
       <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>
-      <ComplexityThreshold>20</ComplexityThreshold>
+      <ComplexityThreshold>30</ComplexityThreshold>
       <OffspringBatchSize>20</OffspringBatchSize>
-      <PopulationEvaluationFrequency>100</PopulationEvaluationFrequency>
+      <PopulationEvaluationFrequency>30</PopulationEvaluationFrequency>
       <GenomeConfig>
         <InitialConnectionProportion>1</InitialConnectionProportion>
         <WeightMutationProbability>0.6</WeightMutationProbability>
@@ -97,8 +97,16 @@
       <MinSuccessDistance>5</MinSuccessDistance>
       <MaxDistanceToTarget>300</MaxDistanceToTarget>
       <MazeVariant>HardMaze</MazeVariant>
-      <EvolutionLogFile>F:\\User Data\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Novelty Search\\Experiments\\EvolutionData.csv</EvolutionLogFile>
-      <!--<EvaluationLogFile>F:\\User Data\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Novelty Search\\Experiments\\EvaluationData.csv</EvaluationLogFile>-->
+      <!--<LoggingConfig>
+        <Type>Evolution</Type>
+        <Destination>Database</Destination>
+        <ExperimentConfigurationName>Experiment 1</ExperimentConfigurationName>
+      </LoggingConfig>-->
+      <LoggingConfig>
+        <Type>Evaluation</Type>
+        <Destination>Database</Destination>
+        <ExperimentConfigurationName>Experiment 1</ExperimentConfigurationName>
+      </LoggingConfig>
       <Description>
         This is the maze navigation experiment used in the original novelty search papers (citation needed).
       </Description>
@@ -212,7 +220,7 @@
         <Scheme>CyclicFixedIters</Scheme>
         <Iters>2</Iters>
       </Activation>
-      <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>
+      <ComplexityRegulationStrategy>Absolute</ComplexityRegulationStrategy>
       <ComplexityThreshold>30</ComplexityThreshold>
       <OffspringBatchSize>20</OffspringBatchSize>
       <PopulationEvaluationFrequency>20</PopulationEvaluationFrequency>
@@ -234,7 +242,7 @@
           <MinimalCriteriaConstraint>EuclideanDistance</MinimalCriteriaConstraint>
           <XStart>30</XStart>
           <YStart>22</YStart>
-          <MinimumRequiredDistance>100</MinimumRequiredDistance>
+          <MinimumRequiredDistance>175</MinimumRequiredDistance>
         </MinimalCriteriaConfig>
       </BehaviorConfig>
       <NearestNeighbors>15</NearestNeighbors>

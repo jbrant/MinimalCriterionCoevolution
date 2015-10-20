@@ -85,7 +85,7 @@ namespace SharpNeat.Domains.FunctionRegression
         /// <summary>
         /// EvaluateFitness the provided IBlackBox against the XOR problem domain and return its fitness score.
         /// </summary>
-        public FitnessInfo Evaluate(IBlackBox box, IDataLogger evaluationLogger)
+        public FitnessInfo Evaluate(IBlackBox box, uint currentGeneration, IDataLogger evaluationLogger)
         {
             _evalCount++;
             int paramCount = _paramSamplingInfoArr.Length;

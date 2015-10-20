@@ -56,7 +56,7 @@ namespace SharpNeat.Domains.BinaryThreeMultiplexer
         /// EvaluateFitness the provided IBlackBox against the Binary 6-Multiplexer problem domain and return
         /// its fitness score.
         /// </summary>
-        public FitnessInfo Evaluate(IBlackBox box, IDataLogger evaluationLogger)
+        public FitnessInfo Evaluate(IBlackBox box, uint currentGeneration, IDataLogger evaluationLogger)
         {
             double fitness = 0.0;
             bool success = true;

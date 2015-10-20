@@ -23,17 +23,9 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
         private double _archiveThresholdIncreaseMultiplier;
         private int _batchSize;
         private IBehaviorCharacterization _behaviorCharacterization;
-
-        /// <summary>
-        ///     Path/File to which to write the evolution data log.
-        /// </summary>
-        private string _evaluationLogFile;
-
-        /// <summary>
-        ///     Path/File to which to write the evolution data log.
-        /// </summary>
-        private string _evolutionLogFile;
-
+        private IDataLogger _evaluationDataLogger;
+        // Logging configurations
+        private IDataLogger _evolutionDataLogger;
         private int _maxGenerationArchiveAddition;
         private int _maxGenerationsWithoutArchiveAddition;
         private int _nearestNeighbors;
@@ -59,8 +51,8 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
             _populationEvaluationFrequency = XmlUtils.GetValueAsInt(xmlConfig, "PopulationEvaluationFrequency");
 
             // Read in log file path/name
-            _evolutionLogFile = XmlUtils.TryGetValueAsString(xmlConfig, "EvolutionLogFile");
-            _evaluationLogFile = XmlUtils.TryGetValueAsString(xmlConfig, "EvaluationLogFile");
+            _evolutionDataLogger = ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Evolution);
+            _evaluationDataLogger = ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Evaluation);
         }
 
         /// <summary>
@@ -76,9 +68,6 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
             IGenomeFactory<NeatGenome> genomeFactory,
             List<NeatGenome> genomeList)
         {
-            IDataLogger evolutionLogger = null;
-            IDataLogger evaluationLogger = null;
-
             // Create distance metric. Mismatched genes have a fixed distance of 10; for matched genes the distance is their weigth difference.
             IDistanceMetric distanceMetric = new ManhattanDistanceMetric(1.0, 0.0, 10.0);
             ISpeciationStrategy<NeatGenome> speciationStrategy =
@@ -88,24 +77,10 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
             var complexityRegulationStrategy =
                 ExperimentUtils.CreateComplexityRegulationStrategy(ComplexityRegulationStrategy, Complexitythreshold);
 
-            // Initialize the evolution logger
-            if (_evolutionLogFile != null)
-            {
-                /*evolutionLogger =
-                    new FileDataLogger(_evolutionLogFile);*/
-                evolutionLogger = new EntityDataLogger(1);
-            }
-
-            // Initialize the evaluation logger
-            if (_evaluationLogFile != null)
-            {
-                evaluationLogger = new FileDataLogger(_evaluationLogFile);
-            }
-
             // Create the evolution algorithm.
             var ea = new SteadyStateNeatEvolutionAlgorithm<NeatGenome>(NeatEvolutionAlgorithmParameters,
                 speciationStrategy, complexityRegulationStrategy, _batchSize, _populationEvaluationFrequency,
-                evolutionLogger);
+                _evolutionDataLogger);
 
             // Create IBlackBox evaluator.
             var mazeNavigationEvaluator = new MazeNavigationNoveltyEvaluator(MaxDistanceToTarget, MaxTimesteps,
@@ -124,12 +99,12 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
 //            IGenomeEvaluator<NeatGenome> fitnessEvaluator =
 //                new SerialGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
 //                    EvaluationType.NoveltySearch,
-//                    _nearestNeighbors, archive, evaluationLogger);
+//                    _nearestNeighbors, archive, _evaluationDataLogger);
 
             IGenomeEvaluator<NeatGenome> fitnessEvaluator =
                 new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
                     EvaluationType.NoveltySearch,
-                    _nearestNeighbors, archive, evaluationLogger);
+                    _nearestNeighbors, archive, _evaluationDataLogger);
 
             // Initialize the evolution algorithm.
             ea.Initialize(fitnessEvaluator, genomeFactory, genomeList, archive);

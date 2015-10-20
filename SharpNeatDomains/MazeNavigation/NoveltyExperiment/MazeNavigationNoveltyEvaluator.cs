@@ -1,6 +1,7 @@
 ﻿#region
 
 using System.Collections.Generic;
+using System.Threading;
 using SharpNeat.Core;
 using SharpNeat.Domains.MazeNavigation.Components;
 using SharpNeat.Loggers;
@@ -18,6 +19,7 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
         private readonly MazeVariant _mazeVariant;
         private readonly int? _minSuccessDistance;
         private bool _stopConditionSatisfied;
+        private readonly object evaluationLock = new object();
 
         internal MazeNavigationNoveltyEvaluator(int? maxDistanceToTarget, int? maxTimesteps, MazeVariant mazeVariant,
             int? minSuccessDistance, IBehaviorCharacterization behaviorCharacterization)
@@ -40,10 +42,14 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
         /// </summary>
         public bool StopConditionSatisfied { get; private set; }
 
-        public BehaviorInfo Evaluate(IBlackBox phenome, IDataLogger evaluationLogger)
+        public BehaviorInfo Evaluate(IBlackBox phenome, uint currentGeneration, IDataLogger evaluationLogger)
         {
-            // Increment evaluation count
-            EvaluationCount++;
+            ulong threadLocalEvaluationCount;
+            lock (evaluationLock)
+            {
+                // Increment evaluation count
+                threadLocalEvaluationCount = EvaluationCount++;
+            }
 
             // Default the stop condition satisfied to false
             bool stopConditionSatisfied = false;
@@ -63,7 +69,8 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
             // Log trial information
             evaluationLogger?.LogRow(new List<LoggableElement>
             {
-                new LoggableElement(NoveltyEvaluationFieldElements.EvaluationCount, EvaluationCount),
+                new LoggableElement(NoveltyEvaluationFieldElements.Generation, currentGeneration),
+                new LoggableElement(NoveltyEvaluationFieldElements.EvaluationCount, threadLocalEvaluationCount),
                 new LoggableElement(NoveltyEvaluationFieldElements.StopConditionSatisfied, StopConditionSatisfied)
             },
                 world.GetLoggableElements());

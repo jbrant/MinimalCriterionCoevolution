@@ -26,6 +26,7 @@ namespace ExperimentEntities
         }
     
         public virtual DbSet<ExperimentDictionary> ExperimentDictionaries { get; set; }
+        public virtual DbSet<NoveltyExperimentOrganismStateData> NoveltyExperimentOrganismStateDatas { get; set; }
         public virtual DbSet<NoveltyExperimentEvaluationData> NoveltyExperimentEvaluationDatas { get; set; }
     }
 }

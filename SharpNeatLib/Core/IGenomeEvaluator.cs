@@ -46,13 +46,15 @@ namespace SharpNeat.Core
         ///     Evaluates the fitness or behavior of a list of genomes.
         /// </summary>
         /// <param name="genomeList">The list of genomes under evaluation.</param>
-        void Evaluate(IList<TGenome> genomeList);
+        /// <param name="currentGeneration">The current generation for which we're evaluating.</param>
+        void Evaluate(IList<TGenome> genomeList, uint currentGeneration);
 
         /// <summary>
         ///     Evalutes the fitness or behavior of a single genome and potentially against a list of other genomes.
         /// </summary>
         /// <param name="genomesToEvaluate">The list of genomes under evaluation.</param>
         /// <param name="population">The genomes against which to evaluate.</param>
-        void Evaluate(IList<TGenome> genomesToEvaluate, IList<TGenome> population);
+        /// <param name="currentGeneration">The current generation for which we're evaluating.</param>
+        void Evaluate(IList<TGenome> genomesToEvaluate, IList<TGenome> population, uint currentGeneration);
     }
 }

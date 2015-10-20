@@ -4,10 +4,12 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="7a682437cf1e4210bd191b9658988124" Name="Diagram1" ZoomLevel="98">
-        <EntityTypeShape EntityType="ExperimentDataModel.ExperimentDictionary" Width="1.5" PointX="0.75" PointY="1.125" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperimentDataModel.NoveltyExperimentEvaluationData" Width="1.5" PointX="3" PointY="8.5" />
-        <AssociationConnector Association="ExperimentDataModel.FK_NoveltyExperiments_ExperimentDictionary1" />
+      <Diagram DiagramId="7a682437cf1e4210bd191b9658988124" Name="Diagram1" ZoomLevel="88">
+        <EntityTypeShape EntityType="ExperimentDataModel.ExperimentDictionary" Width="2.875" PointX="0.75" PointY="2.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperimentDataModel.NoveltyExperimentOrganismStateData" Width="1.5" PointX="4.375" PointY="1.25" />
+        <AssociationConnector Association="ExperimentDataModel.FK_NoveltyExperimentOrganism_ExperimentDictionary" />
+        <EntityTypeShape EntityType="ExperimentDataModel.NoveltyExperimentEvaluationData" Width="1.5" PointX="4.375" PointY="5" />
+        <AssociationConnector Association="ExperimentDataModel.FK_NoveltyExperimentEvaluation_ExperimentDictionary" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

@@ -120,7 +120,7 @@ namespace SharpNeat.Domains.DoublePoleBalancing
         /// <summary>
         /// EvaluateFitness the provided IBlackBox.
         /// </summary>
-        public virtual FitnessInfo Evaluate(IBlackBox box, IDataLogger evaluationLogger)
+        public virtual FitnessInfo Evaluate(IBlackBox box, uint currentGeneration, IDataLogger evaluationLogger)
         {
             _evalCount++;
 

@@ -27,6 +27,7 @@ using SharpNeat.Core;
 using SharpNeat.Decoders;
 using SharpNeat.EvolutionAlgorithms.ComplexityRegulation;
 using SharpNeat.Genomes.Neat;
+using SharpNeat.Loggers;
 using SharpNeat.MinimalCriterias;
 
 #endregion
@@ -227,6 +228,71 @@ namespace SharpNeat.Domains
                 "MaxGenerationsWithoutArchiveAddition");
         }
 
+        public static IDataLogger ReadDataLogger(XmlElement xmlConfig, LoggingType loggingType)
+        {
+            IDataLogger dataLogger = null;
+            XmlElement xmlLoggingConfig = null;
+            int cnt = 0;
+
+            // Get root of novelty configuration section
+            XmlNodeList nodeList = xmlConfig.GetElementsByTagName("LoggingConfig", "");
+            
+            // Iterate through the list of logging configurations, finding one that matches the specified logging type
+            foreach (XmlElement curXmlLoggingConfig in nodeList)
+            {
+                if (loggingType ==
+                    LoggingParameterUtils.ConvertStringToLoggingType(XmlUtils.TryGetValueAsString(curXmlLoggingConfig,
+                        "Type")))
+                {
+                    xmlLoggingConfig = curXmlLoggingConfig;
+                    break;
+                }
+            }
+
+            // If no appropriate logger was found, just return null (meaning there won't be any logging for this type)
+            if (xmlLoggingConfig == null) return null;
+
+            // Get the logging destination
+            LoggingDestination loggingDestination =
+                LoggingParameterUtils.ConvertStringToLoggingDestination(
+                    XmlUtils.TryGetValueAsString(xmlLoggingConfig,
+                        "Destination"));
+
+            // Configure a file-based logger
+            if (LoggingDestination.File == loggingDestination)
+            {
+                // Read in the log file name
+                string logFileName = XmlUtils.TryGetValueAsString(xmlLoggingConfig, "LogFile");
+
+                // Instantiate the file data logger
+                dataLogger = new FileDataLogger(logFileName);
+            }
+            else if (LoggingDestination.Database == loggingDestination)
+            {
+                // Read in the experiment configuration and run number
+                string experimentConfigurationName = XmlUtils.TryGetValueAsString(xmlLoggingConfig,
+                    "ExperimentConfigurationName");
+
+                if (LoggingType.Evolution == loggingType)
+                {
+                    // Instantiate the evolution database data logger
+                    dataLogger = new NoveltyExperimentEvaluationEntityDataLogger(experimentConfigurationName);
+                }
+                else if (LoggingType.Evaluation == loggingType)
+                {
+                    // Instantiate the evaluation database data logger
+                    dataLogger = new NoveltyExperimentOrganismStateEntityDataLogger(experimentConfigurationName);
+                }
+            }
+
+            return dataLogger;
+        }
+
+        /// <summary>
+        ///     Reads behavior characterization parameters from the configuration file.
+        /// </summary>
+        /// <param name="xmlConfig">The reference to the XML configuration file.</param>
+        /// <returns>The behavior characterization parameters.</returns>
         public static IBehaviorCharacterization ReadBehaviorCharacterization(XmlElement xmlConfig)
         {
             // Get root of behavior configuration section
@@ -289,7 +355,7 @@ namespace SharpNeat.Domains
                             minimumDistanceTraveled);
 
                         break;
-                }               
+                }
             }
 
             return behaviorCharacterization;

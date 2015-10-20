@@ -2,76 +2,64 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using ExperimentEntities;
-using SharpNeat.Core;
 
 #endregion
 
 namespace SharpNeat.Loggers
 {
-    public class EntityDataLogger : IDataLogger
+    /// <summary>
+    ///     Entity data logger class for novelty experiment evaluation data.
+    /// </summary>
+    public class NoveltyExperimentEvaluationEntityDataLogger : AbstractEntityDataLogger
     {
         #region Constructors
 
-        public EntityDataLogger(int experimentConfiguration)
-        {
-            _experimentConfiguration = experimentConfiguration;
-        }
-
-        #endregion
-
-        #region Logger Properties
-
         /// <summary>
-        ///     The name of the log file.
+        ///     Novelty experiment evaluation constructor (simply passes parameters to base constructor).
         /// </summary>
-        public string LogFileName { get; }
-
-        #endregion
-
-        private List<LoggableElement> extractSortedCombinedList(params List<LoggableElement>[] loggableElements)
+        /// <param name="experimentName">The unique name of the experiment configuration.</param>
+        public NoveltyExperimentEvaluationEntityDataLogger(string experimentName)
+            : base(experimentName)
         {
-            List<LoggableElement> combinedElements = new List<LoggableElement>();
-
-            // Combine everything into a single list
-            foreach (var loggableElementList in loggableElements)
-            {
-                combinedElements.AddRange(loggableElementList);
-            }
-
-            // Sort the elements so that everything logged is kept in the same order
-            combinedElements.Sort();
-
-            return combinedElements;
         }
-
-        #region Logger Instance Fields
-
-        private ExperimentDataEntities _dbContext;
-
-        private readonly int _experimentConfiguration;
 
         #endregion
 
         #region Logging Control Methods
 
-        public void Open()
+        /// <summary>
+        ///     Defers to the base method to instantiate the database connection and then reads in the maximum run ID so that we
+        ///     have a starting point for the new experiment run.
+        /// </summary>
+        public override void Open()
         {
-            _dbContext = new ExperimentDataEntities();
+            // Call the base method to open the database connection and get the experiment configuration entity
+            base.Open();
+
+            // If there were previous runs, get the maximum existing run number and increment that by one
+            // Otherwise, if there were no previous runs for this experiment, set the run ID to 1
+            Run = ExperimentConfiguration.NoveltyExperimentEvaluationDatas.Count > 0
+                ? ExperimentConfiguration.NoveltyExperimentEvaluationDatas.Max(x => x.Run) + 1
+                : 1;
         }
 
-        public void LogHeader(params List<LoggableElement>[] loggableElements)
-        {
-        }
-
-        public void LogRow(params List<LoggableElement>[] loggableElements)
+        /// <summary>
+        ///     Maps applicable entity fields for the novelty experiment evaluation entity and persists to the database.
+        /// </summary>
+        /// <param name="loggableElements">The loggable elements (data) to persist.</param>
+        public override void LogRow(params List<LoggableElement>[] loggableElements)
         {
             // Combine and sort the loggable elements
-            List<LoggableElement> combinedElements = extractSortedCombinedList(loggableElements);
+            List<LoggableElement> combinedElements = ExtractSortedCombinedList(loggableElements);
 
-            NoveltyExperimentEvaluationData noveltyData = new NoveltyExperimentEvaluationData();
+            NoveltyExperimentEvaluationData noveltyData = new NoveltyExperimentEvaluationData
+            {
+                ExperimentID_FK = ExperimentConfiguration.ExperimentID,
+                Run = Run
+            };
 
-            noveltyData.ExperimentID_FK = _experimentConfiguration;
             noveltyData.Generation =
                 (int)
                     Convert.ChangeType(combinedElements[NoveltyEvolutionFieldElements.Generation.Position].Value,
@@ -172,31 +160,26 @@ namespace SharpNeat.Loggers
                         combinedElements[NoveltyEvolutionFieldElements.ChampGenomeTotalGeneCount.Position].Value,
                         noveltyData.ChampGenomeTotalGeneCount.GetType());
             if (noveltyData.ChampGenomeEvaluationCount != null)
-            noveltyData.ChampGenomeEvaluationCount =
-                (int)
-                    Convert.ChangeType(
-                        combinedElements[NoveltyEvolutionFieldElements.ChampGenomeEvaluationCount.Position].Value,
-                        noveltyData.ChampGenomeEvaluationCount.GetType());
+                noveltyData.ChampGenomeEvaluationCount =
+                    (int)
+                        Convert.ChangeType(
+                            combinedElements[NoveltyEvolutionFieldElements.ChampGenomeEvaluationCount.Position].Value,
+                            noveltyData.ChampGenomeEvaluationCount.GetType());
             if (noveltyData.ChampGenomeBehavior1 != null)
-            noveltyData.ChampGenomeBehavior1 =
-                (double)
-                    Convert.ChangeType(
-                        combinedElements[NoveltyEvolutionFieldElements.ChampGenomeBehaviorX.Position].Value,
-                        noveltyData.ChampGenomeBehavior1.GetType());
+                noveltyData.ChampGenomeBehavior1 =
+                    (double)
+                        Convert.ChangeType(
+                            combinedElements[NoveltyEvolutionFieldElements.ChampGenomeBehaviorX.Position].Value,
+                            noveltyData.ChampGenomeBehavior1.GetType());
             if (noveltyData.ChampGenomeBehavior2 != null)
-            noveltyData.ChampGenomeBehavior2 =
-                (double)
-                    Convert.ChangeType(
-                        combinedElements[NoveltyEvolutionFieldElements.ChampGenomeBehaviorY.Position].Value,
-                        noveltyData.ChampGenomeBehavior2.GetType());
+                noveltyData.ChampGenomeBehavior2 =
+                    (double)
+                        Convert.ChangeType(
+                            combinedElements[NoveltyEvolutionFieldElements.ChampGenomeBehaviorY.Position].Value,
+                            noveltyData.ChampGenomeBehavior2.GetType());
 
-            _dbContext.NoveltyExperimentEvaluationDatas.Add(noveltyData);
-            _dbContext.SaveChanges();
-        }
-
-        public void Close()
-        {
-            _dbContext.Dispose();
+            DbContext.NoveltyExperimentEvaluationDatas.Add(noveltyData);
+            DbContext.SaveChanges();
         }
 
         #endregion

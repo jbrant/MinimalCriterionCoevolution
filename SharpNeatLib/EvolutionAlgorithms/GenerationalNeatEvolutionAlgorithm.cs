@@ -69,7 +69,7 @@ namespace SharpNeat.EvolutionAlgorithms
             ((List<TGenome>) GenomeList).AddRange(offspringList);
 
             // EvaluateFitness genomes.            
-            GenomeEvaluator.Evaluate(GenomeList);
+            GenomeEvaluator.Evaluate(GenomeList, CurrentGeneration);
 
             // Add each applicable genomes to archive based on whether they qualified
             foreach (TGenome childGenome in GenomeList)

@@ -44,11 +44,12 @@
 
     public class NoveltyEvaluationFieldElements
     {
-        public static readonly FieldElement EvaluationCount = new FieldElement(0, "Evaluation Count");
-        public static readonly FieldElement StopConditionSatisfied = new FieldElement(1, "Stop Condition Satisfied");
-        public static readonly FieldElement DistanceToTarget = new FieldElement(2, "Distance to Target");
-        public static readonly FieldElement AgentXLocation = new FieldElement(3, "Agent X Location");
-        public static readonly FieldElement AgentYLocation = new FieldElement(4, "Agent Y Location");
+        public static readonly FieldElement Generation = new FieldElement(0, "Generation");
+        public static readonly FieldElement EvaluationCount = new FieldElement(1, "Evaluation Count");
+        public static readonly FieldElement StopConditionSatisfied = new FieldElement(2, "Stop Condition Satisfied");
+        public static readonly FieldElement DistanceToTarget = new FieldElement(3, "Distance to Target");
+        public static readonly FieldElement AgentXLocation = new FieldElement(4, "Agent X Location");
+        public static readonly FieldElement AgentYLocation = new FieldElement(5, "Agent Y Location");
     }
 
     public class FieldElement

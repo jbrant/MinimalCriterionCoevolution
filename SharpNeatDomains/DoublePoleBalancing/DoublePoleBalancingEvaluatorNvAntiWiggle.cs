@@ -51,7 +51,7 @@ namespace SharpNeat.Domains.DoublePoleBalancing
         /// <summary>
         /// EvaluateFitness the provided IBlackBox.
         /// </summary>
-        public override FitnessInfo Evaluate(IBlackBox box, IDataLogger evaluationLogger)
+        public override FitnessInfo Evaluate(IBlackBox box, uint currentGeneration, IDataLogger evaluationLogger)
         {
             _evalCount++;
 

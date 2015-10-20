@@ -11,11 +11,6 @@ namespace SharpNeat.Core
     public interface IDataLogger
     {
         /// <summary>
-        ///     The name of the log file.
-        /// </summary>
-        String LogFileName { get; }
-
-        /// <summary>
         ///     Opens the log file for writing.
         /// </summary>
         void Open();

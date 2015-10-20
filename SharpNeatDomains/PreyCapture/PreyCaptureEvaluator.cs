@@ -78,7 +78,7 @@ namespace SharpNeat.Domains.PreyCapture
         /// <summary>
         /// EvaluateFitness the provided IBlackBox against the XOR problem domain and return its fitness score.
         /// </summary>
-        public FitnessInfo Evaluate(IBlackBox box, IDataLogger evaluationLogger)
+        public FitnessInfo Evaluate(IBlackBox box, uint currentGeneration, IDataLogger evaluationLogger)
         {
             // Create grid based world.
             PreyCaptureWorld world = new PreyCaptureWorld(_gridSize, _preyInitMoves, _preySpeed, _sensorRange, _maxTimesteps);

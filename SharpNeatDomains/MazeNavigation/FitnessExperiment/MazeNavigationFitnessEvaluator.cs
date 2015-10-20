@@ -40,7 +40,7 @@ namespace SharpNeat.Domains.MazeNavigation
             set { _stopConditionSatisfied = value; }
         }
 
-        public FitnessInfo Evaluate(IBlackBox phenome, IDataLogger evaluationLogger)
+        public FitnessInfo Evaluate(IBlackBox phenome, uint currentGeneration, IDataLogger evaluationLogger)
         {
             // Increment eval count
             EvaluationCount++;

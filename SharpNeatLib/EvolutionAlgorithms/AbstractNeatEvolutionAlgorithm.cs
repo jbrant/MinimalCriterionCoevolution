@@ -347,7 +347,7 @@ namespace SharpNeat.EvolutionAlgorithms
             GenomeEvaluator.Initialize();
 
             // Evaluate the genomes.
-            GenomeEvaluator.Evaluate(GenomeList);
+            GenomeEvaluator.Evaluate(GenomeList, CurrentGeneration);
 
             // Speciate the genomes.
             SpecieList = SpeciationStrategy.InitializeSpeciation(GenomeList, EaParams.SpecieCount);

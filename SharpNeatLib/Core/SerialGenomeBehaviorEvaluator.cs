@@ -24,11 +24,11 @@ namespace SharpNeat.Core
         #region Private Instance fields
 
         private readonly BatchEvaluationMethod _batchEvaluationMethod;
+        private readonly PopulationEvaluationMethod _populationEvaluationMethod;
         private readonly AbstractNoveltyArchive<TGenome> _noveltyArchive;
         private readonly IGenomeDecoder<TGenome, TPhenome> _genomeDecoder;
         private readonly int _nearestNeighbors;
         private readonly IPhenomeEvaluator<TPhenome, BehaviorInfo> _phenomeEvaluator;
-        private readonly PopulationEvaluationMethod _populationEvaluationMethod;
         private readonly IDataLogger _evaluationLogger;
         private readonly EvaluationType _evaluationType;
 
@@ -40,14 +40,17 @@ namespace SharpNeat.Core
         ///     Delegate for population (generational) evaluation.
         /// </summary>
         /// <param name="genomeList">The list of genomes (population) to evaluate.</param>
-        private delegate void PopulationEvaluationMethod(IList<TGenome> genomeList);
+        /// <param name="currentGeneration">The current generation for which the genomes are being evaluated.</param>
+        private delegate void PopulationEvaluationMethod(IList<TGenome> genomeList, uint currentGeneration);
 
         /// <summary>
         ///     Delegate for batch (steady-state) evaluation.
         /// </summary>
         /// <param name="genomesToEvaluate">The list of genomes (batch) to evaluate.</param>
         /// <param name="population">The population of genomes against which the batch of genomes are being evaluated.</param>
-        private delegate void BatchEvaluationMethod(IList<TGenome> genomesToEvaluate, IList<TGenome> population);
+        /// <param name="currentGeneration">The current generation for which the genomes are being evaluated.</param>
+        private delegate void BatchEvaluationMethod(
+            IList<TGenome> genomesToEvaluate, IList<TGenome> population, uint currentGeneration);
 
         #endregion
 
@@ -170,9 +173,10 @@ namespace SharpNeat.Core
         ///     contained IGenomeDecoder and evaluate the resulting TPhenome using the contained IPhenomeEvaluator.
         /// </summary>
         /// <param name="genomeList">The list of genomes under evaluation.</param>
-        public void Evaluate(IList<TGenome> genomeList)
+        /// <param name="currentGeneration">The current generation for which the genomes are being evaluated.</param>
+        public void Evaluate(IList<TGenome> genomeList, uint currentGeneration)
         {
-            _populationEvaluationMethod(genomeList);
+            _populationEvaluationMethod(genomeList, currentGeneration);
         }
 
         /// <summary>
@@ -182,9 +186,10 @@ namespace SharpNeat.Core
         /// </summary>
         /// <param name="genomesToEvaluate">The genomes under evaluation.</param>
         /// <param name="population">The genomes against which to evaluate.</param>
-        public void Evaluate(IList<TGenome> genomesToEvaluate, IList<TGenome> population)
+        /// <param name="currentGeneration">The current generation for which the genomes are being evaluated.</param>
+        public void Evaluate(IList<TGenome> genomesToEvaluate, IList<TGenome> population, uint currentGeneration)
         {
-            _batchEvaluationMethod(genomesToEvaluate, population);
+            _batchEvaluationMethod(genomesToEvaluate, population, currentGeneration);
         }
 
         /// <summary>
@@ -204,13 +209,14 @@ namespace SharpNeat.Core
         ///     archive.  Phenotypes for each genome are decoded upon invocation (no caching).
         /// </summary>
         /// <param name="genomeList">The list of genomes (population) under evaluation.</param>
-        private void EvaluateAllBehaviors_NonCaching(IList<TGenome> genomeList)
+        /// <param name="currentGeneration">The current generation for which the genomes are being evaluated.</param>
+        private void EvaluateAllBehaviors_NonCaching(IList<TGenome> genomeList, uint currentGeneration)
         {
             // Decode and evaluate the behavior of each genome in turn.
             foreach (var genome in genomeList)
             {
                 EvaluationUtils<TGenome, TPhenome>.EvaluateBehavior_NonCaching(genome, _genomeDecoder, _phenomeEvaluator,
-                    _evaluationLogger);
+                    currentGeneration, _evaluationLogger);
             }
 
             switch (_evaluationType)
@@ -252,13 +258,15 @@ namespace SharpNeat.Core
         /// </summary>
         /// <param name="genomesToEvaluate">The batch of genomes to evaluate.</param>
         /// <param name="population">The population of genomes against which the batch is being evaluated.</param>
-        private void EvaluateBatchBehaviors_NonCaching(IList<TGenome> genomesToEvaluate, IList<TGenome> population)
+        /// <param name="currentGeneration">The current generation for which the genomes are being evaluated.</param>
+        private void EvaluateBatchBehaviors_NonCaching(IList<TGenome> genomesToEvaluate, IList<TGenome> population,
+            uint currentGeneration)
         {
             // Decode and evaluate the behavior of the genomes under evaluation
             foreach (var genome in genomesToEvaluate)
             {
                 EvaluationUtils<TGenome, TPhenome>.EvaluateBehavior_NonCaching(genome, _genomeDecoder, _phenomeEvaluator,
-                    _evaluationLogger);
+                    currentGeneration, _evaluationLogger);
             }
 
             switch (_evaluationType)
@@ -298,14 +306,15 @@ namespace SharpNeat.Core
         ///     archive.  We first try to retrieve the phenome from each genome's cache and then decode the genome if it has not
         ///     yet been cached.
         /// </summary>
-        /// <param name="genomeList"></param>
-        private void EvaluateAllBehaviors_Caching(IList<TGenome> genomeList)
+        /// <param name="genomeList">The list of genomes (population) under evaluation.</param>
+        /// <param name="currentGeneration">The current generation for which the genomes are being evaluated.</param>
+        private void EvaluateAllBehaviors_Caching(IList<TGenome> genomeList, uint currentGeneration)
         {
             // Decode and evaluate the behavior of each genome in turn.
             foreach (var genome in genomeList)
             {
                 EvaluationUtils<TGenome, TPhenome>.EvaluateBehavior_Caching(genome, _genomeDecoder, _phenomeEvaluator,
-                    _evaluationLogger);
+                    currentGeneration, _evaluationLogger);
             }
 
             switch (_evaluationType)
@@ -348,13 +357,15 @@ namespace SharpNeat.Core
         /// </summary>
         /// <param name="genomesToEvaluate">The batch of genomes to evaluate.</param>
         /// <param name="population">The population of genomes against which the batch is being evaluated.</param>
-        private void EvaluateBatchBehaviors_Caching(IList<TGenome> genomesToEvaluate, IList<TGenome> population)
+        /// <param name="currentGeneration">The current generation for which the genomes are being evaluated.</param>
+        private void EvaluateBatchBehaviors_Caching(IList<TGenome> genomesToEvaluate, IList<TGenome> population,
+            uint currentGeneration)
         {
             // Decode and evaluate the behavior of the genomes under evaluation
             foreach (var genome in genomesToEvaluate)
             {
                 EvaluationUtils<TGenome, TPhenome>.EvaluateBehavior_Caching(genome, _genomeDecoder, _phenomeEvaluator,
-                    _evaluationLogger);
+                    currentGeneration, _evaluationLogger);
             }
 
             switch (_evaluationType)

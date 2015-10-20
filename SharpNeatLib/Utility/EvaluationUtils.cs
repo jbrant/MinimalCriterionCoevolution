@@ -24,9 +24,11 @@ namespace SharpNeat.Utility
         /// <param name="genome">The genome under evaluation.</param>
         /// <param name="genomeDecoder">The decoder for decoding the genotype to its phenotypic representation.</param>
         /// <param name="phenomeEvaluator">The phenome evaluator.</param>
+        /// <param name="currentGeneration">The generation during which the given genome is being evaluated.</param>
         /// <param name="evaluationLogger">The evaluation logger.</param>
         public static void EvaluateBehavior_NonCaching(TGenome genome, IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
-            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, IDataLogger evaluationLogger)
+            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, uint currentGeneration,
+            IDataLogger evaluationLogger)
         {
             var phenome = genomeDecoder.Decode(genome);
             if (null == phenome)
@@ -40,7 +42,7 @@ namespace SharpNeat.Utility
             {
                 // Evaluate the behavior, update the genome's behavior characterization, calculate the distance to the domain objective,
                 // and indicate if the genome is viable based on whether the minimal criteria was satisfied
-                var behaviorInfo = phenomeEvaluator.Evaluate(phenome, evaluationLogger);
+                var behaviorInfo = phenomeEvaluator.Evaluate(phenome, currentGeneration, evaluationLogger);
                 genome.EvaluationInfo.BehaviorCharacterization = behaviorInfo.Behaviors;
                 genome.EvaluationInfo.ObjectiveDistance = behaviorInfo.ObjectiveDistance;
                 genome.EvaluationInfo.IsViable = behaviorInfo.DoesBehaviorSatisfyMinimalCriteria;
@@ -54,9 +56,11 @@ namespace SharpNeat.Utility
         /// <param name="genome">The genome under evaluation.</param>
         /// <param name="genomeDecoder">The decoder for decoding the genotype to its phenotypic representation.</param>
         /// <param name="phenomeEvaluator">The phenome evaluator.</param>
+        /// <param name="currentGeneration">The generation during which the given genome is being evaluated.</param>
         /// <param name="evaluationLogger">The evaluation logger.</param>
         public static void EvaluateBehavior_Caching(TGenome genome, IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
-            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, IDataLogger evaluationLogger)
+            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, uint currentGeneration,
+            IDataLogger evaluationLogger)
         {
             var phenome = (TPhenome) genome.CachedPhenome;
             if (null == phenome)
@@ -77,7 +81,7 @@ namespace SharpNeat.Utility
             {
                 // Evaluate the behavior, update the genome's behavior characterization, calculate the distance to the domain objective,
                 // and indicate if the genome is viable based on whether the minimal criteria was satisfied
-                var behaviorInfo = phenomeEvaluator.Evaluate(phenome, evaluationLogger);
+                var behaviorInfo = phenomeEvaluator.Evaluate(phenome, currentGeneration, evaluationLogger);
                 genome.EvaluationInfo.BehaviorCharacterization = behaviorInfo.Behaviors;
                 genome.EvaluationInfo.ObjectiveDistance = behaviorInfo.ObjectiveDistance;
                 genome.EvaluationInfo.IsViable = behaviorInfo.DoesBehaviorSatisfyMinimalCriteria;
@@ -90,9 +94,11 @@ namespace SharpNeat.Utility
         /// <param name="genome">The genome to evaluate.</param>
         /// <param name="genomeDecoder">The decoder for decoding the genotype to its phenotypic representation.</param>
         /// <param name="phenomeEvaluator">The phenome evaluator.</param>
+        /// <param name="currentGeneration">The generation during which the given genome is being evaluated.</param>
         /// <param name="evaluationLogger">The evaluation logger.</param>
         public static void EvaluateFitness_NonCaching(TGenome genome, IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
-            IPhenomeEvaluator<TPhenome, FitnessInfo> phenomeEvaluator, IDataLogger evaluationLogger)
+            IPhenomeEvaluator<TPhenome, FitnessInfo> phenomeEvaluator, uint currentGeneration,
+            IDataLogger evaluationLogger)
         {
             TPhenome phenome = genomeDecoder.Decode(genome);
             if (null == phenome)
@@ -104,7 +110,7 @@ namespace SharpNeat.Utility
             else
             {
                 // Run evaluation and set fitness/auxiliary fitness
-                FitnessInfo fitnessInfo = phenomeEvaluator.Evaluate(phenome, evaluationLogger);
+                FitnessInfo fitnessInfo = phenomeEvaluator.Evaluate(phenome, currentGeneration, evaluationLogger);
                 genome.EvaluationInfo.SetFitness(fitnessInfo._fitness);
                 genome.EvaluationInfo.AuxFitnessArr = fitnessInfo._auxFitnessArr;
             }
@@ -117,9 +123,11 @@ namespace SharpNeat.Utility
         /// <param name="genome">The genome to evaluate.</param>
         /// <param name="genomeDecoder">The decoder for decoding the genotype to its phenotypic representation.</param>
         /// <param name="phenomeEvaluator">The phenome evaluator.</param>
+        /// <param name="currentGeneration">The generation during which the given genome is being evaluated.</param>
         /// <param name="evaluationLogger">The evaluation logger.</param>
         public static void EvaluateFitness_Caching(TGenome genome, IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
-            IPhenomeEvaluator<TPhenome, FitnessInfo> phenomeEvaluator, IDataLogger evaluationLogger)
+            IPhenomeEvaluator<TPhenome, FitnessInfo> phenomeEvaluator, uint currentGeneration,
+            IDataLogger evaluationLogger)
         {
             TPhenome phenome = (TPhenome) genome.CachedPhenome;
             if (null == phenome)
@@ -137,7 +145,7 @@ namespace SharpNeat.Utility
             }
             else
             {
-                FitnessInfo fitnessInfo = phenomeEvaluator.Evaluate(phenome, evaluationLogger);
+                FitnessInfo fitnessInfo = phenomeEvaluator.Evaluate(phenome, currentGeneration, evaluationLogger);
                 genome.EvaluationInfo.SetFitness(fitnessInfo._fitness);
                 genome.EvaluationInfo.AuxFitnessArr = fitnessInfo._auxFitnessArr;
             }

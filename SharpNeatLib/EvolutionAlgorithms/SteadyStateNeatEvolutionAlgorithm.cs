@@ -47,7 +47,7 @@ namespace SharpNeat.EvolutionAlgorithms
             // Re-evaluate the fitness of the population after the specified number of evaluations have elapsed
             if (CurrentGeneration%_populationEvaluationFrequency == 0)
             {
-                GenomeEvaluator.Evaluate(GenomeList);
+                GenomeEvaluator.Evaluate(GenomeList, CurrentGeneration);
                 
                 // Clear all the species and respeciate
                 ClearAllSpecies();
@@ -67,7 +67,7 @@ namespace SharpNeat.EvolutionAlgorithms
             List<TGenome> childGenomes = CreateOffspring(specieStatsArr, _batchSize);
 
             // Evaluate the offspring batch
-            GenomeEvaluator.Evaluate(childGenomes, GenomeList);
+            GenomeEvaluator.Evaluate(childGenomes, GenomeList, CurrentGeneration);
 
             // Determine genomes to remove based on their adjusted fitness
             List<TGenome> genomesToRemove = SelectGenomesForRemoval(_batchSize);
@@ -83,7 +83,7 @@ namespace SharpNeat.EvolutionAlgorithms
             {
                 AbstractNoveltyArchive?.TestAndAddCandidateToArchive(childGenome);
             }
-
+            
             // Clear all the species and respeciate
             ClearAllSpecies();
             SpeciationStrategy.SpeciateGenomes(GenomeList, SpecieList);
