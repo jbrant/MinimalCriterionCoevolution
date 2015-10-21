@@ -102,11 +102,11 @@
         <Destination>Database</Destination>
         <ExperimentConfigurationName>Experiment 1</ExperimentConfigurationName>
       </LoggingConfig>-->
-      <LoggingConfig>
+      <!--<LoggingConfig>
         <Type>Evaluation</Type>
         <Destination>Database</Destination>
         <ExperimentConfigurationName>Experiment 1</ExperimentConfigurationName>
-      </LoggingConfig>
+      </LoggingConfig>-->
       <Description>
         This is the maze navigation experiment used in the original novelty search papers (citation needed).
       </Description>

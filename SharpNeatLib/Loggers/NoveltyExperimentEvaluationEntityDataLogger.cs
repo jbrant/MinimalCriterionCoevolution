@@ -51,6 +51,12 @@ namespace SharpNeat.Loggers
         /// <param name="loggableElements">The loggable elements (data) to persist.</param>
         public override void LogRow(params List<LoggableElement>[] loggableElements)
         {
+            // Initialize new DB context
+            ExperimentDataEntities localDbContext = new ExperimentDataEntities
+            {
+                Configuration = {AutoDetectChangesEnabled = false, ValidateOnSaveEnabled = false}
+            };
+
             // Combine and sort the loggable elements
             List<LoggableElement> combinedElements = ExtractSortedCombinedList(loggableElements);
 
@@ -178,8 +184,12 @@ namespace SharpNeat.Loggers
                             combinedElements[NoveltyEvolutionFieldElements.ChampGenomeBehaviorY.Position].Value,
                             noveltyData.ChampGenomeBehavior2.GetType());
 
-            DbContext.NoveltyExperimentEvaluationDatas.Add(noveltyData);
-            DbContext.SaveChanges();
+            // Add the new evaluation data
+            localDbContext.NoveltyExperimentEvaluationDatas.Add(noveltyData);
+
+            // Save the changes and dispose of the context
+            localDbContext.SaveChanges();
+            localDbContext.Dispose();
         }
 
         #endregion
