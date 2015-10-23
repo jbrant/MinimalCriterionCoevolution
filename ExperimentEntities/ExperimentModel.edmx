@@ -15,14 +15,20 @@
           <Property Name="ExperimentDomain" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="ExperimentType" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="AlgorithmType" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="MaxGenerations" Type="int" Nullable="false" />
           <Property Name="OffspringBatchSize" Type="int" />
+          <Property Name="PopulationEvaluationFrequency" Type="int" />
           <Property Name="BehaviorCharacterization" Type="varchar" MaxLength="50" />
+          <Property Name="NearestNeighbors" Type="int" />
           <Property Name="ArchiveAdditionThreshold" Type="int" />
           <Property Name="ArchiveThresholdDecreaseMultiplier" Type="float" />
           <Property Name="ArchiveThresholdIncreaseMultiplier" Type="float" />
           <Property Name="MaxGenerationalArchiveAddition" Type="int" />
           <Property Name="MaxGenerationsWithoutArchiveAddition" Type="int" />
-          <Property Name="PopulationEvaluationFrequency" Type="int" />
+          <Property Name="MinimalCriteriaConstraint" Type="varchar" MaxLength="50" />
+          <Property Name="MinimumRequiredDistance" Type="int" />
+          <Property Name="McsStartX" Type="int" />
+          <Property Name="McsStartY" Type="int" />
           <Property Name="ConnectionProportion" Type="float" Nullable="false" />
           <Property Name="PopulationSize" Type="int" Nullable="false" />
           <Property Name="NumSpecies" Type="int" Nullable="false" />
@@ -36,7 +42,7 @@
           <Property Name="MutateAddConnectionProbability" Type="float" Nullable="false" />
           <Property Name="MutateDeleteConnectionProbability" Type="float" Nullable="false" />
           <Property Name="ConnectionWeightRange" Type="int" Nullable="false" />
-          <Property Name="UniqueParameterHash" Type="varchar" MaxLength="572" StoreGeneratedPattern="Computed" Nullable="false" />
+          <Property Name="UniqueParameterHash" Type="varchar" MaxLength="682" StoreGeneratedPattern="Computed" Nullable="false" />
         </EntityType>
         <EntityType Name="NoveltyExperimentEvaluationData">
           <Key>
@@ -161,6 +167,12 @@
           <Property Name="ConnectionWeightRange" Type="Int32" Nullable="false" />
           <NavigationProperty Name="NoveltyExperimentOrganismStateDatas" Relationship="ExperimentDataModel.FK_NoveltyExperimentOrganism_ExperimentDictionary" FromRole="ExperimentDictionary" ToRole="NoveltyExperimentOrganismStateData" />
           <NavigationProperty Name="NoveltyExperimentEvaluationDatas" Relationship="ExperimentDataModel.FK_NoveltyExperimentEvaluation_ExperimentDictionary" FromRole="ExperimentDictionary" ToRole="NoveltyExperimentEvaluationData" />
+          <Property Name="MaxGenerations" Type="Int32" Nullable="false" />
+          <Property Name="NearestNeighbors" Type="Int32" />
+          <Property Name="MinimalCriteriaConstraint" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="MinimumRequiredDistance" Type="Int32" />
+          <Property Name="McsStartX" Type="Int32" />
+          <Property Name="McsStartY" Type="Int32" />
         </EntityType>
         <EntityContainer Name="ExperimentDataEntities" annotation:LazyLoadingEnabled="true">
           <EntitySet Name="ExperimentDictionaries" EntityType="Self.ExperimentDictionary" />
@@ -259,6 +271,12 @@
           <EntitySetMapping Name="ExperimentDictionaries">
             <EntityTypeMapping TypeName="ExperimentDataModel.ExperimentDictionary">
               <MappingFragment StoreEntitySet="ExperimentDictionary">
+                <ScalarProperty Name="McsStartY" ColumnName="McsStartY" />
+                <ScalarProperty Name="McsStartX" ColumnName="McsStartX" />
+                <ScalarProperty Name="MinimumRequiredDistance" ColumnName="MinimumRequiredDistance" />
+                <ScalarProperty Name="MinimalCriteriaConstraint" ColumnName="MinimalCriteriaConstraint" />
+                <ScalarProperty Name="NearestNeighbors" ColumnName="NearestNeighbors" />
+                <ScalarProperty Name="MaxGenerations" ColumnName="MaxGenerations" />
                 <ScalarProperty Name="ExperimentID" ColumnName="ExperimentID" />
                 <ScalarProperty Name="ExperimentName" ColumnName="ExperimentName" />
                 <ScalarProperty Name="ConfigurationFile" ColumnName="ConfigurationFile" />

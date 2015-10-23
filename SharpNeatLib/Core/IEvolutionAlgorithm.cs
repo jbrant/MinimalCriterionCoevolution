@@ -76,6 +76,7 @@ namespace SharpNeat.Core
         void Initialize(IGenomeEvaluator<TGenome> genomeFitnessEvaluator,
                         IGenomeFactory<TGenome> genomeFactory,
                         List<TGenome> genomeList,
+                        int maxGenerations,
                         AbstractNoveltyArchive<TGenome> abstractNoveltyArchive);
 
         /// <summary>
@@ -85,6 +86,7 @@ namespace SharpNeat.Core
         void Initialize(IGenomeEvaluator<TGenome> genomeFitnessEvaluator,
                         IGenomeFactory<TGenome> genomeFactory,
                         int populationSize,
+                        int maxGenerations,
                         AbstractNoveltyArchive<TGenome> abstractNoveltyArchive);
 
         /// <summary>

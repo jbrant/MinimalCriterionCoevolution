@@ -3,7 +3,6 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Threading;
 using SharpNeat.Core;
-using SharpNeat.Domains.PreyCapture;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Phenomes;
 

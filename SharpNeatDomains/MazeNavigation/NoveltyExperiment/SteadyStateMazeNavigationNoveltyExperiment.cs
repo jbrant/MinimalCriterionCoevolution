@@ -24,7 +24,6 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
         private int _batchSize;
         private IBehaviorCharacterization _behaviorCharacterization;
         private IDataLogger _evaluationDataLogger;
-        // Logging configurations
         private IDataLogger _evolutionDataLogger;
         private int _maxGenerationArchiveAddition;
         private int _maxGenerationsWithoutArchiveAddition;
@@ -107,7 +106,7 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
                     _nearestNeighbors, archive, _evaluationDataLogger);
 
             // Initialize the evolution algorithm.
-            ea.Initialize(fitnessEvaluator, genomeFactory, genomeList, archive);
+            ea.Initialize(fitnessEvaluator, genomeFactory, genomeList, MaxGenerations, archive);
 
             // Finished. Return the evolution algorithm
             return ea;

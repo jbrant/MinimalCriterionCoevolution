@@ -1,7 +1,9 @@
 ﻿#region
 
+using System.Collections.Generic;
 using SharpNeat.Core;
 using SharpNeat.Domains.MazeNavigation.Components;
+using SharpNeat.Loggers;
 using SharpNeat.Phenomes;
 
 #endregion
@@ -16,6 +18,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         private readonly MazeVariant _mazeVariant;
         private readonly int? _minSuccessDistance;
         private bool _stopConditionSatisfied;
+        private readonly object evaluationLock = new object();
 
         internal MazeNavigationMCSEvaluator(int? maxDistanceToTarget, int? maxTimesteps, MazeVariant mazeVariant,
             int? minSuccessDistance, IBehaviorCharacterization behaviorCharacterization)
@@ -40,8 +43,12 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 
         public BehaviorInfo Evaluate(IBlackBox phenome, uint currentGeneration, IDataLogger evaluationLogger)
         {
-            // Increment evaluation count
-            EvaluationCount++;
+            ulong threadLocalEvaluationCount;
+            lock (evaluationLock)
+            {
+                // Increment evaluation count
+                threadLocalEvaluationCount = EvaluationCount++;
+            }
 
             // Default the stop condition satisfied to false
             bool stopConditionSatisfied = false;
@@ -65,6 +72,15 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             // If the navigator reached the goal, stop the experiment
             if (stopConditionSatisfied)
                 StopConditionSatisfied = true;
+
+            // Log trial information
+            evaluationLogger?.LogRow(new List<LoggableElement>
+            {
+                new LoggableElement(NoveltyEvaluationFieldElements.Generation, currentGeneration),
+                new LoggableElement(NoveltyEvaluationFieldElements.EvaluationCount, threadLocalEvaluationCount),
+                new LoggableElement(NoveltyEvaluationFieldElements.StopConditionSatisfied, StopConditionSatisfied)
+            },
+                world.GetLoggableElements());
 
             return trialInfo;
         }

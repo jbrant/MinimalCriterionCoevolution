@@ -20,9 +20,11 @@
 #region
 
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Xml;
+using ExperimentEntities;
 using log4net;
 using SharpNeat.Core;
 using SharpNeat.Decoders;
@@ -124,6 +126,11 @@ namespace SharpNeat.Domains.Xor
             NeatGenomeParameters = new NeatGenomeParameters();
             NeatGenomeParameters.FeedforwardOnly = _activationScheme.AcyclicNetwork;
             NeatGenomeParameters.ActivationFn = PlainSigmoid.__DefaultInstance;
+        }
+
+        public void Initialize(ExperimentDictionary databaseContext)
+        {
+            throw new System.NotImplementedException();
         }
 
         /// <summary>
@@ -240,7 +247,7 @@ namespace SharpNeat.Domains.Xor
                 innerFitnessEvaluator,
                 SelectiveGenomeFitnessEvaluator<NeatGenome>.CreatePredicate_OnceOnly());
             // Initialize the evolution algorithm.
-            ea.Initialize(selectiveFitnessEvaluator, genomeFactory, genomeList);
+            ea.Initialize(selectiveFitnessEvaluator, genomeFactory, genomeList, 500);
 
             // Finished. Return the evolution algorithm
             return ea;

@@ -47,7 +47,7 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     Logs evolution data from classes that implement ILoggable.
         /// </summary>
         protected IDataLogger EvolutionLogger;
-        
+
         /// <summary>
         ///     The last generation during which the display/logging was updated.
         /// </summary>
@@ -57,6 +57,12 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     Captures the clock time of the last update.
         /// </summary>
         private long _prevUpdateTimeTick;
+
+        /// <summary>
+        ///     Defines the maximum number of generations that the algorithm can run before it is forcefully stopped (whether the
+        ///     solution has been found or not).
+        /// </summary>
+        private int _maxGenerations;
 
         /// <summary>
         ///     The genome evaluation scheme for the evolution algorithm.
@@ -137,13 +143,14 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     genomes.
         /// </param>
         /// <param name="genomeList">An initial genome population.</param>
+        /// <param name="maxGenerations">The maximum number of generations that the algorithm is allowed to run.</param>
         /// <param name="abstractNoveltyArchive">
         ///     The persistent archive of genomes posessing a unique trait with respect to a behavior
         ///     characterization (optional).
         /// </param>
         public virtual void Initialize(IGenomeEvaluator<TGenome> genomeFitnessEvaluator,
             IGenomeFactory<TGenome> genomeFactory,
-            List<TGenome> genomeList, AbstractNoveltyArchive<TGenome> abstractNoveltyArchive)
+            List<TGenome> genomeList, int maxGenerations, AbstractNoveltyArchive<TGenome> abstractNoveltyArchive)
         {
             CurrentGeneration = 0;
             GenomeEvaluator = genomeFitnessEvaluator;
@@ -153,6 +160,7 @@ namespace SharpNeat.EvolutionAlgorithms
             PopulationSize = GenomeList.Count;
             RunState = RunState.Ready;
             UpdateScheme = new UpdateScheme(new TimeSpan(0, 0, 1));
+            _maxGenerations = maxGenerations;
         }
 
         /// <summary>
@@ -165,13 +173,14 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     genomes.
         /// </param>
         /// <param name="populationSize">The number of genomes to create for the initial population.</param>
+        /// <param name="maxGenerations">The maximum number of generations that the algorithm is allowed to run.</param>
         /// <param name="abstractNoveltyArchive">
         ///     The persistent archive of genomes posessing a unique trait with respect to a behavior
         ///     characterization (optional).
         /// </param>
         public virtual void Initialize(IGenomeEvaluator<TGenome> genomeFitnessEvaluator,
             IGenomeFactory<TGenome> genomeFactory,
-            int populationSize, AbstractNoveltyArchive<TGenome> abstractNoveltyArchive)
+            int populationSize, int maxGenerations, AbstractNoveltyArchive<TGenome> abstractNoveltyArchive)
         {
             CurrentGeneration = 0;
             GenomeEvaluator = genomeFitnessEvaluator;
@@ -181,6 +190,7 @@ namespace SharpNeat.EvolutionAlgorithms
             AbstractNoveltyArchive = abstractNoveltyArchive;
             RunState = RunState.Ready;
             UpdateScheme = new UpdateScheme(new TimeSpan(0, 0, 1));
+            _maxGenerations = maxGenerations;
         }
 
         /// <summary>
@@ -305,7 +315,7 @@ namespace SharpNeat.EvolutionAlgorithms
                     // Check if a pause has been requested. 
                     // Access to the flag is not thread synchronized, but it doesn't really matter if
                     // we miss it being set and perform one other generation before pausing.
-                    if (_pauseRequestFlag || GenomeEvaluator.StopConditionSatisfied)
+                    if (_pauseRequestFlag || GenomeEvaluator.StopConditionSatisfied || CurrentGeneration >= _maxGenerations)
                     {
                         // Signal to any waiting thread that we are pausing
                         _awaitPauseEvent.Set();

@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Data.Entity;
 using System.IO;
 using System.Threading.Tasks;
 using System.Xml;
+using ExperimentEntities;
 using SharpNeat.Core;
 using SharpNeat.Decoders;
 using SharpNeat.Decoders.Neat;
@@ -15,6 +17,7 @@ namespace SharpNeat.Domains.MazeNavigation
     public abstract class BaseMazeNavigationExperiment : IGuiNeatExperiment
     {
         private NetworkActivationScheme _activationScheme;
+        protected int MaxGenerations;
         protected string ComplexityRegulationStrategy;
         protected int? Complexitythreshold;
         protected int? MaxDistanceToTarget;
@@ -75,15 +78,17 @@ namespace SharpNeat.Domains.MazeNavigation
             ComplexityRegulationStrategy = XmlUtils.TryGetValueAsString(xmlConfig, "ComplexityRegulationStrategy");
             Complexitythreshold = XmlUtils.TryGetValueAsInt(xmlConfig, "ComplexityThreshold");
             ParallelOptions = ExperimentUtils.ReadParallelOptions(xmlConfig);
+            MaxGenerations = XmlUtils.GetValueAsInt(xmlConfig, "MaxGenerations");
 
             // Set evolution/genome parameters
             NeatEvolutionAlgorithmParameters = new NeatEvolutionAlgorithmParameters
             {
                 SpecieCount = XmlUtils.GetValueAsInt(xmlConfig, "SpecieCount"),
                 InterspeciesMatingProportion = XmlUtils.GetValueAsDouble(xmlConfig,
-                    "InterspeciesMatingProbability"),
+                    "InterspeciesMatingProbability")
             };
             NeatGenomeParameters = ExperimentUtils.ReadNeatGenomeParameters(xmlConfig);
+            NeatGenomeParameters.FeedforwardOnly = _activationScheme.AcyclicNetwork;
 
             // Set experiment-specific parameters
             MaxTimesteps = XmlUtils.TryGetValueAsInt(xmlConfig, "MaxTimesteps");
@@ -91,6 +96,44 @@ namespace SharpNeat.Domains.MazeNavigation
             MaxDistanceToTarget = XmlUtils.TryGetValueAsInt(xmlConfig, "MaxDistanceToTarget");
             MazeVariant =
                 MazeVariantUtil.convertStringToMazeVariant(XmlUtils.TryGetValueAsString(xmlConfig, "MazeVariant"));         
+        }
+
+        public virtual void Initialize(ExperimentDictionary experimentDictionary)
+        {
+            // Set all properties
+            Name = experimentDictionary.ExperimentName;
+            DefaultPopulationSize = experimentDictionary.PopulationSize;
+            Description = experimentDictionary.ExperimentName;            
+
+            // Set all internal class variables
+            _activationScheme = NetworkActivationScheme.CreateAcyclicScheme();
+            ComplexityRegulationStrategy = "Relative";
+            Complexitythreshold = 30;
+            ParallelOptions = new ParallelOptions();
+            MaxGenerations = experimentDictionary.MaxGenerations;
+
+            // Set evolution/genome parameters
+            NeatEvolutionAlgorithmParameters = new NeatEvolutionAlgorithmParameters
+            {
+                SpecieCount = experimentDictionary.NumSpecies,
+                InterspeciesMatingProportion = experimentDictionary.InterspeciesMatingProbability
+            };
+            NeatGenomeParameters = new NeatGenomeParameters()
+            {
+                InitialInterconnectionsProportion = experimentDictionary.ConnectionProportion,
+                ConnectionWeightMutationProbability = experimentDictionary.MutateConnectionWeightProbability,
+                AddConnectionMutationProbability = experimentDictionary.MutateAddConnectionProbability,
+                AddNodeMutationProbability = experimentDictionary.MutateAddNeuronProbability,
+                DeleteConnectionMutationProbability = experimentDictionary.MutateDeleteConnectionProbability,
+                ConnectionWeightRange = experimentDictionary.ConnectionWeightRange
+            };
+            NeatGenomeParameters.FeedforwardOnly = _activationScheme.AcyclicNetwork;
+
+            // Set experiment-specific parameters
+            MaxTimesteps = 400;
+            MinSuccessDistance = 5;
+            MaxDistanceToTarget = 300;
+            MazeVariant = MazeVariant.HardMaze;
         }
 
         /// <summary>

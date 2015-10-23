@@ -108,7 +108,7 @@ namespace SharpNeat.Loggers
         public abstract void LogRow(params List<LoggableElement>[] loggableElements);
 
         /// <summary>
-        ///     Closes the database connection.
+        ///     Closes the database connection (not needed since we're creating/disposing the context on every transaction).
         /// </summary>
         public void Close()
         {

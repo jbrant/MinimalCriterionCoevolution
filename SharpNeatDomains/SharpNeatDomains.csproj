@@ -40,6 +40,13 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer">
+      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
     <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\ThirdPartyAssemblies\log4net.dll</HintPath>
@@ -47,6 +54,7 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data.Entity" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
@@ -59,16 +67,9 @@
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="BehaviorCharacterizationUtils.cs" />
-    <Compile Include="BinaryElevenMultiplexer\RbfBinaryElevenMultiplexerExperiment.cs" />
-    <Compile Include="BinarySixMultiplexer\BinarySixMultiplexerEvaluator.cs" />
     <Compile Include="AbstractDomainView.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="BinarySixMultiplexer\BinarySixMultiplexerExperiment.cs" />
-    <Compile Include="BinarySixMultiplexer\RbfBinarySixMultiplexerExperiment.cs" />
-    <Compile Include="BinaryThreeMultiplexer\BinaryThreeMultiplexerExperiment.cs" />
-    <Compile Include="BinaryThreeMultiplexer\BinaryThreeMultiplexerEvaluator.cs" />
-    <Compile Include="BoxesVisualDiscrimination\BoxesVisualDiscriminationEvaluator.cs" />
     <Compile Include="DoubleLine.cs" />
     <Compile Include="DoublePoint.cs" />
     <Compile Include="ExperimentDataDataSet.Designer.cs">
@@ -76,48 +77,16 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ExperimentDataDataSet.xsd</DependentUpon>
     </Compile>
-    <Compile Include="FunctionRegression\AbsFunction.cs" />
-    <Compile Include="FunctionRegression\LogFunction.cs" />
-    <Compile Include="FunctionRegression\RbfFunctionRegressionExperiment.cs" />
     <Compile Include="IGuiNeatExperiment.cs" />
     <Compile Include="IntLine.cs" />
     <Compile Include="IntPoint.cs" />
-    <Compile Include="BoxesVisualDiscrimination\BoxesVisualDiscriminationView.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="BoxesVisualDiscrimination\BoxesVisualDiscriminationView.Designer.cs">
-      <DependentUpon>BoxesVisualDiscriminationView.cs</DependentUpon>
-    </Compile>
-    <Compile Include="BoxesVisualDiscrimination\TestCaseField.cs" />
-    <Compile Include="BoxesVisualDiscrimination\BoxesVisualDiscriminationExperiment.cs" />
-    <Compile Include="BinaryElevenMultiplexer\BinaryElevenMultiplexerEvaluator.cs" />
-    <Compile Include="BinaryElevenMultiplexer\BinaryElevenMultiplexerExperiment.cs" />
     <Compile Include="CppnGenomeView.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="CppnGenomeView.Designer.cs">
       <DependentUpon>CppnGenomeView.cs</DependentUpon>
     </Compile>
-    <Compile Include="DoublePoleBalancing\DoublePoleBalancingEvaluatorNvAntiWiggle.cs" />
-    <Compile Include="DoublePoleBalancing\DoublePoleBalancingEvaluatorNv.cs" />
-    <Compile Include="DoublePoleBalancing\DoublePoleBalancingEvaluator.cs" />
-    <Compile Include="DoublePoleBalancing\DoublePoleBalancingExperiment.cs" />
-    <Compile Include="DoublePoleBalancing\JiggleBuffer.cs" />
     <Compile Include="ExperimentUtils.cs" />
-    <Compile Include="FunctionRegression\SineXSquaredFunction.cs" />
-    <Compile Include="FunctionRegression\FunctionRegressionView2D.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="FunctionRegression\FunctionRegressionView2D.Designer.cs">
-      <DependentUpon>FunctionRegressionView2D.cs</DependentUpon>
-    </Compile>
-    <Compile Include="FunctionRegression\SineFunction.cs" />
-    <Compile Include="FunctionRegression\FunctionRegressionEvaluator.cs" />
-    <Compile Include="FunctionRegression\FunctionId.cs" />
-    <Compile Include="FunctionRegression\IFunction.cs" />
-    <Compile Include="FunctionRegression\MultiplicationFunction.cs" />
-    <Compile Include="FunctionRegression\ParameterSamplingInfo.cs" />
-    <Compile Include="FunctionRegression\FunctionRegressionExperiment.cs" />
     <Compile Include="INeatExperiment.cs" />
     <Compile Include="MathUtils.cs" />
     <Compile Include="MazeNavigation\Components\MazeNavigator.cs" />
@@ -151,24 +120,12 @@
       <DependentUpon>NeatGenomeView.cs</DependentUpon>
     </Compile>
     <Compile Include="PolarPoint.cs" />
-    <Compile Include="PreyCapture\PreyCaptureView.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="PreyCapture\PreyCaptureView.Designer.cs">
-      <DependentUpon>PreyCaptureView.cs</DependentUpon>
-    </Compile>
-    <Compile Include="PreyCapture\PreyCaptureWorld.cs" />
-    <Compile Include="PreyCapture\PreyCaptureEvaluator.cs" />
-    <Compile Include="PreyCapture\PreyCaptureExperiment.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="SinglePoleBalancing\SinglePoleBalancingEvaluator.cs" />
-    <Compile Include="SinglePoleBalancing\SinglePoleStateData.cs" />
-    <Compile Include="SinglePoleBalancing\SinglePoleBalancingExperiment.cs" />
     <Compile Include="ThreeParity\ThreeParityEvaluator.cs" />
     <Compile Include="ThreeParity\ThreeParityExperiment.cs" />
     <Compile Include="XmlUtils.cs" />
@@ -176,6 +133,10 @@
     <Compile Include="Xor\XorExperiment.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ExperimentEntities\ExperimentEntities.csproj">
+      <Project>{e8688333-dd40-4905-9522-85971ae41b97}</Project>
+      <Name>ExperimentEntities</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SharpNeatLib\SharpNeatLib.csproj">
       <Project>{ABC5C77A-DEBA-420C-926C-BD3E6F37AE15}</Project>
       <Name>SharpNeatLib</Name>
@@ -186,14 +147,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="BoxesVisualDiscrimination\BoxesVisualDiscriminationView.resx">
-      <DependentUpon>BoxesVisualDiscriminationView.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="CppnGenomeView.resx">
       <DependentUpon>CppnGenomeView.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="FunctionRegression\FunctionRegressionView2D.resx">
-      <DependentUpon>FunctionRegressionView2D.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MazeNavigation\MazeNavigationView.resx">
       <DependentUpon>MazeNavigationView.cs</DependentUpon>
@@ -201,12 +156,8 @@
     <EmbeddedResource Include="NeatGenomeView.resx">
       <DependentUpon>NeatGenomeView.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="PreyCapture\PreyCaptureView.resx">
-      <DependentUpon>PreyCaptureView.cs</DependentUpon>
-    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="DoublePoleBalancing\Antiwiggle_Explanation_Email.txt" />
     <Content Include="MazeNavigation.experiments.xml">
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

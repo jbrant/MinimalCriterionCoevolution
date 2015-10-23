@@ -308,13 +308,15 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     genomes.
         /// </param>
         /// <param name="genomeList">An initial genome population.</param>
+        /// <param name="maxGenerations">The maximum number of generations that the algorithm is allowed to run.</param>
         /// <param name="abstractNoveltyArchive">The cross-generational archive of high-performing/novel genomes (optional).</param>
         public override void Initialize(IGenomeEvaluator<TGenome> genomeFitnessEvaluator,
             IGenomeFactory<TGenome> genomeFactory,
             List<TGenome> genomeList,
+            int maxGenerations,
             AbstractNoveltyArchive<TGenome> abstractNoveltyArchive = null)
         {
-            base.Initialize(genomeFitnessEvaluator, genomeFactory, genomeList, abstractNoveltyArchive);
+            base.Initialize(genomeFitnessEvaluator, genomeFactory, genomeList, maxGenerations, abstractNoveltyArchive);
             Initialize();
         }
 
@@ -328,13 +330,16 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     genomes.
         /// </param>
         /// <param name="populationSize">The number of genomes to create for the initial population.</param>
+        /// <param name="maxGenerations">The maximum number of generations that the algorithm is allowed to run.</param>
         /// <param name="abstractNoveltyArchive">The cross-generational archive of high-performing/novel genomes (optional).</param>
         public override void Initialize(IGenomeEvaluator<TGenome> genomeFitnessEvaluator,
             IGenomeFactory<TGenome> genomeFactory,
             int populationSize,
+            int maxGenerations,
             AbstractNoveltyArchive<TGenome> abstractNoveltyArchive = null)
         {
-            base.Initialize(genomeFitnessEvaluator, genomeFactory, populationSize, abstractNoveltyArchive);
+            base.Initialize(genomeFitnessEvaluator, genomeFactory, populationSize, maxGenerations,
+                abstractNoveltyArchive);
             Initialize();
         }
 

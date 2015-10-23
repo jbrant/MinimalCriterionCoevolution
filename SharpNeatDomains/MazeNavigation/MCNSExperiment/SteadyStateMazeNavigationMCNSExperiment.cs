@@ -116,7 +116,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCNSExperiment
                     _nearestNeighbors, archive);
 
             // Initialize the evolution algorithm.
-            ea.Initialize(fitnessEvaluator, genomeFactory, genomeList, archive);
+            ea.Initialize(fitnessEvaluator, genomeFactory, genomeList, MaxGenerations, archive);
 
             // Finished. Return the evolution algorithm
             return ea;

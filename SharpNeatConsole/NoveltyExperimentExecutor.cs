@@ -46,17 +46,16 @@ namespace SharpNeatConsole
         private static void Main(string[] args)
         {
             Debug.Assert(args != null && args.Length == 2,
-                "Experiment configuration file amd max generations are required!");
+                "Experiment configuration file and number of runs are required!");
 
             // Read in experiment configuration file
             string exprimentConfigurationFile = args[0];
-            int maxGenerations = Int32.Parse(args[1]);
+            int numRuns = Int32.Parse(args[1]);
 
             // Initialise log4net (log to console).
             XmlConfigurator.Configure(new FileInfo("log4net.properties"));
-
+            
             // Experiment classes encapsulate much of the nuts and bolts of setting up a NEAT search.
-            //XorExperiment experiment = new XorExperiment();
             SteadyStateMazeNavigationNoveltyExperiment experiment = new SteadyStateMazeNavigationNoveltyExperiment();
 
             // Load config XML.
@@ -77,11 +76,11 @@ namespace SharpNeatConsole
             // Start algorithm (it will run on a background thread).
             _ea.StartContinue();
 
-            while (RunState.Terminated != _ea.RunState && RunState.Paused != _ea.RunState &&
+            /*while (RunState.Terminated != _ea.RunState && RunState.Paused != _ea.RunState &&
                    _ea.CurrentGeneration < maxGenerations)
             {
                 Thread.Sleep(2000);
-            }
+            }*/
 
             // Hit return to quit.
             //Console.ReadLine();

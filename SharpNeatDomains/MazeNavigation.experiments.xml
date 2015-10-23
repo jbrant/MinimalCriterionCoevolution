@@ -66,21 +66,23 @@
     <ClassName>SharpNeat.Domains.MazeNavigation.NoveltyExperiment.SteadyStateMazeNavigationNoveltyExperiment</ClassName>
     <Config>
       <PopulationSize>250</PopulationSize>
-      <SpecieCount>20</SpecieCount>
+      <SpecieCount>15</SpecieCount>
       <InterspeciesMatingProbability>0.001</InterspeciesMatingProbability>
       <Activation>
-        <Scheme>CyclicFixedIters</Scheme>
-        <Iters>2</Iters>
+        <Scheme>Acyclic</Scheme>
       </Activation>
       <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>
       <ComplexityThreshold>30</ComplexityThreshold>
-      <OffspringBatchSize>20</OffspringBatchSize>
-      <PopulationEvaluationFrequency>30</PopulationEvaluationFrequency>
+      <OffspringBatchSize>50</OffspringBatchSize>
+      <PopulationEvaluationFrequency>10</PopulationEvaluationFrequency>
+      <MaxGenerations>8000</MaxGenerations>
       <GenomeConfig>
-        <InitialConnectionProportion>1</InitialConnectionProportion>
+        <InitialConnectionProportion>1</InitialConnectionProportion>        
         <WeightMutationProbability>0.6</WeightMutationProbability>
         <AddConnnectionProbability>0.1</AddConnnectionProbability>
         <AddNodeProbability>0.005</AddNodeProbability>
+        <DeleteConnectionProbability>0.001</DeleteConnectionProbability>
+        <ConnectionWeightRange>1</ConnectionWeightRange>
       </GenomeConfig>
       <BehaviorConfig>
         <BehaviorCharacterization>EndPoint</BehaviorCharacterization>
@@ -100,12 +102,12 @@
       <!--<LoggingConfig>
         <Type>Evolution</Type>
         <Destination>Database</Destination>
-        <ExperimentConfigurationName>Experiment 1</ExperimentConfigurationName>
-      </LoggingConfig>-->
-      <!--<LoggingConfig>
+        <ExperimentConfigurationName>Experiment 7</ExperimentConfigurationName>
+      </LoggingConfig>
+      <LoggingConfig>
         <Type>Evaluation</Type>
         <Destination>Database</Destination>
-        <ExperimentConfigurationName>Experiment 1</ExperimentConfigurationName>
+        <ExperimentConfigurationName>Experiment 7</ExperimentConfigurationName>
       </LoggingConfig>-->
       <Description>
         This is the maze navigation experiment used in the original novelty search papers (citation needed).
@@ -217,28 +219,25 @@
       <SpecieCount>10</SpecieCount>
       <InterspeciesMatingProbability>0.001</InterspeciesMatingProbability>
       <Activation>
-        <Scheme>CyclicFixedIters</Scheme>
-        <Iters>2</Iters>
+        <Scheme>Acyclic</Scheme>
       </Activation>
-      <ComplexityRegulationStrategy>Absolute</ComplexityRegulationStrategy>
+      <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>
       <ComplexityThreshold>30</ComplexityThreshold>
       <OffspringBatchSize>20</OffspringBatchSize>
-      <PopulationEvaluationFrequency>20</PopulationEvaluationFrequency>
+      <PopulationEvaluationFrequency>30</PopulationEvaluationFrequency>
       <McsSelectionMethod>Queueing</McsSelectionMethod>
+      <MaxGenerations>10000</MaxGenerations>
       <GenomeConfig>
         <InitialConnectionProportion>1</InitialConnectionProportion>
         <WeightMutationProbability>0.6</WeightMutationProbability>
         <AddConnnectionProbability>0.1</AddConnnectionProbability>
         <AddNodeProbability>0.005</AddNodeProbability>
+        <DeleteConnectionProbability>0.001</DeleteConnectionProbability>
+        <ConnectionWeightRange>1</ConnectionWeightRange>
       </GenomeConfig>
       <BehaviorConfig>
         <BehaviorCharacterization>EndPoint</BehaviorCharacterization>
         <MinimalCriteriaConfig>
-          <!--<MinimalCriteriaConstraint>EuclideanLocation</MinimalCriteriaConstraint>
-          <XMin>6</XMin>
-          <XMax>289</XMax>
-          <YMin>5</YMin>
-          <YMax>134</YMax>-->
           <MinimalCriteriaConstraint>EuclideanDistance</MinimalCriteriaConstraint>
           <XStart>30</XStart>
           <YStart>22</YStart>
@@ -250,8 +249,16 @@
       <MinSuccessDistance>5</MinSuccessDistance>
       <MaxDistanceToTarget>300</MaxDistanceToTarget>
       <MazeVariant>MediumMaze</MazeVariant>
-      <EvolutionLogFile>F:\\User Data\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Novelty Search\\Experiments\\EvolutionData.csv</EvolutionLogFile>
-      <EvaluationLogFile>F:\\User Data\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Novelty Search\\Experiments\\EvaluationData.csv</EvaluationLogFile>
+      <LoggingConfig>
+        <Type>Evolution</Type>
+        <Destination>Database</Destination>
+        <ExperimentConfigurationName>Experiment 13</ExperimentConfigurationName>
+      </LoggingConfig>
+      <LoggingConfig>
+        <Type>Evaluation</Type>
+        <Destination>Database</Destination>
+        <ExperimentConfigurationName>Experiment 13</ExperimentConfigurationName>
+      </LoggingConfig>
       <Description>
         This is the maze navigation experiment used in the original novelty search papers (citation needed).
       </Description>

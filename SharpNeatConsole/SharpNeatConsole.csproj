@@ -90,6 +90,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="ExperimentConfigurations\AutomaticExperiment.config.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="ExperimentConfigurations\Experiment2.config.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

@@ -48,6 +48,12 @@ namespace ExperimentEntities
         public double MutateAddConnectionProbability { get; set; }
         public double MutateDeleteConnectionProbability { get; set; }
         public int ConnectionWeightRange { get; set; }
+        public int MaxGenerations { get; set; }
+        public Nullable<int> NearestNeighbors { get; set; }
+        public string MinimalCriteriaConstraint { get; set; }
+        public Nullable<int> MinimumRequiredDistance { get; set; }
+        public Nullable<int> McsStartX { get; set; }
+        public Nullable<int> McsStartY { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<NoveltyExperimentOrganismStateData> NoveltyExperimentOrganismStateDatas { get; set; }

@@ -157,15 +157,17 @@ namespace SharpNeat.Domains
                 var xmlNeatGenomeConfig = nodeList[0] as XmlElement;
 
                 // Read all of the applicable parameters in
-                var initialConnectionProportion = XmlUtils.TryGetValueAsDouble(xmlNeatGenomeConfig,
+                double? initialConnectionProportion = XmlUtils.TryGetValueAsDouble(xmlNeatGenomeConfig,
                     "InitialConnectionProportion");
-                var weightMutationProbability = XmlUtils.TryGetValueAsDouble(xmlNeatGenomeConfig,
+                double? weightMutationProbability = XmlUtils.TryGetValueAsDouble(xmlNeatGenomeConfig,
                     "WeightMutationProbability");
-                var addConnectionProbability = XmlUtils.TryGetValueAsDouble(xmlNeatGenomeConfig,
+                double? addConnectionProbability = XmlUtils.TryGetValueAsDouble(xmlNeatGenomeConfig,
                     "AddConnnectionProbability");
-                var addNodeProbability = XmlUtils.TryGetValueAsDouble(xmlNeatGenomeConfig, "AddNodeProbability");
-                var interspeciesMatingProbability = XmlUtils.TryGetValueAsDouble(xmlNeatGenomeConfig,
-                    "InterspeciesMatingProbability");
+                double? addNodeProbability = XmlUtils.TryGetValueAsDouble(xmlNeatGenomeConfig, "AddNodeProbability");
+                double? deleteConnectionProbability = XmlUtils.TryGetValueAsDouble(xmlNeatGenomeConfig,
+                    "DeleteConnectionProbability");
+                double? connectionWeightRange = XmlUtils.TryGetValueAsDouble(xmlNeatGenomeConfig,
+                    "ConnectionWeightRange");
 
                 // Set each if it's specified in the configuration (otherwise, accept the default)
                 if (initialConnectionProportion != null)
@@ -183,6 +185,15 @@ namespace SharpNeat.Domains
                 if (addNodeProbability != null)
                 {
                     genomeParameters.AddNodeMutationProbability = addNodeProbability ?? default(double);
+                }
+                if (deleteConnectionProbability != null)
+                {
+                    genomeParameters.DeleteConnectionMutationProbability = deleteConnectionProbability ??
+                                                                           default(double);
+                }
+                if (connectionWeightRange != null)
+                {
+                    genomeParameters.ConnectionWeightRange = connectionWeightRange ?? default(double);
                 }
             }
 
@@ -236,7 +247,7 @@ namespace SharpNeat.Domains
 
             // Get root of novelty configuration section
             XmlNodeList nodeList = xmlConfig.GetElementsByTagName("LoggingConfig", "");
-            
+
             // Iterate through the list of logging configurations, finding one that matches the specified logging type
             foreach (XmlElement curXmlLoggingConfig in nodeList)
             {

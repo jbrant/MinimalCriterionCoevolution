@@ -22,6 +22,8 @@ using SharpNeat.Core;
 using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Phenomes;
+using System.Data.Entity;
+using ExperimentEntities;
 
 namespace SharpNeat.Domains
 {
@@ -74,6 +76,12 @@ namespace SharpNeat.Domains
         /// Initialize the experiment with some optional XML configutation data.
         /// </summary>
         void Initialize(string name, XmlElement xmlConfig);
+
+        /// <summary>
+        /// Initialize from parameters defined in a database.
+        /// </summary>
+        /// <param name="databaseContext"></param>
+        void Initialize(ExperimentDictionary databaseContext);
 
         /// <summary>
         /// Load a population of genomes from an XmlReader and returns the genomes in a new list.

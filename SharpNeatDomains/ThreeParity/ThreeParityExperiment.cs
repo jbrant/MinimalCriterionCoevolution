@@ -1,8 +1,10 @@
 ﻿#region
 
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Threading.Tasks;
 using System.Xml;
+using ExperimentEntities;
 using SharpNeat.Core;
 using SharpNeat.Decoders;
 using SharpNeat.Decoders.Neat;
@@ -111,6 +113,11 @@ namespace SharpNeat.Domains.ThreeParity
             NeatGenomeParameters = new NeatGenomeParameters();
             NeatGenomeParameters.FeedforwardOnly = _activationScheme.AcyclicNetwork;
             NeatGenomeParameters.ActivationFn = PlainSigmoid.__DefaultInstance;
+        }
+
+        public void Initialize(ExperimentDictionary databaseContext)
+        {
+            throw new System.NotImplementedException();
         }
 
         /// <summary>
@@ -229,7 +236,7 @@ namespace SharpNeat.Domains.ThreeParity
                 SelectiveGenomeFitnessEvaluator<NeatGenome>.CreatePredicate_OnceOnly());
 
             // Initialize the evolution algorithm.
-            ea.Initialize(selectiveFitnessEvaluator, genomeFactory, genomeList);
+            ea.Initialize(selectiveFitnessEvaluator, genomeFactory, genomeList, 1000);
 
             // Finished. Return the evolution algorithm
             return ea;
