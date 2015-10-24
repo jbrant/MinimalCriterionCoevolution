@@ -1,6 +1,7 @@
 ﻿#region
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Xml;
 using ExperimentEntities;
 using SharpNeat.Behaviors;
@@ -21,16 +22,16 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
     {
         private int _batchSize;
         private IBehaviorCharacterization _behaviorCharacterization;
+        private IDataLogger _evaluationDataLogger;
+        private IDataLogger _evolutionDataLogger;
 
         /// <summary>
         ///     Path/File to which to write generational data log.
         /// </summary>
         private string _generationalLogFile;
 
-        private int _populationEvaluationFrequency;
         private string _mcsSelectionMethod;
-        private IDataLogger _evaluationDataLogger;
-        private IDataLogger _evolutionDataLogger;
+        private int _populationEvaluationFrequency;
 
         public override void Initialize(string name, XmlElement xmlConfig)
         {
@@ -55,9 +56,17 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         {
             base.Initialize(experimentDictionary);
 
+            // Ensure the start position and minimum distance constraint are not null
+            Debug.Assert(experimentDictionary.McsStartX != null, "experimentDictionary.McsStartX != null");
+            Debug.Assert(experimentDictionary.McsStartY != null, "experimentDictionary.McsStartY != null");
+            Debug.Assert(experimentDictionary.MinimumRequiredDistance != null,
+                "experimentDictionary.MinimumRequiredDistance != null");
+
             // Read in the behavior characterization
-            _behaviorCharacterization = new EndPointBehaviorCharacterization(new EuclideanDistanceCriteria((double)experimentDictionary.McsStartX,
-                (double)experimentDictionary.McsStartY, (double)experimentDictionary.MinimumRequiredDistance));
+            _behaviorCharacterization =
+                new EndPointBehaviorCharacterization(
+                    new EuclideanDistanceCriteria((double) experimentDictionary.McsStartX,
+                        (double) experimentDictionary.McsStartY, (double) experimentDictionary.MinimumRequiredDistance));
 
             // Read in steady-state specific parameters
             _batchSize = experimentDictionary.OffspringBatchSize ?? default(int);
@@ -68,7 +77,8 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 
             // Read in log file path/name
             _evolutionDataLogger = new NoveltyExperimentEvaluationEntityDataLogger(experimentDictionary.ExperimentName);
-            _evaluationDataLogger = new NoveltyExperimentOrganismStateEntityDataLogger(experimentDictionary.ExperimentName);
+            _evaluationDataLogger =
+                new NoveltyExperimentOrganismStateEntityDataLogger(experimentDictionary.ExperimentName);
         }
 
         /// <summary>
@@ -83,7 +93,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         public override INeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(
             IGenomeFactory<NeatGenome> genomeFactory,
             List<NeatGenome> genomeList)
-        {            
+        {
             // Create distance metric. Mismatched genes have a fixed distance of 10; for matched genes the distance is their weigth difference.
             IDistanceMetric distanceMetric = new ManhattanDistanceMetric(1.0, 0.0, 10.0);
             ISpeciationStrategy<NeatGenome> speciationStrategy =
@@ -98,7 +108,8 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             if ("Random".Equals(_mcsSelectionMethod))
             {
                 ea = new SteadyStateNeatEvolutionAlgorithm<NeatGenome>(NeatEvolutionAlgorithmParameters,
-                    speciationStrategy, complexityRegulationStrategy, _batchSize, _populationEvaluationFrequency, _evolutionDataLogger);
+                    speciationStrategy, complexityRegulationStrategy, _batchSize, _populationEvaluationFrequency,
+                    _evolutionDataLogger);
             }
             else
             {

@@ -17,8 +17,8 @@ namespace ExperimentEntities
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public ExperimentDictionary()
         {
-            this.NoveltyExperimentOrganismStateDatas = new HashSet<NoveltyExperimentOrganismStateData>();
             this.NoveltyExperimentEvaluationDatas = new HashSet<NoveltyExperimentEvaluationData>();
+            this.NoveltyExperimentOrganismStateDatas = new HashSet<NoveltyExperimentOrganismStateData>();
         }
     
         public int ExperimentID { get; set; }
@@ -27,14 +27,22 @@ namespace ExperimentEntities
         public string ExperimentDomain { get; set; }
         public string ExperimentType { get; set; }
         public string AlgorithmType { get; set; }
+        public int MaxGenerations { get; set; }
+        public string ComplexityRegulationStrategy { get; set; }
+        public int ComplexityThreshold { get; set; }
         public Nullable<int> OffspringBatchSize { get; set; }
+        public Nullable<int> PopulationEvaluationFrequency { get; set; }
         public string BehaviorCharacterization { get; set; }
+        public Nullable<int> NearestNeighbors { get; set; }
         public Nullable<int> ArchiveAdditionThreshold { get; set; }
         public Nullable<double> ArchiveThresholdDecreaseMultiplier { get; set; }
         public Nullable<double> ArchiveThresholdIncreaseMultiplier { get; set; }
         public Nullable<int> MaxGenerationalArchiveAddition { get; set; }
         public Nullable<int> MaxGenerationsWithoutArchiveAddition { get; set; }
-        public Nullable<int> PopulationEvaluationFrequency { get; set; }
+        public string MinimalCriteriaConstraint { get; set; }
+        public Nullable<double> MinimumRequiredDistance { get; set; }
+        public Nullable<double> McsStartX { get; set; }
+        public Nullable<double> McsStartY { get; set; }
         public double ConnectionProportion { get; set; }
         public int PopulationSize { get; set; }
         public int NumSpecies { get; set; }
@@ -48,16 +56,13 @@ namespace ExperimentEntities
         public double MutateAddConnectionProbability { get; set; }
         public double MutateDeleteConnectionProbability { get; set; }
         public int ConnectionWeightRange { get; set; }
-        public int MaxGenerations { get; set; }
-        public Nullable<int> NearestNeighbors { get; set; }
-        public string MinimalCriteriaConstraint { get; set; }
-        public Nullable<int> MinimumRequiredDistance { get; set; }
-        public Nullable<int> McsStartX { get; set; }
-        public Nullable<int> McsStartY { get; set; }
+        public Nullable<int> MaxTimesteps { get; set; }
+        public Nullable<int> MinSuccessDistance { get; set; }
+        public Nullable<int> MaxDistanceToTarget { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<NoveltyExperimentOrganismStateData> NoveltyExperimentOrganismStateDatas { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<NoveltyExperimentEvaluationData> NoveltyExperimentEvaluationDatas { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<NoveltyExperimentOrganismStateData> NoveltyExperimentOrganismStateDatas { get; set; }
     }
 }

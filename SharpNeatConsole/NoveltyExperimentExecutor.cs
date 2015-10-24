@@ -49,7 +49,7 @@ namespace SharpNeatConsole
                 "Experiment configuration file and number of runs are required!");
 
             // Read in experiment configuration file
-            string exprimentConfigurationFile = args[0];
+            string experimentName = args[0];
             int numRuns = Int32.Parse(args[1]);
 
             // Initialise log4net (log to console).
@@ -60,7 +60,7 @@ namespace SharpNeatConsole
 
             // Load config XML.
             XmlDocument xmlConfig = new XmlDocument();
-            xmlConfig.Load("./ExperimentConfigurations/" + exprimentConfigurationFile);
+            xmlConfig.Load("./ExperimentConfigurations/" + experimentName);
             experiment.Initialize("Novelty", xmlConfig.DocumentElement);
 
             // Create a genome factory with our neat genome parameters object and the appropriate number of input and output neuron genes.
