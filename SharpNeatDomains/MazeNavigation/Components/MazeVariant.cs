@@ -45,17 +45,18 @@ namespace SharpNeat.Domains.MazeNavigation.Components
         /// <returns>The maze variant domain type.</returns>
         public static MazeVariant convertStringToMazeVariant(String strMazeVariant)
         {
-            if (MazeVariant.MediumMaze.ToString().Equals(strMazeVariant, StringComparison.InvariantCultureIgnoreCase))
+            if ("MediumMaze".Equals(strMazeVariant, StringComparison.InvariantCultureIgnoreCase) ||
+                "Medium Maze".Equals(strMazeVariant, StringComparison.InvariantCultureIgnoreCase))
             {
                 return MazeVariant.MediumMaze;
             }
-            if (MazeVariant.OpenEndedMediumMaze.ToString()
-                .Equals(strMazeVariant, StringComparison.InvariantCultureIgnoreCase))
+            if ("OpenEndedMediumMaze".Equals(strMazeVariant, StringComparison.InvariantCultureIgnoreCase) ||
+                "Open Ended Medium Maze".Equals(strMazeVariant, StringComparison.InvariantCultureIgnoreCase))
             {
                 return MazeVariant.OpenEndedMediumMaze;
             }
-            if (MazeVariant.OpenEndedHardMaze.ToString()
-                .Equals(strMazeVariant, StringComparison.InvariantCultureIgnoreCase))
+            if ("OpenEndedHardMaze".Equals(strMazeVariant, StringComparison.InvariantCultureIgnoreCase) ||
+                "Open Ended Hard Maze".Equals(strMazeVariant, StringComparison.InvariantCultureIgnoreCase))
             {
                 return MazeVariant.OpenEndedHardMaze;
             }

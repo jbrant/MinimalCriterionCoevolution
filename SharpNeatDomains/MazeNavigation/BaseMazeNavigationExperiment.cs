@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Data.Entity;
-using System.IO;
+﻿#region
+
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Xml;
 using ExperimentEntities;
@@ -12,20 +12,22 @@ using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Phenomes;
 
+#endregion
+
 namespace SharpNeat.Domains.MazeNavigation
 {
     public abstract class BaseMazeNavigationExperiment : IGuiNeatExperiment
     {
         private NetworkActivationScheme _activationScheme;
-        protected int MaxGenerations;
         protected string ComplexityRegulationStrategy;
         protected int? Complexitythreshold;
         protected int? MaxDistanceToTarget;
+        protected int MaxGenerations;
         protected int? MaxTimesteps;
         protected MazeVariant MazeVariant;
         protected int? MinSuccessDistance;
         protected ParallelOptions ParallelOptions;
-        
+
         /// <summary>
         ///     Name of the experiment.
         /// </summary>
@@ -95,7 +97,7 @@ namespace SharpNeat.Domains.MazeNavigation
             MinSuccessDistance = XmlUtils.TryGetValueAsInt(xmlConfig, "MinSuccessDistance");
             MaxDistanceToTarget = XmlUtils.TryGetValueAsInt(xmlConfig, "MaxDistanceToTarget");
             MazeVariant =
-                MazeVariantUtil.convertStringToMazeVariant(XmlUtils.TryGetValueAsString(xmlConfig, "MazeVariant"));         
+                MazeVariantUtil.convertStringToMazeVariant(XmlUtils.TryGetValueAsString(xmlConfig, "MazeVariant"));
         }
 
         public virtual void Initialize(ExperimentDictionary experimentDictionary)
@@ -103,12 +105,12 @@ namespace SharpNeat.Domains.MazeNavigation
             // Set all properties
             Name = experimentDictionary.ExperimentName;
             DefaultPopulationSize = experimentDictionary.PopulationSize;
-            Description = experimentDictionary.ExperimentName;            
+            Description = experimentDictionary.ExperimentName;
 
             // Set all internal class variables
             _activationScheme = NetworkActivationScheme.CreateAcyclicScheme();
-            ComplexityRegulationStrategy = "Relative";
-            Complexitythreshold = 30;
+            ComplexityRegulationStrategy = experimentDictionary.ComplexityRegulationStrategy;
+            Complexitythreshold = experimentDictionary.ComplexityThreshold;
             ParallelOptions = new ParallelOptions();
             MaxGenerations = experimentDictionary.MaxGenerations;
 
@@ -118,7 +120,7 @@ namespace SharpNeat.Domains.MazeNavigation
                 SpecieCount = experimentDictionary.NumSpecies,
                 InterspeciesMatingProportion = experimentDictionary.InterspeciesMatingProbability
             };
-            NeatGenomeParameters = new NeatGenomeParameters()
+            NeatGenomeParameters = new NeatGenomeParameters
             {
                 InitialInterconnectionsProportion = experimentDictionary.ConnectionProportion,
                 ConnectionWeightMutationProbability = experimentDictionary.MutateConnectionWeightProbability,
@@ -130,10 +132,10 @@ namespace SharpNeat.Domains.MazeNavigation
             NeatGenomeParameters.FeedforwardOnly = _activationScheme.AcyclicNetwork;
 
             // Set experiment-specific parameters
-            MaxTimesteps = 400;
-            MinSuccessDistance = 5;
-            MaxDistanceToTarget = 300;
-            MazeVariant = MazeVariant.HardMaze;
+            MaxTimesteps = experimentDictionary.MaxTimesteps;
+            MinSuccessDistance = experimentDictionary.MinSuccessDistance;
+            MaxDistanceToTarget = experimentDictionary.MaxDistanceToTarget;
+            MazeVariant = MazeVariantUtil.convertStringToMazeVariant(experimentDictionary.ExperimentDomain);
         }
 
         /// <summary>
@@ -176,7 +178,8 @@ namespace SharpNeat.Domains.MazeNavigation
         }
 
         /// <summary>
-        ///     Create and return a GenerationalNeatEvolutionAlgorithm object ready for running the NEAT algorithm/search. Various sub-parts of
+        ///     Create and return a GenerationalNeatEvolutionAlgorithm object ready for running the NEAT algorithm/search. Various
+        ///     sub-parts of
         ///     the algorithm are also constructed and connected up.  Uses the default population size.
         /// </summary>
         /// <returns>NEAT evolutionary algorithm</returns>
@@ -186,7 +189,8 @@ namespace SharpNeat.Domains.MazeNavigation
         }
 
         /// <summary>
-        ///     Create and return a GenerationalNeatEvolutionAlgorithm object ready for running the NEAT algorithm/search based on the given
+        ///     Create and return a GenerationalNeatEvolutionAlgorithm object ready for running the NEAT algorithm/search based on
+        ///     the given
         ///     population size. Various sub-parts of the algorithm are also constructed and connected up.
         /// </summary>
         /// <param name="populationSize">The genome population size</param>
@@ -204,7 +208,8 @@ namespace SharpNeat.Domains.MazeNavigation
         }
 
         /// <summary>
-        ///     Create and return a GenerationalNeatEvolutionAlgorithm object ready for running the NEAT algorithm/search based on the given
+        ///     Create and return a GenerationalNeatEvolutionAlgorithm object ready for running the NEAT algorithm/search based on
+        ///     the given
         ///     genome factory and genome list.  Various sub-parts of the algorithm are also constructed and connected up.
         /// </summary>
         /// <param name="genomeFactory">The genome factory from which to generate new genomes</param>

@@ -16,6 +16,11 @@
           <Property Name="ExperimentType" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="AlgorithmType" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="MaxGenerations" Type="int" Nullable="false" />
+          <Property Name="MaxTimesteps" Type="int" />
+          <Property Name="MinSuccessDistance" Type="int" />
+          <Property Name="MaxDistanceToTarget" Type="int" />
+          <Property Name="ComplexityRegulationStrategy" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="ComplexityThreshold" Type="int" Nullable="false" />
           <Property Name="OffspringBatchSize" Type="int" />
           <Property Name="PopulationEvaluationFrequency" Type="int" />
           <Property Name="BehaviorCharacterization" Type="varchar" MaxLength="50" />
@@ -26,9 +31,9 @@
           <Property Name="MaxGenerationalArchiveAddition" Type="int" />
           <Property Name="MaxGenerationsWithoutArchiveAddition" Type="int" />
           <Property Name="MinimalCriteriaConstraint" Type="varchar" MaxLength="50" />
-          <Property Name="MinimumRequiredDistance" Type="int" />
-          <Property Name="McsStartX" Type="int" />
-          <Property Name="McsStartY" Type="int" />
+          <Property Name="MinimumRequiredDistance" Type="float" />
+          <Property Name="McsStartX" Type="float" />
+          <Property Name="McsStartY" Type="float" />
           <Property Name="ConnectionProportion" Type="float" Nullable="false" />
           <Property Name="PopulationSize" Type="int" Nullable="false" />
           <Property Name="NumSpecies" Type="int" Nullable="false" />
@@ -42,7 +47,7 @@
           <Property Name="MutateAddConnectionProbability" Type="float" Nullable="false" />
           <Property Name="MutateDeleteConnectionProbability" Type="float" Nullable="false" />
           <Property Name="ConnectionWeightRange" Type="int" Nullable="false" />
-          <Property Name="UniqueParameterHash" Type="varchar" MaxLength="682" StoreGeneratedPattern="Computed" Nullable="false" />
+          <Property Name="UniqueParameterHash" Type="varchar" MaxLength="715" StoreGeneratedPattern="Computed" Nullable="false" />
         </EntityType>
         <EntityType Name="NoveltyExperimentEvaluationData">
           <Key>
@@ -93,7 +98,7 @@
           <Property Name="AgentXLocation" Type="float" Nullable="false" />
           <Property Name="AgentYLocation" Type="float" Nullable="false" />
         </EntityType>
-        <Association Name="FK_NoveltyExperimentEvaluation_ExperimentDictionary">
+        <Association Name="FK_NoveltyExperimentEvaluationData_ExperimentDictionary">
           <End Role="ExperimentDictionary" Type="Self.ExperimentDictionary" Multiplicity="1" />
           <End Role="NoveltyExperimentEvaluationData" Type="Self.NoveltyExperimentEvaluationData" Multiplicity="*" />
           <ReferentialConstraint>
@@ -105,7 +110,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_NoveltyExperimentOrganism_ExperimentDictionary">
+        <Association Name="FK_NoveltyExperimentOrganismStateData_ExperimentDictionary">
           <End Role="ExperimentDictionary" Type="Self.ExperimentDictionary" Multiplicity="1" />
           <End Role="NoveltyExperimentOrganismStateData" Type="Self.NoveltyExperimentOrganismStateData" Multiplicity="*" />
           <ReferentialConstraint>
@@ -121,11 +126,11 @@
           <EntitySet Name="ExperimentDictionary" EntityType="Self.ExperimentDictionary" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="NoveltyExperimentEvaluationData" EntityType="Self.NoveltyExperimentEvaluationData" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="NoveltyExperimentOrganismStateData" EntityType="Self.NoveltyExperimentOrganismStateData" Schema="dbo" store:Type="Tables" />
-          <AssociationSet Name="FK_NoveltyExperimentEvaluation_ExperimentDictionary" Association="Self.FK_NoveltyExperimentEvaluation_ExperimentDictionary">
+          <AssociationSet Name="FK_NoveltyExperimentEvaluationData_ExperimentDictionary" Association="Self.FK_NoveltyExperimentEvaluationData_ExperimentDictionary">
             <End Role="ExperimentDictionary" EntitySet="ExperimentDictionary" />
             <End Role="NoveltyExperimentEvaluationData" EntitySet="NoveltyExperimentEvaluationData" />
           </AssociationSet>
-          <AssociationSet Name="FK_NoveltyExperimentOrganism_ExperimentDictionary" Association="Self.FK_NoveltyExperimentOrganism_ExperimentDictionary">
+          <AssociationSet Name="FK_NoveltyExperimentOrganismStateData_ExperimentDictionary" Association="Self.FK_NoveltyExperimentOrganismStateData_ExperimentDictionary">
             <End Role="ExperimentDictionary" EntitySet="ExperimentDictionary" />
             <End Role="NoveltyExperimentOrganismStateData" EntitySet="NoveltyExperimentOrganismStateData" />
           </AssociationSet>
@@ -134,57 +139,17 @@
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="ExperimentDataModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
-        <EntityType Name="ExperimentDictionary">
-          <Key>
-            <PropertyRef Name="ExperimentID" />
-          </Key>
-          <Property Name="ExperimentID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="ExperimentName" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="ConfigurationFile" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="ExperimentDomain" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="ExperimentType" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="AlgorithmType" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="OffspringBatchSize" Type="Int32" />
-          <Property Name="BehaviorCharacterization" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="ArchiveAdditionThreshold" Type="Int32" />
-          <Property Name="ArchiveThresholdDecreaseMultiplier" Type="Double" />
-          <Property Name="ArchiveThresholdIncreaseMultiplier" Type="Double" />
-          <Property Name="MaxGenerationalArchiveAddition" Type="Int32" />
-          <Property Name="MaxGenerationsWithoutArchiveAddition" Type="Int32" />
-          <Property Name="PopulationEvaluationFrequency" Type="Int32" />
-          <Property Name="ConnectionProportion" Type="Double" Nullable="false" />
-          <Property Name="PopulationSize" Type="Int32" Nullable="false" />
-          <Property Name="NumSpecies" Type="Int32" Nullable="false" />
-          <Property Name="ElitismProportion" Type="Double" />
-          <Property Name="SelectionProportion" Type="Double" />
-          <Property Name="AsexualProbability" Type="Double" Nullable="false" />
-          <Property Name="CrossoverProbability" Type="Double" Nullable="false" />
-          <Property Name="InterspeciesMatingProbability" Type="Double" Nullable="false" />
-          <Property Name="MutateConnectionWeightProbability" Type="Double" Nullable="false" />
-          <Property Name="MutateAddNeuronProbability" Type="Double" Nullable="false" />
-          <Property Name="MutateAddConnectionProbability" Type="Double" Nullable="false" />
-          <Property Name="MutateDeleteConnectionProbability" Type="Double" Nullable="false" />
-          <Property Name="ConnectionWeightRange" Type="Int32" Nullable="false" />
-          <NavigationProperty Name="NoveltyExperimentOrganismStateDatas" Relationship="ExperimentDataModel.FK_NoveltyExperimentOrganism_ExperimentDictionary" FromRole="ExperimentDictionary" ToRole="NoveltyExperimentOrganismStateData" />
-          <NavigationProperty Name="NoveltyExperimentEvaluationDatas" Relationship="ExperimentDataModel.FK_NoveltyExperimentEvaluation_ExperimentDictionary" FromRole="ExperimentDictionary" ToRole="NoveltyExperimentEvaluationData" />
-          <Property Name="MaxGenerations" Type="Int32" Nullable="false" />
-          <Property Name="NearestNeighbors" Type="Int32" />
-          <Property Name="MinimalCriteriaConstraint" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="MinimumRequiredDistance" Type="Int32" />
-          <Property Name="McsStartX" Type="Int32" />
-          <Property Name="McsStartY" Type="Int32" />
-        </EntityType>
         <EntityContainer Name="ExperimentDataEntities" annotation:LazyLoadingEnabled="true">
-          <EntitySet Name="ExperimentDictionaries" EntityType="Self.ExperimentDictionary" />
           <EntitySet Name="NoveltyExperimentOrganismStateDatas" EntityType="ExperimentDataModel.NoveltyExperimentOrganismStateData" />
-          <AssociationSet Name="FK_NoveltyExperimentOrganism_ExperimentDictionary" Association="ExperimentDataModel.FK_NoveltyExperimentOrganism_ExperimentDictionary">
-            <End Role="ExperimentDictionary" EntitySet="ExperimentDictionaries" />
-            <End Role="NoveltyExperimentOrganismStateData" EntitySet="NoveltyExperimentOrganismStateDatas" />
-          </AssociationSet>
           <EntitySet Name="NoveltyExperimentEvaluationDatas" EntityType="ExperimentDataModel.NoveltyExperimentEvaluationData" />
-          <AssociationSet Name="FK_NoveltyExperimentEvaluation_ExperimentDictionary" Association="ExperimentDataModel.FK_NoveltyExperimentEvaluation_ExperimentDictionary">
+          <EntitySet Name="ExperimentDictionaries" EntityType="ExperimentDataModel.ExperimentDictionary" />
+          <AssociationSet Name="FK_NoveltyExperimentEvaluationData_ExperimentDictionary" Association="ExperimentDataModel.FK_NoveltyExperimentEvaluationData_ExperimentDictionary">
             <End Role="ExperimentDictionary" EntitySet="ExperimentDictionaries" />
             <End Role="NoveltyExperimentEvaluationData" EntitySet="NoveltyExperimentEvaluationDatas" />
+          </AssociationSet>
+          <AssociationSet Name="FK_NoveltyExperimentOrganismStateData_ExperimentDictionary" Association="ExperimentDataModel.FK_NoveltyExperimentOrganismStateData_ExperimentDictionary">
+            <End Role="ExperimentDictionary" EntitySet="ExperimentDictionaries" />
+            <End Role="NoveltyExperimentOrganismStateData" EntitySet="NoveltyExperimentOrganismStateDatas" />
           </AssociationSet>
         </EntityContainer>
         <EntityType Name="NoveltyExperimentOrganismStateData">
@@ -202,20 +167,8 @@
           <Property Name="DistanceToTarget" Type="Double" Nullable="false" />
           <Property Name="AgentXLocation" Type="Double" Nullable="false" />
           <Property Name="AgentYLocation" Type="Double" Nullable="false" />
-          <NavigationProperty Name="ExperimentDictionary" Relationship="ExperimentDataModel.FK_NoveltyExperimentOrganism_ExperimentDictionary" FromRole="NoveltyExperimentOrganismStateData" ToRole="ExperimentDictionary" />
+          <NavigationProperty Name="ExperimentDictionary" Relationship="ExperimentDataModel.FK_NoveltyExperimentOrganismStateData_ExperimentDictionary" FromRole="NoveltyExperimentOrganismStateData" ToRole="ExperimentDictionary" />
         </EntityType>
-        <Association Name="FK_NoveltyExperimentOrganism_ExperimentDictionary">
-          <End Type="ExperimentDataModel.ExperimentDictionary" Role="ExperimentDictionary" Multiplicity="1" />
-          <End Type="ExperimentDataModel.NoveltyExperimentOrganismStateData" Role="NoveltyExperimentOrganismStateData" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="ExperimentDictionary">
-              <PropertyRef Name="ExperimentID" />
-            </Principal>
-            <Dependent Role="NoveltyExperimentOrganismStateData">
-              <PropertyRef Name="ExperimentID_FK" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <EntityType Name="NoveltyExperimentEvaluationData">
           <Key>
             <PropertyRef Name="ExperimentID_FK" />
@@ -248,9 +201,54 @@
           <Property Name="ChampGenomeEvaluationCount" Type="Int32" />
           <Property Name="ChampGenomeBehavior1" Type="Double" />
           <Property Name="ChampGenomeBehavior2" Type="Double" />
-          <NavigationProperty Name="ExperimentDictionary" Relationship="ExperimentDataModel.FK_NoveltyExperimentEvaluation_ExperimentDictionary" FromRole="NoveltyExperimentEvaluationData" ToRole="ExperimentDictionary" />
+          <NavigationProperty Name="ExperimentDictionary" Relationship="ExperimentDataModel.FK_NoveltyExperimentEvaluationData_ExperimentDictionary" FromRole="NoveltyExperimentEvaluationData" ToRole="ExperimentDictionary" />
         </EntityType>
-        <Association Name="FK_NoveltyExperimentEvaluation_ExperimentDictionary">
+        <EntityType Name="ExperimentDictionary">
+          <Key>
+            <PropertyRef Name="ExperimentID" />
+          </Key>
+          <Property Name="ExperimentID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ExperimentName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ConfigurationFile" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ExperimentDomain" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ExperimentType" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="AlgorithmType" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="MaxGenerations" Type="Int32" Nullable="false" />
+          <Property Name="ComplexityRegulationStrategy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ComplexityThreshold" Type="Int32" Nullable="false" />
+          <Property Name="OffspringBatchSize" Type="Int32" />
+          <Property Name="PopulationEvaluationFrequency" Type="Int32" />
+          <Property Name="BehaviorCharacterization" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="NearestNeighbors" Type="Int32" />
+          <Property Name="ArchiveAdditionThreshold" Type="Int32" />
+          <Property Name="ArchiveThresholdDecreaseMultiplier" Type="Double" />
+          <Property Name="ArchiveThresholdIncreaseMultiplier" Type="Double" />
+          <Property Name="MaxGenerationalArchiveAddition" Type="Int32" />
+          <Property Name="MaxGenerationsWithoutArchiveAddition" Type="Int32" />
+          <Property Name="MinimalCriteriaConstraint" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="MinimumRequiredDistance" Type="Double" />
+          <Property Name="McsStartX" Type="Double" />
+          <Property Name="McsStartY" Type="Double" />
+          <Property Name="ConnectionProportion" Type="Double" Nullable="false" />
+          <Property Name="PopulationSize" Type="Int32" Nullable="false" />
+          <Property Name="NumSpecies" Type="Int32" Nullable="false" />
+          <Property Name="ElitismProportion" Type="Double" />
+          <Property Name="SelectionProportion" Type="Double" />
+          <Property Name="AsexualProbability" Type="Double" Nullable="false" />
+          <Property Name="CrossoverProbability" Type="Double" Nullable="false" />
+          <Property Name="InterspeciesMatingProbability" Type="Double" Nullable="false" />
+          <Property Name="MutateConnectionWeightProbability" Type="Double" Nullable="false" />
+          <Property Name="MutateAddNeuronProbability" Type="Double" Nullable="false" />
+          <Property Name="MutateAddConnectionProbability" Type="Double" Nullable="false" />
+          <Property Name="MutateDeleteConnectionProbability" Type="Double" Nullable="false" />
+          <Property Name="ConnectionWeightRange" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="NoveltyExperimentEvaluationDatas" Relationship="ExperimentDataModel.FK_NoveltyExperimentEvaluationData_ExperimentDictionary" FromRole="ExperimentDictionary" ToRole="NoveltyExperimentEvaluationData" />
+          <NavigationProperty Name="NoveltyExperimentOrganismStateDatas" Relationship="ExperimentDataModel.FK_NoveltyExperimentOrganismStateData_ExperimentDictionary" FromRole="ExperimentDictionary" ToRole="NoveltyExperimentOrganismStateData" />
+          <Property Name="MaxTimesteps" Type="Int32" />
+          <Property Name="MinSuccessDistance" Type="Int32" />
+          <Property Name="MaxDistanceToTarget" Type="Int32" />
+        </EntityType>
+        <Association Name="FK_NoveltyExperimentEvaluationData_ExperimentDictionary">
           <End Type="ExperimentDataModel.ExperimentDictionary" Role="ExperimentDictionary" Multiplicity="1" />
           <End Type="ExperimentDataModel.NoveltyExperimentEvaluationData" Role="NoveltyExperimentEvaluationData" Multiplicity="*" />
           <ReferentialConstraint>
@@ -262,51 +260,24 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_NoveltyExperimentOrganismStateData_ExperimentDictionary">
+          <End Type="ExperimentDataModel.ExperimentDictionary" Role="ExperimentDictionary" Multiplicity="1" />
+          <End Type="ExperimentDataModel.NoveltyExperimentOrganismStateData" Role="NoveltyExperimentOrganismStateData" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ExperimentDictionary">
+              <PropertyRef Name="ExperimentID" />
+            </Principal>
+            <Dependent Role="NoveltyExperimentOrganismStateData">
+              <PropertyRef Name="ExperimentID_FK" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
         <EntityContainerMapping StorageEntityContainer="ExperimentDataModelStoreContainer" CdmEntityContainer="ExperimentDataEntities">
-          <EntitySetMapping Name="ExperimentDictionaries">
-            <EntityTypeMapping TypeName="ExperimentDataModel.ExperimentDictionary">
-              <MappingFragment StoreEntitySet="ExperimentDictionary">
-                <ScalarProperty Name="McsStartY" ColumnName="McsStartY" />
-                <ScalarProperty Name="McsStartX" ColumnName="McsStartX" />
-                <ScalarProperty Name="MinimumRequiredDistance" ColumnName="MinimumRequiredDistance" />
-                <ScalarProperty Name="MinimalCriteriaConstraint" ColumnName="MinimalCriteriaConstraint" />
-                <ScalarProperty Name="NearestNeighbors" ColumnName="NearestNeighbors" />
-                <ScalarProperty Name="MaxGenerations" ColumnName="MaxGenerations" />
-                <ScalarProperty Name="ExperimentID" ColumnName="ExperimentID" />
-                <ScalarProperty Name="ExperimentName" ColumnName="ExperimentName" />
-                <ScalarProperty Name="ConfigurationFile" ColumnName="ConfigurationFile" />
-                <ScalarProperty Name="ExperimentDomain" ColumnName="ExperimentDomain" />
-                <ScalarProperty Name="ExperimentType" ColumnName="ExperimentType" />
-                <ScalarProperty Name="AlgorithmType" ColumnName="AlgorithmType" />
-                <ScalarProperty Name="OffspringBatchSize" ColumnName="OffspringBatchSize" />
-                <ScalarProperty Name="BehaviorCharacterization" ColumnName="BehaviorCharacterization" />
-                <ScalarProperty Name="ArchiveAdditionThreshold" ColumnName="ArchiveAdditionThreshold" />
-                <ScalarProperty Name="ArchiveThresholdDecreaseMultiplier" ColumnName="ArchiveThresholdDecreaseMultiplier" />
-                <ScalarProperty Name="ArchiveThresholdIncreaseMultiplier" ColumnName="ArchiveThresholdIncreaseMultiplier" />
-                <ScalarProperty Name="MaxGenerationalArchiveAddition" ColumnName="MaxGenerationalArchiveAddition" />
-                <ScalarProperty Name="MaxGenerationsWithoutArchiveAddition" ColumnName="MaxGenerationsWithoutArchiveAddition" />
-                <ScalarProperty Name="PopulationEvaluationFrequency" ColumnName="PopulationEvaluationFrequency" />
-                <ScalarProperty Name="ConnectionProportion" ColumnName="ConnectionProportion" />
-                <ScalarProperty Name="PopulationSize" ColumnName="PopulationSize" />
-                <ScalarProperty Name="NumSpecies" ColumnName="NumSpecies" />
-                <ScalarProperty Name="ElitismProportion" ColumnName="ElitismProportion" />
-                <ScalarProperty Name="SelectionProportion" ColumnName="SelectionProportion" />
-                <ScalarProperty Name="AsexualProbability" ColumnName="AsexualProbability" />
-                <ScalarProperty Name="CrossoverProbability" ColumnName="CrossoverProbability" />
-                <ScalarProperty Name="InterspeciesMatingProbability" ColumnName="InterspeciesMatingProbability" />
-                <ScalarProperty Name="MutateConnectionWeightProbability" ColumnName="MutateConnectionWeightProbability" />
-                <ScalarProperty Name="MutateAddNeuronProbability" ColumnName="MutateAddNeuronProbability" />
-                <ScalarProperty Name="MutateAddConnectionProbability" ColumnName="MutateAddConnectionProbability" />
-                <ScalarProperty Name="MutateDeleteConnectionProbability" ColumnName="MutateDeleteConnectionProbability" />
-                <ScalarProperty Name="ConnectionWeightRange" ColumnName="ConnectionWeightRange" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="NoveltyExperimentOrganismStateDatas">
             <EntityTypeMapping TypeName="ExperimentDataModel.NoveltyExperimentOrganismStateData">
               <MappingFragment StoreEntitySet="NoveltyExperimentOrganismStateData">
@@ -350,6 +321,50 @@
                 <ScalarProperty Name="Generation" ColumnName="Generation" />
                 <ScalarProperty Name="Run" ColumnName="Run" />
                 <ScalarProperty Name="ExperimentID_FK" ColumnName="ExperimentID_FK" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ExperimentDictionaries">
+            <EntityTypeMapping TypeName="ExperimentDataModel.ExperimentDictionary">
+              <MappingFragment StoreEntitySet="ExperimentDictionary">
+                <ScalarProperty Name="MaxDistanceToTarget" ColumnName="MaxDistanceToTarget" />
+                <ScalarProperty Name="MinSuccessDistance" ColumnName="MinSuccessDistance" />
+                <ScalarProperty Name="MaxTimesteps" ColumnName="MaxTimesteps" />
+                <ScalarProperty Name="ConnectionWeightRange" ColumnName="ConnectionWeightRange" />
+                <ScalarProperty Name="MutateDeleteConnectionProbability" ColumnName="MutateDeleteConnectionProbability" />
+                <ScalarProperty Name="MutateAddConnectionProbability" ColumnName="MutateAddConnectionProbability" />
+                <ScalarProperty Name="MutateAddNeuronProbability" ColumnName="MutateAddNeuronProbability" />
+                <ScalarProperty Name="MutateConnectionWeightProbability" ColumnName="MutateConnectionWeightProbability" />
+                <ScalarProperty Name="InterspeciesMatingProbability" ColumnName="InterspeciesMatingProbability" />
+                <ScalarProperty Name="CrossoverProbability" ColumnName="CrossoverProbability" />
+                <ScalarProperty Name="AsexualProbability" ColumnName="AsexualProbability" />
+                <ScalarProperty Name="SelectionProportion" ColumnName="SelectionProportion" />
+                <ScalarProperty Name="ElitismProportion" ColumnName="ElitismProportion" />
+                <ScalarProperty Name="NumSpecies" ColumnName="NumSpecies" />
+                <ScalarProperty Name="PopulationSize" ColumnName="PopulationSize" />
+                <ScalarProperty Name="ConnectionProportion" ColumnName="ConnectionProportion" />
+                <ScalarProperty Name="McsStartY" ColumnName="McsStartY" />
+                <ScalarProperty Name="McsStartX" ColumnName="McsStartX" />
+                <ScalarProperty Name="MinimumRequiredDistance" ColumnName="MinimumRequiredDistance" />
+                <ScalarProperty Name="MinimalCriteriaConstraint" ColumnName="MinimalCriteriaConstraint" />
+                <ScalarProperty Name="MaxGenerationsWithoutArchiveAddition" ColumnName="MaxGenerationsWithoutArchiveAddition" />
+                <ScalarProperty Name="MaxGenerationalArchiveAddition" ColumnName="MaxGenerationalArchiveAddition" />
+                <ScalarProperty Name="ArchiveThresholdIncreaseMultiplier" ColumnName="ArchiveThresholdIncreaseMultiplier" />
+                <ScalarProperty Name="ArchiveThresholdDecreaseMultiplier" ColumnName="ArchiveThresholdDecreaseMultiplier" />
+                <ScalarProperty Name="ArchiveAdditionThreshold" ColumnName="ArchiveAdditionThreshold" />
+                <ScalarProperty Name="NearestNeighbors" ColumnName="NearestNeighbors" />
+                <ScalarProperty Name="BehaviorCharacterization" ColumnName="BehaviorCharacterization" />
+                <ScalarProperty Name="PopulationEvaluationFrequency" ColumnName="PopulationEvaluationFrequency" />
+                <ScalarProperty Name="OffspringBatchSize" ColumnName="OffspringBatchSize" />
+                <ScalarProperty Name="ComplexityThreshold" ColumnName="ComplexityThreshold" />
+                <ScalarProperty Name="ComplexityRegulationStrategy" ColumnName="ComplexityRegulationStrategy" />
+                <ScalarProperty Name="MaxGenerations" ColumnName="MaxGenerations" />
+                <ScalarProperty Name="AlgorithmType" ColumnName="AlgorithmType" />
+                <ScalarProperty Name="ExperimentType" ColumnName="ExperimentType" />
+                <ScalarProperty Name="ExperimentDomain" ColumnName="ExperimentDomain" />
+                <ScalarProperty Name="ConfigurationFile" ColumnName="ConfigurationFile" />
+                <ScalarProperty Name="ExperimentName" ColumnName="ExperimentName" />
+                <ScalarProperty Name="ExperimentID" ColumnName="ExperimentID" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
