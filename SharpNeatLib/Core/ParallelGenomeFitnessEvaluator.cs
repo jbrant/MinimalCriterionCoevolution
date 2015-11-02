@@ -166,7 +166,11 @@ namespace SharpNeat.Core
         /// </summary>
         /// <param name="genomeList">The list of genomes under evaluation.</param>
         /// <param name="currentGeneration">The current generation for which the genomes are being evaluated.</param>
-        public void Evaluate(IList<TGenome> genomeList, uint currentGeneration)
+        /// <param name="runSimulation">
+        ///     Determines whether to run the simulation to get behavioral characteristics before
+        ///     evaluating fitness or behavioral novelty (this isn't applicable for pure fitness evaluation).
+        /// </param>
+        public void Evaluate(IList<TGenome> genomeList, uint currentGeneration, bool runSimulation = true)
         {
             _evalMethod(genomeList, currentGeneration);
         }
@@ -177,7 +181,12 @@ namespace SharpNeat.Core
         /// <param name="genomesToEvaluate">The genomes under evaluation.</param>
         /// <param name="population">The genomes against which to evaluate.</param>
         /// <param name="currentGeneration">The current generation for which the genomes are being evaluated.</param>
-        public void Evaluate(IList<TGenome> genomesToEvaluate, IList<TGenome> population, uint currentGeneration)
+        /// <param name="runSimulation">
+        ///     Determines whether to run the simulation to get behavioral characteristics before
+        ///     evaluating fitness or behavioral novelty (this isn't applicable for pure fitness evaluation).
+        /// </param>
+        public void Evaluate(IList<TGenome> genomesToEvaluate, IList<TGenome> population, uint currentGeneration,
+            bool runSimulation = true)
         {
             _evalMethod(genomesToEvaluate, currentGeneration);
         }

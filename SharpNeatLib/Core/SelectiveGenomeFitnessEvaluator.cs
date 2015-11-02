@@ -80,7 +80,8 @@ namespace SharpNeat.Core
         /// <summary>
         ///     Evalutes a single genome against a list of genomes.
         /// </summary>
-        public void Evaluate(IList<TGenome> genomesToEvaluate, IList<TGenome> population, uint currentGeneration)
+        public void Evaluate(IList<TGenome> genomesToEvaluate, IList<TGenome> population, uint currentGeneration,
+            bool runSimulation = true)
         {
             // TODO: Need to implement this
             throw new NotImplementedException();
@@ -106,7 +107,7 @@ namespace SharpNeat.Core
         ///     Evaluates a list of genomes. Here we select the genomes to be evaluated before invoking
         ///     _innerFitnessEvaluator to evaluate them.
         /// </summary>
-        public void Evaluate(IList<TGenome> genomeList, uint currentGeneration)
+        public void Evaluate(IList<TGenome> genomeList, uint currentGeneration, bool runSimulation = true)
         {
             // Select the genomes to be evaluated. Place them in a temporary list of genomes to be 
             // evaluated after the genome selection loop. The selection is not performed in series
@@ -127,7 +128,7 @@ namespace SharpNeat.Core
             }
 
             // EvaluateFitness selected genomes.
-            _innerFitnessEvaluator.Evaluate(filteredList, currentGeneration);
+            _innerFitnessEvaluator.Evaluate(filteredList, currentGeneration, runSimulation);
         }
 
         /// <summary>
