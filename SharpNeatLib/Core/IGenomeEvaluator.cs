@@ -43,18 +43,28 @@ namespace SharpNeat.Core
         void Cleanup();
 
         /// <summary>
-        ///     Evaluates the fitness or behavior of a list of genomes.
+        ///     Evaluates the fitness or behavioral novelty of a list of genomes.
         /// </summary>
         /// <param name="genomeList">The list of genomes under evaluation.</param>
         /// <param name="currentGeneration">The current generation for which we're evaluating.</param>
-        void Evaluate(IList<TGenome> genomeList, uint currentGeneration);
+        /// <param name="runSimulation">
+        ///     Determines whether to run the simulation to get behavioral characteristics before
+        ///     evaluating fitness or behavioral novelty.
+        /// </param>
+        void Evaluate(IList<TGenome> genomeList, uint currentGeneration, bool runSimulation = true);
 
         /// <summary>
-        ///     Evalutes the fitness or behavior of a single genome and potentially against a list of other genomes.
+        ///     Evalutes the fitness or behavioral novelty of a single genome and potentially against a list of other genomes.
         /// </summary>
         /// <param name="genomesToEvaluate">The list of genomes under evaluation.</param>
         /// <param name="population">The genomes against which to evaluate.</param>
         /// <param name="currentGeneration">The current generation for which we're evaluating.</param>
-        void Evaluate(IList<TGenome> genomesToEvaluate, IList<TGenome> population, uint currentGeneration);
+        /// ///
+        /// <param name="runSimulation">
+        ///     Determines whether to run the simulation to get behavioral characteristics before
+        ///     evaluating fitness or behavioral novelty.
+        /// </param>
+        void Evaluate(IList<TGenome> genomesToEvaluate, IList<TGenome> population, uint currentGeneration,
+            bool runSimulation = true);
     }
 }

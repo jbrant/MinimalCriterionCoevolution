@@ -241,7 +241,7 @@
           <MinimalCriteriaConstraint>EuclideanDistance</MinimalCriteriaConstraint>
           <XStart>30</XStart>
           <YStart>22</YStart>
-          <MinimumRequiredDistance>175</MinimumRequiredDistance>
+          <MinimumRequiredDistance>100</MinimumRequiredDistance>
         </MinimalCriteriaConfig>
       </BehaviorConfig>
       <NearestNeighbors>15</NearestNeighbors>
@@ -249,7 +249,7 @@
       <MinSuccessDistance>5</MinSuccessDistance>
       <MaxDistanceToTarget>300</MaxDistanceToTarget>
       <MazeVariant>MediumMaze</MazeVariant>
-      <LoggingConfig>
+      <!--<LoggingConfig>
         <Type>Evolution</Type>
         <Destination>Database</Destination>
         <ExperimentConfigurationName>Experiment 13</ExperimentConfigurationName>
@@ -258,7 +258,7 @@
         <Type>Evaluation</Type>
         <Destination>Database</Destination>
         <ExperimentConfigurationName>Experiment 13</ExperimentConfigurationName>
-      </LoggingConfig>
+      </LoggingConfig>-->
       <Description>
         This is the maze navigation experiment used in the original novelty search papers (citation needed).
       </Description>
