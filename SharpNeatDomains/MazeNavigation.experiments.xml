@@ -73,9 +73,9 @@
       </Activation>
       <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>
       <ComplexityThreshold>30</ComplexityThreshold>
-      <OffspringBatchSize>30</OffspringBatchSize>
-      <PopulationEvaluationFrequency>20</PopulationEvaluationFrequency>
-      <MaxGenerations>8000</MaxGenerations>
+      <OffspringBatchSize>20</OffspringBatchSize>
+      <PopulationEvaluationFrequency>25</PopulationEvaluationFrequency>
+      <MaxGenerations>150000</MaxGenerations>
       <GenomeConfig>
         <InitialConnectionProportion>1</InitialConnectionProportion>        
         <WeightMutationProbability>0.6</WeightMutationProbability>

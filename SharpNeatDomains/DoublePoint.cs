@@ -55,9 +55,13 @@ namespace SharpNeat.Domains
             // Decrement this point by the given point about which to rotate
             this -= point;
 
+            // Copy off the X/Y position values
+            double tempX = X;
+            double tempY = Y;
+
             // Perform the actual rotation
-            X = Math.Cos(radianAngle)*X - Math.Sin(radianAngle)*Y;
-            Y = Math.Sin(radianAngle)*X + Math.Cos(radianAngle)*Y;
+            X = Math.Cos(radianAngle)* tempX - Math.Sin(radianAngle)* tempY;
+            Y = Math.Sin(radianAngle)* tempX + Math.Cos(radianAngle)* tempY;
 
             // Add the coordinates that had been offset back in
             this += point;
