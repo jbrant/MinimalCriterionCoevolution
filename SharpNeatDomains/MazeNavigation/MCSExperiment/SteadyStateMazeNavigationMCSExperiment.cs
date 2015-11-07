@@ -57,23 +57,26 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             base.Initialize(experimentDictionary);
 
             // Ensure the start position and minimum distance constraint are not null
-            Debug.Assert(experimentDictionary.McsStartX != null, "experimentDictionary.McsStartX != null");
-            Debug.Assert(experimentDictionary.McsStartY != null, "experimentDictionary.McsStartY != null");
-            Debug.Assert(experimentDictionary.MinimumRequiredDistance != null,
-                "experimentDictionary.MinimumRequiredDistance != null");
+            Debug.Assert(experimentDictionary.Primary_MCS_MinimalCriteriaStartX != null,
+                "experimentDictionary.Primary_MCS_MinimalCriteriaStartX != null");
+            Debug.Assert(experimentDictionary.Primary_MCS_MinimalCriteriaStartY != null,
+                "experimentDictionary.Primary_MCS_MinimalCriteriaStartY != null");
+            Debug.Assert(experimentDictionary.Primary_MCS_MinimalCriteriaThreshold != null,
+                "experimentDictionary.Primary_MCS_MinimalCriteriaThreshold != null");
 
             // Read in the behavior characterization
             _behaviorCharacterization =
                 new EndPointBehaviorCharacterization(
-                    new EuclideanDistanceCriteria((double) experimentDictionary.McsStartX,
-                        (double) experimentDictionary.McsStartY, (double) experimentDictionary.MinimumRequiredDistance));
+                    new EuclideanDistanceCriteria((double) experimentDictionary.Primary_MCS_MinimalCriteriaStartX,
+                        (double) experimentDictionary.Primary_MCS_MinimalCriteriaStartY,
+                        (double) experimentDictionary.Primary_MCS_MinimalCriteriaThreshold));
 
             // Read in steady-state specific parameters
-            _batchSize = experimentDictionary.OffspringBatchSize ?? default(int);
-            _populationEvaluationFrequency = experimentDictionary.PopulationEvaluationFrequency ?? default(int);
+            _batchSize = experimentDictionary.Primary_OffspringBatchSize ?? default(int);
+            _populationEvaluationFrequency = experimentDictionary.Primary_PopulationEvaluationFrequency ?? default(int);
 
             // Read in MCS selection method
-            _mcsSelectionMethod = experimentDictionary.AlgorithmType;
+            _mcsSelectionMethod = experimentDictionary.Primary_SelectionAlgorithmName;
 
             // Read in log file path/name
             _evolutionDataLogger = new NoveltyExperimentEvaluationEntityDataLogger(experimentDictionary.ExperimentName);

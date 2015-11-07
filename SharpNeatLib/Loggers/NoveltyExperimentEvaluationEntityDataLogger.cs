@@ -62,7 +62,7 @@ namespace SharpNeat.Loggers
 
             NoveltyExperimentEvaluationData noveltyData = new NoveltyExperimentEvaluationData
             {
-                ExperimentID_FK = ExperimentConfiguration.ExperimentID,
+                ExperimentDictionaryID = ExperimentConfiguration.ExperimentDictionaryID,
                 Run = Run
             };
 

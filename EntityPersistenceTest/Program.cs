@@ -22,7 +22,7 @@ namespace EntityPersistenceTest
 
             NoveltyExperimentEvaluationData ne = new NoveltyExperimentEvaluationData();
 
-            ne.ExperimentID_FK = 1;
+            ne.ExperimentDictionaryID = 1;
             ne.Generation = 2;
             ne.SpecieCount = 10;
             ne.AsexualOffspringCount = 5;

@@ -68,7 +68,7 @@ namespace SharpNeat.Loggers
 
             NoveltyExperimentOrganismStateData noveltyData = new NoveltyExperimentOrganismStateData
             {
-                ExperimentID_FK = ExperimentConfiguration.ExperimentID,
+                ExperimentDictionaryID = ExperimentConfiguration.ExperimentDictionaryID,
                 Run = Run
             };
 
@@ -76,10 +76,10 @@ namespace SharpNeat.Loggers
                 (int)
                     Convert.ChangeType(combinedElements[NoveltyEvaluationFieldElements.Generation.Position].Value,
                         noveltyData.Generation.GetType());
-            noveltyData.EvaluationCount =
+            noveltyData.Evaluation =
                 (int)
                     Convert.ChangeType(combinedElements[NoveltyEvaluationFieldElements.EvaluationCount.Position].Value,
-                        noveltyData.EvaluationCount.GetType());
+                        noveltyData.Evaluation.GetType());
             noveltyData.StopConditionSatisfied =
                 (bool)
                     Convert.ChangeType(

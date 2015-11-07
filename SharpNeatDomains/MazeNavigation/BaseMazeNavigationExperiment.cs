@@ -109,8 +109,8 @@ namespace SharpNeat.Domains.MazeNavigation
 
             // Set all internal class variables
             _activationScheme = NetworkActivationScheme.CreateAcyclicScheme();
-            ComplexityRegulationStrategy = experimentDictionary.ComplexityRegulationStrategy;
-            Complexitythreshold = experimentDictionary.ComplexityThreshold;
+            ComplexityRegulationStrategy = experimentDictionary.Primary_ComplexityRegulationStrategy;
+            Complexitythreshold = experimentDictionary.Primary_ComplexityThreshold;
             ParallelOptions = new ParallelOptions();
             MaxGenerations = experimentDictionary.MaxGenerations;
 
@@ -135,7 +135,7 @@ namespace SharpNeat.Domains.MazeNavigation
             MaxTimesteps = experimentDictionary.MaxTimesteps;
             MinSuccessDistance = experimentDictionary.MinSuccessDistance;
             MaxDistanceToTarget = experimentDictionary.MaxDistanceToTarget;
-            MazeVariant = MazeVariantUtil.convertStringToMazeVariant(experimentDictionary.ExperimentDomain);
+            MazeVariant = MazeVariantUtil.convertStringToMazeVariant(experimentDictionary.ExperimentDomainName);
         }
 
         /// <summary>

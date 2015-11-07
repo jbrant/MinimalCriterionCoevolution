@@ -14,10 +14,10 @@ namespace ExperimentEntities
     
     public partial class NoveltyExperimentOrganismStateData
     {
-        public int ExperimentID_FK { get; set; }
+        public int ExperimentDictionaryID { get; set; }
         public int Run { get; set; }
         public int Generation { get; set; }
-        public int EvaluationCount { get; set; }
+        public int Evaluation { get; set; }
         public bool StopConditionSatisfied { get; set; }
         public double DistanceToTarget { get; set; }
         public double AgentXLocation { get; set; }
