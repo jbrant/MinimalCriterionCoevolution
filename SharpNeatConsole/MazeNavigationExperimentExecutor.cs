@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -23,7 +22,7 @@ using SharpNeat.Genomes.Neat;
 
 namespace SharpNeatConsole
 {
-    public class SteadyStateNoveltyExperimentExecutor
+    public class MazeNavigationExperimentExecutor
     {
         private static IGenomeFactory<NeatGenome> _genomeFactory;
         private static List<NeatGenome> _genomeList;
@@ -31,8 +30,11 @@ namespace SharpNeatConsole
 
         private static void Main(string[] args)
         {
-            Debug.Assert(args != null && args.Length >= 3,
-                "Seed population file, number of runs, and at least one experiment name are required!");
+            if (args == null || args.Length < 3)
+            {
+                throw new SharpNeatException(
+                    "Seed population file, number of runs, and at least one experiment name are required!");
+            }
 
             // Initialise log4net (log to console).
             XmlConfigurator.Configure(new FileInfo("log4net.properties"));
