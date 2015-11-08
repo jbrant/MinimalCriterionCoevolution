@@ -58,7 +58,7 @@ namespace SharpNeat.Domains.MazeNavigation.RandomExperiment
                 _maxTimesteps);
 
             // Run a single trial
-            world.RunTrial(phenome, EvaluationType.Fitness, out _stopConditionSatisfied);
+            world.RunTrial(phenome, SearchType.Fitness, out _stopConditionSatisfied);
 
             // Generate new random fitness value
             double randomFitness = _rng.NextDouble();

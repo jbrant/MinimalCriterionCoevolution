@@ -130,11 +130,11 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 
 //            IGenomeEvaluator<NeatGenome> fitnessEvaluator =
 //                new SerialGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
-//                    EvaluationType.MinimalCriteriaSearch);
+//                    SearchType.MinimalCriteriaSearch);
 
             IGenomeEvaluator<NeatGenome> fitnessEvaluator =
                 new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
-                    EvaluationType.MinimalCriteriaSearchQueueing, _evaluationDataLogger);
+                    SelectionType.SteadyState, SearchType.MinimalCriteriaSearch, _evaluationDataLogger);
 
             // Initialize the evolution algorithm.
             ea.Initialize(fitnessEvaluator, genomeFactory, genomeList, null, MaxEvaluations);

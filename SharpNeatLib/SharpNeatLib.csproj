@@ -91,7 +91,7 @@
     <Compile Include="MinimalCriterias\EuclideanDistanceCriteria.cs" />
     <Compile Include="MinimalCriterias\EuclideanLocationCriteria.cs" />
     <Compile Include="NoveltyArchives\AbstractNoveltyArchive.cs" />
-    <Compile Include="Core\EvaluationType.cs" />
+    <Compile Include="Core\AlgorithmType.cs" />
     <Compile Include="Core\FitnessInfo.cs" />
     <Compile Include="Core\GenomeFitnessComparer.cs" />
     <Compile Include="Core\IBehaviorCharacterization.cs" />

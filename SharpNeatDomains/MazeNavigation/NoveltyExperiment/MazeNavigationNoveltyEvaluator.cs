@@ -60,7 +60,7 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
                 _maxTimesteps, _behaviorCharacterization);
 
             // Run a single trial
-            BehaviorInfo trialInfo = world.RunTrial(phenome, EvaluationType.NoveltySearch, out stopConditionSatisfied);
+            BehaviorInfo trialInfo = world.RunTrial(phenome, SearchType.NoveltySearch, out stopConditionSatisfied);
 
             // If the navigator reached the goal, stop the experiment
             if (stopConditionSatisfied)

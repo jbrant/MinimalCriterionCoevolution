@@ -17,8 +17,8 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         private readonly int? _maxTimesteps;
         private readonly MazeVariant _mazeVariant;
         private readonly int? _minSuccessDistance;
-        private bool _stopConditionSatisfied;
         private readonly object evaluationLock = new object();
+        private bool _stopConditionSatisfied;
 
         internal MazeNavigationMCSEvaluator(int? maxDistanceToTarget, int? maxTimesteps, MazeVariant mazeVariant,
             int? minSuccessDistance, IBehaviorCharacterization behaviorCharacterization)
@@ -58,7 +58,8 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                 _maxTimesteps, _behaviorCharacterization);
 
             // Run a single trial
-            BehaviorInfo trialInfo = world.RunTrial(phenome, EvaluationType.MinimalCriteriaSearchQueueing, out stopConditionSatisfied);
+            BehaviorInfo trialInfo = world.RunTrial(phenome, SearchType.MinimalCriteriaSearch,
+                out stopConditionSatisfied);
 
             // Set the objective distance
             trialInfo.ObjectiveDistance = world.GetDistanceToTarget();

@@ -177,9 +177,9 @@ namespace SharpNeat.Domains.MazeNavigation
         ///     The black box (neural network) that takes in the navigator sensors controls the navigator by
         ///     outputting the angular velocity and speed differentials based on those inputs.
         /// </param>
-        /// <param name="evaluationType">The type of evaluation to perform (i.e. fitness, novelty, etc.).</param>
+        /// <param name="searchType">The type of evaluation to perform (i.e. fitness, novelty, etc.).</param>
         /// <returns>The trial results (which will either be a fitness value or a behavior).</returns>
-        public TTrialInfo RunTrial(IBlackBox agent, EvaluationType evaluationType, out bool goalReached)
+        public TTrialInfo RunTrial(IBlackBox agent, SearchType searchType, out bool goalReached)
         {
             ITrialInfo trialInfo;
 
@@ -192,7 +192,7 @@ namespace SharpNeat.Domains.MazeNavigation
             // If this is a fitness evaluation, return the fitness score as the 
             // difference between the maximum target distance and the ending distance 
             // to the target
-            if (evaluationType.Equals(EvaluationType.Fitness))
+            if (searchType.Equals(SearchType.Fitness))
             {
                 // Run for the given number of timesteps or until the goal is reached
                 for (var curTimestep = 0; curTimestep < _maxTimesteps; curTimestep++)

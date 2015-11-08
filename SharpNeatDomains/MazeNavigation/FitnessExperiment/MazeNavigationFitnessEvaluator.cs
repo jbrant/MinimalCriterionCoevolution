@@ -53,7 +53,7 @@ namespace SharpNeat.Domains.MazeNavigation
                 _maxTimesteps);
 
             // Run a single trial
-            return world.RunTrial(phenome, EvaluationType.Fitness, out _stopConditionSatisfied);
+            return world.RunTrial(phenome, SearchType.Fitness, out _stopConditionSatisfied);
         }
 
         /// <summary>

@@ -31,21 +31,6 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </summary>
         protected override void PerformOneGeneration()
         {
-//            if (CurrentGeneration%200 == 0)
-//            {
-//                List<TGenome> topNGenomes =
-//                    AbstractNoveltyArchive.GetTopNArchiveGenomes(PopulationSize <= AbstractNoveltyArchive.Archive.Count
-//                        ? PopulationSize
-//                        : AbstractNoveltyArchive.Archive.Count);
-//
-//                for (int idx = 0; idx < topNGenomes.Count; idx++)
-//                {
-//                    GenomeList[idx] = topNGenomes[idx];
-//                }
-//            }
-
-            //GenomeEvaluator.Evaluate(GenomeList, CurrentGeneration, false);
-
             // Re-evaluate the fitness of the population after the specified number of evaluations have elapsed
             if (CurrentGeneration%_populationEvaluationFrequency == 0)
             {
@@ -59,7 +44,7 @@ namespace SharpNeat.EvolutionAlgorithms
 
                 // Sort the genomes in each specie. Fittest first (secondary sort - youngest first).
                 SortSpecieGenomes();
-                
+
                 // Update the archive parameters and reset for next evaluation
                 AbstractNoveltyArchive?.UpdateArchiveParameters();
             }

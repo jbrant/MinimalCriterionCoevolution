@@ -95,7 +95,7 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
             //                new SerialGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator, _nearestNeighbors, archive);
             IGenomeEvaluator<NeatGenome> fitnessEvaluator =
                 new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
-                    EvaluationType.NoveltySearch,
+                    SelectionType.Generational, SearchType.NoveltySearch,
                     ParallelOptions, _nearestNeighbors, archive);
 
             // Initialize the evolution algorithm.

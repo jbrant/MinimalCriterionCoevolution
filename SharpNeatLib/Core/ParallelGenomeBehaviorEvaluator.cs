@@ -56,7 +56,8 @@ namespace SharpNeat.Core
         private readonly ParallelOptions _parallelOptions;
         private readonly IPhenomeEvaluator<TPhenome, BehaviorInfo> _phenomeEvaluator;
         private readonly IDataLogger _evaluationLogger;
-        private readonly EvaluationType _evaluationType;
+        private readonly SelectionType _selectionType;
+        private readonly SearchType _searchType;
 
         #endregion
 
@@ -98,13 +99,16 @@ namespace SharpNeat.Core
         /// </summary>
         /// <param name="genomeDecoder">The genome decoder to use.</param>
         /// <param name="phenomeEvaluator">The phenome evaluator.</param>
-        /// <param name="evaluationType">The fitness/behavior evaluation type.</param>
+        /// <param name="selectionType">The selection algorithm type.</param>
+        /// <param name="searchType">The search algorithm type.</param>
         /// <param name="evaluationLogger">A reference to the evaluation data logger (optional).</param>
         public ParallelGenomeBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
-            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, EvaluationType evaluationType,
+            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, SelectionType selectionType,
+            SearchType searchType,
             IDataLogger evaluationLogger = null)
             : this(
-                genomeDecoder, phenomeEvaluator, evaluationType, new ParallelOptions(), true, 0, null, evaluationLogger)
+                genomeDecoder, phenomeEvaluator, selectionType, searchType, new ParallelOptions(), true, 0, null,
+                evaluationLogger)
         {
         }
 
@@ -115,16 +119,19 @@ namespace SharpNeat.Core
         /// </summary>
         /// <param name="genomeDecoder">The genome decoder to use.</param>
         /// <param name="phenomeEvaluator">The phenome evaluator.</param>
-        /// <param name="evaluationType">The fitness/behavior evaluation type.</param>
+        /// <param name="selectionType">The selection algorithm type.</param>
+        /// <param name="searchType">The search algorithm type.</param>
         /// <param name="nearestNeighbors">The number of nearest neighbors to use in behavior distance calculations.</param>
         /// <param name="archive">A reference to the elite archive (optional).</param>
         /// <param name="evaluationLogger">A reference to the evaluation data logger (optional).</param>
         public ParallelGenomeBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
-            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, EvaluationType evaluationType,
+            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, SelectionType selectionType,
+            SearchType searchType,
             int nearestNeighbors,
             AbstractNoveltyArchive<TGenome> archive = null, IDataLogger evaluationLogger = null)
             : this(
-                genomeDecoder, phenomeEvaluator, evaluationType, new ParallelOptions(), true, nearestNeighbors, archive,
+                genomeDecoder, phenomeEvaluator, selectionType, searchType, new ParallelOptions(), true,
+                nearestNeighbors, archive,
                 evaluationLogger)
         {
         }
@@ -136,17 +143,19 @@ namespace SharpNeat.Core
         /// </summary>
         /// <param name="genomeDecoder">The genome decoder to use.</param>
         /// <param name="phenomeEvaluator">The phenome evaluator.</param>
-        /// <param name="evaluationType">The fitness/behavior evaluation type.</param>
+        /// <param name="selectionType">The selection algorithm type.</param>
+        /// <param name="searchType">The search algorithm type.</param>
         /// <param name="options">Controls the number of parallel evaluations.</param>
         /// <param name="nearestNeighbors">The number of nearest neighbors to use in behavior distance calculations.</param>
         /// <param name="archive">A reference to the elite archive (optional).</param>
         /// <param name="evaluationLogger">A reference to the evaluation data logger (optional).</param>
         public ParallelGenomeBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
-            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, EvaluationType evaluationType,
+            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, SelectionType selectionType,
+            SearchType searchType,
             ParallelOptions options, int nearestNeighbors, AbstractNoveltyArchive<TGenome> archive = null,
             IDataLogger evaluationLogger = null)
             : this(
-                genomeDecoder, phenomeEvaluator, evaluationType, options, true, nearestNeighbors, archive,
+                genomeDecoder, phenomeEvaluator, selectionType, searchType, options, true, nearestNeighbors, archive,
                 evaluationLogger)
         {
         }
@@ -156,20 +165,23 @@ namespace SharpNeat.Core
         /// </summary>
         /// <param name="genomeDecoder">The genome decoder to use.</param>
         /// <param name="phenomeEvaluator">The phenome evaluator.</param>
-        /// <param name="evaluationType">The fitness/behavior evaluation type.</param>
+        /// <param name="selectionType">The selection algorithm type.</param>
+        /// <param name="searchType">The search algorithm type.</param>
         /// <param name="options">Controls the number of parallel evaluations.</param>
         /// <param name="enablePhenomeCaching">Whether or not to enable phenome caching.</param>
         /// <param name="nearestNeighbors">The number of nearest neighbors to use in behavior distance calculations.</param>
         /// <param name="archive">A reference to the elite archive (optional).</param>
         /// <param name="evaluationLogger">A reference to the evaluation data logger (optional).</param>
         private ParallelGenomeBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
-            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, EvaluationType evaluationType,
+            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, SelectionType selectionType,
+            SearchType searchType,
             ParallelOptions options, bool enablePhenomeCaching, int nearestNeighbors,
             AbstractNoveltyArchive<TGenome> archive = null, IDataLogger evaluationLogger = null)
         {
             _genomeDecoder = genomeDecoder;
             _phenomeEvaluator = phenomeEvaluator;
-            _evaluationType = evaluationType;
+            _selectionType = selectionType;
+            _searchType = searchType;
             _parallelOptions = options;
             _enablePhenomeCaching = enablePhenomeCaching;
             _nearestNeighbors = nearestNeighbors;
@@ -295,11 +307,11 @@ namespace SharpNeat.Core
                     });
             }
 
-            switch (_evaluationType)
+            switch (_searchType)
             {
                 // If we're doing novelty search, include nearest neighbor measure and novelty archive (if applicable)
-                case EvaluationType.NoveltySearch:
-                case EvaluationType.MinimalCriteriaNoveltySearch:
+                case SearchType.NoveltySearch:
+                case SearchType.MinimalCriteriaNoveltySearch:
                     // After the behavior of each genome in the offspring batch has been evaluated,
                     // iterate through each genome and compare its behavioral novelty (distance) to its 
                     // k -nearest neighbors from the population in behavior space (and the archive if applicable)
@@ -309,14 +321,9 @@ namespace SharpNeat.Core
                             _noveltyArchive);
                     });
                     break;
-                // If we're doing minimal criteria search with random fitness, generate a random value for the fitness
-                case EvaluationType.MinimalCriteriaSearchRandom:
-                    Parallel.ForEach(genomeList, _parallelOptions,
-                        delegate(TGenome genome) { EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, false); });
-                    break;
-                // If we're doing minimal criteria search with queueing, the objective distance will be assigned as the fitness
-                // (but it will ultimately have no bearing on the progression of search)
-                case EvaluationType.MinimalCriteriaSearchQueueing:
+                case SearchType.MinimalCriteriaSearch:
+                    // If we're doing minimal criteria search with queueing, the objective distance will be assigned as the fitness
+                    // (but it will ultimately have no bearing on the progression of search)
                     Parallel.ForEach(genomeList, _parallelOptions,
                         delegate(TGenome genome) { EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, true); });
                     break;
@@ -349,11 +356,11 @@ namespace SharpNeat.Core
                     });
             }
 
-            switch (_evaluationType)
+            switch (_searchType)
             {
                 // If we're doing novelty search, include nearest neighbor measure and novelty archive (if applicable)
-                case EvaluationType.NoveltySearch:
-                case EvaluationType.MinimalCriteriaNoveltySearch:
+                case SearchType.NoveltySearch:
+                case SearchType.MinimalCriteriaNoveltySearch:
                     // After the behavior of each genome in the offspring batch has been evaluated,
                     // iterate through each genome and compare its behavioral novelty (distance) to its 
                     // k -nearest neighbors from the population in behavior space (and the archive if applicable)
@@ -363,14 +370,9 @@ namespace SharpNeat.Core
                             _noveltyArchive);
                     });
                     break;
-                // If we're doing minimal criteria search with random fitness, generate a random value for the fitness
-                case EvaluationType.MinimalCriteriaSearchRandom:
-                    Parallel.ForEach(genomesToEvaluate, _parallelOptions,
-                        delegate(TGenome genome) { EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, false); });
-                    break;
                 // If we're doing minimal criteria search with queueing, the objective distance will be assigned as the fitness
                 // (but it will ultimately have no bearing on the progression of search)
-                case EvaluationType.MinimalCriteriaSearchQueueing:
+                case SearchType.MinimalCriteriaSearch:
                     Parallel.ForEach(genomesToEvaluate, _parallelOptions,
                         delegate(TGenome genome) { EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, true); });
                     break;
@@ -399,11 +401,11 @@ namespace SharpNeat.Core
                     });
             }
 
-            switch (_evaluationType)
+            switch (_searchType)
             {
                 // If we're doing novelty search, include nearest neighbor measure and novelty archive (if applicable)
-                case EvaluationType.NoveltySearch:
-                case EvaluationType.MinimalCriteriaNoveltySearch:
+                case SearchType.NoveltySearch:
+                case SearchType.MinimalCriteriaNoveltySearch:
                     // After the behavior of each genome in the offspring batch has been evaluated,
                     // iterate through each genome and compare its behavioral novelty (distance) to its 
                     // k -nearest neighbors from the population in behavior space (and the archive if applicable)
@@ -413,14 +415,9 @@ namespace SharpNeat.Core
                             _noveltyArchive);
                     });
                     break;
-                // If we're doing minimal criteria search with random fitness, generate a random value for the fitness
-                case EvaluationType.MinimalCriteriaSearchRandom:
-                    Parallel.ForEach(genomeList, _parallelOptions,
-                        delegate(TGenome genome) { EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, false); });
-                    break;
                 // If we're doing minimal criteria search with queueing, the objective distance will be assigned as the fitness
                 // (but it will ultimately have no bearing on the progression of search)
-                case EvaluationType.MinimalCriteriaSearchQueueing:
+                case SearchType.MinimalCriteriaSearch:
                     Parallel.ForEach(genomeList, _parallelOptions,
                         delegate(TGenome genome) { EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, true); });
                     break;
@@ -454,11 +451,11 @@ namespace SharpNeat.Core
                     });
             }
 
-            switch (_evaluationType)
+            switch (_searchType)
             {
                 // If we're doing novelty search, include nearest neighbor measure and novelty archive (if applicable)
-                case EvaluationType.NoveltySearch:
-                case EvaluationType.MinimalCriteriaNoveltySearch:
+                case SearchType.NoveltySearch:
+                case SearchType.MinimalCriteriaNoveltySearch:
                     // After the behavior of each genome in the offspring batch has been evaluated,
                     // iterate through each genome and compare its behavioral novelty (distance) to its 
                     // k -nearest neighbors from the population in behavior space (and the archive if applicable)
@@ -468,14 +465,9 @@ namespace SharpNeat.Core
                             _noveltyArchive);
                     });
                     break;
-                // If we're doing minimal criteria search with random fitness, generate a random value for the fitness
-                case EvaluationType.MinimalCriteriaSearchRandom:
-                    Parallel.ForEach(genomesToEvaluate, _parallelOptions,
-                        delegate(TGenome genome) { EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, false); });
-                    break;
                 // If we're doing minimal criteria search with queueing, the objective distance will be assigned as the fitness
                 // (but it will ultimately have no bearing on the progression of search)
-                case EvaluationType.MinimalCriteriaSearchQueueing:
+                case SearchType.MinimalCriteriaSearch:
                     Parallel.ForEach(genomesToEvaluate, _parallelOptions,
                         delegate(TGenome genome) { EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, true); });
                     break;

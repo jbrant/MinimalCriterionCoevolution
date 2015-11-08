@@ -3,7 +3,6 @@
 using System.Collections.Generic;
 using System.Xml;
 using ExperimentEntities;
-using SharpNeat.Behaviors;
 using SharpNeat.Core;
 using SharpNeat.DistanceMetrics;
 using SharpNeat.EliteArchives;
@@ -59,12 +58,13 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
         public override void Initialize(ExperimentDictionary experimentDictionary)
         {
             base.Initialize(experimentDictionary);
-            
+
             // Read in behavior characterization
             _behaviorCharacterization = ExperimentUtils.ReadBehaviorCharacterization(experimentDictionary, true);
 
             // Read in novelty archive parameters
-            _archiveAdditionThreshold = experimentDictionary.Primary_NoveltySearch_ArchiveAdditionThreshold ?? default(int);
+            _archiveAdditionThreshold = experimentDictionary.Primary_NoveltySearch_ArchiveAdditionThreshold ??
+                                        default(int);
             _archiveThresholdDecreaseMultiplier =
                 experimentDictionary.Primary_NoveltySearch_ArchiveThresholdDecreaseMultiplier ?? default(double);
             _archiveThresholdIncreaseMultiplier =
@@ -130,12 +130,12 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
 
 //            IGenomeEvaluator<NeatGenome> fitnessEvaluator =
 //                new SerialGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
-//                    EvaluationType.NoveltySearch,
+//                    SearchType.NoveltySearch,
 //                    _nearestNeighbors, archive, _evaluationDataLogger);
 
             IGenomeEvaluator<NeatGenome> fitnessEvaluator =
                 new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
-                    EvaluationType.NoveltySearch,
+                    SelectionType.SteadyState, SearchType.NoveltySearch,
                     _nearestNeighbors, archive, _evaluationDataLogger);
 
             // Initialize the evolution algorithm.

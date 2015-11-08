@@ -118,7 +118,12 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     Gets the current generation.
         /// </summary>
         public uint CurrentGeneration { get; protected set; }
-        
+
+        /// <summary>
+        ///     Gets the current number of evaluations executed.
+        /// </summary>
+        public ulong CurrentEvaluations { get; protected set; }
+
         /// <summary>
         ///     Gets or sets the algorithm's update scheme.
         /// </summary>
@@ -314,7 +319,11 @@ namespace SharpNeat.EvolutionAlgorithms
                 // or the stop condition is satisfied
                 for (;;)
                 {
+                    // Increment the current generation and set the current number of evaluations
                     CurrentGeneration++;
+                    CurrentEvaluations = GenomeEvaluator.EvaluationCount;
+
+                    // Execute the generation
                     PerformOneGeneration();
 
                     if (UpdateTest())

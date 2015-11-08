@@ -51,7 +51,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCNSExperiment
                 _maxTimesteps, _behaviorCharacterization);
 
             // Run a single trial
-            BehaviorInfo trialInfo = world.RunTrial(phenome, EvaluationType.MinimalCriteriaNoveltySearch, out stopConditionSatisfied);
+            BehaviorInfo trialInfo = world.RunTrial(phenome, SearchType.MinimalCriteriaNoveltySearch, out stopConditionSatisfied);
 
             // Check if the current location satisfies the minimal criteria
             if (_behaviorCharacterization.IsMinimalCriteriaSatisfied(trialInfo) == false)
