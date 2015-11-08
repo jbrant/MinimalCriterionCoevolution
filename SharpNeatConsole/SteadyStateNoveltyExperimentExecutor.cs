@@ -46,20 +46,20 @@ namespace SharpNeatConsole
 
             foreach (string curExperimentName in experimentNames)
             {
+                // Create new database context and read in configuration for the given experiment
+                ExperimentDataEntities experimentContext = new ExperimentDataEntities();
+                var name = curExperimentName;
+                ExperimentDictionary experimentConfiguration =
+                    experimentContext.ExperimentDictionaries.Single(
+                        expName => expName.ExperimentName == name);
+
+                // Initialize new steady state novelty experiment
+                SteadyStateMazeNavigationNoveltyExperiment experiment =
+                    new SteadyStateMazeNavigationNoveltyExperiment();
+
                 // Execute the experiment for the specified number of runs
                 for (int runIdx = 0; runIdx < numRuns; runIdx++)
                 {
-                    // Create new database context and read in configuration for the given experiment
-                    ExperimentDataEntities experimentContext = new ExperimentDataEntities();
-                    var name = curExperimentName;
-                    ExperimentDictionary experimentConfiguration =
-                        experimentContext.ExperimentDictionaries.Single(
-                            expName => expName.ExperimentName == name);
-
-                    // Initialize new steady state novelty experiment
-                    SteadyStateMazeNavigationNoveltyExperiment experiment =
-                        new SteadyStateMazeNavigationNoveltyExperiment();
-
                     // Initialize the experiment
                     experiment.Initialize(experimentConfiguration);
 
@@ -82,10 +82,10 @@ namespace SharpNeatConsole
                     {
                         Thread.Sleep(2000);
                     }
-
-                    // Dispose of the database context
-                    experimentContext.Dispose();
                 }
+
+                // Dispose of the database context
+                experimentContext.Dispose();
             }
         }
 

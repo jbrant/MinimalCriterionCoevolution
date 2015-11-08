@@ -45,10 +45,14 @@ namespace SharpNeat.Loggers
             base.Open();
 
             // If there were previous runs, get the maximum existing run number and increment that by one
-            // Otherwise, if there were no previous runs for this experiment, set the run ID to 1
-            Run = ExperimentConfiguration.NoveltyExperimentOrganismStateDatas.Count > 0
-                ? ExperimentConfiguration.NoveltyExperimentOrganismStateDatas.Max(x => x.Run) + 1
-                : 1;
+            // Otherwise, if there were no previous runs for this experiment, set the run ID to 1            
+            Run =
+                DbContext.NoveltyExperimentOrganismStateDatas.Count(
+                    c => c.ExperimentDictionaryID == ExperimentConfiguration.ExperimentDictionaryID) > 0
+                    ? DbContext.NoveltyExperimentOrganismStateDatas.Where(
+                        w => w.ExperimentDictionaryID == ExperimentConfiguration.ExperimentDictionaryID).Max(m => m.Run) +
+                      1
+                    : 1;
         }
 
         /// <summary>
