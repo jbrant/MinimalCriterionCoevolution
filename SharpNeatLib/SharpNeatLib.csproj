@@ -77,6 +77,7 @@
     <Compile Include="Behaviors\EndPointBehaviorCharacterization.cs" />
     <Compile Include="Behaviors\NullBehaviorCharacterization.cs" />
     <Compile Include="Behaviors\TrajectoryBehaviorCharacterization.cs" />
+    <Compile Include="Core\AlgorithmType.cs" />
     <Compile Include="Core\AuxFitnessInfo.cs" />
     <Compile Include="Core\BehaviorInfo.cs" />
     <Compile Include="Core\CoordinateVector.cs" />
@@ -91,7 +92,6 @@
     <Compile Include="MinimalCriterias\EuclideanDistanceCriteria.cs" />
     <Compile Include="MinimalCriterias\EuclideanLocationCriteria.cs" />
     <Compile Include="NoveltyArchives\AbstractNoveltyArchive.cs" />
-    <Compile Include="Core\AlgorithmType.cs" />
     <Compile Include="Core\FitnessInfo.cs" />
     <Compile Include="Core\GenomeFitnessComparer.cs" />
     <Compile Include="Core\IBehaviorCharacterization.cs" />
