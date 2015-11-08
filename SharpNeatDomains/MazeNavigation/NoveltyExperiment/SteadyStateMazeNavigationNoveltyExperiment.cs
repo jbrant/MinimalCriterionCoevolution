@@ -2,6 +2,8 @@
 
 using System.Collections.Generic;
 using System.Xml;
+using ExperimentEntities;
+using SharpNeat.Behaviors;
 using SharpNeat.Core;
 using SharpNeat.DistanceMetrics;
 using SharpNeat.EliteArchives;
@@ -52,6 +54,37 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
             // Read in log file path/name
             _evolutionDataLogger = ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Evolution);
             _evaluationDataLogger = ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Evaluation);
+        }
+
+        public override void Initialize(ExperimentDictionary experimentDictionary)
+        {
+            base.Initialize(experimentDictionary);
+            
+            // Read in behavior characterization
+            _behaviorCharacterization = ExperimentUtils.ReadBehaviorCharacterization(experimentDictionary, true);
+
+            // Read in novelty archive parameters
+            _archiveAdditionThreshold = experimentDictionary.Primary_NoveltySearch_ArchiveAdditionThreshold ?? default(int);
+            _archiveThresholdDecreaseMultiplier =
+                experimentDictionary.Primary_NoveltySearch_ArchiveThresholdDecreaseMultiplier ?? default(double);
+            _archiveThresholdIncreaseMultiplier =
+                experimentDictionary.Primary_NoveltySearch_ArchiveThresholdIncreaseMultiplier ?? default(double);
+            _maxGenerationArchiveAddition =
+                experimentDictionary.Primary_NoveltySearch_MaxGenerationsWithArchiveAddition ?? default(int);
+            _maxGenerationsWithoutArchiveAddition =
+                experimentDictionary.Primary_NoveltySearch_MaxGenerationsWithoutArchiveAddition ?? default(int);
+
+            // Read in nearest neighbors for behavior distance calculations
+            _nearestNeighbors = experimentDictionary.Primary_NoveltySearch_NearestNeighbors ?? default(int);
+
+            // Read in steady-state specific parameters
+            _batchSize = experimentDictionary.Primary_OffspringBatchSize ?? default(int);
+            _populationEvaluationFrequency = experimentDictionary.Primary_PopulationEvaluationFrequency ?? default(int);
+
+            // Setup entity loggers
+            _evolutionDataLogger = new NoveltyExperimentEvaluationEntityDataLogger(experimentDictionary.ExperimentName);
+            _evaluationDataLogger =
+                new NoveltyExperimentOrganismStateEntityDataLogger(experimentDictionary.ExperimentName);
         }
 
         /// <summary>

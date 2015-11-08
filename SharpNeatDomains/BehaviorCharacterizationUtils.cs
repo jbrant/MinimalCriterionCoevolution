@@ -53,8 +53,8 @@ namespace SharpNeat.Domains
         public static BehaviorCharacterizationUtils ConvertStringToBehavioralCharacterization(
             String strBehavioralCharacterization)
         {
-            if (BehaviorCharacterizationUtils.EndPoint.ToString()
-                .Equals(strBehavioralCharacterization, StringComparison.InvariantCultureIgnoreCase))
+            if ("EndPoint".Equals(strBehavioralCharacterization, StringComparison.InvariantCultureIgnoreCase) ||
+                "End Point".Equals(strBehavioralCharacterization, StringComparison.InvariantCultureIgnoreCase))
             {
                 return BehaviorCharacterizationUtils.EndPoint;
             }

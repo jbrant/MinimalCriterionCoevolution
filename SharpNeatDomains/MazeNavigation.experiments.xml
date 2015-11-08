@@ -93,7 +93,7 @@
         <ArchiveThresholdDecreaseMultiplier>0.95</ArchiveThresholdDecreaseMultiplier>
         <ArchiveThresholdIncreaseMultiplier>1.3</ArchiveThresholdIncreaseMultiplier>
         <MaxGenerationalArchiveAddition>5</MaxGenerationalArchiveAddition>
-        <MaxEvaluationsWithoutArchiveAddition>10</MaxEvaluationsWithoutArchiveAddition>
+        <MaxGenerationsWithoutArchiveAddition>10</MaxGenerationsWithoutArchiveAddition>
       </NoveltyConfig>
       <MaxTimesteps>400</MaxTimesteps>
       <MinSuccessDistance>5</MinSuccessDistance>

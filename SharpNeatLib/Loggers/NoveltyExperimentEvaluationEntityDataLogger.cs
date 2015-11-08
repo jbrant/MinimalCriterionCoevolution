@@ -123,18 +123,16 @@ namespace SharpNeat.Loggers
                 (int)
                     Convert.ChangeType(combinedElements[NoveltyEvolutionFieldElements.MaxSpecieSize.Position].Value,
                         noveltyData.MaxSpecieSize.GetType());
-            if (noveltyData.TotalEvaluations != null)
-                noveltyData.TotalEvaluations =
-                    (int)
-                        Convert.ChangeType(
-                            combinedElements[NoveltyEvolutionFieldElements.TotalEvaluations.Position].Value,
-                            noveltyData.TotalEvaluations.GetType());
-            if (noveltyData.EvaluationsPerSecond != null)
-                noveltyData.EvaluationsPerSecond =
-                    (int)
-                        Convert.ChangeType(
-                            combinedElements[NoveltyEvolutionFieldElements.EvaluationsPerSecond.Position].Value,
-                            noveltyData.EvaluationsPerSecond.GetType());
+            noveltyData.TotalEvaluations =
+                (int)
+                    Convert.ChangeType(
+                        combinedElements[NoveltyEvolutionFieldElements.TotalEvaluations.Position].Value,
+                        typeof (int));
+            noveltyData.EvaluationsPerSecond =
+                (int)
+                    Convert.ChangeType(
+                        combinedElements[NoveltyEvolutionFieldElements.EvaluationsPerSecond.Position].Value,
+                        typeof (int));
             noveltyData.ChampGenomeID =
                 (int)
                     Convert.ChangeType(
@@ -165,24 +163,21 @@ namespace SharpNeat.Loggers
                     Convert.ChangeType(
                         combinedElements[NoveltyEvolutionFieldElements.ChampGenomeTotalGeneCount.Position].Value,
                         noveltyData.ChampGenomeTotalGeneCount.GetType());
-            if (noveltyData.ChampGenomeEvaluationCount != null)
-                noveltyData.ChampGenomeEvaluationCount =
-                    (int)
-                        Convert.ChangeType(
-                            combinedElements[NoveltyEvolutionFieldElements.ChampGenomeEvaluationCount.Position].Value,
-                            noveltyData.ChampGenomeEvaluationCount.GetType());
-            if (noveltyData.ChampGenomeBehavior1 != null)
-                noveltyData.ChampGenomeBehavior1 =
-                    (double)
-                        Convert.ChangeType(
-                            combinedElements[NoveltyEvolutionFieldElements.ChampGenomeBehaviorX.Position].Value,
-                            noveltyData.ChampGenomeBehavior1.GetType());
-            if (noveltyData.ChampGenomeBehavior2 != null)
-                noveltyData.ChampGenomeBehavior2 =
-                    (double)
-                        Convert.ChangeType(
-                            combinedElements[NoveltyEvolutionFieldElements.ChampGenomeBehaviorY.Position].Value,
-                            noveltyData.ChampGenomeBehavior2.GetType());
+            noveltyData.ChampGenomeEvaluationCount =
+                (int)
+                    Convert.ChangeType(
+                        combinedElements[NoveltyEvolutionFieldElements.ChampGenomeEvaluationCount.Position].Value,
+                        typeof (int));
+            noveltyData.ChampGenomeBehavior1 =
+                (double)
+                    Convert.ChangeType(
+                        combinedElements[NoveltyEvolutionFieldElements.ChampGenomeBehaviorX.Position].Value,
+                        typeof (double));
+            noveltyData.ChampGenomeBehavior2 =
+                (double)
+                    Convert.ChangeType(
+                        combinedElements[NoveltyEvolutionFieldElements.ChampGenomeBehaviorY.Position].Value,
+                        typeof (double));
 
             // Add the new evaluation data
             localDbContext.NoveltyExperimentEvaluationDatas.Add(noveltyData);

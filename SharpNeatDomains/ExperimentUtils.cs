@@ -23,6 +23,7 @@ using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Xml;
+using ExperimentEntities;
 using SharpNeat.Core;
 using SharpNeat.Decoders;
 using SharpNeat.EvolutionAlgorithms.ComplexityRegulation;
@@ -368,6 +369,38 @@ namespace SharpNeat.Domains
                         break;
                 }
             }
+
+            return behaviorCharacterization;
+        }
+
+        /// <summary>
+        ///     Reads behavior characterization parameters from the database.
+        /// </summary>
+        /// <param name="experiment">The experiment dictionary entity.</param>
+        /// <param name="isPrimary">
+        ///     Boolean flag indicating whether this is the primary behavior characterization or the behavior
+        ///     characterization used for experiment initialization.
+        /// </param>
+        /// <returns></returns>
+        public static IBehaviorCharacterization ReadBehaviorCharacterization(ExperimentDictionary experiment,
+            bool isPrimary)
+        {
+            // Read behavior characterization
+            String behaviorCharacterizationName = isPrimary
+                ? experiment.Primary_BehaviorCharacterizationName
+                : experiment.Initialization_BehaviorCharacterizationName;
+
+            // Ensure that the behavior was specified
+            if (behaviorCharacterizationName == null)
+            {
+                throw new ArgumentException("Missing or invalid BehaviorConfig settings.");
+            }
+
+            // Parse and generate the appropriate behavior characterization
+            IBehaviorCharacterization behaviorCharacterization = BehaviorCharacterizationUtil
+                .GenerateBehaviorCharacterization(behaviorCharacterizationName);
+
+            // TODO: Need to handle associated minimal criteria
 
             return behaviorCharacterization;
         }

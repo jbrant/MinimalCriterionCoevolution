@@ -115,13 +115,17 @@ namespace SharpNeat.Domains.MazeNavigation
             Complexitythreshold = experimentDictionary.Primary_ComplexityThreshold;
             ParallelOptions = new ParallelOptions();
 
-            MaxEvaluations = (ulong)experimentDictionary.MaxEvaluations;
+            MaxEvaluations = (ulong) experimentDictionary.MaxEvaluations;
 
             // Set evolution/genome parameters
             NeatEvolutionAlgorithmParameters = new NeatEvolutionAlgorithmParameters
             {
                 SpecieCount = experimentDictionary.NumSpecies,
-                InterspeciesMatingProportion = experimentDictionary.InterspeciesMatingProbability
+                InterspeciesMatingProportion = experimentDictionary.InterspeciesMatingProbability,
+                ElitismProportion = experimentDictionary.ElitismProportion,
+                SelectionProportion = experimentDictionary.SelectionProportion,
+                OffspringAsexualProportion = experimentDictionary.AsexualProbability,
+                OffspringSexualProportion = experimentDictionary.CrossoverProbability
             };
             NeatGenomeParameters = new NeatGenomeParameters
             {
