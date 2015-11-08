@@ -54,7 +54,7 @@
       <ArchiveThresholdDecreaseMultiplier>0.95</ArchiveThresholdDecreaseMultiplier>
       <ArchiveThresholdIncreaseMultiplier>1.3</ArchiveThresholdIncreaseMultiplier>
       <MaxGenerationalArchiveAddition>5</MaxGenerationalArchiveAddition>
-      <MaxGenerationsWithoutArchiveAddition>5</MaxGenerationsWithoutArchiveAddition>
+      <MaxEvaluationsWithoutArchiveAddition>5</MaxEvaluationsWithoutArchiveAddition>
       <Description>
         This is the maze navigation experiment used in the original novelty search papers (citation needed).
       </Description>
@@ -75,7 +75,7 @@
       <ComplexityThreshold>30</ComplexityThreshold>
       <OffspringBatchSize>20</OffspringBatchSize>
       <PopulationEvaluationFrequency>30</PopulationEvaluationFrequency>
-      <MaxGenerations>150000</MaxGenerations>
+      <MaxEvaluations>150000</MaxEvaluations>
       <GenomeConfig>
         <InitialConnectionProportion>1</InitialConnectionProportion>        
         <WeightMutationProbability>0.6</WeightMutationProbability>
@@ -93,7 +93,7 @@
         <ArchiveThresholdDecreaseMultiplier>0.95</ArchiveThresholdDecreaseMultiplier>
         <ArchiveThresholdIncreaseMultiplier>1.3</ArchiveThresholdIncreaseMultiplier>
         <MaxGenerationalArchiveAddition>5</MaxGenerationalArchiveAddition>
-        <MaxGenerationsWithoutArchiveAddition>10</MaxGenerationsWithoutArchiveAddition>
+        <MaxEvaluationsWithoutArchiveAddition>10</MaxEvaluationsWithoutArchiveAddition>
       </NoveltyConfig>
       <MaxTimesteps>400</MaxTimesteps>
       <MinSuccessDistance>5</MinSuccessDistance>
@@ -152,7 +152,7 @@
         <ArchiveThresholdDecreaseMultiplier>0.95</ArchiveThresholdDecreaseMultiplier>
         <ArchiveThresholdIncreaseMultiplier>1.3</ArchiveThresholdIncreaseMultiplier>
         <MaxGenerationalArchiveAddition>5</MaxGenerationalArchiveAddition>
-        <MaxGenerationsWithoutArchiveAddition>10</MaxGenerationsWithoutArchiveAddition>
+        <MaxEvaluationsWithoutArchiveAddition>10</MaxEvaluationsWithoutArchiveAddition>
       </NoveltyConfig>
       <MaxTimesteps>400</MaxTimesteps>
       <MinSuccessDistance>5</MinSuccessDistance>
@@ -226,7 +226,7 @@
       <OffspringBatchSize>20</OffspringBatchSize>
       <PopulationEvaluationFrequency>30</PopulationEvaluationFrequency>
       <McsSelectionMethod>Queueing</McsSelectionMethod>
-      <MaxGenerations>10000</MaxGenerations>
+      <MaxEvaluations>10000</MaxEvaluations>
       <GenomeConfig>
         <InitialConnectionProportion>1</InitialConnectionProportion>
         <WeightMutationProbability>0.6</WeightMutationProbability>

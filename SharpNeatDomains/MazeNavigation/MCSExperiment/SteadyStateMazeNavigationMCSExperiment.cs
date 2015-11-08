@@ -137,7 +137,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                     EvaluationType.MinimalCriteriaSearchQueueing, _evaluationDataLogger);
 
             // Initialize the evolution algorithm.
-            ea.Initialize(fitnessEvaluator, genomeFactory, genomeList, MaxGenerations);
+            ea.Initialize(fitnessEvaluator, genomeFactory, genomeList, null, MaxEvaluations);
 
             // Finished. Return the evolution algorithm
             return ea;

@@ -64,6 +64,46 @@ namespace SharpNeat.Domains
         }
 
         /// <summary>
+        /// Parse the inner text of element with the given name as an unsigned long. If element is missing or parsing fails then
+        /// throws an ArgumentException.
+        /// </summary>
+        public static ulong GetValueAsULong(XmlElement xmlParent, string elemName)
+        {
+            ulong? val = TryGetValueAsULong(xmlParent, elemName);
+            if (null == val)
+            {
+                throw new ArgumentException(string.Format("Missing [{0}] configuration setting.", elemName));
+            }
+            return val.Value;
+        }
+
+        /// <summary>
+        /// Parse the inner text of element with the given name as an unsigned long. If element is missing or parsing fails then
+        /// returns null.
+        /// </summary>
+        public static ulong? TryGetValueAsULong(XmlElement xmlParent, string elemName)
+        {
+            XmlElement xmlElem = xmlParent.SelectSingleNode(elemName) as XmlElement;
+            if (null == xmlElem)
+            {
+                return null;
+            }
+
+            string valStr = xmlElem.InnerText;
+            if (string.IsNullOrEmpty(valStr))
+            {
+                return null;
+            }
+
+            ulong result;
+            if (ulong.TryParse(valStr, out result))
+            {
+                return result;
+            }
+            return null;
+        }
+
+        /// <summary>
         /// Parse the inner text of element with the given name as a double. If element is missing or parsing fails then
         /// throws an ArgumentException.
         /// </summary>

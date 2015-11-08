@@ -22,7 +22,8 @@ namespace SharpNeat.Domains.MazeNavigation
         protected string ComplexityRegulationStrategy;
         protected int? Complexitythreshold;
         protected int? MaxDistanceToTarget;
-        protected int MaxGenerations;
+        protected ulong? MaxEvaluations;
+        protected int? MaxGenerations;
         protected int? MaxTimesteps;
         protected MazeVariant MazeVariant;
         protected int? MinSuccessDistance;
@@ -80,7 +81,8 @@ namespace SharpNeat.Domains.MazeNavigation
             ComplexityRegulationStrategy = XmlUtils.TryGetValueAsString(xmlConfig, "ComplexityRegulationStrategy");
             Complexitythreshold = XmlUtils.TryGetValueAsInt(xmlConfig, "ComplexityThreshold");
             ParallelOptions = ExperimentUtils.ReadParallelOptions(xmlConfig);
-            MaxGenerations = XmlUtils.GetValueAsInt(xmlConfig, "MaxGenerations");
+            MaxGenerations = XmlUtils.TryGetValueAsInt(xmlConfig, "MaxGenerations");
+            MaxEvaluations = XmlUtils.TryGetValueAsULong(xmlConfig, "MaxEvaluations");
 
             // Set evolution/genome parameters
             NeatEvolutionAlgorithmParameters = new NeatEvolutionAlgorithmParameters
@@ -112,7 +114,8 @@ namespace SharpNeat.Domains.MazeNavigation
             ComplexityRegulationStrategy = experimentDictionary.Primary_ComplexityRegulationStrategy;
             Complexitythreshold = experimentDictionary.Primary_ComplexityThreshold;
             ParallelOptions = new ParallelOptions();
-            MaxGenerations = experimentDictionary.MaxGenerations;
+
+            MaxEvaluations = (ulong)experimentDictionary.MaxEvaluations;
 
             // Set evolution/genome parameters
             NeatEvolutionAlgorithmParameters = new NeatEvolutionAlgorithmParameters

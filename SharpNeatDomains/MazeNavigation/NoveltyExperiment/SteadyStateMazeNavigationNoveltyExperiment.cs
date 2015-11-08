@@ -106,7 +106,7 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
                     _nearestNeighbors, archive, _evaluationDataLogger);
 
             // Initialize the evolution algorithm.
-            ea.Initialize(fitnessEvaluator, genomeFactory, genomeList, MaxGenerations, archive);
+            ea.Initialize(fitnessEvaluator, genomeFactory, genomeList, null, MaxEvaluations, archive);
 
             // Finished. Return the evolution algorithm
             return ea;

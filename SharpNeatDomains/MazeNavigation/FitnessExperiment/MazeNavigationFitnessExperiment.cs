@@ -48,7 +48,7 @@ namespace SharpNeat.Domains.MazeNavigation.FitnessExperiment
                     ParallelOptions);
 
             // Initialize the evolution algorithm.
-            ea.Initialize(fitnessEvaluator, genomeFactory, genomeList, MaxGenerations);
+            ea.Initialize(fitnessEvaluator, genomeFactory, genomeList, MaxGenerations, null);
 
             // Finished. Return the evolution algorithm
             return ea;

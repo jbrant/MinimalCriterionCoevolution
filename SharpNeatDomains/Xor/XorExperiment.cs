@@ -247,7 +247,7 @@ namespace SharpNeat.Domains.Xor
                 innerFitnessEvaluator,
                 SelectiveGenomeFitnessEvaluator<NeatGenome>.CreatePredicate_OnceOnly());
             // Initialize the evolution algorithm.
-            ea.Initialize(selectiveFitnessEvaluator, genomeFactory, genomeList, 500);
+            ea.Initialize(selectiveFitnessEvaluator, genomeFactory, genomeList, 500, null);
 
             // Finished. Return the evolution algorithm
             return ea;

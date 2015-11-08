@@ -309,14 +309,17 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </param>
         /// <param name="genomeList">An initial genome population.</param>
         /// <param name="maxGenerations">The maximum number of generations that the algorithm is allowed to run.</param>
+        /// <param name="maxEvaluations">The maximum number of evaluations that the algorithm is allowed to run.</param>
         /// <param name="abstractNoveltyArchive">The cross-generational archive of high-performing/novel genomes (optional).</param>
         public override void Initialize(IGenomeEvaluator<TGenome> genomeFitnessEvaluator,
             IGenomeFactory<TGenome> genomeFactory,
             List<TGenome> genomeList,
-            int maxGenerations,
+            int? maxGenerations,
+            ulong? maxEvaluations,
             AbstractNoveltyArchive<TGenome> abstractNoveltyArchive = null)
         {
-            base.Initialize(genomeFitnessEvaluator, genomeFactory, genomeList, maxGenerations, abstractNoveltyArchive);
+            base.Initialize(genomeFitnessEvaluator, genomeFactory, genomeList, maxGenerations, maxEvaluations,
+                abstractNoveltyArchive);
             Initialize();
         }
 
@@ -331,14 +334,16 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </param>
         /// <param name="populationSize">The number of genomes to create for the initial population.</param>
         /// <param name="maxGenerations">The maximum number of generations that the algorithm is allowed to run.</param>
+        /// <param name="maxEvaluations">The maximum number of evaluations that the algorithm is allowed to run.</param>
         /// <param name="abstractNoveltyArchive">The cross-generational archive of high-performing/novel genomes (optional).</param>
         public override void Initialize(IGenomeEvaluator<TGenome> genomeFitnessEvaluator,
             IGenomeFactory<TGenome> genomeFactory,
             int populationSize,
-            int maxGenerations,
+            int? maxGenerations,
+            ulong? maxEvaluations,
             AbstractNoveltyArchive<TGenome> abstractNoveltyArchive = null)
         {
-            base.Initialize(genomeFitnessEvaluator, genomeFactory, populationSize, maxGenerations,
+            base.Initialize(genomeFitnessEvaluator, genomeFactory, populationSize, maxGenerations, maxEvaluations,
                 abstractNoveltyArchive);
             Initialize();
         }

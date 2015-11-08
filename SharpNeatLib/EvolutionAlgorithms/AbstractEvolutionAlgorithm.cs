@@ -62,7 +62,13 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     Defines the maximum number of generations that the algorithm can run before it is forcefully stopped (whether the
         ///     solution has been found or not).
         /// </summary>
-        private int _maxGenerations;
+        private int? _maxGenerations;
+
+        /// <summary>
+        ///     Defines the maximum number of network evaluations that the algorithm can run before it is forefully stopped
+        ///     (whether the solution has been found or not).
+        /// </summary>
+        private ulong? _maxEvaluations;
 
         /// <summary>
         ///     The genome evaluation scheme for the evolution algorithm.
@@ -112,7 +118,7 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     Gets the current generation.
         /// </summary>
         public uint CurrentGeneration { get; protected set; }
-
+        
         /// <summary>
         ///     Gets or sets the algorithm's update scheme.
         /// </summary>
@@ -144,13 +150,15 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </param>
         /// <param name="genomeList">An initial genome population.</param>
         /// <param name="maxGenerations">The maximum number of generations that the algorithm is allowed to run.</param>
+        /// <param name="maxEvaluations">The maximum number of evaluations that the algorithm is allowed to run.</param>
         /// <param name="abstractNoveltyArchive">
         ///     The persistent archive of genomes posessing a unique trait with respect to a behavior
         ///     characterization (optional).
         /// </param>
         public virtual void Initialize(IGenomeEvaluator<TGenome> genomeFitnessEvaluator,
             IGenomeFactory<TGenome> genomeFactory,
-            List<TGenome> genomeList, int maxGenerations, AbstractNoveltyArchive<TGenome> abstractNoveltyArchive)
+            List<TGenome> genomeList, int? maxGenerations, ulong? maxEvaluations,
+            AbstractNoveltyArchive<TGenome> abstractNoveltyArchive)
         {
             CurrentGeneration = 0;
             GenomeEvaluator = genomeFitnessEvaluator;
@@ -161,6 +169,7 @@ namespace SharpNeat.EvolutionAlgorithms
             RunState = RunState.Ready;
             UpdateScheme = new UpdateScheme(new TimeSpan(0, 0, 1));
             _maxGenerations = maxGenerations;
+            _maxEvaluations = maxEvaluations;
         }
 
         /// <summary>
@@ -174,13 +183,15 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </param>
         /// <param name="populationSize">The number of genomes to create for the initial population.</param>
         /// <param name="maxGenerations">The maximum number of generations that the algorithm is allowed to run.</param>
+        /// <param name="maxEvaluations">The maximum number of evaluations that the algorithm is allowed to run.</param>
         /// <param name="abstractNoveltyArchive">
         ///     The persistent archive of genomes posessing a unique trait with respect to a behavior
         ///     characterization (optional).
         /// </param>
         public virtual void Initialize(IGenomeEvaluator<TGenome> genomeFitnessEvaluator,
             IGenomeFactory<TGenome> genomeFactory,
-            int populationSize, int maxGenerations, AbstractNoveltyArchive<TGenome> abstractNoveltyArchive)
+            int populationSize, int? maxGenerations, ulong? maxEvaluations,
+            AbstractNoveltyArchive<TGenome> abstractNoveltyArchive)
         {
             CurrentGeneration = 0;
             GenomeEvaluator = genomeFitnessEvaluator;
@@ -191,6 +202,7 @@ namespace SharpNeat.EvolutionAlgorithms
             RunState = RunState.Ready;
             UpdateScheme = new UpdateScheme(new TimeSpan(0, 0, 1));
             _maxGenerations = maxGenerations;
+            _maxEvaluations = maxEvaluations;
         }
 
         /// <summary>
@@ -315,7 +327,8 @@ namespace SharpNeat.EvolutionAlgorithms
                     // Check if a pause has been requested. 
                     // Access to the flag is not thread synchronized, but it doesn't really matter if
                     // we miss it being set and perform one other generation before pausing.
-                    if (_pauseRequestFlag || GenomeEvaluator.StopConditionSatisfied || CurrentGeneration >= _maxGenerations)
+                    if (_pauseRequestFlag || GenomeEvaluator.StopConditionSatisfied ||
+                        CurrentGeneration >= _maxGenerations || GenomeEvaluator.EvaluationCount >= _maxEvaluations)
                     {
                         // Signal to any waiting thread that we are pausing
                         _awaitPauseEvent.Set();
