@@ -31,7 +31,10 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </summary>
         protected override void Initialize()
         {
+            // TODO: Remove this call
             base.Initialize();
+
+            // TODO: Need to run novelty search here to get a single genome that satisfies minimal criteria
 
             // Remove all genomes from the initial population that do not satisfy the minimal criteria
             ((List<TGenome>) GenomeList).RemoveAll(genome => genome.EvaluationInfo.IsViable == false);
@@ -147,8 +150,7 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <param name="logger">The data logger (optional).</param>
         public QueueingNeatEvolutionAlgorithm(IDataLogger logger = null)
             : this(
-                new KMeansClusteringStrategy<TGenome>(new ManhattanDistanceMetric()),
-                new NullComplexityRegulationStrategy(), 10, 100, logger)
+                new NullComplexityRegulationStrategy(), 10, logger)
         {
             SpeciationStrategy = new KMeansClusteringStrategy<TGenome>(new ManhattanDistanceMetric());
             ComplexityRegulationStrategy = new NullComplexityRegulationStrategy();
@@ -157,50 +159,35 @@ namespace SharpNeat.EvolutionAlgorithms
         }
 
         /// <summary>
-        ///     Constructs steady state evolution algorithm with the given NEAT parameters, speciation strategy, and complexity
-        ///     regulation strategy.
+        ///     Constructs steady state evolution algorithm with the given NEAT parameters and complexity regulation strategy.
         /// </summary>
-        /// <param name="eaParams">The NEAT algorithm parameters.</param>
-        /// <param name="speciationStrategy">The speciation strategy.</param>
         /// <param name="complexityRegulationStrategy">The complexity regulation strategy.</param>
         /// <param name="batchSize">The batch size of offspring to produce, evaluate, and remove.</param>
-        /// <param name="populationEvaluationFrequency">The frequency at which to evaluate the fitness of the entire population.</param>
         /// <param name="logger">The data logger (optional).</param>
         public QueueingNeatEvolutionAlgorithm(
-            ISpeciationStrategy<TGenome> speciationStrategy,
             IComplexityRegulationStrategy complexityRegulationStrategy,
             int batchSize,
-            int populationEvaluationFrequency,
             IDataLogger logger = null)
         {
-            SpeciationStrategy = speciationStrategy;
             ComplexityRegulationStrategy = complexityRegulationStrategy;
             _batchSize = batchSize;
-            _populationEvaluationFrequency = populationEvaluationFrequency;
             EvolutionLogger = logger;
         }
 
         /// <summary>
-        ///     Constructs steady state evolution algorithm with the given NEAT parameters, speciation strategy, and complexity
-        ///     regulation strategy.
+        ///     Constructs steady state evolution algorithm with the given NEAT parameters and complexity regulation strategy.
         /// </summary>
         /// <param name="eaParams">The NEAT algorithm parameters.</param>
-        /// <param name="speciationStrategy">The speciation strategy.</param>
         /// <param name="complexityRegulationStrategy">The complexity regulation strategy.</param>
         /// <param name="batchSize">The batch size of offspring to produce, evaluate, and remove.</param>
-        /// <param name="populationEvaluationFrequency">The frequency at which to evaluate the fitness of the entire population.</param>
         /// <param name="logger">The data logger (optional).</param>
         public QueueingNeatEvolutionAlgorithm(NeatEvolutionAlgorithmParameters eaParams,
-            ISpeciationStrategy<TGenome> speciationStrategy,
             IComplexityRegulationStrategy complexityRegulationStrategy,
             int batchSize,
-            int populationEvaluationFrequency,
             IDataLogger logger = null) : base(eaParams)
         {
-            SpeciationStrategy = speciationStrategy;
             ComplexityRegulationStrategy = complexityRegulationStrategy;
             _batchSize = batchSize;
-            _populationEvaluationFrequency = populationEvaluationFrequency;
             EvolutionLogger = logger;
         }
 

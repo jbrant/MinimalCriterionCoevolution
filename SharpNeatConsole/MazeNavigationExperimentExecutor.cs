@@ -54,7 +54,7 @@ namespace SharpNeatConsole
 
             foreach (string curExperimentName in experimentNames)
             {
-                Console.WriteLine("Executing Experiment {0}", curExperimentName);
+                Console.WriteLine(@"Executing Experiment {0}", curExperimentName);
 
                 // Create new database context and read in configuration for the given experiment
                 ExperimentDataEntities experimentContext = new ExperimentDataEntities();
@@ -65,7 +65,7 @@ namespace SharpNeatConsole
 
                 // Initialize new steady state novelty experiment
                 BaseMazeNavigationExperiment experiment =
-                    determineMazeNavigationExperiment(experimentConfiguration.Primary_SearchAlgorithmName,
+                    DetermineMazeNavigationExperiment(experimentConfiguration.Primary_SearchAlgorithmName,
                         experimentConfiguration.Primary_SelectionAlgorithmName);
 
                 // Execute the experiment for the specified number of runs
@@ -80,13 +80,14 @@ namespace SharpNeatConsole
                         _genomeList = experiment.LoadPopulation(xr);
                     }
                     _genomeFactory = _genomeList[0].GenomeFactory;
-                    Console.WriteLine("Loaded [{0}] genomes as initial population.", _genomeList.Count);
+                    Console.WriteLine(@"Loaded [{0}] genomes as initial population.", _genomeList.Count);
 
                     // Create evolution algorithm and attach update event.
                     _ea = experiment.CreateEvolutionAlgorithm(_genomeFactory, _genomeList);
                     _ea.UpdateEvent += ea_UpdateEvent;
 
-                    Console.WriteLine("Executing Experiment {0}, Run {1} of {2}", curExperimentName, runIdx + 1, numRuns);
+                    Console.WriteLine(@"Executing Experiment {0}, Run {1} of {2}", curExperimentName, runIdx + 1,
+                        numRuns);
 
                     // Start algorithm (it will run on a background thread).
                     _ea.StartContinue();
@@ -109,7 +110,7 @@ namespace SharpNeatConsole
         /// <param name="e">Event arguments</param>
         private static void ea_UpdateEvent(object sender, EventArgs e)
         {
-            Console.WriteLine("Generation={0:N0} Evaluations={0:N0} BestFitness={1:N6}", _ea.CurrentGeneration,
+            Console.WriteLine(@"Generation={0:N0} Evaluations={1:N0} BestFitness={2:N6}", _ea.CurrentGeneration,
                 _ea.CurrentEvaluations, _ea.Statistics._maxFitness);
         }
 
@@ -119,7 +120,7 @@ namespace SharpNeatConsole
         /// <param name="searchAlgorithmName">The search algorithm to run.</param>
         /// <param name="selectionAlgorithmName">The selection algorithm to run.</param>
         /// <returns></returns>
-        private static BaseMazeNavigationExperiment determineMazeNavigationExperiment(string searchAlgorithmName,
+        private static BaseMazeNavigationExperiment DetermineMazeNavigationExperiment(string searchAlgorithmName,
             string selectionAlgorithmName)
         {
             // Extract the corresponding search and selection algorithm domain types

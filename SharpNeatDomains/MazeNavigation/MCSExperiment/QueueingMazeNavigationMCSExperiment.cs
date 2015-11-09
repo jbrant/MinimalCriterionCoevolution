@@ -8,6 +8,7 @@ using SharpNeat.Behaviors;
 using SharpNeat.Core;
 using SharpNeat.DistanceMetrics;
 using SharpNeat.EvolutionAlgorithms;
+using SharpNeat.EvolutionAlgorithms.ComplexityRegulation;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Loggers;
 using SharpNeat.MinimalCriterias;
@@ -18,20 +19,13 @@ using SharpNeat.SpeciationStrategies;
 
 namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 {
-    public class SteadyStateMazeNavigationMCSExperiment : BaseMazeNavigationExperiment
+    public class QueueingMazeNavigationMCSExperiment : BaseMazeNavigationExperiment
     {
         private int _batchSize;
         private IBehaviorCharacterization _behaviorCharacterization;
         private IDataLogger _evaluationDataLogger;
         private IDataLogger _evolutionDataLogger;
-
-        /// <summary>
-        ///     Path/File to which to write generational data log.
-        /// </summary>
-        private string _generationalLogFile;
-
-        private string _mcsSelectionMethod;
-        private int _populationEvaluationFrequency;
+        private AbstractNeatEvolutionAlgorithm<NeatGenome> _initializationEa;
 
         public override void Initialize(string name, XmlElement xmlConfig)
         {
@@ -40,16 +34,17 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             // Read in the behavior characterization
             _behaviorCharacterization = ExperimentUtils.ReadBehaviorCharacterization(xmlConfig);
 
-            // Read in steady-state specific parameters
+            // Read in number of offspring to produce in a single batch
             _batchSize = XmlUtils.GetValueAsInt(xmlConfig, "OffspringBatchSize");
-            _populationEvaluationFrequency = XmlUtils.GetValueAsInt(xmlConfig, "PopulationEvaluationFrequency");
-
-            // Read in MCS selection method
-            _mcsSelectionMethod = XmlUtils.TryGetValueAsString(xmlConfig, "McsSelectionMethod");
 
             // Read in log file path/name
             _evolutionDataLogger = ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Evolution);
             _evaluationDataLogger = ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Evaluation);
+
+            // Setup initialization algorithm
+            _initializationEa =
+                initializeInitializationAlgorithm(
+                    xmlConfig.GetElementsByTagName("InitializationAlgorithmConfig", "")[0] as XmlElement);
         }
 
         public override void Initialize(ExperimentDictionary experimentDictionary)
@@ -71,12 +66,8 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                         (double) experimentDictionary.Primary_MCS_MinimalCriteriaStartY,
                         (double) experimentDictionary.Primary_MCS_MinimalCriteriaThreshold));
 
-            // Read in steady-state specific parameters
+            // Read in number of offspring to produce in a single batch
             _batchSize = experimentDictionary.Primary_OffspringBatchSize ?? default(int);
-            _populationEvaluationFrequency = experimentDictionary.Primary_PopulationEvaluationFrequency ?? default(int);
-
-            // Read in MCS selection method
-            _mcsSelectionMethod = experimentDictionary.Primary_SelectionAlgorithmName;
 
             // Read in log file path/name
             _evolutionDataLogger = new NoveltyExperimentEvaluationEntityDataLogger(experimentDictionary.ExperimentName);
@@ -97,28 +88,14 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             IGenomeFactory<NeatGenome> genomeFactory,
             List<NeatGenome> genomeList)
         {
-            // Create distance metric. Mismatched genes have a fixed distance of 10; for matched genes the distance is their weigth difference.
-            IDistanceMetric distanceMetric = new ManhattanDistanceMetric(1.0, 0.0, 10.0);
-            ISpeciationStrategy<NeatGenome> speciationStrategy =
-                new ParallelKMeansClusteringStrategy<NeatGenome>(distanceMetric, ParallelOptions);
-
             // Create complexity regulation strategy.
             var complexityRegulationStrategy =
                 ExperimentUtils.CreateComplexityRegulationStrategy(ComplexityRegulationStrategy, Complexitythreshold);
 
             // Create the evolution algorithm.
-            AbstractNeatEvolutionAlgorithm<NeatGenome> ea;
-            if ("Random".Equals(_mcsSelectionMethod))
-            {
-                ea = new SteadyStateNeatEvolutionAlgorithm<NeatGenome>(NeatEvolutionAlgorithmParameters,
-                    speciationStrategy, complexityRegulationStrategy, _batchSize, _populationEvaluationFrequency,
-                    _evolutionDataLogger);
-            }
-            else
-            {
-                ea = new QueueingNeatEvolutionAlgorithm<NeatGenome>(NeatEvolutionAlgorithmParameters,
+            AbstractNeatEvolutionAlgorithm<NeatGenome> ea =
+                new QueueingNeatEvolutionAlgorithm<NeatGenome>(NeatEvolutionAlgorithmParameters,
                     complexityRegulationStrategy, _batchSize, _evolutionDataLogger);
-            }
 
             // Create IBlackBox evaluator.
             var mazeNavigationEvaluator = new MazeNavigationMCSEvaluator(MaxDistanceToTarget, MaxTimesteps,
@@ -126,7 +103,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                 MinSuccessDistance, _behaviorCharacterization);
 
             // Create genome decoder.
-            var genomeDecoder = CreateGenomeDecoder();
+            IGenomeDecoder<NeatGenome, IBlackBox> genomeDecoder = CreateGenomeDecoder();
 
 //            IGenomeEvaluator<NeatGenome> fitnessEvaluator =
 //                new SerialGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
@@ -134,13 +111,66 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 
             IGenomeEvaluator<NeatGenome> fitnessEvaluator =
                 new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
-                    SelectionType.SteadyState, SearchType.MinimalCriteriaSearch, _evaluationDataLogger);
+                    SelectionType.Queueing, SearchType.MinimalCriteriaSearch, _evaluationDataLogger);
 
             // Initialize the evolution algorithm.
             ea.Initialize(fitnessEvaluator, genomeFactory, genomeList, null, MaxEvaluations);
 
             // Finished. Return the evolution algorithm
             return ea;
+        }
+
+        /// <summary>
+        ///     Constructs and initializes the MCS initialization algorithm (novelty search).
+        /// </summary>
+        /// <param name="xmlConfig">The XML configuration for the initialization algorithm.</param>
+        /// <returns>The constructed initialization algorithm.</returns>
+        private AbstractNeatEvolutionAlgorithm<NeatGenome> initializeInitializationAlgorithm(XmlElement xmlConfig)
+        {
+            double archiveAdditionThreshold;
+            double archiveThresholdDecreaseMultiplier;
+            double archiveThresholdIncreaseMultiplier;
+            int maxGenerationArchiveAddition;
+            int maxGenerationsWithoutArchiveAddition;
+
+            // Get complexity constraint parameters
+            string complexityRegulationStrategyDefinition = XmlUtils.TryGetValueAsString(xmlConfig,
+                "ComplexityRegulationStrategy");
+            int? complexityThreshold = XmlUtils.TryGetValueAsInt(xmlConfig, "ComplexityThreshold");
+
+            // Read in the behavior characterization
+            IBehaviorCharacterization behaviorCharacterization = ExperimentUtils.ReadBehaviorCharacterization(xmlConfig);
+
+            // Read in the novelty archive parameters
+            ExperimentUtils.ReadNoveltyParameters(xmlConfig, out archiveAdditionThreshold,
+                out archiveThresholdDecreaseMultiplier, out archiveThresholdIncreaseMultiplier,
+                out maxGenerationArchiveAddition, out maxGenerationsWithoutArchiveAddition);
+
+            // Read in nearest neighbors for behavior distance calculations
+            int nearestNeighbors = XmlUtils.GetValueAsInt(xmlConfig, "NearestNeighbors");
+
+            // Read in steady-state specific parameters
+            int batchSize = XmlUtils.GetValueAsInt(xmlConfig, "OffspringBatchSize");
+            int populationEvaluationFrequency = XmlUtils.GetValueAsInt(xmlConfig, "PopulationEvaluationFrequency");
+
+            // Create distance metric. Mismatched genes have a fixed distance of 10; for matched genes the distance is their weigth difference.
+            IDistanceMetric distanceMetric = new ManhattanDistanceMetric(1.0, 0.0, 10.0);
+            ISpeciationStrategy<NeatGenome> speciationStrategy =
+                new ParallelKMeansClusteringStrategy<NeatGenome>(distanceMetric, ParallelOptions);
+
+            // Create complexity regulation strategy.
+            IComplexityRegulationStrategy complexityRegulationStrategy =
+                ExperimentUtils.CreateComplexityRegulationStrategy(complexityRegulationStrategyDefinition,
+                    complexityThreshold);
+
+            // Create the initialization evolution algorithm.
+            return new SteadyStateNeatEvolutionAlgorithm<NeatGenome>(NeatEvolutionAlgorithmParameters,
+                speciationStrategy, complexityRegulationStrategy, batchSize, populationEvaluationFrequency);
+        }
+
+        private List<NeatGenome> initializeViableGenomes(List<NeatGenome> initialGenomes)
+        {
+            return null;
         }
     }
 }
