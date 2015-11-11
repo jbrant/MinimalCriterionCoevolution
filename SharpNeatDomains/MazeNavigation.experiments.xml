@@ -54,7 +54,7 @@
       <ArchiveThresholdDecreaseMultiplier>0.95</ArchiveThresholdDecreaseMultiplier>
       <ArchiveThresholdIncreaseMultiplier>1.3</ArchiveThresholdIncreaseMultiplier>
       <MaxGenerationalArchiveAddition>5</MaxGenerationalArchiveAddition>
-      <MaxEvaluationsWithoutArchiveAddition>5</MaxEvaluationsWithoutArchiveAddition>
+      <MaxGenerationsWithoutArchiveAddition>5</MaxGenerationsWithoutArchiveAddition>
       <Description>
         This is the maze navigation experiment used in the original novelty search papers (citation needed).
       </Description>
@@ -152,7 +152,7 @@
         <ArchiveThresholdDecreaseMultiplier>0.95</ArchiveThresholdDecreaseMultiplier>
         <ArchiveThresholdIncreaseMultiplier>1.3</ArchiveThresholdIncreaseMultiplier>
         <MaxGenerationalArchiveAddition>5</MaxGenerationalArchiveAddition>
-        <MaxEvaluationsWithoutArchiveAddition>10</MaxEvaluationsWithoutArchiveAddition>
+        <MaxGenerationsWithoutArchiveAddition>10</MaxGenerationsWithoutArchiveAddition>
       </NoveltyConfig>
       <MaxTimesteps>400</MaxTimesteps>
       <MinSuccessDistance>5</MinSuccessDistance>
@@ -210,7 +210,7 @@
         <PopulationEvaluationFrequency>30</PopulationEvaluationFrequency>
         <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>
         <ComplexityThreshold>30</ComplexityThreshold>
-        <BehaviorConfig>
+        <InitBehaviorConfig>
           <BehaviorCharacterization>EndPoint</BehaviorCharacterization>
           <MinimalCriteriaConfig>
             <MinimalCriteriaConstraint>EuclideanDistance</MinimalCriteriaConstraint>
@@ -218,14 +218,14 @@
             <YStart>22</YStart>
             <MinimumRequiredDistance>100</MinimumRequiredDistance>
           </MinimalCriteriaConfig>
-        </BehaviorConfig>
+        </InitBehaviorConfig>
         <NearestNeighbors>15</NearestNeighbors>
         <NoveltyConfig>
           <ArchiveAdditionThreshold>6</ArchiveAdditionThreshold>
           <ArchiveThresholdDecreaseMultiplier>0.95</ArchiveThresholdDecreaseMultiplier>
           <ArchiveThresholdIncreaseMultiplier>1.3</ArchiveThresholdIncreaseMultiplier>
           <MaxGenerationalArchiveAddition>5</MaxGenerationalArchiveAddition>
-          <MaxEvaluationsWithoutArchiveAddition>10</MaxEvaluationsWithoutArchiveAddition>
+          <MaxGenerationsWithoutArchiveAddition>10</MaxGenerationsWithoutArchiveAddition>
         </NoveltyConfig>        
       </InitializationAlgorithmConfig>
       <!--<LoggingConfig>

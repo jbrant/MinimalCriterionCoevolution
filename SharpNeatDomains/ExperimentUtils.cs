@@ -305,10 +305,11 @@ namespace SharpNeat.Domains
         /// </summary>
         /// <param name="xmlConfig">The reference to the XML configuration file.</param>
         /// <returns>The behavior characterization parameters.</returns>
-        public static IBehaviorCharacterization ReadBehaviorCharacterization(XmlElement xmlConfig)
+        public static IBehaviorCharacterization ReadBehaviorCharacterization(XmlElement xmlConfig,
+            string behaviorConfigTagName)
         {
             // Get root of behavior configuration section
-            XmlNodeList behaviorNodeList = xmlConfig.GetElementsByTagName("BehaviorConfig", "");
+            XmlNodeList behaviorNodeList = xmlConfig.GetElementsByTagName(behaviorConfigTagName, "");
 
             // Ensure that the behavior node list was found
             if (behaviorNodeList.Count != 1)

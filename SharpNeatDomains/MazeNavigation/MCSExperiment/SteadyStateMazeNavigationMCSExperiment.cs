@@ -38,7 +38,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             base.Initialize(name, xmlConfig);
 
             // Read in the behavior characterization
-            _behaviorCharacterization = ExperimentUtils.ReadBehaviorCharacterization(xmlConfig);
+            _behaviorCharacterization = ExperimentUtils.ReadBehaviorCharacterization(xmlConfig, "BehaviorConfig");
 
             // Read in steady-state specific parameters
             _batchSize = XmlUtils.GetValueAsInt(xmlConfig, "OffspringBatchSize");

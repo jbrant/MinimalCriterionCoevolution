@@ -21,13 +21,14 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         private bool _stopConditionSatisfied;
 
         internal MazeNavigationMCSEvaluator(int? maxDistanceToTarget, int? maxTimesteps, MazeVariant mazeVariant,
-            int? minSuccessDistance, IBehaviorCharacterization behaviorCharacterization)
+            int? minSuccessDistance, IBehaviorCharacterization behaviorCharacterization, ulong initializationEvaluations = 0)
         {
             _maxDistanceToTarget = maxDistanceToTarget;
             _maxTimesteps = maxTimesteps;
             _mazeVariant = mazeVariant;
             _minSuccessDistance = minSuccessDistance;
             _behaviorCharacterization = behaviorCharacterization;
+            EvaluationCount = initializationEvaluations;
         }
 
         /// <summary>
