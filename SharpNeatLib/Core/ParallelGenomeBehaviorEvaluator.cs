@@ -311,6 +311,15 @@ namespace SharpNeat.Core
             {
                 // If we're doing novelty search, include nearest neighbor measure and novelty archive (if applicable)
                 case SearchType.NoveltySearch:
+                    // After the behavior of each genome in the offspring batch has been evaluated,
+                    // iterate through each genome and compare its behavioral novelty (distance) to its 
+                    // k -nearest neighbors from the population in behavior space (and the archive if applicable)
+                    Parallel.ForEach(genomeList, _parallelOptions, delegate (TGenome genome)
+                    {
+                        EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, genomeList, _nearestNeighbors,
+                            _noveltyArchive, false);
+                    });
+                    break;
                 case SearchType.MinimalCriteriaNoveltySearch:
                     // After the behavior of each genome in the offspring batch has been evaluated,
                     // iterate through each genome and compare its behavioral novelty (distance) to its 
@@ -318,7 +327,7 @@ namespace SharpNeat.Core
                     Parallel.ForEach(genomeList, _parallelOptions, delegate(TGenome genome)
                     {
                         EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, genomeList, _nearestNeighbors,
-                            _noveltyArchive);
+                            _noveltyArchive, true);
                     });
                     break;
                 case SearchType.MinimalCriteriaSearch:
@@ -360,6 +369,15 @@ namespace SharpNeat.Core
             {
                 // If we're doing novelty search, include nearest neighbor measure and novelty archive (if applicable)
                 case SearchType.NoveltySearch:
+                    // After the behavior of each genome in the offspring batch has been evaluated,
+                    // iterate through each genome and compare its behavioral novelty (distance) to its 
+                    // k -nearest neighbors from the population in behavior space (and the archive if applicable)
+                    Parallel.ForEach(genomesToEvaluate, _parallelOptions, delegate (TGenome genome)
+                    {
+                        EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, population, _nearestNeighbors,
+                            _noveltyArchive, false);
+                    });
+                    break;
                 case SearchType.MinimalCriteriaNoveltySearch:
                     // After the behavior of each genome in the offspring batch has been evaluated,
                     // iterate through each genome and compare its behavioral novelty (distance) to its 
@@ -367,7 +385,7 @@ namespace SharpNeat.Core
                     Parallel.ForEach(genomesToEvaluate, _parallelOptions, delegate(TGenome genome)
                     {
                         EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, population, _nearestNeighbors,
-                            _noveltyArchive);
+                            _noveltyArchive, true);
                     });
                     break;
                 // If we're doing minimal criteria search with queueing, the objective distance will be assigned as the fitness
@@ -405,6 +423,15 @@ namespace SharpNeat.Core
             {
                 // If we're doing novelty search, include nearest neighbor measure and novelty archive (if applicable)
                 case SearchType.NoveltySearch:
+                    // After the behavior of each genome in the offspring batch has been evaluated,
+                    // iterate through each genome and compare its behavioral novelty (distance) to its 
+                    // k -nearest neighbors from the population in behavior space (and the archive if applicable)
+                    Parallel.ForEach(genomeList, _parallelOptions, delegate (TGenome genome)
+                    {
+                        EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, genomeList, _nearestNeighbors,
+                            _noveltyArchive, false);
+                    });
+                    break;
                 case SearchType.MinimalCriteriaNoveltySearch:
                     // After the behavior of each genome in the offspring batch has been evaluated,
                     // iterate through each genome and compare its behavioral novelty (distance) to its 
@@ -412,7 +439,7 @@ namespace SharpNeat.Core
                     Parallel.ForEach(genomeList, _parallelOptions, delegate(TGenome genome)
                     {
                         EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, genomeList, _nearestNeighbors,
-                            _noveltyArchive);
+                            _noveltyArchive, true);
                     });
                     break;
                 // If we're doing minimal criteria search with queueing, the objective distance will be assigned as the fitness
@@ -455,6 +482,15 @@ namespace SharpNeat.Core
             {
                 // If we're doing novelty search, include nearest neighbor measure and novelty archive (if applicable)
                 case SearchType.NoveltySearch:
+                    // After the behavior of each genome in the offspring batch has been evaluated,
+                    // iterate through each genome and compare its behavioral novelty (distance) to its 
+                    // k -nearest neighbors from the population in behavior space (and the archive if applicable)
+                    Parallel.ForEach(genomesToEvaluate, _parallelOptions, delegate (TGenome genome)
+                    {
+                        EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, population, _nearestNeighbors,
+                            _noveltyArchive, false);
+                    });
+                    break;
                 case SearchType.MinimalCriteriaNoveltySearch:
                     // After the behavior of each genome in the offspring batch has been evaluated,
                     // iterate through each genome and compare its behavioral novelty (distance) to its 
@@ -462,7 +498,7 @@ namespace SharpNeat.Core
                     Parallel.ForEach(genomesToEvaluate, _parallelOptions, delegate(TGenome genome)
                     {
                         EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, population, _nearestNeighbors,
-                            _noveltyArchive);
+                            _noveltyArchive, true);
                     });
                     break;
                 // If we're doing minimal criteria search with queueing, the objective distance will be assigned as the fitness

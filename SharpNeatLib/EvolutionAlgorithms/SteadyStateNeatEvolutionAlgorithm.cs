@@ -82,7 +82,7 @@ namespace SharpNeat.EvolutionAlgorithms
 
             // Update stats and store reference to best genome.
             UpdateBestGenome();
-            UpdateStats();
+            UpdateStats(true);
 
             Debug.Assert(GenomeList.Count == PopulationSize);
 

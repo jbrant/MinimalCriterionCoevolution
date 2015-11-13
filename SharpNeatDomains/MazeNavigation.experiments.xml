@@ -180,7 +180,7 @@
       <ComplexityThreshold>30</ComplexityThreshold>
       <OffspringBatchSize>20</OffspringBatchSize>
       <PopulationEvaluationFrequency>30</PopulationEvaluationFrequency>
-      <MaxEvaluations>10000</MaxEvaluations>
+      <MaxEvaluations>100000</MaxEvaluations>
       <GenomeConfig>
         <InitialConnectionProportion>1</InitialConnectionProportion>
         <WeightMutationProbability>0.6</WeightMutationProbability>
@@ -193,16 +193,16 @@
         <BehaviorCharacterization>EndPoint</BehaviorCharacterization>
         <MinimalCriteriaConfig>
           <MinimalCriteriaConstraint>EuclideanDistance</MinimalCriteriaConstraint>
-          <XStart>30</XStart>
-          <YStart>22</YStart>
-          <MinimumRequiredDistance>100</MinimumRequiredDistance>
+          <XStart>36</XStart>
+          <YStart>184</YStart>
+          <MinimumRequiredDistance>200</MinimumRequiredDistance>
         </MinimalCriteriaConfig>
       </BehaviorConfig>
       <NearestNeighbors>15</NearestNeighbors>
       <MaxTimesteps>400</MaxTimesteps>
       <MinSuccessDistance>5</MinSuccessDistance>
       <MaxDistanceToTarget>300</MaxDistanceToTarget>
-      <MazeVariant>MediumMaze</MazeVariant>
+      <MazeVariant>HardMaze</MazeVariant>
       <InitializationAlgorithmConfig>
         <SearchAlgorithm>NoveltySearch</SearchAlgorithm>
         <SelectionAlgorithm>SteadyState</SelectionAlgorithm>
@@ -214,9 +214,9 @@
           <BehaviorCharacterization>EndPoint</BehaviorCharacterization>
           <MinimalCriteriaConfig>
             <MinimalCriteriaConstraint>EuclideanDistance</MinimalCriteriaConstraint>
-            <XStart>30</XStart>
-            <YStart>22</YStart>
-            <MinimumRequiredDistance>100</MinimumRequiredDistance>
+            <XStart>36</XStart>
+            <YStart>184</YStart>
+            <MinimumRequiredDistance>200</MinimumRequiredDistance>
           </MinimalCriteriaConfig>
         </InitBehaviorConfig>
         <NearestNeighbors>15</NearestNeighbors>

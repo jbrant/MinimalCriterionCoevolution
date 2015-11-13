@@ -158,13 +158,17 @@ namespace SharpNeat.Utility
         /// <param name="genomeList">The population against which the genome is being evaluated.</param>
         /// <param name="nearestNeighbors">The number of nearest neighbors in behavior space against which to evaluate.</param>
         /// <param name="noveltyArchive">The archive of novel individuals.</param>
+        /// <param name="applyViabilityConstraint">
+        ///     Indicates rather viability should be taken into account when assigned fitness
+        ///     values (i.e. if the genome is not viable, it is assigned a fitness of zero).
+        /// </param>
         public static void EvaluateFitness(TGenome genome, IList<TGenome> genomeList, int nearestNeighbors,
-            INoveltyArchive<TGenome> noveltyArchive)
+            INoveltyArchive<TGenome> noveltyArchive, bool applyViabilityConstraint)
         {
             FitnessInfo fitnessInfo;
 
             // If the genome is not viable, set the fitness (i.e. behavioral novelty) to zero
-            if (genome.EvaluationInfo.IsViable == false)
+            if (applyViabilityConstraint && genome.EvaluationInfo.IsViable == false)
             {
                 fitnessInfo = FitnessInfo.Zero;
             }

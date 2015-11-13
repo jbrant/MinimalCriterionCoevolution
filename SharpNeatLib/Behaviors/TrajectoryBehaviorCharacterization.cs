@@ -1,6 +1,5 @@
 ﻿#region
 
-using System;
 using System.Collections.Generic;
 using SharpNeat.Core;
 
@@ -14,6 +13,22 @@ namespace SharpNeat.Behaviors
     /// </summary>
     public class TrajectoryBehaviorCharacterization : IBehaviorCharacterization
     {
+        /// <summary>
+        ///     Default trajectory-behavior characterization constructor.
+        /// </summary>
+        public TrajectoryBehaviorCharacterization()
+        {
+        }
+
+        /// <summary>
+        ///     Trajectory behavior characterization constructor accepting a minimal criteria definition.
+        /// </summary>
+        /// <param name="minmalCriteria"></param>
+        public TrajectoryBehaviorCharacterization(IMinimalCriteria minmalCriteria)
+        {
+            MinimalCriteria = minmalCriteria;
+        }
+
         /// <summary>
         ///     The double array of behaviors.  Since this is a trajectory characterization, it will contain the position of the
         ///     agent for each time step.
@@ -45,7 +60,8 @@ namespace SharpNeat.Behaviors
         /// </returns>
         public bool IsMinimalCriteriaSatisfied(BehaviorInfo behaviorInfo)
         {
-            throw new NotImplementedException();
+            // If there is no minimal criteria, then by definition it has been met
+            return MinimalCriteria?.DoesCharacterizationSatisfyMinimalCriteria(behaviorInfo) ?? true;
         }
     }
 }

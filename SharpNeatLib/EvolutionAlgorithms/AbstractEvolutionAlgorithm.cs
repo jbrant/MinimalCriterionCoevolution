@@ -178,6 +178,40 @@ namespace SharpNeat.EvolutionAlgorithms
         }
 
         /// <summary>
+        ///     Initializes the evolution algorithm with the provided IGenomeFitnessEvaluator, IGenomeFactory
+        ///     and an initial population of genomes.
+        /// </summary>
+        /// <param name="genomeFitnessEvaluator">The genome evaluation scheme for the evolution algorithm.</param>
+        /// <param name="genomeFactory">
+        ///     The factory that was used to create the genomeList and which is therefore referenced by the
+        ///     genomes.
+        /// </param>
+        /// <param name="genomeList">An initial genome population.</param>
+        /// <param name="targetPopulationSize">The ceiling population size at which the algorithm should cap out.</param>
+        /// <param name="maxGenerations">The maximum number of generations that the algorithm is allowed to run.</param>
+        /// <param name="maxEvaluations">The maximum number of evaluations that the algorithm is allowed to run.</param>
+        /// <param name="abstractNoveltyArchive">
+        ///     The persistent archive of genomes posessing a unique trait with respect to a behavior
+        ///     characterization (optional).
+        /// </param>
+        public virtual void Initialize(IGenomeEvaluator<TGenome> genomeFitnessEvaluator,
+            IGenomeFactory<TGenome> genomeFactory,
+            List<TGenome> genomeList, int targetPopulationSize, int? maxGenerations, ulong? maxEvaluations,
+            AbstractNoveltyArchive<TGenome> abstractNoveltyArchive)
+        {
+            CurrentGeneration = 0;
+            GenomeEvaluator = genomeFitnessEvaluator;
+            GenomeFactory = genomeFactory;
+            GenomeList = genomeList;
+            AbstractNoveltyArchive = abstractNoveltyArchive;
+            PopulationSize = targetPopulationSize;
+            RunState = RunState.Ready;
+            UpdateScheme = new UpdateScheme(new TimeSpan(0, 0, 1));
+            _maxGenerations = maxGenerations;
+            _maxEvaluations = maxEvaluations;
+        }
+
+        /// <summary>
         ///     Initializes the evolution algorithm with the provided IGenomeFitnessEvaluator
         ///     and an IGenomeFactory that can be used to create an initial population of genomes.
         /// </summary>

@@ -1,5 +1,6 @@
 ﻿#region
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -31,11 +32,7 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </summary>
         protected override void Initialize()
         {
-            // TODO: Remove this call
-            base.Initialize();
-
-            // TODO: Need to run novelty search here to get a single genome that satisfies minimal criteria
-
+            /*
             // Remove all genomes from the initial population that do not satisfy the minimal criteria
             ((List<TGenome>) GenomeList).RemoveAll(genome => genome.EvaluationInfo.IsViable == false);
 
@@ -66,7 +63,7 @@ namespace SharpNeat.EvolutionAlgorithms
                     // Update the count of additional genomes that need to be created
                     numGenomesToGenerate = PopulationSize - GenomeList.Count;
                 } while (numGenomesToGenerate > 0);
-            }
+            }*/
         }
 
         /// <summary>
@@ -74,46 +71,38 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </summary>
         protected override void PerformOneGeneration()
         {
-            int curBatchSize = _batchSize;
+            // Get the initial batch size as the minimum of the batch size or the size of the population.
+            // When we're first starting, the population will likely be smaller than the desired batch size.
+            int curBatchSize = Math.Min(_batchSize, GenomeList.Count);
             List<TGenome> childGenomes = new List<TGenome>(_batchSize);
 
-            do
+            // Produce number of offspring equivalent to the given batch size
+            childGenomes = CreateOffspring(curBatchSize);
+
+            // Evaluate the offspring batch
+            GenomeEvaluator.Evaluate(childGenomes, CurrentGeneration);
+
+            // Remove child genomes that are not viable
+            childGenomes.RemoveAll(genome => genome.EvaluationInfo.IsViable == false);
+
+            // TODO: Remove oldest (only if we've reached the target population size AND viable genomes have been added)
+            if ((GenomeList.Count + childGenomes.Count) > PopulationSize)
             {
-                // Produce number of offspring equivalent to the given batch size
-                List<TGenome> curChildGenomes = CreateOffspring(curBatchSize);
+                // Calculate number of genomes to remove
+                int genomesToRemove = (GenomeList.Count + childGenomes.Count) - PopulationSize;
 
-                // Evaluate the offspring batch
-                GenomeEvaluator.Evaluate(curChildGenomes, CurrentGeneration);
-
-                // Remove child genomes that are not viable
-                curChildGenomes.RemoveAll(genome => genome.EvaluationInfo.IsViable == false);
-
-                // Add only the viable genomes to the overall list of child genomes
-                childGenomes.AddRange(curChildGenomes);
-
-                // Set the current batch size to the remaining number of child genomes to create
-                curBatchSize = _batchSize - childGenomes.Count;
-            } while (childGenomes.Count < _batchSize);
-
-            // Remove the parent genomes
-            (GenomeList as List<TGenome>)?.RemoveRange(0, _batchSize);
+                // Remove the calculated number of oldest genomes
+                (GenomeList as List<TGenome>)?.RemoveRange(0, genomesToRemove);
+            }
 
             // Add new children
             (GenomeList as List<TGenome>)?.AddRange(childGenomes);
 
-            // Clear all the species and respeciate
-            ClearAllSpecies();
-            SpeciationStrategy.SpeciateGenomes(GenomeList, SpecieList);
-
-            // TODO: This shouldn't really matter since we're fitness agnostic
-            // Sort the genomes in each specie. Fittest first (secondary sort - youngest first).
-            SortSpecieGenomes();
-
             // Update stats and store reference to best genome.
-            UpdateBestGenome();
-            UpdateStats();
+            UpdateBestGenomeWithoutSpeciation(false);
+            UpdateStats(false);
 
-            Debug.Assert(GenomeList.Count == PopulationSize);
+            Debug.Assert(GenomeList.Count <= PopulationSize);
 
             // If there is a logger defined, log the generation stats
             EvolutionLogger?.LogRow(GetLoggableElements(), Statistics.GetLoggableElements(),

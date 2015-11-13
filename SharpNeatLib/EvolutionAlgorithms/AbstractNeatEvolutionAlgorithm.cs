@@ -128,9 +128,43 @@ namespace SharpNeat.EvolutionAlgorithms
         }
 
         /// <summary>
+        ///     Updates _currentBestGenome without taking species into consideration.  This is considered the fittest genome in the
+        ///     population.
+        /// </summary>
+        protected void UpdateBestGenomeWithoutSpeciation(bool isMaximization)
+        {
+            // If all genomes have the same fitness (including zero) then we simply return the first genome.
+            TGenome bestGenome = null;
+            var bestFitness = -1.0;
+
+            // Iterate through the genome list, testing for the highest fitness genome
+            foreach (TGenome genome in GenomeList)
+            {
+                if (isMaximization)
+                {
+                    if (genome.EvaluationInfo.Fitness > bestFitness)
+                    {
+                        bestGenome = genome;
+                        bestFitness = genome.EvaluationInfo.Fitness;
+                    }
+                }
+                else
+                {
+                    if (bestFitness <= 0 || genome.EvaluationInfo.Fitness < bestFitness)
+                    {
+                        bestGenome = genome;
+                        bestFitness = genome.EvaluationInfo.Fitness;
+                    }
+                }
+            }
+
+            CurrentChampGenome = bestGenome;
+        }
+
+        /// <summary>
         ///     Updates the NeatAlgorithmStats object.
         /// </summary>
-        protected void UpdateStats()
+        protected void UpdateStats(bool updateSpeciesStats)
         {
             Statistics._generation = CurrentGeneration;
             Statistics._totalEvaluationCount = GenomeEvaluator.EvaluationCount;
@@ -171,14 +205,17 @@ namespace SharpNeat.EvolutionAlgorithms
             Statistics._maxComplexity = maxComplexity;
             Statistics._meanComplexity = totalComplexity/count;
 
-            // Specie champs mean fitness.
-            var totalSpecieChampFitness = SpecieList[0].GenomeList[0].EvaluationInfo.Fitness;
-            var specieCount = SpecieList.Count;
-            for (var i = 1; i < specieCount; i++)
+            if (updateSpeciesStats)
             {
-                totalSpecieChampFitness += SpecieList[i].GenomeList[0].EvaluationInfo.Fitness;
+                // Specie champs mean fitness.
+                var totalSpecieChampFitness = SpecieList[0].GenomeList[0].EvaluationInfo.Fitness;
+                var specieCount = SpecieList.Count;
+                for (var i = 1; i < specieCount; i++)
+                {
+                    totalSpecieChampFitness += SpecieList[i].GenomeList[0].EvaluationInfo.Fitness;
+                }
+                Statistics._meanSpecieChampFitness = totalSpecieChampFitness/specieCount;
             }
-            Statistics._meanSpecieChampFitness = totalSpecieChampFitness/specieCount;
 
             // Moving averages.
             Statistics._prevBestFitnessMA = Statistics._bestFitnessMA.Mean;
@@ -319,6 +356,34 @@ namespace SharpNeat.EvolutionAlgorithms
             AbstractNoveltyArchive<TGenome> abstractNoveltyArchive = null)
         {
             base.Initialize(genomeFitnessEvaluator, genomeFactory, genomeList, maxGenerations, maxEvaluations,
+                abstractNoveltyArchive);
+            Initialize();
+        }
+
+        /// <summary>
+        ///     Initializes the evolution algorithm with the provided IGenomeFitnessEvaluator, IGenomeFactory
+        ///     and an initial population of genomes.
+        /// </summary>
+        /// <param name="genomeFitnessEvaluator">The genome evaluation scheme for the evolution algorithm.</param>
+        /// <param name="genomeFactory">
+        ///     The factory that was used to create the genomeList and which is therefore referenced by the
+        ///     genomes.
+        /// </param>
+        /// <param name="genomeList">An initial genome population.</param>
+        /// <param name="targetPopulationSize">The ceiling population size at which the algorithm should cap out.</param>
+        /// <param name="maxGenerations">The maximum number of generations that the algorithm is allowed to run.</param>
+        /// <param name="maxEvaluations">The maximum number of evaluations that the algorithm is allowed to run.</param>
+        /// <param name="abstractNoveltyArchive">
+        ///     The persistent archive of genomes posessing a unique trait with respect to a behavior
+        ///     characterization (optional).
+        /// </param>
+        public override void Initialize(IGenomeEvaluator<TGenome> genomeFitnessEvaluator,
+            IGenomeFactory<TGenome> genomeFactory,
+            List<TGenome> genomeList, int targetPopulationSize, int? maxGenerations, ulong? maxEvaluations,
+            AbstractNoveltyArchive<TGenome> abstractNoveltyArchive = null)
+        {
+            base.Initialize(genomeFitnessEvaluator, genomeFactory, genomeList, targetPopulationSize, maxGenerations,
+                maxEvaluations,
                 abstractNoveltyArchive);
             Initialize();
         }

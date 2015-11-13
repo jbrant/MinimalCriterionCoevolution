@@ -106,7 +106,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                 CreateGenomeDecoder(), NeatEvolutionAlgorithmParameters);
 
             // Run the algorithm until a viable genome is found
-            _initializationAlgorithm.EvolveViableGenome(out initializationEvaluations);
+            NeatGenome genomeSeed = _initializationAlgorithm.EvolveViableGenome(out initializationEvaluations);
 
             // Create complexity regulation strategy.
             var complexityRegulationStrategy =
@@ -135,7 +135,8 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                     SelectionType.Queueing, SearchType.MinimalCriteriaSearch, _evaluationDataLogger);
 
             // Initialize the evolution algorithm.
-            ea.Initialize(fitnessEvaluator, genomeFactory, genomeList, null, MaxEvaluations);
+            ea.Initialize(fitnessEvaluator, genomeFactory, new List<NeatGenome> {genomeSeed}, DefaultPopulationSize,
+                null, MaxEvaluations);
 
             // Finished. Return the evolution algorithm
             return ea;

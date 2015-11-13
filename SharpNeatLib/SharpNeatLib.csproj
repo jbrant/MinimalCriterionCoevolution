@@ -91,6 +91,7 @@
     <Compile Include="Loggers\FieldElement.cs" />
     <Compile Include="MinimalCriterias\EuclideanDistanceCriteria.cs" />
     <Compile Include="MinimalCriterias\EuclideanLocationCriteria.cs" />
+    <Compile Include="MinimalCriterias\MileageCriteria.cs" />
     <Compile Include="NoveltyArchives\AbstractNoveltyArchive.cs" />
     <Compile Include="Core\FitnessInfo.cs" />
     <Compile Include="Core\GenomeFitnessComparer.cs" />
