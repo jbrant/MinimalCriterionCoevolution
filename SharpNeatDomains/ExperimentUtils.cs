@@ -340,6 +340,9 @@ namespace SharpNeat.Domains
                 MinimalCriteriaType mcType =
                     BehaviorCharacterizationUtil.ConvertStringToMinimalCriteria(minimalCriteriaConstraint);
 
+                // Starting location used in most criterias
+                double xStart, yStart;
+
                 switch (mcType)
                 {
                     case MinimalCriteriaType.EuclideanLocation:
@@ -358,14 +361,26 @@ namespace SharpNeat.Domains
                     case MinimalCriteriaType.EuclideanDistance:
 
                         // Read in the starting coordinates and the minimum required distance traveled
-                        double xStart = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "XStart");
-                        double yStart = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "YStart");
+                        xStart = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "XStart");
+                        yStart = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "YStart");
                         double minimumDistanceTraveled = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig,
                             "MinimumRequiredDistance");
 
                         // Set the euclidean distance minimal criteria on the behavior characterization
                         behaviorCharacterization.MinimalCriteria = new EuclideanDistanceCriteria(xStart, yStart,
                             minimumDistanceTraveled);
+
+                        break;
+
+                    case MinimalCriteriaType.Mileage:
+
+                        // Read in the starting coordinates and minimum required total distance traveled (mileage)
+                        xStart = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "XStart");
+                        yStart = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "YStart");
+                        double minimumMileage = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "MinimumMileage");
+
+                        // Set the mileage minimal criteria on the behavior characterization
+                        behaviorCharacterization.MinimalCriteria = new MileageCriteria(xStart, yStart, minimumMileage);
 
                         break;
                 }

@@ -37,7 +37,12 @@ namespace SharpNeat.Domains
         /// <summary>
         ///     Indicates the euclidean distance minimal criteria.
         /// </summary>
-        EuclideanDistance
+        EuclideanDistance,
+
+        /// <summary>
+        ///     Indicates the mileage minimal criteria.
+        /// </summary>
+        Mileage
     }
 
     /// <summary>
@@ -68,13 +73,18 @@ namespace SharpNeat.Domains
         /// <returns>The minimal criteria domain type.</returns>
         public static MinimalCriteriaType ConvertStringToMinimalCriteria(String strMinimalCriteria)
         {
-            // TODO: Doesn't really make sense until additional minimal criteria types are added
-            if (MinimalCriteriaType.EuclideanLocation.ToString()
-                .Equals(strMinimalCriteria, StringComparison.InvariantCultureIgnoreCase))
+            if ("EuclideanLocation".Equals(strMinimalCriteria, StringComparison.InvariantCultureIgnoreCase) ||
+                "Euclidean Location".Equals(strMinimalCriteria, StringComparison.InvariantCultureIgnoreCase))
             {
                 return MinimalCriteriaType.EuclideanLocation;
             }
-            return MinimalCriteriaType.EuclideanDistance;
+            if ("EuclideanDistance".Equals(strMinimalCriteria, StringComparison.InvariantCultureIgnoreCase) ||
+                "Euclidean Distance".Equals(strMinimalCriteria, StringComparison.InvariantCultureIgnoreCase))
+            {
+                return MinimalCriteriaType.EuclideanDistance;
+            }
+
+            return MinimalCriteriaType.Mileage;
         }
 
         /// <summary>

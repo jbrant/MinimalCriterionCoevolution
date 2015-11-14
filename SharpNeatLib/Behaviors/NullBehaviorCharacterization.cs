@@ -13,16 +13,6 @@ namespace SharpNeat.Behaviors
     public class NullBehaviorCharacterization : IBehaviorCharacterization
     {
         /// <summary>
-        ///     Null array of behaviors.
-        /// </summary>
-        public List<double> Behaviors => null;
-
-        /// <summary>
-        ///     The minimal criteria which the behavior must meet in order to be considered viable.
-        /// </summary>
-        public IMinimalCriteria MinimalCriteria { get; set; }
-
-        /// <summary>
         ///     Does nothing given that there are no behaviors to update.
         /// </summary>
         /// <param name="newBehaviors">The list of new behaviors.</param>
@@ -43,6 +33,22 @@ namespace SharpNeat.Behaviors
         public bool IsMinimalCriteriaSatisfied(BehaviorInfo behaviorInfo)
         {
             return true;
+        }
+
+        /// <summary>
+        ///     Does nothing given that there are no behavior characterizations to convert to a double-array.
+        /// </summary>
+        /// <returns>Null</returns>
+        public double[] GetBehaviorCharacterizationAsArray()
+        {
+            return null;
+        }
+
+        /// <summary>
+        ///     Does nothing given that there are no behaviors to reset.
+        /// </summary>
+        public void ResetState()
+        {
         }
     }
 }

@@ -12,16 +12,6 @@ namespace SharpNeat.Core
     public interface IBehaviorCharacterization
     {
         /// <summary>
-        ///     The behaviors of an individual (represented as a list of double-precision values).
-        /// </summary>
-        List<double> Behaviors { get; }
-
-        /// <summary>
-        ///     The minimal criteria which the behavior must meet in order to be considered viable.
-        /// </summary>
-        IMinimalCriteria MinimalCriteria { get; set; }
-
-        /// <summary>
         ///     Updates the behavior characterization with the numeric list of new (or replacement) behaviors.
         /// </summary>
         /// <param name="newBehaviors">The numeric list of behaviors with which to update this characterization.</param>
@@ -33,5 +23,11 @@ namespace SharpNeat.Core
         /// <param name="behaviorInfo">The post-evaluation behavior of the individual.</param>
         /// <returns></returns>
         bool IsMinimalCriteriaSatisfied(BehaviorInfo behaviorInfo);
+
+        /// <summary>
+        ///     Converts behavior characterization to an array of doubles.
+        /// </summary>
+        /// <returns>Behavior characterization as an array of doubles.</returns>
+        double[] GetBehaviorCharacterizationAsArray();
     }
 }

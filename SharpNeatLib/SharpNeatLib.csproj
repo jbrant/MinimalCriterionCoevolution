@@ -75,12 +75,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Behaviors\EndPointBehaviorCharacterization.cs" />
+    <Compile Include="Behaviors\EndPointBehaviorCharacterizationFactory.cs" />
     <Compile Include="Behaviors\NullBehaviorCharacterization.cs" />
     <Compile Include="Behaviors\TrajectoryBehaviorCharacterization.cs" />
+    <Compile Include="Behaviors\TrajectoryBehaviorCharacterizationFactory.cs" />
     <Compile Include="Core\AlgorithmType.cs" />
     <Compile Include="Core\AuxFitnessInfo.cs" />
     <Compile Include="Core\BehaviorInfo.cs" />
     <Compile Include="Core\CoordinateVector.cs" />
+    <Compile Include="Core\IBehaviorCharacterizationFactory.cs" />
     <Compile Include="Core\IMinimalCriteria.cs" />
     <Compile Include="Core\INoveltyArchive.cs" />
     <Compile Include="EvolutionAlgorithms\QueueingNeatEvolutionAlgorithm.cs" />

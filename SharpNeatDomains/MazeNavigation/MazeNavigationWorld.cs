@@ -234,7 +234,7 @@ namespace SharpNeat.Domains.MazeNavigation
                 }
 
                 // Extract the behavior info object
-                trialInfo = new BehaviorInfo(_behaviorCharacterization.Behaviors.ToArray());
+                trialInfo = new BehaviorInfo(_behaviorCharacterization.GetBehaviorCharacterizationAsArray());
             }
 
             // TODO: Remove this

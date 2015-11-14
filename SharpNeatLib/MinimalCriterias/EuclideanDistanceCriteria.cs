@@ -7,6 +7,9 @@ using SharpNeat.Core;
 
 namespace SharpNeat.MinimalCriterias
 {
+    /// <summary>
+    ///     Defines the calculations for determining whether a given behavior satisfies the euclidean distance criteria.
+    /// </summary>
     public class EuclideanDistanceCriteria : IMinimalCriteria
     {
         /// <summary>

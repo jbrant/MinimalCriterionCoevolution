@@ -190,12 +190,12 @@
         <ConnectionWeightRange>1</ConnectionWeightRange>
       </GenomeConfig>
       <BehaviorConfig>
-        <BehaviorCharacterization>EndPoint</BehaviorCharacterization>
+        <BehaviorCharacterization>Trajectory</BehaviorCharacterization>
         <MinimalCriteriaConfig>
-          <MinimalCriteriaConstraint>EuclideanDistance</MinimalCriteriaConstraint>
+          <MinimalCriteriaConstraint>Mileage</MinimalCriteriaConstraint>
           <XStart>36</XStart>
           <YStart>184</YStart>
-          <MinimumRequiredDistance>200</MinimumRequiredDistance>
+          <MinimumMileage>150</MinimumMileage>
         </MinimalCriteriaConfig>
       </BehaviorConfig>
       <NearestNeighbors>15</NearestNeighbors>
@@ -211,12 +211,12 @@
         <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>
         <ComplexityThreshold>30</ComplexityThreshold>
         <InitBehaviorConfig>
-          <BehaviorCharacterization>EndPoint</BehaviorCharacterization>
+          <BehaviorCharacterization>Trajectory</BehaviorCharacterization>
           <MinimalCriteriaConfig>
-            <MinimalCriteriaConstraint>EuclideanDistance</MinimalCriteriaConstraint>
+            <MinimalCriteriaConstraint>Mileage</MinimalCriteriaConstraint>
             <XStart>36</XStart>
             <YStart>184</YStart>
-            <MinimumRequiredDistance>200</MinimumRequiredDistance>
+            <MinimumMileage>150</MinimumMileage>
           </MinimalCriteriaConfig>
         </InitBehaviorConfig>
         <NearestNeighbors>15</NearestNeighbors>

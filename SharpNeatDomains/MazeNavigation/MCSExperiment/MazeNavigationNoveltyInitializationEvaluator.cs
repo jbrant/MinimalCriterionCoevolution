@@ -53,6 +53,9 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             // Default the stop condition satisfied to false
             bool goalReached = false;
 
+            // Reset the internal state of the behavior characterization
+            _behaviorCharacterization.ResetState();
+
             // Instantiate the maze world
             MazeNavigationWorld<BehaviorInfo> world = new MazeNavigationWorld<BehaviorInfo>(_mazeVariant,
                 _minSuccessDistance, _maxDistanceToTarget,

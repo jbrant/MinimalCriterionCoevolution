@@ -21,7 +21,8 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         private bool _stopConditionSatisfied;
 
         internal MazeNavigationMCSEvaluator(int? maxDistanceToTarget, int? maxTimesteps, MazeVariant mazeVariant,
-            int? minSuccessDistance, IBehaviorCharacterization behaviorCharacterization, ulong initializationEvaluations = 0)
+            int? minSuccessDistance, IBehaviorCharacterization behaviorCharacterization,
+            ulong initializationEvaluations = 0)
         {
             _maxDistanceToTarget = maxDistanceToTarget;
             _maxTimesteps = maxTimesteps;
@@ -54,8 +55,12 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             // Default the stop condition satisfied to false
             bool stopConditionSatisfied = false;
 
+            // Reset the internal state of the behavior characterization
+            _behaviorCharacterization.ResetState();
+
             // Instantiate the maze world
-            var world = new MazeNavigationWorld<BehaviorInfo>(_mazeVariant, _minSuccessDistance, _maxDistanceToTarget,
+            MazeNavigationWorld<BehaviorInfo> world = new MazeNavigationWorld<BehaviorInfo>(_mazeVariant,
+                _minSuccessDistance, _maxDistanceToTarget,
                 _maxTimesteps, _behaviorCharacterization);
 
             // Run a single trial

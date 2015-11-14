@@ -244,9 +244,14 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                         _maxGenerationArchiveAddition, _maxGenerationsWithoutArchiveAddition);
 
                 IGenomeEvaluator<NeatGenome> fitnessEvaluator =
-                    new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
+                    new SerialGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
                         SelectionType.SteadyState, SearchType.NoveltySearch,
                         _nearestNeighbors, archive);
+
+//                IGenomeEvaluator < NeatGenome> fitnessEvaluator =
+//                    new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
+//                        SelectionType.SteadyState, SearchType.NoveltySearch,
+//                        _nearestNeighbors, archive);
 
                 // Initialize the evolution algorithm.
                 _initializationEa.Initialize(fitnessEvaluator, genomeFactory, genomeList, null, null, archive);

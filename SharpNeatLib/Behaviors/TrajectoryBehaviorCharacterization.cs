@@ -14,31 +14,32 @@ namespace SharpNeat.Behaviors
     public class TrajectoryBehaviorCharacterization : IBehaviorCharacterization
     {
         /// <summary>
+        ///     The double array of behaviors.  Since this is a trajectory characterization, it will contain the position of the
+        ///     agent for each time step.
+        /// </summary>
+        private readonly List<double> _behaviors;
+
+        /// <summary>
+        ///     The minimal criteria which the behavior must meet in order to be considered viable.
+        /// </summary>
+        private readonly IMinimalCriteria _minimalCriteria;
+
+        /// <summary>
         ///     Default trajectory-behavior characterization constructor.
         /// </summary>
         public TrajectoryBehaviorCharacterization()
         {
+            _behaviors = new List<double>();
         }
 
         /// <summary>
         ///     Trajectory behavior characterization constructor accepting a minimal criteria definition.
         /// </summary>
-        /// <param name="minmalCriteria"></param>
-        public TrajectoryBehaviorCharacterization(IMinimalCriteria minmalCriteria)
+        /// <param name="minimalCriteria"></param>
+        public TrajectoryBehaviorCharacterization(IMinimalCriteria minimalCriteria) : this()
         {
-            MinimalCriteria = minmalCriteria;
+            _minimalCriteria = minimalCriteria;
         }
-
-        /// <summary>
-        ///     The double array of behaviors.  Since this is a trajectory characterization, it will contain the position of the
-        ///     agent for each time step.
-        /// </summary>
-        public List<double> Behaviors { get; private set; }
-
-        /// <summary>
-        ///     The minimal criteria which the behavior must meet in order to be considered viable.
-        /// </summary>
-        public IMinimalCriteria MinimalCriteria { get; set; }
 
         /// <summary>
         ///     Updates the behavior array.  This equates to appending the the end point to the existing behavior array, thus
@@ -47,7 +48,7 @@ namespace SharpNeat.Behaviors
         /// <param name="newBehaviors">The new end point to append to the existing behavior state.</param>
         public void UpdateBehaviors(List<double> newBehaviors)
         {
-            Behaviors.AddRange(newBehaviors);
+            _behaviors.AddRange(newBehaviors);
         }
 
         /// <summary>
@@ -61,7 +62,16 @@ namespace SharpNeat.Behaviors
         public bool IsMinimalCriteriaSatisfied(BehaviorInfo behaviorInfo)
         {
             // If there is no minimal criteria, then by definition it has been met
-            return MinimalCriteria?.DoesCharacterizationSatisfyMinimalCriteria(behaviorInfo) ?? true;
+            return _minimalCriteria?.DoesCharacterizationSatisfyMinimalCriteria(behaviorInfo) ?? true;
+        }
+
+        /// <summary>
+        ///     Converts behavior characterization to an array of doubles.
+        /// </summary>
+        /// <returns>Behavior characterization as an array of doubles.</returns>
+        public double[] GetBehaviorCharacterizationAsArray()
+        {
+            return _behaviors.ToArray();
         }
     }
 }
