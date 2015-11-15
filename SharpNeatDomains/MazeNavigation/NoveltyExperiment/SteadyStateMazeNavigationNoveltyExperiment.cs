@@ -23,7 +23,7 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
         private double _archiveThresholdDecreaseMultiplier;
         private double _archiveThresholdIncreaseMultiplier;
         private int _batchSize;
-        private IBehaviorCharacterization _behaviorCharacterization;
+        private IBehaviorCharacterizationFactory _behaviorCharacterizationFactory;
         private IDataLogger _evaluationDataLogger;
         private IDataLogger _evolutionDataLogger;
         private int _maxGenerationArchiveAddition;
@@ -36,7 +36,8 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
             base.Initialize(name, xmlConfig);
 
             // Read in the behavior characterization
-            _behaviorCharacterization = ExperimentUtils.ReadBehaviorCharacterization(xmlConfig, "BehaviorConfig");
+            _behaviorCharacterizationFactory = ExperimentUtils.ReadBehaviorCharacterizationFactory(xmlConfig,
+                "BehaviorConfig");
 
             // Read in the novelty archive parameters
             ExperimentUtils.ReadNoveltyParameters(xmlConfig, out _archiveAdditionThreshold,
@@ -60,7 +61,8 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
             base.Initialize(experimentDictionary);
 
             // Read in behavior characterization
-            _behaviorCharacterization = ExperimentUtils.ReadBehaviorCharacterization(experimentDictionary, true);
+            _behaviorCharacterizationFactory = ExperimentUtils.ReadBehaviorCharacterizationFactory(
+                experimentDictionary, true);
 
             // Read in novelty archive parameters
             _archiveAdditionThreshold = experimentDictionary.Primary_NoveltySearch_ArchiveAdditionThreshold ??
@@ -117,7 +119,7 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
             // Create IBlackBox evaluator.
             var mazeNavigationEvaluator = new MazeNavigationNoveltyEvaluator(MaxDistanceToTarget, MaxTimesteps,
                 MazeVariant,
-                MinSuccessDistance, _behaviorCharacterization);
+                MinSuccessDistance, _behaviorCharacterizationFactory);
 
             // Create genome decoder.
             var genomeDecoder = CreateGenomeDecoder();

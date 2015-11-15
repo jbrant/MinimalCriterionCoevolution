@@ -10,7 +10,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCNSExperiment
 {
     public class MazeNavigationMCNSEvaluator : IPhenomeEvaluator<IBlackBox, BehaviorInfo>
     {
-        private readonly IBehaviorCharacterization _behaviorCharacterization;
+        private readonly IBehaviorCharacterizationFactory _behaviorCharacterizationFactory;
         private readonly int? _maxDistanceToTarget;
         private readonly int? _maxTimesteps;
         private readonly MazeVariant _mazeVariant;
@@ -18,13 +18,13 @@ namespace SharpNeat.Domains.MazeNavigation.MCNSExperiment
         private bool _stopConditionSatisfied;
 
         internal MazeNavigationMCNSEvaluator(int? maxDistanceToTarget, int? maxTimesteps, MazeVariant mazeVariant,
-            int? minSuccessDistance, IBehaviorCharacterization behaviorCharacterization)
+            int? minSuccessDistance, IBehaviorCharacterizationFactory behaviorCharacterizationFactory)
         {
             _maxDistanceToTarget = maxDistanceToTarget;
             _maxTimesteps = maxTimesteps;
             _mazeVariant = mazeVariant;
             _minSuccessDistance = minSuccessDistance;
-            _behaviorCharacterization = behaviorCharacterization;
+            _behaviorCharacterizationFactory = behaviorCharacterizationFactory;
         }
 
         /// <summary>
@@ -46,15 +46,19 @@ namespace SharpNeat.Domains.MazeNavigation.MCNSExperiment
             // Default the stop condition satisfied to false
             bool stopConditionSatisfied = false;
 
+            // Generate new behavior characterization
+            IBehaviorCharacterization behaviorCharacterization =
+                _behaviorCharacterizationFactory.CreateBehaviorCharacterization();
+
             // Instantiate the maze world
             var world = new MazeNavigationWorld<BehaviorInfo>(_mazeVariant, _minSuccessDistance, _maxDistanceToTarget,
-                _maxTimesteps, _behaviorCharacterization);
+                _maxTimesteps, behaviorCharacterization);
 
             // Run a single trial
             BehaviorInfo trialInfo = world.RunTrial(phenome, SearchType.MinimalCriteriaNoveltySearch, out stopConditionSatisfied);
 
             // Check if the current location satisfies the minimal criteria
-            if (_behaviorCharacterization.IsMinimalCriteriaSatisfied(trialInfo) == false)
+            if (behaviorCharacterization.IsMinimalCriteriaSatisfied(trialInfo) == false)
             {
                 trialInfo.DoesBehaviorSatisfyMinimalCriteria = false;
             }

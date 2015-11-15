@@ -4,13 +4,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Xml;
 using ExperimentEntities;
-using SharpNeat.Behaviors;
 using SharpNeat.Core;
 using SharpNeat.DistanceMetrics;
 using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Loggers;
-using SharpNeat.MinimalCriterias;
 using SharpNeat.Phenomes;
 using SharpNeat.SpeciationStrategies;
 
@@ -21,7 +19,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
     public class SteadyStateMazeNavigationMCSExperiment : BaseMazeNavigationExperiment
     {
         private int _batchSize;
-        private IBehaviorCharacterization _behaviorCharacterization;
+        private IBehaviorCharacterizationFactory _behaviorCharacterizationFactory;
         private IDataLogger _evaluationDataLogger;
         private IDataLogger _evolutionDataLogger;
 
@@ -38,7 +36,8 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             base.Initialize(name, xmlConfig);
 
             // Read in the behavior characterization
-            _behaviorCharacterization = ExperimentUtils.ReadBehaviorCharacterization(xmlConfig, "BehaviorConfig");
+            _behaviorCharacterizationFactory = ExperimentUtils.ReadBehaviorCharacterizationFactory(xmlConfig,
+                "BehaviorConfig");
 
             // Read in steady-state specific parameters
             _batchSize = XmlUtils.GetValueAsInt(xmlConfig, "OffspringBatchSize");
@@ -65,11 +64,8 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                 "experimentDictionary.Primary_MCS_MinimalCriteriaThreshold != null");
 
             // Read in the behavior characterization
-            _behaviorCharacterization =
-                new EndPointBehaviorCharacterization(
-                    new EuclideanDistanceCriteria((double) experimentDictionary.Primary_MCS_MinimalCriteriaStartX,
-                        (double) experimentDictionary.Primary_MCS_MinimalCriteriaStartY,
-                        (double) experimentDictionary.Primary_MCS_MinimalCriteriaThreshold));
+            _behaviorCharacterizationFactory = ExperimentUtils.ReadBehaviorCharacterizationFactory(
+                experimentDictionary, true);
 
             // Read in steady-state specific parameters
             _batchSize = experimentDictionary.Primary_OffspringBatchSize ?? default(int);
@@ -123,7 +119,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             // Create IBlackBox evaluator.
             var mazeNavigationEvaluator = new MazeNavigationMCSEvaluator(MaxDistanceToTarget, MaxTimesteps,
                 MazeVariant,
-                MinSuccessDistance, _behaviorCharacterization);
+                MinSuccessDistance, _behaviorCharacterizationFactory);
 
             // Create genome decoder.
             var genomeDecoder = CreateGenomeDecoder();

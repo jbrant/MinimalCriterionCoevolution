@@ -11,7 +11,7 @@ namespace SharpNeat.Domains
     /// <summary>
     ///     Defines the behavior characterization type to use (end point, trajectory, etc.) for a given experiment.
     /// </summary>
-    public enum BehaviorCharacterizationUtils
+    public enum BehaviorCharacterizationType
     {
         /// <summary>
         ///     Indicates the end point behavior characterization type.
@@ -55,15 +55,15 @@ namespace SharpNeat.Domains
         /// </summary>
         /// <param name="strBehavioralCharacterization">The string-valued behavior characterization.</param>
         /// <returns>The behavior characterization domain type.</returns>
-        public static BehaviorCharacterizationUtils ConvertStringToBehavioralCharacterization(
+        public static BehaviorCharacterizationType ConvertStringToBehavioralCharacterization(
             String strBehavioralCharacterization)
         {
             if ("EndPoint".Equals(strBehavioralCharacterization, StringComparison.InvariantCultureIgnoreCase) ||
                 "End Point".Equals(strBehavioralCharacterization, StringComparison.InvariantCultureIgnoreCase))
             {
-                return BehaviorCharacterizationUtils.EndPoint;
+                return BehaviorCharacterizationType.EndPoint;
             }
-            return BehaviorCharacterizationUtils.Trajectory;
+            return BehaviorCharacterizationType.Trajectory;
         }
 
         /// <summary>
@@ -99,7 +99,7 @@ namespace SharpNeat.Domains
         {
             switch (ConvertStringToBehavioralCharacterization(strBehaviorCharacterization))
             {
-                case BehaviorCharacterizationUtils.EndPoint:
+                case BehaviorCharacterizationType.EndPoint:
                     return new EndPointBehaviorCharacterization();
                 default:
                     return new TrajectoryBehaviorCharacterization();
@@ -115,14 +115,56 @@ namespace SharpNeat.Domains
         /// </param>
         /// <returns>An instantiated behavior characterization.</returns>
         public static IBehaviorCharacterization GenerateBehaviorCharacterization(
-            BehaviorCharacterizationUtils behaviorCharacterizationType)
+            BehaviorCharacterizationType behaviorCharacterizationType)
         {
             switch (behaviorCharacterizationType)
             {
-                case BehaviorCharacterizationUtils.EndPoint:
+                case BehaviorCharacterizationType.EndPoint:
                     return new EndPointBehaviorCharacterization();
                 default:
                     return new TrajectoryBehaviorCharacterization();
+            }
+        }
+
+        /// <summary>
+        ///     Creates a new behavior characterization factory based on the given string-valued behavior characterization.
+        /// </summary>
+        /// <param name="strBehaviorCharacterization">
+        ///     String representation of the behavior charcterization type for which to create a new behavior characterization
+        ///     factory.
+        /// </param>
+        /// <param name="minimalCriteria">The minimal criteria to impose upon generated behavior characterizations.</param>
+        /// <returns>An instantiated behavior characterization factory.</returns>
+        public static IBehaviorCharacterizationFactory GenerateBehaviorCharacterizationFactory(
+            String strBehaviorCharacterization, IMinimalCriteria minimalCriteria)
+        {
+            switch (ConvertStringToBehavioralCharacterization(strBehaviorCharacterization))
+            {
+                case BehaviorCharacterizationType.EndPoint:
+                    return new EndPointBehaviorCharacterizationFactory(minimalCriteria);
+                default:
+                    return new TrajectoryBehaviorCharacterizationFactory(minimalCriteria);
+            }
+        }
+
+        /// <summary>
+        ///     Creates a new behavior characterization factory based on the given behavior characterization type.
+        /// </summary>
+        /// <param name="behaviorCharacterizationType">
+        ///     The behavior charcterization type for which to create a new behavior
+        ///     characterization factory.
+        /// </param>
+        /// <param name="minimalCriteria">The minimal criteria to impose upon generated behavior characterizations.</param>
+        /// <returns>An instantiated behavior characterization factory.</returns>
+        public static IBehaviorCharacterizationFactory GenerateBehaviorCharacterizationFactory(
+            BehaviorCharacterizationType behaviorCharacterizationType, IMinimalCriteria minimalCriteria)
+        {
+            switch (behaviorCharacterizationType)
+            {
+                case BehaviorCharacterizationType.EndPoint:
+                    return new EndPointBehaviorCharacterizationFactory(minimalCriteria);
+                default:
+                    return new TrajectoryBehaviorCharacterizationFactory(minimalCriteria);
             }
         }
     }

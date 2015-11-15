@@ -22,7 +22,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCNSExperiment
         private double _archiveThresholdDecreaseMultiplier;
         private double _archiveThresholdIncreaseMultiplier;
         private int _batchSize;
-        private IBehaviorCharacterization _behaviorCharacterization;
+        private IBehaviorCharacterizationFactory _behaviorCharacterizationFactory;
 
         /// <summary>
         ///     Path/File to which to write generational data log.
@@ -39,7 +39,8 @@ namespace SharpNeat.Domains.MazeNavigation.MCNSExperiment
             base.Initialize(name, xmlConfig);
 
             // Read in the behavior characterization
-            _behaviorCharacterization = ExperimentUtils.ReadBehaviorCharacterization(xmlConfig, "BehaviorConfig");
+            _behaviorCharacterizationFactory = ExperimentUtils.ReadBehaviorCharacterizationFactory(xmlConfig,
+                "BehaviorConfig");
 
             // Read in the novelty archive parameters
             ExperimentUtils.ReadNoveltyParameters(xmlConfig, out _archiveAdditionThreshold,
@@ -95,7 +96,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCNSExperiment
             // Create IBlackBox evaluator.
             var mazeNavigationEvaluator = new MazeNavigationMCNSEvaluator(MaxDistanceToTarget, MaxTimesteps,
                 MazeVariant,
-                MinSuccessDistance, _behaviorCharacterization);
+                MinSuccessDistance, _behaviorCharacterizationFactory);
 
             // Create genome decoder.
             var genomeDecoder = CreateGenomeDecoder();

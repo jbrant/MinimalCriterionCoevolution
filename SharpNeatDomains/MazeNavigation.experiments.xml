@@ -170,7 +170,7 @@
     <AssemblyPath>SharpNeatDomains.dll</AssemblyPath>
     <ClassName>SharpNeat.Domains.MazeNavigation.MCSExperiment.QueueingMazeNavigationMCSExperiment</ClassName>
     <Config>
-      <PopulationSize>250</PopulationSize>
+      <PopulationSize>5000</PopulationSize>
       <SpecieCount>10</SpecieCount>
       <InterspeciesMatingProbability>0.001</InterspeciesMatingProbability>
       <Activation>
@@ -195,7 +195,7 @@
           <MinimalCriteriaConstraint>Mileage</MinimalCriteriaConstraint>
           <XStart>36</XStart>
           <YStart>184</YStart>
-          <MinimumMileage>150</MinimumMileage>
+          <MinimumMileage>350</MinimumMileage>
         </MinimalCriteriaConfig>
       </BehaviorConfig>
       <NearestNeighbors>15</NearestNeighbors>
@@ -216,7 +216,7 @@
             <MinimalCriteriaConstraint>Mileage</MinimalCriteriaConstraint>
             <XStart>36</XStart>
             <YStart>184</YStart>
-            <MinimumMileage>150</MinimumMileage>
+            <MinimumMileage>350</MinimumMileage>
           </MinimalCriteriaConfig>
         </InitBehaviorConfig>
         <NearestNeighbors>15</NearestNeighbors>

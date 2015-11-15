@@ -304,8 +304,9 @@ namespace SharpNeat.Domains
         ///     Reads behavior characterization parameters from the configuration file.
         /// </summary>
         /// <param name="xmlConfig">The reference to the XML configuration file.</param>
+        /// <param name="behaviorConfigTagName"></param>
         /// <returns>The behavior characterization parameters.</returns>
-        public static IBehaviorCharacterization ReadBehaviorCharacterization(XmlElement xmlConfig,
+        public static IBehaviorCharacterizationFactory ReadBehaviorCharacterizationFactory(XmlElement xmlConfig,
             string behaviorConfigTagName)
         {
             // Get root of behavior configuration section
@@ -318,11 +319,7 @@ namespace SharpNeat.Domains
             }
 
             XmlElement xmlBehaviorConfig = behaviorNodeList[0] as XmlElement;
-
-            // Parse and generate the appropriate behavior characterization
-            IBehaviorCharacterization behaviorCharacterization = BehaviorCharacterizationUtil
-                .GenerateBehaviorCharacterization(
-                    XmlUtils.TryGetValueAsString(xmlBehaviorConfig, "BehaviorCharacterization"));
+            IMinimalCriteria minimalCriteria = null;
 
             // Try to get the child minimal criteria configuration
             XmlNodeList minimalCriteriaNodeList = xmlBehaviorConfig.GetElementsByTagName("MinimalCriteriaConfig", "");
@@ -354,7 +351,7 @@ namespace SharpNeat.Domains
                         double yMax = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "YMax");
 
                         // Set the euclidean location minimal criteria on the behavior characterization
-                        behaviorCharacterization.MinimalCriteria = new EuclideanLocationCriteria(xMin, xMax, yMin, yMax);
+                        minimalCriteria = new EuclideanLocationCriteria(xMin, xMax, yMin, yMax);
 
                         break;
 
@@ -367,7 +364,7 @@ namespace SharpNeat.Domains
                             "MinimumRequiredDistance");
 
                         // Set the euclidean distance minimal criteria on the behavior characterization
-                        behaviorCharacterization.MinimalCriteria = new EuclideanDistanceCriteria(xStart, yStart,
+                        minimalCriteria = new EuclideanDistanceCriteria(xStart, yStart,
                             minimumDistanceTraveled);
 
                         break;
@@ -380,13 +377,18 @@ namespace SharpNeat.Domains
                         double minimumMileage = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "MinimumMileage");
 
                         // Set the mileage minimal criteria on the behavior characterization
-                        behaviorCharacterization.MinimalCriteria = new MileageCriteria(xStart, yStart, minimumMileage);
+                        minimalCriteria = new MileageCriteria(xStart, yStart, minimumMileage);
 
                         break;
                 }
             }
 
-            return behaviorCharacterization;
+            // Parse and generate the appropriate behavior characterization factory
+            IBehaviorCharacterizationFactory behaviorCharacterizationFactory =
+                BehaviorCharacterizationUtil.GenerateBehaviorCharacterizationFactory(
+                    XmlUtils.TryGetValueAsString(xmlBehaviorConfig, "BehaviorCharacterization"), minimalCriteria);
+
+            return behaviorCharacterizationFactory;
         }
 
         /// <summary>
@@ -398,7 +400,8 @@ namespace SharpNeat.Domains
         ///     characterization used for experiment initialization.
         /// </param>
         /// <returns></returns>
-        public static IBehaviorCharacterization ReadBehaviorCharacterization(ExperimentDictionary experiment,
+        public static IBehaviorCharacterizationFactory ReadBehaviorCharacterizationFactory(
+            ExperimentDictionary experiment,
             bool isPrimary)
         {
             // Read behavior characterization
@@ -412,13 +415,16 @@ namespace SharpNeat.Domains
                 throw new ArgumentException("Missing or invalid BehaviorConfig settings.");
             }
 
-            // Parse and generate the appropriate behavior characterization
-            IBehaviorCharacterization behaviorCharacterization = BehaviorCharacterizationUtil
-                .GenerateBehaviorCharacterization(behaviorCharacterizationName);
+            IMinimalCriteria minimalCriteria = null;
 
             // TODO: Need to handle associated minimal criteria
 
-            return behaviorCharacterization;
+            // Parse and generate the appropriate behavior characterization factory
+            IBehaviorCharacterizationFactory behaviorCharacterizationFactory =
+                BehaviorCharacterizationUtil.GenerateBehaviorCharacterizationFactory(behaviorCharacterizationName,
+                    minimalCriteria);
+
+            return behaviorCharacterizationFactory;
         }
     }
 }

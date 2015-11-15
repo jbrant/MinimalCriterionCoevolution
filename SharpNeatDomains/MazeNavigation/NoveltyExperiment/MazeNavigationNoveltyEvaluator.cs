@@ -1,7 +1,6 @@
 ﻿#region
 
 using System.Collections.Generic;
-using System.Threading;
 using SharpNeat.Core;
 using SharpNeat.Domains.MazeNavigation.Components;
 using SharpNeat.Loggers;
@@ -13,22 +12,22 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
 {
     internal class MazeNavigationNoveltyEvaluator : IPhenomeEvaluator<IBlackBox, BehaviorInfo>
     {
-        private readonly IBehaviorCharacterization _behaviorCharacterization;
+        private readonly IBehaviorCharacterizationFactory _behaviorCharacterizationFactory;
         private readonly int? _maxDistanceToTarget;
         private readonly int? _maxTimesteps;
         private readonly MazeVariant _mazeVariant;
         private readonly int? _minSuccessDistance;
-        private bool _stopConditionSatisfied;
         private readonly object evaluationLock = new object();
+        private bool _stopConditionSatisfied;
 
         internal MazeNavigationNoveltyEvaluator(int? maxDistanceToTarget, int? maxTimesteps, MazeVariant mazeVariant,
-            int? minSuccessDistance, IBehaviorCharacterization behaviorCharacterization)
+            int? minSuccessDistance, IBehaviorCharacterizationFactory behaviorCharacterizationFactory)
         {
             _maxDistanceToTarget = maxDistanceToTarget;
             _maxTimesteps = maxTimesteps;
             _mazeVariant = mazeVariant;
             _minSuccessDistance = minSuccessDistance;
-            _behaviorCharacterization = behaviorCharacterization;
+            _behaviorCharacterizationFactory = behaviorCharacterizationFactory;
         }
 
         /// <summary>
@@ -54,10 +53,14 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
             // Default the stop condition satisfied to false
             bool stopConditionSatisfied = false;
 
+            // Generate new behavior characterization
+            IBehaviorCharacterization behaviorCharacterization =
+                _behaviorCharacterizationFactory.CreateBehaviorCharacterization();
+
             // Instantiate the maze world
             MazeNavigationWorld<BehaviorInfo> world = new MazeNavigationWorld<BehaviorInfo>(_mazeVariant,
                 _minSuccessDistance, _maxDistanceToTarget,
-                _maxTimesteps, _behaviorCharacterization);
+                _maxTimesteps, behaviorCharacterization);
 
             // Run a single trial
             BehaviorInfo trialInfo = world.RunTrial(phenome, SearchType.NoveltySearch, out stopConditionSatisfied);

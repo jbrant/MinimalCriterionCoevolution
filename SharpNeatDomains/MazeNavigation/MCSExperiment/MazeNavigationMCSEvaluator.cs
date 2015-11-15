@@ -12,7 +12,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 {
     public class MazeNavigationMCSEvaluator : IPhenomeEvaluator<IBlackBox, BehaviorInfo>
     {
-        private readonly IBehaviorCharacterization _behaviorCharacterization;
+        private readonly IBehaviorCharacterizationFactory _behaviorCharacterizationFactory;
         private readonly int? _maxDistanceToTarget;
         private readonly int? _maxTimesteps;
         private readonly MazeVariant _mazeVariant;
@@ -21,14 +21,14 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         private bool _stopConditionSatisfied;
 
         internal MazeNavigationMCSEvaluator(int? maxDistanceToTarget, int? maxTimesteps, MazeVariant mazeVariant,
-            int? minSuccessDistance, IBehaviorCharacterization behaviorCharacterization,
+            int? minSuccessDistance, IBehaviorCharacterizationFactory behaviorCharacterizationFactory,
             ulong initializationEvaluations = 0)
         {
             _maxDistanceToTarget = maxDistanceToTarget;
             _maxTimesteps = maxTimesteps;
             _mazeVariant = mazeVariant;
             _minSuccessDistance = minSuccessDistance;
-            _behaviorCharacterization = behaviorCharacterization;
+            _behaviorCharacterizationFactory = behaviorCharacterizationFactory;
             EvaluationCount = initializationEvaluations;
         }
 
@@ -54,14 +54,15 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 
             // Default the stop condition satisfied to false
             bool stopConditionSatisfied = false;
-
-            // Reset the internal state of the behavior characterization
-            _behaviorCharacterization.ResetState();
+            
+            // Generate new behavior characterization
+            IBehaviorCharacterization behaviorCharacterization =
+                _behaviorCharacterizationFactory.CreateBehaviorCharacterization();
 
             // Instantiate the maze world
             MazeNavigationWorld<BehaviorInfo> world = new MazeNavigationWorld<BehaviorInfo>(_mazeVariant,
                 _minSuccessDistance, _maxDistanceToTarget,
-                _maxTimesteps, _behaviorCharacterization);
+                _maxTimesteps, behaviorCharacterization);
 
             // Run a single trial
             BehaviorInfo trialInfo = world.RunTrial(phenome, SearchType.MinimalCriteriaSearch,
@@ -71,7 +72,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             trialInfo.ObjectiveDistance = world.GetDistanceToTarget();
 
             // Check if the current location satisfies the minimal criteria
-            if (_behaviorCharacterization.IsMinimalCriteriaSatisfied(trialInfo) == false)
+            if (behaviorCharacterization.IsMinimalCriteriaSatisfied(trialInfo) == false)
             {
                 trialInfo.DoesBehaviorSatisfyMinimalCriteria = false;
             }

@@ -7,7 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using ExperimentEntities;
-using SharpNeat.Behaviors;
 using SharpNeat.Core;
 using SharpNeat.DistanceMetrics;
 using SharpNeat.Domains.MazeNavigation.Components;
@@ -16,7 +15,6 @@ using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.EvolutionAlgorithms.ComplexityRegulation;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Loggers;
-using SharpNeat.MinimalCriterias;
 using SharpNeat.NoveltyArchives;
 using SharpNeat.Phenomes;
 using SharpNeat.SpeciationStrategies;
@@ -28,7 +26,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
     public class QueueingMazeNavigationMCSExperiment : BaseMazeNavigationExperiment
     {
         private int _batchSize;
-        private IBehaviorCharacterization _behaviorCharacterization;
+        private IBehaviorCharacterizationFactory _behaviorCharacterizationFactory;
         private IDataLogger _evaluationDataLogger;
         private IDataLogger _evolutionDataLogger;
         private InitializationAlgorithm _initializationAlgorithm;
@@ -38,7 +36,8 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             base.Initialize(name, xmlConfig);
 
             // Read in the behavior characterization
-            _behaviorCharacterization = ExperimentUtils.ReadBehaviorCharacterization(xmlConfig, "BehaviorConfig");
+            _behaviorCharacterizationFactory = ExperimentUtils.ReadBehaviorCharacterizationFactory(xmlConfig,
+                "BehaviorConfig");
 
             // Read in number of offspring to produce in a single batch
             _batchSize = XmlUtils.GetValueAsInt(xmlConfig, "OffspringBatchSize");
@@ -71,11 +70,8 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                 "experimentDictionary.Primary_MCS_MinimalCriteriaThreshold != null");
 
             // Read in the behavior characterization
-            _behaviorCharacterization =
-                new EndPointBehaviorCharacterization(
-                    new EuclideanDistanceCriteria((double) experimentDictionary.Primary_MCS_MinimalCriteriaStartX,
-                        (double) experimentDictionary.Primary_MCS_MinimalCriteriaStartY,
-                        (double) experimentDictionary.Primary_MCS_MinimalCriteriaThreshold));
+            _behaviorCharacterizationFactory = ExperimentUtils.ReadBehaviorCharacterizationFactory(
+                experimentDictionary, true);
 
             // Read in number of offspring to produce in a single batch
             _batchSize = experimentDictionary.Primary_OffspringBatchSize ?? default(int);
@@ -121,7 +117,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             IPhenomeEvaluator<IBlackBox, BehaviorInfo> mazeNavigationEvaluator =
                 new MazeNavigationMCSEvaluator(MaxDistanceToTarget, MaxTimesteps,
                     MazeVariant,
-                    MinSuccessDistance, _behaviorCharacterization, initializationEvaluations);
+                    MinSuccessDistance, _behaviorCharacterizationFactory, initializationEvaluations);
 
             // Create genome decoder.
             IGenomeDecoder<NeatGenome, IBlackBox> genomeDecoder = CreateGenomeDecoder();
@@ -148,7 +144,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             private double _archiveThresholdDecreaseMultiplier;
             private double _archiveThresholdIncreaseMultiplier;
             private int _batchSize;
-            private IBehaviorCharacterization _behaviorCharacterization;
+            private IBehaviorCharacterizationFactory _behaviorCharacterizationFactory;
             private string _complexityRegulationStrategyDefinition;
             private int? _complexityThreshold;
             private AbstractNeatEvolutionAlgorithm<NeatGenome> _initializationEa;
@@ -174,7 +170,8 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                 _complexityThreshold = XmlUtils.TryGetValueAsInt(xmlConfig, "ComplexityThreshold");
 
                 // Read in the behavior characterization
-                _behaviorCharacterization = ExperimentUtils.ReadBehaviorCharacterization(xmlConfig, "InitBehaviorConfig");
+                _behaviorCharacterizationFactory = ExperimentUtils.ReadBehaviorCharacterizationFactory(xmlConfig,
+                    "InitBehaviorConfig");
 
                 // Read in the novelty archive parameters
                 ExperimentUtils.ReadNoveltyParameters(xmlConfig, out _archiveAdditionThreshold,
@@ -235,7 +232,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                 MazeNavigationNoveltyInitializationEvaluator mazeNavigationEvaluator =
                     new MazeNavigationNoveltyInitializationEvaluator(_maxDistanceToTarget, _maxTimesteps,
                         _mazeVariant,
-                        _minSuccessDistance, _behaviorCharacterization);
+                        _minSuccessDistance, _behaviorCharacterizationFactory);
 
                 // Create a novelty archive.
                 AbstractNoveltyArchive<NeatGenome> archive =
@@ -243,15 +240,15 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                         _archiveThresholdDecreaseMultiplier, _archiveThresholdIncreaseMultiplier,
                         _maxGenerationArchiveAddition, _maxGenerationsWithoutArchiveAddition);
 
-                IGenomeEvaluator<NeatGenome> fitnessEvaluator =
-                    new SerialGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
-                        SelectionType.SteadyState, SearchType.NoveltySearch,
-                        _nearestNeighbors, archive);
-
-//                IGenomeEvaluator < NeatGenome> fitnessEvaluator =
-//                    new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
+//                IGenomeEvaluator<NeatGenome> fitnessEvaluator =
+//                    new SerialGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
 //                        SelectionType.SteadyState, SearchType.NoveltySearch,
 //                        _nearestNeighbors, archive);
+
+                IGenomeEvaluator < NeatGenome> fitnessEvaluator =
+                    new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
+                        SelectionType.SteadyState, SearchType.NoveltySearch,
+                        _nearestNeighbors, archive);
 
                 // Initialize the evolution algorithm.
                 _initializationEa.Initialize(fitnessEvaluator, genomeFactory, genomeList, null, null, archive);
