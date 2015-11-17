@@ -5,6 +5,45 @@
     <!-- SSDL content -->
     <edmx:StorageModels>
     <Schema Namespace="ExperimentDataModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="MCSExperimentEvaluationData">
+          <Key>
+            <PropertyRef Name="ExperimentDictionaryID" />
+            <PropertyRef Name="Run" />
+            <PropertyRef Name="Generation" />
+          </Key>
+          <Property Name="ExperimentDictionaryID" Type="int" Nullable="false" />
+          <Property Name="Run" Type="int" Nullable="false" />
+          <Property Name="Generation" Type="int" Nullable="false" />
+          <Property Name="PopulationSize" Type="int" Nullable="false" />
+          <Property Name="OffspringCount" Type="int" Nullable="false" />
+          <Property Name="TotalEvaluations" Type="int" />
+          <Property Name="EvaluationsPerSecond" Type="int" />
+          <Property Name="ClosestGenomeID" Type="int" Nullable="false" />
+          <Property Name="ClosestGenomeConnectionGeneCount" Type="int" Nullable="false" />
+          <Property Name="ClosestGenomeNeuronGeneCount" Type="int" Nullable="false" />
+          <Property Name="ClosestGenomeTotalGeneCount" Type="int" Nullable="false" />
+          <Property Name="ClosestGenomeEvaluationCount" Type="int" />
+          <Property Name="ClosestGenomeDistanceToTarget" Type="float" />
+          <Property Name="ClosestGenomeEndPositionX" Type="float" />
+          <Property Name="ClosestGenomeEndPositionY" Type="float" />
+        </EntityType>
+        <EntityType Name="MCSExperimentOrganismStateData">
+          <Key>
+            <PropertyRef Name="ExperimentDictionaryID" />
+            <PropertyRef Name="Run" />
+            <PropertyRef Name="Generation" />
+            <PropertyRef Name="Evaluation" />
+          </Key>
+          <Property Name="ExperimentDictionaryID" Type="int" Nullable="false" />
+          <Property Name="Run" Type="int" Nullable="false" />
+          <Property Name="Generation" Type="int" Nullable="false" />
+          <Property Name="Evaluation" Type="int" Nullable="false" />
+          <Property Name="IsViable" Type="bit" Nullable="false" />
+          <Property Name="StopConditionSatisfied" Type="bit" Nullable="false" />
+          <Property Name="DistanceToTarget" Type="float" Nullable="false" />
+          <Property Name="AgentXLocation" Type="float" Nullable="false" />
+          <Property Name="AgentYLocation" Type="float" Nullable="false" />
+        </EntityType>
         <EntityType Name="NoveltyExperimentEvaluationData">
           <Key>
             <PropertyRef Name="ExperimentDictionaryID" />
@@ -136,6 +175,8 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <Property Name="Primary_MCS_MinimalCriteriaName" Type="varchar" MaxLength="200" />
         </EntityType>
         <EntityContainer Name="ExperimentDataModelStoreContainer">
+          <EntitySet Name="MCSExperimentEvaluationData" EntityType="Self.MCSExperimentEvaluationData" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="MCSExperimentOrganismStateData" EntityType="Self.MCSExperimentOrganismStateData" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="NoveltyExperimentEvaluationData" EntityType="Self.NoveltyExperimentEvaluationData" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="NoveltyExperimentOrganismStateData" EntityType="Self.NoveltyExperimentOrganismStateData" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ExperimentDictionary_vw" EntityType="Self.ExperimentDictionary_vw" store:Type="Views" store:Schema="dbo">
@@ -214,6 +255,16 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
             <End Role="ExperimentDictionary" EntitySet="ExperimentDictionaries" />
             <End Role="NoveltyExperimentEvaluationData" EntitySet="NoveltyExperimentEvaluationDatas" />
           </AssociationSet>
+          <EntitySet Name="MCSExperimentEvaluationDatas" EntityType="ExperimentDataModel.MCSExperimentEvaluationData" />
+          <AssociationSet Name="FK_MCSExperimentEvaluationData_ExperimentDictionary" Association="ExperimentDataModel.FK_MCSExperimentEvaluationData_ExperimentDictionary">
+            <End Role="ExperimentDictionary" EntitySet="ExperimentDictionaries" />
+            <End Role="MCSExperimentEvaluationData" EntitySet="MCSExperimentEvaluationDatas" />
+          </AssociationSet>
+          <EntitySet Name="MCSExperimentOrganismStateDatas" EntityType="ExperimentDataModel.MCSExperimentOrganismStateData" />
+          <AssociationSet Name="FK_MCSExperimentOrganismStateData_ExperimentDictionary" Association="ExperimentDataModel.FK_MCSExperimentOrganismStateData_ExperimentDictionary">
+            <End Role="ExperimentDictionary" EntitySet="ExperimentDictionaries" />
+            <End Role="MCSExperimentOrganismStateData" EntitySet="MCSExperimentOrganismStateDatas" />
+          </AssociationSet>
         </EntityContainer>
         <EntityType Name="ExperimentDictionary">
           <Key>
@@ -276,6 +327,8 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <Property Name="Primary_MCS_MinimalCriteriaName" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
           <NavigationProperty Name="NoveltyExperimentOrganismStateDatas" Relationship="ExperimentDataModel.FK_NoveltyExperimentOrganismStateData_ExperimentDictionary" FromRole="ExperimentDictionary" ToRole="NoveltyExperimentOrganismStateData" />
           <NavigationProperty Name="NoveltyExperimentEvaluationDatas" Relationship="ExperimentDataModel.FK_NoveltyExperimentEvaluationData_ExperimentDictionary" FromRole="ExperimentDictionary" ToRole="NoveltyExperimentEvaluationData" />
+          <NavigationProperty Name="MCSExperimentEvaluationDatas" Relationship="ExperimentDataModel.FK_MCSExperimentEvaluationData_ExperimentDictionary" FromRole="ExperimentDictionary" ToRole="MCSExperimentEvaluationData" />
+          <NavigationProperty Name="MCSExperimentOrganismStateDatas" Relationship="ExperimentDataModel.FK_MCSExperimentOrganismStateData_ExperimentDictionary" FromRole="ExperimentDictionary" ToRole="MCSExperimentOrganismStateData" />
         </EntityType>
         <EntityType Name="NoveltyExperimentOrganismStateData">
           <Key>
@@ -348,6 +401,71 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
               <PropertyRef Name="ExperimentDictionaryID" />
             </Principal>
             <Dependent Role="NoveltyExperimentEvaluationData">
+              <PropertyRef Name="ExperimentDictionaryID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="MCSExperimentEvaluationData">
+          <Key>
+            <PropertyRef Name="ExperimentDictionaryID" />
+            <PropertyRef Name="Run" />
+            <PropertyRef Name="Generation" />
+          </Key>
+          <Property Name="ExperimentDictionaryID" Type="Int32" Nullable="false" />
+          <Property Name="Run" Type="Int32" Nullable="false" />
+          <Property Name="Generation" Type="Int32" Nullable="false" />
+          <Property Name="PopulationSize" Type="Int32" Nullable="false" />
+          <Property Name="OffspringCount" Type="Int32" Nullable="false" />
+          <Property Name="TotalEvaluations" Type="Int32" />
+          <Property Name="EvaluationsPerSecond" Type="Int32" />
+          <Property Name="ClosestGenomeID" Type="Int32" Nullable="false" />
+          <Property Name="ClosestGenomeConnectionGeneCount" Type="Int32" Nullable="false" />
+          <Property Name="ClosestGenomeNeuronGeneCount" Type="Int32" Nullable="false" />
+          <Property Name="ClosestGenomeTotalGeneCount" Type="Int32" Nullable="false" />
+          <Property Name="ClosestGenomeEvaluationCount" Type="Int32" />
+          <Property Name="ClosestGenomeDistanceToTarget" Type="Double" />
+          <Property Name="ClosestGenomeEndPositionX" Type="Double" />
+          <Property Name="ClosestGenomeEndPositionY" Type="Double" />
+          <NavigationProperty Name="ExperimentDictionary" Relationship="ExperimentDataModel.FK_MCSExperimentEvaluationData_ExperimentDictionary" FromRole="MCSExperimentEvaluationData" ToRole="ExperimentDictionary" />
+        </EntityType>
+        <Association Name="FK_MCSExperimentEvaluationData_ExperimentDictionary">
+          <End Type="ExperimentDataModel.ExperimentDictionary" Role="ExperimentDictionary" Multiplicity="1" />
+          <End Type="ExperimentDataModel.MCSExperimentEvaluationData" Role="MCSExperimentEvaluationData" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ExperimentDictionary">
+              <PropertyRef Name="ExperimentDictionaryID" />
+            </Principal>
+            <Dependent Role="MCSExperimentEvaluationData">
+              <PropertyRef Name="ExperimentDictionaryID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="MCSExperimentOrganismStateData">
+          <Key>
+            <PropertyRef Name="ExperimentDictionaryID" />
+            <PropertyRef Name="Run" />
+            <PropertyRef Name="Generation" />
+            <PropertyRef Name="Evaluation" />
+          </Key>
+          <Property Name="ExperimentDictionaryID" Type="Int32" Nullable="false" />
+          <Property Name="Run" Type="Int32" Nullable="false" />
+          <Property Name="Generation" Type="Int32" Nullable="false" />
+          <Property Name="Evaluation" Type="Int32" Nullable="false" />
+          <Property Name="IsViable" Type="Boolean" Nullable="false" />
+          <Property Name="StopConditionSatisfied" Type="Boolean" Nullable="false" />
+          <Property Name="DistanceToTarget" Type="Double" Nullable="false" />
+          <Property Name="AgentXLocation" Type="Double" Nullable="false" />
+          <Property Name="AgentYLocation" Type="Double" Nullable="false" />
+          <NavigationProperty Name="ExperimentDictionary" Relationship="ExperimentDataModel.FK_MCSExperimentOrganismStateData_ExperimentDictionary" FromRole="MCSExperimentOrganismStateData" ToRole="ExperimentDictionary" />
+        </EntityType>
+        <Association Name="FK_MCSExperimentOrganismStateData_ExperimentDictionary">
+          <End Type="ExperimentDataModel.ExperimentDictionary" Role="ExperimentDictionary" Multiplicity="1" />
+          <End Type="ExperimentDataModel.MCSExperimentOrganismStateData" Role="MCSExperimentOrganismStateData" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ExperimentDictionary">
+              <PropertyRef Name="ExperimentDictionaryID" />
+            </Principal>
+            <Dependent Role="MCSExperimentOrganismStateData">
               <PropertyRef Name="ExperimentDictionaryID" />
             </Dependent>
           </ReferentialConstraint>
@@ -459,6 +577,42 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
                 <ScalarProperty Name="SexualOffspringCount" ColumnName="SexualOffspringCount" />
                 <ScalarProperty Name="AsexualOffspringCount" ColumnName="AsexualOffspringCount" />
                 <ScalarProperty Name="SpecieCount" ColumnName="SpecieCount" />
+                <ScalarProperty Name="Generation" ColumnName="Generation" />
+                <ScalarProperty Name="Run" ColumnName="Run" />
+                <ScalarProperty Name="ExperimentDictionaryID" ColumnName="ExperimentDictionaryID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="MCSExperimentEvaluationDatas">
+            <EntityTypeMapping TypeName="ExperimentDataModel.MCSExperimentEvaluationData">
+              <MappingFragment StoreEntitySet="MCSExperimentEvaluationData">
+                <ScalarProperty Name="ClosestGenomeEndPositionY" ColumnName="ClosestGenomeEndPositionY" />
+                <ScalarProperty Name="ClosestGenomeEndPositionX" ColumnName="ClosestGenomeEndPositionX" />
+                <ScalarProperty Name="ClosestGenomeDistanceToTarget" ColumnName="ClosestGenomeDistanceToTarget" />
+                <ScalarProperty Name="ClosestGenomeEvaluationCount" ColumnName="ClosestGenomeEvaluationCount" />
+                <ScalarProperty Name="ClosestGenomeTotalGeneCount" ColumnName="ClosestGenomeTotalGeneCount" />
+                <ScalarProperty Name="ClosestGenomeNeuronGeneCount" ColumnName="ClosestGenomeNeuronGeneCount" />
+                <ScalarProperty Name="ClosestGenomeConnectionGeneCount" ColumnName="ClosestGenomeConnectionGeneCount" />
+                <ScalarProperty Name="ClosestGenomeID" ColumnName="ClosestGenomeID" />
+                <ScalarProperty Name="EvaluationsPerSecond" ColumnName="EvaluationsPerSecond" />
+                <ScalarProperty Name="TotalEvaluations" ColumnName="TotalEvaluations" />
+                <ScalarProperty Name="OffspringCount" ColumnName="OffspringCount" />
+                <ScalarProperty Name="PopulationSize" ColumnName="PopulationSize" />
+                <ScalarProperty Name="Generation" ColumnName="Generation" />
+                <ScalarProperty Name="Run" ColumnName="Run" />
+                <ScalarProperty Name="ExperimentDictionaryID" ColumnName="ExperimentDictionaryID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="MCSExperimentOrganismStateDatas">
+            <EntityTypeMapping TypeName="ExperimentDataModel.MCSExperimentOrganismStateData">
+              <MappingFragment StoreEntitySet="MCSExperimentOrganismStateData">
+                <ScalarProperty Name="AgentYLocation" ColumnName="AgentYLocation" />
+                <ScalarProperty Name="AgentXLocation" ColumnName="AgentXLocation" />
+                <ScalarProperty Name="DistanceToTarget" ColumnName="DistanceToTarget" />
+                <ScalarProperty Name="StopConditionSatisfied" ColumnName="StopConditionSatisfied" />
+                <ScalarProperty Name="IsViable" ColumnName="IsViable" />
+                <ScalarProperty Name="Evaluation" ColumnName="Evaluation" />
                 <ScalarProperty Name="Generation" ColumnName="Generation" />
                 <ScalarProperty Name="Run" ColumnName="Run" />
                 <ScalarProperty Name="ExperimentDictionaryID" ColumnName="ExperimentDictionaryID" />

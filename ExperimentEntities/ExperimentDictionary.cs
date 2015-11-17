@@ -19,6 +19,8 @@ namespace ExperimentEntities
         {
             this.NoveltyExperimentOrganismStateDatas = new HashSet<NoveltyExperimentOrganismStateData>();
             this.NoveltyExperimentEvaluationDatas = new HashSet<NoveltyExperimentEvaluationData>();
+            this.MCSExperimentEvaluationDatas = new HashSet<MCSExperimentEvaluationData>();
+            this.MCSExperimentOrganismStateDatas = new HashSet<MCSExperimentOrganismStateData>();
         }
     
         public int ExperimentDictionaryID { get; set; }
@@ -81,5 +83,9 @@ namespace ExperimentEntities
         public virtual ICollection<NoveltyExperimentOrganismStateData> NoveltyExperimentOrganismStateDatas { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<NoveltyExperimentEvaluationData> NoveltyExperimentEvaluationDatas { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<MCSExperimentEvaluationData> MCSExperimentEvaluationDatas { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<MCSExperimentOrganismStateData> MCSExperimentOrganismStateDatas { get; set; }
     }
 }

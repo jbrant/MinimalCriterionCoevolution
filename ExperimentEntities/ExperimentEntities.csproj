@@ -71,6 +71,12 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ExperimentModel.edmx</DependentUpon>
     </Compile>
+    <Compile Include="MCSExperimentEvaluationData.cs">
+      <DependentUpon>ExperimentModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="MCSExperimentOrganismStateData.cs">
+      <DependentUpon>ExperimentModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="NoveltyExperimentEvaluationData.cs">
       <DependentUpon>ExperimentModel.tt</DependentUpon>
     </Compile>
