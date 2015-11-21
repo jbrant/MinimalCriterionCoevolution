@@ -59,7 +59,7 @@ namespace SharpNeat.EvolutionAlgorithms
         {
             return new List<LoggableElement>
             {
-                new LoggableElement(NoveltyEvolutionFieldElements.SpecieCount, SpecieList.Count)
+                new LoggableElement(EvolutionFieldElements.SpecieCount, SpecieList.Count)
             };
         }
 

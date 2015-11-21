@@ -86,9 +86,12 @@
     <Compile Include="Core\IBehaviorCharacterizationFactory.cs" />
     <Compile Include="Core\IMinimalCriteria.cs" />
     <Compile Include="Core\INoveltyArchive.cs" />
+    <Compile Include="Core\RunPhase.cs" />
     <Compile Include="EvolutionAlgorithms\QueueingNeatEvolutionAlgorithm.cs" />
     <Compile Include="Loggers\AbstractEntityDataLogger.cs" />
     <Compile Include="Loggers\LoggingParameters.cs" />
+    <Compile Include="Loggers\McsExperimentEvaluationEntityDataLogger.cs" />
+    <Compile Include="Loggers\McsExperimentOrganismStateEntityDataLogger.cs" />
     <Compile Include="Loggers\NoveltyExperimentOrganismStateEntityDataLogger.cs" />
     <Compile Include="Loggers\NoveltyExperimentEvaluationEntityDataLogger.cs" />
     <Compile Include="Loggers\FieldElement.cs" />

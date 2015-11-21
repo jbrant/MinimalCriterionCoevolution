@@ -59,21 +59,21 @@ namespace SharpNeat.EvolutionAlgorithms
         {
             return new List<LoggableElement>
             {
-                new LoggableElement(NoveltyEvolutionFieldElements.Generation, _generation),
-                new LoggableElement(NoveltyEvolutionFieldElements.TotalEvaluations, _totalEvaluationCount),
-                new LoggableElement(NoveltyEvolutionFieldElements.EvaluationsPerSecond, _evaluationsPerSec),
-                new LoggableElement(NoveltyEvolutionFieldElements.MaxFitness, _maxFitness),
-                new LoggableElement(NoveltyEvolutionFieldElements.MeanFitness, _meanFitness),
-                new LoggableElement(NoveltyEvolutionFieldElements.MeanSpecieChampFitness, _meanSpecieChampFitness),
-                new LoggableElement(NoveltyEvolutionFieldElements.MaxComplexity, _maxComplexity),
-                new LoggableElement(NoveltyEvolutionFieldElements.MeanComplexity, _meanComplexity),
-                new LoggableElement(NoveltyEvolutionFieldElements.TotalOffspringCount, _totalOffspringCount),
-                new LoggableElement(NoveltyEvolutionFieldElements.AsexualOffspringCount, _asexualOffspringCount),
-                new LoggableElement(NoveltyEvolutionFieldElements.SexualOffspringCount, _sexualOffspringCount),
-                new LoggableElement(NoveltyEvolutionFieldElements.InterspeciesOffspringCount,
+                new LoggableElement(EvolutionFieldElements.Generation, _generation),
+                new LoggableElement(EvolutionFieldElements.TotalEvaluations, _totalEvaluationCount),
+                new LoggableElement(EvolutionFieldElements.EvaluationsPerSecond, _evaluationsPerSec),
+                new LoggableElement(EvolutionFieldElements.MaxFitness, _maxFitness),
+                new LoggableElement(EvolutionFieldElements.MeanFitness, _meanFitness),
+                new LoggableElement(EvolutionFieldElements.MeanSpecieChampFitness, _meanSpecieChampFitness),
+                new LoggableElement(EvolutionFieldElements.MaxComplexity, _maxComplexity),
+                new LoggableElement(EvolutionFieldElements.MeanComplexity, _meanComplexity),
+                new LoggableElement(EvolutionFieldElements.TotalOffspringCount, _totalOffspringCount),
+                new LoggableElement(EvolutionFieldElements.AsexualOffspringCount, _asexualOffspringCount),
+                new LoggableElement(EvolutionFieldElements.SexualOffspringCount, _sexualOffspringCount),
+                new LoggableElement(EvolutionFieldElements.InterspeciesOffspringCount,
                     _interspeciesOffspringCount),
-                new LoggableElement(NoveltyEvolutionFieldElements.MinSpecieSize, _minSpecieSize),
-                new LoggableElement(NoveltyEvolutionFieldElements.MaxSpecieSize, _maxSpecieSize)
+                new LoggableElement(EvolutionFieldElements.MinSpecieSize, _minSpecieSize),
+                new LoggableElement(EvolutionFieldElements.MaxSpecieSize, _maxSpecieSize)
             };
 
             #endregion

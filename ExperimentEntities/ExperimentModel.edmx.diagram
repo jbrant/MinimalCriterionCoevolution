@@ -14,6 +14,9 @@
         <AssociationConnector Association="ExperimentDataModel.FK_MCSExperimentEvaluationData_ExperimentDictionary" />
         <EntityTypeShape EntityType="ExperimentDataModel.MCSExperimentOrganismStateData" Width="2.875" PointX="2" PointY="7.375" />
         <AssociationConnector Association="ExperimentDataModel.FK_MCSExperimentOrganismStateData_ExperimentDictionary" />
+        <EntityTypeShape EntityType="ExperimentDataModel.RunPhase" Width="1.5" PointX="0.75" PointY="11.875" />
+        <AssociationConnector Association="ExperimentDataModel.FK_MCSExperimentEvaluationData_RunPhase" />
+        <AssociationConnector Association="ExperimentDataModel.FK_MCSExperimentOrganismStateData_RunPhase" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

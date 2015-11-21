@@ -84,6 +84,9 @@
       <DependentUpon>ExperimentModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RunPhase.cs">
+      <DependentUpon>ExperimentModel.tt</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.Config" />

@@ -29,7 +29,12 @@ namespace ExperimentEntities
         public Nullable<double> ClosestGenomeDistanceToTarget { get; set; }
         public Nullable<double> ClosestGenomeEndPositionX { get; set; }
         public Nullable<double> ClosestGenomeEndPositionY { get; set; }
+        public int RunPhase_FK { get; set; }
+        public string ClosestGenomeXml { get; set; }
+        public double MaxComplexity { get; set; }
+        public double MeanComplexity { get; set; }
     
         public virtual ExperimentDictionary ExperimentDictionary { get; set; }
+        public virtual RunPhase RunPhase { get; set; }
     }
 }

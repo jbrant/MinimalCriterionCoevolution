@@ -32,38 +32,8 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </summary>
         protected override void Initialize()
         {
-            /*
-            // Remove all genomes from the initial population that do not satisfy the minimal criteria
-            ((List<TGenome>) GenomeList).RemoveAll(genome => genome.EvaluationInfo.IsViable == false);
-
-            // If there were genomes removed that did not satsify the minimal criteria, we need to generate
-            // new genomes (all of which are required to meet the minimal criteria) to fill out the specified 
-            // population size
-            if (GenomeList.Count < PopulationSize)
-            {
-                // Compute the number of additional genomes that need to be generated
-                int numGenomesToGenerate = PopulationSize - GenomeList.Count;
-
-                // Continue the loop until all necessary genomes (that all meet the minimal criteria) have been 
-                // generated and added to the population
-                do
-                {
-                    // Produce the necessary number of genomes to fill in the remaining population gap
-                    List<TGenome> newGenomes = GenomeFactory.CreateGenomeList(numGenomesToGenerate, 0);
-
-                    // Evaluate the genomes to determine which meet the minimal criteria
-                    GenomeEvaluator.Evaluate(newGenomes, CurrentGeneration);
-
-                    // Remove the newly created genomes that do not meet the minimal criteria
-                    newGenomes.RemoveAll(genome => genome.EvaluationInfo.IsViable == false);
-
-                    // Add the new genomes that do satisfy the minimal criteria to the population
-                    ((List<TGenome>) GenomeList).AddRange(newGenomes);
-
-                    // Update the count of additional genomes that need to be created
-                    numGenomesToGenerate = PopulationSize - GenomeList.Count;
-                } while (numGenomesToGenerate > 0);
-            }*/
+            // Open the logger
+            EvolutionLogger?.Open();            
         }
 
         /// <summary>
@@ -105,7 +75,7 @@ namespace SharpNeat.EvolutionAlgorithms
             Debug.Assert(GenomeList.Count <= PopulationSize);
 
             // If there is a logger defined, log the generation stats
-            EvolutionLogger?.LogRow(GetLoggableElements(), Statistics.GetLoggableElements(),
+            EvolutionLogger?.LogRow(Statistics.GetLoggableElements(),
                 (CurrentChampGenome as NeatGenome)?.GetLoggableElements());
         }
 

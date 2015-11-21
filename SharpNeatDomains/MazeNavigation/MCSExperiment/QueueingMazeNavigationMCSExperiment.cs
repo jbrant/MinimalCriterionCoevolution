@@ -97,6 +97,9 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         {
             ulong initializationEvaluations;
 
+            // TODO: Get rid of this section eventually
+            _evolutionDataLogger = new McsExperimentEvaluationEntityDataLogger("Queueing MCS 1");
+
             // Instantiate the internal initialization algorithm
             _initializationAlgorithm.InitializeAlgorithm(ParallelOptions, genomeFactory, genomeList,
                 CreateGenomeDecoder(), NeatEvolutionAlgorithmParameters);

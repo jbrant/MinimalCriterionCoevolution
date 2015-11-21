@@ -68,115 +68,115 @@ namespace SharpNeat.Loggers
 
             noveltyData.Generation =
                 (int)
-                    Convert.ChangeType(combinedElements[NoveltyEvolutionFieldElements.Generation.Position].Value,
+                    Convert.ChangeType(combinedElements[EvolutionFieldElements.Generation.Position].Value,
                         noveltyData.Generation.GetType());
             noveltyData.SpecieCount =
                 (int)
-                    Convert.ChangeType(combinedElements[NoveltyEvolutionFieldElements.SpecieCount.Position].Value,
+                    Convert.ChangeType(combinedElements[EvolutionFieldElements.SpecieCount.Position].Value,
                         noveltyData.SpecieCount.GetType());
             noveltyData.AsexualOffspringCount =
                 (int)
                     Convert.ChangeType(
-                        combinedElements[NoveltyEvolutionFieldElements.AsexualOffspringCount.Position].Value,
+                        combinedElements[EvolutionFieldElements.AsexualOffspringCount.Position].Value,
                         noveltyData.AsexualOffspringCount.GetType());
             noveltyData.SexualOffspringCount =
                 (int)
                     Convert.ChangeType(
-                        combinedElements[NoveltyEvolutionFieldElements.SexualOffspringCount.Position].Value,
+                        combinedElements[EvolutionFieldElements.SexualOffspringCount.Position].Value,
                         noveltyData.SexualOffspringCount.GetType());
             noveltyData.TotalOffspringCount =
                 (int)
                     Convert.ChangeType(
-                        combinedElements[NoveltyEvolutionFieldElements.TotalOffspringCount.Position].Value,
+                        combinedElements[EvolutionFieldElements.TotalOffspringCount.Position].Value,
                         noveltyData.TotalOffspringCount.GetType());
             noveltyData.InterspeciesOffspringCount =
                 (int)
                     Convert.ChangeType(
-                        combinedElements[NoveltyEvolutionFieldElements.InterspeciesOffspringCount.Position].Value,
+                        combinedElements[EvolutionFieldElements.InterspeciesOffspringCount.Position].Value,
                         noveltyData.InterspeciesOffspringCount.GetType());
             noveltyData.MaxFitness =
                 (double)
-                    Convert.ChangeType(combinedElements[NoveltyEvolutionFieldElements.MaxFitness.Position].Value,
+                    Convert.ChangeType(combinedElements[EvolutionFieldElements.MaxFitness.Position].Value,
                         noveltyData.MaxFitness.GetType());
             noveltyData.MeanFitness =
                 (double)
-                    Convert.ChangeType(combinedElements[NoveltyEvolutionFieldElements.MeanFitness.Position].Value,
+                    Convert.ChangeType(combinedElements[EvolutionFieldElements.MeanFitness.Position].Value,
                         noveltyData.MeanFitness.GetType());
             noveltyData.MeanSpecieChampFitness =
                 (double)
                     Convert.ChangeType(
-                        combinedElements[NoveltyEvolutionFieldElements.MeanSpecieChampFitness.Position].Value,
+                        combinedElements[EvolutionFieldElements.MeanSpecieChampFitness.Position].Value,
                         noveltyData.MeanSpecieChampFitness.GetType());
             noveltyData.MaxComplexity =
                 (int)
-                    Convert.ChangeType(combinedElements[NoveltyEvolutionFieldElements.MaxComplexity.Position].Value,
+                    Convert.ChangeType(combinedElements[EvolutionFieldElements.MaxComplexity.Position].Value,
                         noveltyData.MaxComplexity.GetType());
             noveltyData.MeanComplexity =
                 (double)
-                    Convert.ChangeType(combinedElements[NoveltyEvolutionFieldElements.MeanComplexity.Position].Value,
+                    Convert.ChangeType(combinedElements[EvolutionFieldElements.MeanComplexity.Position].Value,
                         noveltyData.MeanComplexity.GetType());
             noveltyData.MinSpecieSize =
                 (int)
-                    Convert.ChangeType(combinedElements[NoveltyEvolutionFieldElements.MinSpecieSize.Position].Value,
+                    Convert.ChangeType(combinedElements[EvolutionFieldElements.MinSpecieSize.Position].Value,
                         noveltyData.MinSpecieSize.GetType());
             noveltyData.MaxSpecieSize =
                 (int)
-                    Convert.ChangeType(combinedElements[NoveltyEvolutionFieldElements.MaxSpecieSize.Position].Value,
+                    Convert.ChangeType(combinedElements[EvolutionFieldElements.MaxSpecieSize.Position].Value,
                         noveltyData.MaxSpecieSize.GetType());
             noveltyData.TotalEvaluations =
                 (int)
                     Convert.ChangeType(
-                        combinedElements[NoveltyEvolutionFieldElements.TotalEvaluations.Position].Value,
+                        combinedElements[EvolutionFieldElements.TotalEvaluations.Position].Value,
                         typeof (int));
             noveltyData.EvaluationsPerSecond =
                 (int)
                     Convert.ChangeType(
-                        combinedElements[NoveltyEvolutionFieldElements.EvaluationsPerSecond.Position].Value,
+                        combinedElements[EvolutionFieldElements.EvaluationsPerSecond.Position].Value,
                         typeof (int));
             noveltyData.ChampGenomeID =
                 (int)
                     Convert.ChangeType(
-                        combinedElements[NoveltyEvolutionFieldElements.ChampGenomeGenomeId.Position].Value,
+                        combinedElements[EvolutionFieldElements.ChampGenomeGenomeId.Position].Value,
                         noveltyData.ChampGenomeID.GetType());
             noveltyData.ChampGenomeFitness =
                 (double)
                     Convert.ChangeType(
-                        combinedElements[NoveltyEvolutionFieldElements.ChampGenomeFitness.Position].Value,
+                        combinedElements[EvolutionFieldElements.ChampGenomeFitness.Position].Value,
                         noveltyData.ChampGenomeFitness.GetType());
             noveltyData.ChampGenomeBirthGeneration =
                 (int)
                     Convert.ChangeType(
-                        combinedElements[NoveltyEvolutionFieldElements.ChampGenomeBirthGeneration.Position].Value,
+                        combinedElements[EvolutionFieldElements.ChampGenomeBirthGeneration.Position].Value,
                         noveltyData.ChampGenomeBirthGeneration.GetType());
             noveltyData.ChampGenomeConnectionGeneCount =
                 (int)
                     Convert.ChangeType(
-                        combinedElements[NoveltyEvolutionFieldElements.ChampGenomeConnectionGeneCount.Position].Value,
+                        combinedElements[EvolutionFieldElements.ChampGenomeConnectionGeneCount.Position].Value,
                         noveltyData.ChampGenomeConnectionGeneCount.GetType());
             noveltyData.ChampGenomeNeuronGeneCount =
                 (int)
                     Convert.ChangeType(
-                        combinedElements[NoveltyEvolutionFieldElements.ChampGenomeNeuronGeneCount.Position].Value,
+                        combinedElements[EvolutionFieldElements.ChampGenomeNeuronGeneCount.Position].Value,
                         noveltyData.ChampGenomeNeuronGeneCount.GetType());
             noveltyData.ChampGenomeTotalGeneCount =
                 (int)
                     Convert.ChangeType(
-                        combinedElements[NoveltyEvolutionFieldElements.ChampGenomeTotalGeneCount.Position].Value,
+                        combinedElements[EvolutionFieldElements.ChampGenomeTotalGeneCount.Position].Value,
                         noveltyData.ChampGenomeTotalGeneCount.GetType());
             noveltyData.ChampGenomeEvaluationCount =
                 (int)
                     Convert.ChangeType(
-                        combinedElements[NoveltyEvolutionFieldElements.ChampGenomeEvaluationCount.Position].Value,
+                        combinedElements[EvolutionFieldElements.ChampGenomeEvaluationCount.Position].Value,
                         typeof (int));
             noveltyData.ChampGenomeBehavior1 =
                 (double)
                     Convert.ChangeType(
-                        combinedElements[NoveltyEvolutionFieldElements.ChampGenomeBehaviorX.Position].Value,
+                        combinedElements[EvolutionFieldElements.ChampGenomeBehaviorX.Position].Value,
                         typeof (double));
             noveltyData.ChampGenomeBehavior2 =
                 (double)
                     Convert.ChangeType(
-                        combinedElements[NoveltyEvolutionFieldElements.ChampGenomeBehaviorY.Position].Value,
+                        combinedElements[EvolutionFieldElements.ChampGenomeBehaviorY.Position].Value,
                         typeof (double));
 
             // Add the new evaluation data

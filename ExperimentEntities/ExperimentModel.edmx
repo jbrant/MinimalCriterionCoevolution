@@ -14,8 +14,11 @@
           <Property Name="ExperimentDictionaryID" Type="int" Nullable="false" />
           <Property Name="Run" Type="int" Nullable="false" />
           <Property Name="Generation" Type="int" Nullable="false" />
+          <Property Name="RunPhase_FK" Type="int" Nullable="false" />
           <Property Name="PopulationSize" Type="int" Nullable="false" />
           <Property Name="OffspringCount" Type="int" Nullable="false" />
+          <Property Name="MaxComplexity" Type="float" Nullable="false" />
+          <Property Name="MeanComplexity" Type="float" Nullable="false" />
           <Property Name="TotalEvaluations" Type="int" />
           <Property Name="EvaluationsPerSecond" Type="int" />
           <Property Name="ClosestGenomeID" Type="int" Nullable="false" />
@@ -26,6 +29,7 @@
           <Property Name="ClosestGenomeDistanceToTarget" Type="float" />
           <Property Name="ClosestGenomeEndPositionX" Type="float" />
           <Property Name="ClosestGenomeEndPositionY" Type="float" />
+          <Property Name="ClosestGenomeXml" Type="xml" />
         </EntityType>
         <EntityType Name="MCSExperimentOrganismStateData">
           <Key>
@@ -38,11 +42,13 @@
           <Property Name="Run" Type="int" Nullable="false" />
           <Property Name="Generation" Type="int" Nullable="false" />
           <Property Name="Evaluation" Type="int" Nullable="false" />
+          <Property Name="RunPhase_FK" Type="int" Nullable="false" />
           <Property Name="IsViable" Type="bit" Nullable="false" />
           <Property Name="StopConditionSatisfied" Type="bit" Nullable="false" />
           <Property Name="DistanceToTarget" Type="float" Nullable="false" />
           <Property Name="AgentXLocation" Type="float" Nullable="false" />
           <Property Name="AgentYLocation" Type="float" Nullable="false" />
+          <Property Name="AgentXml" Type="xml" />
         </EntityType>
         <EntityType Name="NoveltyExperimentEvaluationData">
           <Key>
@@ -92,6 +98,13 @@
           <Property Name="DistanceToTarget" Type="float" Nullable="false" />
           <Property Name="AgentXLocation" Type="float" Nullable="false" />
           <Property Name="AgentYLocation" Type="float" Nullable="false" />
+        </EntityType>
+        <EntityType Name="RunPhase">
+          <Key>
+            <PropertyRef Name="RunPhaseID" />
+          </Key>
+          <Property Name="RunPhaseID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="RunPhaseName" Type="varchar" MaxLength="100" Nullable="false" />
         </EntityType>
         <!--Errors Found During Generation:
 warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
@@ -161,6 +174,7 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <Property Name="Initialization_MCS_MinimalCriteriaStartX" Type="float" />
           <Property Name="Initialization_MCS_MinimalCriteriaStartY" Type="float" />
           <Property Name="Initialization_MCS_MinimalCriteriaName" Type="varchar" MaxLength="200" />
+          <Property Name="Initialization_MCS_IsBridgingEnabled" Type="bit" />
           <Property Name="Primary_SearchAlgorithmName" Type="varchar" MaxLength="100" />
           <Property Name="Primary_BehaviorCharacterizationName" Type="varchar" MaxLength="100" />
           <Property Name="Primary_NoveltySearch_NearestNeighbors" Type="int" />
@@ -173,12 +187,38 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <Property Name="Primary_MCS_MinimalCriteriaStartX" Type="float" />
           <Property Name="Primary_MCS_MinimalCriteriaStartY" Type="float" />
           <Property Name="Primary_MCS_MinimalCriteriaName" Type="varchar" MaxLength="200" />
+          <Property Name="Primary_MCS_IsBridgingEnabled" Type="bit" />
         </EntityType>
+        <Association Name="FK_MCSExperimentEvaluationData_RunPhase">
+          <End Role="RunPhase" Type="Self.RunPhase" Multiplicity="1" />
+          <End Role="MCSExperimentEvaluationData" Type="Self.MCSExperimentEvaluationData" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="RunPhase">
+              <PropertyRef Name="RunPhaseID" />
+            </Principal>
+            <Dependent Role="MCSExperimentEvaluationData">
+              <PropertyRef Name="RunPhase_FK" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_MCSExperimentOrganismStateData_RunPhase">
+          <End Role="RunPhase" Type="Self.RunPhase" Multiplicity="1" />
+          <End Role="MCSExperimentOrganismStateData" Type="Self.MCSExperimentOrganismStateData" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="RunPhase">
+              <PropertyRef Name="RunPhaseID" />
+            </Principal>
+            <Dependent Role="MCSExperimentOrganismStateData">
+              <PropertyRef Name="RunPhase_FK" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <EntityContainer Name="ExperimentDataModelStoreContainer">
           <EntitySet Name="MCSExperimentEvaluationData" EntityType="Self.MCSExperimentEvaluationData" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="MCSExperimentOrganismStateData" EntityType="Self.MCSExperimentOrganismStateData" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="NoveltyExperimentEvaluationData" EntityType="Self.NoveltyExperimentEvaluationData" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="NoveltyExperimentOrganismStateData" EntityType="Self.NoveltyExperimentOrganismStateData" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="RunPhase" EntityType="Self.RunPhase" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ExperimentDictionary_vw" EntityType="Self.ExperimentDictionary_vw" store:Type="Views" store:Schema="dbo">
             <DefiningQuery>SELECT 
     [ExperimentDictionary_vw].[ExperimentDictionaryID] AS [ExperimentDictionaryID], 
@@ -224,6 +264,7 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
     [ExperimentDictionary_vw].[Initialization_MCS_MinimalCriteriaStartX] AS [Initialization_MCS_MinimalCriteriaStartX], 
     [ExperimentDictionary_vw].[Initialization_MCS_MinimalCriteriaStartY] AS [Initialization_MCS_MinimalCriteriaStartY], 
     [ExperimentDictionary_vw].[Initialization_MCS_MinimalCriteriaName] AS [Initialization_MCS_MinimalCriteriaName], 
+    [ExperimentDictionary_vw].[Initialization_MCS_IsBridgingEnabled] AS [Initialization_MCS_IsBridgingEnabled], 
     [ExperimentDictionary_vw].[Primary_SearchAlgorithmName] AS [Primary_SearchAlgorithmName], 
     [ExperimentDictionary_vw].[Primary_BehaviorCharacterizationName] AS [Primary_BehaviorCharacterizationName], 
     [ExperimentDictionary_vw].[Primary_NoveltySearch_NearestNeighbors] AS [Primary_NoveltySearch_NearestNeighbors], 
@@ -235,9 +276,18 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
     [ExperimentDictionary_vw].[Primary_MCS_MinimalCriteriaThreshold] AS [Primary_MCS_MinimalCriteriaThreshold], 
     [ExperimentDictionary_vw].[Primary_MCS_MinimalCriteriaStartX] AS [Primary_MCS_MinimalCriteriaStartX], 
     [ExperimentDictionary_vw].[Primary_MCS_MinimalCriteriaStartY] AS [Primary_MCS_MinimalCriteriaStartY], 
-    [ExperimentDictionary_vw].[Primary_MCS_MinimalCriteriaName] AS [Primary_MCS_MinimalCriteriaName]
+    [ExperimentDictionary_vw].[Primary_MCS_MinimalCriteriaName] AS [Primary_MCS_MinimalCriteriaName], 
+    [ExperimentDictionary_vw].[Primary_MCS_IsBridgingEnabled] AS [Primary_MCS_IsBridgingEnabled]
     FROM [dbo].[ExperimentDictionary_vw] AS [ExperimentDictionary_vw]</DefiningQuery>
           </EntitySet>
+          <AssociationSet Name="FK_MCSExperimentEvaluationData_RunPhase" Association="Self.FK_MCSExperimentEvaluationData_RunPhase">
+            <End Role="RunPhase" EntitySet="RunPhase" />
+            <End Role="MCSExperimentEvaluationData" EntitySet="MCSExperimentEvaluationData" />
+          </AssociationSet>
+          <AssociationSet Name="FK_MCSExperimentOrganismStateData_RunPhase" Association="Self.FK_MCSExperimentOrganismStateData_RunPhase">
+            <End Role="RunPhase" EntitySet="RunPhase" />
+            <End Role="MCSExperimentOrganismStateData" EntitySet="MCSExperimentOrganismStateData" />
+          </AssociationSet>
         </EntityContainer>
       </Schema></edmx:StorageModels>
     <!-- CSDL content -->
@@ -263,6 +313,15 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <EntitySet Name="MCSExperimentOrganismStateDatas" EntityType="ExperimentDataModel.MCSExperimentOrganismStateData" />
           <AssociationSet Name="FK_MCSExperimentOrganismStateData_ExperimentDictionary" Association="ExperimentDataModel.FK_MCSExperimentOrganismStateData_ExperimentDictionary">
             <End Role="ExperimentDictionary" EntitySet="ExperimentDictionaries" />
+            <End Role="MCSExperimentOrganismStateData" EntitySet="MCSExperimentOrganismStateDatas" />
+          </AssociationSet>
+          <EntitySet Name="RunPhases" EntityType="ExperimentDataModel.RunPhase" />
+          <AssociationSet Name="FK_MCSExperimentEvaluationData_RunPhase" Association="ExperimentDataModel.FK_MCSExperimentEvaluationData_RunPhase">
+            <End Role="RunPhase" EntitySet="RunPhases" />
+            <End Role="MCSExperimentEvaluationData" EntitySet="MCSExperimentEvaluationDatas" />
+          </AssociationSet>
+          <AssociationSet Name="FK_MCSExperimentOrganismStateData_RunPhase" Association="ExperimentDataModel.FK_MCSExperimentOrganismStateData_RunPhase">
+            <End Role="RunPhase" EntitySet="RunPhases" />
             <End Role="MCSExperimentOrganismStateData" EntitySet="MCSExperimentOrganismStateDatas" />
           </AssociationSet>
         </EntityContainer>
@@ -329,6 +388,8 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <NavigationProperty Name="NoveltyExperimentEvaluationDatas" Relationship="ExperimentDataModel.FK_NoveltyExperimentEvaluationData_ExperimentDictionary" FromRole="ExperimentDictionary" ToRole="NoveltyExperimentEvaluationData" />
           <NavigationProperty Name="MCSExperimentEvaluationDatas" Relationship="ExperimentDataModel.FK_MCSExperimentEvaluationData_ExperimentDictionary" FromRole="ExperimentDictionary" ToRole="MCSExperimentEvaluationData" />
           <NavigationProperty Name="MCSExperimentOrganismStateDatas" Relationship="ExperimentDataModel.FK_MCSExperimentOrganismStateData_ExperimentDictionary" FromRole="ExperimentDictionary" ToRole="MCSExperimentOrganismStateData" />
+          <Property Name="Initialization_MCS_IsBridgingEnabled" Type="Boolean" />
+          <Property Name="Primary_MCS_IsBridgingEnabled" Type="Boolean" />
         </EntityType>
         <EntityType Name="NoveltyExperimentOrganismStateData">
           <Key>
@@ -427,6 +488,11 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <Property Name="ClosestGenomeEndPositionX" Type="Double" />
           <Property Name="ClosestGenomeEndPositionY" Type="Double" />
           <NavigationProperty Name="ExperimentDictionary" Relationship="ExperimentDataModel.FK_MCSExperimentEvaluationData_ExperimentDictionary" FromRole="MCSExperimentEvaluationData" ToRole="ExperimentDictionary" />
+          <Property Name="RunPhase_FK" Type="Int32" Nullable="false" />
+          <Property Name="ClosestGenomeXml" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="RunPhase" Relationship="ExperimentDataModel.FK_MCSExperimentEvaluationData_RunPhase" FromRole="MCSExperimentEvaluationData" ToRole="RunPhase" />
+          <Property Name="MaxComplexity" Type="Double" Nullable="false" />
+          <Property Name="MeanComplexity" Type="Double" Nullable="false" />
         </EntityType>
         <Association Name="FK_MCSExperimentEvaluationData_ExperimentDictionary">
           <End Type="ExperimentDataModel.ExperimentDictionary" Role="ExperimentDictionary" Multiplicity="1" />
@@ -457,6 +523,9 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <Property Name="AgentXLocation" Type="Double" Nullable="false" />
           <Property Name="AgentYLocation" Type="Double" Nullable="false" />
           <NavigationProperty Name="ExperimentDictionary" Relationship="ExperimentDataModel.FK_MCSExperimentOrganismStateData_ExperimentDictionary" FromRole="MCSExperimentOrganismStateData" ToRole="ExperimentDictionary" />
+          <Property Name="RunPhase_FK" Type="Int32" Nullable="false" />
+          <Property Name="AgentXml" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="RunPhase" Relationship="ExperimentDataModel.FK_MCSExperimentOrganismStateData_RunPhase" FromRole="MCSExperimentOrganismStateData" ToRole="RunPhase" />
         </EntityType>
         <Association Name="FK_MCSExperimentOrganismStateData_ExperimentDictionary">
           <End Type="ExperimentDataModel.ExperimentDictionary" Role="ExperimentDictionary" Multiplicity="1" />
@@ -470,6 +539,39 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <EntityType Name="RunPhase">
+          <Key>
+            <PropertyRef Name="RunPhaseID" />
+          </Key>
+          <Property Name="RunPhaseID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <NavigationProperty Name="MCSExperimentEvaluationDatas" Relationship="ExperimentDataModel.FK_MCSExperimentEvaluationData_RunPhase" FromRole="RunPhase" ToRole="MCSExperimentEvaluationData" />
+          <NavigationProperty Name="MCSExperimentOrganismStateDatas" Relationship="ExperimentDataModel.FK_MCSExperimentOrganismStateData_RunPhase" FromRole="RunPhase" ToRole="MCSExperimentOrganismStateData" />
+          <Property Name="RunPhaseName" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <Association Name="FK_MCSExperimentEvaluationData_RunPhase">
+          <End Type="ExperimentDataModel.RunPhase" Role="RunPhase" Multiplicity="1" />
+          <End Type="ExperimentDataModel.MCSExperimentEvaluationData" Role="MCSExperimentEvaluationData" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="RunPhase">
+              <PropertyRef Name="RunPhaseID" />
+            </Principal>
+            <Dependent Role="MCSExperimentEvaluationData">
+              <PropertyRef Name="RunPhase_FK" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_MCSExperimentOrganismStateData_RunPhase">
+          <End Type="ExperimentDataModel.RunPhase" Role="RunPhase" Multiplicity="1" />
+          <End Type="ExperimentDataModel.MCSExperimentOrganismStateData" Role="MCSExperimentOrganismStateData" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="RunPhase">
+              <PropertyRef Name="RunPhaseID" />
+            </Principal>
+            <Dependent Role="MCSExperimentOrganismStateData">
+              <PropertyRef Name="RunPhase_FK" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -479,6 +581,8 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <EntitySetMapping Name="ExperimentDictionaries">
             <EntityTypeMapping TypeName="ExperimentDataModel.ExperimentDictionary">
               <MappingFragment StoreEntitySet="ExperimentDictionary_vw">
+                <ScalarProperty Name="Primary_MCS_IsBridgingEnabled" ColumnName="Primary_MCS_IsBridgingEnabled" />
+                <ScalarProperty Name="Initialization_MCS_IsBridgingEnabled" ColumnName="Initialization_MCS_IsBridgingEnabled" />
                 <ScalarProperty Name="Primary_MCS_MinimalCriteriaName" ColumnName="Primary_MCS_MinimalCriteriaName" />
                 <ScalarProperty Name="Primary_MCS_MinimalCriteriaStartY" ColumnName="Primary_MCS_MinimalCriteriaStartY" />
                 <ScalarProperty Name="Primary_MCS_MinimalCriteriaStartX" ColumnName="Primary_MCS_MinimalCriteriaStartX" />
@@ -586,6 +690,10 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <EntitySetMapping Name="MCSExperimentEvaluationDatas">
             <EntityTypeMapping TypeName="ExperimentDataModel.MCSExperimentEvaluationData">
               <MappingFragment StoreEntitySet="MCSExperimentEvaluationData">
+                <ScalarProperty Name="MeanComplexity" ColumnName="MeanComplexity" />
+                <ScalarProperty Name="MaxComplexity" ColumnName="MaxComplexity" />
+                <ScalarProperty Name="ClosestGenomeXml" ColumnName="ClosestGenomeXml" />
+                <ScalarProperty Name="RunPhase_FK" ColumnName="RunPhase_FK" />
                 <ScalarProperty Name="ClosestGenomeEndPositionY" ColumnName="ClosestGenomeEndPositionY" />
                 <ScalarProperty Name="ClosestGenomeEndPositionX" ColumnName="ClosestGenomeEndPositionX" />
                 <ScalarProperty Name="ClosestGenomeDistanceToTarget" ColumnName="ClosestGenomeDistanceToTarget" />
@@ -607,6 +715,8 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <EntitySetMapping Name="MCSExperimentOrganismStateDatas">
             <EntityTypeMapping TypeName="ExperimentDataModel.MCSExperimentOrganismStateData">
               <MappingFragment StoreEntitySet="MCSExperimentOrganismStateData">
+                <ScalarProperty Name="AgentXml" ColumnName="AgentXml" />
+                <ScalarProperty Name="RunPhase_FK" ColumnName="RunPhase_FK" />
                 <ScalarProperty Name="AgentYLocation" ColumnName="AgentYLocation" />
                 <ScalarProperty Name="AgentXLocation" ColumnName="AgentXLocation" />
                 <ScalarProperty Name="DistanceToTarget" ColumnName="DistanceToTarget" />
@@ -616,6 +726,14 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
                 <ScalarProperty Name="Generation" ColumnName="Generation" />
                 <ScalarProperty Name="Run" ColumnName="Run" />
                 <ScalarProperty Name="ExperimentDictionaryID" ColumnName="ExperimentDictionaryID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="RunPhases">
+            <EntityTypeMapping TypeName="ExperimentDataModel.RunPhase">
+              <MappingFragment StoreEntitySet="RunPhase">
+                <ScalarProperty Name="RunPhaseName" ColumnName="RunPhaseName" />
+                <ScalarProperty Name="RunPhaseID" ColumnName="RunPhaseID" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

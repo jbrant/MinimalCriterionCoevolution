@@ -57,24 +57,24 @@ namespace SharpNeat.Genomes.Neat
             // Add all loggable elements except for behavior characterization
             List<LoggableElement> loggableElements = new List<LoggableElement>
             {
-                new LoggableElement(NoveltyEvolutionFieldElements.ChampGenomeGenomeId, Id),
-                new LoggableElement(NoveltyEvolutionFieldElements.ChampGenomeBirthGeneration, BirthGeneration),
-                new LoggableElement(NoveltyEvolutionFieldElements.ChampGenomeNeuronGeneCount, NeuronGeneList.Count),
-                new LoggableElement(NoveltyEvolutionFieldElements.ChampGenomeConnectionGeneCount,
+                new LoggableElement(EvolutionFieldElements.ChampGenomeGenomeId, Id),
+                new LoggableElement(EvolutionFieldElements.ChampGenomeBirthGeneration, BirthGeneration),
+                new LoggableElement(EvolutionFieldElements.ChampGenomeNeuronGeneCount, NeuronGeneList.Count),
+                new LoggableElement(EvolutionFieldElements.ChampGenomeConnectionGeneCount,
                     ConnectionGeneList.Count),
-                new LoggableElement(NoveltyEvolutionFieldElements.ChampGenomeTotalGeneCount,
+                new LoggableElement(EvolutionFieldElements.ChampGenomeTotalGeneCount,
                     NeuronGeneList.Count + ConnectionGeneList.Count),
-                new LoggableElement(NoveltyEvolutionFieldElements.ChampGenomeFitness, EvaluationInfo.Fitness),
-                new LoggableElement(NoveltyEvolutionFieldElements.ChampGenomeEvaluationCount,
+                new LoggableElement(EvolutionFieldElements.ChampGenomeFitness, EvaluationInfo.Fitness),
+                new LoggableElement(EvolutionFieldElements.ChampGenomeEvaluationCount,
                     EvaluationInfo.EvaluationCount)
             };
 
             // Add all behavior characteriazation elements as a separate column
             if (EvaluationInfo.BehaviorCharacterization != null)
             {
-                loggableElements.Add(new LoggableElement(NoveltyEvolutionFieldElements.ChampGenomeBehaviorX,
+                loggableElements.Add(new LoggableElement(EvolutionFieldElements.ChampGenomeBehaviorX,
                     EvaluationInfo.BehaviorCharacterization[0]));
-                loggableElements.Add(new LoggableElement(NoveltyEvolutionFieldElements.ChampGenomeBehaviorY,
+                loggableElements.Add(new LoggableElement(EvolutionFieldElements.ChampGenomeBehaviorY,
                     EvaluationInfo.BehaviorCharacterization[1]));
             }
 
