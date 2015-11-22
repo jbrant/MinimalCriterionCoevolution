@@ -31,13 +31,16 @@ namespace SharpNeat.Loggers
         #region Protected instance methods
 
         /// <summary>
-        ///     Extracts all of the sub-lists and combines them into a single unified list of loggable elements.
+        ///     Extracts all of the sub-lists, combines them into a single unified list of loggable elements, and positions them at
+        ///     the appropriate location in a loggable elements array.
         /// </summary>
         /// <param name="loggableElements">The list(s) of loggable elements to combine.</param>
-        /// <returns>Unified, sorted lists of all loggable elements.</returns>
-        protected List<LoggableElement> ExtractSortedCombinedList(params List<LoggableElement>[] loggableElements)
+        /// <returns>Array of all loggable elements.</returns>
+        protected LoggableElement[] ExtractLoggableElementArray(int fieldArrayLength,
+            params List<LoggableElement>[] loggableElements)
         {
             List<LoggableElement> combinedElements = new List<LoggableElement>();
+            LoggableElement[] loggableElementArray = new LoggableElement[fieldArrayLength];
 
             // Combine everything into a single list
             foreach (var loggableElementList in loggableElements)
@@ -46,9 +49,15 @@ namespace SharpNeat.Loggers
             }
 
             // Sort the elements so that everything logged is kept in the same order
-            combinedElements.Sort();
+            //combinedElements.Sort();
 
-            return combinedElements;
+            foreach (LoggableElement curLoggableElement in combinedElements)
+            {
+                // Place the loggable element in the array at the specified location
+                loggableElementArray[curLoggableElement.FieldMetadata.Position] = curLoggableElement;
+            }
+
+            return loggableElementArray;
         }
 
         #endregion

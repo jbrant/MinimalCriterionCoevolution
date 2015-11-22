@@ -11,6 +11,7 @@ using SharpNeat.Genomes.Neat;
 using SharpNeat.Loggers;
 using SharpNeat.Phenomes;
 using SharpNeat.SpeciationStrategies;
+using RunPhase = SharpNeat.Core.RunPhase;
 
 #endregion
 
@@ -108,12 +109,12 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             {
                 ea = new SteadyStateNeatEvolutionAlgorithm<NeatGenome>(NeatEvolutionAlgorithmParameters,
                     speciationStrategy, complexityRegulationStrategy, _batchSize, _populationEvaluationFrequency,
-                    _evolutionDataLogger);
+                    RunPhase.Primary, _evolutionDataLogger);
             }
             else
             {
                 ea = new QueueingNeatEvolutionAlgorithm<NeatGenome>(NeatEvolutionAlgorithmParameters,
-                    complexityRegulationStrategy, _batchSize, _evolutionDataLogger);
+                    complexityRegulationStrategy, _batchSize, RunPhase.Primary, _evolutionDataLogger);
             }
 
             // Create IBlackBox evaluator.

@@ -135,6 +135,11 @@ namespace SharpNeat.EvolutionAlgorithms
         public RunState RunState { get; protected set; }
 
         /// <summary>
+        ///     Gets the current phase of experiment execution (e.g. initialization phase or primary phase).
+        /// </summary>
+        public RunPhase RunPhase { get; protected set; }
+
+        /// <summary>
         ///     Gets the population's current champion genome.
         /// </summary>
         public TGenome CurrentChampGenome { get; protected set; }

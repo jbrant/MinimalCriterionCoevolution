@@ -114,10 +114,10 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     manhattan distance and null complexity regulation strategy.
         /// </summary>
         /// <param name="logger">The data logger (optional).</param>
-        public SteadyStateNeatEvolutionAlgorithm(IDataLogger logger = null)
+        public SteadyStateNeatEvolutionAlgorithm(IDataLogger logger = null, RunPhase runPhase = RunPhase.Primary)
             : this(
                 new KMeansClusteringStrategy<TGenome>(new ManhattanDistanceMetric()),
-                new NullComplexityRegulationStrategy(), 10, 100, logger)
+                new NullComplexityRegulationStrategy(), 10, 100, runPhase, logger)
         {
             SpeciationStrategy = new KMeansClusteringStrategy<TGenome>(new ManhattanDistanceMetric());
             ComplexityRegulationStrategy = new NullComplexityRegulationStrategy();
@@ -134,18 +134,24 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <param name="complexityRegulationStrategy">The complexity regulation strategy.</param>
         /// <param name="batchSize">The batch size of offspring to produce, evaluate, and remove.</param>
         /// <param name="populationEvaluationFrequency">The frequency at which to evaluate the fitness of the entire population.</param>
+        /// <param name="runPhase">
+        ///     The experiment phase indicating whether this is an initialization process or the primary
+        ///     algorithm.
+        /// </param>
         /// <param name="logger">The data logger (optional).</param>
         public SteadyStateNeatEvolutionAlgorithm(
             ISpeciationStrategy<TGenome> speciationStrategy,
             IComplexityRegulationStrategy complexityRegulationStrategy,
             int batchSize,
             int populationEvaluationFrequency,
+            RunPhase runPhase = RunPhase.Primary,
             IDataLogger logger = null)
         {
             SpeciationStrategy = speciationStrategy;
             ComplexityRegulationStrategy = complexityRegulationStrategy;
             _batchSize = batchSize;
             _populationEvaluationFrequency = populationEvaluationFrequency;
+            RunPhase = runPhase;
             EvolutionLogger = logger;
         }
 
@@ -158,18 +164,24 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <param name="complexityRegulationStrategy">The complexity regulation strategy.</param>
         /// <param name="batchSize">The batch size of offspring to produce, evaluate, and remove.</param>
         /// <param name="populationEvaluationFrequency">The frequency at which to evaluate the fitness of the entire population.</param>
+        /// <param name="runPhase">
+        ///     The experiment phase indicating whether this is an initialization process or the primary
+        ///     algorithm.
+        /// </param>
         /// <param name="logger">The data logger (optional).</param>
         public SteadyStateNeatEvolutionAlgorithm(NeatEvolutionAlgorithmParameters eaParams,
             ISpeciationStrategy<TGenome> speciationStrategy,
             IComplexityRegulationStrategy complexityRegulationStrategy,
             int batchSize,
             int populationEvaluationFrequency,
+            RunPhase runPhase = RunPhase.Primary,
             IDataLogger logger = null) : base(eaParams)
         {
             SpeciationStrategy = speciationStrategy;
             ComplexityRegulationStrategy = complexityRegulationStrategy;
             _batchSize = batchSize;
             _populationEvaluationFrequency = populationEvaluationFrequency;
+            RunPhase = runPhase;
             EvolutionLogger = logger;
         }
 

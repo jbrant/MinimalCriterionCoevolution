@@ -18,6 +18,7 @@ using SharpNeat.Loggers;
 using SharpNeat.NoveltyArchives;
 using SharpNeat.Phenomes;
 using SharpNeat.SpeciationStrategies;
+using RunPhase = SharpNeat.Core.RunPhase;
 
 #endregion
 
@@ -46,7 +47,8 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             _evolutionDataLogger = ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Evolution);
             _evaluationDataLogger = ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Evaluation);
 
-            _initializationAlgorithm = new InitializationAlgorithm();
+            // Initialize the initialization algorithm
+            _initializationAlgorithm = new InitializationAlgorithm(_evolutionDataLogger, _evaluationDataLogger);
 
             // Setup initialization algorithm
             _initializationAlgorithm.SetAlgorithmParameters(
@@ -99,6 +101,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 
             // TODO: Get rid of this section eventually
             _evolutionDataLogger = new McsExperimentEvaluationEntityDataLogger("Queueing MCS 1");
+            _evaluationDataLogger = new McsExperimentOrganismStateEntityDataLogger("Queueing MCS 1");
 
             // Instantiate the internal initialization algorithm
             _initializationAlgorithm.InitializeAlgorithm(ParallelOptions, genomeFactory, genomeList,
@@ -114,7 +117,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             // Create the evolution algorithm.
             AbstractNeatEvolutionAlgorithm<NeatGenome> ea =
                 new QueueingNeatEvolutionAlgorithm<NeatGenome>(NeatEvolutionAlgorithmParameters,
-                    complexityRegulationStrategy, _batchSize, _evolutionDataLogger);
+                    complexityRegulationStrategy, _batchSize, RunPhase.Primary, _evolutionDataLogger);
 
             // Create IBlackBox evaluator.
             IPhenomeEvaluator<IBlackBox, BehaviorInfo> mazeNavigationEvaluator =
@@ -150,6 +153,8 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             private IBehaviorCharacterizationFactory _behaviorCharacterizationFactory;
             private string _complexityRegulationStrategyDefinition;
             private int? _complexityThreshold;
+            private IDataLogger _evaluationDataLogger;
+            private IDataLogger _evolutionDataLogger;
             private AbstractNeatEvolutionAlgorithm<NeatGenome> _initializationEa;
             private int? _maxDistanceToTarget;
             private int _maxGenerationArchiveAddition;
@@ -159,6 +164,17 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             private int? _minSuccessDistance;
             private int _nearestNeighbors;
             private int _populationEvaluationFrequency;
+
+            /// <summary>
+            ///     Initialization algorithm constructor.
+            /// </summary>
+            /// <param name="evolutionDataLogger">Sets the evolution logger reference from the parent algorithm.</param>
+            /// <param name="evaluationDataLogger">Sets the evaluation logger reference from the parent algorithm.</param>
+            public InitializationAlgorithm(IDataLogger evolutionDataLogger, IDataLogger evaluationDataLogger)
+            {
+                _evolutionDataLogger = evolutionDataLogger;
+                _evaluationDataLogger = evaluationDataLogger;
+            }
 
             /// <summary>
             ///     Constructs and initializes the MCS initialization algorithm (novelty search).
@@ -229,7 +245,8 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 
                 // Create the initialization evolution algorithm.
                 _initializationEa = new SteadyStateNeatEvolutionAlgorithm<NeatGenome>(neatParameters,
-                    speciationStrategy, complexityRegulationStrategy, _batchSize, _populationEvaluationFrequency);
+                    speciationStrategy, complexityRegulationStrategy, _batchSize, _populationEvaluationFrequency,
+                    RunPhase.Initialization);
 
                 // Create IBlackBox evaluator.
                 MazeNavigationNoveltyInitializationEvaluator mazeNavigationEvaluator =
@@ -248,7 +265,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 //                        SelectionType.SteadyState, SearchType.NoveltySearch,
 //                        _nearestNeighbors, archive);
 
-                IGenomeEvaluator < NeatGenome> fitnessEvaluator =
+                IGenomeEvaluator<NeatGenome> fitnessEvaluator =
                     new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
                         SelectionType.SteadyState, SearchType.NoveltySearch,
                         _nearestNeighbors, archive);

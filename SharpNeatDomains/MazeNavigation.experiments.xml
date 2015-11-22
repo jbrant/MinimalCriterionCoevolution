@@ -196,7 +196,7 @@
           <XStart>36</XStart>
           <YStart>184</YStart>
           <!--<MinimumMileage>16000</MinimumMileage>-->
-          <MinimumRequiredDistance>50</MinimumRequiredDistance>
+          <MinimumRequiredDistance>5</MinimumRequiredDistance>
         </MinimalCriteriaConfig>
       </BehaviorConfig>
       <NearestNeighbors>15</NearestNeighbors>
@@ -217,7 +217,7 @@
             <MinimalCriteriaConstraint>EuclideanDistance</MinimalCriteriaConstraint>
             <XStart>36</XStart>
             <YStart>184</YStart>
-            <MinimumRequiredDistance>50</MinimumRequiredDistance>
+            <MinimumRequiredDistance>5</MinimumRequiredDistance>
           </MinimalCriteriaConfig>
         </InitBehaviorConfig>
         <NearestNeighbors>15</NearestNeighbors>

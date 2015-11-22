@@ -12,6 +12,7 @@ using SharpNeat.Loggers;
 using SharpNeat.NoveltyArchives;
 using SharpNeat.Phenomes;
 using SharpNeat.SpeciationStrategies;
+using RunPhase = SharpNeat.Core.RunPhase;
 
 #endregion
 
@@ -114,7 +115,7 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
             // Create the evolution algorithm.
             var ea = new SteadyStateNeatEvolutionAlgorithm<NeatGenome>(NeatEvolutionAlgorithmParameters,
                 speciationStrategy, complexityRegulationStrategy, _batchSize, _populationEvaluationFrequency,
-                _evolutionDataLogger);
+                RunPhase.Primary, _evolutionDataLogger);
 
             // Create IBlackBox evaluator.
             var mazeNavigationEvaluator = new MazeNavigationNoveltyEvaluator(MaxDistanceToTarget, MaxTimesteps,

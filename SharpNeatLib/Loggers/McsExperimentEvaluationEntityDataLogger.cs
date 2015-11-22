@@ -1,12 +1,14 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ExperimentEntities;
 
+#endregion
+
 namespace SharpNeat.Loggers
-{    
+{
     /// <summary>
     ///     Entity data logger class for MCS experiment evaluation data.
     /// </summary>
@@ -51,21 +53,112 @@ namespace SharpNeat.Loggers
             // Initialize new DB context
             ExperimentDataEntities localDbContext = new ExperimentDataEntities
             {
-                Configuration = { AutoDetectChangesEnabled = false, ValidateOnSaveEnabled = false }
+                Configuration = {AutoDetectChangesEnabled = false, ValidateOnSaveEnabled = false}
             };
 
             // Combine and sort the loggable elements
-            List<LoggableElement> combinedElements = ExtractSortedCombinedList(loggableElements);
+            LoggableElement[] combinedElements = ExtractLoggableElementArray(EvolutionFieldElements.NumFieldElements,
+                loggableElements);
 
-            MCSExperimentEvaluationData mcsData = new MCSExperimentEvaluationData()
+            MCSExperimentEvaluationData mcsData = new MCSExperimentEvaluationData
             {
                 ExperimentDictionaryID = ExperimentConfiguration.ExperimentDictionaryID,
                 Run = Run
             };
 
-            // TODO: Add field assignemnts
-            RunPhase runPhase = DbContext.RunPhases.First(w => w.RunPhaseName == "Initialization");
-            
+            // Get the reference to the current run phase (e.g. initialization or primary)
+            string runPhaseName = combinedElements[EvolutionFieldElements.RunPhase.Position].Value.ToString();
+            int runPhaseId =
+                DbContext.RunPhases.First(
+                    x => x.RunPhaseName == runPhaseName).RunPhaseID;
+
+            mcsData.Generation =
+                (int)
+                    Convert.ChangeType(combinedElements[EvolutionFieldElements.Generation.Position].Value,
+                        mcsData.Generation.GetType());
+            mcsData.RunPhase_FK = runPhaseId;
+
+            mcsData.OffspringCount =
+                (int)
+                    Convert.ChangeType(
+                        combinedElements[EvolutionFieldElements.TotalOffspringCount.Position].Value,
+                        mcsData.OffspringCount.GetType());
+
+            mcsData.MaxComplexity =
+                (int)
+                    Convert.ChangeType(combinedElements[EvolutionFieldElements.MaxComplexity.Position].Value,
+                        mcsData.MaxComplexity.GetType());
+            mcsData.MeanComplexity =
+                (double)
+                    Convert.ChangeType(combinedElements[EvolutionFieldElements.MeanComplexity.Position].Value,
+                        mcsData.MeanComplexity.GetType());
+
+            mcsData.TotalEvaluations =
+                (int)
+                    Convert.ChangeType(
+                        combinedElements[EvolutionFieldElements.TotalEvaluations.Position].Value,
+                        typeof (int));
+            mcsData.EvaluationsPerSecond =
+                (int)
+                    Convert.ChangeType(
+                        combinedElements[EvolutionFieldElements.EvaluationsPerSecond.Position].Value,
+                        typeof (int));
+
+            mcsData.ClosestGenomeID =
+                (int)
+                    Convert.ChangeType(
+                        combinedElements[EvolutionFieldElements.ChampGenomeGenomeId.Position].Value,
+                        mcsData.ClosestGenomeID.GetType());
+
+            mcsData.ClosestGenomeConnectionGeneCount =
+                (int)
+                    Convert.ChangeType(
+                        combinedElements[EvolutionFieldElements.ChampGenomeConnectionGeneCount.Position].Value,
+                        mcsData.ClosestGenomeConnectionGeneCount.GetType());
+            mcsData.ClosestGenomeNeuronGeneCount =
+                (int)
+                    Convert.ChangeType(
+                        combinedElements[EvolutionFieldElements.ChampGenomeNeuronGeneCount.Position].Value,
+                        mcsData.ClosestGenomeNeuronGeneCount.GetType());
+            mcsData.ClosestGenomeTotalGeneCount =
+                (int)
+                    Convert.ChangeType(
+                        combinedElements[EvolutionFieldElements.ChampGenomeTotalGeneCount.Position].Value,
+                        mcsData.ClosestGenomeTotalGeneCount.GetType());
+            mcsData.ClosestGenomeEvaluationCount =
+                (int)
+                    Convert.ChangeType(
+                        combinedElements[EvolutionFieldElements.ChampGenomeEvaluationCount.Position].Value,
+                        typeof (int));
+
+            mcsData.ClosestGenomeDistanceToTarget =
+                (double)
+                    Convert.ChangeType(
+                        combinedElements[EvolutionFieldElements.ChampGenomeFitness.Position].Value,
+                        typeof (double));
+
+            mcsData.ClosestGenomeEndPositionX =
+                (double)
+                    Convert.ChangeType(
+                        combinedElements[EvolutionFieldElements.ChampGenomeBehaviorX.Position].Value,
+                        typeof (double));
+            mcsData.ClosestGenomeEndPositionY =
+                (double)
+                    Convert.ChangeType(
+                        combinedElements[EvolutionFieldElements.ChampGenomeBehaviorY.Position].Value,
+                        typeof (double));
+
+            mcsData.ClosestGenomeXml =
+                (string)
+                    Convert.ChangeType(combinedElements[EvolutionFieldElements.ChampGenomeXml.Position].Value,
+                        typeof (string));
+
+            // Add the new evaluation data
+            localDbContext.MCSExperimentEvaluationDatas.Add(mcsData);
+
+            // Save the changes and dispose of the context
+            localDbContext.SaveChanges();
+            localDbContext.Dispose();
         }
 
         #endregion

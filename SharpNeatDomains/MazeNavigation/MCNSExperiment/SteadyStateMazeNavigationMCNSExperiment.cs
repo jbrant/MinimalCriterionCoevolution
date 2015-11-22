@@ -91,7 +91,8 @@ namespace SharpNeat.Domains.MazeNavigation.MCNSExperiment
 
             // Create the evolution algorithm.
             var ea = new SteadyStateNeatEvolutionAlgorithm<NeatGenome>(NeatEvolutionAlgorithmParameters,
-                speciationStrategy, complexityRegulationStrategy, _batchSize, _populationEvaluationFrequency, logger);
+                speciationStrategy, complexityRegulationStrategy, _batchSize, _populationEvaluationFrequency,
+                RunPhase.Primary, logger);
 
             // Create IBlackBox evaluator.
             var mazeNavigationEvaluator = new MazeNavigationMCNSEvaluator(MaxDistanceToTarget, MaxTimesteps,

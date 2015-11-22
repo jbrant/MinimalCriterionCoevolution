@@ -22,6 +22,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Xml;
 using SharpNeat.Core;
 using SharpNeat.Loggers;
 using SharpNeat.Network;
@@ -77,6 +79,11 @@ namespace SharpNeat.Genomes.Neat
                 loggableElements.Add(new LoggableElement(EvolutionFieldElements.ChampGenomeBehaviorY,
                     EvaluationInfo.BehaviorCharacterization[1]));
             }
+
+            // Serialize the champ genome to XML and add as a loggable element
+            StringWriter champGenomeSw = new StringWriter();
+            NeatGenomeXmlIO.WriteComplete(new XmlTextWriter(champGenomeSw), this, false);
+            loggableElements.Add(new LoggableElement(EvolutionFieldElements.ChampGenomeXml, champGenomeSw.ToString()));
 
             return loggableElements;
         }

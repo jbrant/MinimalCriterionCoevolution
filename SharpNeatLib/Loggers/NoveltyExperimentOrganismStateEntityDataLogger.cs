@@ -68,7 +68,8 @@ namespace SharpNeat.Loggers
             };
 
             // Combine and sort the loggable elements
-            List<LoggableElement> combinedElements = ExtractSortedCombinedList(loggableElements);
+            LoggableElement[] combinedElements = ExtractLoggableElementArray(EvaluationFieldElements.NumFieldElements,
+                loggableElements);
 
             NoveltyExperimentOrganismStateData noveltyData = new NoveltyExperimentOrganismStateData
             {
@@ -78,29 +79,29 @@ namespace SharpNeat.Loggers
 
             noveltyData.Generation =
                 (int)
-                    Convert.ChangeType(combinedElements[NoveltyEvaluationFieldElements.Generation.Position].Value,
+                    Convert.ChangeType(combinedElements[EvaluationFieldElements.Generation.Position].Value,
                         noveltyData.Generation.GetType());
             noveltyData.Evaluation =
                 (int)
-                    Convert.ChangeType(combinedElements[NoveltyEvaluationFieldElements.EvaluationCount.Position].Value,
+                    Convert.ChangeType(combinedElements[EvaluationFieldElements.EvaluationCount.Position].Value,
                         noveltyData.Evaluation.GetType());
             noveltyData.StopConditionSatisfied =
                 (bool)
                     Convert.ChangeType(
-                        combinedElements[NoveltyEvaluationFieldElements.StopConditionSatisfied.Position].Value,
+                        combinedElements[EvaluationFieldElements.StopConditionSatisfied.Position].Value,
                         noveltyData.StopConditionSatisfied.GetType());
             noveltyData.DistanceToTarget =
                 (double)
                     Convert.ChangeType(
-                        combinedElements[NoveltyEvaluationFieldElements.DistanceToTarget.Position].Value,
+                        combinedElements[EvaluationFieldElements.DistanceToTarget.Position].Value,
                         noveltyData.DistanceToTarget.GetType());
             noveltyData.AgentXLocation =
                 (double)
-                    Convert.ChangeType(combinedElements[NoveltyEvaluationFieldElements.AgentXLocation.Position].Value,
+                    Convert.ChangeType(combinedElements[EvaluationFieldElements.AgentXLocation.Position].Value,
                         noveltyData.AgentXLocation.GetType());
             noveltyData.AgentYLocation =
                 (double)
-                    Convert.ChangeType(combinedElements[NoveltyEvaluationFieldElements.AgentYLocation.Position].Value,
+                    Convert.ChangeType(combinedElements[EvaluationFieldElements.AgentYLocation.Position].Value,
                         noveltyData.AgentYLocation.GetType());
 
             // Add the new organism state observation

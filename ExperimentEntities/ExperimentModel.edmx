@@ -17,7 +17,7 @@
           <Property Name="RunPhase_FK" Type="int" Nullable="false" />
           <Property Name="PopulationSize" Type="int" Nullable="false" />
           <Property Name="OffspringCount" Type="int" Nullable="false" />
-          <Property Name="MaxComplexity" Type="float" Nullable="false" />
+          <Property Name="MaxComplexity" Type="int" Nullable="false" />
           <Property Name="MeanComplexity" Type="float" Nullable="false" />
           <Property Name="TotalEvaluations" Type="int" />
           <Property Name="EvaluationsPerSecond" Type="int" />
@@ -491,7 +491,7 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <Property Name="RunPhase_FK" Type="Int32" Nullable="false" />
           <Property Name="ClosestGenomeXml" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
           <NavigationProperty Name="RunPhase" Relationship="ExperimentDataModel.FK_MCSExperimentEvaluationData_RunPhase" FromRole="MCSExperimentEvaluationData" ToRole="RunPhase" />
-          <Property Name="MaxComplexity" Type="Double" Nullable="false" />
+          <Property Name="MaxComplexity" Type="Int32" Nullable="false" />
           <Property Name="MeanComplexity" Type="Double" Nullable="false" />
         </EntityType>
         <Association Name="FK_MCSExperimentEvaluationData_ExperimentDictionary">

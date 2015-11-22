@@ -22,12 +22,13 @@ namespace SharpNeat.Domains.MazeNavigation.RandomExperiment
         ///     Path/File to which to write generational data log.
         /// </summary>
         private string _generationalLogFile;
+
         private int _populationEvaluationFrequency;
 
         public override void Initialize(string name, XmlElement xmlConfig)
         {
             base.Initialize(name, xmlConfig);
-            
+
             // Read in steady-state specific parameters
             _batchSize = XmlUtils.GetValueAsInt(xmlConfig, "OffspringBatchSize");
             _populationEvaluationFrequency = XmlUtils.GetValueAsInt(xmlConfig, "PopulationEvaluationFrequency");
@@ -69,7 +70,8 @@ namespace SharpNeat.Domains.MazeNavigation.RandomExperiment
 
             // Create the evolution algorithm.
             var ea = new SteadyStateNeatEvolutionAlgorithm<NeatGenome>(NeatEvolutionAlgorithmParameters,
-                speciationStrategy, complexityRegulationStrategy, _batchSize, _populationEvaluationFrequency, logger);
+                speciationStrategy, complexityRegulationStrategy, _batchSize, _populationEvaluationFrequency,
+                RunPhase.Primary, logger);
 
             // Create IBlackBox evaluator.
             var mazeNavigationEvaluator = new MazeNavigationRandomEvaluator(MaxDistanceToTarget, MaxTimesteps,

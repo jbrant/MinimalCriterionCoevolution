@@ -161,9 +161,9 @@ namespace SharpNeat.Domains.MazeNavigation
         {
             return new List<LoggableElement>
             {
-                new LoggableElement(NoveltyEvaluationFieldElements.DistanceToTarget, GetDistanceToTarget()),
-                new LoggableElement(NoveltyEvaluationFieldElements.AgentXLocation, _navigator.Location.X),
-                new LoggableElement(NoveltyEvaluationFieldElements.AgentYLocation, _navigator.Location.Y)
+                new LoggableElement(EvaluationFieldElements.DistanceToTarget, GetDistanceToTarget()),
+                new LoggableElement(EvaluationFieldElements.AgentXLocation, _navigator.Location.X),
+                new LoggableElement(EvaluationFieldElements.AgentYLocation, _navigator.Location.Y)
             };
         }
 

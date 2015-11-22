@@ -58,7 +58,8 @@ namespace SharpNeat.Loggers
             };
 
             // Combine and sort the loggable elements
-            List<LoggableElement> combinedElements = ExtractSortedCombinedList(loggableElements);
+            LoggableElement[] combinedElements = ExtractLoggableElementArray(EvolutionFieldElements.NumFieldElements,
+                loggableElements);
 
             NoveltyExperimentEvaluationData noveltyData = new NoveltyExperimentEvaluationData
             {

@@ -72,9 +72,9 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
             // Log trial information
             evaluationLogger?.LogRow(new List<LoggableElement>
             {
-                new LoggableElement(NoveltyEvaluationFieldElements.Generation, currentGeneration),
-                new LoggableElement(NoveltyEvaluationFieldElements.EvaluationCount, threadLocalEvaluationCount),
-                new LoggableElement(NoveltyEvaluationFieldElements.StopConditionSatisfied, StopConditionSatisfied)
+                new LoggableElement(EvaluationFieldElements.Generation, currentGeneration),
+                new LoggableElement(EvaluationFieldElements.EvaluationCount, threadLocalEvaluationCount),
+                new LoggableElement(EvaluationFieldElements.StopConditionSatisfied, StopConditionSatisfied)
             },
                 world.GetLoggableElements());
 
@@ -89,8 +89,8 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
         {
             evaluationLogger?.LogHeader(new List<LoggableElement>
             {
-                new LoggableElement(NoveltyEvaluationFieldElements.EvaluationCount, EvaluationCount),
-                new LoggableElement(NoveltyEvaluationFieldElements.StopConditionSatisfied, StopConditionSatisfied)
+                new LoggableElement(EvaluationFieldElements.EvaluationCount, EvaluationCount),
+                new LoggableElement(EvaluationFieldElements.StopConditionSatisfied, StopConditionSatisfied)
             },
                 new MazeNavigationWorld<FitnessInfo>(_mazeVariant, _minSuccessDistance, _maxDistanceToTarget,
                     _maxTimesteps).GetLoggableElements());

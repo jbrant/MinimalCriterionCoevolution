@@ -1,5 +1,6 @@
 ﻿#region
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using ExperimentEntities;
@@ -60,7 +61,8 @@ namespace SharpNeat.Loggers
             };
 
             // Combine and sort the loggable elements
-            List<LoggableElement> combinedElements = ExtractSortedCombinedList(loggableElements);
+            LoggableElement[] combinedElements = ExtractLoggableElementArray(EvaluationFieldElements.NumFieldElements,
+                loggableElements);
 
             MCSExperimentOrganismStateData mcsData = new MCSExperimentOrganismStateData
             {
@@ -68,7 +70,53 @@ namespace SharpNeat.Loggers
                 Run = Run
             };
 
-            // TODO: Add field assignemnts
+            // Get the reference to the current run phase (e.g. initialization or primary)
+            string runPhaseName = combinedElements[EvaluationFieldElements.RunPhase.Position].Value.ToString();
+            int runPhaseId =
+                DbContext.RunPhases.First(
+                    x => x.RunPhaseName == runPhaseName).RunPhaseID;
+
+            mcsData.Generation =
+                (int)
+                    Convert.ChangeType(combinedElements[EvaluationFieldElements.Generation.Position].Value,
+                        mcsData.Generation.GetType());
+            mcsData.Evaluation = (int)
+                Convert.ChangeType(combinedElements[EvaluationFieldElements.EvaluationCount.Position].Value,
+                    mcsData.Evaluation.GetType());
+            mcsData.RunPhase_FK = runPhaseId;
+            mcsData.IsViable =
+                (bool)
+                    Convert.ChangeType(combinedElements[EvaluationFieldElements.IsViable.Position].Value,
+                        mcsData.IsViable.GetType());
+            mcsData.StopConditionSatisfied =
+                (bool)
+                    Convert.ChangeType(
+                        combinedElements[EvaluationFieldElements.StopConditionSatisfied.Position].Value,
+                        mcsData.StopConditionSatisfied.GetType());
+            mcsData.DistanceToTarget =
+                (double)
+                    Convert.ChangeType(
+                        combinedElements[EvaluationFieldElements.DistanceToTarget.Position].Value,
+                        mcsData.DistanceToTarget.GetType());
+            mcsData.AgentXLocation =
+                (double)
+                    Convert.ChangeType(combinedElements[EvaluationFieldElements.AgentXLocation.Position].Value,
+                        mcsData.AgentXLocation.GetType());
+            mcsData.AgentYLocation =
+                (double)
+                    Convert.ChangeType(combinedElements[EvaluationFieldElements.AgentYLocation.Position].Value,
+                        mcsData.AgentYLocation.GetType());
+            mcsData.AgentXml =
+                (string)
+                    Convert.ChangeType(combinedElements[EvaluationFieldElements.AgentXml.Position].Value,
+                        typeof (string));
+
+            // Add the new organism state observation
+            localDbContext.MCSExperimentOrganismStateDatas.Add(mcsData);
+
+            // Save the changes and dispose of the context
+            localDbContext.SaveChanges();
+            localDbContext.Dispose();
         }
 
         #endregion
