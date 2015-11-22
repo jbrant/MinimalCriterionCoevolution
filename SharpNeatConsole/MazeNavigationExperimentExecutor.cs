@@ -152,8 +152,7 @@ namespace SharpNeatConsole
                     {
                         return new SteadyStateMazeNavigationMCSExperiment();
                     }
-                    // TODO: Insert queueing MCS experiment
-                    break;
+                    return new QueueingMazeNavigationMCSExperiment();
 
                 // If none of the above were matched, return the steady state experiment with
                 // randomly assigned fitness
