@@ -47,7 +47,7 @@
 
     public class EvaluationFieldElements
     {
-        public static readonly int NumFieldElements = 8;
+        public static readonly int NumFieldElements = 9;
         public static readonly FieldElement Generation = new FieldElement(0, "Generation");
         public static readonly FieldElement EvaluationCount = new FieldElement(1, "Evaluation Count");
         public static readonly FieldElement RunPhase = new FieldElement(2, "Run Phase");

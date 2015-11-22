@@ -181,6 +181,7 @@
       <OffspringBatchSize>20</OffspringBatchSize>
       <PopulationEvaluationFrequency>30</PopulationEvaluationFrequency>
       <MaxEvaluations>100000</MaxEvaluations>
+      <DecodeGenomesToXml>true</DecodeGenomesToXml>
       <GenomeConfig>
         <InitialConnectionProportion>1</InitialConnectionProportion>
         <WeightMutationProbability>0.6</WeightMutationProbability>
@@ -211,6 +212,7 @@
         <PopulationEvaluationFrequency>30</PopulationEvaluationFrequency>
         <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>
         <ComplexityThreshold>30</ComplexityThreshold>
+        <DecodeGenomesToXml>true</DecodeGenomesToXml>
         <InitBehaviorConfig>
           <BehaviorCharacterization>EndPoint</BehaviorCharacterization>
           <MinimalCriteriaConfig>

@@ -43,7 +43,8 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         /// </summary>
         public bool StopConditionSatisfied { get; private set; }
 
-        public BehaviorInfo Evaluate(IBlackBox phenome, uint currentGeneration, IDataLogger evaluationLogger)
+        public BehaviorInfo Evaluate(IBlackBox phenome, uint currentGeneration, IDataLogger evaluationLogger,
+            string genomeXml)
         {
             ulong threadLocalEvaluationCount;
             lock (evaluationLock)
@@ -54,7 +55,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 
             // Default the stop condition satisfied to false
             bool stopConditionSatisfied = false;
-            
+
             // Generate new behavior characterization
             IBehaviorCharacterization behaviorCharacterization =
                 _behaviorCharacterizationFactory.CreateBehaviorCharacterization();
@@ -86,7 +87,10 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             {
                 new LoggableElement(EvaluationFieldElements.Generation, currentGeneration),
                 new LoggableElement(EvaluationFieldElements.EvaluationCount, threadLocalEvaluationCount),
-                new LoggableElement(EvaluationFieldElements.StopConditionSatisfied, StopConditionSatisfied)
+                new LoggableElement(EvaluationFieldElements.StopConditionSatisfied, StopConditionSatisfied),
+                new LoggableElement(EvaluationFieldElements.RunPhase, RunPhase.Primary),
+                new LoggableElement(EvaluationFieldElements.IsViable, trialInfo.DoesBehaviorSatisfyMinimalCriteria),
+                new LoggableElement(EvaluationFieldElements.AgentXml, genomeXml)
             },
                 world.GetLoggableElements());
 
@@ -99,7 +103,18 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         /// <param name="evaluationLogger">The evaluation logger.</param>
         public void Initialize(IDataLogger evaluationLogger)
         {
-            evaluationLogger?.LogHeader(
+            // Set the run phase
+            evaluationLogger?.UpdateRunPhase(RunPhase.Primary);
+
+            // Log the header
+            evaluationLogger?.LogHeader(new List<LoggableElement>
+            {
+                new LoggableElement(EvaluationFieldElements.EvaluationCount, EvaluationCount),
+                new LoggableElement(EvaluationFieldElements.StopConditionSatisfied, StopConditionSatisfied),
+                new LoggableElement(EvaluationFieldElements.RunPhase, RunPhase.Initialization),
+                new LoggableElement(EvaluationFieldElements.IsViable, false),
+                new LoggableElement(EvaluationFieldElements.AgentXml, "GenomeXML")
+            },
                 new MazeNavigationWorld<FitnessInfo>(_mazeVariant, _minSuccessDistance, _maxDistanceToTarget,
                     _maxTimesteps).GetLoggableElements());
         }

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ExperimentEntities;
+using RunPhase = SharpNeat.Core.RunPhase;
 
 #endregion
 
@@ -37,11 +38,44 @@ namespace SharpNeat.Loggers
             // Call the base method to open the database connection and get the experiment configuration entity
             base.Open();
 
-            // If there were previous runs, get the maximum existing run number and increment that by one
-            // Otherwise, if there were no previous runs for this experiment, set the run ID to 1
-            Run = ExperimentConfiguration.NoveltyExperimentEvaluationDatas.Count > 0
-                ? ExperimentConfiguration.NoveltyExperimentEvaluationDatas.Max(x => x.Run) + 1
-                : 1;
+            // Get any previous runs for this experiment
+            int experimentRuns =
+                DbContext.MCSExperimentEvaluationDatas.Count(
+                    c => c.ExperimentDictionaryID == ExperimentConfiguration.ExperimentDictionaryID);
+
+            // If there were previous runs, we need to figure out whether this is the primary portion of
+            // a previous initializing run or a new run altogether
+            if (experimentRuns > 0)
+            {
+                // Get a count of primary runs that have executed
+                int experimentPrimaryRuns =
+                    DbContext.MCSExperimentEvaluationDatas.Count(
+                        w =>
+                            w.ExperimentDictionaryID == ExperimentConfiguration.ExperimentDictionaryID &&
+                            w.RunPhase.RunPhaseName == RunPhase.Primary.ToString());
+
+                // If primary algorithm runs have executed, this is a new run of the experiment, so increment the run counter
+                if (experimentPrimaryRuns > 0)
+                {
+                    Run = DbContext.MCSExperimentEvaluationDatas.Where(
+                        w =>
+                            w.ExperimentDictionaryID == ExperimentConfiguration.ExperimentDictionaryID &&
+                            w.RunPhase.RunPhaseName == RunPhase.Primary.ToString()).Max(m => m.Run) + 1;
+                }
+                // Otherwise, this is the primary algorithm portion of a previous initialization run
+                else
+                {
+                    Run = DbContext.MCSExperimentEvaluationDatas.Where(
+                        w =>
+                            w.ExperimentDictionaryID == ExperimentConfiguration.ExperimentDictionaryID &&
+                            w.RunPhase.RunPhaseName == RunPhase.Initialization.ToString()).Max(m => m.Run);
+                }
+            }
+            // If there were no runs at all for this experiment, this is the first run by definition
+            else
+            {
+                Run = 1;
+            }
         }
 
         /// <summary>
@@ -66,17 +100,11 @@ namespace SharpNeat.Loggers
                 Run = Run
             };
 
-            // Get the reference to the current run phase (e.g. initialization or primary)
-            string runPhaseName = combinedElements[EvolutionFieldElements.RunPhase.Position].Value.ToString();
-            int runPhaseId =
-                DbContext.RunPhases.First(
-                    x => x.RunPhaseName == runPhaseName).RunPhaseID;
-
             mcsData.Generation =
                 (int)
                     Convert.ChangeType(combinedElements[EvolutionFieldElements.Generation.Position].Value,
                         mcsData.Generation.GetType());
-            mcsData.RunPhase_FK = runPhaseId;
+            mcsData.RunPhase_FK = RunPhaseKey;
 
             mcsData.OffspringCount =
                 (int)

@@ -38,7 +38,8 @@ namespace SharpNeat.Domains.MazeNavigation.MCNSExperiment
         /// </summary>
         public bool StopConditionSatisfied { get; private set; }
 
-        public BehaviorInfo Evaluate(IBlackBox phenome, uint currentGeneration, IDataLogger evaluationLogger)
+        public BehaviorInfo Evaluate(IBlackBox phenome, uint currentGeneration, IDataLogger evaluationLogger,
+            string genomeXml)
         {
             // Increment evaluation count
             EvaluationCount++;
@@ -55,7 +56,8 @@ namespace SharpNeat.Domains.MazeNavigation.MCNSExperiment
                 _maxTimesteps, behaviorCharacterization);
 
             // Run a single trial
-            BehaviorInfo trialInfo = world.RunTrial(phenome, SearchType.MinimalCriteriaNoveltySearch, out stopConditionSatisfied);
+            BehaviorInfo trialInfo = world.RunTrial(phenome, SearchType.MinimalCriteriaNoveltySearch,
+                out stopConditionSatisfied);
 
             // Check if the current location satisfies the minimal criteria
             if (behaviorCharacterization.IsMinimalCriteriaSatisfied(trialInfo) == false)

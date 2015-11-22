@@ -40,7 +40,7 @@ namespace SharpNeat.Core
         /// <summary>
         ///     EvaluateFitness the provided phenome and return its fitness score.
         /// </summary>
-        TTrialInfo Evaluate(TPhenome phenome, uint currentGeneration, IDataLogger evaluationLogger);
+        TTrialInfo Evaluate(TPhenome phenome, uint currentGeneration, IDataLogger evaluationLogger, string genomeXml);
 
         /// <summary>
         ///     Initializes state variables in the phenome evalutor.

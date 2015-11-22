@@ -61,6 +61,11 @@ namespace SharpNeat.Loggers
             _writer = new StreamWriter(LogFileName);
         }
 
+        public void UpdateRunPhase(RunPhase runPhase)
+        {
+            // Nothing to be done for the file logger
+        }
+
         /// <summary>
         ///     Logs the file header.
         /// </summary>

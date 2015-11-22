@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ExperimentEntities;
 using SharpNeat.Core;
+using RunPhase = SharpNeat.Core.RunPhase;
 
 #endregion
 
@@ -48,9 +49,6 @@ namespace SharpNeat.Loggers
                 combinedElements.AddRange(loggableElementList);
             }
 
-            // Sort the elements so that everything logged is kept in the same order
-            //combinedElements.Sort();
-
             foreach (LoggableElement curLoggableElement in combinedElements)
             {
                 // Place the loggable element in the array at the specified location
@@ -84,6 +82,11 @@ namespace SharpNeat.Loggers
         /// </summary>
         protected int Run;
 
+        /// <summary>
+        ///     The run phase foreign key.
+        /// </summary>
+        protected int RunPhaseKey;
+
         #endregion
 
         #region Logging Control Methods
@@ -99,6 +102,17 @@ namespace SharpNeat.Loggers
             // Query for the experiment configuration entity
             ExperimentConfiguration =
                 DbContext.ExperimentDictionaries.Single(expName => expName.ExperimentName == ExperimentConfigurationName);
+        }
+
+        /// <summary>
+        ///     Updates the run phase and sets the corresponding foreign key.
+        /// </summary>
+        /// <param name="runPhase">The run phase for the current experiment.</param>
+        public void UpdateRunPhase(RunPhase runPhase)
+        {
+            RunPhaseKey =
+                DbContext.RunPhases.First(
+                    x => x.RunPhaseName == runPhase.ToString()).RunPhaseID;
         }
 
         /// <summary>

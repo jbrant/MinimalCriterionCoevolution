@@ -28,6 +28,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
     {
         private int _batchSize;
         private IBehaviorCharacterizationFactory _behaviorCharacterizationFactory;
+        private bool _decodeGenomeToXml;
         private IDataLogger _evaluationDataLogger;
         private IDataLogger _evolutionDataLogger;
         private InitializationAlgorithm _initializationAlgorithm;
@@ -47,8 +48,16 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             _evolutionDataLogger = ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Evolution);
             _evaluationDataLogger = ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Evaluation);
 
+            // Read in whether genomes should be decoded to XML during evaluation
+            _decodeGenomeToXml = XmlUtils.GetValueAsBool(xmlConfig, "DecodeGenomesToXml");
+
+            // TODO: Get rid of this section eventually
+            _evolutionDataLogger = new McsExperimentEvaluationEntityDataLogger("Queueing MCS 1");
+            _evaluationDataLogger = new McsExperimentOrganismStateEntityDataLogger("Queueing MCS 1");
+
             // Initialize the initialization algorithm
-            _initializationAlgorithm = new InitializationAlgorithm(_evolutionDataLogger, _evaluationDataLogger);
+            _initializationAlgorithm = new InitializationAlgorithm(_evolutionDataLogger, _evaluationDataLogger,
+                _decodeGenomeToXml);
 
             // Setup initialization algorithm
             _initializationAlgorithm.SetAlgorithmParameters(
@@ -99,17 +108,13 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         {
             ulong initializationEvaluations;
 
-            // TODO: Get rid of this section eventually
-            _evolutionDataLogger = new McsExperimentEvaluationEntityDataLogger("Queueing MCS 1");
-            _evaluationDataLogger = new McsExperimentOrganismStateEntityDataLogger("Queueing MCS 1");
-
             // Instantiate the internal initialization algorithm
             _initializationAlgorithm.InitializeAlgorithm(ParallelOptions, genomeFactory, genomeList,
                 CreateGenomeDecoder(), NeatEvolutionAlgorithmParameters);
 
             // Run the algorithm until a viable genome is found
             NeatGenome genomeSeed = _initializationAlgorithm.EvolveViableGenome(out initializationEvaluations);
-
+            
             // Create complexity regulation strategy.
             var complexityRegulationStrategy =
                 ExperimentUtils.CreateComplexityRegulationStrategy(ComplexityRegulationStrategy, Complexitythreshold);
@@ -130,11 +135,11 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 
 //            IGenomeEvaluator<NeatGenome> fitnessEvaluator =
 //                new SerialGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
-//                    SearchType.MinimalCriteriaSearch);
+//                    SelectionType.Queueing, SearchType.MinimalCriteriaSearch, _evaluationDataLogger, _decodeGenomeToXml);
 
             IGenomeEvaluator<NeatGenome> fitnessEvaluator =
                 new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
-                    SelectionType.Queueing, SearchType.MinimalCriteriaSearch, _evaluationDataLogger);
+                    SelectionType.Queueing, SearchType.MinimalCriteriaSearch, _evaluationDataLogger, _decodeGenomeToXml);
 
             // Initialize the evolution algorithm.
             ea.Initialize(fitnessEvaluator, genomeFactory, new List<NeatGenome> {genomeSeed}, DefaultPopulationSize,
@@ -146,6 +151,9 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 
         private class InitializationAlgorithm
         {
+            private readonly bool _decodeGenomeToXml;
+            private readonly IDataLogger _evaluationDataLogger;
+            private readonly IDataLogger _evolutionDataLogger;
             private double _archiveAdditionThreshold;
             private double _archiveThresholdDecreaseMultiplier;
             private double _archiveThresholdIncreaseMultiplier;
@@ -153,8 +161,6 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             private IBehaviorCharacterizationFactory _behaviorCharacterizationFactory;
             private string _complexityRegulationStrategyDefinition;
             private int? _complexityThreshold;
-            private IDataLogger _evaluationDataLogger;
-            private IDataLogger _evolutionDataLogger;
             private AbstractNeatEvolutionAlgorithm<NeatGenome> _initializationEa;
             private int? _maxDistanceToTarget;
             private int _maxGenerationArchiveAddition;
@@ -170,10 +176,13 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             /// </summary>
             /// <param name="evolutionDataLogger">Sets the evolution logger reference from the parent algorithm.</param>
             /// <param name="evaluationDataLogger">Sets the evaluation logger reference from the parent algorithm.</param>
-            public InitializationAlgorithm(IDataLogger evolutionDataLogger, IDataLogger evaluationDataLogger)
+            /// <param name="decodeGenomeToXml">Whether each evaluated genome should be serialized to XML.</param>
+            public InitializationAlgorithm(IDataLogger evolutionDataLogger, IDataLogger evaluationDataLogger,
+                bool decodeGenomeToXml)
             {
                 _evolutionDataLogger = evolutionDataLogger;
                 _evaluationDataLogger = evaluationDataLogger;
+                _decodeGenomeToXml = decodeGenomeToXml;
             }
 
             /// <summary>
@@ -232,7 +241,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             public void InitializeAlgorithm(ParallelOptions parallelOptions, IGenomeFactory<NeatGenome> genomeFactory,
                 List<NeatGenome> genomeList, IGenomeDecoder<NeatGenome, IBlackBox> genomeDecoder,
                 NeatEvolutionAlgorithmParameters neatParameters)
-            {
+            {                
                 // Create distance metric. Mismatched genes have a fixed distance of 10; for matched genes the distance is their weigth difference.
                 IDistanceMetric distanceMetric = new ManhattanDistanceMetric(1.0, 0.0, 10.0);
                 ISpeciationStrategy<NeatGenome> speciationStrategy =
@@ -246,11 +255,11 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                 // Create the initialization evolution algorithm.
                 _initializationEa = new SteadyStateNeatEvolutionAlgorithm<NeatGenome>(neatParameters,
                     speciationStrategy, complexityRegulationStrategy, _batchSize, _populationEvaluationFrequency,
-                    RunPhase.Initialization);
+                    RunPhase.Initialization, _evolutionDataLogger);
 
                 // Create IBlackBox evaluator.
-                MazeNavigationNoveltyInitializationEvaluator mazeNavigationEvaluator =
-                    new MazeNavigationNoveltyInitializationEvaluator(_maxDistanceToTarget, _maxTimesteps,
+                MazeNavigationMCSInitializationEvaluator mazeNavigationEvaluator =
+                    new MazeNavigationMCSInitializationEvaluator(_maxDistanceToTarget, _maxTimesteps,
                         _mazeVariant,
                         _minSuccessDistance, _behaviorCharacterizationFactory);
 
@@ -263,12 +272,12 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 //                IGenomeEvaluator<NeatGenome> fitnessEvaluator =
 //                    new SerialGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
 //                        SelectionType.SteadyState, SearchType.NoveltySearch,
-//                        _nearestNeighbors, archive);
+//                        _nearestNeighbors, archive, _evaluationDataLogger, _decodeGenomeToXml);
 
                 IGenomeEvaluator<NeatGenome> fitnessEvaluator =
                     new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
                         SelectionType.SteadyState, SearchType.NoveltySearch,
-                        _nearestNeighbors, archive);
+                        _nearestNeighbors, archive, _evaluationDataLogger, _decodeGenomeToXml);
 
                 // Initialize the evolution algorithm.
                 _initializationEa.Initialize(fitnessEvaluator, genomeFactory, genomeList, null, null, archive);

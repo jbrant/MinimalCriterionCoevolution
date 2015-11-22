@@ -419,6 +419,16 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </summary>
         protected virtual void Initialize()
         {
+            // Open the logger
+            EvolutionLogger?.Open();
+
+            // Set the run phase on the logger
+            EvolutionLogger?.UpdateRunPhase(RunPhase);
+
+            // Write out the header
+            EvolutionLogger?.LogHeader(GetLoggableElements(), Statistics.GetLoggableElements(),
+                (CurrentChampGenome as NeatGenome)?.GetLoggableElements());
+
             // Initialize the genome evalutor
             GenomeEvaluator.Initialize();
 
@@ -434,14 +444,7 @@ namespace SharpNeat.EvolutionAlgorithms
             SortSpecieGenomes();
 
             // Store ref to best genome.
-            UpdateBestGenome();
-
-            // Open the logger
-            EvolutionLogger?.Open();
-
-            // Write out the header
-            EvolutionLogger?.LogHeader(GetLoggableElements(), Statistics.GetLoggableElements(),
-                (CurrentChampGenome as NeatGenome)?.GetLoggableElements());
+            UpdateBestGenome();            
         }
 
         #endregion

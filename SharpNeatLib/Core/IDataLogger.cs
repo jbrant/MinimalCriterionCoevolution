@@ -1,6 +1,5 @@
 ﻿#region
 
-using System;
 using System.Collections.Generic;
 using SharpNeat.Loggers;
 
@@ -14,6 +13,12 @@ namespace SharpNeat.Core
         ///     Opens the log file for writing.
         /// </summary>
         void Open();
+
+        /// <summary>
+        ///     Sets the current run phase.
+        /// </summary>
+        /// <param name="runPhase">The run phase (i.e. initialization or the primary algorithm).</param>
+        void UpdateRunPhase(RunPhase runPhase);
 
         /// <summary>
         ///     Writes the header row of the log file.

@@ -58,6 +58,7 @@ namespace SharpNeat.Core
         private readonly IDataLogger _evaluationLogger;
         private readonly SelectionType _selectionType;
         private readonly SearchType _searchType;
+        private readonly bool _decodeGenomeToXml;
 
         #endregion
 
@@ -102,13 +103,17 @@ namespace SharpNeat.Core
         /// <param name="selectionType">The selection algorithm type.</param>
         /// <param name="searchType">The search algorithm type.</param>
         /// <param name="evaluationLogger">A reference to the evaluation data logger (optional).</param>
+        /// <param name="decodeGenomeToXml">
+        ///     Whether a genome should be decoded to its XML string representation (generally used to
+        ///     support logging).
+        /// </param>
         public ParallelGenomeBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
             IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, SelectionType selectionType,
             SearchType searchType,
-            IDataLogger evaluationLogger = null)
+            IDataLogger evaluationLogger = null, bool decodeGenomeToXml = false)
             : this(
                 genomeDecoder, phenomeEvaluator, selectionType, searchType, new ParallelOptions(), true, 0, null,
-                evaluationLogger)
+                evaluationLogger, decodeGenomeToXml)
         {
         }
 
@@ -124,15 +129,20 @@ namespace SharpNeat.Core
         /// <param name="nearestNeighbors">The number of nearest neighbors to use in behavior distance calculations.</param>
         /// <param name="archive">A reference to the elite archive (optional).</param>
         /// <param name="evaluationLogger">A reference to the evaluation data logger (optional).</param>
+        /// <param name="decodeGenomeToXml">
+        ///     Whether a genome should be decoded to its XML string representation (generally used to
+        ///     support logging).
+        /// </param>
         public ParallelGenomeBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
             IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, SelectionType selectionType,
             SearchType searchType,
             int nearestNeighbors,
-            AbstractNoveltyArchive<TGenome> archive = null, IDataLogger evaluationLogger = null)
+            AbstractNoveltyArchive<TGenome> archive = null, IDataLogger evaluationLogger = null,
+            bool decodeGenomeToXml = false)
             : this(
                 genomeDecoder, phenomeEvaluator, selectionType, searchType, new ParallelOptions(), true,
                 nearestNeighbors, archive,
-                evaluationLogger)
+                evaluationLogger, decodeGenomeToXml)
         {
         }
 
@@ -149,14 +159,18 @@ namespace SharpNeat.Core
         /// <param name="nearestNeighbors">The number of nearest neighbors to use in behavior distance calculations.</param>
         /// <param name="archive">A reference to the elite archive (optional).</param>
         /// <param name="evaluationLogger">A reference to the evaluation data logger (optional).</param>
+        /// <param name="decodeGenomeToXml">
+        ///     Whether a genome should be decoded to its XML string representation (generally used to
+        ///     support logging).
+        /// </param>
         public ParallelGenomeBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
             IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, SelectionType selectionType,
             SearchType searchType,
             ParallelOptions options, int nearestNeighbors, AbstractNoveltyArchive<TGenome> archive = null,
-            IDataLogger evaluationLogger = null)
+            IDataLogger evaluationLogger = null, bool decodeGenomeToXml = false)
             : this(
                 genomeDecoder, phenomeEvaluator, selectionType, searchType, options, true, nearestNeighbors, archive,
-                evaluationLogger)
+                evaluationLogger, decodeGenomeToXml)
         {
         }
 
@@ -172,11 +186,16 @@ namespace SharpNeat.Core
         /// <param name="nearestNeighbors">The number of nearest neighbors to use in behavior distance calculations.</param>
         /// <param name="archive">A reference to the elite archive (optional).</param>
         /// <param name="evaluationLogger">A reference to the evaluation data logger (optional).</param>
+        /// <param name="decodeGenomeToXml">
+        ///     Whether a genome should be decoded to its XML string representation (generally used to
+        ///     support logging).
+        /// </param>
         private ParallelGenomeBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
             IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, SelectionType selectionType,
             SearchType searchType,
             ParallelOptions options, bool enablePhenomeCaching, int nearestNeighbors,
-            AbstractNoveltyArchive<TGenome> archive = null, IDataLogger evaluationLogger = null)
+            AbstractNoveltyArchive<TGenome> archive = null, IDataLogger evaluationLogger = null,
+            bool decodeGenomeToXml = false)
         {
             _genomeDecoder = genomeDecoder;
             _phenomeEvaluator = phenomeEvaluator;
@@ -187,6 +206,7 @@ namespace SharpNeat.Core
             _nearestNeighbors = nearestNeighbors;
             _noveltyArchive = archive;
             _evaluationLogger = evaluationLogger;
+            _decodeGenomeToXml = decodeGenomeToXml;
 
             // Determine the appropriate evaluation method.
             if (_enablePhenomeCaching)
@@ -303,7 +323,7 @@ namespace SharpNeat.Core
                     delegate(TGenome genome)
                     {
                         EvaluationUtils<TGenome, TPhenome>.EvaluateBehavior_NonCaching(genome, _genomeDecoder,
-                            _phenomeEvaluator, currentGeneration, _evaluationLogger);
+                            _phenomeEvaluator, currentGeneration, _evaluationLogger, _decodeGenomeToXml);
                     });
             }
 
@@ -314,7 +334,7 @@ namespace SharpNeat.Core
                     // After the behavior of each genome in the offspring batch has been evaluated,
                     // iterate through each genome and compare its behavioral novelty (distance) to its 
                     // k -nearest neighbors from the population in behavior space (and the archive if applicable)
-                    Parallel.ForEach(genomeList, _parallelOptions, delegate (TGenome genome)
+                    Parallel.ForEach(genomeList, _parallelOptions, delegate(TGenome genome)
                     {
                         EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, genomeList, _nearestNeighbors,
                             _noveltyArchive, false);
@@ -361,7 +381,7 @@ namespace SharpNeat.Core
                     delegate(TGenome genome)
                     {
                         EvaluationUtils<TGenome, TPhenome>.EvaluateBehavior_NonCaching(genome, _genomeDecoder,
-                            _phenomeEvaluator, currentGeneration, _evaluationLogger);
+                            _phenomeEvaluator, currentGeneration, _evaluationLogger, _decodeGenomeToXml);
                     });
             }
 
@@ -372,7 +392,7 @@ namespace SharpNeat.Core
                     // After the behavior of each genome in the offspring batch has been evaluated,
                     // iterate through each genome and compare its behavioral novelty (distance) to its 
                     // k -nearest neighbors from the population in behavior space (and the archive if applicable)
-                    Parallel.ForEach(genomesToEvaluate, _parallelOptions, delegate (TGenome genome)
+                    Parallel.ForEach(genomesToEvaluate, _parallelOptions, delegate(TGenome genome)
                     {
                         EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, population, _nearestNeighbors,
                             _noveltyArchive, false);
@@ -415,7 +435,7 @@ namespace SharpNeat.Core
                     delegate(TGenome genome)
                     {
                         EvaluationUtils<TGenome, TPhenome>.EvaluateBehavior_Caching(genome, _genomeDecoder,
-                            _phenomeEvaluator, currentGeneration, _evaluationLogger);
+                            _phenomeEvaluator, currentGeneration, _evaluationLogger, _decodeGenomeToXml);
                     });
             }
 
@@ -426,7 +446,7 @@ namespace SharpNeat.Core
                     // After the behavior of each genome in the offspring batch has been evaluated,
                     // iterate through each genome and compare its behavioral novelty (distance) to its 
                     // k -nearest neighbors from the population in behavior space (and the archive if applicable)
-                    Parallel.ForEach(genomeList, _parallelOptions, delegate (TGenome genome)
+                    Parallel.ForEach(genomeList, _parallelOptions, delegate(TGenome genome)
                     {
                         EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, genomeList, _nearestNeighbors,
                             _noveltyArchive, false);
@@ -474,7 +494,7 @@ namespace SharpNeat.Core
                     delegate(TGenome genome)
                     {
                         EvaluationUtils<TGenome, TPhenome>.EvaluateBehavior_Caching(genome, _genomeDecoder,
-                            _phenomeEvaluator, currentGeneration, _evaluationLogger);
+                            _phenomeEvaluator, currentGeneration, _evaluationLogger, _decodeGenomeToXml);
                     });
             }
 
@@ -485,7 +505,7 @@ namespace SharpNeat.Core
                     // After the behavior of each genome in the offspring batch has been evaluated,
                     // iterate through each genome and compare its behavioral novelty (distance) to its 
                     // k -nearest neighbors from the population in behavior space (and the archive if applicable)
-                    Parallel.ForEach(genomesToEvaluate, _parallelOptions, delegate (TGenome genome)
+                    Parallel.ForEach(genomesToEvaluate, _parallelOptions, delegate(TGenome genome)
                     {
                         EvaluationUtils<TGenome, TPhenome>.EvaluateFitness(genome, population, _nearestNeighbors,
                             _noveltyArchive, false);

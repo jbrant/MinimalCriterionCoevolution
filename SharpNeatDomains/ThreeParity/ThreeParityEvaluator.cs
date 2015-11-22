@@ -14,7 +14,7 @@ namespace SharpNeat.Domains.ThreeParity
     /// </summary>
     public class ThreeParityEvaluator : IPhenomeEvaluator<IBlackBox, FitnessInfo>
     {
-        const double StopFitness = 100.0;
+        private const double StopFitness = 100.0;
 
         /// <summary>
         ///     The number of evaluations conducted over the course of a run.
@@ -31,7 +31,8 @@ namespace SharpNeat.Domains.ThreeParity
         /// </summary>
         /// <param name="phenome">The phenome/black box (ANN) under evaluation.</param>
         /// <returns>The fitness score of the given black box optimizer.</returns>
-        public FitnessInfo Evaluate(IBlackBox phenome, uint currentGeneration, IDataLogger evaluationLogger)
+        public FitnessInfo Evaluate(IBlackBox phenome, uint currentGeneration, IDataLogger evaluationLogger,
+            string genomeXml)
         {
             double fitness = 0;
             bool success = true;
@@ -77,7 +78,7 @@ namespace SharpNeat.Domains.ThreeParity
                     // Since the desired output is 1, the square error ends up being the distance from the desired
                     // value of 1.  Also, since we want to reward lower error by inversely maximizing the fitness
                     // score, we subtract the squared error from 1
-                    fitness += 1.0 - ((1.0 - output) * (1.0 - output));
+                    fitness += 1.0 - ((1.0 - output)*(1.0 - output));
 
                     // Test if output is within certain margin of error
                     if (output < 0.5)
@@ -91,7 +92,7 @@ namespace SharpNeat.Domains.ThreeParity
                 {
                     // since the desired output is 0, the squared error is calculated as the square of the ANN output
                     // subtracted from 1
-                    fitness += 1.0 - (output * output);
+                    fitness += 1.0 - (output*output);
 
                     // Test if output is within certain margin of error
                     if (output >= 0.5)
