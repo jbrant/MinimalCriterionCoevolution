@@ -130,10 +130,10 @@ namespace SharpNeat.Loggers
                 (double)
                     Convert.ChangeType(combinedElements[EvaluationFieldElements.AgentYLocation.Position].Value,
                         mcsData.AgentYLocation.GetType());
-            mcsData.AgentXml =
-                (string)
-                    Convert.ChangeType(combinedElements[EvaluationFieldElements.AgentXml.Position].Value,
-                        typeof (string));
+//            mcsData.AgentXml =
+//                (string)
+//                    Convert.ChangeType(combinedElements[EvaluationFieldElements.AgentXml.Position].Value,
+//                        typeof (string));
 
             // Add the new organism state observation
             localDbContext.MCSExperimentOrganismStateDatas.Add(mcsData);

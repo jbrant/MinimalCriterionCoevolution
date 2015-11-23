@@ -1,7 +1,6 @@
 ﻿#region
 
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,7 +27,6 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
     {
         private int _batchSize;
         private IBehaviorCharacterizationFactory _behaviorCharacterizationFactory;
-        private bool _decodeGenomeToXml;
         private IDataLogger _evaluationDataLogger;
         private IDataLogger _evolutionDataLogger;
         private InitializationAlgorithm _initializationAlgorithm;
@@ -47,17 +45,11 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             // Read in log file path/name
             _evolutionDataLogger = ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Evolution);
             _evaluationDataLogger = ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Evaluation);
-
-            // Read in whether genomes should be decoded to XML during evaluation
-            _decodeGenomeToXml = XmlUtils.GetValueAsBool(xmlConfig, "DecodeGenomesToXml");
-
-            // TODO: Get rid of this section eventually
-            _evolutionDataLogger = new McsExperimentEvaluationEntityDataLogger("Queueing MCS 1");
-            _evaluationDataLogger = new McsExperimentOrganismStateEntityDataLogger("Queueing MCS 1");
-
+            
             // Initialize the initialization algorithm
-            _initializationAlgorithm = new InitializationAlgorithm(_evolutionDataLogger, _evaluationDataLogger,
-                _decodeGenomeToXml);
+            _initializationAlgorithm = new InitializationAlgorithm(MaxEvaluations, _evolutionDataLogger,
+                _evaluationDataLogger,
+                SerializeGenomeToXml);
 
             // Setup initialization algorithm
             _initializationAlgorithm.SetAlgorithmParameters(
@@ -72,14 +64,6 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         {
             base.Initialize(experimentDictionary);
 
-            // Ensure the start position and minimum distance constraint are not null
-            Debug.Assert(experimentDictionary.Primary_MCS_MinimalCriteriaStartX != null,
-                "experimentDictionary.Primary_MCS_MinimalCriteriaStartX != null");
-            Debug.Assert(experimentDictionary.Primary_MCS_MinimalCriteriaStartY != null,
-                "experimentDictionary.Primary_MCS_MinimalCriteriaStartY != null");
-            Debug.Assert(experimentDictionary.Primary_MCS_MinimalCriteriaThreshold != null,
-                "experimentDictionary.Primary_MCS_MinimalCriteriaThreshold != null");
-
             // Read in the behavior characterization
             _behaviorCharacterizationFactory = ExperimentUtils.ReadBehaviorCharacterizationFactory(
                 experimentDictionary, true);
@@ -88,9 +72,21 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             _batchSize = experimentDictionary.Primary_OffspringBatchSize ?? default(int);
 
             // Read in log file path/name
-            _evolutionDataLogger = new NoveltyExperimentEvaluationEntityDataLogger(experimentDictionary.ExperimentName);
+            _evolutionDataLogger = new McsExperimentEvaluationEntityDataLogger(experimentDictionary.ExperimentName);
             _evaluationDataLogger =
-                new NoveltyExperimentOrganismStateEntityDataLogger(experimentDictionary.ExperimentName);
+                new McsExperimentOrganismStateEntityDataLogger(experimentDictionary.ExperimentName);
+
+            // Initialize the initialization algorithm
+            _initializationAlgorithm = new InitializationAlgorithm(MaxEvaluations, _evolutionDataLogger,
+                _evaluationDataLogger,
+                SerializeGenomeToXml);
+
+            // Setup initialization algorithm
+            _initializationAlgorithm.SetAlgorithmParameters(experimentDictionary);
+
+            // Pass in maze experiment specific parameters
+            _initializationAlgorithm.SetEnvironmentParameters(MaxDistanceToTarget, MaxTimesteps, MazeVariant,
+                MinSuccessDistance);
         }
 
         /// <summary>
@@ -114,7 +110,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 
             // Run the algorithm until a viable genome is found
             NeatGenome genomeSeed = _initializationAlgorithm.EvolveViableGenome(out initializationEvaluations);
-            
+
             // Create complexity regulation strategy.
             var complexityRegulationStrategy =
                 ExperimentUtils.CreateComplexityRegulationStrategy(ComplexityRegulationStrategy, Complexitythreshold);
@@ -139,7 +135,8 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 
             IGenomeEvaluator<NeatGenome> fitnessEvaluator =
                 new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
-                    SelectionType.Queueing, SearchType.MinimalCriteriaSearch, _evaluationDataLogger, _decodeGenomeToXml);
+                    SelectionType.Queueing, SearchType.MinimalCriteriaSearch, _evaluationDataLogger,
+                    SerializeGenomeToXml);
 
             // Initialize the evolution algorithm.
             ea.Initialize(fitnessEvaluator, genomeFactory, new List<NeatGenome> {genomeSeed}, DefaultPopulationSize,
@@ -151,9 +148,10 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 
         private class InitializationAlgorithm
         {
-            private readonly bool _decodeGenomeToXml;
             private readonly IDataLogger _evaluationDataLogger;
             private readonly IDataLogger _evolutionDataLogger;
+            private readonly ulong? _maxEvaluations;
+            private readonly bool _serializeGenomeToXml;
             private double _archiveAdditionThreshold;
             private double _archiveThresholdDecreaseMultiplier;
             private double _archiveThresholdIncreaseMultiplier;
@@ -176,13 +174,15 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             /// </summary>
             /// <param name="evolutionDataLogger">Sets the evolution logger reference from the parent algorithm.</param>
             /// <param name="evaluationDataLogger">Sets the evaluation logger reference from the parent algorithm.</param>
-            /// <param name="decodeGenomeToXml">Whether each evaluated genome should be serialized to XML.</param>
-            public InitializationAlgorithm(IDataLogger evolutionDataLogger, IDataLogger evaluationDataLogger,
-                bool decodeGenomeToXml)
+            /// <param name="serializeGenomeToXml">Whether each evaluated genome should be serialized to XML.</param>
+            public InitializationAlgorithm(ulong? maxEvaluations, IDataLogger evolutionDataLogger,
+                IDataLogger evaluationDataLogger,
+                bool? serializeGenomeToXml)
             {
+                _maxEvaluations = maxEvaluations;
                 _evolutionDataLogger = evolutionDataLogger;
                 _evaluationDataLogger = evaluationDataLogger;
-                _decodeGenomeToXml = decodeGenomeToXml;
+                _serializeGenomeToXml = serializeGenomeToXml ?? false;
             }
 
             /// <summary>
@@ -215,6 +215,47 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             }
 
             /// <summary>
+            ///     Constructs and initializes the MCS initialization algorithm (novelty search) using the database configuration.
+            /// </summary>
+            /// <param name="xmlConfig">The XML configuration for the initialization algorithm.</param>
+            /// <returns>The constructed initialization algorithm.</returns>
+            public void SetAlgorithmParameters(ExperimentDictionary experimentDictionary)
+            {
+                // Get complexity constraint parameters
+                _complexityRegulationStrategyDefinition =
+                    experimentDictionary.Initialization_ComplexityRegulationStrategy;
+                _complexityThreshold = experimentDictionary.Initialization_ComplexityThreshold;
+
+                // Read in the behavior characterization
+                _behaviorCharacterizationFactory =
+                    ExperimentUtils.ReadBehaviorCharacterizationFactory(experimentDictionary, false);
+
+                // Read in the novelty archive parameters
+                _archiveAdditionThreshold =
+                    experimentDictionary.Initialization_NoveltySearch_ArchiveAdditionThreshold ?? default(double);
+                _archiveThresholdDecreaseMultiplier =
+                    experimentDictionary.Initialization_NoveltySearch_ArchiveThresholdDecreaseMultiplier ??
+                    default(double);
+                _archiveThresholdIncreaseMultiplier =
+                    experimentDictionary.Initialization_NoveltySearch_ArchiveThresholdIncreaseMultiplier ??
+                    default(double);
+                _maxGenerationArchiveAddition =
+                    experimentDictionary.Initialization_NoveltySearch_MaxGenerationsWithArchiveAddition ??
+                    default(int);
+                _maxGenerationsWithoutArchiveAddition =
+                    experimentDictionary.Initialization_NoveltySearch_MaxGenerationsWithoutArchiveAddition ??
+                    default(int);
+
+                // Read in nearest neighbors for behavior distance calculations
+                _nearestNeighbors = experimentDictionary.Initialization_NoveltySearch_NearestNeighbors ?? default(int);
+
+                // Read in steady-state specific parameters
+                _batchSize = experimentDictionary.Initialization_OffspringBatchSize ?? default(int);
+                _populationEvaluationFrequency = experimentDictionary.Initialization_PopulationEvaluationFrequency ??
+                                                 default(int);
+            }
+
+            /// <summary>
             ///     Sets configuration variables specific to the maze navigation simulation.
             /// </summary>
             /// <param name="maxDistanceToTarget">The maximum distance possible from the target location.</param>
@@ -241,7 +282,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             public void InitializeAlgorithm(ParallelOptions parallelOptions, IGenomeFactory<NeatGenome> genomeFactory,
                 List<NeatGenome> genomeList, IGenomeDecoder<NeatGenome, IBlackBox> genomeDecoder,
                 NeatEvolutionAlgorithmParameters neatParameters)
-            {                
+            {
                 // Create distance metric. Mismatched genes have a fixed distance of 10; for matched genes the distance is their weigth difference.
                 IDistanceMetric distanceMetric = new ManhattanDistanceMetric(1.0, 0.0, 10.0);
                 ISpeciationStrategy<NeatGenome> speciationStrategy =
@@ -272,15 +313,15 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 //                IGenomeEvaluator<NeatGenome> fitnessEvaluator =
 //                    new SerialGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
 //                        SelectionType.SteadyState, SearchType.NoveltySearch,
-//                        _nearestNeighbors, archive, _evaluationDataLogger, _decodeGenomeToXml);
+//                        _nearestNeighbors, archive, _evaluationDataLogger, _serializeGenomeToXml);
 
                 IGenomeEvaluator<NeatGenome> fitnessEvaluator =
                     new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
                         SelectionType.SteadyState, SearchType.NoveltySearch,
-                        _nearestNeighbors, archive, _evaluationDataLogger, _decodeGenomeToXml);
+                        _nearestNeighbors, archive, _evaluationDataLogger, _serializeGenomeToXml);
 
                 // Initialize the evolution algorithm.
-                _initializationEa.Initialize(fitnessEvaluator, genomeFactory, genomeList, null, null, archive);
+                _initializationEa.Initialize(fitnessEvaluator, genomeFactory, genomeList, null, _maxEvaluations, archive);
             }
 
             /// <summary>

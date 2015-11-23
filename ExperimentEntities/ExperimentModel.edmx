@@ -10,6 +10,7 @@
             <PropertyRef Name="ExperimentDictionaryID" />
             <PropertyRef Name="Run" />
             <PropertyRef Name="Generation" />
+            <PropertyRef Name="RunPhase_FK" />
           </Key>
           <Property Name="ExperimentDictionaryID" Type="int" Nullable="false" />
           <Property Name="Run" Type="int" Nullable="false" />
@@ -130,6 +131,7 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
             
             
             
+            
           </Key>
           <Property Name="ExperimentDictionaryID" Type="int" Nullable="false" StoreGeneratedPattern="Identity" />
           <Property Name="ExperimentName" Type="varchar" MaxLength="100" Nullable="false" />
@@ -138,6 +140,7 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <Property Name="MaxTimesteps" Type="int" Nullable="false" />
           <Property Name="MinSuccessDistance" Type="int" Nullable="false" />
           <Property Name="MaxDistanceToTarget" Type="int" Nullable="false" />
+          <Property Name="SerializeGenomeToXml" Type="bit" Nullable="false" />
           <Property Name="ExperimentDomainName" Type="varchar" MaxLength="100" Nullable="false" />
           <Property Name="PopulationSize" Type="int" Nullable="false" />
           <Property Name="NumSpecies" Type="int" Nullable="false" />
@@ -228,6 +231,7 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
     [ExperimentDictionary_vw].[MaxTimesteps] AS [MaxTimesteps], 
     [ExperimentDictionary_vw].[MinSuccessDistance] AS [MinSuccessDistance], 
     [ExperimentDictionary_vw].[MaxDistanceToTarget] AS [MaxDistanceToTarget], 
+    [ExperimentDictionary_vw].[SerializeGenomeToXml] AS [SerializeGenomeToXml], 
     [ExperimentDictionary_vw].[ExperimentDomainName] AS [ExperimentDomainName], 
     [ExperimentDictionary_vw].[PopulationSize] AS [PopulationSize], 
     [ExperimentDictionary_vw].[NumSpecies] AS [NumSpecies], 
@@ -390,6 +394,7 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <NavigationProperty Name="MCSExperimentOrganismStateDatas" Relationship="ExperimentDataModel.FK_MCSExperimentOrganismStateData_ExperimentDictionary" FromRole="ExperimentDictionary" ToRole="MCSExperimentOrganismStateData" />
           <Property Name="Initialization_MCS_IsBridgingEnabled" Type="Boolean" />
           <Property Name="Primary_MCS_IsBridgingEnabled" Type="Boolean" />
+          <Property Name="SerializeGenomeToXml" Type="Boolean" Nullable="false" />
         </EntityType>
         <EntityType Name="NoveltyExperimentOrganismStateData">
           <Key>
@@ -471,6 +476,7 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
             <PropertyRef Name="ExperimentDictionaryID" />
             <PropertyRef Name="Run" />
             <PropertyRef Name="Generation" />
+            <PropertyRef Name="RunPhase_FK" />
           </Key>
           <Property Name="ExperimentDictionaryID" Type="Int32" Nullable="false" />
           <Property Name="Run" Type="Int32" Nullable="false" />
@@ -581,6 +587,7 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <EntitySetMapping Name="ExperimentDictionaries">
             <EntityTypeMapping TypeName="ExperimentDataModel.ExperimentDictionary">
               <MappingFragment StoreEntitySet="ExperimentDictionary_vw">
+                <ScalarProperty Name="SerializeGenomeToXml" ColumnName="SerializeGenomeToXml" />
                 <ScalarProperty Name="Primary_MCS_IsBridgingEnabled" ColumnName="Primary_MCS_IsBridgingEnabled" />
                 <ScalarProperty Name="Initialization_MCS_IsBridgingEnabled" ColumnName="Initialization_MCS_IsBridgingEnabled" />
                 <ScalarProperty Name="Primary_MCS_MinimalCriteriaName" ColumnName="Primary_MCS_MinimalCriteriaName" />

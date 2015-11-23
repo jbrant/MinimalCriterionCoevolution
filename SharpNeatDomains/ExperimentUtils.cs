@@ -417,7 +417,59 @@ namespace SharpNeat.Domains
 
             IMinimalCriteria minimalCriteria = null;
 
-            // TODO: Need to handle associated minimal criteria
+            // Get the appropriate minimal criteria type
+            MinimalCriteriaType mcType = BehaviorCharacterizationUtil.ConvertStringToMinimalCriteria(isPrimary
+                ? experiment.Primary_MCS_MinimalCriteriaName
+                : experiment.Initialization_MCS_MinimalCriteriaName);
+
+            // Starting location used in most criterias
+            double xStart, yStart;
+
+            switch (mcType)
+            {
+                case MinimalCriteriaType.EuclideanLocation:
+
+                    // TODO: Not implemented at the database layer yet
+
+                    break;
+
+                case MinimalCriteriaType.EuclideanDistance:
+
+                    // Read in the starting coordinates and the minimum required distance traveled
+                    xStart = isPrimary
+                        ? experiment.Primary_MCS_MinimalCriteriaStartX ?? default(double)
+                        : experiment.Initialization_MCS_MinimalCriteriaStartX ?? default(double);
+                    yStart = isPrimary
+                        ? experiment.Primary_MCS_MinimalCriteriaStartY ?? default(double)
+                        : experiment.Initialization_MCS_MinimalCriteriaStartY ?? default(double);
+                    double minimumDistanceTraveled = isPrimary
+                        ? experiment.Primary_MCS_MinimalCriteriaThreshold ?? default(double)
+                        : experiment.Initialization_MCS_MinimalCriteriaThreshold ?? default(double);
+
+                    // Set the euclidean distance minimal criteria on the behavior characterization
+                    minimalCriteria = new EuclideanDistanceCriteria(xStart, yStart,
+                        minimumDistanceTraveled);
+
+                    break;
+
+                case MinimalCriteriaType.Mileage:
+
+                    // Read in the starting coordinates and minimum required total distance traveled (mileage)
+                    xStart = isPrimary
+                        ? experiment.Primary_MCS_MinimalCriteriaStartX ?? default(double)
+                        : experiment.Initialization_MCS_MinimalCriteriaStartX ?? default(double);
+                    yStart = isPrimary
+                        ? experiment.Primary_MCS_MinimalCriteriaStartY ?? default(double)
+                        : experiment.Initialization_MCS_MinimalCriteriaStartY ?? default(double);
+                    double minimumMileage = isPrimary
+                        ? experiment.Primary_MCS_MinimalCriteriaThreshold ?? default(double)
+                        : experiment.Initialization_MCS_MinimalCriteriaThreshold ?? default(double);
+
+                    // Set the mileage minimal criteria on the behavior characterization
+                    minimalCriteria = new MileageCriteria(xStart, yStart, minimumMileage);
+
+                    break;
+            }
 
             // Parse and generate the appropriate behavior characterization factory
             IBehaviorCharacterizationFactory behaviorCharacterizationFactory =

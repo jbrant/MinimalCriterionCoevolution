@@ -358,9 +358,8 @@ namespace SharpNeat.EvolutionAlgorithms
                 // or the stop condition is satisfied
                 for (;;)
                 {
-                    // Increment the current generation and set the current number of evaluations
-                    CurrentGeneration++;
-                    CurrentEvaluations = GenomeEvaluator.EvaluationCount;
+                    // Increment the current generation
+                    CurrentGeneration++;                    
 
                     // Execute the generation
                     PerformOneGeneration();
@@ -371,6 +370,10 @@ namespace SharpNeat.EvolutionAlgorithms
                         _prevUpdateTimeTick = DateTime.Now.Ticks;
                         OnUpdateEvent();
                     }
+
+                    // Set the current number of evaluations 
+                    // (this after the algorithm has run so we have the correct number for this iteration)
+                    CurrentEvaluations = GenomeEvaluator.EvaluationCount;
 
                     // Check if a pause has been requested. 
                     // Access to the flag is not thread synchronized, but it doesn't really matter if

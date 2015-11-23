@@ -80,6 +80,7 @@ namespace ExperimentEntities
         public string Primary_MCS_MinimalCriteriaName { get; set; }
         public Nullable<bool> Initialization_MCS_IsBridgingEnabled { get; set; }
         public Nullable<bool> Primary_MCS_IsBridgingEnabled { get; set; }
+        public bool SerializeGenomeToXml { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<NoveltyExperimentOrganismStateData> NoveltyExperimentOrganismStateDatas { get; set; }

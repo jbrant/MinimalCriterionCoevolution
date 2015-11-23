@@ -74,6 +74,8 @@ namespace SharpNeatConsole
                     // Initialize the experiment
                     experiment.Initialize(experimentConfiguration);
 
+                    Console.WriteLine(@"Initialized experiment {0}.", experiment.GetType());
+
                     // Open and load population XML file.
                     using (XmlReader xr = XmlReader.Create(seedPopulationFile))
                     {
@@ -81,6 +83,10 @@ namespace SharpNeatConsole
                     }
                     _genomeFactory = _genomeList[0].GenomeFactory;
                     Console.WriteLine(@"Loaded [{0}] genomes as initial population.", _genomeList.Count);
+
+                    Console.WriteLine(@"Creating primary EA {0} initialized by {1}",
+                        experimentConfiguration.Primary_SearchAlgorithmName,
+                        experimentConfiguration.Initialization_SearchAlgorithmName);
 
                     // Create evolution algorithm and attach update event.
                     _ea = experiment.CreateEvolutionAlgorithm(_genomeFactory, _genomeList);

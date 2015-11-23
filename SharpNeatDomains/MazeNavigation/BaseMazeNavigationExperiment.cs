@@ -28,6 +28,7 @@ namespace SharpNeat.Domains.MazeNavigation
         protected MazeVariant MazeVariant;
         protected int? MinSuccessDistance;
         protected ParallelOptions ParallelOptions;
+        protected bool SerializeGenomeToXml;
 
         /// <summary>
         ///     Name of the experiment.
@@ -81,6 +82,7 @@ namespace SharpNeat.Domains.MazeNavigation
             ComplexityRegulationStrategy = XmlUtils.TryGetValueAsString(xmlConfig, "ComplexityRegulationStrategy");
             Complexitythreshold = XmlUtils.TryGetValueAsInt(xmlConfig, "ComplexityThreshold");
             ParallelOptions = ExperimentUtils.ReadParallelOptions(xmlConfig);
+            SerializeGenomeToXml = XmlUtils.TryGetValueAsBool(xmlConfig, "DecodeGenomesToXml") ?? false;
             MaxGenerations = XmlUtils.TryGetValueAsInt(xmlConfig, "MaxGenerations");
             MaxEvaluations = XmlUtils.TryGetValueAsULong(xmlConfig, "MaxEvaluations");
 
@@ -102,6 +104,10 @@ namespace SharpNeat.Domains.MazeNavigation
                 MazeVariantUtil.convertStringToMazeVariant(XmlUtils.TryGetValueAsString(xmlConfig, "MazeVariant"));
         }
 
+        /// <summary>
+        ///     Initialize the experiment with database configuration parameters.
+        /// </summary>
+        /// <param name="experimentDictionary">The handle to the experiment dictionary row pulled from the database.</param>
         public virtual void Initialize(ExperimentDictionary experimentDictionary)
         {
             // Set all properties
@@ -114,9 +120,9 @@ namespace SharpNeat.Domains.MazeNavigation
             ComplexityRegulationStrategy = experimentDictionary.Primary_ComplexityRegulationStrategy;
             Complexitythreshold = experimentDictionary.Primary_ComplexityThreshold;
             ParallelOptions = new ParallelOptions();
-
+            SerializeGenomeToXml = experimentDictionary.SerializeGenomeToXml;
             MaxEvaluations = (ulong) experimentDictionary.MaxEvaluations;
-
+            
             // Set evolution/genome parameters
             NeatEvolutionAlgorithmParameters = new NeatEvolutionAlgorithmParameters
             {
@@ -134,9 +140,9 @@ namespace SharpNeat.Domains.MazeNavigation
                 AddConnectionMutationProbability = experimentDictionary.MutateAddConnectionProbability,
                 AddNodeMutationProbability = experimentDictionary.MutateAddNeuronProbability,
                 DeleteConnectionMutationProbability = experimentDictionary.MutateDeleteConnectionProbability,
-                ConnectionWeightRange = experimentDictionary.ConnectionWeightRange
+                ConnectionWeightRange = experimentDictionary.ConnectionWeightRange,
+                FeedforwardOnly = _activationScheme.AcyclicNetwork
             };
-            NeatGenomeParameters.FeedforwardOnly = _activationScheme.AcyclicNetwork;
 
             // Set experiment-specific parameters
             MaxTimesteps = experimentDictionary.MaxTimesteps;
