@@ -76,7 +76,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             }
 
             // If the navigator reached the goal or if the minimal criteria has been satisfied, then stop the experiment
-            if (goalReached || trialInfo.DoesBehaviorSatisfyMinimalCriteria)
+            if (trialInfo.DoesBehaviorSatisfyMinimalCriteria)
                 StopConditionSatisfied = true;
 
             // Log the trial information
@@ -104,6 +104,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             // Log the header
             evaluationLogger?.LogHeader(new List<LoggableElement>
             {
+                new LoggableElement(EvaluationFieldElements.Generation, 0),
                 new LoggableElement(EvaluationFieldElements.EvaluationCount, EvaluationCount),
                 new LoggableElement(EvaluationFieldElements.StopConditionSatisfied, StopConditionSatisfied),
                 new LoggableElement(EvaluationFieldElements.RunPhase, RunPhase.Initialization),

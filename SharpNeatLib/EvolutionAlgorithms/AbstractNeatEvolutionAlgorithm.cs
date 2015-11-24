@@ -426,9 +426,9 @@ namespace SharpNeat.EvolutionAlgorithms
             // Set the run phase on the logger
             EvolutionLogger?.UpdateRunPhase(RunPhase);
 
-            // Write out the header
+            // Write out the header (for the champ genome, we don't care which genome is used)
             EvolutionLogger?.LogHeader(GetLoggableElements(), Statistics.GetLoggableElements(),
-                (CurrentChampGenome as NeatGenome)?.GetLoggableElements());
+                (GenomeList[0] as NeatGenome)?.GetLoggableElements());
 
             // Initialize the genome evalutor
             GenomeEvaluator.Initialize();

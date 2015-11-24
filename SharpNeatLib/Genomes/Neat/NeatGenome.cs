@@ -80,6 +80,11 @@ namespace SharpNeat.Genomes.Neat
                 loggableElements.Add(new LoggableElement(EvolutionFieldElements.ChampGenomeBehaviorY,
                     EvaluationInfo.BehaviorCharacterization[1]));
             }
+            else
+            {
+                loggableElements.Add(new LoggableElement(EvolutionFieldElements.ChampGenomeBehaviorX, null));
+                loggableElements.Add(new LoggableElement(EvolutionFieldElements.ChampGenomeBehaviorY, null));
+            }
 
             // Serialize the champ genome to XML and add as a loggable element
             StringWriter champGenomeSw = new StringWriter();

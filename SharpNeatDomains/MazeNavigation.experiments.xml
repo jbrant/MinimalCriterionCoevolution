@@ -231,16 +231,16 @@
           <MaxGenerationsWithoutArchiveAddition>10</MaxGenerationsWithoutArchiveAddition>
         </NoveltyConfig>        
       </InitializationAlgorithmConfig>
-      <!--<LoggingConfig>
+      <LoggingConfig>
         <Type>Evolution</Type>
-        <Destination>Database</Destination>
-        <ExperimentConfigurationName>Experiment 13</ExperimentConfigurationName>
+        <Destination>File</Destination>
+        <LogFile>C:\\Users\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Novelty Search\Experiments\\EvolutionData.csv</LogFile>
       </LoggingConfig>
       <LoggingConfig>
         <Type>Evaluation</Type>
-        <Destination>Database</Destination>
-        <ExperimentConfigurationName>Experiment 13</ExperimentConfigurationName>
-      </LoggingConfig>-->
+        <Destination>File</Destination>
+        <LogFile>C:\\Users\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Novelty Search\Experiments\\EvaluationData.csv</LogFile>
+      </LoggingConfig>
       <Description>
         This is the maze navigation experiment used in the original novelty search papers (citation needed).
       </Description>

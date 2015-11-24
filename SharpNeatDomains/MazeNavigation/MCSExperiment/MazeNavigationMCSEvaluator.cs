@@ -108,6 +108,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             // Log the header
             evaluationLogger?.LogHeader(new List<LoggableElement>
             {
+                new LoggableElement(EvaluationFieldElements.Generation, 0),
                 new LoggableElement(EvaluationFieldElements.EvaluationCount, EvaluationCount),
                 new LoggableElement(EvaluationFieldElements.StopConditionSatisfied, StopConditionSatisfied),
                 new LoggableElement(EvaluationFieldElements.RunPhase, RunPhase.Initialization),

@@ -24,6 +24,7 @@ namespace SharpNeat.Loggers
         {
             LogFileName = filename;
             _rowElementDelimiter = delimiter;
+            _isHeaderWritten = false;
         }
 
         #endregion
@@ -49,6 +50,12 @@ namespace SharpNeat.Loggers
         /// </summary>
         private StreamWriter _writer;
 
+        /// <summary>
+        ///     Indicates whether the header has been written or not (used in multipart EAs where the open method could be called
+        ///     more than once).
+        /// </summary>
+        private bool _isHeaderWritten;
+
         #endregion
 
         #region Logging Control Methods
@@ -58,7 +65,8 @@ namespace SharpNeat.Loggers
         /// </summary>
         public void Open()
         {
-            _writer = new StreamWriter(LogFileName);
+            if (_writer != null) return;
+            _writer = new StreamWriter(LogFileName) {AutoFlush = true};
         }
 
         public void UpdateRunPhase(RunPhase runPhase)
@@ -72,11 +80,18 @@ namespace SharpNeat.Loggers
         /// <param name="loggableElements">The LoggableElements which include the header text.</param>
         public void LogHeader(params List<LoggableElement>[] loggableElements)
         {
+            // Do nothing if the header has already been written to the output file
+            if (_isHeaderWritten)
+                return;
+
             // Combine and sort the loggable elements
             List<LoggableElement> combinedElements = extractSortedCombinedList(loggableElements);
 
             // Write the header
             _writer.WriteLine(string.Join(_rowElementDelimiter, extractHeaderNames(combinedElements)));
+
+            // Update the header written state
+            _isHeaderWritten = true;
 
             // Immediatley flush to the log file
             _writer.Flush();
@@ -126,6 +141,7 @@ namespace SharpNeat.Loggers
             // Combine everything into a single list
             foreach (var loggableElementList in loggableElements)
             {
+                if (loggableElementList == null) continue;
                 combinedElements.AddRange(loggableElementList);
             }
 

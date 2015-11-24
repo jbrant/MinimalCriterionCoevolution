@@ -110,9 +110,20 @@ namespace SharpNeatConsole
                         experimentConfiguration.Primary_SearchAlgorithmName,
                         experimentConfiguration.Initialization_SearchAlgorithmName);
 
-                    // Create evolution algorithm and attach update event.
-                    _ea = experiment.CreateEvolutionAlgorithm(_genomeFactory, _genomeList);
-                    _ea.UpdateEvent += ea_UpdateEvent;
+                    // Trap initialization exceptions (which, if applicable, could be due to initialization algorithm not
+                    // finding a viable seed) and continue to the next run if an exception does occur
+                    try
+                    {
+                        // Create evolution algorithm and attach update event.
+                        _ea = experiment.CreateEvolutionAlgorithm(_genomeFactory, _genomeList);
+                        _ea.UpdateEvent += ea_UpdateEvent;
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine(@"Experiment {0}, Run {1} of {2} failed to initialize", curExperimentName,
+                            runIdx + 1);
+                        continue;
+                    }
 
                     Console.WriteLine(@"Executing Experiment {0}, Run {1} of {2}", curExperimentName, runIdx + 1,
                         numRuns);

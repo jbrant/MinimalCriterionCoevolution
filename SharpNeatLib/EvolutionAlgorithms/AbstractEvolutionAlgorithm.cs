@@ -389,7 +389,7 @@ namespace SharpNeat.EvolutionAlgorithms
                         RunState = RunState.Paused;
                         OnUpdateEvent();
                         OnPausedEvent();
-
+                        
                         // Wait indefinitely for a signal to wake up and continue.
                         _awaitRestartEvent.WaitOne();
                     }
