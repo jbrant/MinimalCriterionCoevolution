@@ -110,6 +110,9 @@ namespace SharpNeat.EvolutionAlgorithms
             // Add new children
             (GenomeList as List<TGenome>)?.AddRange(childGenomes);
 
+            // Update the total offspring count based on the number of *viable* offspring produced
+            Statistics._totalOffspringCount = (ulong) childGenomes.Count;
+
             // Update stats and store reference to best genome.
             UpdateBestGenomeWithoutSpeciation(false);
             UpdateStats(false);

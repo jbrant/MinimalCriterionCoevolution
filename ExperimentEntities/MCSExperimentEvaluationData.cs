@@ -25,7 +25,6 @@ namespace ExperimentEntities
         public int ClosestGenomeConnectionGeneCount { get; set; }
         public int ClosestGenomeNeuronGeneCount { get; set; }
         public int ClosestGenomeTotalGeneCount { get; set; }
-        public Nullable<int> ClosestGenomeEvaluationCount { get; set; }
         public Nullable<double> ClosestGenomeDistanceToTarget { get; set; }
         public Nullable<double> ClosestGenomeEndPositionX { get; set; }
         public Nullable<double> ClosestGenomeEndPositionY { get; set; }

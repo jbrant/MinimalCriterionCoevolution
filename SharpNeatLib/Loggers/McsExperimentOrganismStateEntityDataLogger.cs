@@ -37,7 +37,7 @@ namespace SharpNeat.Loggers
         {
             // Call the base method to open the database connection and get the experiment configuration entity
             base.Open();
-            
+
             // Get any previous runs for this experiment
             int experimentRuns =
                 DbContext.MCSExperimentOrganismStateDatas.Count(
@@ -130,10 +130,6 @@ namespace SharpNeat.Loggers
                 (double)
                     Convert.ChangeType(combinedElements[EvaluationFieldElements.AgentYLocation.Position].Value,
                         mcsData.AgentYLocation.GetType());
-//            mcsData.AgentXml =
-//                (string)
-//                    Convert.ChangeType(combinedElements[EvaluationFieldElements.AgentXml.Position].Value,
-//                        typeof (string));
 
             // Add the new organism state observation
             localDbContext.MCSExperimentOrganismStateDatas.Add(mcsData);

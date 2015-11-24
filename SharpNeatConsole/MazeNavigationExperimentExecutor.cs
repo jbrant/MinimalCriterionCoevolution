@@ -33,15 +33,37 @@ namespace SharpNeatConsole
             if (args == null || args.Length < 3)
             {
                 throw new SharpNeatException(
-                    "Seed population file, number of runs, and at least one experiment name are required!");
+                    "Seed population file directory, number of runs, and at least one experiment name are required!");
             }
 
             // Initialise log4net (log to console).
             XmlConfigurator.Configure(new FileInfo("log4net.properties"));
 
             // Read seed populuation file and number of runs
-            string seedPopulationFile = args[0];
+            string seedPopulationFileDirectory = args[0];
             int numRuns = Int32.Parse(args[1]);
+
+            if (Directory.Exists(seedPopulationFileDirectory) == false)
+            {
+                throw new SharpNeatException(
+                    string.Format("The given seed population file directory [{0}] does not exist",
+                        seedPopulationFileDirectory));
+            }
+
+            // Read in the seed population files
+            // Note that two assumptions are made here
+            // 1. Files can be naturally sorted and match the naming convention "*Run01", "*Run02", etc.
+            // 2. The number of files in the directory matches the number of runs (this is checked for below)
+            string[] seedPopulationFiles = Directory.GetFiles(seedPopulationFileDirectory);
+
+            // Make sure that the appropriate number of seed population have been specified
+            if (seedPopulationFiles.Count() != numRuns)
+            {
+                throw new SharpNeatException(
+                    string.Format(
+                        "Number of seed population files [{0}] does not match the specified number of runs [{1}]",
+                        seedPopulationFiles.Count(), numRuns));
+            }
 
             // Create experiment names array with the defined size
             string[] experimentNames = new string[args.Length - 2];
@@ -77,7 +99,7 @@ namespace SharpNeatConsole
                     Console.WriteLine(@"Initialized experiment {0}.", experiment.GetType());
 
                     // Open and load population XML file.
-                    using (XmlReader xr = XmlReader.Create(seedPopulationFile))
+                    using (XmlReader xr = XmlReader.Create(seedPopulationFiles[runIdx]))
                     {
                         _genomeList = experiment.LoadPopulation(xr);
                     }

@@ -68,7 +68,8 @@ namespace SharpNeat.Genomes.Neat
                     NeuronGeneList.Count + ConnectionGeneList.Count),
                 new LoggableElement(EvolutionFieldElements.ChampGenomeFitness, EvaluationInfo.Fitness),
                 new LoggableElement(EvolutionFieldElements.ChampGenomeEvaluationCount,
-                    EvaluationInfo.EvaluationCount)
+                    EvaluationInfo.EvaluationCount),
+                new LoggableElement(EvolutionFieldElements.ChampGenomeDistanceToTarget, EvaluationInfo.ObjectiveDistance)
             };
 
             // Add all behavior characteriazation elements as a separate column

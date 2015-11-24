@@ -26,7 +26,6 @@
           <Property Name="ClosestGenomeConnectionGeneCount" Type="int" Nullable="false" />
           <Property Name="ClosestGenomeNeuronGeneCount" Type="int" Nullable="false" />
           <Property Name="ClosestGenomeTotalGeneCount" Type="int" Nullable="false" />
-          <Property Name="ClosestGenomeEvaluationCount" Type="int" />
           <Property Name="ClosestGenomeDistanceToTarget" Type="float" />
           <Property Name="ClosestGenomeEndPositionX" Type="float" />
           <Property Name="ClosestGenomeEndPositionY" Type="float" />
@@ -49,7 +48,6 @@
           <Property Name="DistanceToTarget" Type="float" Nullable="false" />
           <Property Name="AgentXLocation" Type="float" Nullable="false" />
           <Property Name="AgentYLocation" Type="float" Nullable="false" />
-          <Property Name="AgentXml" Type="xml" />
         </EntityType>
         <EntityType Name="NoveltyExperimentEvaluationData">
           <Key>
@@ -489,7 +487,6 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <Property Name="ClosestGenomeConnectionGeneCount" Type="Int32" Nullable="false" />
           <Property Name="ClosestGenomeNeuronGeneCount" Type="Int32" Nullable="false" />
           <Property Name="ClosestGenomeTotalGeneCount" Type="Int32" Nullable="false" />
-          <Property Name="ClosestGenomeEvaluationCount" Type="Int32" />
           <Property Name="ClosestGenomeDistanceToTarget" Type="Double" />
           <Property Name="ClosestGenomeEndPositionX" Type="Double" />
           <Property Name="ClosestGenomeEndPositionY" Type="Double" />
@@ -530,7 +527,6 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <Property Name="AgentYLocation" Type="Double" Nullable="false" />
           <NavigationProperty Name="ExperimentDictionary" Relationship="ExperimentDataModel.FK_MCSExperimentOrganismStateData_ExperimentDictionary" FromRole="MCSExperimentOrganismStateData" ToRole="ExperimentDictionary" />
           <Property Name="RunPhase_FK" Type="Int32" Nullable="false" />
-          <Property Name="AgentXml" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
           <NavigationProperty Name="RunPhase" Relationship="ExperimentDataModel.FK_MCSExperimentOrganismStateData_RunPhase" FromRole="MCSExperimentOrganismStateData" ToRole="RunPhase" />
         </EntityType>
         <Association Name="FK_MCSExperimentOrganismStateData_ExperimentDictionary">
@@ -704,7 +700,6 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
                 <ScalarProperty Name="ClosestGenomeEndPositionY" ColumnName="ClosestGenomeEndPositionY" />
                 <ScalarProperty Name="ClosestGenomeEndPositionX" ColumnName="ClosestGenomeEndPositionX" />
                 <ScalarProperty Name="ClosestGenomeDistanceToTarget" ColumnName="ClosestGenomeDistanceToTarget" />
-                <ScalarProperty Name="ClosestGenomeEvaluationCount" ColumnName="ClosestGenomeEvaluationCount" />
                 <ScalarProperty Name="ClosestGenomeTotalGeneCount" ColumnName="ClosestGenomeTotalGeneCount" />
                 <ScalarProperty Name="ClosestGenomeNeuronGeneCount" ColumnName="ClosestGenomeNeuronGeneCount" />
                 <ScalarProperty Name="ClosestGenomeConnectionGeneCount" ColumnName="ClosestGenomeConnectionGeneCount" />
@@ -722,7 +717,6 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <EntitySetMapping Name="MCSExperimentOrganismStateDatas">
             <EntityTypeMapping TypeName="ExperimentDataModel.MCSExperimentOrganismStateData">
               <MappingFragment StoreEntitySet="MCSExperimentOrganismStateData">
-                <ScalarProperty Name="AgentXml" ColumnName="AgentXml" />
                 <ScalarProperty Name="RunPhase_FK" ColumnName="RunPhase_FK" />
                 <ScalarProperty Name="AgentYLocation" ColumnName="AgentYLocation" />
                 <ScalarProperty Name="AgentXLocation" ColumnName="AgentXLocation" />

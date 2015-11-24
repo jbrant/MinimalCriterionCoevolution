@@ -180,7 +180,7 @@
       <ComplexityThreshold>30</ComplexityThreshold>
       <OffspringBatchSize>20</OffspringBatchSize>
       <PopulationEvaluationFrequency>30</PopulationEvaluationFrequency>
-      <MaxEvaluations>100000</MaxEvaluations>
+      <MaxEvaluations>1000000</MaxEvaluations>
       <DecodeGenomesToXml>true</DecodeGenomesToXml>
       <GenomeConfig>
         <InitialConnectionProportion>1</InitialConnectionProportion>
@@ -197,7 +197,7 @@
           <XStart>36</XStart>
           <YStart>184</YStart>
           <!--<MinimumMileage>16000</MinimumMileage>-->
-          <MinimumRequiredDistance>5</MinimumRequiredDistance>
+          <MinimumRequiredDistance>25</MinimumRequiredDistance>
         </MinimalCriteriaConfig>
       </BehaviorConfig>
       <NearestNeighbors>15</NearestNeighbors>
@@ -219,7 +219,7 @@
             <MinimalCriteriaConstraint>EuclideanDistance</MinimalCriteriaConstraint>
             <XStart>36</XStart>
             <YStart>184</YStart>
-            <MinimumRequiredDistance>5</MinimumRequiredDistance>
+            <MinimumRequiredDistance>25</MinimumRequiredDistance>
           </MinimalCriteriaConfig>
         </InitBehaviorConfig>
         <NearestNeighbors>15</NearestNeighbors>

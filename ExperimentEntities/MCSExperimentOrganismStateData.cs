@@ -24,7 +24,6 @@ namespace ExperimentEntities
         public double AgentXLocation { get; set; }
         public double AgentYLocation { get; set; }
         public int RunPhase_FK { get; set; }
-        public string AgentXml { get; set; }
     
         public virtual ExperimentDictionary ExperimentDictionary { get; set; }
         public virtual RunPhase RunPhase { get; set; }

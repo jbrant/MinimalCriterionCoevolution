@@ -106,6 +106,11 @@ namespace SharpNeat.Loggers
                         mcsData.Generation.GetType());
             mcsData.RunPhase_FK = RunPhaseKey;
 
+            mcsData.PopulationSize =
+                (int)
+                    Convert.ChangeType(combinedElements[EvolutionFieldElements.PopulationSize.Position].Value,
+                        mcsData.PopulationSize.GetType());
+
             mcsData.OffspringCount =
                 (int)
                     Convert.ChangeType(
@@ -153,16 +158,11 @@ namespace SharpNeat.Loggers
                     Convert.ChangeType(
                         combinedElements[EvolutionFieldElements.ChampGenomeTotalGeneCount.Position].Value,
                         mcsData.ClosestGenomeTotalGeneCount.GetType());
-            mcsData.ClosestGenomeEvaluationCount =
-                (int)
-                    Convert.ChangeType(
-                        combinedElements[EvolutionFieldElements.ChampGenomeEvaluationCount.Position].Value,
-                        typeof (int));
 
             mcsData.ClosestGenomeDistanceToTarget =
                 (double)
                     Convert.ChangeType(
-                        combinedElements[EvolutionFieldElements.ChampGenomeFitness.Position].Value,
+                        combinedElements[EvolutionFieldElements.ChampGenomeDistanceToTarget.Position].Value,
                         typeof (double));
 
             mcsData.ClosestGenomeEndPositionX =

@@ -60,7 +60,8 @@ namespace SharpNeat.EvolutionAlgorithms
             return new List<LoggableElement>
             {
                 new LoggableElement(EvolutionFieldElements.SpecieCount, SpecieList?.Count),
-                new LoggableElement(EvolutionFieldElements.RunPhase, RunPhase)
+                new LoggableElement(EvolutionFieldElements.RunPhase, RunPhase),
+                new LoggableElement(EvolutionFieldElements.PopulationSize, GenomeList.Count)
             };
         }
 
@@ -444,7 +445,7 @@ namespace SharpNeat.EvolutionAlgorithms
             SortSpecieGenomes();
 
             // Store ref to best genome.
-            UpdateBestGenome();            
+            UpdateBestGenome();
         }
 
         #endregion
