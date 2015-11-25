@@ -70,7 +70,10 @@ namespace SharpNeat.Domains.MazeNavigation
         /// </summary>
         /// <param name="name">The name of the experiment</param>
         /// <param name="xmlConfig">The parent XML configuration element</param>
-        public virtual void Initialize(string name, XmlElement xmlConfig)
+        /// <param name="evolutionDataLogger">The optional evolution data logger.</param>
+        /// <param name="evaluationDataLogger">The optional evaluation data logger.</param>
+        public virtual void Initialize(string name, XmlElement xmlConfig, IDataLogger evolutionDataLogger,
+            IDataLogger evaluationDataLogger)
         {
             // Set all properties
             Name = name;
@@ -122,7 +125,7 @@ namespace SharpNeat.Domains.MazeNavigation
             ParallelOptions = new ParallelOptions();
             SerializeGenomeToXml = experimentDictionary.SerializeGenomeToXml;
             MaxEvaluations = (ulong) experimentDictionary.MaxEvaluations;
-            
+
             // Set evolution/genome parameters
             NeatEvolutionAlgorithmParameters = new NeatEvolutionAlgorithmParameters
             {

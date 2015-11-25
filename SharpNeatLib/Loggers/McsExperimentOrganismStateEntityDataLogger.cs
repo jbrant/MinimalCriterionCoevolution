@@ -84,12 +84,6 @@ namespace SharpNeat.Loggers
         /// <param name="loggableElements">The loggable elements (data) to persist.</param>
         public override void LogRow(params List<LoggableElement>[] loggableElements)
         {
-            // Initialize new DB context
-            ExperimentDataEntities localDbContext = new ExperimentDataEntities
-            {
-                Configuration = {AutoDetectChangesEnabled = false, ValidateOnSaveEnabled = false}
-            };
-
             // Combine and sort the loggable elements
             LoggableElement[] combinedElements = ExtractLoggableElementArray(EvaluationFieldElements.NumFieldElements,
                 loggableElements);
@@ -131,12 +125,32 @@ namespace SharpNeat.Loggers
                     Convert.ChangeType(combinedElements[EvaluationFieldElements.AgentYLocation.Position].Value,
                         mcsData.AgentYLocation.GetType());
 
-            // Add the new organism state observation
-            localDbContext.MCSExperimentOrganismStateDatas.Add(mcsData);
+            // Initialize new DB context and persist new record
+            using (ExperimentDataEntities experimentContext = new ExperimentDataEntities
+            {
+                Configuration = {AutoDetectChangesEnabled = false, ValidateOnSaveEnabled = false}
+            })
+            {
+                bool commitSuccessful = false;
 
-            // Save the changes and dispose of the context
-            localDbContext.SaveChanges();
-            localDbContext.Dispose();
+                while (commitSuccessful == false)
+                {
+                    try
+                    {
+                        // Add the new organism state data
+                        experimentContext.MCSExperimentOrganismStateDatas.Add(mcsData);
+
+                        // Save the changes
+                        experimentContext.SaveChanges();
+
+                        commitSuccessful = true;
+                    }
+                    catch (Exception)
+                    {
+                        // Retry until record is successfully committed
+                    }
+                }
+            }
         }
 
         #endregion

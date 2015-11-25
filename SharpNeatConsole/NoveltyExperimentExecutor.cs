@@ -61,7 +61,7 @@ namespace SharpNeatConsole
             // Load config XML.
             XmlDocument xmlConfig = new XmlDocument();
             xmlConfig.Load("./ExperimentConfigurations/" + experimentName);
-            experiment.Initialize("Novelty", xmlConfig.DocumentElement);
+            experiment.Initialize("Novelty", xmlConfig.DocumentElement, null, null);
 
             // Create a genome factory with our neat genome parameters object and the appropriate number of input and output neuron genes.
             _genomeFactory = experiment.CreateGenomeFactory();

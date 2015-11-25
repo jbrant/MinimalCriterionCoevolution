@@ -4,12 +4,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Xml;
 using ExperimentEntities;
+using log4net;
 using log4net.Config;
-using SharpNeat;
 using SharpNeat.Core;
+using SharpNeat.Domains;
 using SharpNeat.Domains.MazeNavigation;
 using SharpNeat.Domains.MazeNavigation.FitnessExperiment;
 using SharpNeat.Domains.MazeNavigation.MCNSExperiment;
@@ -17,6 +19,7 @@ using SharpNeat.Domains.MazeNavigation.MCSExperiment;
 using SharpNeat.Domains.MazeNavigation.NoveltyExperiment;
 using SharpNeat.Domains.MazeNavigation.RandomExperiment;
 using SharpNeat.Genomes.Neat;
+using SharpNeat.Loggers;
 
 #endregion
 
@@ -27,27 +30,49 @@ namespace SharpNeatConsole
         private static IGenomeFactory<NeatGenome> _genomeFactory;
         private static List<NeatGenome> _genomeList;
         private static INeatEvolutionAlgorithm<NeatGenome> _ea;
+        private static ILog _executionLogger;
 
         private static void Main(string[] args)
         {
-            if (args == null || args.Length < 3)
-            {
-                throw new SharpNeatException(
-                    "Seed population file directory, number of runs, and at least one experiment name are required!");
-            }
-
-            // Initialise log4net (log to console).
+            // Initialise log4net (log to console and file).
             XmlConfigurator.Configure(new FileInfo("log4net.properties"));
 
+            // Instantiate the execution logger
+            _executionLogger = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+
+            if (args == null || args.Length < 4)
+            {
+                _executionLogger.Error(
+                    "The following invocation is required for a file source/destination: " +
+                    "SharpNeatConsole.exe <Experiment source (file)> <seed population directory> <# of runs> <experiment config directory> <output file directory> <experiment names>");
+                _executionLogger.Error("The following invocation is required for a database source/destination: " +
+                                       "SharpNeatConsole.exe <Experiment source (file)> <seed population directory> <# of runs> <experiment names>");
+                Environment.Exit(0);
+            }
+
+            if ("file".Equals(args[0].ToLowerInvariant()) == false &&
+                "database".Equals(args[0].ToLowerInvariant()) == false)
+            {
+                _executionLogger.Error("Argument 1 is the source type, which should be either \"File\" or \"Database\"");
+                Environment.Exit(0);
+            }
+
+            // Set the execution source (file or database)
+            string executionSource = args[0].ToLowerInvariant();
+
             // Read seed populuation file and number of runs
-            string seedPopulationFileDirectory = args[0];
-            int numRuns = Int32.Parse(args[1]);
+            string seedPopulationFileDirectory = args[1];
+            int numRuns = Int32.Parse(args[2]);
+
+            // Read experiment configuration directory and log file output directory (only applicable if file-based)
+            string experimentConfigurationDirectory = "file".Equals(executionSource) ? args[3] : null;
+            string outputFileDirectory = "file".Equals(executionSource) ? args[4] : null;
 
             if (Directory.Exists(seedPopulationFileDirectory) == false)
             {
-                throw new SharpNeatException(
-                    string.Format("The given seed population file directory [{0}] does not exist",
-                        seedPopulationFileDirectory));
+                _executionLogger.Error(string.Format("The given seed population file directory [{0}] does not exist",
+                    seedPopulationFileDirectory));
+                Environment.Exit(0);
             }
 
             // Read in the seed population files
@@ -59,86 +84,206 @@ namespace SharpNeatConsole
             // Make sure that the appropriate number of seed population have been specified
             if (seedPopulationFiles.Count() != numRuns)
             {
-                throw new SharpNeatException(
+                _executionLogger.Error(
                     string.Format(
                         "Number of seed population files [{0}] does not match the specified number of runs [{1}]",
                         seedPopulationFiles.Count(), numRuns));
+                Environment.Exit(0);
+            }
+
+            // The default offset for the experiment names in the argument list
+            int experimentNameOffset = 3;
+
+            if ("file".Equals(executionSource))
+            {
+                // Offset by 4 to make room for experiment configuration directory parameter
+                experimentNameOffset = 5;
             }
 
             // Create experiment names array with the defined size
-            string[] experimentNames = new string[args.Length - 2];
+            string[] experimentNames = new string[args.Length - experimentNameOffset];
 
             // Read all experiments
             for (int cnt = 0; cnt < experimentNames.Length; cnt++)
             {
-                experimentNames[cnt] = args[cnt + 2];
+                experimentNames[cnt] = args[cnt + experimentNameOffset];
             }
 
             foreach (string curExperimentName in experimentNames)
             {
-                Console.WriteLine(@"Executing Experiment {0}", curExperimentName);
+                _executionLogger.Info(string.Format("Executing Experiment {0}", curExperimentName));
 
-                // Create new database context and read in configuration for the given experiment
-                ExperimentDataEntities experimentContext = new ExperimentDataEntities();
-                var name = curExperimentName;
-                ExperimentDictionary experimentConfiguration =
-                    experimentContext.ExperimentDictionaries.Single(
-                        expName => expName.ExperimentName == name);
+                if ("file".Equals(executionSource))
+                {
+                    // Execute file-based experiment
+                    ExecuteFileBasedExperiment(experimentConfigurationDirectory, outputFileDirectory, curExperimentName,
+                        numRuns,
+                        seedPopulationFiles);
+                }
+                else
+                {
+                    // Execute database-based experiment
+                    ExecuteDatabaseBasedExperiment(curExperimentName, numRuns, seedPopulationFiles);
+                }
+            }
+        }
+
+        /// <summary>
+        ///     Executes all runs of a given experiment using a configuration file as the configuration source and generated flat
+        ///     files as the result destination.
+        /// </summary>
+        /// <param name="experimentConfigurationDirectory">The directory containing the XML experiment configuration file.</param>
+        /// <param name="logFileDirectory">The directory into which to write the evolution/evaluation log files.</param>
+        /// <param name="experimentName">The name of the experiment to execute.</param>
+        /// <param name="numRuns">The number of runs to execute for that experiment.</param>
+        /// <param name="seedPopulationFiles">The seed population XML file names.</param>
+        private static void ExecuteFileBasedExperiment(string experimentConfigurationDirectory, string logFileDirectory,
+            string experimentName,
+            int numRuns, string[] seedPopulationFiles)
+        {
+            if (Directory.Exists(experimentConfigurationDirectory) == false)
+            {
+                _executionLogger.Error(string.Format(
+                    "The given experiment configuration directory [{0}] does not exist",
+                    experimentConfigurationDirectory));
+                Environment.Exit(0);
+            }
+
+            // Read in the configuration files that match the given experiment name (should only be 1 file)
+            string[] experimentConfigurationFiles = Directory.GetFiles(experimentConfigurationDirectory,
+                string.Format("{0}*", experimentName));
+
+            // Make sure there's only one configuration file that matches the experiment name
+            // (otherwise, we don't know for sure which configuration to use)
+            if (experimentConfigurationFiles.Count() != 1)
+            {
+                _executionLogger.Error(
+                    string.Format(
+                        "Experiment configuration ambiguous: expeted a single possible configuration, but found {0} possible configurations",
+                        experimentConfigurationFiles.Count()));
+            }
+
+            // Instantiate XML reader for configuration file
+            XmlDocument xmlConfig = new XmlDocument();
+            xmlConfig.Load(experimentConfigurationFiles[0]);
+
+            // Determine which experiment to execute
+            BaseMazeNavigationExperiment experiment = DetermnineMazeNavigationExperiment(xmlConfig.DocumentElement);
+
+            // Execute the experiment for the specified number of runs
+            for (int runIdx = 0; runIdx < numRuns; runIdx++)
+            {
+                // Initialize the data loggers for the given run
+                IDataLogger evolutionDataLogger =
+                    new FileDataLogger(string.Format("{0}\\{1} - Run{2} - Evolution.csv", logFileDirectory,
+                        experimentName,
+                        runIdx + 1));
+                IDataLogger evaluationDataLogger =
+                    new FileDataLogger(string.Format("{0}\\{1} - Run{2} - Evaluation.csv", logFileDirectory,
+                        experimentName,
+                        runIdx + 1));
 
                 // Initialize new steady state novelty experiment
-                BaseMazeNavigationExperiment experiment =
-                    DetermineMazeNavigationExperiment(experimentConfiguration.Primary_SearchAlgorithmName,
-                        experimentConfiguration.Primary_SelectionAlgorithmName);
+                experiment.Initialize(experimentName, xmlConfig.DocumentElement, evolutionDataLogger,
+                    evaluationDataLogger);
 
-                // Execute the experiment for the specified number of runs
-                for (int runIdx = 0; runIdx < numRuns; runIdx++)
+                _executionLogger.Info(string.Format("Initialized experiment {0}.", experiment.GetType()));
+
+                // Open and load population XML file.
+                using (XmlReader xr = XmlReader.Create(seedPopulationFiles[runIdx]))
                 {
-                    // Initialize the experiment
-                    experiment.Initialize(experimentConfiguration);
-
-                    Console.WriteLine(@"Initialized experiment {0}.", experiment.GetType());
-
-                    // Open and load population XML file.
-                    using (XmlReader xr = XmlReader.Create(seedPopulationFiles[runIdx]))
-                    {
-                        _genomeList = experiment.LoadPopulation(xr);
-                    }
-                    _genomeFactory = _genomeList[0].GenomeFactory;
-                    Console.WriteLine(@"Loaded [{0}] genomes as initial population.", _genomeList.Count);
-
-                    Console.WriteLine(@"Creating primary EA {0} initialized by {1}",
-                        experimentConfiguration.Primary_SearchAlgorithmName,
-                        experimentConfiguration.Initialization_SearchAlgorithmName);
-
-                    // Trap initialization exceptions (which, if applicable, could be due to initialization algorithm not
-                    // finding a viable seed) and continue to the next run if an exception does occur
-                    try
-                    {
-                        // Create evolution algorithm and attach update event.
-                        _ea = experiment.CreateEvolutionAlgorithm(_genomeFactory, _genomeList);
-                        _ea.UpdateEvent += ea_UpdateEvent;
-                    }
-                    catch (Exception)
-                    {
-                        Console.WriteLine(@"Experiment {0}, Run {1} of {2} failed to initialize", curExperimentName,
-                            runIdx + 1);
-                        continue;
-                    }
-
-                    Console.WriteLine(@"Executing Experiment {0}, Run {1} of {2}", curExperimentName, runIdx + 1,
-                        numRuns);
-
-                    // Start algorithm (it will run on a background thread).
-                    _ea.StartContinue();
-
-                    while (RunState.Terminated != _ea.RunState && RunState.Paused != _ea.RunState)
-                    {
-                        Thread.Sleep(2000);
-                    }
+                    _genomeList = experiment.LoadPopulation(xr);
                 }
+                _genomeFactory = _genomeList[0].GenomeFactory;
+                _executionLogger.Info(string.Format("Loaded [{0}] genomes as initial population.", _genomeList.Count));
 
-                // Dispose of the database context
-                experimentContext.Dispose();
+                _executionLogger.Info("Kicking off Experiment initialization/execution");
+
+                // Kick off the experiment run
+                RunExperiment(experimentName, experiment, numRuns, runIdx);
+
+                // Close the data loggers
+                evolutionDataLogger.Close();
+                evaluationDataLogger.Close();
+            }
+        }
+
+        /// <summary>
+        ///     Executes all runs of a given experiment using the database as both the configuration source and the results
+        ///     destination.
+        /// </summary>
+        /// <param name="experimentName">The name of the experiment to execute.</param>
+        /// <param name="numRuns">The number of runs to execute for that experiment.</param>
+        /// <param name="seedPopulationFiles">The seed population XML file names.</param>
+        private static void ExecuteDatabaseBasedExperiment(string experimentName, int numRuns,
+            string[] seedPopulationFiles)
+        {
+            // Create new database context and read in configuration for the given experiment
+            ExperimentDataEntities experimentContext = new ExperimentDataEntities();
+            var name = experimentName;
+            ExperimentDictionary experimentConfiguration =
+                experimentContext.ExperimentDictionaries.Single(
+                    expName => expName.ExperimentName == name);
+
+            // Determine which experiment to execute
+            BaseMazeNavigationExperiment experiment =
+                DetermineMazeNavigationExperiment(experimentConfiguration.Primary_SearchAlgorithmName,
+                    experimentConfiguration.Primary_SelectionAlgorithmName);
+
+            // Execute the experiment for the specified number of runs
+            for (int runIdx = 0; runIdx < numRuns; runIdx++)
+            {
+                // Initialize the experiment
+                experiment.Initialize(experimentConfiguration);
+
+                _executionLogger.Error(string.Format("Initialized experiment {0}.", experiment.GetType()));
+
+                // Open and load population XML file.
+                using (XmlReader xr = XmlReader.Create(seedPopulationFiles[runIdx]))
+                {
+                    _genomeList = experiment.LoadPopulation(xr);
+                }
+                _genomeFactory = _genomeList[0].GenomeFactory;
+                _executionLogger.Info(string.Format("Loaded [{0}] genomes as initial population.", _genomeList.Count));
+
+                _executionLogger.Info("Kicking off Experiment initialization/execution");
+
+                // Kick off the experiment run
+                RunExperiment(experimentName, experiment, numRuns, runIdx);
+            }
+
+            // Dispose of the database context
+            experimentContext.Dispose();
+        }
+
+        private static void RunExperiment(string experimentName, BaseMazeNavigationExperiment experiment, int numRuns,
+            int runIdx)
+        {
+            // Trap initialization exceptions (which, if applicable, could be due to initialization algorithm not
+            // finding a viable seed) and continue to the next run if an exception does occur
+            try
+            {
+                // Create evolution algorithm and attach update event.
+                _ea = experiment.CreateEvolutionAlgorithm(_genomeFactory, _genomeList);
+                _ea.UpdateEvent += ea_UpdateEvent;
+            }
+            catch (Exception)
+            {
+                _executionLogger.Error(string.Format("Experiment {0}, Run {1} of {2} failed to initialize",
+                    experimentName,
+                    runIdx + 1));
+                return;
+            }
+
+            _executionLogger.Info(string.Format("Executing Experiment {0}, Run {1} of {2}", experimentName, runIdx + 1,
+                numRuns));
+
+            // Start algorithm (it will run on a background thread).
+            _ea.StartContinue();
+
+            while (RunState.Terminated != _ea.RunState && RunState.Paused != _ea.RunState)
+            {
+                Thread.Sleep(2000);
             }
         }
 
@@ -149,8 +294,33 @@ namespace SharpNeatConsole
         /// <param name="e">Event arguments</param>
         private static void ea_UpdateEvent(object sender, EventArgs e)
         {
-            Console.WriteLine(@"Generation={0:N0} Evaluations={1:N0} BestFitness={2:N6}", _ea.CurrentGeneration,
-                _ea.CurrentEvaluations, _ea.Statistics._maxFitness);
+            _executionLogger.Info(string.Format("Generation={0:N0} Evaluations={1:N0} BestFitness={2:N6}",
+                _ea.CurrentGeneration,
+                _ea.CurrentEvaluations, _ea.Statistics._maxFitness));
+        }
+
+        /// <summary>
+        ///     Determine the maze navigation experiment to run based on the search and selection algorithms specified in the
+        ///     configuration file.
+        /// </summary>
+        /// <param name="xmlConfig">The reference to the root node of the XML configuration file.</param>
+        /// <returns>The appropriate maze navigation experiment class.</returns>
+        private static BaseMazeNavigationExperiment DetermnineMazeNavigationExperiment(XmlElement xmlConfig)
+        {
+            // Get the search and selection algorithm types
+            string searchAlgorithm = XmlUtils.TryGetValueAsString(xmlConfig, "SearchAlgorithm");
+            string selectionAlgorithm = XmlUtils.TryGetValueAsString(xmlConfig, "SelectionAlgorithm");
+
+            // Make sure both the search algorithm and selection algorithm have been set in the configuration file
+            if (searchAlgorithm == null || selectionAlgorithm == null)
+            {
+                _executionLogger.Error(
+                    "Both the search algorithm and selection algorithm must be specified in the XML configuration file.");
+                Environment.Exit(0);
+            }
+
+            // Get the appropriate experiment class
+            return DetermineMazeNavigationExperiment(searchAlgorithm, selectionAlgorithm);
         }
 
         /// <summary>
@@ -198,8 +368,6 @@ namespace SharpNeatConsole
                 default:
                     return new SteadyStateMazeNavigationRandomExperiment();
             }
-
-            throw new SharpNeatException("Unable to determine appropriate experiment.");
         }
     }
 }

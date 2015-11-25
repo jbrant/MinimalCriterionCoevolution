@@ -109,7 +109,8 @@ namespace SharpNeat.Domains.Xor
         /// <summary>
         ///     Initialize the experiment with some optional XML configutation data.
         /// </summary>
-        public void Initialize(string name, XmlElement xmlConfig)
+        public void Initialize(string name, XmlElement xmlConfig, IDataLogger evolutionDataLogger,
+            IDataLogger evaluationDataLogger)
         {
             Name = name;
             DefaultPopulationSize = XmlUtils.GetValueAsInt(xmlConfig, "PopulationSize");

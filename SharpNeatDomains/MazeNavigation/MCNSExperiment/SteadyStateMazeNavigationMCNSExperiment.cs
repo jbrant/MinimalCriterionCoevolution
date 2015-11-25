@@ -34,9 +34,10 @@ namespace SharpNeat.Domains.MazeNavigation.MCNSExperiment
         private int _nearestNeighbors;
         private int _populationEvaluationFrequency;
 
-        public override void Initialize(string name, XmlElement xmlConfig)
+        public override void Initialize(string name, XmlElement xmlConfig, IDataLogger evolutionDataLogger,
+            IDataLogger evaluationDataLogger)
         {
-            base.Initialize(name, xmlConfig);
+            base.Initialize(name, xmlConfig, evolutionDataLogger, evaluationDataLogger);
 
             // Read in the behavior characterization
             _behaviorCharacterizationFactory = ExperimentUtils.ReadBehaviorCharacterizationFactory(xmlConfig,

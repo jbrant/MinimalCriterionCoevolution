@@ -111,6 +111,12 @@
     <Content Include="ExperimentConfigurations\Experiment2.config.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="ExperimentConfigurations\Queueing MCS no Bridging 3.config.xml" />
+    <Content Include="ExperimentConfigurations\Queueing MCS no Bridging 4.config.xml" />
+    <Content Include="ExperimentConfigurations\Queueing MCS no Bridging 5.config.xml" />
+    <Content Include="ExperimentConfigurations\Queueing MCS no Bridging 6.config.xml" />
+    <Content Include="ExperimentConfigurations\Queueing MCS no Bridging 8.config.xml" />
+    <Content Include="ExperimentConfigurations\Queueing MCS no Bridging 7.config.xml" />
     <Content Include="SeedPopulations\SeedPopulation250_Run01.pop.xml" />
     <Content Include="SeedPopulations\SeedPopulation250_Run02.pop.xml" />
     <Content Include="SeedPopulations\SeedPopulation250_Run03.pop.xml" />

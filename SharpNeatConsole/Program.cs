@@ -45,7 +45,7 @@ namespace SharpNeatConsole
             // Load config XML.
             XmlDocument xmlConfig = new XmlDocument();
             xmlConfig.Load("xor.config.xml");
-            experiment.Initialize("XOR", xmlConfig.DocumentElement);
+            experiment.Initialize("XOR", xmlConfig.DocumentElement, null, null);
 
             WriteHelp();
 

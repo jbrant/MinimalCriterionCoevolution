@@ -32,9 +32,10 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
         private int _nearestNeighbors;
         private int _populationEvaluationFrequency;
 
-        public override void Initialize(string name, XmlElement xmlConfig)
+        public override void Initialize(string name, XmlElement xmlConfig, IDataLogger evolutionDataLogger,
+            IDataLogger evaluationDataLogger)
         {
-            base.Initialize(name, xmlConfig);
+            base.Initialize(name, xmlConfig, evolutionDataLogger, evaluationDataLogger);
 
             // Read in the behavior characterization
             _behaviorCharacterizationFactory = ExperimentUtils.ReadBehaviorCharacterizationFactory(xmlConfig,
@@ -53,8 +54,10 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
             _populationEvaluationFrequency = XmlUtils.GetValueAsInt(xmlConfig, "PopulationEvaluationFrequency");
 
             // Read in log file path/name
-            _evolutionDataLogger = ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Evolution);
-            _evaluationDataLogger = ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Evaluation);
+            _evolutionDataLogger = evolutionDataLogger ??
+                                   ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Evolution);
+            _evaluationDataLogger = evaluationDataLogger ??
+                                    ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Evaluation);
         }
 
         public override void Initialize(ExperimentDictionary experimentDictionary)

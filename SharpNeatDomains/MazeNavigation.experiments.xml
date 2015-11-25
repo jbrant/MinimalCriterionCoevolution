@@ -170,6 +170,8 @@
     <AssemblyPath>SharpNeatDomains.dll</AssemblyPath>
     <ClassName>SharpNeat.Domains.MazeNavigation.MCSExperiment.QueueingMazeNavigationMCSExperiment</ClassName>
     <Config>
+      <SearchAlgorithm>MinimalCriteriaSearch</SearchAlgorithm>
+      <SelectionAlgorithm>Queueing</SelectionAlgorithm>
       <PopulationSize>250</PopulationSize>
       <SpecieCount>10</SpecieCount>
       <InterspeciesMatingProbability>0.001</InterspeciesMatingProbability>
@@ -197,14 +199,14 @@
           <XStart>36</XStart>
           <YStart>184</YStart>
           <!--<MinimumMileage>16000</MinimumMileage>-->
-          <MinimumRequiredDistance>25</MinimumRequiredDistance>
+          <MinimumRequiredDistance>175</MinimumRequiredDistance>
         </MinimalCriteriaConfig>
       </BehaviorConfig>
       <NearestNeighbors>15</NearestNeighbors>
       <MaxTimesteps>400</MaxTimesteps>
       <MinSuccessDistance>5</MinSuccessDistance>
       <MaxDistanceToTarget>300</MaxDistanceToTarget>
-      <MazeVariant>HardMaze</MazeVariant>z
+      <MazeVariant>HardMaze</MazeVariant>
       <InitializationAlgorithmConfig>
         <SearchAlgorithm>NoveltySearch</SearchAlgorithm>
         <SelectionAlgorithm>SteadyState</SelectionAlgorithm>
@@ -219,7 +221,7 @@
             <MinimalCriteriaConstraint>EuclideanDistance</MinimalCriteriaConstraint>
             <XStart>36</XStart>
             <YStart>184</YStart>
-            <MinimumRequiredDistance>25</MinimumRequiredDistance>
+            <MinimumRequiredDistance>175</MinimumRequiredDistance>
           </MinimalCriteriaConfig>
         </InitBehaviorConfig>
         <NearestNeighbors>15</NearestNeighbors>

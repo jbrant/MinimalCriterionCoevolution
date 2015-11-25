@@ -84,12 +84,6 @@ namespace SharpNeat.Loggers
         /// <param name="loggableElements">The loggable elements (data) to persist.</param>
         public override void LogRow(params List<LoggableElement>[] loggableElements)
         {
-            // Initialize new DB context
-            ExperimentDataEntities localDbContext = new ExperimentDataEntities
-            {
-                Configuration = {AutoDetectChangesEnabled = false, ValidateOnSaveEnabled = false}
-            };
-
             // Combine and sort the loggable elements
             LoggableElement[] combinedElements = ExtractLoggableElementArray(EvolutionFieldElements.NumFieldElements,
                 loggableElements);
@@ -181,12 +175,32 @@ namespace SharpNeat.Loggers
                     Convert.ChangeType(combinedElements[EvolutionFieldElements.ChampGenomeXml.Position].Value,
                         typeof (string));
 
-            // Add the new evaluation data
-            localDbContext.MCSExperimentEvaluationDatas.Add(mcsData);
+            // Initialize new DB context and persist new record
+            using (ExperimentDataEntities experimentContext = new ExperimentDataEntities
+            {
+                Configuration = {AutoDetectChangesEnabled = false, ValidateOnSaveEnabled = false}
+            })
+            {
+                bool commitSuccessful = false;
 
-            // Save the changes and dispose of the context
-            localDbContext.SaveChanges();
-            localDbContext.Dispose();
+                while (commitSuccessful == false)
+                {
+                    try
+                    {
+                        // Add the new evaluation data
+                        experimentContext.MCSExperimentEvaluationDatas.Add(mcsData);
+
+                        // Save the changes
+                        experimentContext.SaveChanges();
+
+                        commitSuccessful = true;
+                    }
+                    catch (Exception)
+                    {
+                        // Retry until record is successfully committed
+                    }
+                }
+            }
         }
 
         #endregion

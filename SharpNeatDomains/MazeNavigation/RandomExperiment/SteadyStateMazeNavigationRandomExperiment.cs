@@ -25,9 +25,10 @@ namespace SharpNeat.Domains.MazeNavigation.RandomExperiment
 
         private int _populationEvaluationFrequency;
 
-        public override void Initialize(string name, XmlElement xmlConfig)
+        public override void Initialize(string name, XmlElement xmlConfig, IDataLogger evolutionDataLogger,
+            IDataLogger evaluationDataLogger)
         {
-            base.Initialize(name, xmlConfig);
+            base.Initialize(name, xmlConfig, evolutionDataLogger, evaluationDataLogger);
 
             // Read in steady-state specific parameters
             _batchSize = XmlUtils.GetValueAsInt(xmlConfig, "OffspringBatchSize");

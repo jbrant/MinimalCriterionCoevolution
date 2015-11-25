@@ -96,7 +96,8 @@ namespace SharpNeat.Domains.ThreeParity
         /// </summary>
         /// <param name="name">The name of the experiment.</param>
         /// <param name="xmlConfig">The reference to the XML configuration.</param>
-        public void Initialize(string name, XmlElement xmlConfig)
+        public void Initialize(string name, XmlElement xmlConfig, IDataLogger evolutionDataLogger,
+            IDataLogger evaluationDataLogger)
         {
             Name = name;
             DefaultPopulationSize = XmlUtils.GetValueAsInt(xmlConfig, "PopulationSize");

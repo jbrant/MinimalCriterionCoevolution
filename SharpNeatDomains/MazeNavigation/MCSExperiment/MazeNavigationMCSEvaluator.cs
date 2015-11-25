@@ -54,7 +54,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             }
 
             // Default the stop condition satisfied to false
-            bool stopConditionSatisfied = false;
+            bool goalReached = false;
 
             // Generate new behavior characterization
             IBehaviorCharacterization behaviorCharacterization =
@@ -67,7 +67,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 
             // Run a single trial
             BehaviorInfo trialInfo = world.RunTrial(phenome, SearchType.MinimalCriteriaSearch,
-                out stopConditionSatisfied);
+                out goalReached);
 
             // Set the objective distance
             trialInfo.ObjectiveDistance = world.GetDistanceToTarget();
@@ -79,8 +79,14 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             }
 
             // If the navigator reached the goal, stop the experiment
-            if (stopConditionSatisfied)
+            // Also, note that if the goal has been reached, then the minimal criterion is irrelevant
+            // and should also be satisfied (this is really part of a larger experiment design issue in 
+            // which the goal can be reached prior to the minimal criteria being satisfied)
+            if (goalReached)
+            {
                 StopConditionSatisfied = true;
+                trialInfo.DoesBehaviorSatisfyMinimalCriteria = true;
+            }
 
             // Log trial information
             evaluationLogger?.LogRow(new List<LoggableElement>
