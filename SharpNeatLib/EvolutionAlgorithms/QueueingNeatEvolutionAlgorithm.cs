@@ -48,11 +48,37 @@ namespace SharpNeat.EvolutionAlgorithms
             // Get the parent genomes
             List<TGenome> parentList = ((List<TGenome>) GenomeList).GetRange(0, offspringCount);
 
+            // Remove the parents from the queue
+            ((List<TGenome>) GenomeList).RemoveRange(0, offspringCount);
+
             // Generate an offspring asexually for each parent genome (this is not done asexually because depending on the batch size, 
             // we may not be able to have genomes from the same species mate)
             offspringList.AddRange(parentList.Select(parentGenome => parentGenome.CreateOffspring(CurrentGeneration)));
 
+            // Move the parents who replaced offspring to the back of the queue (list)
+            ((List<TGenome>) GenomeList).AddRange(parentList);
+
             return offspringList;
+        }
+
+        /// <summary>
+        ///     Removes the specified number of oldest genomes from the population.
+        /// </summary>
+        /// <param name="numGenomesToRemove">The number of oldest genomes to remove from the population.</param>
+        private void RemoveOldestGenomes(int numGenomesToRemove)
+        {
+            // Sort the population by age (oldest to youngest)
+            IEnumerable<TGenome> ageSortedPopulation =
+                ((List<TGenome>) GenomeList).OrderBy(g => g.BirthGeneration).AsParallel();
+
+            // Select the specified number of oldest genomes
+            IEnumerable<TGenome> oldestGenomes = ageSortedPopulation.Take(numGenomesToRemove);
+
+            // Remove the oldest genomes from the population
+            foreach (TGenome oldestGenome in oldestGenomes)
+            {
+                ((List<TGenome>) GenomeList).Remove(oldestGenome);
+            }
         }
 
         #endregion
@@ -103,8 +129,8 @@ namespace SharpNeat.EvolutionAlgorithms
                 // Calculate number of genomes to remove
                 int genomesToRemove = (GenomeList.Count + childGenomes.Count) - PopulationSize;
 
-                // Remove the calculated number of oldest genomes
-                (GenomeList as List<TGenome>)?.RemoveRange(0, genomesToRemove);
+                // Remove the above-computed number of oldest genomes from the population
+                RemoveOldestGenomes(genomesToRemove);
             }
 
             // Add new children

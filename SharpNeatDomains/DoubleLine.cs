@@ -1,4 +1,8 @@
-﻿using System;
+﻿#region
+
+using System;
+
+#endregion
 
 namespace SharpNeat.Domains
 {
@@ -148,7 +152,7 @@ namespace SharpNeat.Domains
         /// <param name="b">The segment line segment.</param>
         /// <param name="intersectionFound">Whether or not the lines intersect.</param>
         /// <returns>The point of intersection between the two given line segments.</returns>
-        public static DoublePoint CalculateIntersection(DoubleLine a, DoubleLine b, out bool intersectionFound)
+        public static DoublePoint CalculateLineIntersection(DoubleLine a, DoubleLine b, out bool intersectionFound)
         {
             // Calculate the determinant's denominator
             var denominator = (a.Start.X - a.End.X)*(b.Start.Y - b.End.Y) - (a.Start.Y - a.End.Y)*(b.Start.X - b.End.X);
@@ -174,6 +178,25 @@ namespace SharpNeat.Domains
             // line segments, then the lines don't intersect
             intersectionFound = false;
             return new DoublePoint(0, 0);
+        }
+
+        /// <summary>
+        ///     Calculates the closest point on the line segment to the given point.
+        /// </summary>
+        /// <param name="line">The line segment on which to find the closest point.</param>
+        /// <param name="point">The source point.</param>
+        /// <returns>The closest point on the line segment.</returns>
+        public static DoublePoint CalculateLineSegmentClosestPoint(DoubleLine line, DoublePoint point)
+        {
+            // Calculate the projection of the given point onto the given line
+            double numerator = (point.X - line.Start.X)*(line.End.X - line.Start.X) +
+                               (point.Y - line.Start.Y)*(line.End.Y - line.Start.Y);
+            double denominator = DoublePoint.CalculateSquaredDistance(line.Start, line.End);
+            double projection = numerator/denominator;
+
+            // Return the intersection point on the line segment
+            return new DoublePoint(line.Start.X + projection*(line.End.X - line.Start.X),
+                line.Start.Y + projection*(line.End.Y - line.Start.Y));
         }
 
         /// <summary>

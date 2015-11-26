@@ -128,6 +128,7 @@ namespace SharpNeat.Domains.MazeNavigation.Components
             {
                 Location = new DoublePoint(newLocation.X, newLocation.Y);
             }
+            // TODO: Need to have an else block here that calls Wall.CalculateAdjustedHeading()
 
             // Update range finders and radar array
             UpdateRangeFinders(walls);
@@ -167,6 +168,9 @@ namespace SharpNeat.Domains.MazeNavigation.Components
                 doesCollide = true;
                 break;
             }
+
+
+            // TODO: Need to return (via output method parameter) which wall the navigator collided with
 
             return doesCollide;
         }

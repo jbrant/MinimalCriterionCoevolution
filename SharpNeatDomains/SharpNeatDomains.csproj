@@ -95,6 +95,7 @@
     <Compile Include="MazeNavigation\Components\PieSliceSensorArray.cs" />
     <Compile Include="MazeNavigation\Components\Radar.cs" />
     <Compile Include="MazeNavigation\Components\RangeFinder.cs" />
+    <Compile Include="MazeNavigation\Components\Wall.cs" />
     <Compile Include="MazeNavigation\FitnessExperiment\MazeNavigationFitnessExperiment.cs" />
     <Compile Include="MazeNavigation\FitnessExperiment\MazeNavigationFitnessEvaluator.cs" />
     <Compile Include="MazeNavigation\BaseMazeNavigationExperiment.cs" />

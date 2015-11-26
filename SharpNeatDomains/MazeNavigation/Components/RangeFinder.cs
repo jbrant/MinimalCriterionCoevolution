@@ -71,7 +71,7 @@ namespace SharpNeat.Domains.MazeNavigation.Components
 
                 // Get the intersection point between wall and projected trajectory
                 // (if one exists)
-                var wallIntersectionPoint = DoubleLine.CalculateIntersection(wall, projectedLine, out intersectionFound);
+                var wallIntersectionPoint = DoubleLine.CalculateLineIntersection(wall, projectedLine, out intersectionFound);
 
                 // If trajectory intersects with a wall, adjust the range to the point
                 // of intersection (as the range finder cannot penetrate walls)
