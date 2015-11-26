@@ -111,32 +111,90 @@
     <Content Include="ExperimentConfigurations\Experiment2.config.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="ExperimentConfigurations\Queueing MCS no Bridging 3.config.xml" />
-    <Content Include="ExperimentConfigurations\Queueing MCS no Bridging 4.config.xml" />
-    <Content Include="ExperimentConfigurations\Queueing MCS no Bridging 5.config.xml" />
-    <Content Include="ExperimentConfigurations\Queueing MCS no Bridging 6.config.xml" />
-    <Content Include="ExperimentConfigurations\Queueing MCS no Bridging 8.config.xml" />
-    <Content Include="ExperimentConfigurations\Queueing MCS no Bridging 7.config.xml" />
-    <Content Include="SeedPopulations\SeedPopulation250_Run01.pop.xml" />
-    <Content Include="SeedPopulations\SeedPopulation250_Run02.pop.xml" />
-    <Content Include="SeedPopulations\SeedPopulation250_Run03.pop.xml" />
-    <Content Include="SeedPopulations\SeedPopulation250_Run04.pop.xml" />
-    <Content Include="SeedPopulations\SeedPopulation250_Run05.pop.xml" />
-    <Content Include="SeedPopulations\SeedPopulation250_Run06.pop.xml" />
-    <Content Include="SeedPopulations\SeedPopulation250_Run07.pop.xml" />
-    <Content Include="SeedPopulations\SeedPopulation250_Run08.pop.xml" />
-    <Content Include="SeedPopulations\SeedPopulation250_Run09.pop.xml" />
-    <Content Include="SeedPopulations\SeedPopulation250_Run10.pop.xml" />
-    <Content Include="SeedPopulations\SeedPopulation250_Run11.pop.xml" />
-    <Content Include="SeedPopulations\SeedPopulation250_Run12.pop.xml" />
-    <Content Include="SeedPopulations\SeedPopulation250_Run13.pop.xml" />
-    <Content Include="SeedPopulations\SeedPopulation250_Run14.pop.xml" />
-    <Content Include="SeedPopulations\SeedPopulation250_Run15.pop.xml" />
-    <Content Include="SeedPopulations\SeedPopulation250_Run16.pop.xml" />
-    <Content Include="SeedPopulations\SeedPopulation250_Run17.pop.xml" />
-    <Content Include="SeedPopulations\SeedPopulation250_Run18.pop.xml" />
-    <Content Include="SeedPopulations\SeedPopulation250_Run19.pop.xml" />
-    <Content Include="SeedPopulations\SeedPopulation250_Run20.pop.xml" />
+    <Content Include="ExperimentConfigurations\Queueing MCS no Bridging 1.config.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\Queueing MCS no Bridging 2.config.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\Queueing MCS no Bridging 3.config.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\Queueing MCS no Bridging 4.config.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\Queueing MCS no Bridging 5.config.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\Queueing MCS no Bridging 6.config.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\Queueing MCS no Bridging 8.config.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\Queueing MCS no Bridging 7.config.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SeedPopulations\SeedPopulation250_Run01.pop.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SeedPopulations\SeedPopulation250_Run02.pop.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SeedPopulations\SeedPopulation250_Run03.pop.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SeedPopulations\SeedPopulation250_Run04.pop.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SeedPopulations\SeedPopulation250_Run05.pop.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SeedPopulations\SeedPopulation250_Run06.pop.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SeedPopulations\SeedPopulation250_Run07.pop.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SeedPopulations\SeedPopulation250_Run08.pop.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SeedPopulations\SeedPopulation250_Run09.pop.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SeedPopulations\SeedPopulation250_Run10.pop.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SeedPopulations\SeedPopulation250_Run11.pop.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SeedPopulations\SeedPopulation250_Run12.pop.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SeedPopulations\SeedPopulation250_Run13.pop.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SeedPopulations\SeedPopulation250_Run14.pop.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SeedPopulations\SeedPopulation250_Run15.pop.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SeedPopulations\SeedPopulation250_Run16.pop.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SeedPopulations\SeedPopulation250_Run17.pop.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SeedPopulations\SeedPopulation250_Run18.pop.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SeedPopulations\SeedPopulation250_Run19.pop.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SeedPopulations\SeedPopulation250_Run20.pop.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="xor.config.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
