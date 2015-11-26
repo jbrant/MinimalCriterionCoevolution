@@ -13,6 +13,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
     public class MazeNavigationMCSEvaluator : IPhenomeEvaluator<IBlackBox, BehaviorInfo>
     {
         private readonly IBehaviorCharacterizationFactory _behaviorCharacterizationFactory;
+        private readonly int _bridgingMagnitude;
         private readonly int? _maxDistanceToTarget;
         private readonly int? _maxTimesteps;
         private readonly MazeVariant _mazeVariant;
@@ -22,7 +23,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 
         internal MazeNavigationMCSEvaluator(int? maxDistanceToTarget, int? maxTimesteps, MazeVariant mazeVariant,
             int? minSuccessDistance, IBehaviorCharacterizationFactory behaviorCharacterizationFactory,
-            ulong initializationEvaluations = 0)
+            ulong initializationEvaluations = 0, int bridgingMagnitude = 0)
         {
             _maxDistanceToTarget = maxDistanceToTarget;
             _maxTimesteps = maxTimesteps;
@@ -30,6 +31,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             _minSuccessDistance = minSuccessDistance;
             _behaviorCharacterizationFactory = behaviorCharacterizationFactory;
             EvaluationCount = initializationEvaluations;
+            _bridgingMagnitude = bridgingMagnitude;
         }
 
         /// <summary>
@@ -62,8 +64,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 
             // Instantiate the maze world
             MazeNavigationWorld<BehaviorInfo> world = new MazeNavigationWorld<BehaviorInfo>(_mazeVariant,
-                _minSuccessDistance, _maxDistanceToTarget,
-                _maxTimesteps, behaviorCharacterization);
+                _minSuccessDistance, _maxDistanceToTarget, _maxTimesteps, behaviorCharacterization, _bridgingMagnitude);
 
             // Run a single trial
             BehaviorInfo trialInfo = world.RunTrial(phenome, SearchType.MinimalCriteriaSearch,
@@ -95,7 +96,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                 new LoggableElement(EvaluationFieldElements.EvaluationCount, threadLocalEvaluationCount),
                 new LoggableElement(EvaluationFieldElements.StopConditionSatisfied, StopConditionSatisfied),
                 new LoggableElement(EvaluationFieldElements.RunPhase, RunPhase.Primary),
-                new LoggableElement(EvaluationFieldElements.IsViable, trialInfo.DoesBehaviorSatisfyMinimalCriteria),
+                new LoggableElement(EvaluationFieldElements.IsViable, trialInfo.DoesBehaviorSatisfyMinimalCriteria)
             },
                 world.GetLoggableElements());
 
@@ -118,7 +119,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                 new LoggableElement(EvaluationFieldElements.EvaluationCount, EvaluationCount),
                 new LoggableElement(EvaluationFieldElements.StopConditionSatisfied, StopConditionSatisfied),
                 new LoggableElement(EvaluationFieldElements.RunPhase, RunPhase.Initialization),
-                new LoggableElement(EvaluationFieldElements.IsViable, false),
+                new LoggableElement(EvaluationFieldElements.IsViable, false)
             },
                 new MazeNavigationWorld<FitnessInfo>(_mazeVariant, _minSuccessDistance, _maxDistanceToTarget,
                     _maxTimesteps).GetLoggableElements());

@@ -161,6 +161,7 @@ namespace SharpNeatConsole
                     string.Format(
                         "Experiment configuration ambiguous: expeted a single possible configuration, but found {0} possible configurations",
                         experimentConfigurationFiles.Count()));
+                Environment.Exit(0);
             }
 
             // Instantiate XML reader for configuration file

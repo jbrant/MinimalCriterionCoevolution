@@ -207,6 +207,7 @@
       <MinSuccessDistance>5</MinSuccessDistance>
       <MaxDistanceToTarget>300</MaxDistanceToTarget>
       <MazeVariant>HardMaze</MazeVariant>
+      <BridgingMagnitude>5</BridgingMagnitude>
       <InitializationAlgorithmConfig>
         <SearchAlgorithm>NoveltySearch</SearchAlgorithm>
         <SelectionAlgorithm>SteadyState</SelectionAlgorithm>

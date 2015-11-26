@@ -1,5 +1,9 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections.Generic;
+
+#endregion
 
 namespace SharpNeat.Domains.MazeNavigation.Components
 {
@@ -45,7 +49,7 @@ namespace SharpNeat.Domains.MazeNavigation.Components
         /// <param name="walls">The list of walls in the environment.</param>
         /// <param name="heading">The heading of the navigator (in degrees).</param>
         /// <param name="location">The location of the navigator in the environment.</param>
-        internal void Update(List<DoubleLine> walls, double heading, DoublePoint location)
+        internal void Update(List<Wall> walls, double heading, DoublePoint location)
         {
             // Convert rangefinder angle to radians
             var radianAngle = MathUtils.toRadians(Angle);
@@ -71,7 +75,8 @@ namespace SharpNeat.Domains.MazeNavigation.Components
 
                 // Get the intersection point between wall and projected trajectory
                 // (if one exists)
-                var wallIntersectionPoint = DoubleLine.CalculateLineIntersection(wall, projectedLine, out intersectionFound);
+                var wallIntersectionPoint = DoubleLine.CalculateLineIntersection(wall.WallLine, projectedLine,
+                    out intersectionFound);
 
                 // If trajectory intersects with a wall, adjust the range to the point
                 // of intersection (as the range finder cannot penetrate walls)

@@ -1,52 +1,43 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SharpNeat.Domains.MazeNavigation.Components;
+﻿#region
+
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+#endregion
 
 namespace SharpNeat.Domains.MazeNavigation.Components.Tests
 {
-    [TestClass()]
+    [TestClass]
     public class MazeNavigatorTests
     {
-        [TestMethod()]
+        [TestMethod]
         public void MazeNavigatorTest()
         {
             //Assert.Fail();
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void MoveTest()
         {
-            List<DoubleLine> walls = new List<DoubleLine>(11)
+            List<Wall> walls = new List<Wall>(11)
             {
-                /*new DoubleLine(293, 7, 289, 130),
-                new DoubleLine(289, 130, 6, 134),
-                new DoubleLine(6, 134, 8, 5),
-                new DoubleLine(8, 5, 292, 7),
-                new DoubleLine(241, 130, 58, 65),
-                new DoubleLine(114, 7, 73, 42),
-                new DoubleLine(130, 91, 107, 46),
-                new DoubleLine(196, 8, 139, 51),
-                new DoubleLine(219, 122, 182, 63),
-                new DoubleLine(267, 9, 214, 63),
-                new DoubleLine(271, 129, 237, 88)*/
+                // Boundary walls
+                new Wall(new DoubleLine(7, 202, 195, 198), -1, -1, 5),
+                new Wall(new DoubleLine(41, 5, 3, 8), -1, -1, 5),
+                new Wall(new DoubleLine(3, 8, 4, 49), 1, 1, 5),
+                new Wall(new DoubleLine(4, 49, 7, 202), 1, 1, 5),
+                new Wall(new DoubleLine(195, 198, 186, 8), -1, -1, 5),
+                new Wall(new DoubleLine(186, 8, 39, 5), -1, -1, 5),
 
-                new DoubleLine(41, 5, 3, 8),
-                        new DoubleLine(3, 8, 4, 49),
-                        new DoubleLine(4, 49, 57, 53),
-                        new DoubleLine(4, 49, 7, 202),
-                        new DoubleLine(7, 202, 195, 198),
-                        new DoubleLine(195, 198, 186, 8),
-                        new DoubleLine(186, 8, 39, 5),
-                        new DoubleLine(56, 54, 56, 157),
-                        new DoubleLine(57, 106, 158, 162),
-                        new DoubleLine(77, 201, 108, 164),
-                        new DoubleLine(6, 80, 33, 121),
-                        new DoubleLine(192, 146, 87, 91),
-                        new DoubleLine(56, 55, 133, 30)
+                // Obstructing walls
+                new Wall(new DoubleLine(4, 49, 57, 53), 1, 1, 5),
+                new Wall(new DoubleLine(56, 54, 56, 157), -1, 1, 5),
+                new Wall(new DoubleLine(57, 106, 158, 162), 1, 1, 5),
+                new Wall(new DoubleLine(77, 201, 108, 164), -1, -1, 5),
+                new Wall(new DoubleLine(6, 80, 33, 121), -1, 1, 5),
+                new Wall(new DoubleLine(192, 146, 87, 91), -1, -1, 5),
+                new Wall(new DoubleLine(56, 55, 133, 30), 1, 1, 5)
             };
 
             //DoublePoint goalLocation = new DoublePoint(270, 100);

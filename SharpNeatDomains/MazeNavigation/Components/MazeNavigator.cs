@@ -1,5 +1,9 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections.Generic;
+
+#endregion
 
 namespace SharpNeat.Domains.MazeNavigation.Components
 {
@@ -96,7 +100,7 @@ namespace SharpNeat.Domains.MazeNavigation.Components
         ///     moves is also dictated by the presence of walls that might be obstructing its path.
         /// </summary>
         /// <param name="walls">The list of walls in the environment.</param>
-        public void Move(List<DoubleLine> walls, DoublePoint targetLocation)
+        public void Move(List<Wall> walls, DoublePoint targetLocation)
         {
             // Compute angular velocity components
             var angularVelocityX = Math.Cos(MathUtils.toRadians(Heading))*Speed;
@@ -121,14 +125,22 @@ namespace SharpNeat.Domains.MazeNavigation.Components
 
             // Determine the new location, incremented by the X and Y component velocities
             var newLocation = new DoublePoint(angularVelocityX + Location.X, angularVelocityY + Location.Y);
-            
+
+            // Declare variable in which to store the colliding wall in the event of a potential collision
+            Wall collidingWall;
+
             // Move the navigator to the new location only if said movement does not
             // result in a wall collision
-            if (IsCollision(newLocation, walls) == false)
+            if (IsCollision(newLocation, walls, out collidingWall) == false)
             {
                 Location = new DoublePoint(newLocation.X, newLocation.Y);
             }
-            // TODO: Need to have an else block here that calls Wall.CalculateAdjustedHeading()
+            // Otherwise, if there was a collision, calculate an adjusted heading based on the properties 
+            // of the wall with which the navigator collided and the side of that wall that it hit
+            else
+            {
+                Heading = collidingWall.CalculateAdjustedHeading(Heading, Location);
+            }
 
             // Update range finders and radar array
             UpdateRangeFinders(walls);
@@ -139,7 +151,7 @@ namespace SharpNeat.Domains.MazeNavigation.Components
         ///     Updates the output of each of the range finders based on the proximity of walls in its respective direction.
         /// </summary>
         /// <param name="walls">The list of walls in the environment.</param>
-        private void UpdateRangeFinders(List<DoubleLine> walls)
+        private void UpdateRangeFinders(List<Wall> walls)
         {
             // Update each range finder on the navigator
             foreach (var rangeFinder in RangeFinders)
@@ -153,24 +165,28 @@ namespace SharpNeat.Domains.MazeNavigation.Components
         /// </summary>
         /// <param name="newLocation">The location to which the navigator is prepped to move.</param>
         /// <param name="walls">The list of walls in the environment.</param>
+        /// <param name="collidingWall">Output parameter recording the wall at which the collision would occur.</param>
         /// <returns>Whether or not the proposed move will result in a collision.</returns>
-        private bool IsCollision(DoublePoint newLocation, List<DoubleLine> walls)
+        private bool IsCollision(DoublePoint newLocation, List<Wall> walls, out Wall collidingWall)
         {
             var doesCollide = false;
+            collidingWall = null;
 
             // Iterate through all of the walls, determining if the traversal to the
             // newly proposed location will result in a collision
-            foreach (var wall in walls)
+            foreach (Wall wall in walls)
             {
                 // If the distance between the wall and the new location is less than
                 // the radius of the navigator itself, then a collision will occur
-                if (!(DoubleLine.CalculateEuclideanDistanceFromLineToPoint(wall, newLocation) < Radius)) continue;
+                if (!(DoubleLine.CalculateEuclideanDistanceFromLineToPoint(wall.WallLine, newLocation) < Radius))
+                    continue;
+
+                // If we made it here, there is a collision, so set the flag, record the colliding wall, and break
                 doesCollide = true;
+                collidingWall = wall;
+
                 break;
             }
-
-
-            // TODO: Need to return (via output method parameter) which wall the navigator collided with
 
             return doesCollide;
         }
@@ -187,7 +203,7 @@ namespace SharpNeat.Domains.MazeNavigation.Components
             // Create ANN input array with a separate input for each range finder and
             // radar, as well as an additional input for the bias
             var annInputs = new double[RangeFinders.Count + RadarArray.NumRadars];
-            
+
             // Get the output of every range finder
             foreach (var rangeFinder in RangeFinders)
             {

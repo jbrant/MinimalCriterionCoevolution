@@ -27,6 +27,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
     {
         private int _batchSize;
         private IBehaviorCharacterizationFactory _behaviorCharacterizationFactory;
+        private int _bridgingMagnitude;
         private IDataLogger _evaluationDataLogger;
         private IDataLogger _evolutionDataLogger;
         private InitializationAlgorithm _initializationAlgorithm;
@@ -42,6 +43,9 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 
             // Read in number of offspring to produce in a single batch
             _batchSize = XmlUtils.GetValueAsInt(xmlConfig, "OffspringBatchSize");
+
+            // Read in the bridging magnitude
+            _bridgingMagnitude = XmlUtils.GetValueAsInt(xmlConfig, "BridgingMagnitude");
 
             // Read in log file path/name
             _evolutionDataLogger = evolutionDataLogger ??
@@ -126,8 +130,8 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             // Create IBlackBox evaluator.
             IPhenomeEvaluator<IBlackBox, BehaviorInfo> mazeNavigationEvaluator =
                 new MazeNavigationMCSEvaluator(MaxDistanceToTarget, MaxTimesteps,
-                    MazeVariant,
-                    MinSuccessDistance, _behaviorCharacterizationFactory, initializationEvaluations);
+                    MazeVariant, MinSuccessDistance, _behaviorCharacterizationFactory, initializationEvaluations,
+                    _bridgingMagnitude);
 
             // Create genome decoder.
             IGenomeDecoder<NeatGenome, IBlackBox> genomeDecoder = CreateGenomeDecoder();
