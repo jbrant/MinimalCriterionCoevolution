@@ -111,6 +111,30 @@
     <Content Include="ExperimentConfigurations\Experiment2.config.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="ExperimentConfigurations\Queueing MCS with Bridging 8.config.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\Queueing MCS with Bridging 7.config.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\Queueing MCS with Bridging 6.config.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\Queueing MCS with Bridging 5.config.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\Queueing MCS with Bridging 4.config.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\Queueing MCS with Bridging 3.config.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\Queueing MCS with Bridging 2.config.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\Queueing MCS with Bridging 1.config.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="ExperimentConfigurations\Queueing MCS no Bridging 1.config.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

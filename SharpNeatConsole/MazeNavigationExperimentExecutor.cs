@@ -43,10 +43,12 @@ namespace SharpNeatConsole
             if (args == null || args.Length < 4)
             {
                 _executionLogger.Error(
-                    "The following invocation is required for a file source/destination: " +
+                    "The following invocation is required for a file source/destination:");
+                _executionLogger.Error(
                     "SharpNeatConsole.exe <Experiment source (file)> <seed population directory> <# of runs> <experiment config directory> <output file directory> <experiment names>");
-                _executionLogger.Error("The following invocation is required for a database source/destination: " +
-                                       "SharpNeatConsole.exe <Experiment source (file)> <seed population directory> <# of runs> <experiment names>");
+                _executionLogger.Error("The following invocation is required for a database source/destination:");
+                _executionLogger.Error(
+                    "SharpNeatConsole.exe <Experiment source (database)> <seed population directory> <# of runs> <experiment names>");
                 Environment.Exit(0);
             }
 
