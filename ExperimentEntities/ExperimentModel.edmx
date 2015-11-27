@@ -175,7 +175,7 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <Property Name="Initialization_MCS_MinimalCriteriaStartX" Type="float" />
           <Property Name="Initialization_MCS_MinimalCriteriaStartY" Type="float" />
           <Property Name="Initialization_MCS_MinimalCriteriaName" Type="varchar" MaxLength="200" />
-          <Property Name="Initialization_MCS_IsBridgingEnabled" Type="bit" />
+          <Property Name="Initialization_MCS_BridgingMagnitude" Type="int" />
           <Property Name="Primary_SearchAlgorithmName" Type="varchar" MaxLength="100" />
           <Property Name="Primary_BehaviorCharacterizationName" Type="varchar" MaxLength="100" />
           <Property Name="Primary_NoveltySearch_NearestNeighbors" Type="int" />
@@ -188,7 +188,7 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <Property Name="Primary_MCS_MinimalCriteriaStartX" Type="float" />
           <Property Name="Primary_MCS_MinimalCriteriaStartY" Type="float" />
           <Property Name="Primary_MCS_MinimalCriteriaName" Type="varchar" MaxLength="200" />
-          <Property Name="Primary_MCS_IsBridgingEnabled" Type="bit" />
+          <Property Name="Primary_MCS_BridgingMagnitude" Type="int" />
         </EntityType>
         <Association Name="FK_MCSExperimentEvaluationData_RunPhase">
           <End Role="RunPhase" Type="Self.RunPhase" Multiplicity="1" />
@@ -266,7 +266,7 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
     [ExperimentDictionary_vw].[Initialization_MCS_MinimalCriteriaStartX] AS [Initialization_MCS_MinimalCriteriaStartX], 
     [ExperimentDictionary_vw].[Initialization_MCS_MinimalCriteriaStartY] AS [Initialization_MCS_MinimalCriteriaStartY], 
     [ExperimentDictionary_vw].[Initialization_MCS_MinimalCriteriaName] AS [Initialization_MCS_MinimalCriteriaName], 
-    [ExperimentDictionary_vw].[Initialization_MCS_IsBridgingEnabled] AS [Initialization_MCS_IsBridgingEnabled], 
+    [ExperimentDictionary_vw].[Initialization_MCS_BridgingMagnitude] AS [Initialization_MCS_BridgingMagnitude], 
     [ExperimentDictionary_vw].[Primary_SearchAlgorithmName] AS [Primary_SearchAlgorithmName], 
     [ExperimentDictionary_vw].[Primary_BehaviorCharacterizationName] AS [Primary_BehaviorCharacterizationName], 
     [ExperimentDictionary_vw].[Primary_NoveltySearch_NearestNeighbors] AS [Primary_NoveltySearch_NearestNeighbors], 
@@ -279,7 +279,7 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
     [ExperimentDictionary_vw].[Primary_MCS_MinimalCriteriaStartX] AS [Primary_MCS_MinimalCriteriaStartX], 
     [ExperimentDictionary_vw].[Primary_MCS_MinimalCriteriaStartY] AS [Primary_MCS_MinimalCriteriaStartY], 
     [ExperimentDictionary_vw].[Primary_MCS_MinimalCriteriaName] AS [Primary_MCS_MinimalCriteriaName], 
-    [ExperimentDictionary_vw].[Primary_MCS_IsBridgingEnabled] AS [Primary_MCS_IsBridgingEnabled]
+    [ExperimentDictionary_vw].[Primary_MCS_BridgingMagnitude] AS [Primary_MCS_BridgingMagnitude]
     FROM [dbo].[ExperimentDictionary_vw] AS [ExperimentDictionary_vw]</DefiningQuery>
           </EntitySet>
           <AssociationSet Name="FK_MCSExperimentEvaluationData_RunPhase" Association="Self.FK_MCSExperimentEvaluationData_RunPhase">
@@ -390,9 +390,9 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <NavigationProperty Name="NoveltyExperimentEvaluationDatas" Relationship="ExperimentDataModel.FK_NoveltyExperimentEvaluationData_ExperimentDictionary" FromRole="ExperimentDictionary" ToRole="NoveltyExperimentEvaluationData" />
           <NavigationProperty Name="MCSExperimentEvaluationDatas" Relationship="ExperimentDataModel.FK_MCSExperimentEvaluationData_ExperimentDictionary" FromRole="ExperimentDictionary" ToRole="MCSExperimentEvaluationData" />
           <NavigationProperty Name="MCSExperimentOrganismStateDatas" Relationship="ExperimentDataModel.FK_MCSExperimentOrganismStateData_ExperimentDictionary" FromRole="ExperimentDictionary" ToRole="MCSExperimentOrganismStateData" />
-          <Property Name="Initialization_MCS_IsBridgingEnabled" Type="Boolean" />
-          <Property Name="Primary_MCS_IsBridgingEnabled" Type="Boolean" />
           <Property Name="SerializeGenomeToXml" Type="Boolean" Nullable="false" />
+          <Property Name="Initialization_MCS_BridgingMagnitude" Type="Int32" />
+          <Property Name="Primary_MCS_BridgingMagnitude" Type="Int32" />
         </EntityType>
         <EntityType Name="NoveltyExperimentOrganismStateData">
           <Key>
@@ -583,9 +583,9 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <EntitySetMapping Name="ExperimentDictionaries">
             <EntityTypeMapping TypeName="ExperimentDataModel.ExperimentDictionary">
               <MappingFragment StoreEntitySet="ExperimentDictionary_vw">
+                <ScalarProperty Name="Primary_MCS_BridgingMagnitude" ColumnName="Primary_MCS_BridgingMagnitude" />
+                <ScalarProperty Name="Initialization_MCS_BridgingMagnitude" ColumnName="Initialization_MCS_BridgingMagnitude" />
                 <ScalarProperty Name="SerializeGenomeToXml" ColumnName="SerializeGenomeToXml" />
-                <ScalarProperty Name="Primary_MCS_IsBridgingEnabled" ColumnName="Primary_MCS_IsBridgingEnabled" />
-                <ScalarProperty Name="Initialization_MCS_IsBridgingEnabled" ColumnName="Initialization_MCS_IsBridgingEnabled" />
                 <ScalarProperty Name="Primary_MCS_MinimalCriteriaName" ColumnName="Primary_MCS_MinimalCriteriaName" />
                 <ScalarProperty Name="Primary_MCS_MinimalCriteriaStartY" ColumnName="Primary_MCS_MinimalCriteriaStartY" />
                 <ScalarProperty Name="Primary_MCS_MinimalCriteriaStartX" ColumnName="Primary_MCS_MinimalCriteriaStartX" />

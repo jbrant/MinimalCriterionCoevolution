@@ -136,14 +136,14 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             // Create genome decoder.
             IGenomeDecoder<NeatGenome, IBlackBox> genomeDecoder = CreateGenomeDecoder();
 
-//            IGenomeEvaluator<NeatGenome> fitnessEvaluator =
-//                new SerialGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
-//                    SelectionType.Queueing, SearchType.MinimalCriteriaSearch, _evaluationDataLogger, _decodeGenomeToXml);
-
             IGenomeEvaluator<NeatGenome> fitnessEvaluator =
-                new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
-                    SelectionType.Queueing, SearchType.MinimalCriteriaSearch, _evaluationDataLogger,
-                    SerializeGenomeToXml);
+                new SerialGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
+                    SelectionType.Queueing, SearchType.MinimalCriteriaSearch, _evaluationDataLogger, SerializeGenomeToXml);
+
+//            IGenomeEvaluator<NeatGenome> fitnessEvaluator =
+//                new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
+//                    SelectionType.Queueing, SearchType.MinimalCriteriaSearch, _evaluationDataLogger,
+//                    SerializeGenomeToXml);
 
             // Initialize the evolution algorithm.
             ea.Initialize(fitnessEvaluator, genomeFactory, new List<NeatGenome> {genomeSeed}, DefaultPopulationSize,
@@ -317,15 +317,15 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                         _archiveThresholdDecreaseMultiplier, _archiveThresholdIncreaseMultiplier,
                         _maxGenerationArchiveAddition, _maxGenerationsWithoutArchiveAddition);
 
-//                IGenomeEvaluator<NeatGenome> fitnessEvaluator =
-//                    new SerialGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
-//                        SelectionType.SteadyState, SearchType.NoveltySearch,
-//                        _nearestNeighbors, archive, _evaluationDataLogger, _serializeGenomeToXml);
-
                 IGenomeEvaluator<NeatGenome> fitnessEvaluator =
-                    new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
+                    new SerialGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
                         SelectionType.SteadyState, SearchType.NoveltySearch,
                         _nearestNeighbors, archive, _evaluationDataLogger, _serializeGenomeToXml);
+
+//                IGenomeEvaluator<NeatGenome> fitnessEvaluator =
+//                    new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
+//                        SelectionType.SteadyState, SearchType.NoveltySearch,
+//                        _nearestNeighbors, archive, _evaluationDataLogger, _serializeGenomeToXml);
 
                 // Initialize the evolution algorithm.
                 _initializationEa.Initialize(fitnessEvaluator, genomeFactory, genomeList, null, _maxEvaluations, archive);
