@@ -41,8 +41,8 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
         /// </summary>
         public bool StopConditionSatisfied { get; private set; }
 
-        public BehaviorInfo Evaluate(IBlackBox phenome, uint currentGeneration, IDataLogger evaluationLogger,
-            string genomeXml)
+        public BehaviorInfo Evaluate(IBlackBox phenome, uint currentGeneration, bool isBridgingEvaluation,
+            IDataLogger evaluationLogger, string genomeXml)
         {
             ulong threadLocalEvaluationCount;
             lock (evaluationLock)

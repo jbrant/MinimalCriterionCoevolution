@@ -41,8 +41,8 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         /// </summary>
         public bool StopConditionSatisfied { get; private set; }
 
-        public BehaviorInfo Evaluate(IBlackBox phenome, uint currentGeneration, IDataLogger evaluationLogger,
-            string genomeXml)
+        public BehaviorInfo Evaluate(IBlackBox phenome, uint currentGeneration, bool isBridgingEvaluation,
+            IDataLogger evaluationLogger, string genomeXml)
         {
             ulong threadLocalEvaluationCount;
             lock (evaluationLock)
@@ -86,7 +86,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                 new LoggableElement(EvaluationFieldElements.EvaluationCount, threadLocalEvaluationCount),
                 new LoggableElement(EvaluationFieldElements.StopConditionSatisfied, StopConditionSatisfied),
                 new LoggableElement(EvaluationFieldElements.RunPhase, RunPhase.Initialization),
-                new LoggableElement(EvaluationFieldElements.IsViable, trialInfo.DoesBehaviorSatisfyMinimalCriteria),
+                new LoggableElement(EvaluationFieldElements.IsViable, trialInfo.DoesBehaviorSatisfyMinimalCriteria)
             }, world.GetLoggableElements());
 
             return trialInfo;
@@ -108,7 +108,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                 new LoggableElement(EvaluationFieldElements.EvaluationCount, EvaluationCount),
                 new LoggableElement(EvaluationFieldElements.StopConditionSatisfied, StopConditionSatisfied),
                 new LoggableElement(EvaluationFieldElements.RunPhase, RunPhase.Initialization),
-                new LoggableElement(EvaluationFieldElements.IsViable, false),
+                new LoggableElement(EvaluationFieldElements.IsViable, false)
             },
                 new MazeNavigationWorld<FitnessInfo>(_mazeVariant, _minSuccessDistance, _maxDistanceToTarget,
                     _maxTimesteps).GetLoggableElements());

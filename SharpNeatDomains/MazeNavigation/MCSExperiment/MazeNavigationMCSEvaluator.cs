@@ -45,14 +45,19 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         /// </summary>
         public bool StopConditionSatisfied { get; private set; }
 
-        public BehaviorInfo Evaluate(IBlackBox phenome, uint currentGeneration, IDataLogger evaluationLogger,
-            string genomeXml)
+        public BehaviorInfo Evaluate(IBlackBox phenome, uint currentGeneration, bool isBridgingEvaluation,
+            IDataLogger evaluationLogger, string genomeXml)
         {
-            ulong threadLocalEvaluationCount;
-            lock (evaluationLock)
+            ulong threadLocalEvaluationCount = default(ulong);
+
+            // TODO: Figure out better way of handling evaluation counting rather than just checking bridging flag
+            if (isBridgingEvaluation == false)
             {
-                // Increment evaluation count
-                threadLocalEvaluationCount = EvaluationCount++;
+                lock (evaluationLock)
+                {
+                    // Increment evaluation count
+                    threadLocalEvaluationCount = EvaluationCount++;
+                }
             }
 
             // Default the stop condition satisfied to false
@@ -64,7 +69,8 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 
             // Instantiate the maze world
             MazeNavigationWorld<BehaviorInfo> world = new MazeNavigationWorld<BehaviorInfo>(_mazeVariant,
-                _minSuccessDistance, _maxDistanceToTarget, _maxTimesteps, behaviorCharacterization, _bridgingMagnitude);
+                _minSuccessDistance, _maxDistanceToTarget, _maxTimesteps, behaviorCharacterization,
+                isBridgingEvaluation ? _bridgingMagnitude : 0);
 
             // Run a single trial
             BehaviorInfo trialInfo = world.RunTrial(phenome, SearchType.MinimalCriteriaSearch,
@@ -83,22 +89,26 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             // Also, note that if the goal has been reached, then the minimal criterion is irrelevant
             // and should also be satisfied (this is really part of a larger experiment design issue in 
             // which the goal can be reached prior to the minimal criteria being satisfied)
-            if (goalReached)
+            if (goalReached && isBridgingEvaluation == false)
             {
                 StopConditionSatisfied = true;
                 trialInfo.DoesBehaviorSatisfyMinimalCriteria = true;
             }
 
-            // Log trial information
-            evaluationLogger?.LogRow(new List<LoggableElement>
+            // TODO: Need to figure out better way for logging bridging and non-bridging evaluations
+            if (isBridgingEvaluation == false)
             {
-                new LoggableElement(EvaluationFieldElements.Generation, currentGeneration),
-                new LoggableElement(EvaluationFieldElements.EvaluationCount, threadLocalEvaluationCount),
-                new LoggableElement(EvaluationFieldElements.StopConditionSatisfied, StopConditionSatisfied),
-                new LoggableElement(EvaluationFieldElements.RunPhase, RunPhase.Primary),
-                new LoggableElement(EvaluationFieldElements.IsViable, trialInfo.DoesBehaviorSatisfyMinimalCriteria)
-            },
-                world.GetLoggableElements());
+                // Log trial information
+                evaluationLogger?.LogRow(new List<LoggableElement>
+                {
+                    new LoggableElement(EvaluationFieldElements.Generation, currentGeneration),
+                    new LoggableElement(EvaluationFieldElements.EvaluationCount, threadLocalEvaluationCount),
+                    new LoggableElement(EvaluationFieldElements.StopConditionSatisfied, StopConditionSatisfied),
+                    new LoggableElement(EvaluationFieldElements.RunPhase, RunPhase.Primary),
+                    new LoggableElement(EvaluationFieldElements.IsViable, trialInfo.DoesBehaviorSatisfyMinimalCriteria)
+                },
+                    world.GetLoggableElements());
+            }
 
             return trialInfo;
         }

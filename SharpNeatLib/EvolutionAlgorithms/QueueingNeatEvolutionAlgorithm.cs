@@ -117,8 +117,14 @@ namespace SharpNeat.EvolutionAlgorithms
             // Produce number of offspring equivalent to the given batch size
             List<TGenome> childGenomes = CreateOffspring(curBatchSize);
 
-            // Evaluate the offspring batch
+            // First evaluate the offspring batch with bridging disabled
             GenomeEvaluator.Evaluate(childGenomes, CurrentGeneration);
+
+            // If no one met the stop condition, evaluate the batch with bridging
+            if (StopConditionSatisfied == false)
+            {
+                GenomeEvaluator.Evaluate(childGenomes, CurrentGeneration, enableBridging: true);
+            }
 
             // Remove child genomes that are not viable
             childGenomes.RemoveAll(genome => genome.EvaluationInfo.IsViable == false);

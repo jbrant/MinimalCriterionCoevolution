@@ -38,8 +38,8 @@ namespace SharpNeat.Domains.MazeNavigation.MCNSExperiment
         /// </summary>
         public bool StopConditionSatisfied { get; private set; }
 
-        public BehaviorInfo Evaluate(IBlackBox phenome, uint currentGeneration, IDataLogger evaluationLogger,
-            string genomeXml)
+        public BehaviorInfo Evaluate(IBlackBox phenome, uint currentGeneration, bool isBridgingEvaluation,
+            IDataLogger evaluationLogger, string genomeXml)
         {
             // Increment evaluation count
             EvaluationCount++;

@@ -151,7 +151,9 @@ namespace SharpNeat.Core
         ///     Determines whether to run the simulation to get behavioral characteristics before
         ///     evaluating fitness or behavioral novelty (this isn't applicable for pure fitness evaluation).
         /// </param>
-        public void Evaluate(IList<TGenome> genomeList, uint currentGeneration, bool runSimulation = true)
+        /// <param name="enableBridging">Determines whether bridging is enabled on genome evaluations.</param>
+        public void Evaluate(IList<TGenome> genomeList, uint currentGeneration, bool runSimulation = true,
+            bool enableBridging = false)
         {
             _evaluationMethod(genomeList, currentGeneration);
         }
@@ -166,8 +168,9 @@ namespace SharpNeat.Core
         ///     Determines whether to run the simulation to get behavioral characteristics before
         ///     evaluating fitness or behavioral novelty (this isn't applicable for pure fitness evaluation).
         /// </param>
+        /// <param name="enableBridging">Determines whether bridging is enabled on genome evaluations.</param>
         public void Evaluate(IList<TGenome> genomesToEvaluate, IList<TGenome> population, uint currentGeneration,
-            bool runSimulation = true)
+            bool runSimulation = true, bool enableBridging = false)
         {
             // TODO: Need to implement this
             throw new NotImplementedException();
@@ -199,7 +202,8 @@ namespace SharpNeat.Core
                 }
                 else
                 {
-                    FitnessInfo fitnessInfo = _phenomeEvaluator.Evaluate(phenome, currentGeneration, _evaluationLogger, null);
+                    FitnessInfo fitnessInfo = _phenomeEvaluator.Evaluate(phenome, currentGeneration, false,
+                        _evaluationLogger, null);
                     genome.EvaluationInfo.SetFitness(fitnessInfo._fitness);
                     genome.EvaluationInfo.AuxFitnessArr = fitnessInfo._auxFitnessArr;
                 }
@@ -227,7 +231,8 @@ namespace SharpNeat.Core
                 }
                 else
                 {
-                    FitnessInfo fitnessInfo = _phenomeEvaluator.Evaluate(phenome, currentGeneration, _evaluationLogger, null);
+                    FitnessInfo fitnessInfo = _phenomeEvaluator.Evaluate(phenome, currentGeneration, false,
+                        _evaluationLogger, null);
                     genome.EvaluationInfo.SetFitness(fitnessInfo._fitness);
                     genome.EvaluationInfo.AuxFitnessArr = fitnessInfo._auxFitnessArr;
                 }

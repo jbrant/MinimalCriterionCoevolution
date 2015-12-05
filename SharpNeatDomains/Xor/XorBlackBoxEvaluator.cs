@@ -73,8 +73,8 @@ namespace SharpNeat.Domains
         /// <summary>
         ///     EvaluateFitness the provided IBlackBox against the XOR problem domain and return its fitness score.
         /// </summary>
-        public FitnessInfo Evaluate(IBlackBox box, uint currentGeneration, IDataLogger evaluationLogger,
-            string genomeXml)
+        public FitnessInfo Evaluate(IBlackBox box, uint currentGeneration, bool isBridgingEvaluation, 
+            IDataLogger evaluationLogger, string genomeXml)
         {
             double fitness = 0;
             double output;

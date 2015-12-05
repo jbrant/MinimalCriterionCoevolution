@@ -19,11 +19,6 @@ namespace SharpNeat.Domains.MazeNavigation
         private readonly IBehaviorCharacterization _behaviorCharacterization;
 
         /// <summary>
-        ///     Magnitude of heading change to use for bridging experiments.
-        /// </summary>
-        private readonly int _bridgingMagnitude;
-
-        /// <summary>
         ///     Location of the goal.
         /// </summary>
         private readonly DoublePoint _goalLocation;
@@ -72,7 +67,7 @@ namespace SharpNeat.Domains.MazeNavigation
             _maxDistanceToTarget = maxDistanceToTarget;
             _maxTimesteps = maxTimeSteps;
             _behaviorCharacterization = behaviorCharacterization;
-            _bridgingMagnitude = bridgingMagnitude;
+            int bridgingMagnitude1 = bridgingMagnitude;
 
             switch (mazeVariant)
             {
@@ -88,17 +83,17 @@ namespace SharpNeat.Domains.MazeNavigation
                     _walls = new List<Wall>(11)
                     {
                         // TODO: Set appropriate adjustment coefficients for the walls
-                        new Wall(new DoubleLine(293, 7, 289, 130), 1, 1, _bridgingMagnitude),
-                        new Wall(new DoubleLine(289, 130, 6, 134), 1, 1, _bridgingMagnitude),
-                        new Wall(new DoubleLine(6, 134, 8, 5), 1, 1, _bridgingMagnitude),
-                        new Wall(new DoubleLine(8, 5, 292, 7), 1, 1, _bridgingMagnitude),
-                        new Wall(new DoubleLine(241, 130, 58, 65), 1, 1, _bridgingMagnitude),
-                        new Wall(new DoubleLine(114, 7, 73, 42), 1, 1, _bridgingMagnitude),
-                        new Wall(new DoubleLine(130, 91, 107, 46), 1, 1, _bridgingMagnitude),
-                        new Wall(new DoubleLine(196, 8, 139, 51), 1, 1, _bridgingMagnitude),
-                        new Wall(new DoubleLine(219, 122, 182, 63), 1, 1, _bridgingMagnitude),
-                        new Wall(new DoubleLine(267, 9, 214, 63), 1, 1, _bridgingMagnitude),
-                        new Wall(new DoubleLine(271, 129, 237, 88), 1, 1, _bridgingMagnitude)
+                        new Wall(new DoubleLine(293, 7, 289, 130), 1, 1, bridgingMagnitude1),
+                        new Wall(new DoubleLine(289, 130, 6, 134), 1, 1, bridgingMagnitude1),
+                        new Wall(new DoubleLine(6, 134, 8, 5), 1, 1, bridgingMagnitude1),
+                        new Wall(new DoubleLine(8, 5, 292, 7), 1, 1, bridgingMagnitude1),
+                        new Wall(new DoubleLine(241, 130, 58, 65), 1, 1, bridgingMagnitude1),
+                        new Wall(new DoubleLine(114, 7, 73, 42), 1, 1, bridgingMagnitude1),
+                        new Wall(new DoubleLine(130, 91, 107, 46), 1, 1, bridgingMagnitude1),
+                        new Wall(new DoubleLine(196, 8, 139, 51), 1, 1, bridgingMagnitude1),
+                        new Wall(new DoubleLine(219, 122, 182, 63), 1, 1, bridgingMagnitude1),
+                        new Wall(new DoubleLine(267, 9, 214, 63), 1, 1, bridgingMagnitude1),
+                        new Wall(new DoubleLine(271, 129, 237, 88), 1, 1, bridgingMagnitude1)
                     };
                     break;
 
@@ -114,21 +109,21 @@ namespace SharpNeat.Domains.MazeNavigation
                     _walls = new List<Wall>(13)
                     {
                         // Boundary walls
-                        new Wall(new DoubleLine(7, 202, 195, 198), -1, -1, _bridgingMagnitude),
-                        new Wall(new DoubleLine(41, 5, 3, 8), -1, -1, _bridgingMagnitude),
-                        new Wall(new DoubleLine(3, 8, 4, 49), 1, 1, _bridgingMagnitude),
-                        new Wall(new DoubleLine(4, 49, 7, 202), 1, 1, _bridgingMagnitude),
-                        new Wall(new DoubleLine(195, 198, 186, 8), -1, -1, _bridgingMagnitude),
-                        new Wall(new DoubleLine(186, 8, 39, 5), -1, -1, _bridgingMagnitude),
+                        new Wall(new DoubleLine(7, 202, 195, 198), -1, -1, bridgingMagnitude1),
+                        new Wall(new DoubleLine(41, 5, 3, 8), -1, -1, bridgingMagnitude1),
+                        new Wall(new DoubleLine(3, 8, 4, 49), 1, 1, bridgingMagnitude1),
+                        new Wall(new DoubleLine(4, 49, 7, 202), 1, 1, bridgingMagnitude1),
+                        new Wall(new DoubleLine(195, 198, 186, 8), -1, -1, bridgingMagnitude1),
+                        new Wall(new DoubleLine(186, 8, 39, 5), -1, -1, bridgingMagnitude1),
 
                         // Obstructing walls
-                        new Wall(new DoubleLine(4, 49, 57, 53), 1, 1, _bridgingMagnitude),
-                        new Wall(new DoubleLine(56, 54, 56, 157), -1, 1, _bridgingMagnitude),
-                        new Wall(new DoubleLine(57, 106, 158, 162), 1, 1, _bridgingMagnitude),
-                        new Wall(new DoubleLine(77, 201, 108, 164), -1, -1, _bridgingMagnitude),
-                        new Wall(new DoubleLine(6, 80, 33, 121), -1, 1, _bridgingMagnitude),
-                        new Wall(new DoubleLine(192, 146, 87, 91), -1, -1, _bridgingMagnitude),
-                        new Wall(new DoubleLine(56, 55, 133, 30), 1, 1, _bridgingMagnitude)
+                        new Wall(new DoubleLine(4, 49, 57, 53), 1, 1, bridgingMagnitude1),
+                        new Wall(new DoubleLine(56, 54, 56, 157), -1, 1, bridgingMagnitude1),
+                        new Wall(new DoubleLine(57, 106, 158, 162), 1, 1, bridgingMagnitude1),
+                        new Wall(new DoubleLine(77, 201, 108, 164), -1, -1, bridgingMagnitude1),
+                        new Wall(new DoubleLine(6, 80, 33, 121), -1, 1, bridgingMagnitude1),
+                        new Wall(new DoubleLine(192, 146, 87, 91), -1, -1, bridgingMagnitude1),
+                        new Wall(new DoubleLine(56, 55, 133, 30), 1, 1, bridgingMagnitude1)
                     };
                     break;
 
@@ -144,19 +139,19 @@ namespace SharpNeat.Domains.MazeNavigation
                     _walls = new List<Wall>(10)
                     {
                         // TODO: Set appropriate adjustment coefficients for the walls
-                        new Wall(new DoubleLine(293, 7, 289, 130), 1, 1, _bridgingMagnitude),
-                        new Wall(new DoubleLine(289, 130, 6, 134), 1, 1, _bridgingMagnitude),
+                        new Wall(new DoubleLine(293, 7, 289, 130), 1, 1, bridgingMagnitude1),
+                        new Wall(new DoubleLine(289, 130, 6, 134), 1, 1, bridgingMagnitude1),
 
                         // Left wall is missing here
 
-                        new Wall(new DoubleLine(8, 5, 292, 7), 1, 1, _bridgingMagnitude),
-                        new Wall(new DoubleLine(241, 130, 58, 65), 1, 1, _bridgingMagnitude),
-                        new Wall(new DoubleLine(114, 7, 73, 42), 1, 1, _bridgingMagnitude),
-                        new Wall(new DoubleLine(130, 91, 107, 46), 1, 1, _bridgingMagnitude),
-                        new Wall(new DoubleLine(196, 8, 139, 51), 1, 1, _bridgingMagnitude),
-                        new Wall(new DoubleLine(219, 122, 182, 63), 1, 1, _bridgingMagnitude),
-                        new Wall(new DoubleLine(267, 9, 214, 63), 1, 1, _bridgingMagnitude),
-                        new Wall(new DoubleLine(271, 129, 237, 88), 1, 1, _bridgingMagnitude)
+                        new Wall(new DoubleLine(8, 5, 292, 7), 1, 1, bridgingMagnitude1),
+                        new Wall(new DoubleLine(241, 130, 58, 65), 1, 1, bridgingMagnitude1),
+                        new Wall(new DoubleLine(114, 7, 73, 42), 1, 1, bridgingMagnitude1),
+                        new Wall(new DoubleLine(130, 91, 107, 46), 1, 1, bridgingMagnitude1),
+                        new Wall(new DoubleLine(196, 8, 139, 51), 1, 1, bridgingMagnitude1),
+                        new Wall(new DoubleLine(219, 122, 182, 63), 1, 1, bridgingMagnitude1),
+                        new Wall(new DoubleLine(267, 9, 214, 63), 1, 1, bridgingMagnitude1),
+                        new Wall(new DoubleLine(271, 129, 237, 88), 1, 1, bridgingMagnitude1)
                     };
                     break;
 

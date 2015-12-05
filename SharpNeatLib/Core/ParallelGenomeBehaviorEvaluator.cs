@@ -73,8 +73,9 @@ namespace SharpNeat.Core
         ///     Determines whether to run the simulation to get behavioral characteristics before
         ///     evaluating fitness or behavioral novelty.
         /// </param>
+        /// <param name="enableBridging">Determines whether bridging is enabled on genome evaluations.</param>
         private delegate void PopulationEvaluationMethod(
-            IList<TGenome> genomeList, uint currentGeneration, bool runSimulation);
+            IList<TGenome> genomeList, uint currentGeneration, bool runSimulation, bool enableBridging = false);
 
         /// <summary>
         ///     Delegate for batch (steady-state) evaluation.
@@ -86,8 +87,10 @@ namespace SharpNeat.Core
         ///     Determines whether to run the simulation to get behavioral characteristics before
         ///     evaluating fitness or behavioral novelty.
         /// </param>
+        /// <param name="enableBridging">Determines whether bridging is enabled on genome evaluations.</param>
         private delegate void BatchEvaluationMethod(
-            IList<TGenome> genomesToEvaluate, IList<TGenome> population, uint currentGeneration, bool runSimulation);
+            IList<TGenome> genomesToEvaluate, IList<TGenome> population, uint currentGeneration, bool runSimulation,
+            bool enableBridging = false);
 
         #endregion
 
@@ -280,9 +283,11 @@ namespace SharpNeat.Core
         ///     Determines whether to run the simulation to get behavioral characteristics before
         ///     evaluating fitness or behavioral novelty.
         /// </param>
-        public void Evaluate(IList<TGenome> genomeList, uint currentGeneration, bool runSimulation = true)
+        /// <param name="enableBridging">Determines whether bridging is enabled on genome evaluations.</param>
+        public void Evaluate(IList<TGenome> genomeList, uint currentGeneration, bool runSimulation = true,
+            bool enableBridging = false)
         {
-            _populationEvaluationMethod(genomeList, currentGeneration, runSimulation);
+            _populationEvaluationMethod(genomeList, currentGeneration, runSimulation, enableBridging);
         }
 
         /// <summary>
@@ -295,10 +300,11 @@ namespace SharpNeat.Core
         ///     Determines whether to run the simulation to get behavioral characteristics before
         ///     evaluating fitness or behavioral novelty.
         /// </param>
+        /// <param name="enableBridging">Determines whether bridging is enabled on genome evaluations.</param>
         public void Evaluate(IList<TGenome> genomesToEvaluate, IList<TGenome> population, uint currentGeneration,
-            bool runSimulation = true)
+            bool runSimulation = true, bool enableBridging = false)
         {
-            _batchEvaluationMethod(genomesToEvaluate, population, currentGeneration, runSimulation);
+            _batchEvaluationMethod(genomesToEvaluate, population, currentGeneration, runSimulation, enableBridging);
         }
 
         #endregion
@@ -314,8 +320,9 @@ namespace SharpNeat.Core
         ///     Determines whether to run the simulation to get behavioral characteristics before
         ///     evaluating fitness or behavioral novelty.
         /// </param>
+        /// <param name="enableBridging">Determines whether bridging is enabled on genome evaluations.</param>
         private void EvaluateAllBehaviors_NonCaching(IList<TGenome> genomeList, uint currentGeneration,
-            bool runSimulation)
+            bool runSimulation, bool enableBridging = false)
         {
             if (runSimulation)
             {
@@ -323,7 +330,7 @@ namespace SharpNeat.Core
                     delegate(TGenome genome)
                     {
                         EvaluationUtils<TGenome, TPhenome>.EvaluateBehavior_NonCaching(genome, _genomeDecoder,
-                            _phenomeEvaluator, currentGeneration, _evaluationLogger, _decodeGenomeToXml);
+                            _phenomeEvaluator, currentGeneration, enableBridging, _evaluationLogger, _decodeGenomeToXml);
                     });
             }
 
@@ -371,8 +378,9 @@ namespace SharpNeat.Core
         ///     Determines whether to run the simulation to get behavioral characteristics before
         ///     evaluating fitness or behavioral novelty.
         /// </param>
+        /// <param name="enableBridging">Determines whether bridging is enabled on genome evaluations.</param>
         private void EvaluateBatchBehaviors_NonCaching(IList<TGenome> genomesToEvaluate, IList<TGenome> population,
-            uint currentGeneration, bool runSimulation)
+            uint currentGeneration, bool runSimulation, bool enableBridging = false)
         {
             if (runSimulation)
             {
@@ -381,7 +389,7 @@ namespace SharpNeat.Core
                     delegate(TGenome genome)
                     {
                         EvaluationUtils<TGenome, TPhenome>.EvaluateBehavior_NonCaching(genome, _genomeDecoder,
-                            _phenomeEvaluator, currentGeneration, _evaluationLogger, _decodeGenomeToXml);
+                            _phenomeEvaluator, currentGeneration, enableBridging, _evaluationLogger, _decodeGenomeToXml);
                     });
             }
 
@@ -427,7 +435,9 @@ namespace SharpNeat.Core
         ///     Determines whether to run the simulation to get behavioral characteristics before
         ///     evaluating fitness or behavioral novelty.
         /// </param>
-        private void EvaluateAllBehaviors_Caching(IList<TGenome> genomeList, uint currentGeneration, bool runSimulation)
+        /// <param name="enableBridging">Determines whether bridging is enabled on genome evaluations.</param>
+        private void EvaluateAllBehaviors_Caching(IList<TGenome> genomeList, uint currentGeneration, bool runSimulation,
+            bool enableBridging = false)
         {
             if (runSimulation)
             {
@@ -435,7 +445,7 @@ namespace SharpNeat.Core
                     delegate(TGenome genome)
                     {
                         EvaluationUtils<TGenome, TPhenome>.EvaluateBehavior_Caching(genome, _genomeDecoder,
-                            _phenomeEvaluator, currentGeneration, _evaluationLogger, _decodeGenomeToXml);
+                            _phenomeEvaluator, currentGeneration, enableBridging, _evaluationLogger, _decodeGenomeToXml);
                     });
             }
 
@@ -484,8 +494,9 @@ namespace SharpNeat.Core
         ///     Determines whether to run the simulation to get behavioral characteristics before
         ///     evaluating fitness or behavioral novelty.
         /// </param>
+        /// <param name="enableBridging">Determines whether bridging is enabled on genome evaluations.</param>
         private void EvaluateBatchBehaviors_Caching(IList<TGenome> genomesToEvaluate, IList<TGenome> population,
-            uint currentGeneration, bool runSimulation)
+            uint currentGeneration, bool runSimulation, bool enableBridging = false)
         {
             if (runSimulation)
             {
@@ -494,7 +505,7 @@ namespace SharpNeat.Core
                     delegate(TGenome genome)
                     {
                         EvaluationUtils<TGenome, TPhenome>.EvaluateBehavior_Caching(genome, _genomeDecoder,
-                            _phenomeEvaluator, currentGeneration, _evaluationLogger, _decodeGenomeToXml);
+                            _phenomeEvaluator, currentGeneration, enableBridging, _evaluationLogger, _decodeGenomeToXml);
                     });
             }
 

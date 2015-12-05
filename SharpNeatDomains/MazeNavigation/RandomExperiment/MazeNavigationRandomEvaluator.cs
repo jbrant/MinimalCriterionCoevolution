@@ -45,8 +45,8 @@ namespace SharpNeat.Domains.MazeNavigation.RandomExperiment
             set { _stopConditionSatisfied = value; }
         }
 
-        public FitnessInfo Evaluate(IBlackBox phenome, uint currentGeneration, IDataLogger evaluationLogger,
-            string genomeXml)
+        public FitnessInfo Evaluate(IBlackBox phenome, uint currentGeneration, bool isBridgingEvaluation,
+            IDataLogger evaluationLogger, string genomeXml)
         {
             // Increment eval count
             EvaluationCount++;
