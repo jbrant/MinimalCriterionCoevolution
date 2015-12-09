@@ -55,12 +55,13 @@
         public static readonly int NumFieldElements = 9;
         public static readonly FieldElement Generation = new FieldElement(0, "Generation");
         public static readonly FieldElement EvaluationCount = new FieldElement(1, "Evaluation Count");
-        public static readonly FieldElement RunPhase = new FieldElement(2, "Run Phase");
-        public static readonly FieldElement IsViable = new FieldElement(3, "Is Viable");
-        public static readonly FieldElement StopConditionSatisfied = new FieldElement(4, "Stop Condition Satisfied");
-        public static readonly FieldElement DistanceToTarget = new FieldElement(5, "Distance to Target");
-        public static readonly FieldElement AgentXLocation = new FieldElement(6, "Agent X Location");
-        public static readonly FieldElement AgentYLocation = new FieldElement(7, "Agent Y Location");
+        public static readonly FieldElement BridgingEvaluation = new FieldElement(2, "Bridging Evaluation");
+        public static readonly FieldElement RunPhase = new FieldElement(3, "Run Phase");
+        public static readonly FieldElement IsViable = new FieldElement(4, "Is Viable");
+        public static readonly FieldElement StopConditionSatisfied = new FieldElement(5, "Stop Condition Satisfied");
+        public static readonly FieldElement DistanceToTarget = new FieldElement(6, "Distance to Target");
+        public static readonly FieldElement AgentXLocation = new FieldElement(7, "Agent X Location");
+        public static readonly FieldElement AgentYLocation = new FieldElement(8, "Agent Y Location");
     }
 
     public class FieldElement

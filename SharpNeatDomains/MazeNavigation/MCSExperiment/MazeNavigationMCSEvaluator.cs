@@ -50,7 +50,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         {
             ulong threadLocalEvaluationCount = default(ulong);
 
-            // TODO: Figure out better way of handling evaluation counting rather than just checking bridging flag
+            // Only increment the evaluation count if this is a regular (i.e. non-bridging) evaluation
             if (isBridgingEvaluation == false)
             {
                 lock (evaluationLock)
@@ -95,20 +95,17 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                 trialInfo.DoesBehaviorSatisfyMinimalCriteria = true;
             }
 
-            // TODO: Need to figure out better way for logging bridging and non-bridging evaluations
-            if (isBridgingEvaluation == false)
+            // Log trial information
+            evaluationLogger?.LogRow(new List<LoggableElement>
             {
-                // Log trial information
-                evaluationLogger?.LogRow(new List<LoggableElement>
-                {
-                    new LoggableElement(EvaluationFieldElements.Generation, currentGeneration),
-                    new LoggableElement(EvaluationFieldElements.EvaluationCount, threadLocalEvaluationCount),
-                    new LoggableElement(EvaluationFieldElements.StopConditionSatisfied, StopConditionSatisfied),
-                    new LoggableElement(EvaluationFieldElements.RunPhase, RunPhase.Primary),
-                    new LoggableElement(EvaluationFieldElements.IsViable, trialInfo.DoesBehaviorSatisfyMinimalCriteria)
-                },
-                    world.GetLoggableElements());
-            }
+                new LoggableElement(EvaluationFieldElements.Generation, currentGeneration),
+                new LoggableElement(EvaluationFieldElements.EvaluationCount, threadLocalEvaluationCount),
+                new LoggableElement(EvaluationFieldElements.BridgingEvaluation, isBridgingEvaluation),
+                new LoggableElement(EvaluationFieldElements.StopConditionSatisfied, StopConditionSatisfied),
+                new LoggableElement(EvaluationFieldElements.RunPhase, RunPhase.Primary),
+                new LoggableElement(EvaluationFieldElements.IsViable, trialInfo.DoesBehaviorSatisfyMinimalCriteria)
+            },
+                world.GetLoggableElements());
 
             return trialInfo;
         }

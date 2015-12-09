@@ -180,7 +180,7 @@
       </Activation>
       <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>
       <ComplexityThreshold>30</ComplexityThreshold>
-      <OffspringBatchSize>20</OffspringBatchSize>
+      <OffspringBatchSize>500</OffspringBatchSize>
       <PopulationEvaluationFrequency>30</PopulationEvaluationFrequency>
       <MaxEvaluations>1000000</MaxEvaluations>
       <DecodeGenomesToXml>true</DecodeGenomesToXml>

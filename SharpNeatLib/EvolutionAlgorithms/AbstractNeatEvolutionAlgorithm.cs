@@ -133,7 +133,7 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     Updates _currentBestGenome without taking species into consideration.  This is considered the fittest genome in the
         ///     population.
         /// </summary>
-        protected void UpdateBestGenomeWithoutSpeciation(bool isMaximization)
+        protected void UpdateBestGenomeWithoutSpeciation(bool isMaximization, bool useAuxFitness)
         {
             // If all genomes have the same fitness (including zero) then we simply return the first genome.
             TGenome bestGenome = null;
@@ -142,20 +142,26 @@ namespace SharpNeat.EvolutionAlgorithms
             // Iterate through the genome list, testing for the highest fitness genome
             foreach (TGenome genome in GenomeList)
             {
+                // Use either the primary fitness or auxiliary fitness based on the
+                // choice upon method invocation
+                double curGenomeFitness = useAuxFitness
+                    ? genome.EvaluationInfo.AuxFitnessArr[0]._value
+                    : genome.EvaluationInfo.Fitness;
+
                 if (isMaximization)
                 {
-                    if (genome.EvaluationInfo.Fitness > bestFitness)
+                    if (curGenomeFitness > bestFitness)
                     {
                         bestGenome = genome;
-                        bestFitness = genome.EvaluationInfo.Fitness;
+                        bestFitness = curGenomeFitness;
                     }
                 }
                 else
                 {
-                    if (bestFitness <= 0 || genome.EvaluationInfo.Fitness < bestFitness)
+                    if (bestFitness <= 0 || curGenomeFitness < bestFitness)
                     {
                         bestGenome = genome;
-                        bestFitness = genome.EvaluationInfo.Fitness;
+                        bestFitness = curGenomeFitness;
                     }
                 }
             }

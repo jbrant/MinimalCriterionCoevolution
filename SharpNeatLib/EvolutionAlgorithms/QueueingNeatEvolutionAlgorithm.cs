@@ -31,6 +31,11 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </summary>
         private readonly int _batchSize;
 
+        /// <summary>
+        ///     Flag that indicates whether bridging (i.e. a temporary nudge in a potentially beneficial direction) is enabled.
+        /// </summary>
+        private readonly bool _isBridgingEnabled;
+
         #endregion
 
         #region Private Methods
@@ -110,6 +115,8 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </summary>
         protected override void PerformOneGeneration()
         {
+            bool useAuxFitnessForBestGenome = false;
+
             // Get the initial batch size as the minimum of the batch size or the size of the population.
             // When we're first starting, the population will likely be smaller than the desired batch size.
             int curBatchSize = Math.Min(_batchSize, GenomeList.Count);
@@ -121,9 +128,27 @@ namespace SharpNeat.EvolutionAlgorithms
             GenomeEvaluator.Evaluate(childGenomes, CurrentGeneration);
 
             // If no one met the stop condition, evaluate the batch with bridging
-            if (StopConditionSatisfied == false)
+            if (_isBridgingEnabled && StopConditionSatisfied == false)
             {
+                // Store off fitnesses calculated without bridging
+                List<AuxFitnessInfo> fitnessesWithoutBridging = new List<AuxFitnessInfo>(childGenomes.Count);
+                fitnessesWithoutBridging.AddRange(
+                    childGenomes.Select(
+                        childGenome => new AuxFitnessInfo("No Bridging Fitness", childGenome.EvaluationInfo.Fitness)));
+
+                // Evaluate genomes with bridging enabled
                 GenomeEvaluator.Evaluate(childGenomes, CurrentGeneration, enableBridging: true);
+
+                // Load the "no bridging" fitness as auxiliary fitness values
+                for (int cnt = 0; cnt < childGenomes.Count; cnt++)
+                {
+                    childGenomes[cnt].EvaluationInfo.AuxFitnessArr[0] = fitnessesWithoutBridging[cnt];
+                }
+
+                // If bridging was enabled, the primary fitness is now the fitness with bridging, which doesn't
+                // really give an indication of the inherent capabilities of the genome.  Therefore, the champ
+                // genome info needs to be set using the non-bridging fitness (which is now in the aux fitness)
+                useAuxFitnessForBestGenome = true;
             }
 
             // Remove child genomes that are not viable
@@ -146,7 +171,7 @@ namespace SharpNeat.EvolutionAlgorithms
             Statistics._totalOffspringCount = (ulong) childGenomes.Count;
 
             // Update stats and store reference to best genome.
-            UpdateBestGenomeWithoutSpeciation(false);
+            UpdateBestGenomeWithoutSpeciation(false, useAuxFitnessForBestGenome);
             UpdateStats(false);
 
             Debug.Assert(GenomeList.Count <= PopulationSize);
@@ -169,9 +194,11 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     The experiment phase indicating whether this is an initialization process or the primary
         ///     algorithm.
         /// </param>
-        public QueueingNeatEvolutionAlgorithm(IDataLogger logger = null, RunPhase runPhase = RunPhase.Primary)
+        /// <param name="isBridgingEnabled">Flag that indicates whether bridging is enabled.</param>
+        public QueueingNeatEvolutionAlgorithm(IDataLogger logger = null, RunPhase runPhase = RunPhase.Primary,
+            bool isBridgingEnabled = false)
             : this(
-                new NullComplexityRegulationStrategy(), 10, runPhase, logger)
+                new NullComplexityRegulationStrategy(), 10, runPhase, isBridgingEnabled, logger)
         {
             SpeciationStrategy = new KMeansClusteringStrategy<TGenome>(new ManhattanDistanceMetric());
             ComplexityRegulationStrategy = new NullComplexityRegulationStrategy();
@@ -187,17 +214,20 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     The experiment phase indicating whether this is an initialization process or the primary
         ///     algorithm.
         /// </param>
+        /// <param name="isBridgingEnabled">Flag that indicates whether bridging is enabled.</param>
         /// <param name="logger">The data logger (optional).</param>
         public QueueingNeatEvolutionAlgorithm(
             IComplexityRegulationStrategy complexityRegulationStrategy,
             int batchSize,
             RunPhase runPhase = RunPhase.Primary,
+            bool isBridgingEnabled = false,
             IDataLogger logger = null)
         {
             ComplexityRegulationStrategy = complexityRegulationStrategy;
             _batchSize = batchSize;
             EvolutionLogger = logger;
             RunPhase = runPhase;
+            _isBridgingEnabled = isBridgingEnabled;
         }
 
         /// <summary>
@@ -210,17 +240,20 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     The experiment phase indicating whether this is an initialization process or the primary
         ///     algorithm.
         /// </param>
+        /// <param name="isBridgingEnabled">Flag that indicates whether bridging is enabled.</param>
         /// <param name="logger">The data logger (optional).</param>
         public QueueingNeatEvolutionAlgorithm(NeatEvolutionAlgorithmParameters eaParams,
             IComplexityRegulationStrategy complexityRegulationStrategy,
             int batchSize,
             RunPhase runPhase = RunPhase.Primary,
+            bool isBridgingEnabled = false,
             IDataLogger logger = null) : base(eaParams)
         {
             ComplexityRegulationStrategy = complexityRegulationStrategy;
             _batchSize = batchSize;
             EvolutionLogger = logger;
             RunPhase = runPhase;
+            _isBridgingEnabled = isBridgingEnabled;
         }
 
         #endregion

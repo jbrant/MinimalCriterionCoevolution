@@ -107,18 +107,10 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                 ExperimentUtils.CreateComplexityRegulationStrategy(ComplexityRegulationStrategy, Complexitythreshold);
 
             // Create the evolution algorithm.
-            AbstractNeatEvolutionAlgorithm<NeatGenome> ea;
-            if ("Random".Equals(_mcsSelectionMethod))
-            {
-                ea = new SteadyStateNeatEvolutionAlgorithm<NeatGenome>(NeatEvolutionAlgorithmParameters,
+            AbstractNeatEvolutionAlgorithm<NeatGenome> ea =
+                new SteadyStateNeatEvolutionAlgorithm<NeatGenome>(NeatEvolutionAlgorithmParameters,
                     speciationStrategy, complexityRegulationStrategy, _batchSize, _populationEvaluationFrequency,
                     RunPhase.Primary, _evolutionDataLogger);
-            }
-            else
-            {
-                ea = new QueueingNeatEvolutionAlgorithm<NeatGenome>(NeatEvolutionAlgorithmParameters,
-                    complexityRegulationStrategy, _batchSize, RunPhase.Primary, _evolutionDataLogger);
-            }
 
             // Create IBlackBox evaluator.
             var mazeNavigationEvaluator = new MazeNavigationMCSEvaluator(MaxDistanceToTarget, MaxTimesteps,
