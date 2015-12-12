@@ -116,6 +116,7 @@
     <Compile Include="MazeNavigation\NoveltyExperiment\MazeNavigationNoveltyEvaluator.cs" />
     <Compile Include="MazeNavigation\NoveltyExperiment\SteadyStateMazeNavigationNoveltyExperiment.cs" />
     <Compile Include="MazeNavigation\RandomExperiment\MazeNavigationRandomEvaluator.cs" />
+    <Compile Include="MazeNavigation\RandomExperiment\QueueingMazeNavigationRandomExperiment.cs" />
     <Compile Include="MazeNavigation\RandomExperiment\SteadyStateMazeNavigationRandomExperiment.cs" />
     <Compile Include="NeatGenomeView.cs">
       <SubType>UserControl</SubType>

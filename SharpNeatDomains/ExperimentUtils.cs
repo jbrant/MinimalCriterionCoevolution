@@ -152,7 +152,9 @@ namespace SharpNeat.Domains
             // Get root of neat genome configuration section
             var nodeList = xmlConfig.GetElementsByTagName("GenomeConfig", "");
 
-            if (nodeList.Count == 1)
+            // Note that if there are multiple defined (such as would be the case with an experiment that uses multiple EAs), 
+            // the first one is used here, which will accurately correspond to the current algorithm under consideration
+            if (nodeList.Count >= 1)
             {
                 // Convert to an XML element
                 var xmlNeatGenomeConfig = nodeList[0] as XmlElement;

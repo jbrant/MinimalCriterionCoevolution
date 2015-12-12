@@ -108,6 +108,8 @@ namespace SharpNeat.EvolutionAlgorithms
 
             // Initialize the genome evalutor
             GenomeEvaluator.Initialize();
+
+            // TODO: Need to do an initial evaluation and best genome update for population here on non-initialized algorithms
         }
 
         /// <summary>

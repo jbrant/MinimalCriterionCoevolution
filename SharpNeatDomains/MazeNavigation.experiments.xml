@@ -166,6 +166,53 @@
     </Config>
   </Experiment>
 
+  <Experiment name="Maze Navigation - Random (Queueing NEAT)">
+    <AssemblyPath>SharpNeatDomains.dll</AssemblyPath>
+    <ClassName>SharpNeat.Domains.MazeNavigation.RandomExperiment.QueueingMazeNavigationRandomExperiment</ClassName>
+    <Config>
+      <SearchAlgorithm>MinimalCriteriaSearch</SearchAlgorithm>
+      <SelectionAlgorithm>Queueing</SelectionAlgorithm>
+      <PopulationSize>250</PopulationSize>
+      <SpecieCount>10</SpecieCount>
+      <InterspeciesMatingProbability>0.001</InterspeciesMatingProbability>
+      <Activation>
+        <Scheme>Acyclic</Scheme>
+      </Activation>
+      <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>
+      <ComplexityThreshold>30</ComplexityThreshold>
+      <OffspringBatchSize>50</OffspringBatchSize>
+      <PopulationEvaluationFrequency>30</PopulationEvaluationFrequency>
+      <MaxEvaluations>1000000</MaxEvaluations>
+      <DecodeGenomesToXml>true</DecodeGenomesToXml>
+      <GenomeConfig>
+        <InitialConnectionProportion>1</InitialConnectionProportion>
+        <WeightMutationProbability>0.2</WeightMutationProbability>
+        <AddConnnectionProbability>0.01</AddConnnectionProbability>
+        <AddNodeProbability>0.002</AddNodeProbability>
+        <DeleteConnectionProbability>0.001</DeleteConnectionProbability>
+        <ConnectionWeightRange>1</ConnectionWeightRange>
+      </GenomeConfig>
+      <NearestNeighbors>15</NearestNeighbors>
+      <MaxTimesteps>400</MaxTimesteps>
+      <MinSuccessDistance>5</MinSuccessDistance>
+      <MaxDistanceToTarget>300</MaxDistanceToTarget>
+      <MazeVariant>HardMaze</MazeVariant>
+      <!--<LoggingConfig>
+        <Type>Evolution</Type>
+        <Destination>File</Destination>
+        <LogFile>C:\\Users\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Novelty Search\Experiments\\EvolutionData.csv</LogFile>
+      </LoggingConfig>
+      <LoggingConfig>
+        <Type>Evaluation</Type>
+        <Destination>File</Destination>
+        <LogFile>C:\\Users\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Novelty Search\Experiments\\EvaluationData.csv</LogFile>
+      </LoggingConfig>-->
+      <Description>
+        This is the maze navigation experiment used in the original novelty search papers (citation needed).
+      </Description>
+    </Config>
+  </Experiment>
+
   <Experiment name="Maze Navigation - MCS (Queueing NEAT)">
     <AssemblyPath>SharpNeatDomains.dll</AssemblyPath>
     <ClassName>SharpNeat.Domains.MazeNavigation.MCSExperiment.QueueingMazeNavigationMCSExperiment</ClassName>
@@ -186,7 +233,7 @@
       <DecodeGenomesToXml>true</DecodeGenomesToXml>
       <GenomeConfig>
         <InitialConnectionProportion>1</InitialConnectionProportion>
-        <WeightMutationProbability>0.1</WeightMutationProbability>
+        <WeightMutationProbability>0.2</WeightMutationProbability>
         <AddConnnectionProbability>0.01</AddConnnectionProbability>
         <AddNodeProbability>0.002</AddNodeProbability>
         <DeleteConnectionProbability>0.001</DeleteConnectionProbability>
@@ -217,6 +264,14 @@
         <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>
         <ComplexityThreshold>30</ComplexityThreshold>
         <DecodeGenomesToXml>true</DecodeGenomesToXml>
+        <GenomeConfig>
+          <InitialConnectionProportion>1</InitialConnectionProportion>
+          <WeightMutationProbability>0.6</WeightMutationProbability>
+          <AddConnnectionProbability>0.1</AddConnnectionProbability>
+          <AddNodeProbability>0.005</AddNodeProbability>
+          <DeleteConnectionProbability>0.001</DeleteConnectionProbability>
+          <ConnectionWeightRange>1</ConnectionWeightRange>
+        </GenomeConfig>
         <InitBehaviorConfig>
           <BehaviorCharacterization>EndPoint</BehaviorCharacterization>
           <MinimalCriteriaConfig>

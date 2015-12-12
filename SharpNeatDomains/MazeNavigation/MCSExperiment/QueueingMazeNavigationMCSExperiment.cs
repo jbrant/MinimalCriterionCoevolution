@@ -27,8 +27,8 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
     {
         private int _batchSize;
         private IBehaviorCharacterizationFactory _behaviorCharacterizationFactory;
-        private int _bridgingMagnitude;
         private int _bridgingApplications;
+        private int _bridgingMagnitude;
         private IDataLogger _evaluationDataLogger;
         private IDataLogger _evolutionDataLogger;
         private InitializationAlgorithm _initializationAlgorithm;
@@ -62,7 +62,8 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 
             // Setup initialization algorithm
             _initializationAlgorithm.SetAlgorithmParameters(
-                xmlConfig.GetElementsByTagName("InitializationAlgorithmConfig", "")[0] as XmlElement);
+                xmlConfig.GetElementsByTagName("InitializationAlgorithmConfig", "")[0] as XmlElement, InputCount,
+                OutputCount);
 
             // Pass in maze experiment specific parameters
             _initializationAlgorithm.SetEnvironmentParameters(MaxDistanceToTarget, MaxTimesteps, MazeVariant,
@@ -117,7 +118,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             ulong initializationEvaluations;
 
             // Instantiate the internal initialization algorithm
-            _initializationAlgorithm.InitializeAlgorithm(ParallelOptions, genomeFactory, genomeList,
+            _initializationAlgorithm.InitializeAlgorithm(ParallelOptions, genomeList,
                 CreateGenomeDecoder(), NeatEvolutionAlgorithmParameters);
 
             // Run the algorithm until a viable genome is found
@@ -173,6 +174,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             private IBehaviorCharacterizationFactory _behaviorCharacterizationFactory;
             private string _complexityRegulationStrategyDefinition;
             private int? _complexityThreshold;
+            private IGenomeFactory<NeatGenome> _genomeFactory;
             private AbstractNeatEvolutionAlgorithm<NeatGenome> _initializationEa;
             private int? _maxDistanceToTarget;
             private int _maxGenerationArchiveAddition;
@@ -204,8 +206,15 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             /// </summary>
             /// <param name="xmlConfig">The XML configuration for the initialization algorithm.</param>
             /// <returns>The constructed initialization algorithm.</returns>
-            public void SetAlgorithmParameters(XmlElement xmlConfig)
+            public void SetAlgorithmParameters(XmlElement xmlConfig, int inputCount, int outputCount)
             {
+                NeatGenomeParameters neatGenomeParameters = ExperimentUtils.ReadNeatGenomeParameters(xmlConfig);
+                // Read NEAT parameters
+
+                // Create genome factory specifically for the initialization algorithm 
+                // (this is primarily because the initialization algorithm will quite likely have different NEAT parameters)
+                _genomeFactory = new NeatGenomeFactory(inputCount, outputCount, neatGenomeParameters);
+
                 // Get complexity constraint parameters
                 _complexityRegulationStrategyDefinition = XmlUtils.TryGetValueAsString(xmlConfig,
                     "ComplexityRegulationStrategy");
@@ -293,9 +302,8 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             /// <param name="genomeList">The initial population of genomes.</param>
             /// <param name="genomeDecoder">The decoder to translate genomes into phenotypes.</param>
             /// <param name="neatParameters">The NEAT EA parameters.</param>
-            public void InitializeAlgorithm(ParallelOptions parallelOptions, IGenomeFactory<NeatGenome> genomeFactory,
-                List<NeatGenome> genomeList, IGenomeDecoder<NeatGenome, IBlackBox> genomeDecoder,
-                NeatEvolutionAlgorithmParameters neatParameters)
+            public void InitializeAlgorithm(ParallelOptions parallelOptions, List<NeatGenome> genomeList,
+                IGenomeDecoder<NeatGenome, IBlackBox> genomeDecoder, NeatEvolutionAlgorithmParameters neatParameters)
             {
                 // Create distance metric. Mismatched genes have a fixed distance of 10; for matched genes the distance is their weigth difference.
                 IDistanceMetric distanceMetric = new ManhattanDistanceMetric(1.0, 0.0, 10.0);
@@ -335,7 +343,8 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                         _nearestNeighbors, archive, _evaluationDataLogger, _serializeGenomeToXml);
 
                 // Initialize the evolution algorithm.
-                _initializationEa.Initialize(fitnessEvaluator, genomeFactory, genomeList, null, _maxEvaluations, archive);
+                _initializationEa.Initialize(fitnessEvaluator, _genomeFactory, genomeList, null, _maxEvaluations,
+                    archive);
             }
 
             /// <summary>
