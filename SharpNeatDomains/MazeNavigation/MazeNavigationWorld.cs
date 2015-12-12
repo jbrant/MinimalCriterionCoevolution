@@ -44,6 +44,11 @@ namespace SharpNeat.Domains.MazeNavigation
         private readonly MazeNavigator _navigator;
 
         /// <summary>
+        ///     The number of times within a given trial to apply bridging "help".
+        /// </summary>
+        private readonly int _numBridgingApplications;
+
+        /// <summary>
         ///     List of walls in the environment.
         /// </summary>
         //private readonly List<DoubleLine> _walls;
@@ -58,16 +63,18 @@ namespace SharpNeat.Domains.MazeNavigation
         /// <param name="maxTimeSteps">The maximum number of time steps to run a given trial.</param>
         /// <param name="behaviorCharacterization">The behavior characterization for a navigator.</param>
         /// <param name="bridgingMagnitude">The magnitude of the navigator heading adjustment upon collision (i.e. bridging).</param>
+        /// <param name="numBridgingApplications">The number of times to apply bridging during a given trial.</param>
         public MazeNavigationWorld(MazeVariant mazeVariant = MazeVariant.MediumMaze, int? minSuccessDistance = 5,
             int? maxDistanceToTarget = 300,
             int? maxTimeSteps = 400, IBehaviorCharacterization behaviorCharacterization = null,
-            int bridgingMagnitude = 0)
+            int bridgingMagnitude = 0,
+            int numBridgingApplications = 0)
         {
             _minSuccessDistance = minSuccessDistance;
             _maxDistanceToTarget = maxDistanceToTarget;
             _maxTimesteps = maxTimeSteps;
             _behaviorCharacterization = behaviorCharacterization;
-            int bridgingMagnitude1 = bridgingMagnitude;
+            _numBridgingApplications = numBridgingApplications;
 
             switch (mazeVariant)
             {
@@ -83,17 +90,17 @@ namespace SharpNeat.Domains.MazeNavigation
                     _walls = new List<Wall>(11)
                     {
                         // TODO: Set appropriate adjustment coefficients for the walls
-                        new Wall(new DoubleLine(293, 7, 289, 130), 1, 1, bridgingMagnitude1),
-                        new Wall(new DoubleLine(289, 130, 6, 134), 1, 1, bridgingMagnitude1),
-                        new Wall(new DoubleLine(6, 134, 8, 5), 1, 1, bridgingMagnitude1),
-                        new Wall(new DoubleLine(8, 5, 292, 7), 1, 1, bridgingMagnitude1),
-                        new Wall(new DoubleLine(241, 130, 58, 65), 1, 1, bridgingMagnitude1),
-                        new Wall(new DoubleLine(114, 7, 73, 42), 1, 1, bridgingMagnitude1),
-                        new Wall(new DoubleLine(130, 91, 107, 46), 1, 1, bridgingMagnitude1),
-                        new Wall(new DoubleLine(196, 8, 139, 51), 1, 1, bridgingMagnitude1),
-                        new Wall(new DoubleLine(219, 122, 182, 63), 1, 1, bridgingMagnitude1),
-                        new Wall(new DoubleLine(267, 9, 214, 63), 1, 1, bridgingMagnitude1),
-                        new Wall(new DoubleLine(271, 129, 237, 88), 1, 1, bridgingMagnitude1)
+                        new Wall(new DoubleLine(293, 7, 289, 130), 1, 1, bridgingMagnitude),
+                        new Wall(new DoubleLine(289, 130, 6, 134), 1, 1, bridgingMagnitude),
+                        new Wall(new DoubleLine(6, 134, 8, 5), 1, 1, bridgingMagnitude),
+                        new Wall(new DoubleLine(8, 5, 292, 7), 1, 1, bridgingMagnitude),
+                        new Wall(new DoubleLine(241, 130, 58, 65), 1, 1, bridgingMagnitude),
+                        new Wall(new DoubleLine(114, 7, 73, 42), 1, 1, bridgingMagnitude),
+                        new Wall(new DoubleLine(130, 91, 107, 46), 1, 1, bridgingMagnitude),
+                        new Wall(new DoubleLine(196, 8, 139, 51), 1, 1, bridgingMagnitude),
+                        new Wall(new DoubleLine(219, 122, 182, 63), 1, 1, bridgingMagnitude),
+                        new Wall(new DoubleLine(267, 9, 214, 63), 1, 1, bridgingMagnitude),
+                        new Wall(new DoubleLine(271, 129, 237, 88), 1, 1, bridgingMagnitude)
                     };
                     break;
 
@@ -109,21 +116,21 @@ namespace SharpNeat.Domains.MazeNavigation
                     _walls = new List<Wall>(13)
                     {
                         // Boundary walls
-                        new Wall(new DoubleLine(7, 202, 195, 198), -1, -1, bridgingMagnitude1),
-                        new Wall(new DoubleLine(41, 5, 3, 8), -1, -1, bridgingMagnitude1),
-                        new Wall(new DoubleLine(3, 8, 4, 49), 1, 1, bridgingMagnitude1),
-                        new Wall(new DoubleLine(4, 49, 7, 202), 1, 1, bridgingMagnitude1),
-                        new Wall(new DoubleLine(195, 198, 186, 8), -1, -1, bridgingMagnitude1),
-                        new Wall(new DoubleLine(186, 8, 39, 5), -1, -1, bridgingMagnitude1),
+                        new Wall(new DoubleLine(7, 202, 195, 198), -1, -1, bridgingMagnitude),
+                        new Wall(new DoubleLine(41, 5, 3, 8), -1, -1, bridgingMagnitude),
+                        new Wall(new DoubleLine(3, 8, 4, 49), 1, 1, bridgingMagnitude),
+                        new Wall(new DoubleLine(4, 49, 7, 202), 1, 1, bridgingMagnitude),
+                        new Wall(new DoubleLine(195, 198, 186, 8), -1, -1, bridgingMagnitude),
+                        new Wall(new DoubleLine(186, 8, 39, 5), -1, -1, bridgingMagnitude),
 
                         // Obstructing walls
-                        new Wall(new DoubleLine(4, 49, 57, 53), 1, 1, bridgingMagnitude1),
-                        new Wall(new DoubleLine(56, 54, 56, 157), -1, 1, bridgingMagnitude1),
-                        new Wall(new DoubleLine(57, 106, 158, 162), 1, 1, bridgingMagnitude1),
-                        new Wall(new DoubleLine(77, 201, 108, 164), -1, -1, bridgingMagnitude1),
-                        new Wall(new DoubleLine(6, 80, 33, 121), -1, 1, bridgingMagnitude1),
-                        new Wall(new DoubleLine(192, 146, 87, 91), -1, -1, bridgingMagnitude1),
-                        new Wall(new DoubleLine(56, 55, 133, 30), 1, 1, bridgingMagnitude1)
+                        new Wall(new DoubleLine(4, 49, 57, 53), 1, 1, bridgingMagnitude),
+                        new Wall(new DoubleLine(56, 54, 56, 157), -1, 1, bridgingMagnitude),
+                        new Wall(new DoubleLine(57, 106, 158, 162), 1, 1, bridgingMagnitude),
+                        new Wall(new DoubleLine(77, 201, 108, 164), -1, -1, bridgingMagnitude),
+                        new Wall(new DoubleLine(6, 80, 33, 121), -1, 1, bridgingMagnitude),
+                        new Wall(new DoubleLine(192, 146, 87, 91), -1, -1, bridgingMagnitude),
+                        new Wall(new DoubleLine(56, 55, 133, 30), 1, 1, bridgingMagnitude)
                     };
                     break;
 
@@ -139,19 +146,19 @@ namespace SharpNeat.Domains.MazeNavigation
                     _walls = new List<Wall>(10)
                     {
                         // TODO: Set appropriate adjustment coefficients for the walls
-                        new Wall(new DoubleLine(293, 7, 289, 130), 1, 1, bridgingMagnitude1),
-                        new Wall(new DoubleLine(289, 130, 6, 134), 1, 1, bridgingMagnitude1),
+                        new Wall(new DoubleLine(293, 7, 289, 130), 1, 1, bridgingMagnitude),
+                        new Wall(new DoubleLine(289, 130, 6, 134), 1, 1, bridgingMagnitude),
 
                         // Left wall is missing here
 
-                        new Wall(new DoubleLine(8, 5, 292, 7), 1, 1, bridgingMagnitude1),
-                        new Wall(new DoubleLine(241, 130, 58, 65), 1, 1, bridgingMagnitude1),
-                        new Wall(new DoubleLine(114, 7, 73, 42), 1, 1, bridgingMagnitude1),
-                        new Wall(new DoubleLine(130, 91, 107, 46), 1, 1, bridgingMagnitude1),
-                        new Wall(new DoubleLine(196, 8, 139, 51), 1, 1, bridgingMagnitude1),
-                        new Wall(new DoubleLine(219, 122, 182, 63), 1, 1, bridgingMagnitude1),
-                        new Wall(new DoubleLine(267, 9, 214, 63), 1, 1, bridgingMagnitude1),
-                        new Wall(new DoubleLine(271, 129, 237, 88), 1, 1, bridgingMagnitude1)
+                        new Wall(new DoubleLine(8, 5, 292, 7), 1, 1, bridgingMagnitude),
+                        new Wall(new DoubleLine(241, 130, 58, 65), 1, 1, bridgingMagnitude),
+                        new Wall(new DoubleLine(114, 7, 73, 42), 1, 1, bridgingMagnitude),
+                        new Wall(new DoubleLine(130, 91, 107, 46), 1, 1, bridgingMagnitude),
+                        new Wall(new DoubleLine(196, 8, 139, 51), 1, 1, bridgingMagnitude),
+                        new Wall(new DoubleLine(219, 122, 182, 63), 1, 1, bridgingMagnitude),
+                        new Wall(new DoubleLine(267, 9, 214, 63), 1, 1, bridgingMagnitude),
+                        new Wall(new DoubleLine(271, 129, 237, 88), 1, 1, bridgingMagnitude)
                     };
                     break;
 
@@ -187,10 +194,14 @@ namespace SharpNeat.Domains.MazeNavigation
         ///     outputting the angular velocity and speed differentials based on those inputs.
         /// </param>
         /// <param name="searchType">The type of evaluation to perform (i.e. fitness, novelty, etc.).</param>
+        /// <param name="goalReached">Indicates whether the goal has been reached.</param>
         /// <returns>The trial results (which will either be a fitness value or a behavior).</returns>
         public TTrialInfo RunTrial(IBlackBox agent, SearchType searchType, out bool goalReached)
         {
             ITrialInfo trialInfo;
+
+            // Initialize the starting number of bridging applications
+            int curBridgingApplications = 0;
 
             // Default the goal reached parameter to false
             goalReached = false;
@@ -206,7 +217,7 @@ namespace SharpNeat.Domains.MazeNavigation
                 // Run for the given number of timesteps or until the goal is reached
                 for (var curTimestep = 0; curTimestep < _maxTimesteps; curTimestep++)
                 {
-                    RunTimestep(agent);
+                    RunTimestep(agent, false, ref curBridgingApplications);
 
                     // If the goal has been reached, break out of the loop
                     if (GetDistanceToTarget() < _minSuccessDistance)
@@ -226,7 +237,7 @@ namespace SharpNeat.Domains.MazeNavigation
                 // Run for the given number of timesteps or until the goal is reached
                 for (var curTimestep = 0; curTimestep < _maxTimesteps; curTimestep++)
                 {
-                    RunTimestep(agent);
+                    RunTimestep(agent, (curBridgingApplications < _numBridgingApplications), ref curBridgingApplications);
 
                     _behaviorCharacterization.UpdateBehaviors(new List<double>
                     {
@@ -263,7 +274,12 @@ namespace SharpNeat.Domains.MazeNavigation
         ///     The black box (neural network) that takes in the navigator sensors controls the navigator by
         ///     outputting the angular velocity and speed differentials based on those inputs.
         /// </param>
-        private void RunTimestep(IBlackBox agent)
+        /// <param name="isBridgingTimestep">Indicates whether bridging should be applied in the current timestep.</param>
+        /// <param name="curBridgingApplications">
+        ///     The current number of times bridging has been applied.  This value
+        ///     will be incremented and the updated value used by the calling routine.
+        /// </param>
+        private void RunTimestep(IBlackBox agent, bool isBridgingTimestep, ref int curBridgingApplications)
         {
             // Reset the ANN input array
             agent.InputSignalArray.Reset();
@@ -284,7 +300,7 @@ namespace SharpNeat.Domains.MazeNavigation
             _navigator.TranslateAndApplyAnnOutputs(agent.OutputSignalArray[0], agent.OutputSignalArray[1]);
 
             // Move the navigator to the new position (i.e. execute a single timestep)
-            _navigator.Move(_walls, _goalLocation);
+            _navigator.Move(_walls, _goalLocation, isBridgingTimestep, ref curBridgingApplications);
         }
 
         /// <summary>

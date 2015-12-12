@@ -180,15 +180,15 @@
       </Activation>
       <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>
       <ComplexityThreshold>30</ComplexityThreshold>
-      <OffspringBatchSize>500</OffspringBatchSize>
+      <OffspringBatchSize>50</OffspringBatchSize>
       <PopulationEvaluationFrequency>30</PopulationEvaluationFrequency>
       <MaxEvaluations>1000000</MaxEvaluations>
       <DecodeGenomesToXml>true</DecodeGenomesToXml>
       <GenomeConfig>
         <InitialConnectionProportion>1</InitialConnectionProportion>
-        <WeightMutationProbability>0.6</WeightMutationProbability>
-        <AddConnnectionProbability>0.1</AddConnnectionProbability>
-        <AddNodeProbability>0.005</AddNodeProbability>
+        <WeightMutationProbability>0.1</WeightMutationProbability>
+        <AddConnnectionProbability>0.01</AddConnnectionProbability>
+        <AddNodeProbability>0.002</AddNodeProbability>
         <DeleteConnectionProbability>0.001</DeleteConnectionProbability>
         <ConnectionWeightRange>1</ConnectionWeightRange>
       </GenomeConfig>
@@ -199,7 +199,7 @@
           <XStart>36</XStart>
           <YStart>184</YStart>
           <!--<MinimumMileage>16000</MinimumMileage>-->
-          <MinimumRequiredDistance>25</MinimumRequiredDistance>
+          <MinimumRequiredDistance>125</MinimumRequiredDistance>
         </MinimalCriteriaConfig>
       </BehaviorConfig>
       <NearestNeighbors>15</NearestNeighbors>
@@ -208,6 +208,7 @@
       <MaxDistanceToTarget>300</MaxDistanceToTarget>
       <MazeVariant>HardMaze</MazeVariant>
       <BridgingMagnitude>5</BridgingMagnitude>
+      <BridgingApplications>20</BridgingApplications>
       <InitializationAlgorithmConfig>
         <SearchAlgorithm>NoveltySearch</SearchAlgorithm>
         <SelectionAlgorithm>SteadyState</SelectionAlgorithm>
@@ -222,7 +223,7 @@
             <MinimalCriteriaConstraint>EuclideanDistance</MinimalCriteriaConstraint>
             <XStart>36</XStart>
             <YStart>184</YStart>
-            <MinimumRequiredDistance>25</MinimumRequiredDistance>
+            <MinimumRequiredDistance>125</MinimumRequiredDistance>
           </MinimalCriteriaConfig>
         </InitBehaviorConfig>
         <NearestNeighbors>15</NearestNeighbors>

@@ -46,11 +46,13 @@ namespace SharpNeat.Domains.MazeNavigation.Components.Tests
             //MazeNavigator navigator = new MazeNavigator(new DoublePoint(30, 22));
             MazeNavigator navigator = new MazeNavigator(new DoublePoint(14.8669777, 190.702774));
 
+            int tempBridgingApplications = 0;
+
             navigator.Speed = -3;
             navigator.AngularVelocity = -3;
             navigator.Heading = 325.075531;
 
-            navigator.Move(walls, goalLocation);
+            navigator.Move(walls, goalLocation, false, ref tempBridgingApplications);
 
             Console.WriteLine(DoublePoint.CalculateEuclideanDistance(navigator.Location, goalLocation));
         }

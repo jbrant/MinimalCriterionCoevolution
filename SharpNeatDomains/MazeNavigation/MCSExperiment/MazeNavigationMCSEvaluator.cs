@@ -18,12 +18,13 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         private readonly int? _maxTimesteps;
         private readonly MazeVariant _mazeVariant;
         private readonly int? _minSuccessDistance;
+        private readonly int _numBridgingApplications;
         private readonly object evaluationLock = new object();
         private bool _stopConditionSatisfied;
 
         internal MazeNavigationMCSEvaluator(int? maxDistanceToTarget, int? maxTimesteps, MazeVariant mazeVariant,
             int? minSuccessDistance, IBehaviorCharacterizationFactory behaviorCharacterizationFactory,
-            ulong initializationEvaluations = 0, int bridgingMagnitude = 0)
+            ulong initializationEvaluations = 0, int bridgingMagnitude = 0, int numBridgingApplications = 0)
         {
             _maxDistanceToTarget = maxDistanceToTarget;
             _maxTimesteps = maxTimesteps;
@@ -32,6 +33,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             _behaviorCharacterizationFactory = behaviorCharacterizationFactory;
             EvaluationCount = initializationEvaluations;
             _bridgingMagnitude = bridgingMagnitude;
+            _numBridgingApplications = numBridgingApplications;
         }
 
         /// <summary>
@@ -70,7 +72,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             // Instantiate the maze world
             MazeNavigationWorld<BehaviorInfo> world = new MazeNavigationWorld<BehaviorInfo>(_mazeVariant,
                 _minSuccessDistance, _maxDistanceToTarget, _maxTimesteps, behaviorCharacterization,
-                isBridgingEvaluation ? _bridgingMagnitude : 0);
+                isBridgingEvaluation ? _bridgingMagnitude : 0, _numBridgingApplications);
 
             // Run a single trial
             BehaviorInfo trialInfo = world.RunTrial(phenome, SearchType.MinimalCriteriaSearch,

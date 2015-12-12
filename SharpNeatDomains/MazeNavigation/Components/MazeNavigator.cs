@@ -100,7 +100,14 @@ namespace SharpNeat.Domains.MazeNavigation.Components
         ///     moves is also dictated by the presence of walls that might be obstructing its path.
         /// </summary>
         /// <param name="walls">The list of walls in the environment.</param>
-        public void Move(List<Wall> walls, DoublePoint targetLocation)
+        /// <param name="targetLocation">The location of the target (goal).</param>
+        /// <param name="applyBridging">Whether or not to apply bridging "help".</param>
+        /// <param name="curBridgingApplications">
+        ///     The current number of times bridging been applied.  This value
+        ///     will be incremented and the updated value used by the calling routine.
+        /// </param>
+        public void Move(List<Wall> walls, DoublePoint targetLocation, bool applyBridging,
+            ref int curBridgingApplications)
         {
             // Compute angular velocity components
             var angularVelocityX = Math.Cos(MathUtils.toRadians(Heading))*Speed;
@@ -135,11 +142,13 @@ namespace SharpNeat.Domains.MazeNavigation.Components
             {
                 Location = new DoublePoint(newLocation.X, newLocation.Y);
             }
-            // Otherwise, if there was a collision, calculate an adjusted heading based on the properties 
-            // of the wall with which the navigator collided and the side of that wall that it hit
-            else
+            // Otherwise, if there was a collision and the bridging indicator is set, calculate an 
+            // adjusted heading based on the properties of the wall with which the navigator collided 
+            // and the side of that wall that it hit
+            else if (applyBridging)
             {
                 Heading = collidingWall.CalculateAdjustedHeading(Heading, Location);
+                curBridgingApplications++;
             }
 
             // Update range finders and radar array
