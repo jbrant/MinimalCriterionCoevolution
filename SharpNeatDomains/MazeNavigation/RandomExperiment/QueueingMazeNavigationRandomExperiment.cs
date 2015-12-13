@@ -56,10 +56,11 @@ namespace SharpNeat.Domains.MazeNavigation.RandomExperiment
         /// </summary>
         /// <param name="genomeFactory">The genome factory from which to generate new genomes</param>
         /// <param name="genomeList">The current genome population</param>
+        /// <param name="startingEvaluations">The number of evaluations that have been executed prior to the current run.</param>
         /// <returns>Constructed evolutionary algorithm</returns>
         public override INeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(
             IGenomeFactory<NeatGenome> genomeFactory,
-            List<NeatGenome> genomeList)
+            List<NeatGenome> genomeList, ulong startingEvaluations)
         {
             // Create complexity regulation strategy.
             var complexityRegulationStrategy =

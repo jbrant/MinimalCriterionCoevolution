@@ -19,8 +19,8 @@
 
 #region
 
+using System;
 using System.Collections.Generic;
-using System.Data.Entity;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Xml;
@@ -131,7 +131,7 @@ namespace SharpNeat.Domains.Xor
 
         public void Initialize(ExperimentDictionary databaseContext)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -209,9 +209,21 @@ namespace SharpNeat.Domains.Xor
         public INeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(IGenomeFactory<NeatGenome> genomeFactory,
             List<NeatGenome> genomeList)
         {
+            return CreateEvolutionAlgorithm(genomeFactory, genomeList, 0);
+        }
+
+        /// <summary>
+        ///     Create and return a NeatEvolutionAlgorithm object ready for running the NEAT algorithm/search. Various sub-parts
+        ///     of the algorithm are also constructed and connected up.
+        ///     This overload accepts a pre-built genome population, their associated/parent genome factory, and the number of
+        ///     evaluations from previous runs.
+        /// </summary>
+        public INeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(IGenomeFactory<NeatGenome> genomeFactory,
+            List<NeatGenome> genomeList, ulong startingEvaluations)
+        {
             FileDataLogger logger = null;
 
-            // Create distance metric. Mismatched genes have a fixed distance of 10; for matched genes the distance is their weigth difference.
+            // Create distance metric. Mismatched genes have a fixed distance of 10; for matched genes the distance is their weight difference.
             IDistanceMetric distanceMetric = new ManhattanDistanceMetric(1.0, 0.0, 10.0);
             ISpeciationStrategy<NeatGenome> speciationStrategy =
                 new ParallelKMeansClusteringStrategy<NeatGenome>(distanceMetric, _parallelOptions);

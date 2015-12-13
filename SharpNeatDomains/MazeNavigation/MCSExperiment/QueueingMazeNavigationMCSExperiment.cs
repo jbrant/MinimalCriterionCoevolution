@@ -110,16 +110,17 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         /// </summary>
         /// <param name="genomeFactory">The genome factory from which to generate new genomes</param>
         /// <param name="genomeList">The current genome population</param>
+        /// <param name="startingEvaluations">The number of evaluations that have been executed prior to the current run.</param>
         /// <returns>Constructed evolutionary algorithm</returns>
         public override INeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(
             IGenomeFactory<NeatGenome> genomeFactory,
-            List<NeatGenome> genomeList)
+            List<NeatGenome> genomeList, ulong startingEvaluations)
         {
             ulong initializationEvaluations;
 
             // Instantiate the internal initialization algorithm
             _initializationAlgorithm.InitializeAlgorithm(ParallelOptions, genomeList,
-                CreateGenomeDecoder(), NeatEvolutionAlgorithmParameters);
+                CreateGenomeDecoder(), NeatEvolutionAlgorithmParameters, startingEvaluations);
 
             // Run the algorithm until a viable genome is found
             NeatGenome genomeSeed = _initializationAlgorithm.EvolveViableGenome(out initializationEvaluations);
@@ -298,12 +299,16 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             ///     Configures and instantiates the initialization evolutionary algorithm.
             /// </summary>
             /// <param name="parallelOptions">Synchronous/Asynchronous execution settings.</param>
-            /// <param name="genomeFactory">The factory used to generate genomes.</param>
             /// <param name="genomeList">The initial population of genomes.</param>
             /// <param name="genomeDecoder">The decoder to translate genomes into phenotypes.</param>
             /// <param name="neatParameters">The NEAT EA parameters.</param>
+            /// <param name="startingEvaluations">
+            ///     The number of evaluations that preceeded this from which this process will pick up
+            ///     (this is used in the case where we're restarting a run because it failed to find a solution in the allotted time).
+            /// </param>
             public void InitializeAlgorithm(ParallelOptions parallelOptions, List<NeatGenome> genomeList,
-                IGenomeDecoder<NeatGenome, IBlackBox> genomeDecoder, NeatEvolutionAlgorithmParameters neatParameters)
+                IGenomeDecoder<NeatGenome, IBlackBox> genomeDecoder, NeatEvolutionAlgorithmParameters neatParameters,
+                ulong startingEvaluations)
             {
                 // Create distance metric. Mismatched genes have a fixed distance of 10; for matched genes the distance is their weigth difference.
                 IDistanceMetric distanceMetric = new ManhattanDistanceMetric(1.0, 0.0, 10.0);
@@ -324,7 +329,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                 MazeNavigationMCSInitializationEvaluator mazeNavigationEvaluator =
                     new MazeNavigationMCSInitializationEvaluator(_maxDistanceToTarget, _maxTimesteps,
                         _mazeVariant,
-                        _minSuccessDistance, _behaviorCharacterizationFactory);
+                        _minSuccessDistance, _behaviorCharacterizationFactory, startingEvaluations);
 
                 // Create a novelty archive.
                 AbstractNoveltyArchive<NeatGenome> archive =

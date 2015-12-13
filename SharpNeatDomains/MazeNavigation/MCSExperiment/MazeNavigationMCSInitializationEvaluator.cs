@@ -20,14 +20,15 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         private readonly object evaluationLock = new object();
 
         internal MazeNavigationMCSInitializationEvaluator(int? maxDistanceToTarget, int? maxTimesteps,
-            MazeVariant mazeVariant,
-            int? minSuccessDistance, IBehaviorCharacterizationFactory behaviorCharacterizationFactory)
+            MazeVariant mazeVariant, int? minSuccessDistance,
+            IBehaviorCharacterizationFactory behaviorCharacterizationFactory, ulong startingEvaluations)
         {
             _maxDistanceToTarget = maxDistanceToTarget;
             _maxTimesteps = maxTimesteps;
             _mazeVariant = mazeVariant;
             _minSuccessDistance = minSuccessDistance;
             _behaviorCharacterizationFactory = behaviorCharacterizationFactory;
+            EvaluationCount = startingEvaluations;
         }
 
         /// <summary>

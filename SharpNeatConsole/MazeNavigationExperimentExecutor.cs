@@ -192,18 +192,27 @@ namespace SharpNeatConsole
 
                 _executionLogger.Info(string.Format("Initialized experiment {0}.", experiment.GetType()));
 
-                // Open and load population XML file.
-                using (XmlReader xr = XmlReader.Create(seedPopulationFiles[runIdx]))
+                // This will hold the number of evaluations executed for each "attempt" of the EA within the current run
+                ulong curEvaluations = 0;
+
+                do
                 {
-                    _genomeList = experiment.LoadPopulation(xr);
-                }
-                _genomeFactory = _genomeList[0].GenomeFactory;
-                _executionLogger.Info(string.Format("Loaded [{0}] genomes as initial population.", _genomeList.Count));
+                    // Open and load population XML file.
+                    using (XmlReader xr = XmlReader.Create(seedPopulationFiles[runIdx]))
+                    {
+                        _genomeList = experiment.LoadPopulation(xr);
+                    }
+                    _genomeFactory = _genomeList[0].GenomeFactory;
+                    _executionLogger.Info(string.Format("Loaded [{0}] genomes as initial population.", _genomeList.Count));
 
-                _executionLogger.Info("Kicking off Experiment initialization/execution");
+                    _executionLogger.Info("Kicking off Experiment initialization/execution");
+                    
+                    // Kick off the experiment run
+                    RunExperiment(experimentName, experiment, numRuns, runIdx, curEvaluations);
 
-                // Kick off the experiment run
-                RunExperiment(experimentName, experiment, numRuns, runIdx);
+                    // Increment the evaluations
+                    curEvaluations += _ea.CurrentEvaluations;
+                } while (_ea.StopConditionSatisfied == false);
 
                 // Close the data loggers
                 evolutionDataLogger.Close();
@@ -241,18 +250,27 @@ namespace SharpNeatConsole
 
                 _executionLogger.Error(string.Format("Initialized experiment {0}.", experiment.GetType()));
 
-                // Open and load population XML file.
-                using (XmlReader xr = XmlReader.Create(seedPopulationFiles[runIdx]))
+                // This will hold the number of evaluations executed for each "attempt" of the EA within the current run
+                ulong curEvaluations = 0;
+
+                do
                 {
-                    _genomeList = experiment.LoadPopulation(xr);
-                }
-                _genomeFactory = _genomeList[0].GenomeFactory;
-                _executionLogger.Info(string.Format("Loaded [{0}] genomes as initial population.", _genomeList.Count));
+                    // Open and load population XML file.
+                    using (XmlReader xr = XmlReader.Create(seedPopulationFiles[runIdx]))
+                    {
+                        _genomeList = experiment.LoadPopulation(xr);
+                    }
+                    _genomeFactory = _genomeList[0].GenomeFactory;
+                    _executionLogger.Info(string.Format("Loaded [{0}] genomes as initial population.", _genomeList.Count));
 
-                _executionLogger.Info("Kicking off Experiment initialization/execution");
+                    _executionLogger.Info("Kicking off Experiment initialization/execution");                    
+                    
+                    // Kick off the experiment run
+                    RunExperiment(experimentName, experiment, numRuns, runIdx, curEvaluations);
 
-                // Kick off the experiment run
-                RunExperiment(experimentName, experiment, numRuns, runIdx);
+                    // Increment the evaluations
+                    curEvaluations += _ea.CurrentEvaluations;
+                } while (_ea.StopConditionSatisfied == false);
             }
 
             // Dispose of the database context
@@ -260,14 +278,14 @@ namespace SharpNeatConsole
         }
 
         private static void RunExperiment(string experimentName, BaseMazeNavigationExperiment experiment, int numRuns,
-            int runIdx)
+            int runIdx, ulong startingEvaluation)
         {
             // Trap initialization exceptions (which, if applicable, could be due to initialization algorithm not
             // finding a viable seed) and continue to the next run if an exception does occur
             try
             {
                 // Create evolution algorithm and attach update event.
-                _ea = experiment.CreateEvolutionAlgorithm(_genomeFactory, _genomeList);
+                _ea = experiment.CreateEvolutionAlgorithm(_genomeFactory, _genomeList, startingEvaluation);
                 _ea.UpdateEvent += ea_UpdateEvent;
             }
             catch (Exception)

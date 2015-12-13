@@ -1,7 +1,7 @@
 ﻿#region
 
+using System;
 using System.Collections.Generic;
-using System.Data.Entity;
 using System.Threading.Tasks;
 using System.Xml;
 using ExperimentEntities;
@@ -118,7 +118,7 @@ namespace SharpNeat.Domains.ThreeParity
 
         public void Initialize(ExperimentDictionary databaseContext)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -193,9 +193,24 @@ namespace SharpNeat.Domains.ThreeParity
         /// </summary>
         /// <param name="genomeFactory">The genome factory to use for generating offspring during evolution.</param>
         /// <param name="genomeList">The initial list of genomes.</param>
+        /// <param name="startingEvaluations">The number of evaluations that have been executed prior to the current run.</param>
         /// <returns>The NEAT evolution algorithm.</returns>
         public INeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(IGenomeFactory<NeatGenome> genomeFactory,
             List<NeatGenome> genomeList)
+        {
+            return CreateEvolutionAlgorithm(genomeFactory, genomeList, 0);
+        }
+
+        /// <summary>
+        ///     Constructs and returns a NEAT evolution algorithm, using the given genome factory, genome list and starting number
+        ///     of evaluations.
+        /// </summary>
+        /// <param name="genomeFactory">The genome factory to use for generating offspring during evolution.</param>
+        /// <param name="genomeList">The initial list of genomes.</param>
+        /// <param name="startingEvaluations">The number of evaluations that have been executed prior to the current run.</param>
+        /// <returns>The NEAT evolution algorithm.</returns>
+        public INeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(IGenomeFactory<NeatGenome> genomeFactory,
+            List<NeatGenome> genomeList, ulong startingEvaluations)
         {
             FileDataLogger logger = null;
 

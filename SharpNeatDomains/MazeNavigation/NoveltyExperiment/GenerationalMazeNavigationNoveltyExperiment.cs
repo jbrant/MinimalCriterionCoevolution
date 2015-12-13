@@ -52,10 +52,11 @@ namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
         /// </summary>
         /// <param name="genomeFactory">The genome factory from which to generate new genomes</param>
         /// <param name="genomeList">The current genome population</param>
+        /// <param name="startingEvaluations">The number of evaluations that have been executed prior to the current run.</param>
         /// <returns>Constructed evolutionary algorithm</returns>
         public override INeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(
             IGenomeFactory<NeatGenome> genomeFactory,
-            List<NeatGenome> genomeList)
+            List<NeatGenome> genomeList, ulong startingEvaluations)
         {
             // Create distance metric. Mismatched genes have a fixed distance of 10; for matched genes the distance is their weigth difference.
             IDistanceMetric distanceMetric = new ManhattanDistanceMetric(1.0, 0.0, 10.0);

@@ -195,9 +195,9 @@ namespace SharpNeat.Domains.MazeNavigation
 
         /// <summary>
         ///     Create and return a GenerationalNeatEvolutionAlgorithm object ready for running the NEAT algorithm/search. Various
-        ///     sub-parts of
-        ///     the algorithm are also constructed and connected up.  Uses the default population size.
+        ///     sub-parts of the algorithm are also constructed and connected up.  Uses the default population size.
         /// </summary>
+        /// <param name="startingEvaluations">The number of evaluations that have been executed prior to the current run.</param>
         /// <returns>NEAT evolutionary algorithm</returns>
         public INeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm()
         {
@@ -206,8 +206,7 @@ namespace SharpNeat.Domains.MazeNavigation
 
         /// <summary>
         ///     Create and return a GenerationalNeatEvolutionAlgorithm object ready for running the NEAT algorithm/search based on
-        ///     the given
-        ///     population size. Various sub-parts of the algorithm are also constructed and connected up.
+        ///     the given population size. Various sub-parts of the algorithm are also constructed and connected up.
         /// </summary>
         /// <param name="populationSize">The genome population size</param>
         /// <returns>NEAT evoluationary algorithm</returns>
@@ -222,18 +221,6 @@ namespace SharpNeat.Domains.MazeNavigation
             // Create evolution algorithm.
             return CreateEvolutionAlgorithm(genomeFactory, genomeList);
         }
-
-        /// <summary>
-        ///     Create and return a GenerationalNeatEvolutionAlgorithm object ready for running the NEAT algorithm/search based on
-        ///     the given
-        ///     genome factory and genome list.  Various sub-parts of the algorithm are also constructed and connected up.
-        /// </summary>
-        /// <param name="genomeFactory">The genome factory from which to generate new genomes</param>
-        /// <param name="genomeList">The current genome population</param>
-        /// <returns>Constructed evolutionary algorithm</returns>
-        public abstract INeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(
-            IGenomeFactory<NeatGenome> genomeFactory,
-            List<NeatGenome> genomeList);
 
         /// <summary>
         ///     Create a System.Windows.Forms derived object for displaying genomes.
@@ -254,5 +241,33 @@ namespace SharpNeat.Domains.MazeNavigation
             return new MazeNavigationView(new NeatGenomeDecoder(_activationScheme),
                 new MazeNavigationWorld<ITrialInfo>(MazeVariant, MinSuccessDistance, MaxDistanceToTarget, MaxTimesteps));
         }
+
+        /// <summary>
+        ///     Create and return a GenerationalNeatEvolutionAlgorithm object ready for running the NEAT algorithm/search based on
+        ///     the given genome factory and genome list.  Various sub-parts of the algorithm are also constructed and connected
+        ///     up.
+        /// </summary>
+        /// <param name="genomeFactory">The genome factory from which to generate new genomes</param>
+        /// <param name="genomeList">The current genome population</param>
+        /// <returns>Constructed evolutionary algorithm</returns>
+        public INeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(
+            IGenomeFactory<NeatGenome> genomeFactory,
+            List<NeatGenome> genomeList)
+        {
+            return CreateEvolutionAlgorithm(genomeFactory, genomeList, 0);
+        }
+
+        /// <summary>
+        ///     Create and return a GenerationalNeatEvolutionAlgorithm object ready for running the NEAT algorithm/search based on
+        ///     the given genome factory and genome list.  Various sub-parts of the algorithm are also constructed and connected
+        ///     up.
+        /// </summary>
+        /// <param name="genomeFactory">The genome factory from which to generate new genomes</param>
+        /// <param name="genomeList">The current genome population</param>
+        /// <param name="startingEvaluations">The number of evaluations that have been executed prior to the current run.</param>
+        /// <returns>Constructed evolutionary algorithm</returns>
+        public abstract INeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(
+            IGenomeFactory<NeatGenome> genomeFactory,
+            List<NeatGenome> genomeList, ulong startingEvaluations);
     }
 }
