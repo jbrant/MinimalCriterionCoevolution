@@ -95,7 +95,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                 SerializeGenomeToXml);
 
             // Setup initialization algorithm
-            _initializationAlgorithm.SetAlgorithmParameters(experimentDictionary);
+            _initializationAlgorithm.SetAlgorithmParameters(experimentDictionary, InputCount, OutputCount);
 
             // Pass in maze experiment specific parameters
             _initializationAlgorithm.SetEnvironmentParameters(MaxDistanceToTarget, MaxTimesteps, MazeVariant,
@@ -156,7 +156,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 
             // Initialize the evolution algorithm.
             ea.Initialize(fitnessEvaluator, genomeFactory, new List<NeatGenome> {genomeSeed}, DefaultPopulationSize,
-                null, MaxEvaluations);
+                null, MaxEvaluations + startingEvaluations);
 
             // Finished. Return the evolution algorithm
             return ea;
@@ -206,11 +206,13 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             ///     Constructs and initializes the MCS initialization algorithm (novelty search).
             /// </summary>
             /// <param name="xmlConfig">The XML configuration for the initialization algorithm.</param>
+            /// <param name="inputCount">The number of input neurons.</param>
+            /// <param name="outputCount">The number of output neurons.</param>
             /// <returns>The constructed initialization algorithm.</returns>
             public void SetAlgorithmParameters(XmlElement xmlConfig, int inputCount, int outputCount)
             {
-                NeatGenomeParameters neatGenomeParameters = ExperimentUtils.ReadNeatGenomeParameters(xmlConfig);
                 // Read NEAT parameters
+                NeatGenomeParameters neatGenomeParameters = ExperimentUtils.ReadNeatGenomeParameters(xmlConfig);
 
                 // Create genome factory specifically for the initialization algorithm 
                 // (this is primarily because the initialization algorithm will quite likely have different NEAT parameters)
@@ -241,10 +243,21 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             /// <summary>
             ///     Constructs and initializes the MCS initialization algorithm (novelty search) using the database configuration.
             /// </summary>
-            /// <param name="xmlConfig">The XML configuration for the initialization algorithm.</param>
+            /// <param name="experimentDictionary">The reference to the experiment dictionary entity.</param>
+            /// <param name="inputCount">The number of input neurons.</param>
+            /// <param name="outputCount">The number of output neurons.</param>
             /// <returns>The constructed initialization algorithm.</returns>
-            public void SetAlgorithmParameters(ExperimentDictionary experimentDictionary)
+            public void SetAlgorithmParameters(ExperimentDictionary experimentDictionary, int inputCount,
+                int outputCount)
             {
+                // Read NEAT parameters
+                NeatGenomeParameters neatGenomeParameters =
+                    ExperimentUtils.ReadNeatGenomeParameters(experimentDictionary, false);
+
+                // Create genome factory specifically for the initialization algorithm 
+                // (this is primarily because the initialization algorithm will quite likely have different NEAT parameters)
+                _genomeFactory = new NeatGenomeFactory(inputCount, outputCount, neatGenomeParameters);
+
                 // Get complexity constraint parameters
                 _complexityRegulationStrategyDefinition =
                     experimentDictionary.Initialization_ComplexityRegulationStrategy;
@@ -348,7 +361,8 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                         _nearestNeighbors, archive, _evaluationDataLogger, _serializeGenomeToXml);
 
                 // Initialize the evolution algorithm.
-                _initializationEa.Initialize(fitnessEvaluator, _genomeFactory, genomeList, null, _maxEvaluations,
+                _initializationEa.Initialize(fitnessEvaluator, _genomeFactory, genomeList, null,
+                    _maxEvaluations + startingEvaluations,
                     archive);
             }
 

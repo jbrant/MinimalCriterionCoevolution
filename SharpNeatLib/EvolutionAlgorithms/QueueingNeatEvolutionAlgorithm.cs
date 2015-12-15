@@ -130,7 +130,7 @@ namespace SharpNeat.EvolutionAlgorithms
             GenomeEvaluator.Evaluate(childGenomes, CurrentGeneration);
 
             // If no one met the stop condition, evaluate the batch with bridging
-            if (_isBridgingEnabled && StopConditionSatisfied == false)
+            if (_isBridgingEnabled && GenomeEvaluator.StopConditionSatisfied == false)
             {
                 // Store off fitnesses calculated without bridging
                 List<AuxFitnessInfo> fitnessesWithoutBridging = new List<AuxFitnessInfo>(childGenomes.Count);

@@ -140,19 +140,32 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <Property Name="MaxDistanceToTarget" Type="int" Nullable="false" />
           <Property Name="SerializeGenomeToXml" Type="bit" Nullable="false" />
           <Property Name="ExperimentDomainName" Type="varchar" MaxLength="100" Nullable="false" />
-          <Property Name="PopulationSize" Type="int" Nullable="false" />
-          <Property Name="NumSpecies" Type="int" Nullable="false" />
-          <Property Name="ElitismProportion" Type="float" Nullable="false" />
-          <Property Name="SelectionProportion" Type="float" Nullable="false" />
-          <Property Name="AsexualProbability" Type="float" Nullable="false" />
-          <Property Name="CrossoverProbability" Type="float" Nullable="false" />
-          <Property Name="InterspeciesMatingProbability" Type="float" Nullable="false" />
-          <Property Name="MutateConnectionWeightProbability" Type="float" Nullable="false" />
-          <Property Name="MutateAddNeuronProbability" Type="float" Nullable="false" />
-          <Property Name="MutateAddConnectionProbability" Type="float" Nullable="false" />
-          <Property Name="MutateDeleteConnectionProbability" Type="float" Nullable="false" />
-          <Property Name="ConnectionProportion" Type="float" Nullable="false" />
-          <Property Name="ConnectionWeightRange" Type="int" Nullable="false" />
+          <Property Name="Initialization_PopulationSize" Type="int" />
+          <Property Name="Initialization_NumSpecies" Type="int" />
+          <Property Name="Initialization_ElitismProportion" Type="float" />
+          <Property Name="Initialization_SelectionProportion" Type="float" />
+          <Property Name="Initialization_AsexualProbability" Type="float" />
+          <Property Name="Initialization_CrossoverProbability" Type="float" />
+          <Property Name="Initialization_InterspeciesMatingProbability" Type="float" />
+          <Property Name="Initialization_MutateConnectionWeightsProbability" Type="float" />
+          <Property Name="Initialization_MutateAddNeuronProbability" Type="float" />
+          <Property Name="Initialization_MutateAddConnectionProbability" Type="float" />
+          <Property Name="Initialization_MutateDeleteConnectionProbability" Type="float" />
+          <Property Name="Initialization_ConnectionProportion" Type="float" />
+          <Property Name="Initialization_ConnectionWeightRange" Type="int" />
+          <Property Name="Primary_PopulationSize" Type="int" Nullable="false" />
+          <Property Name="Primary_NumSpecies" Type="int" Nullable="false" />
+          <Property Name="Primary_ElitismProportion" Type="float" Nullable="false" />
+          <Property Name="Primary_SelectionProportion" Type="float" Nullable="false" />
+          <Property Name="Primary_AsexualProbability" Type="float" Nullable="false" />
+          <Property Name="Primary_CrossoverProbability" Type="float" Nullable="false" />
+          <Property Name="Primary_InterspeciesMatingProbability" Type="float" Nullable="false" />
+          <Property Name="Primary_MutateConnectionWeightsProbability" Type="float" Nullable="false" />
+          <Property Name="Primary_MutateAddNeuronProbability" Type="float" Nullable="false" />
+          <Property Name="Primary_MutateAddConnectionProbability" Type="float" Nullable="false" />
+          <Property Name="Primary_MutateDeleteConnectionProbability" Type="float" Nullable="false" />
+          <Property Name="Primary_ConnectionProportion" Type="float" Nullable="false" />
+          <Property Name="Primary_ConnectionWeightRange" Type="int" Nullable="false" />
           <Property Name="Initialization_OffspringBatchSize" Type="int" />
           <Property Name="Initialization_PopulationEvaluationFrequency" Type="int" />
           <Property Name="Initialization_ComplexityRegulationStrategy" Type="varchar" MaxLength="100" />
@@ -176,6 +189,7 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <Property Name="Initialization_MCS_MinimalCriteriaStartY" Type="float" />
           <Property Name="Initialization_MCS_MinimalCriteriaName" Type="varchar" MaxLength="200" />
           <Property Name="Initialization_MCS_BridgingMagnitude" Type="int" />
+          <Property Name="Initialization_MCS_BridgingApplications" Type="int" />
           <Property Name="Primary_SearchAlgorithmName" Type="varchar" MaxLength="100" />
           <Property Name="Primary_BehaviorCharacterizationName" Type="varchar" MaxLength="100" />
           <Property Name="Primary_NoveltySearch_NearestNeighbors" Type="int" />
@@ -189,6 +203,7 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <Property Name="Primary_MCS_MinimalCriteriaStartY" Type="float" />
           <Property Name="Primary_MCS_MinimalCriteriaName" Type="varchar" MaxLength="200" />
           <Property Name="Primary_MCS_BridgingMagnitude" Type="int" />
+          <Property Name="Primary_MCS_BridgingApplications" Type="int" />
         </EntityType>
         <Association Name="FK_MCSExperimentEvaluationData_RunPhase">
           <End Role="RunPhase" Type="Self.RunPhase" Multiplicity="1" />
@@ -231,19 +246,32 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
     [ExperimentDictionary_vw].[MaxDistanceToTarget] AS [MaxDistanceToTarget], 
     [ExperimentDictionary_vw].[SerializeGenomeToXml] AS [SerializeGenomeToXml], 
     [ExperimentDictionary_vw].[ExperimentDomainName] AS [ExperimentDomainName], 
-    [ExperimentDictionary_vw].[PopulationSize] AS [PopulationSize], 
-    [ExperimentDictionary_vw].[NumSpecies] AS [NumSpecies], 
-    [ExperimentDictionary_vw].[ElitismProportion] AS [ElitismProportion], 
-    [ExperimentDictionary_vw].[SelectionProportion] AS [SelectionProportion], 
-    [ExperimentDictionary_vw].[AsexualProbability] AS [AsexualProbability], 
-    [ExperimentDictionary_vw].[CrossoverProbability] AS [CrossoverProbability], 
-    [ExperimentDictionary_vw].[InterspeciesMatingProbability] AS [InterspeciesMatingProbability], 
-    [ExperimentDictionary_vw].[MutateConnectionWeightProbability] AS [MutateConnectionWeightProbability], 
-    [ExperimentDictionary_vw].[MutateAddNeuronProbability] AS [MutateAddNeuronProbability], 
-    [ExperimentDictionary_vw].[MutateAddConnectionProbability] AS [MutateAddConnectionProbability], 
-    [ExperimentDictionary_vw].[MutateDeleteConnectionProbability] AS [MutateDeleteConnectionProbability], 
-    [ExperimentDictionary_vw].[ConnectionProportion] AS [ConnectionProportion], 
-    [ExperimentDictionary_vw].[ConnectionWeightRange] AS [ConnectionWeightRange], 
+    [ExperimentDictionary_vw].[Initialization_PopulationSize] AS [Initialization_PopulationSize], 
+    [ExperimentDictionary_vw].[Initialization_NumSpecies] AS [Initialization_NumSpecies], 
+    [ExperimentDictionary_vw].[Initialization_ElitismProportion] AS [Initialization_ElitismProportion], 
+    [ExperimentDictionary_vw].[Initialization_SelectionProportion] AS [Initialization_SelectionProportion], 
+    [ExperimentDictionary_vw].[Initialization_AsexualProbability] AS [Initialization_AsexualProbability], 
+    [ExperimentDictionary_vw].[Initialization_CrossoverProbability] AS [Initialization_CrossoverProbability], 
+    [ExperimentDictionary_vw].[Initialization_InterspeciesMatingProbability] AS [Initialization_InterspeciesMatingProbability], 
+    [ExperimentDictionary_vw].[Initialization_MutateConnectionWeightsProbability] AS [Initialization_MutateConnectionWeightsProbability], 
+    [ExperimentDictionary_vw].[Initialization_MutateAddNeuronProbability] AS [Initialization_MutateAddNeuronProbability], 
+    [ExperimentDictionary_vw].[Initialization_MutateAddConnectionProbability] AS [Initialization_MutateAddConnectionProbability], 
+    [ExperimentDictionary_vw].[Initialization_MutateDeleteConnectionProbability] AS [Initialization_MutateDeleteConnectionProbability], 
+    [ExperimentDictionary_vw].[Initialization_ConnectionProportion] AS [Initialization_ConnectionProportion], 
+    [ExperimentDictionary_vw].[Initialization_ConnectionWeightRange] AS [Initialization_ConnectionWeightRange], 
+    [ExperimentDictionary_vw].[Primary_PopulationSize] AS [Primary_PopulationSize], 
+    [ExperimentDictionary_vw].[Primary_NumSpecies] AS [Primary_NumSpecies], 
+    [ExperimentDictionary_vw].[Primary_ElitismProportion] AS [Primary_ElitismProportion], 
+    [ExperimentDictionary_vw].[Primary_SelectionProportion] AS [Primary_SelectionProportion], 
+    [ExperimentDictionary_vw].[Primary_AsexualProbability] AS [Primary_AsexualProbability], 
+    [ExperimentDictionary_vw].[Primary_CrossoverProbability] AS [Primary_CrossoverProbability], 
+    [ExperimentDictionary_vw].[Primary_InterspeciesMatingProbability] AS [Primary_InterspeciesMatingProbability], 
+    [ExperimentDictionary_vw].[Primary_MutateConnectionWeightsProbability] AS [Primary_MutateConnectionWeightsProbability], 
+    [ExperimentDictionary_vw].[Primary_MutateAddNeuronProbability] AS [Primary_MutateAddNeuronProbability], 
+    [ExperimentDictionary_vw].[Primary_MutateAddConnectionProbability] AS [Primary_MutateAddConnectionProbability], 
+    [ExperimentDictionary_vw].[Primary_MutateDeleteConnectionProbability] AS [Primary_MutateDeleteConnectionProbability], 
+    [ExperimentDictionary_vw].[Primary_ConnectionProportion] AS [Primary_ConnectionProportion], 
+    [ExperimentDictionary_vw].[Primary_ConnectionWeightRange] AS [Primary_ConnectionWeightRange], 
     [ExperimentDictionary_vw].[Initialization_OffspringBatchSize] AS [Initialization_OffspringBatchSize], 
     [ExperimentDictionary_vw].[Initialization_PopulationEvaluationFrequency] AS [Initialization_PopulationEvaluationFrequency], 
     [ExperimentDictionary_vw].[Initialization_ComplexityRegulationStrategy] AS [Initialization_ComplexityRegulationStrategy], 
@@ -267,6 +295,7 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
     [ExperimentDictionary_vw].[Initialization_MCS_MinimalCriteriaStartY] AS [Initialization_MCS_MinimalCriteriaStartY], 
     [ExperimentDictionary_vw].[Initialization_MCS_MinimalCriteriaName] AS [Initialization_MCS_MinimalCriteriaName], 
     [ExperimentDictionary_vw].[Initialization_MCS_BridgingMagnitude] AS [Initialization_MCS_BridgingMagnitude], 
+    [ExperimentDictionary_vw].[Initialization_MCS_BridgingApplications] AS [Initialization_MCS_BridgingApplications], 
     [ExperimentDictionary_vw].[Primary_SearchAlgorithmName] AS [Primary_SearchAlgorithmName], 
     [ExperimentDictionary_vw].[Primary_BehaviorCharacterizationName] AS [Primary_BehaviorCharacterizationName], 
     [ExperimentDictionary_vw].[Primary_NoveltySearch_NearestNeighbors] AS [Primary_NoveltySearch_NearestNeighbors], 
@@ -279,7 +308,8 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
     [ExperimentDictionary_vw].[Primary_MCS_MinimalCriteriaStartX] AS [Primary_MCS_MinimalCriteriaStartX], 
     [ExperimentDictionary_vw].[Primary_MCS_MinimalCriteriaStartY] AS [Primary_MCS_MinimalCriteriaStartY], 
     [ExperimentDictionary_vw].[Primary_MCS_MinimalCriteriaName] AS [Primary_MCS_MinimalCriteriaName], 
-    [ExperimentDictionary_vw].[Primary_MCS_BridgingMagnitude] AS [Primary_MCS_BridgingMagnitude]
+    [ExperimentDictionary_vw].[Primary_MCS_BridgingMagnitude] AS [Primary_MCS_BridgingMagnitude], 
+    [ExperimentDictionary_vw].[Primary_MCS_BridgingApplications] AS [Primary_MCS_BridgingApplications]
     FROM [dbo].[ExperimentDictionary_vw] AS [ExperimentDictionary_vw]</DefiningQuery>
           </EntitySet>
           <AssociationSet Name="FK_MCSExperimentEvaluationData_RunPhase" Association="Self.FK_MCSExperimentEvaluationData_RunPhase">
@@ -339,19 +369,6 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <Property Name="MinSuccessDistance" Type="Int32" Nullable="false" />
           <Property Name="MaxDistanceToTarget" Type="Int32" Nullable="false" />
           <Property Name="ExperimentDomainName" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
-          <Property Name="PopulationSize" Type="Int32" Nullable="false" />
-          <Property Name="NumSpecies" Type="Int32" Nullable="false" />
-          <Property Name="ElitismProportion" Type="Double" Nullable="false" />
-          <Property Name="SelectionProportion" Type="Double" Nullable="false" />
-          <Property Name="AsexualProbability" Type="Double" Nullable="false" />
-          <Property Name="CrossoverProbability" Type="Double" Nullable="false" />
-          <Property Name="InterspeciesMatingProbability" Type="Double" Nullable="false" />
-          <Property Name="MutateConnectionWeightProbability" Type="Double" Nullable="false" />
-          <Property Name="MutateAddNeuronProbability" Type="Double" Nullable="false" />
-          <Property Name="MutateAddConnectionProbability" Type="Double" Nullable="false" />
-          <Property Name="MutateDeleteConnectionProbability" Type="Double" Nullable="false" />
-          <Property Name="ConnectionProportion" Type="Double" Nullable="false" />
-          <Property Name="ConnectionWeightRange" Type="Int32" Nullable="false" />
           <Property Name="Initialization_OffspringBatchSize" Type="Int32" />
           <Property Name="Initialization_PopulationEvaluationFrequency" Type="Int32" />
           <Property Name="Initialization_ComplexityRegulationStrategy" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
@@ -393,6 +410,34 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <Property Name="SerializeGenomeToXml" Type="Boolean" Nullable="false" />
           <Property Name="Initialization_MCS_BridgingMagnitude" Type="Int32" />
           <Property Name="Primary_MCS_BridgingMagnitude" Type="Int32" />
+          <Property Name="Initialization_PopulationSize" Type="Int32" />
+          <Property Name="Initialization_NumSpecies" Type="Int32" />
+          <Property Name="Initialization_ElitismProportion" Type="Double" />
+          <Property Name="Initialization_SelectionProportion" Type="Double" />
+          <Property Name="Initialization_AsexualProbability" Type="Double" />
+          <Property Name="Initialization_CrossoverProbability" Type="Double" />
+          <Property Name="Initialization_InterspeciesMatingProbability" Type="Double" />
+          <Property Name="Initialization_MutateConnectionWeightsProbability" Type="Double" />
+          <Property Name="Initialization_MutateAddNeuronProbability" Type="Double" />
+          <Property Name="Initialization_MutateAddConnectionProbability" Type="Double" />
+          <Property Name="Initialization_MutateDeleteConnectionProbability" Type="Double" />
+          <Property Name="Initialization_ConnectionProportion" Type="Double" />
+          <Property Name="Initialization_ConnectionWeightRange" Type="Int32" />
+          <Property Name="Primary_PopulationSize" Type="Int32" Nullable="false" />
+          <Property Name="Primary_NumSpecies" Type="Int32" Nullable="false" />
+          <Property Name="Primary_ElitismProportion" Type="Double" Nullable="false" />
+          <Property Name="Primary_SelectionProportion" Type="Double" Nullable="false" />
+          <Property Name="Primary_AsexualProbability" Type="Double" Nullable="false" />
+          <Property Name="Primary_CrossoverProbability" Type="Double" Nullable="false" />
+          <Property Name="Primary_InterspeciesMatingProbability" Type="Double" Nullable="false" />
+          <Property Name="Primary_MutateConnectionWeightsProbability" Type="Double" Nullable="false" />
+          <Property Name="Primary_MutateAddNeuronProbability" Type="Double" Nullable="false" />
+          <Property Name="Primary_MutateAddConnectionProbability" Type="Double" Nullable="false" />
+          <Property Name="Primary_MutateDeleteConnectionProbability" Type="Double" Nullable="false" />
+          <Property Name="Primary_ConnectionProportion" Type="Double" Nullable="false" />
+          <Property Name="Primary_ConnectionWeightRange" Type="Int32" Nullable="false" />
+          <Property Name="Initialization_MCS_BridgingApplications" Type="Int32" />
+          <Property Name="Primary_MCS_BridgingApplications" Type="Int32" />
         </EntityType>
         <EntityType Name="NoveltyExperimentOrganismStateData">
           <Key>
@@ -583,6 +628,34 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <EntitySetMapping Name="ExperimentDictionaries">
             <EntityTypeMapping TypeName="ExperimentDataModel.ExperimentDictionary">
               <MappingFragment StoreEntitySet="ExperimentDictionary_vw">
+                <ScalarProperty Name="Primary_MCS_BridgingApplications" ColumnName="Primary_MCS_BridgingApplications" />
+                <ScalarProperty Name="Initialization_MCS_BridgingApplications" ColumnName="Initialization_MCS_BridgingApplications" />
+                <ScalarProperty Name="Primary_ConnectionWeightRange" ColumnName="Primary_ConnectionWeightRange" />
+                <ScalarProperty Name="Primary_ConnectionProportion" ColumnName="Primary_ConnectionProportion" />
+                <ScalarProperty Name="Primary_MutateDeleteConnectionProbability" ColumnName="Primary_MutateDeleteConnectionProbability" />
+                <ScalarProperty Name="Primary_MutateAddConnectionProbability" ColumnName="Primary_MutateAddConnectionProbability" />
+                <ScalarProperty Name="Primary_MutateAddNeuronProbability" ColumnName="Primary_MutateAddNeuronProbability" />
+                <ScalarProperty Name="Primary_MutateConnectionWeightsProbability" ColumnName="Primary_MutateConnectionWeightsProbability" />
+                <ScalarProperty Name="Primary_InterspeciesMatingProbability" ColumnName="Primary_InterspeciesMatingProbability" />
+                <ScalarProperty Name="Primary_CrossoverProbability" ColumnName="Primary_CrossoverProbability" />
+                <ScalarProperty Name="Primary_AsexualProbability" ColumnName="Primary_AsexualProbability" />
+                <ScalarProperty Name="Primary_SelectionProportion" ColumnName="Primary_SelectionProportion" />
+                <ScalarProperty Name="Primary_ElitismProportion" ColumnName="Primary_ElitismProportion" />
+                <ScalarProperty Name="Primary_NumSpecies" ColumnName="Primary_NumSpecies" />
+                <ScalarProperty Name="Primary_PopulationSize" ColumnName="Primary_PopulationSize" />
+                <ScalarProperty Name="Initialization_ConnectionWeightRange" ColumnName="Initialization_ConnectionWeightRange" />
+                <ScalarProperty Name="Initialization_ConnectionProportion" ColumnName="Initialization_ConnectionProportion" />
+                <ScalarProperty Name="Initialization_MutateDeleteConnectionProbability" ColumnName="Initialization_MutateDeleteConnectionProbability" />
+                <ScalarProperty Name="Initialization_MutateAddConnectionProbability" ColumnName="Initialization_MutateAddConnectionProbability" />
+                <ScalarProperty Name="Initialization_MutateAddNeuronProbability" ColumnName="Initialization_MutateAddNeuronProbability" />
+                <ScalarProperty Name="Initialization_MutateConnectionWeightsProbability" ColumnName="Initialization_MutateConnectionWeightsProbability" />
+                <ScalarProperty Name="Initialization_InterspeciesMatingProbability" ColumnName="Initialization_InterspeciesMatingProbability" />
+                <ScalarProperty Name="Initialization_CrossoverProbability" ColumnName="Initialization_CrossoverProbability" />
+                <ScalarProperty Name="Initialization_AsexualProbability" ColumnName="Initialization_AsexualProbability" />
+                <ScalarProperty Name="Initialization_SelectionProportion" ColumnName="Initialization_SelectionProportion" />
+                <ScalarProperty Name="Initialization_ElitismProportion" ColumnName="Initialization_ElitismProportion" />
+                <ScalarProperty Name="Initialization_NumSpecies" ColumnName="Initialization_NumSpecies" />
+                <ScalarProperty Name="Initialization_PopulationSize" ColumnName="Initialization_PopulationSize" />
                 <ScalarProperty Name="Primary_MCS_BridgingMagnitude" ColumnName="Primary_MCS_BridgingMagnitude" />
                 <ScalarProperty Name="Initialization_MCS_BridgingMagnitude" ColumnName="Initialization_MCS_BridgingMagnitude" />
                 <ScalarProperty Name="SerializeGenomeToXml" ColumnName="SerializeGenomeToXml" />
@@ -620,19 +693,6 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
                 <ScalarProperty Name="Initialization_ComplexityRegulationStrategy" ColumnName="Initialization_ComplexityRegulationStrategy" />
                 <ScalarProperty Name="Initialization_PopulationEvaluationFrequency" ColumnName="Initialization_PopulationEvaluationFrequency" />
                 <ScalarProperty Name="Initialization_OffspringBatchSize" ColumnName="Initialization_OffspringBatchSize" />
-                <ScalarProperty Name="ConnectionWeightRange" ColumnName="ConnectionWeightRange" />
-                <ScalarProperty Name="ConnectionProportion" ColumnName="ConnectionProportion" />
-                <ScalarProperty Name="MutateDeleteConnectionProbability" ColumnName="MutateDeleteConnectionProbability" />
-                <ScalarProperty Name="MutateAddConnectionProbability" ColumnName="MutateAddConnectionProbability" />
-                <ScalarProperty Name="MutateAddNeuronProbability" ColumnName="MutateAddNeuronProbability" />
-                <ScalarProperty Name="MutateConnectionWeightProbability" ColumnName="MutateConnectionWeightProbability" />
-                <ScalarProperty Name="InterspeciesMatingProbability" ColumnName="InterspeciesMatingProbability" />
-                <ScalarProperty Name="CrossoverProbability" ColumnName="CrossoverProbability" />
-                <ScalarProperty Name="AsexualProbability" ColumnName="AsexualProbability" />
-                <ScalarProperty Name="SelectionProportion" ColumnName="SelectionProportion" />
-                <ScalarProperty Name="ElitismProportion" ColumnName="ElitismProportion" />
-                <ScalarProperty Name="NumSpecies" ColumnName="NumSpecies" />
-                <ScalarProperty Name="PopulationSize" ColumnName="PopulationSize" />
                 <ScalarProperty Name="ExperimentDomainName" ColumnName="ExperimentDomainName" />
                 <ScalarProperty Name="MaxDistanceToTarget" ColumnName="MaxDistanceToTarget" />
                 <ScalarProperty Name="MinSuccessDistance" ColumnName="MinSuccessDistance" />

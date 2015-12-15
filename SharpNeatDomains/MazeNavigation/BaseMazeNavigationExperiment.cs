@@ -115,7 +115,7 @@ namespace SharpNeat.Domains.MazeNavigation
         {
             // Set all properties
             Name = experimentDictionary.ExperimentName;
-            DefaultPopulationSize = experimentDictionary.PopulationSize;
+            DefaultPopulationSize = experimentDictionary.Primary_PopulationSize;
             Description = experimentDictionary.ExperimentName;
 
             // Set all internal class variables
@@ -127,25 +127,9 @@ namespace SharpNeat.Domains.MazeNavigation
             MaxEvaluations = (ulong) experimentDictionary.MaxEvaluations;
 
             // Set evolution/genome parameters
-            NeatEvolutionAlgorithmParameters = new NeatEvolutionAlgorithmParameters
-            {
-                SpecieCount = experimentDictionary.NumSpecies,
-                InterspeciesMatingProportion = experimentDictionary.InterspeciesMatingProbability,
-                ElitismProportion = experimentDictionary.ElitismProportion,
-                SelectionProportion = experimentDictionary.SelectionProportion,
-                OffspringAsexualProportion = experimentDictionary.AsexualProbability,
-                OffspringSexualProportion = experimentDictionary.CrossoverProbability
-            };
-            NeatGenomeParameters = new NeatGenomeParameters
-            {
-                InitialInterconnectionsProportion = experimentDictionary.ConnectionProportion,
-                ConnectionWeightMutationProbability = experimentDictionary.MutateConnectionWeightProbability,
-                AddConnectionMutationProbability = experimentDictionary.MutateAddConnectionProbability,
-                AddNodeMutationProbability = experimentDictionary.MutateAddNeuronProbability,
-                DeleteConnectionMutationProbability = experimentDictionary.MutateDeleteConnectionProbability,
-                ConnectionWeightRange = experimentDictionary.ConnectionWeightRange,
-                FeedforwardOnly = _activationScheme.AcyclicNetwork
-            };
+            NeatEvolutionAlgorithmParameters = ExperimentUtils.ReadNeatEvolutionAlgorithmParameters(
+                experimentDictionary, true);
+            NeatGenomeParameters = ExperimentUtils.ReadNeatGenomeParameters(experimentDictionary, true);
 
             // Set experiment-specific parameters
             MaxTimesteps = experimentDictionary.MaxTimesteps;

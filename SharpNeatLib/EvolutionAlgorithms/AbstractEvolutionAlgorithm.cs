@@ -359,7 +359,7 @@ namespace SharpNeat.EvolutionAlgorithms
                 for (;;)
                 {
                     // Increment the current generation
-                    CurrentGeneration++;                    
+                    CurrentGeneration++;
 
                     // Execute the generation
                     PerformOneGeneration();
@@ -375,6 +375,9 @@ namespace SharpNeat.EvolutionAlgorithms
                     // (this after the algorithm has run so we have the correct number for this iteration)
                     CurrentEvaluations = GenomeEvaluator.EvaluationCount;
 
+                    // Set genome evaluator stop condition satisfied on the EA property
+                    StopConditionSatisfied = GenomeEvaluator.StopConditionSatisfied;
+
                     // Check if a pause has been requested. 
                     // Access to the flag is not thread synchronized, but it doesn't really matter if
                     // we miss it being set and perform one other generation before pausing.
@@ -389,7 +392,7 @@ namespace SharpNeat.EvolutionAlgorithms
                         RunState = RunState.Paused;
                         OnUpdateEvent();
                         OnPausedEvent();
-                        
+
                         // Wait indefinitely for a signal to wake up and continue.
                         _awaitRestartEvent.WaitOne();
                     }

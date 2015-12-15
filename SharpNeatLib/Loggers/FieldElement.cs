@@ -55,7 +55,6 @@
         public static readonly int NumFieldElements = 9;
         public static readonly FieldElement Generation = new FieldElement(0, "Generation");
         public static readonly FieldElement EvaluationCount = new FieldElement(1, "Evaluation Count");
-        public static readonly FieldElement BridgingEvaluation = new FieldElement(2, "Bridging Evaluation");
         public static readonly FieldElement RunPhase = new FieldElement(3, "Run Phase");
         public static readonly FieldElement IsViable = new FieldElement(4, "Is Viable");
         public static readonly FieldElement StopConditionSatisfied = new FieldElement(5, "Stop Condition Satisfied");

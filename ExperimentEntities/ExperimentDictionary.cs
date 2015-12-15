@@ -31,19 +31,6 @@ namespace ExperimentEntities
         public int MinSuccessDistance { get; set; }
         public int MaxDistanceToTarget { get; set; }
         public string ExperimentDomainName { get; set; }
-        public int PopulationSize { get; set; }
-        public int NumSpecies { get; set; }
-        public double ElitismProportion { get; set; }
-        public double SelectionProportion { get; set; }
-        public double AsexualProbability { get; set; }
-        public double CrossoverProbability { get; set; }
-        public double InterspeciesMatingProbability { get; set; }
-        public double MutateConnectionWeightProbability { get; set; }
-        public double MutateAddNeuronProbability { get; set; }
-        public double MutateAddConnectionProbability { get; set; }
-        public double MutateDeleteConnectionProbability { get; set; }
-        public double ConnectionProportion { get; set; }
-        public int ConnectionWeightRange { get; set; }
         public Nullable<int> Initialization_OffspringBatchSize { get; set; }
         public Nullable<int> Initialization_PopulationEvaluationFrequency { get; set; }
         public string Initialization_ComplexityRegulationStrategy { get; set; }
@@ -81,6 +68,34 @@ namespace ExperimentEntities
         public bool SerializeGenomeToXml { get; set; }
         public Nullable<int> Initialization_MCS_BridgingMagnitude { get; set; }
         public Nullable<int> Primary_MCS_BridgingMagnitude { get; set; }
+        public Nullable<int> Initialization_PopulationSize { get; set; }
+        public Nullable<int> Initialization_NumSpecies { get; set; }
+        public Nullable<double> Initialization_ElitismProportion { get; set; }
+        public Nullable<double> Initialization_SelectionProportion { get; set; }
+        public Nullable<double> Initialization_AsexualProbability { get; set; }
+        public Nullable<double> Initialization_CrossoverProbability { get; set; }
+        public Nullable<double> Initialization_InterspeciesMatingProbability { get; set; }
+        public Nullable<double> Initialization_MutateConnectionWeightsProbability { get; set; }
+        public Nullable<double> Initialization_MutateAddNeuronProbability { get; set; }
+        public Nullable<double> Initialization_MutateAddConnectionProbability { get; set; }
+        public Nullable<double> Initialization_MutateDeleteConnectionProbability { get; set; }
+        public Nullable<double> Initialization_ConnectionProportion { get; set; }
+        public Nullable<int> Initialization_ConnectionWeightRange { get; set; }
+        public int Primary_PopulationSize { get; set; }
+        public int Primary_NumSpecies { get; set; }
+        public double Primary_ElitismProportion { get; set; }
+        public double Primary_SelectionProportion { get; set; }
+        public double Primary_AsexualProbability { get; set; }
+        public double Primary_CrossoverProbability { get; set; }
+        public double Primary_InterspeciesMatingProbability { get; set; }
+        public double Primary_MutateConnectionWeightsProbability { get; set; }
+        public double Primary_MutateAddNeuronProbability { get; set; }
+        public double Primary_MutateAddConnectionProbability { get; set; }
+        public double Primary_MutateDeleteConnectionProbability { get; set; }
+        public double Primary_ConnectionProportion { get; set; }
+        public int Primary_ConnectionWeightRange { get; set; }
+        public Nullable<int> Initialization_MCS_BridgingApplications { get; set; }
+        public Nullable<int> Primary_MCS_BridgingApplications { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<NoveltyExperimentOrganismStateData> NoveltyExperimentOrganismStateDatas { get; set; }

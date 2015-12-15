@@ -206,7 +206,7 @@ namespace SharpNeatConsole
                     _executionLogger.Info(string.Format("Loaded [{0}] genomes as initial population.", _genomeList.Count));
 
                     _executionLogger.Info("Kicking off Experiment initialization/execution");
-                    
+
                     // Kick off the experiment run
                     RunExperiment(experimentName, experiment, numRuns, runIdx, curEvaluations);
 
@@ -263,8 +263,8 @@ namespace SharpNeatConsole
                     _genomeFactory = _genomeList[0].GenomeFactory;
                     _executionLogger.Info(string.Format("Loaded [{0}] genomes as initial population.", _genomeList.Count));
 
-                    _executionLogger.Info("Kicking off Experiment initialization/execution");                    
-                    
+                    _executionLogger.Info("Kicking off Experiment initialization/execution");
+
                     // Kick off the experiment run
                     RunExperiment(experimentName, experiment, numRuns, runIdx, curEvaluations);
 
@@ -296,8 +296,9 @@ namespace SharpNeatConsole
                 return;
             }
 
-            _executionLogger.Info(string.Format("Executing Experiment {0}, Run {1} of {2}", experimentName, runIdx + 1,
-                numRuns));
+            _executionLogger.Info(string.Format(
+                "Executing Experiment {0}, Run {1} of {2} from {3} starting evaluations", experimentName, runIdx + 1,
+                numRuns, startingEvaluation));
 
             // Start algorithm (it will run on a background thread).
             _ea.StartContinue();

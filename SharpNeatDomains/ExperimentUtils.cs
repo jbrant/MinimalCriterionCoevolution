@@ -26,6 +26,7 @@ using System.Xml;
 using ExperimentEntities;
 using SharpNeat.Core;
 using SharpNeat.Decoders;
+using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.EvolutionAlgorithms.ComplexityRegulation;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Loggers;
@@ -201,6 +202,76 @@ namespace SharpNeat.Domains
             }
 
             return genomeParameters;
+        }
+
+        /// <summary>
+        ///     Reads NEAT genome parameters from the database.
+        /// </summary>
+        /// <param name="experimentDictionary">Reference to experiment dictionary table.</param>
+        /// <param name="isPrimary">Flag indicating whether this is the primary or an initialization algorithm.</param>
+        /// <returns>Initialized NEAT genome parameters.</returns>
+        public static NeatGenomeParameters ReadNeatGenomeParameters(ExperimentDictionary experimentDictionary,
+            bool isPrimary)
+        {
+            return (isPrimary
+                ? new NeatGenomeParameters
+                {
+                    InitialInterconnectionsProportion = experimentDictionary.Primary_ConnectionProportion,
+                    ConnectionWeightMutationProbability =
+                        experimentDictionary.Primary_MutateConnectionWeightsProbability,
+                    AddConnectionMutationProbability = experimentDictionary.Primary_MutateAddConnectionProbability,
+                    AddNodeMutationProbability = experimentDictionary.Primary_MutateAddNeuronProbability,
+                    DeleteConnectionMutationProbability = experimentDictionary.Primary_MutateDeleteConnectionProbability,
+                    ConnectionWeightRange = experimentDictionary.Primary_ConnectionWeightRange
+                }
+                : new NeatGenomeParameters
+                {
+                    InitialInterconnectionsProportion =
+                        experimentDictionary.Initialization_ConnectionProportion ?? default(double),
+                    ConnectionWeightMutationProbability =
+                        experimentDictionary.Initialization_MutateConnectionWeightsProbability ?? default(double),
+                    AddConnectionMutationProbability =
+                        experimentDictionary.Initialization_MutateAddConnectionProbability ?? default(double),
+                    AddNodeMutationProbability =
+                        experimentDictionary.Initialization_MutateAddNeuronProbability ?? default(double),
+                    DeleteConnectionMutationProbability =
+                        experimentDictionary.Initialization_MutateDeleteConnectionProbability ?? default(double),
+                    ConnectionWeightRange = experimentDictionary.Initialization_ConnectionWeightRange ?? default(double)
+                });
+        }
+
+        /// <summary>
+        ///     Reads NEAT evolution algorithm parameters from the database.
+        /// </summary>
+        /// <param name="experimentDictionary">Reference to the experiment dictionary table.</param>
+        /// <param name="isPrimary">Flag indicating whether this is the primary or an initialization algorithm.</param>
+        /// <returns>Initialized NEAT evolution algorithm parameters.</returns>
+        public static NeatEvolutionAlgorithmParameters ReadNeatEvolutionAlgorithmParameters(
+            ExperimentDictionary experimentDictionary,
+            bool isPrimary)
+        {
+            return (isPrimary
+                ? new NeatEvolutionAlgorithmParameters
+                {
+                    SpecieCount = experimentDictionary.Primary_NumSpecies,
+                    InterspeciesMatingProportion = experimentDictionary.Primary_InterspeciesMatingProbability,
+                    ElitismProportion = experimentDictionary.Primary_ElitismProportion,
+                    SelectionProportion = experimentDictionary.Primary_SelectionProportion,
+                    OffspringAsexualProportion = experimentDictionary.Primary_AsexualProbability,
+                    OffspringSexualProportion = experimentDictionary.Primary_CrossoverProbability
+                }
+                : new NeatEvolutionAlgorithmParameters
+                {
+                    SpecieCount = experimentDictionary.Initialization_NumSpecies ?? default(int),
+                    InterspeciesMatingProportion =
+                        experimentDictionary.Initialization_InterspeciesMatingProbability ?? default(double),
+                    ElitismProportion = experimentDictionary.Initialization_ElitismProportion ?? default(double),
+                    SelectionProportion = experimentDictionary.Initialization_SelectionProportion ?? default(double),
+                    OffspringAsexualProportion =
+                        experimentDictionary.Initialization_AsexualProbability ?? default(double),
+                    OffspringSexualProportion =
+                        experimentDictionary.Initialization_CrossoverProbability ?? default(double)
+                });
         }
 
         /// <summary>

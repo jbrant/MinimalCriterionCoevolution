@@ -111,6 +111,9 @@
     <Content Include="ExperimentConfigurations\Experiment2.config.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="ExperimentConfigurations\Queueing MCS Parameter Sweep 1.config.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="ExperimentConfigurations\Queueing MCS with Bridging 8.config.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
