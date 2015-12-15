@@ -12,7 +12,7 @@
   <ComplexityThreshold>30</ComplexityThreshold>
   <OffspringBatchSize>50</OffspringBatchSize>
   <PopulationEvaluationFrequency>30</PopulationEvaluationFrequency>
-  <MaxEvaluations>15000</MaxEvaluations>
+  <MaxEvaluations>10000</MaxEvaluations>
   <DecodeGenomesToXml>false</DecodeGenomesToXml>
   <GenomeConfig>
     <InitialConnectionProportion>1</InitialConnectionProportion>

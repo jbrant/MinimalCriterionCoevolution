@@ -209,9 +209,9 @@ namespace SharpNeatConsole
 
                     // Kick off the experiment run
                     RunExperiment(experimentName, experiment, numRuns, runIdx, curEvaluations);
-
+                    
                     // Increment the evaluations
-                    curEvaluations += _ea.CurrentEvaluations;
+                    curEvaluations = _ea.CurrentEvaluations;
                 } while (_ea.StopConditionSatisfied == false);
 
                 // Close the data loggers
@@ -269,7 +269,7 @@ namespace SharpNeatConsole
                     RunExperiment(experimentName, experiment, numRuns, runIdx, curEvaluations);
 
                     // Increment the evaluations
-                    curEvaluations += _ea.CurrentEvaluations;
+                    curEvaluations = _ea.CurrentEvaluations;
                 } while (_ea.StopConditionSatisfied == false);
             }
 
