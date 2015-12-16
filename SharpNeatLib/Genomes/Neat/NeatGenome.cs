@@ -53,8 +53,12 @@ namespace SharpNeat.Genomes.Neat
         /// <summary>
         ///     Returns NeatGenome LoggableElements.
         /// </summary>
+        /// <param name="logFieldEnableMap">
+        ///     Dictionary of logging fields that can be enabled or disabled based on the specification
+        ///     of the calling routine.
+        /// </param>
         /// <returns>The LoggableElements for NeatGenome.</returns>
-        public List<LoggableElement> GetLoggableElements()
+        public List<LoggableElement> GetLoggableElements(IDictionary<FieldElement, bool> logFieldEnableMap = null)
         {
             // Add all loggable elements except for behavior characterization
             List<LoggableElement> loggableElements = new List<LoggableElement>
@@ -66,11 +70,23 @@ namespace SharpNeat.Genomes.Neat
                     ConnectionGeneList.Count),
                 new LoggableElement(EvolutionFieldElements.ChampGenomeTotalGeneCount,
                     NeuronGeneList.Count + ConnectionGeneList.Count),
-                new LoggableElement(EvolutionFieldElements.ChampGenomeFitness, EvaluationInfo.Fitness),
                 new LoggableElement(EvolutionFieldElements.ChampGenomeEvaluationCount,
                     EvaluationInfo.EvaluationCount),
                 new LoggableElement(EvolutionFieldElements.ChampGenomeDistanceToTarget, EvaluationInfo.ObjectiveDistance)
             };
+
+            // If champ genome primary fitness logging is explicitly disabled, then log the auxiliary fitness
+            if (logFieldEnableMap != null && logFieldEnableMap.ContainsKey(EvolutionFieldElements.ChampGenomeFitness) &&
+                logFieldEnableMap[EvolutionFieldElements.ChampGenomeFitness] == false)
+            {
+                loggableElements.Add(new LoggableElement(EvolutionFieldElements.ChampGenomeFitness,
+                    EvaluationInfo.AuxFitnessArr[0]._value));
+            }
+            else
+            {
+                loggableElements.Add(new LoggableElement(EvolutionFieldElements.ChampGenomeFitness,
+                    EvaluationInfo.Fitness));
+            }
 
             // Add all behavior characteriazation elements as a separate column
             if (EvaluationInfo.BehaviorCharacterization != null)
@@ -86,10 +102,15 @@ namespace SharpNeat.Genomes.Neat
                 loggableElements.Add(new LoggableElement(EvolutionFieldElements.ChampGenomeBehaviorY, null));
             }
 
-            // Serialize the champ genome to XML and add as a loggable element
-            StringWriter champGenomeSw = new StringWriter();
-            NeatGenomeXmlIO.WriteComplete(new XmlTextWriter(champGenomeSw), this, false);
-            loggableElements.Add(new LoggableElement(EvolutionFieldElements.ChampGenomeXml, champGenomeSw.ToString()));
+            // Only log champ genome XML if explicitly specified
+            if (logFieldEnableMap != null && logFieldEnableMap.ContainsKey(EvolutionFieldElements.ChampGenomeXml) &&
+                logFieldEnableMap[EvolutionFieldElements.ChampGenomeXml])
+            {
+                // Serialize the champ genome to XML and add as a loggable element
+                StringWriter champGenomeSw = new StringWriter();
+                NeatGenomeXmlIO.WriteComplete(new XmlTextWriter(champGenomeSw), this, false);
+                loggableElements.Add(new LoggableElement(EvolutionFieldElements.ChampGenomeXml, champGenomeSw.ToString()));
+            }
 
             return loggableElements;
         }

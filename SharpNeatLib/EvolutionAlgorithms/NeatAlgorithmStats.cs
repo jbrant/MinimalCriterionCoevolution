@@ -54,8 +54,12 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <summary>
         ///     Returns NeatAlgorithmStats LoggableElements.
         /// </summary>
+        /// <param name="logFieldEnableMap">
+        ///     Dictionary of logging fields that can be enabled or disabled based on the specification
+        ///     of the calling routine.
+        /// </param>
         /// <returns>The LoggableElements for NeatAlgorithmStats.</returns>
-        public List<LoggableElement> GetLoggableElements()
+        public List<LoggableElement> GetLoggableElements(IDictionary<FieldElement, bool> logFieldEnableMap = null)
         {
             return new List<LoggableElement>
             {

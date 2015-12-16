@@ -54,8 +54,12 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <summary>
         ///     Returns AbstractNeatEvolutionAlgorithm LoggableElements.
         /// </summary>
+        /// <param name="logFieldEnableMap">
+        ///     Dictionary of logging fields that can be enabled or disabled based on the specification
+        ///     of the calling routine.
+        /// </param>
         /// <returns>The LoggableElements for AbstractNeatEvolutionAlgorithm.</returns>
-        public List<LoggableElement> GetLoggableElements()
+        public List<LoggableElement> GetLoggableElements(IDictionary<FieldElement, bool> logFieldEnableMap = null)
         {
             return new List<LoggableElement>
             {
@@ -338,6 +342,11 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     Random number generator.
         /// </summary>
         protected readonly FastRandom RandomNumGenerator = new FastRandom();
+
+        /// <summary>
+        ///     Optional map of logging fields and their respective "enabled status" to dynamically control what is logged.
+        /// </summary>
+        protected IDictionary<FieldElement, bool> _logFieldEnabledMap;
 
         #endregion
 

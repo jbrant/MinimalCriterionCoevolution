@@ -7,6 +7,7 @@ using SharpNeat.Core;
 using SharpNeat.DistanceMetrics;
 using SharpNeat.EvolutionAlgorithms.ComplexityRegulation;
 using SharpNeat.Genomes.Neat;
+using SharpNeat.Loggers;
 using SharpNeat.SpeciationStrategies;
 using SharpNeat.Utility;
 
@@ -87,8 +88,9 @@ namespace SharpNeat.EvolutionAlgorithms
             Debug.Assert(GenomeList.Count == PopulationSize);
 
             // If there is a logger defined, log the generation stats
-            EvolutionLogger?.LogRow(GetLoggableElements(), Statistics.GetLoggableElements(),
-                (CurrentChampGenome as NeatGenome)?.GetLoggableElements());
+            EvolutionLogger?.LogRow(GetLoggableElements(_logFieldEnabledMap),
+                Statistics.GetLoggableElements(_logFieldEnabledMap),
+                (CurrentChampGenome as NeatGenome)?.GetLoggableElements(_logFieldEnabledMap));
         }
 
         #endregion
@@ -139,13 +141,14 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     algorithm.
         /// </param>
         /// <param name="logger">The data logger (optional).</param>
+        /// <param name="logFieldEnabledMap">Dictionary of logging fields that can be dynamically enabled or disabled.</param>
         public SteadyStateNeatEvolutionAlgorithm(
             ISpeciationStrategy<TGenome> speciationStrategy,
             IComplexityRegulationStrategy complexityRegulationStrategy,
             int batchSize,
             int populationEvaluationFrequency,
             RunPhase runPhase = RunPhase.Primary,
-            IDataLogger logger = null)
+            IDataLogger logger = null, IDictionary<FieldElement, bool> logFieldEnabledMap = null)
         {
             SpeciationStrategy = speciationStrategy;
             ComplexityRegulationStrategy = complexityRegulationStrategy;
@@ -153,6 +156,7 @@ namespace SharpNeat.EvolutionAlgorithms
             _populationEvaluationFrequency = populationEvaluationFrequency;
             RunPhase = runPhase;
             EvolutionLogger = logger;
+            _logFieldEnabledMap = logFieldEnabledMap;
         }
 
         /// <summary>
@@ -169,13 +173,14 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     algorithm.
         /// </param>
         /// <param name="logger">The data logger (optional).</param>
+        /// <param name="logFieldEnabledMap">Dictionary of logging fields that can be dynamically enabled or disabled.</param>
         public SteadyStateNeatEvolutionAlgorithm(NeatEvolutionAlgorithmParameters eaParams,
             ISpeciationStrategy<TGenome> speciationStrategy,
             IComplexityRegulationStrategy complexityRegulationStrategy,
             int batchSize,
             int populationEvaluationFrequency,
             RunPhase runPhase = RunPhase.Primary,
-            IDataLogger logger = null) : base(eaParams)
+            IDataLogger logger = null, IDictionary<FieldElement, bool> logFieldEnabledMap = null) : base(eaParams)
         {
             SpeciationStrategy = speciationStrategy;
             ComplexityRegulationStrategy = complexityRegulationStrategy;
@@ -183,6 +188,7 @@ namespace SharpNeat.EvolutionAlgorithms
             _populationEvaluationFrequency = populationEvaluationFrequency;
             RunPhase = runPhase;
             EvolutionLogger = logger;
+            _logFieldEnabledMap = logFieldEnabledMap;
         }
 
         #endregion

@@ -8,6 +8,7 @@ using SharpNeat.Core;
 using SharpNeat.DistanceMetrics;
 using SharpNeat.EvolutionAlgorithms.ComplexityRegulation;
 using SharpNeat.Genomes.Neat;
+using SharpNeat.Loggers;
 using SharpNeat.SpeciationStrategies;
 
 #endregion
@@ -179,8 +180,9 @@ namespace SharpNeat.EvolutionAlgorithms
             Debug.Assert(GenomeList.Count <= PopulationSize);
 
             // If there is a logger defined, log the generation stats
-            EvolutionLogger?.LogRow(GetLoggableElements(), Statistics.GetLoggableElements(),
-                (CurrentChampGenome as NeatGenome)?.GetLoggableElements());
+            EvolutionLogger?.LogRow(GetLoggableElements(_logFieldEnabledMap),
+                Statistics.GetLoggableElements(_logFieldEnabledMap),
+                (CurrentChampGenome as NeatGenome)?.GetLoggableElements(_logFieldEnabledMap));
         }
 
         #endregion
@@ -218,18 +220,20 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </param>
         /// <param name="isBridgingEnabled">Flag that indicates whether bridging is enabled.</param>
         /// <param name="logger">The data logger (optional).</param>
+        /// <param name="logFieldEnabledMap">Dictionary of logging fields that can be dynamically enabled or disabled.</param>
         public QueueingNeatEvolutionAlgorithm(
             IComplexityRegulationStrategy complexityRegulationStrategy,
             int batchSize,
             RunPhase runPhase = RunPhase.Primary,
             bool isBridgingEnabled = false,
-            IDataLogger logger = null)
+            IDataLogger logger = null, IDictionary<FieldElement, bool> logFieldEnabledMap = null)
         {
             ComplexityRegulationStrategy = complexityRegulationStrategy;
             _batchSize = batchSize;
             EvolutionLogger = logger;
             RunPhase = runPhase;
             _isBridgingEnabled = isBridgingEnabled;
+            _logFieldEnabledMap = logFieldEnabledMap;
         }
 
         /// <summary>
@@ -244,18 +248,20 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </param>
         /// <param name="isBridgingEnabled">Flag that indicates whether bridging is enabled.</param>
         /// <param name="logger">The data logger (optional).</param>
+        /// <param name="logFieldEnabledMap">Dictionary of logging fields that can be dynamically enabled or disabled.</param>
         public QueueingNeatEvolutionAlgorithm(NeatEvolutionAlgorithmParameters eaParams,
             IComplexityRegulationStrategy complexityRegulationStrategy,
             int batchSize,
             RunPhase runPhase = RunPhase.Primary,
             bool isBridgingEnabled = false,
-            IDataLogger logger = null) : base(eaParams)
+            IDataLogger logger = null, IDictionary<FieldElement, bool> logFieldEnabledMap = null) : base(eaParams)
         {
             ComplexityRegulationStrategy = complexityRegulationStrategy;
             _batchSize = batchSize;
             EvolutionLogger = logger;
             RunPhase = runPhase;
             _isBridgingEnabled = isBridgingEnabled;
+            _logFieldEnabledMap = logFieldEnabledMap;
         }
 
         #endregion

@@ -31,6 +31,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         private int _bridgingMagnitude;
         private IDataLogger _evaluationDataLogger;
         private IDataLogger _evolutionDataLogger;
+        private IDictionary<FieldElement, bool> _experimentLogFieldEnableMap;
         private InitializationAlgorithm _initializationAlgorithm;
 
         public override void Initialize(string name, XmlElement xmlConfig, IDataLogger evolutionDataLogger,
@@ -54,6 +55,21 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                                    ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Evolution);
             _evaluationDataLogger = evaluationDataLogger ??
                                     ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Evaluation);
+
+            // Setup the specific logging options based on parameters that are enabled/disabled
+            _experimentLogFieldEnableMap = new Dictionary<FieldElement, bool>();
+
+            // Enable or disable genome XML logging
+            if (SerializeGenomeToXml)
+            {
+                _experimentLogFieldEnableMap.Add(EvolutionFieldElements.ChampGenomeXml, true);
+            }
+
+            // Enable or disable primary fitness logging (causing utilization of auxiliary fitness)
+            if (_bridgingMagnitude > 0)
+            {
+                _experimentLogFieldEnableMap.Add(EvolutionFieldElements.ChampGenomeFitness, false);
+            }
 
             // Initialize the initialization algorithm
             _initializationAlgorithm = new InitializationAlgorithm(MaxEvaluations, _evolutionDataLogger,
@@ -133,7 +149,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             AbstractNeatEvolutionAlgorithm<NeatGenome> ea =
                 new QueueingNeatEvolutionAlgorithm<NeatGenome>(NeatEvolutionAlgorithmParameters,
                     complexityRegulationStrategy, _batchSize, RunPhase.Primary, (_bridgingMagnitude > 0),
-                    _evolutionDataLogger);
+                    _evolutionDataLogger, _experimentLogFieldEnableMap);
 
             // Create IBlackBox evaluator.
             IPhenomeEvaluator<IBlackBox, BehaviorInfo> mazeNavigationEvaluator =
@@ -166,6 +182,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         {
             private readonly IDataLogger _evaluationDataLogger;
             private readonly IDataLogger _evolutionDataLogger;
+            private readonly IDictionary<FieldElement, bool> _initializationLogFieldEnableMap;
             private readonly ulong? _maxEvaluations;
             private readonly bool _serializeGenomeToXml;
             private double _archiveAdditionThreshold;
@@ -200,6 +217,16 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                 _evolutionDataLogger = evolutionDataLogger;
                 _evaluationDataLogger = evaluationDataLogger;
                 _serializeGenomeToXml = serializeGenomeToXml ?? false;
+
+                // Setup log field enable/disable map
+                _initializationLogFieldEnableMap = new Dictionary<FieldElement, bool>
+                {
+                    {EvolutionFieldElements.ChampGenomeFitness, true}
+                };
+                if (_serializeGenomeToXml)
+                {
+                    _initializationLogFieldEnableMap.Add(EvolutionFieldElements.ChampGenomeXml, true);
+                }
             }
 
             /// <summary>
@@ -336,7 +363,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                 // Create the initialization evolution algorithm.
                 _initializationEa = new SteadyStateNeatEvolutionAlgorithm<NeatGenome>(neatParameters,
                     speciationStrategy, complexityRegulationStrategy, _batchSize, _populationEvaluationFrequency,
-                    RunPhase.Initialization, _evolutionDataLogger);
+                    RunPhase.Initialization, _evolutionDataLogger, _initializationLogFieldEnableMap);
 
                 // Create IBlackBox evaluator.
                 MazeNavigationMCSInitializationEvaluator mazeNavigationEvaluator =
