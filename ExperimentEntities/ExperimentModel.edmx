@@ -128,13 +128,12 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
             
             
             
-            
-            
           </Key>
           <Property Name="ExperimentDictionaryID" Type="int" Nullable="false" StoreGeneratedPattern="Identity" />
           <Property Name="ExperimentName" Type="varchar" MaxLength="100" Nullable="false" />
           <Property Name="ConfigurationFile" Type="varchar" MaxLength="150" />
           <Property Name="MaxEvaluations" Type="int" Nullable="false" />
+          <Property Name="MaxRestarts" Type="int" Nullable="false" />
           <Property Name="MaxTimesteps" Type="int" Nullable="false" />
           <Property Name="MinSuccessDistance" Type="int" Nullable="false" />
           <Property Name="MaxDistanceToTarget" Type="int" Nullable="false" />
@@ -241,6 +240,7 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
     [ExperimentDictionary_vw].[ExperimentName] AS [ExperimentName], 
     [ExperimentDictionary_vw].[ConfigurationFile] AS [ConfigurationFile], 
     [ExperimentDictionary_vw].[MaxEvaluations] AS [MaxEvaluations], 
+    [ExperimentDictionary_vw].[MaxRestarts] AS [MaxRestarts], 
     [ExperimentDictionary_vw].[MaxTimesteps] AS [MaxTimesteps], 
     [ExperimentDictionary_vw].[MinSuccessDistance] AS [MinSuccessDistance], 
     [ExperimentDictionary_vw].[MaxDistanceToTarget] AS [MaxDistanceToTarget], 
@@ -438,6 +438,7 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <Property Name="Primary_ConnectionWeightRange" Type="Int32" Nullable="false" />
           <Property Name="Initialization_MCS_BridgingApplications" Type="Int32" />
           <Property Name="Primary_MCS_BridgingApplications" Type="Int32" />
+          <Property Name="MaxRestarts" Type="Int32" Nullable="false" />
         </EntityType>
         <EntityType Name="NoveltyExperimentOrganismStateData">
           <Key>
@@ -628,6 +629,7 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <EntitySetMapping Name="ExperimentDictionaries">
             <EntityTypeMapping TypeName="ExperimentDataModel.ExperimentDictionary">
               <MappingFragment StoreEntitySet="ExperimentDictionary_vw">
+                <ScalarProperty Name="MaxRestarts" ColumnName="MaxRestarts" />
                 <ScalarProperty Name="Primary_MCS_BridgingApplications" ColumnName="Primary_MCS_BridgingApplications" />
                 <ScalarProperty Name="Initialization_MCS_BridgingApplications" ColumnName="Initialization_MCS_BridgingApplications" />
                 <ScalarProperty Name="Primary_ConnectionWeightRange" ColumnName="Primary_ConnectionWeightRange" />

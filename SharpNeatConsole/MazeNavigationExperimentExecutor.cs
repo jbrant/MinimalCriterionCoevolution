@@ -195,6 +195,9 @@ namespace SharpNeatConsole
                 // This will hold the number of evaluations executed for each "attempt" of the EA within the current run
                 ulong curEvaluations = 0;
 
+                // This will hold the number of restarts of the algorithm
+                int curRestarts = 0;
+
                 do
                 {
                     // Open and load population XML file.
@@ -209,10 +212,13 @@ namespace SharpNeatConsole
 
                     // Kick off the experiment run
                     RunExperiment(experimentName, experiment, numRuns, runIdx, curEvaluations);
-                    
+
                     // Increment the evaluations
                     curEvaluations = _ea.CurrentEvaluations;
-                } while (_ea.StopConditionSatisfied == false);
+
+                    // Increment the restart count
+                    curRestarts++;
+                } while (_ea.StopConditionSatisfied == false && experiment.MaxRestarts >= curRestarts);
 
                 // Close the data loggers
                 evolutionDataLogger.Close();
@@ -253,6 +259,9 @@ namespace SharpNeatConsole
                 // This will hold the number of evaluations executed for each "attempt" of the EA within the current run
                 ulong curEvaluations = 0;
 
+                // This will hold the number of restarts of the algorithm
+                int curRestarts = 0;
+
                 do
                 {
                     // Open and load population XML file.
@@ -270,7 +279,10 @@ namespace SharpNeatConsole
 
                     // Increment the evaluations
                     curEvaluations = _ea.CurrentEvaluations;
-                } while (_ea.StopConditionSatisfied == false);
+
+                    // Increment the restart count
+                    curRestarts++;
+                } while (_ea.StopConditionSatisfied == false && experiment.MaxRestarts >= curRestarts);
             }
 
             // Dispose of the database context
@@ -316,9 +328,32 @@ namespace SharpNeatConsole
         /// <param name="e">Event arguments</param>
         private static void ea_UpdateEvent(object sender, EventArgs e)
         {
-            _executionLogger.Info(string.Format("Generation={0:N0} Evaluations={1:N0} BestFitness={2:N6}",
-                _ea.CurrentGeneration,
-                _ea.CurrentEvaluations, _ea.Statistics._maxFitness));
+            if (_ea.CurrentChampGenome != null)
+            {
+                double champGenomeAuxFitness = _ea.CurrentChampGenome.EvaluationInfo.AuxFitnessArr.Length > 0
+                    ? _ea.CurrentChampGenome.EvaluationInfo.AuxFitnessArr[0]._value
+                    : 0;
+
+                if (champGenomeAuxFitness > 0)
+                {
+                    _executionLogger.Info(
+                        string.Format("Generation={0:N0} Evaluations={1:N0} BestFitness={2:N6} BestAuxFitness={3:N6}",
+                            _ea.CurrentGeneration,
+                            _ea.CurrentEvaluations, _ea.CurrentChampGenome.EvaluationInfo.Fitness, champGenomeAuxFitness));
+                }
+                else
+                {
+                    _executionLogger.Info(string.Format("Generation={0:N0} Evaluations={1:N0} BestFitness={2:N6}",
+                        _ea.CurrentGeneration,
+                        _ea.CurrentEvaluations, _ea.CurrentChampGenome.EvaluationInfo.Fitness));
+                }
+            }
+            else
+            {
+                _executionLogger.Info(string.Format("Generation={0:N0} Evaluations={1:N0} BestFitness={2:N6}",
+                    _ea.CurrentGeneration,
+                    _ea.CurrentEvaluations, _ea.Statistics._maxFitness));
+            }
         }
 
         /// <summary>

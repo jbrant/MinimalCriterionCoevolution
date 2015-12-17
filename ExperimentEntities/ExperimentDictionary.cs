@@ -96,6 +96,7 @@ namespace ExperimentEntities
         public int Primary_ConnectionWeightRange { get; set; }
         public Nullable<int> Initialization_MCS_BridgingApplications { get; set; }
         public Nullable<int> Primary_MCS_BridgingApplications { get; set; }
+        public int MaxRestarts { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<NoveltyExperimentOrganismStateData> NoveltyExperimentOrganismStateDatas { get; set; }

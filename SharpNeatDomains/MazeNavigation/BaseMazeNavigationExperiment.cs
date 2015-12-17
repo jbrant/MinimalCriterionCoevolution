@@ -65,6 +65,8 @@ namespace SharpNeat.Domains.MazeNavigation
         /// </summary>
         public NeatGenomeParameters NeatGenomeParameters { get; private set; }
 
+        public int? MaxRestarts { get; private set; }
+
         /// <summary>
         ///     Initialize the experiment with configuration file parameters.
         /// </summary>
@@ -88,6 +90,7 @@ namespace SharpNeat.Domains.MazeNavigation
             SerializeGenomeToXml = XmlUtils.TryGetValueAsBool(xmlConfig, "DecodeGenomesToXml") ?? false;
             MaxGenerations = XmlUtils.TryGetValueAsInt(xmlConfig, "MaxGenerations");
             MaxEvaluations = XmlUtils.TryGetValueAsULong(xmlConfig, "MaxEvaluations");
+            MaxRestarts = XmlUtils.TryGetValueAsInt(xmlConfig, "MaxRestarts");
 
             // Set evolution/genome parameters
             NeatEvolutionAlgorithmParameters = new NeatEvolutionAlgorithmParameters
@@ -125,6 +128,7 @@ namespace SharpNeat.Domains.MazeNavigation
             ParallelOptions = new ParallelOptions();
             SerializeGenomeToXml = experimentDictionary.SerializeGenomeToXml;
             MaxEvaluations = (ulong) experimentDictionary.MaxEvaluations;
+            MaxRestarts = experimentDictionary.MaxRestarts;
 
             // Set evolution/genome parameters
             NeatEvolutionAlgorithmParameters = ExperimentUtils.ReadNeatEvolutionAlgorithmParameters(
