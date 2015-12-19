@@ -18,6 +18,7 @@ using SharpNeat.Domains.MazeNavigation.MCNSExperiment;
 using SharpNeat.Domains.MazeNavigation.MCSExperiment;
 using SharpNeat.Domains.MazeNavigation.NoveltyExperiment;
 using SharpNeat.Domains.MazeNavigation.RandomExperiment;
+using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Loggers;
 
@@ -199,7 +200,7 @@ namespace SharpNeatConsole
                 int curRestarts = 0;
 
                 do
-                {
+                {                    
                     // Open and load population XML file.
                     using (XmlReader xr = XmlReader.Create(seedPopulationFiles[runIdx]))
                     {

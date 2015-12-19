@@ -10,10 +10,10 @@
   </Activation>
   <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>
   <ComplexityThreshold>30</ComplexityThreshold>
-  <OffspringBatchSize>20</OffspringBatchSize>
+  <OffspringBatchSize>50</OffspringBatchSize>
   <PopulationEvaluationFrequency>30</PopulationEvaluationFrequency>
-  <MaxEvaluations>100000</MaxEvaluations>
-  <MaxRestarts>3</MaxRestarts>
+  <MaxEvaluations>1000000</MaxEvaluations>
+  <MaxRestarts>10</MaxRestarts>
   <DecodeGenomesToXml>false</DecodeGenomesToXml>
   <GenomeConfig>
     <InitialConnectionProportion>1</InitialConnectionProportion>
