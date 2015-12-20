@@ -118,11 +118,12 @@ namespace SharpNeat.Loggers
         }
 
         /// <summary>
-        ///     Closes the StreamWriter.
+        ///     Closes and disposes of the StreamWriter.
         /// </summary>
         public void Close()
         {
             _writer.Close();
+            _writer.Dispose();
         }
 
         #endregion

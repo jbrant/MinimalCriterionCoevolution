@@ -85,11 +85,11 @@ namespace SharpNeatConsole
             string[] seedPopulationFiles = Directory.GetFiles(seedPopulationFileDirectory);
 
             // Make sure that the appropriate number of seed population have been specified
-            if (seedPopulationFiles.Count() != numRuns)
+            if (seedPopulationFiles.Count() < numRuns)
             {
                 _executionLogger.Error(
                     string.Format(
-                        "Number of seed population files [{0}] does not match the specified number of runs [{1}]",
+                        "Number of seed population files [{0}] not sufficient for the specified number of runs [{1}]",
                         seedPopulationFiles.Count(), numRuns));
                 Environment.Exit(0);
             }
@@ -154,7 +154,7 @@ namespace SharpNeatConsole
 
             // Read in the configuration files that match the given experiment name (should only be 1 file)
             string[] experimentConfigurationFiles = Directory.GetFiles(experimentConfigurationDirectory,
-                string.Format("{0}*", experimentName));
+                string.Format("{0}.*", experimentName));
 
             // Make sure there's only one configuration file that matches the experiment name
             // (otherwise, we don't know for sure which configuration to use)
