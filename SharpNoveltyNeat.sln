@@ -31,6 +31,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoveltyUnitTests", "Novelty
 		{73AB8C8C-6315-4DC7-A3DE-3C747F86AC78} = {73AB8C8C-6315-4DC7-A3DE-3C747F86AC78}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpNeatLibTests", "SharpNeatLibTests\SharpNeatLibTests.csproj", "{847DAF93-7704-4C86-9085-52903D5B63FD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -225,6 +227,26 @@ Global
 		{8F07F513-6FB7-400F-A6C7-1EC71785C4A5}.Release|x64.Build.0 = Release|Any CPU
 		{8F07F513-6FB7-400F-A6C7-1EC71785C4A5}.Release|x86.ActiveCfg = Release|Any CPU
 		{8F07F513-6FB7-400F-A6C7-1EC71785C4A5}.Release|x86.Build.0 = Release|Any CPU
+		{847DAF93-7704-4C86-9085-52903D5B63FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{847DAF93-7704-4C86-9085-52903D5B63FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{847DAF93-7704-4C86-9085-52903D5B63FD}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{847DAF93-7704-4C86-9085-52903D5B63FD}.Debug|ARM.Build.0 = Debug|Any CPU
+		{847DAF93-7704-4C86-9085-52903D5B63FD}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{847DAF93-7704-4C86-9085-52903D5B63FD}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{847DAF93-7704-4C86-9085-52903D5B63FD}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{847DAF93-7704-4C86-9085-52903D5B63FD}.Debug|x64.Build.0 = Debug|Any CPU
+		{847DAF93-7704-4C86-9085-52903D5B63FD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{847DAF93-7704-4C86-9085-52903D5B63FD}.Debug|x86.Build.0 = Debug|Any CPU
+		{847DAF93-7704-4C86-9085-52903D5B63FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{847DAF93-7704-4C86-9085-52903D5B63FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{847DAF93-7704-4C86-9085-52903D5B63FD}.Release|ARM.ActiveCfg = Release|Any CPU
+		{847DAF93-7704-4C86-9085-52903D5B63FD}.Release|ARM.Build.0 = Release|Any CPU
+		{847DAF93-7704-4C86-9085-52903D5B63FD}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{847DAF93-7704-4C86-9085-52903D5B63FD}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{847DAF93-7704-4C86-9085-52903D5B63FD}.Release|x64.ActiveCfg = Release|Any CPU
+		{847DAF93-7704-4C86-9085-52903D5B63FD}.Release|x64.Build.0 = Release|Any CPU
+		{847DAF93-7704-4C86-9085-52903D5B63FD}.Release|x86.ActiveCfg = Release|Any CPU
+		{847DAF93-7704-4C86-9085-52903D5B63FD}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
