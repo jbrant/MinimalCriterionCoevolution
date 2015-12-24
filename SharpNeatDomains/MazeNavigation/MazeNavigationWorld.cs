@@ -24,6 +24,11 @@ namespace SharpNeat.Domains.MazeNavigation
         private readonly DoublePoint _goalLocation;
 
         /// <summary>
+        ///     Density of grid points (used to scale ending position into appropriate niche grid location).
+        /// </summary>
+        private readonly int _gridDensity;
+
+        /// <summary>
         ///     Maximum distance to the target (i.e. goal location).
         /// </summary>
         private readonly int? _maxDistanceToTarget;
@@ -51,7 +56,6 @@ namespace SharpNeat.Domains.MazeNavigation
         /// <summary>
         ///     List of walls in the environment.
         /// </summary>
-        //private readonly List<DoubleLine> _walls;
         private readonly List<Wall> _walls;
 
         /// <summary>
@@ -65,9 +69,8 @@ namespace SharpNeat.Domains.MazeNavigation
         /// <param name="bridgingMagnitude">The magnitude of the navigator heading adjustment upon collision (i.e. bridging).</param>
         /// <param name="numBridgingApplications">The number of times to apply bridging during a given trial.</param>
         public MazeNavigationWorld(MazeVariant mazeVariant = MazeVariant.MediumMaze, int? minSuccessDistance = 5,
-            int? maxDistanceToTarget = 300,
-            int? maxTimeSteps = 400, IBehaviorCharacterization behaviorCharacterization = null,
-            int bridgingMagnitude = 0,
+            int? maxDistanceToTarget = 300, int? maxTimeSteps = 400,
+            IBehaviorCharacterization behaviorCharacterization = null, int bridgingMagnitude = 0,
             int numBridgingApplications = 0)
         {
             _minSuccessDistance = minSuccessDistance;
@@ -167,6 +170,13 @@ namespace SharpNeat.Domains.MazeNavigation
                     // TODO: Need to implement this
                     break;
             }
+        }
+
+        public MazeNavigationWorld(MazeVariant mazeVariant = MazeVariant.MediumMaze, int? minSuccessDistance = 5,
+            int? maxDistanceToTarget = 300, int? maxTimeSteps = 400,
+            IBehaviorCharacterization behaviorCharacterization = null, int gridDensity = 20)
+            : this(mazeVariant, minSuccessDistance, maxDistanceToTarget, maxTimeSteps, behaviorCharacterization, 0, 0)
+        {
         }
 
         /// <summary>
@@ -315,6 +325,82 @@ namespace SharpNeat.Domains.MazeNavigation
         {
             // Get the distance to the target based on the navigator's current location
             return DoublePoint.CalculateEuclideanDistance(_navigator.Location, _goalLocation);
+        }
+
+        // TODO: Move this out into its own file
+        private struct MazeNicheGrid
+        {
+            /// <summary>
+            ///     Density of grid points (used to scale ending position into appropriate niche grid location).
+            /// </summary>
+            private readonly int _gridDensity;
+
+            private readonly double _maxXPoint;
+            private readonly double _maxYPoint;
+            private readonly double _minXPoint;
+            private readonly double _minYPoint;
+
+            public MazeNicheGrid(int gridDensity, List<Wall> mazeWalls)
+            {
+                _gridDensity = gridDensity;
+
+                // Initialize all min/max boundaries
+                _minXPoint = 9999;
+                _maxXPoint = 0;
+                _minYPoint = 9999;
+                _maxYPoint = 0;
+
+                // Loop through each wall to determine the min/max X and Y boundaries
+                foreach (Wall mazeWall in mazeWalls)
+                {
+                    // Starting X point is less than current minimum X point
+                    if (mazeWall.WallLine.Start.X < _minXPoint)
+                    {
+                        _minXPoint = mazeWall.WallLine.Start.X;
+                    }
+                    // Ending X point is less than current minimum X point
+                    else if (mazeWall.WallLine.End.X < _minXPoint)
+                    {
+                        _minXPoint = mazeWall.WallLine.End.X;
+                    }
+                    // Starting X point is greater than current maximum X point
+                    else if (mazeWall.WallLine.Start.X > _maxXPoint)
+                    {
+                        _maxXPoint = mazeWall.WallLine.Start.X;
+                    }
+                    // Ending X point is greater than current maximum X point
+                    else if (mazeWall.WallLine.End.X > _maxXPoint)
+                    {
+                        _maxXPoint = mazeWall.WallLine.End.X;
+                    }
+                    // Starting Y point is less than current minimum Y point
+                    else if (mazeWall.WallLine.Start.Y < _minYPoint)
+                    {
+                        _minYPoint = mazeWall.WallLine.Start.Y;
+                    }
+                    // Ending Y point is less than current minimum Y point
+                    else if (mazeWall.WallLine.End.Y < _minYPoint)
+                    {
+                        _minYPoint = mazeWall.WallLine.End.Y;
+                    }
+                    // Starting Y point is greater than current maximum Y point
+                    else if (mazeWall.WallLine.Start.Y > _maxYPoint)
+                    {
+                        _maxYPoint = mazeWall.WallLine.Start.Y;
+                    }
+                    // Ending Y point is greater than current maximum Y point
+                    else if (mazeWall.WallLine.End.Y > _maxYPoint)
+                    {
+                        _maxYPoint = mazeWall.WallLine.End.Y;
+                    }
+                }
+            }
+
+            public int DetermineNicheId(double location)
+            {
+                return _gridDensity*(int) (_gridDensity*(location - _minXPoint)/(0.01*_maxXPoint - _minXPoint)) +
+                       (int) (_gridDensity*(location - _minYPoint)/(_maxYPoint - _minYPoint));
+            }
         }
     }
 }
