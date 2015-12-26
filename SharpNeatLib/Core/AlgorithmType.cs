@@ -61,10 +61,18 @@ namespace SharpNeat.Core
 
         /// <summary>
         ///     Queueing selection in which individuals are placed in a FIFO queue and selected for reproduction in like manner.
-        ///     Those who produce will either be replaced or placed back in the queue.  Reproduction does not necessarily guarantee
-        ///     replacement of the same individuals that reproduced (replacement is often based on age).
+        ///     Those who reproduce will simply be placed back in the queue along with their offspring (subject to applicable
+        ///     viability constraints).  Removals are based on individual age (i.e. the oldest are removed).
         /// </summary>
-        Queueing
+        Queueing,
+
+        /// <summary>
+        ///     Queueing selection in which individuals are placed into a niche-local FIFO queue (depending on the niche to which
+        ///     the individual is assigned).  Those who reproduce will simply be placed back in the queue along with their
+        ///     offspring (subject to applicable viability constraints).  Removals are based on individual age (i.e. the oldest are
+        ///     removed).
+        /// </summary>
+        QueueingWithNiching
     }
 
     /// <summary>

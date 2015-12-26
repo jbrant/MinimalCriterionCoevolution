@@ -23,12 +23,10 @@ using RunPhase = SharpNeat.Core.RunPhase;
 
 namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 {
-    public class QueueingMazeNavigationMCSExperiment : BaseMazeNavigationExperiment
+    public class QueueingNichedMazeNavigationMCSExperiment : BaseMazeNavigationExperiment
     {
         private int _batchSize;
         private IBehaviorCharacterizationFactory _behaviorCharacterizationFactory;
-        private int _bridgingApplications;
-        private int _bridgingMagnitude;
         private IDataLogger _evaluationDataLogger;
         private IDataLogger _evolutionDataLogger;
         private IDictionary<FieldElement, bool> _experimentLogFieldEnableMap;
@@ -46,11 +44,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 
             // Read in number of offspring to produce in a single batch
             _batchSize = XmlUtils.GetValueAsInt(xmlConfig, "OffspringBatchSize");
-
-            // Read in the bridging magnitude and number of applications
-            _bridgingMagnitude = XmlUtils.TryGetValueAsInt(xmlConfig, "BridgingMagnitude") ?? default(int);
-            _bridgingApplications = XmlUtils.TryGetValueAsInt(xmlConfig, "BridgingApplications") ?? default(int);
-
+            
             // Read in niche grid density
             _gridDensity = XmlUtils.TryGetValueAsUInt(xmlConfig, "GridDensity") ?? default(uint);
 
@@ -68,13 +62,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             {
                 _experimentLogFieldEnableMap.Add(EvolutionFieldElements.ChampGenomeXml, true);
             }
-
-            // Enable or disable primary fitness logging (causing utilization of auxiliary fitness)
-            if (_bridgingMagnitude > 0)
-            {
-                _experimentLogFieldEnableMap.Add(EvolutionFieldElements.ChampGenomeFitness, false);
-            }
-
+            
             // Initialize the initialization algorithm
             _initializationAlgorithm = new InitializationAlgorithm(MaxEvaluations, _evolutionDataLogger,
                 _evaluationDataLogger,
@@ -100,10 +88,8 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 
             // Read in number of offspring to produce in a single batch
             _batchSize = experimentDictionary.Primary_OffspringBatchSize ?? default(int);
-
-            // Read in the bridging magnitude
-            _bridgingMagnitude = experimentDictionary.Primary_MCS_BridgingMagnitude ?? default(int);
-            _bridgingApplications = experimentDictionary.Primary_MCS_BridgingApplications ?? default(int);
+            
+            // TODO: Read niche grid density from the database
 
             // Read in log file path/name
             _evolutionDataLogger = new McsExperimentEvaluationEntityDataLogger(experimentDictionary.ExperimentName);
@@ -139,48 +125,8 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         {
             ulong initializationEvaluations;
 
-            // Instantiate the internal initialization algorithm
-            _initializationAlgorithm.InitializeAlgorithm(ParallelOptions, genomeList,
-                CreateGenomeDecoder(), NeatEvolutionAlgorithmParameters, startingEvaluations);
 
-            // Run the algorithm until a viable genome is found
-            NeatGenome genomeSeed = _initializationAlgorithm.EvolveViableGenome(out initializationEvaluations);
-
-            // Create complexity regulation strategy.
-            var complexityRegulationStrategy =
-                ExperimentUtils.CreateComplexityRegulationStrategy(ComplexityRegulationStrategy, Complexitythreshold);
-
-            // Create the evolution algorithm.
-            AbstractNeatEvolutionAlgorithm<NeatGenome> ea =
-                new QueueingNeatEvolutionAlgorithm<NeatGenome>(NeatEvolutionAlgorithmParameters,
-                    complexityRegulationStrategy, _batchSize, RunPhase.Primary, (_bridgingMagnitude > 0),
-                    _evolutionDataLogger, _experimentLogFieldEnableMap);
-
-            // Create IBlackBox evaluator.
-            IPhenomeEvaluator<IBlackBox, BehaviorInfo> mazeNavigationEvaluator =
-                new MazeNavigationMCSEvaluator(MaxDistanceToTarget, MaxTimesteps,
-                    MazeVariant, MinSuccessDistance, _behaviorCharacterizationFactory,
-                    _bridgingMagnitude, _bridgingApplications, initializationEvaluations);
-
-            // Create genome decoder.
-            IGenomeDecoder<NeatGenome, IBlackBox> genomeDecoder = CreateGenomeDecoder();
-
-            IGenomeEvaluator<NeatGenome> fitnessEvaluator =
-                new SerialGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
-                    SelectionType.Queueing, SearchType.MinimalCriteriaSearch, _evaluationDataLogger,
-                    SerializeGenomeToXml);
-
-//            IGenomeEvaluator<NeatGenome> fitnessEvaluator =
-//                new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
-//                    SelectionType.Queueing, SearchType.MinimalCriteriaSearch, _evaluationDataLogger,
-//                    SerializeGenomeToXml);
-
-            // Initialize the evolution algorithm.
-            ea.Initialize(fitnessEvaluator, genomeFactory, new List<NeatGenome> {genomeSeed}, DefaultPopulationSize,
-                null, MaxEvaluations + startingEvaluations);
-
-            // Finished. Return the evolution algorithm
-            return ea;
+            return null;
         }
 
         private class InitializationAlgorithm

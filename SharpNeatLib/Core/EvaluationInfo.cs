@@ -143,6 +143,11 @@ namespace SharpNeat.Core
         /// </summary>
         public int FitnessHistoryLength { get; }
 
+        /// <summary>
+        ///     The behavioral niche into which the genome is mapped.
+        /// </summary>
+        public uint NicheId { get; set; }
+
         #endregion
 
         #region Public Methods

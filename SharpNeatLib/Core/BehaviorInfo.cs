@@ -1,4 +1,8 @@
-﻿using System;
+﻿#region
+
+using System;
+
+#endregion
 
 namespace SharpNeat.Core
 {
@@ -7,10 +11,16 @@ namespace SharpNeat.Core
     /// </summary>
     public class BehaviorInfo : ITrialInfo
     {
+        #region Public members
+
         /// <summary>
         ///     Preconstructed BehaviorInfo indicating "no behavior".
         /// </summary>
         public static BehaviorInfo NoBehavior = new BehaviorInfo(new double[0]);
+
+        #endregion
+
+        #region Constructors
 
         /// <summary>
         ///     Default constructor.
@@ -21,6 +31,16 @@ namespace SharpNeat.Core
             Behaviors = behaviors;
             DoesBehaviorSatisfyMinimalCriteria = true;
         }
+
+        #endregion
+
+        #region Public properties
+
+        /// <summary>
+        ///     The genotypic, phenotypic, or behavioral niche into which the organism under evaluation maps based on the
+        ///     evaluation.
+        /// </summary>
+        public uint NicheId { get; set; }
 
         /// <summary>
         ///     The numeric behavior representation.
@@ -38,6 +58,10 @@ namespace SharpNeat.Core
         ///     implementation still seems a bit clumsy.
         /// </summary>
         public double ObjectiveDistance { get; set; }
+
+        #endregion
+
+        #region Public methods
 
         /// <summary>
         ///     Calculates the distance between two behaviors.
@@ -82,5 +106,7 @@ namespace SharpNeat.Core
 
             return Math.Sqrt(distance);
         }
+
+        #endregion
     }
 }

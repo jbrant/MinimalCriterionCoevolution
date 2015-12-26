@@ -16,56 +16,19 @@ using SharpNeat.Phenomes;
 
 namespace SharpNeat.Domains.MazeNavigation
 {
+    /// <summary>
+    ///     The base class for all maze navigation experiments.
+    /// </summary>
     public abstract class BaseMazeNavigationExperiment : IGuiNeatExperiment
     {
+        #region Private members
+
+        /// <summary>
+        ///     The activation scheme (i.e. cyclic or acyclic).
+        /// </summary>
         private NetworkActivationScheme _activationScheme;
-        protected string ComplexityRegulationStrategy;
-        protected int? Complexitythreshold;
-        protected int? MaxDistanceToTarget;
-        protected ulong? MaxEvaluations;
-        protected int? MaxGenerations;
-        protected int? MaxTimesteps;
-        protected MazeVariant MazeVariant;
-        protected int? MinSuccessDistance;
-        protected ParallelOptions ParallelOptions;
-        protected bool SerializeGenomeToXml;
 
-        /// <summary>
-        ///     Name of the experiment.
-        /// </summary>
-        public string Name { get; private set; }
-
-        /// <summary>
-        ///     Description of the experiment.
-        /// </summary>
-        public string Description { get; private set; }
-
-        /// <summary>
-        ///     The neural network input count (excluding the bias).
-        /// </summary>
-        public int InputCount => 10;
-
-        /// <summary>
-        ///     The neural network output count.
-        /// </summary>
-        public int OutputCount => 2;
-
-        /// <summary>
-        ///     The default population size for the experiment.
-        /// </summary>
-        public int DefaultPopulationSize { get; private set; }
-
-        /// <summary>
-        ///     The NEAT parameters to use for the experiment.
-        /// </summary>
-        public NeatEvolutionAlgorithmParameters NeatEvolutionAlgorithmParameters { get; private set; }
-
-        /// <summary>
-        ///     The NEAT genome parameters to use for the experiment.
-        /// </summary>
-        public NeatGenomeParameters NeatGenomeParameters { get; private set; }
-
-        public int? MaxRestarts { get; private set; }
+        #endregion
 
         /// <summary>
         ///     Initialize the experiment with configuration file parameters.
@@ -103,9 +66,9 @@ namespace SharpNeat.Domains.MazeNavigation
             NeatGenomeParameters.FeedforwardOnly = _activationScheme.AcyclicNetwork;
 
             // Set experiment-specific parameters
-            MaxTimesteps = XmlUtils.TryGetValueAsInt(xmlConfig, "MaxTimesteps");
-            MinSuccessDistance = XmlUtils.TryGetValueAsInt(xmlConfig, "MinSuccessDistance");
-            MaxDistanceToTarget = XmlUtils.TryGetValueAsInt(xmlConfig, "MaxDistanceToTarget");
+            MaxTimesteps = XmlUtils.GetValueAsInt(xmlConfig, "MaxTimesteps");
+            MinSuccessDistance = XmlUtils.GetValueAsInt(xmlConfig, "MinSuccessDistance");
+            MaxDistanceToTarget = XmlUtils.GetValueAsInt(xmlConfig, "MaxDistanceToTarget");
             MazeVariant =
                 MazeVariantUtil.convertStringToMazeVariant(XmlUtils.TryGetValueAsString(xmlConfig, "MazeVariant"));
         }
@@ -185,7 +148,6 @@ namespace SharpNeat.Domains.MazeNavigation
         ///     Create and return a GenerationalNeatEvolutionAlgorithm object ready for running the NEAT algorithm/search. Various
         ///     sub-parts of the algorithm are also constructed and connected up.  Uses the default population size.
         /// </summary>
-        /// <param name="startingEvaluations">The number of evaluations that have been executed prior to the current run.</param>
         /// <returns>NEAT evolutionary algorithm</returns>
         public INeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm()
         {
@@ -226,8 +188,7 @@ namespace SharpNeat.Domains.MazeNavigation
         /// <returns></returns>
         public AbstractDomainView CreateDomainView()
         {
-            return new MazeNavigationView(new NeatGenomeDecoder(_activationScheme),
-                new MazeNavigationWorld<ITrialInfo>(MazeVariant, MinSuccessDistance, MaxDistanceToTarget, MaxTimesteps));
+            return null;
         }
 
         /// <summary>
@@ -257,5 +218,104 @@ namespace SharpNeat.Domains.MazeNavigation
         public abstract INeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(
             IGenomeFactory<NeatGenome> genomeFactory,
             List<NeatGenome> genomeList, ulong startingEvaluations);
+
+        #region Public properties
+
+        /// <summary>
+        ///     The maximum number of experiment restarts allowed (usually from a new seed).
+        /// </summary>
+        public int? MaxRestarts { get; private set; }
+
+        /// <summary>
+        ///     Name of the experiment.
+        /// </summary>
+        public string Name { get; private set; }
+
+        /// <summary>
+        ///     Description of the experiment.
+        /// </summary>
+        public string Description { get; private set; }
+
+        /// <summary>
+        ///     The neural network input count (excluding the bias).
+        /// </summary>
+        public int InputCount => 10;
+
+        /// <summary>
+        ///     The neural network output count.
+        /// </summary>
+        public int OutputCount => 2;
+
+        /// <summary>
+        ///     The default population size for the experiment.
+        /// </summary>
+        public int DefaultPopulationSize { get; private set; }
+
+        /// <summary>
+        ///     The NEAT parameters to use for the experiment.
+        /// </summary>
+        public NeatEvolutionAlgorithmParameters NeatEvolutionAlgorithmParameters { get; private set; }
+
+        /// <summary>
+        ///     The NEAT genome parameters to use for the experiment.
+        /// </summary>
+        public NeatGenomeParameters NeatGenomeParameters { get; private set; }
+
+        #endregion
+
+        #region Protected members
+
+        /// <summary>
+        ///     The strategy for decomplexifying once the network reaches a certain size (i.e. relative to other networks or an
+        ///     absolute number of genes).
+        /// </summary>
+        protected string ComplexityRegulationStrategy;
+
+        /// <summary>
+        ///     The threshold at which the network should be de-complexified (in terms of the number of genes).
+        /// </summary>
+        protected int? Complexitythreshold;
+
+        /// <summary>
+        ///     The maximum possible distance to the target location.
+        /// </summary>
+        protected int MaxDistanceToTarget;
+
+        /// <summary>
+        ///     The maximum number of evaluations allowed (optional).
+        /// </summary>
+        protected ulong? MaxEvaluations;
+
+        /// <summary>
+        ///     The maximum number of generations allowed (optional).
+        /// </summary>
+        protected int? MaxGenerations;
+
+        /// <summary>
+        ///     The maximum number of timesteps allowed for a single simulation.
+        /// </summary>
+        protected int MaxTimesteps;
+
+        /// <summary>
+        ///     The maze to use as the simulation environment.
+        /// </summary>
+        protected MazeVariant MazeVariant;
+
+        /// <summary>
+        ///     The minimum distance to the target required in order to have "solved" the maze.
+        /// </summary>
+        protected int MinSuccessDistance;
+
+        /// <summary>
+        ///     Switches between synchronous and asynchronous execution (with user-defined number of threads).
+        /// </summary>
+        protected ParallelOptions ParallelOptions;
+
+        /// <summary>
+        ///     Dictates whether genome XML should be serialized and logged.
+        /// </summary>
+        protected bool SerializeGenomeToXml;
+
+        #endregion
     }
 }

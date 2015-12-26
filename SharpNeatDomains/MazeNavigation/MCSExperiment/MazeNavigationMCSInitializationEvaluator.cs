@@ -10,26 +10,57 @@ using SharpNeat.Phenomes;
 
 namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 {
+    /// <summary>
+    ///     Defines evaluation rules and process for an initialization evaluation of the minimal criteria search (MCS)
+    ///     algorithm.
+    /// </summary>
     internal class MazeNavigationMCSInitializationEvaluator : IPhenomeEvaluator<IBlackBox, BehaviorInfo>
     {
-        private readonly IBehaviorCharacterizationFactory _behaviorCharacterizationFactory;
-        private readonly int? _maxDistanceToTarget;
-        private readonly int? _maxTimesteps;
-        private readonly MazeVariant _mazeVariant;
-        private readonly int? _minSuccessDistance;
-        private readonly object evaluationLock = new object();
+        #region Constructor
 
-        internal MazeNavigationMCSInitializationEvaluator(int? maxDistanceToTarget, int? maxTimesteps,
-            MazeVariant mazeVariant, int? minSuccessDistance,
+        /// <summary>
+        ///     MCS Initialization Evaluator constructor.
+        /// </summary>
+        /// <param name="maxDistanceToTarget">The maximum distance possible from the target location.</param>
+        /// <param name="maxTimesteps">The maximum number of time steps in a single simulation.</param>
+        /// <param name="mazeVariant">The maze environment used for the simulation.</param>
+        /// <param name="minSuccessDistance">The minimum distance from the target to be considered a successful run.</param>
+        /// <param name="behaviorCharacterizationFactory">The initialized behavior characterization factory.</param>
+        /// <param name="startingEvaluations">Number of evaluations that have been executed prior to this run.</param>
+        internal MazeNavigationMCSInitializationEvaluator(int maxDistanceToTarget, int maxTimesteps,
+            MazeVariant mazeVariant, int minSuccessDistance,
             IBehaviorCharacterizationFactory behaviorCharacterizationFactory, ulong startingEvaluations)
         {
-            _maxDistanceToTarget = maxDistanceToTarget;
-            _maxTimesteps = maxTimesteps;
-            _mazeVariant = mazeVariant;
-            _minSuccessDistance = minSuccessDistance;
             _behaviorCharacterizationFactory = behaviorCharacterizationFactory;
             EvaluationCount = startingEvaluations;
+
+            // Create the maze world factory
+            _mazeWorldFactory = new MazeNavigationWorldFactory<BehaviorInfo>(mazeVariant, minSuccessDistance,
+                maxDistanceToTarget, maxTimesteps);
         }
+
+        #endregion
+
+        #region Private members
+
+        /// <summary>
+        ///     The behavior characterization factory.
+        /// </summary>
+        private readonly IBehaviorCharacterizationFactory _behaviorCharacterizationFactory;
+
+        /// <summary>
+        ///     The maze navigation world factory.
+        /// </summary>
+        private readonly MazeNavigationWorldFactory<BehaviorInfo> _mazeWorldFactory;
+
+        /// <summary>
+        ///     Lock object for synchronizing evaluation counter increments.
+        /// </summary>
+        private readonly object _evaluationLock = new object();
+
+        #endregion
+
+        #region Public properties
 
         /// <summary>
         ///     Gets the total number of evaluations that have been performed.
@@ -42,11 +73,24 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         /// </summary>
         public bool StopConditionSatisfied { get; private set; }
 
+        #endregion
+
+        #region Public methods
+
+        /// <summary>
+        ///     Runs a phenome (i.e. maze navigator brain) through a single maze trial.
+        /// </summary>
+        /// <param name="phenome">The maze navigator brain (ANN).</param>
+        /// <param name="currentGeneration">The current generation or evaluation batch.</param>
+        /// <param name="isBridgingEvaluation">Indicates whether bridging is enabled for this evaluation.</param>
+        /// <param name="evaluationLogger">Reference to the evaluation logger.</param>
+        /// <param name="genomeXml">The string-representation of the genome (for logging purposes).</param>
+        /// <returns>A behavior info (which is a type of behavior-based trial information).</returns>
         public BehaviorInfo Evaluate(IBlackBox phenome, uint currentGeneration, bool isBridgingEvaluation,
             IDataLogger evaluationLogger, string genomeXml)
         {
             ulong threadLocalEvaluationCount;
-            lock (evaluationLock)
+            lock (_evaluationLock)
             {
                 // Increment evaluation count
                 threadLocalEvaluationCount = EvaluationCount++;
@@ -60,9 +104,8 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                 _behaviorCharacterizationFactory.CreateBehaviorCharacterization();
 
             // Instantiate the maze world
-            MazeNavigationWorld<BehaviorInfo> world = new MazeNavigationWorld<BehaviorInfo>(_mazeVariant,
-                _minSuccessDistance, _maxDistanceToTarget,
-                _maxTimesteps, behaviorCharacterization);
+            MazeNavigationWorld<BehaviorInfo> world =
+                _mazeWorldFactory.CreateMazeNavigationWorld(behaviorCharacterization);
 
             // Run a single trial
             BehaviorInfo trialInfo = world.RunTrial(phenome, SearchType.NoveltySearch, out goalReached);
@@ -111,8 +154,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                 new LoggableElement(EvaluationFieldElements.RunPhase, RunPhase.Initialization),
                 new LoggableElement(EvaluationFieldElements.IsViable, false)
             },
-                new MazeNavigationWorld<FitnessInfo>(_mazeVariant, _minSuccessDistance, _maxDistanceToTarget,
-                    _maxTimesteps).GetLoggableElements());
+                _mazeWorldFactory.CreateMazeNavigationWorld().GetLoggableElements());
         }
 
         /// <summary>
@@ -121,5 +163,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         public void Reset()
         {
         }
+
+        #endregion
     }
 }

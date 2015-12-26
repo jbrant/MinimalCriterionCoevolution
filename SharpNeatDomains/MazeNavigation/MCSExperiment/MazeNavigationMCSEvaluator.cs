@@ -10,31 +10,102 @@ using SharpNeat.Phenomes;
 
 namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 {
+    /// <summary>
+    ///     Defines evaluation rules and process for an evaluation of the minimal criteria search (MCS) algorithm.
+    /// </summary>
     public class MazeNavigationMCSEvaluator : IPhenomeEvaluator<IBlackBox, BehaviorInfo>
     {
-        private readonly IBehaviorCharacterizationFactory _behaviorCharacterizationFactory;
-        private readonly int _bridgingMagnitude;
-        private readonly int? _maxDistanceToTarget;
-        private readonly int? _maxTimesteps;
-        private readonly MazeVariant _mazeVariant;
-        private readonly int? _minSuccessDistance;
-        private readonly int _numBridgingApplications;
-        private readonly object evaluationLock = new object();
-        private bool _stopConditionSatisfied;
+        #region Constructors
 
-        internal MazeNavigationMCSEvaluator(int? maxDistanceToTarget, int? maxTimesteps, MazeVariant mazeVariant,
-            int? minSuccessDistance, IBehaviorCharacterizationFactory behaviorCharacterizationFactory,
-            ulong initializationEvaluations = 0, int bridgingMagnitude = 0, int numBridgingApplications = 0)
+        /// <summary>
+        ///     MCS Evaluator constructor.
+        /// </summary>
+        /// <param name="maxDistanceToTarget">The maximum distance possible from the target location.</param>
+        /// <param name="maxTimesteps">The maximum number of time steps in a single simulation.</param>
+        /// <param name="mazeVariant">The maze environment used for the simulation.</param>
+        /// <param name="minSuccessDistance">The minimum distance from the target to be considered a successful run.</param>
+        /// <param name="behaviorCharacterizationFactory">The initialized behavior characterization factory.</param>
+        /// <param name="initializationEvaluations">The number of evaluations that were expended during intialization.</param>
+        internal MazeNavigationMCSEvaluator(int maxDistanceToTarget, int maxTimesteps, MazeVariant mazeVariant,
+            int minSuccessDistance, IBehaviorCharacterizationFactory behaviorCharacterizationFactory,
+            ulong initializationEvaluations = 0)
         {
-            _maxDistanceToTarget = maxDistanceToTarget;
-            _maxTimesteps = maxTimesteps;
-            _mazeVariant = mazeVariant;
-            _minSuccessDistance = minSuccessDistance;
             _behaviorCharacterizationFactory = behaviorCharacterizationFactory;
             EvaluationCount = initializationEvaluations;
-            _bridgingMagnitude = bridgingMagnitude;
-            _numBridgingApplications = numBridgingApplications;
+
+            // Create the maze world factory
+            _mazeWorldFactory = new MazeNavigationWorldFactory<BehaviorInfo>(mazeVariant, minSuccessDistance,
+                maxDistanceToTarget, maxTimesteps);
         }
+
+        /// <summary>
+        ///     MCS Evaluator constructor with bridging.
+        /// </summary>
+        /// <param name="maxDistanceToTarget">The maximum distance possible from the target location.</param>
+        /// <param name="maxTimesteps">The maximum number of time steps in a single simulation.</param>
+        /// <param name="mazeVariant">The maze environment used for the simulation.</param>
+        /// <param name="minSuccessDistance">The minimum distance from the target to be considered a successful run.</param>
+        /// <param name="behaviorCharacterizationFactory">The initialized behavior characterization factory.</param>
+        /// <param name="bridgingMagnitude">The degree heading adjustment imposed by bridging.</param>
+        /// <param name="numBridgingApplications">The maximum number of times bridging heading adjustment can be applied.</param>
+        /// <param name="initializationEvaluations">The number of evaluations that were expended during intialization.</param>
+        internal MazeNavigationMCSEvaluator(int maxDistanceToTarget, int maxTimesteps, MazeVariant mazeVariant,
+            int minSuccessDistance, IBehaviorCharacterizationFactory behaviorCharacterizationFactory,
+            int bridgingMagnitude, int numBridgingApplications,
+            ulong initializationEvaluations = 0)
+        {
+            _behaviorCharacterizationFactory = behaviorCharacterizationFactory;
+            EvaluationCount = initializationEvaluations;
+
+            // Create the maze world factory
+            _mazeWorldFactory = new MazeNavigationWorldFactory<BehaviorInfo>(mazeVariant, minSuccessDistance,
+                maxDistanceToTarget, maxTimesteps, bridgingMagnitude, numBridgingApplications);
+        }
+
+        /// <summary>
+        ///     MCS Evaluator constructor with grid-based niching.
+        /// </summary>
+        /// <param name="maxDistanceToTarget">The maximum distance possible from the target location.</param>
+        /// <param name="maxTimesteps">The maximum number of time steps in a single simulation.</param>
+        /// <param name="mazeVariant">The maze environment used for the simulation.</param>
+        /// <param name="minSuccessDistance">The minimum distance from the target to be considered a successful run.</param>
+        /// <param name="behaviorCharacterizationFactory">The initialized behavior characterization factory.</param>
+        /// <param name="initializationEvaluations">The number of evaluations that were expended during intialization.</param>
+        /// <param name="gridDensity">The density of the niche grid.</param>
+        internal MazeNavigationMCSEvaluator(int maxDistanceToTarget, int maxTimesteps, MazeVariant mazeVariant,
+            int minSuccessDistance, IBehaviorCharacterizationFactory behaviorCharacterizationFactory, uint gridDensity,
+            ulong initializationEvaluations = 0)
+        {
+            _behaviorCharacterizationFactory = behaviorCharacterizationFactory;
+            EvaluationCount = initializationEvaluations;
+
+            // Create the maze world factory
+            _mazeWorldFactory = new MazeNavigationWorldFactory<BehaviorInfo>(mazeVariant, minSuccessDistance,
+                maxDistanceToTarget, maxTimesteps, gridDensity);
+        }
+
+        #endregion
+
+        #region Private members
+
+        /// <summary>
+        ///     The behavior characterization factory.
+        /// </summary>
+        private readonly IBehaviorCharacterizationFactory _behaviorCharacterizationFactory;
+
+        /// <summary>
+        ///     The maze navigation world factory.
+        /// </summary>
+        private readonly MazeNavigationWorldFactory<BehaviorInfo> _mazeWorldFactory;
+
+        /// <summary>
+        ///     Lock object for synchronizing evaluation counter increments.
+        /// </summary>
+        private readonly object _evaluationLock = new object();
+
+        #endregion
+
+        #region Public properties
 
         /// <summary>
         ///     Gets the total number of evaluations that have been performed.
@@ -47,6 +118,19 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         /// </summary>
         public bool StopConditionSatisfied { get; private set; }
 
+        #endregion
+
+        #region Public methods
+
+        /// <summary>
+        ///     Runs a phenome (i.e. maze navigator brain) through a single maze trial.
+        /// </summary>
+        /// <param name="phenome">The maze navigator brain (ANN).</param>
+        /// <param name="currentGeneration">The current generation or evaluation batch.</param>
+        /// <param name="isBridgingEvaluation">Indicates whether bridging is enabled for this evaluation.</param>
+        /// <param name="evaluationLogger">Reference to the evaluation logger.</param>
+        /// <param name="genomeXml">The string-representation of the genome (for logging purposes).</param>
+        /// <returns>A behavior info (which is a type of behavior-based trial information).</returns>
         public BehaviorInfo Evaluate(IBlackBox phenome, uint currentGeneration, bool isBridgingEvaluation,
             IDataLogger evaluationLogger, string genomeXml)
         {
@@ -55,7 +139,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             // Only increment the evaluation count if this is a regular (i.e. non-bridging) evaluation
             if (isBridgingEvaluation == false)
             {
-                lock (evaluationLock)
+                lock (_evaluationLock)
                 {
                     // Increment evaluation count
                     threadLocalEvaluationCount = EvaluationCount++;
@@ -69,10 +153,9 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             IBehaviorCharacterization behaviorCharacterization =
                 _behaviorCharacterizationFactory.CreateBehaviorCharacterization();
 
-            // Instantiate the maze world
-            MazeNavigationWorld<BehaviorInfo> world = new MazeNavigationWorld<BehaviorInfo>(_mazeVariant,
-                _minSuccessDistance, _maxDistanceToTarget, _maxTimesteps, behaviorCharacterization,
-                isBridgingEvaluation ? _bridgingMagnitude : 0, _numBridgingApplications);
+            // Generate a new maze world
+            MazeNavigationWorld<BehaviorInfo> world =
+                _mazeWorldFactory.CreateMazeNavigationWorld(behaviorCharacterization, isBridgingEvaluation);
 
             // Run a single trial
             BehaviorInfo trialInfo = world.RunTrial(phenome, SearchType.MinimalCriteriaSearch,
@@ -96,7 +179,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                 StopConditionSatisfied = true;
                 trialInfo.DoesBehaviorSatisfyMinimalCriteria = true;
             }
-            
+
             // Log trial information (only log for non-bridging evaluations)
             if (isBridgingEvaluation == false)
             {
@@ -132,8 +215,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                 new LoggableElement(EvaluationFieldElements.RunPhase, RunPhase.Initialization),
                 new LoggableElement(EvaluationFieldElements.IsViable, false)
             },
-                new MazeNavigationWorld<FitnessInfo>(_mazeVariant, _minSuccessDistance, _maxDistanceToTarget,
-                    _maxTimesteps).GetLoggableElements());
+                _mazeWorldFactory.CreateMazeNavigationWorld().GetLoggableElements());
         }
 
         /// <summary>
@@ -142,5 +224,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         public void Reset()
         {
         }
+
+        #endregion
     }
 }

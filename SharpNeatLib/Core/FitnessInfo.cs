@@ -20,42 +20,64 @@
 namespace SharpNeat.Core
 {
     /// <summary>
-    /// Wrapper struct for fitness values.
+    ///     Wrapper struct for fitness values.
     /// </summary>
-    public struct FitnessInfo : ITrialInfo
+    public class FitnessInfo : ITrialInfo
     {
+        #region Public members
+
         /// <summary>
-        /// Precosntructed FitnessInfo for commen case of representing zero fitness.
+        ///     Precosntructed FitnessInfo for commen case of representing zero fitness.
         /// </summary>
         public static FitnessInfo Zero = new FitnessInfo(0.0, 0.0);
 
-        /// <summary>
-        /// Fitness score.
-        /// </summary>
-        public double _fitness;
+        #endregion
+
+        #region Constructors
 
         /// <summary>
-        /// Auxiliary fitness info, i.e. for evaluation metrics other than the
-        /// primary fitness metric but that nonetheless we are interested in observing.
+        ///     Construct with the provided fitness value and auxiliary fitness info.
         /// </summary>
-        public AuxFitnessInfo[] _auxFitnessArr;
-
-        /// <summary>
-        /// Default constructor.
-        /// </summary>
+        /// <param name="fitness">The primary fitness of the organism evaluated.</param>
+        /// <param name="alternativeFitness">Alternative fitness measure for the organism evaluated.</param>
         public FitnessInfo(double fitness, double alternativeFitness)
         {
-            _fitness = fitness;
-            _auxFitnessArr = new AuxFitnessInfo[] {new AuxFitnessInfo("Alternative Fitness", alternativeFitness)};
+            Fitness = fitness;
+            AuxFitnessArr = new[] {new AuxFitnessInfo("Alternative Fitness", alternativeFitness)};
         }
 
         /// <summary>
-        /// Construct with the provided fitness value and auxiliary fitness info.
+        ///     Construct with the provided fitness value and auxiliary fitness info array.
         /// </summary>
+        /// <param name="fitness">The primary fitness of the organism evaluated.</param>
+        /// <param name="auxFitnessArr">Array of alternative fitness measures for the organism evaluated.</param>
         public FitnessInfo(double fitness, AuxFitnessInfo[] auxFitnessArr)
         {
-            _fitness = fitness;
-            _auxFitnessArr = auxFitnessArr;
+            Fitness = fitness;
+            AuxFitnessArr = auxFitnessArr;
         }
+
+        #endregion
+
+        #region Public properties
+
+        /// <summary>
+        ///     Auxiliary fitness info, i.e. for evaluation metrics other than the
+        ///     primary fitness metric but that nonetheless we are interested in observing.
+        /// </summary>
+        public AuxFitnessInfo[] AuxFitnessArr { get; private set; }
+
+        /// <summary>
+        ///     Fitness score.
+        /// </summary>
+        public double Fitness { get; private set; }
+
+        /// <summary>
+        ///     The genotypic, phenotypic, or behavioral niche into which the organism under evaluation maps based on the
+        ///     evaluation.
+        /// </summary>
+        public uint NicheId { get; set; }
+
+        #endregion
     }
 }

@@ -107,6 +107,7 @@
     <Compile Include="Core\IMinimalCriteria.cs" />
     <Compile Include="Core\INoveltyArchive.cs" />
     <Compile Include="Core\RunPhase.cs" />
+    <Compile Include="EvolutionAlgorithms\QueueingNichedNeatEvolutionAlgorithm.cs" />
     <Compile Include="EvolutionAlgorithms\QueueingNeatEvolutionAlgorithm.cs" />
     <Compile Include="Loggers\AbstractEntityDataLogger.cs" />
     <Compile Include="Loggers\LoggingParameters.cs" />

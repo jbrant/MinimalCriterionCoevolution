@@ -18,7 +18,6 @@ using SharpNeat.Domains.MazeNavigation.MCNSExperiment;
 using SharpNeat.Domains.MazeNavigation.MCSExperiment;
 using SharpNeat.Domains.MazeNavigation.NoveltyExperiment;
 using SharpNeat.Domains.MazeNavigation.RandomExperiment;
-using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Loggers;
 
@@ -172,7 +171,7 @@ namespace SharpNeatConsole
             xmlConfig.Load(experimentConfigurationFiles[0]);
 
             // Determine which experiment to execute
-            BaseMazeNavigationExperiment experiment = DetermnineMazeNavigationExperiment(xmlConfig.DocumentElement);
+            BaseMazeNavigationExperiment experiment = DetermineMazeNavigationExperiment(xmlConfig.DocumentElement);
 
             // Execute the experiment for the specified number of runs
             for (int runIdx = 0; runIdx < numRuns; runIdx++)
@@ -200,7 +199,7 @@ namespace SharpNeatConsole
                 int curRestarts = 0;
 
                 do
-                {                    
+                {
                     // Open and load population XML file.
                     using (XmlReader xr = XmlReader.Create(seedPopulationFiles[runIdx]))
                     {
@@ -363,7 +362,7 @@ namespace SharpNeatConsole
         /// </summary>
         /// <param name="xmlConfig">The reference to the root node of the XML configuration file.</param>
         /// <returns>The appropriate maze navigation experiment class.</returns>
-        private static BaseMazeNavigationExperiment DetermnineMazeNavigationExperiment(XmlElement xmlConfig)
+        private static BaseMazeNavigationExperiment DetermineMazeNavigationExperiment(XmlElement xmlConfig)
         {
             // Get the search and selection algorithm types
             string searchAlgorithm = XmlUtils.TryGetValueAsString(xmlConfig, "SearchAlgorithm");
@@ -418,6 +417,10 @@ namespace SharpNeatConsole
                     if (SelectionType.SteadyState.Equals(selectionType))
                     {
                         return new SteadyStateMazeNavigationMCSExperiment();
+                    }
+                    if (SelectionType.QueueingWithNiching.Equals(selectionType))
+                    {
+                        return new QueueingNichedMazeNavigationMCSExperiment();
                     }
                     return new QueueingMazeNavigationMCSExperiment();
 

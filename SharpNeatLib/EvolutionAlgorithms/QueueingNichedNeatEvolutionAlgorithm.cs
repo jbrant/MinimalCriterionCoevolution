@@ -16,12 +16,12 @@ using SharpNeat.SpeciationStrategies;
 namespace SharpNeat.EvolutionAlgorithms
 {
     /// <summary>
-    ///     Implementation of a queue-based NEAT evolution algorithm.  Note that this omits the speciation aspects of NEAT
-    ///     (because the algorithm inherently imposes no preference other than age-based removal) and reproduction is asexual
-    ///     only.
+    ///     Implementation of a queue-based NEAT evolution algorithm with a separate queue per niche (whether genetic or
+    ///     behavioral).  Note that this omits the speciation aspects of NEAT (because the algorithm inherently imposes no
+    ///     preference other than age-based removal) and reproduction is asexual only.
     /// </summary>
     /// <typeparam name="TGenome">The genome type that the algorithm will operate on.</typeparam>
-    public class QueueingNeatEvolutionAlgorithm<TGenome> : AbstractNeatEvolutionAlgorithm<TGenome>
+    public class QueueingNichedNeatEvolutionAlgorithm<TGenome> : AbstractNeatEvolutionAlgorithm<TGenome>
         where TGenome : class, IGenome<TGenome>
     {
         #region Instance Fields
@@ -32,9 +32,9 @@ namespace SharpNeat.EvolutionAlgorithms
         private readonly int _batchSize;
 
         /// <summary>
-        ///     Flag that indicates whether bridging (i.e. a temporary nudge in a potentially beneficial direction) is enabled.
+        ///     The genome populations in each niche.
         /// </summary>
-        private readonly bool _isBridgingEnabled;
+        private Dictionary<uint, List<TGenome>> _nichePopulations;
 
         #endregion
 
@@ -117,7 +117,11 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </summary>
         protected override void PerformOneGeneration()
         {
-            bool useAuxFitnessForBestGenome = false;
+            // Produce offspring from each niche and evaluate
+            foreach (KeyValuePair<uint, List<TGenome>> nichePopulation in _nichePopulations)
+            {
+                
+            }
 
             // Get the initial batch size as the minimum of the batch size or the size of the population.
             // When we're first starting, the population will likely be smaller than the desired batch size.
@@ -128,31 +132,7 @@ namespace SharpNeat.EvolutionAlgorithms
 
             // First evaluate the offspring batch with bridging disabled
             GenomeEvaluator.Evaluate(childGenomes, CurrentGeneration);
-
-            // If no one met the stop condition, evaluate the batch with bridging
-            if (_isBridgingEnabled && GenomeEvaluator.StopConditionSatisfied == false)
-            {
-                // Store off fitnesses calculated without bridging
-                List<AuxFitnessInfo> fitnessesWithoutBridging = new List<AuxFitnessInfo>(childGenomes.Count);
-                fitnessesWithoutBridging.AddRange(
-                    childGenomes.Select(
-                        childGenome => new AuxFitnessInfo("No Bridging Fitness", childGenome.EvaluationInfo.Fitness)));
-
-                // Evaluate genomes with bridging enabled
-                GenomeEvaluator.Evaluate(childGenomes, CurrentGeneration, enableBridging: true);
-
-                // Load the "no bridging" fitness as auxiliary fitness values
-                for (int cnt = 0; cnt < childGenomes.Count; cnt++)
-                {
-                    childGenomes[cnt].EvaluationInfo.AuxFitnessArr[0] = fitnessesWithoutBridging[cnt];
-                }
-
-                // If bridging was enabled, the primary fitness is now the fitness with bridging, which doesn't
-                // really give an indication of the inherent capabilities of the genome.  Therefore, the champ
-                // genome info needs to be set using the non-bridging fitness (which is now in the aux fitness)
-                useAuxFitnessForBestGenome = true;
-            }
-
+            
             // Remove child genomes that are not viable
             childGenomes.RemoveAll(genome => genome.EvaluationInfo.IsViable == false);
 
@@ -173,7 +153,7 @@ namespace SharpNeat.EvolutionAlgorithms
             Statistics._totalOffspringCount = (ulong) childGenomes.Count;
 
             // Update stats and store reference to best genome.
-            UpdateBestGenomeWithoutSpeciation(false, useAuxFitnessForBestGenome);
+            UpdateBestGenomeWithoutSpeciation(false, false);
             UpdateStats(false);
 
             Debug.Assert(GenomeList.Count <= PopulationSize);
@@ -197,11 +177,9 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     The experiment phase indicating whether this is an initialization process or the primary
         ///     algorithm.
         /// </param>
-        /// <param name="isBridgingEnabled">Flag that indicates whether bridging is enabled.</param>
-        public QueueingNeatEvolutionAlgorithm(IDataLogger logger = null, RunPhase runPhase = RunPhase.Primary,
-            bool isBridgingEnabled = false)
+        public QueueingNichedNeatEvolutionAlgorithm(IDataLogger logger = null, RunPhase runPhase = RunPhase.Primary)
             : this(
-                new NullComplexityRegulationStrategy(), 10, runPhase, isBridgingEnabled, logger)
+                new NullComplexityRegulationStrategy(), 10, runPhase, logger)
         {
             SpeciationStrategy = new KMeansClusteringStrategy<TGenome>(new ManhattanDistanceMetric());
             ComplexityRegulationStrategy = new NullComplexityRegulationStrategy();
@@ -217,21 +195,18 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     The experiment phase indicating whether this is an initialization process or the primary
         ///     algorithm.
         /// </param>
-        /// <param name="isBridgingEnabled">Flag that indicates whether bridging is enabled.</param>
         /// <param name="logger">The data logger (optional).</param>
         /// <param name="logFieldEnabledMap">Dictionary of logging fields that can be dynamically enabled or disabled.</param>
-        public QueueingNeatEvolutionAlgorithm(
+        public QueueingNichedNeatEvolutionAlgorithm(
             IComplexityRegulationStrategy complexityRegulationStrategy,
             int batchSize,
             RunPhase runPhase = RunPhase.Primary,
-            bool isBridgingEnabled = false,
             IDataLogger logger = null, IDictionary<FieldElement, bool> logFieldEnabledMap = null)
         {
             ComplexityRegulationStrategy = complexityRegulationStrategy;
             _batchSize = batchSize;
             EvolutionLogger = logger;
             RunPhase = runPhase;
-            _isBridgingEnabled = isBridgingEnabled;
             _logFieldEnabledMap = logFieldEnabledMap;
         }
 
@@ -245,21 +220,18 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     The experiment phase indicating whether this is an initialization process or the primary
         ///     algorithm.
         /// </param>
-        /// <param name="isBridgingEnabled">Flag that indicates whether bridging is enabled.</param>
         /// <param name="logger">The data logger (optional).</param>
         /// <param name="logFieldEnabledMap">Dictionary of logging fields that can be dynamically enabled or disabled.</param>
-        public QueueingNeatEvolutionAlgorithm(NeatEvolutionAlgorithmParameters eaParams,
+        public QueueingNichedNeatEvolutionAlgorithm(NeatEvolutionAlgorithmParameters eaParams,
             IComplexityRegulationStrategy complexityRegulationStrategy,
             int batchSize,
             RunPhase runPhase = RunPhase.Primary,
-            bool isBridgingEnabled = false,
             IDataLogger logger = null, IDictionary<FieldElement, bool> logFieldEnabledMap = null) : base(eaParams)
         {
             ComplexityRegulationStrategy = complexityRegulationStrategy;
             _batchSize = batchSize;
             EvolutionLogger = logger;
             RunPhase = runPhase;
-            _isBridgingEnabled = isBridgingEnabled;
             _logFieldEnabledMap = logFieldEnabledMap;
         }
 

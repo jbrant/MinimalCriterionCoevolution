@@ -11,8 +11,91 @@ using SharpNeat.Phenomes;
 
 namespace SharpNeat.Domains.MazeNavigation
 {
+    /// <summary>
+    ///     Sets up and runs the maze navigation simulation.
+    /// </summary>
+    /// <typeparam name="TTrialInfo">Information about a trial through the maze.</typeparam>
     public class MazeNavigationWorld<TTrialInfo> : ILoggable
     {
+        #region Constructors
+
+        /// <summary>
+        ///     Creates the maze navigation world (environment) given the experiment parameters.
+        /// </summary>
+        /// <param name="walls">The walls in the maze environemnt.</param>
+        /// <param name="mazeNicheGrid">Metadata about the grid of niches overlaying the maze.</param>
+        /// <param name="navigatorLocation">The starting location of the maze navigator.</param>
+        /// <param name="goalLocation">The location of the goal (target).</param>
+        /// <param name="minSuccessDistance">The minimum distance from the target for the trial to be considered a success.</param>
+        /// <param name="maxDistanceToTarget">The maximum distance from the target possible.</param>
+        /// <param name="maxTimeSteps">The maximum number of time steps to run a given trial.</param>
+        /// <param name="numBridgingApplications">The number of times to apply bridging during a given trial.</param>
+        /// ///
+        /// <param name="behaviorCharacterization">The behavior characterization for a navigator.</param>
+        public MazeNavigationWorld(List<Wall> walls, MazeNicheGrid mazeNicheGrid, DoublePoint navigatorLocation,
+            DoublePoint goalLocation,
+            int minSuccessDistance,
+            int maxDistanceToTarget, int maxTimeSteps,
+            int numBridgingApplications,
+            IBehaviorCharacterization behaviorCharacterization = null)
+        {
+            _walls = walls;
+            _goalLocation = goalLocation;
+            _minSuccessDistance = minSuccessDistance;
+            _maxDistanceToTarget = maxDistanceToTarget;
+            _maxTimesteps = maxTimeSteps;
+            _behaviorCharacterization = behaviorCharacterization;
+            _numBridgingApplications = numBridgingApplications;
+            _mazeNicheGrid = mazeNicheGrid;
+
+            // Instantiate the navigator
+            _navigator = new MazeNavigator(navigatorLocation);
+        }
+
+        #endregion
+
+        #region Private methods
+
+        /// <summary>
+        ///     Runs a single time step of the maze navigator.
+        /// </summary>
+        /// <param name="agent">
+        ///     The black box (neural network) that takes in the navigator sensors controls the navigator by
+        ///     outputting the angular velocity and speed differentials based on those inputs.
+        /// </param>
+        /// <param name="isBridgingTimestep">Indicates whether bridging should be applied in the current timestep.</param>
+        /// <param name="curBridgingApplications">
+        ///     The current number of times bridging has been applied.  This value
+        ///     will be incremented and the updated value used by the calling routine.
+        /// </param>
+        private void RunTimestep(IBlackBox agent, bool isBridgingTimestep, ref int curBridgingApplications)
+        {
+            // Reset the ANN input array
+            agent.InputSignalArray.Reset();
+
+            // Get the ANN input values
+            var annInputs = _navigator.GetAnnInputs();
+
+            // Set the inputs on the input signal array
+            for (var annInputIndex = 0; annInputIndex < annInputs.Length; annInputIndex++)
+            {
+                agent.InputSignalArray[annInputIndex] = annInputs[annInputIndex];
+            }
+
+            // Activate the network
+            agent.Activate();
+
+            // Decode the ANN output and update agent state
+            _navigator.TranslateAndApplyAnnOutputs(agent.OutputSignalArray[0], agent.OutputSignalArray[1]);
+
+            // Move the navigator to the new position (i.e. execute a single timestep)
+            _navigator.Move(_walls, _goalLocation, isBridgingTimestep, ref curBridgingApplications);
+        }
+
+        #endregion
+
+        #region Private members
+
         /// <summary>
         ///     Characterization to use for capturing navigator behavior.
         /// </summary>
@@ -24,14 +107,9 @@ namespace SharpNeat.Domains.MazeNavigation
         private readonly DoublePoint _goalLocation;
 
         /// <summary>
-        ///     Density of grid points (used to scale ending position into appropriate niche grid location).
-        /// </summary>
-        private readonly int _gridDensity;
-
-        /// <summary>
         ///     Maximum distance to the target (i.e. goal location).
         /// </summary>
-        private readonly int? _maxDistanceToTarget;
+        private readonly int _maxDistanceToTarget;
 
         /// <summary>
         ///     Maximum timesteps for the trial to run.
@@ -39,9 +117,14 @@ namespace SharpNeat.Domains.MazeNavigation
         private readonly int? _maxTimesteps;
 
         /// <summary>
+        ///     Encapsulates the maze boundaries and supporting methods for mapping ending locations into the niche grid.
+        /// </summary>
+        private readonly MazeNicheGrid _mazeNicheGrid;
+
+        /// <summary>
         ///     Minimum distance from the target for the evaluation to be considered a success.
         /// </summary>
-        private readonly int? _minSuccessDistance;
+        private readonly int _minSuccessDistance;
 
         /// <summary>
         ///     Reference to the navigator robot.
@@ -58,126 +141,9 @@ namespace SharpNeat.Domains.MazeNavigation
         /// </summary>
         private readonly List<Wall> _walls;
 
-        /// <summary>
-        ///     Creates the maze navigation world (environment) given the experiment parameters.
-        /// </summary>
-        /// <param name="mazeVariant">The maze variant to utilize (i.e. medium maze, hard maze, etc.).</param>
-        /// <param name="minSuccessDistance">The minimum distance from the target for the trial to be considered a success.</param>
-        /// <param name="maxDistanceToTarget">The maximum distance from the target possible.</param>
-        /// <param name="maxTimeSteps">The maximum number of time steps to run a given trial.</param>
-        /// <param name="behaviorCharacterization">The behavior characterization for a navigator.</param>
-        /// <param name="bridgingMagnitude">The magnitude of the navigator heading adjustment upon collision (i.e. bridging).</param>
-        /// <param name="numBridgingApplications">The number of times to apply bridging during a given trial.</param>
-        public MazeNavigationWorld(MazeVariant mazeVariant = MazeVariant.MediumMaze, int? minSuccessDistance = 5,
-            int? maxDistanceToTarget = 300, int? maxTimeSteps = 400,
-            IBehaviorCharacterization behaviorCharacterization = null, int bridgingMagnitude = 0,
-            int numBridgingApplications = 0)
-        {
-            _minSuccessDistance = minSuccessDistance;
-            _maxDistanceToTarget = maxDistanceToTarget;
-            _maxTimesteps = maxTimeSteps;
-            _behaviorCharacterization = behaviorCharacterization;
-            _numBridgingApplications = numBridgingApplications;
+        #endregion
 
-            switch (mazeVariant)
-            {
-                // Setup appropriate parameters for medium maze
-                case MazeVariant.MediumMaze:
-                    // Initialize the navigator at the appropriate starting location
-                    _navigator = new MazeNavigator(new DoublePoint(30, 22));
-
-                    // Initialize the goal location
-                    _goalLocation = new DoublePoint(270, 100);
-
-                    // Define all of the maze walls
-                    _walls = new List<Wall>(11)
-                    {
-                        // TODO: Set appropriate adjustment coefficients for the walls
-                        new Wall(new DoubleLine(293, 7, 289, 130), 1, 1, bridgingMagnitude),
-                        new Wall(new DoubleLine(289, 130, 6, 134), 1, 1, bridgingMagnitude),
-                        new Wall(new DoubleLine(6, 134, 8, 5), 1, 1, bridgingMagnitude),
-                        new Wall(new DoubleLine(8, 5, 292, 7), 1, 1, bridgingMagnitude),
-                        new Wall(new DoubleLine(241, 130, 58, 65), 1, 1, bridgingMagnitude),
-                        new Wall(new DoubleLine(114, 7, 73, 42), 1, 1, bridgingMagnitude),
-                        new Wall(new DoubleLine(130, 91, 107, 46), 1, 1, bridgingMagnitude),
-                        new Wall(new DoubleLine(196, 8, 139, 51), 1, 1, bridgingMagnitude),
-                        new Wall(new DoubleLine(219, 122, 182, 63), 1, 1, bridgingMagnitude),
-                        new Wall(new DoubleLine(267, 9, 214, 63), 1, 1, bridgingMagnitude),
-                        new Wall(new DoubleLine(271, 129, 237, 88), 1, 1, bridgingMagnitude)
-                    };
-                    break;
-
-                // Setup appropriate parameters for hard maze
-                case MazeVariant.HardMaze:
-                    // Initialize the navigator at the appropriate starting location
-                    _navigator = new MazeNavigator(new DoublePoint(36, 184));
-
-                    // Initialize the goal location
-                    _goalLocation = new DoublePoint(31, 20);
-
-                    // Define all of the maze walls
-                    _walls = new List<Wall>(13)
-                    {
-                        // Boundary walls
-                        new Wall(new DoubleLine(7, 202, 195, 198), -1, -1, bridgingMagnitude),
-                        new Wall(new DoubleLine(41, 5, 3, 8), -1, -1, bridgingMagnitude),
-                        new Wall(new DoubleLine(3, 8, 4, 49), 1, 1, bridgingMagnitude),
-                        new Wall(new DoubleLine(4, 49, 7, 202), 1, 1, bridgingMagnitude),
-                        new Wall(new DoubleLine(195, 198, 186, 8), -1, -1, bridgingMagnitude),
-                        new Wall(new DoubleLine(186, 8, 39, 5), -1, -1, bridgingMagnitude),
-
-                        // Obstructing walls
-                        new Wall(new DoubleLine(4, 49, 57, 53), 1, 1, bridgingMagnitude),
-                        new Wall(new DoubleLine(56, 54, 56, 157), -1, 1, bridgingMagnitude),
-                        new Wall(new DoubleLine(57, 106, 158, 162), 1, 1, bridgingMagnitude),
-                        new Wall(new DoubleLine(77, 201, 108, 164), -1, -1, bridgingMagnitude),
-                        new Wall(new DoubleLine(6, 80, 33, 121), -1, 1, bridgingMagnitude),
-                        new Wall(new DoubleLine(192, 146, 87, 91), -1, -1, bridgingMagnitude),
-                        new Wall(new DoubleLine(56, 55, 133, 30), 1, 1, bridgingMagnitude)
-                    };
-                    break;
-
-                // Setup appropriate parameters for open-ended medium maze
-                case MazeVariant.OpenEndedMediumMaze:
-                    // Initialize the navigator at the appropriate starting location
-                    _navigator = new MazeNavigator(new DoublePoint(30, 22));
-
-                    // Initialize the goal location
-                    _goalLocation = new DoublePoint(270, 100);
-
-                    // Define all of the maze walls
-                    _walls = new List<Wall>(10)
-                    {
-                        // TODO: Set appropriate adjustment coefficients for the walls
-                        new Wall(new DoubleLine(293, 7, 289, 130), 1, 1, bridgingMagnitude),
-                        new Wall(new DoubleLine(289, 130, 6, 134), 1, 1, bridgingMagnitude),
-
-                        // Left wall is missing here
-
-                        new Wall(new DoubleLine(8, 5, 292, 7), 1, 1, bridgingMagnitude),
-                        new Wall(new DoubleLine(241, 130, 58, 65), 1, 1, bridgingMagnitude),
-                        new Wall(new DoubleLine(114, 7, 73, 42), 1, 1, bridgingMagnitude),
-                        new Wall(new DoubleLine(130, 91, 107, 46), 1, 1, bridgingMagnitude),
-                        new Wall(new DoubleLine(196, 8, 139, 51), 1, 1, bridgingMagnitude),
-                        new Wall(new DoubleLine(219, 122, 182, 63), 1, 1, bridgingMagnitude),
-                        new Wall(new DoubleLine(267, 9, 214, 63), 1, 1, bridgingMagnitude),
-                        new Wall(new DoubleLine(271, 129, 237, 88), 1, 1, bridgingMagnitude)
-                    };
-                    break;
-
-                // Setup appropriate parameters for open-ended hard maze
-                case MazeVariant.OpenEndedHardMaze:
-                    // TODO: Need to implement this
-                    break;
-            }
-        }
-
-        public MazeNavigationWorld(MazeVariant mazeVariant = MazeVariant.MediumMaze, int? minSuccessDistance = 5,
-            int? maxDistanceToTarget = 300, int? maxTimeSteps = 400,
-            IBehaviorCharacterization behaviorCharacterization = null, int gridDensity = 20)
-            : this(mazeVariant, minSuccessDistance, maxDistanceToTarget, maxTimeSteps, behaviorCharacterization, 0, 0)
-        {
-        }
+        #region Public methods
 
         /// <summary>
         ///     Returns MazeNavigationWorld LoggableElements.
@@ -241,7 +207,7 @@ namespace SharpNeat.Domains.MazeNavigation
                     }
                 }
 
-                var fitness = (double) _maxDistanceToTarget - GetDistanceToTarget();
+                double fitness = _maxDistanceToTarget - GetDistanceToTarget();
                 trialInfo = new FitnessInfo(fitness, fitness);
             }
             // Otherwise, this is a behavioral evaluation, so return the ending 
@@ -278,43 +244,10 @@ namespace SharpNeat.Domains.MazeNavigation
                 Debug.WriteLine("Distance to goal: {0}", tempDistance);
             }
 
+            // Determine the behavioral niche in which the navigator ended
+            trialInfo.NicheId = _mazeNicheGrid.DetermineNicheId(_navigator.Location);
+
             return (TTrialInfo) trialInfo;
-        }
-
-        /// <summary>
-        ///     Runs a single time step of the maze navigator.
-        /// </summary>
-        /// <param name="agent">
-        ///     The black box (neural network) that takes in the navigator sensors controls the navigator by
-        ///     outputting the angular velocity and speed differentials based on those inputs.
-        /// </param>
-        /// <param name="isBridgingTimestep">Indicates whether bridging should be applied in the current timestep.</param>
-        /// <param name="curBridgingApplications">
-        ///     The current number of times bridging has been applied.  This value
-        ///     will be incremented and the updated value used by the calling routine.
-        /// </param>
-        private void RunTimestep(IBlackBox agent, bool isBridgingTimestep, ref int curBridgingApplications)
-        {
-            // Reset the ANN input array
-            agent.InputSignalArray.Reset();
-
-            // Get the ANN input values
-            var annInputs = _navigator.GetAnnInputs();
-
-            // Set the inputs on the input signal array
-            for (var annInputIndex = 0; annInputIndex < annInputs.Length; annInputIndex++)
-            {
-                agent.InputSignalArray[annInputIndex] = annInputs[annInputIndex];
-            }
-
-            // Activate the network
-            agent.Activate();
-
-            // Decode the ANN output and update agent state
-            _navigator.TranslateAndApplyAnnOutputs(agent.OutputSignalArray[0], agent.OutputSignalArray[1]);
-
-            // Move the navigator to the new position (i.e. execute a single timestep)
-            _navigator.Move(_walls, _goalLocation, isBridgingTimestep, ref curBridgingApplications);
         }
 
         /// <summary>
@@ -327,80 +260,6 @@ namespace SharpNeat.Domains.MazeNavigation
             return DoublePoint.CalculateEuclideanDistance(_navigator.Location, _goalLocation);
         }
 
-        // TODO: Move this out into its own file
-        private struct MazeNicheGrid
-        {
-            /// <summary>
-            ///     Density of grid points (used to scale ending position into appropriate niche grid location).
-            /// </summary>
-            private readonly int _gridDensity;
-
-            private readonly double _maxXPoint;
-            private readonly double _maxYPoint;
-            private readonly double _minXPoint;
-            private readonly double _minYPoint;
-
-            public MazeNicheGrid(int gridDensity, List<Wall> mazeWalls)
-            {
-                _gridDensity = gridDensity;
-
-                // Initialize all min/max boundaries
-                _minXPoint = 9999;
-                _maxXPoint = 0;
-                _minYPoint = 9999;
-                _maxYPoint = 0;
-
-                // Loop through each wall to determine the min/max X and Y boundaries
-                foreach (Wall mazeWall in mazeWalls)
-                {
-                    // Starting X point is less than current minimum X point
-                    if (mazeWall.WallLine.Start.X < _minXPoint)
-                    {
-                        _minXPoint = mazeWall.WallLine.Start.X;
-                    }
-                    // Ending X point is less than current minimum X point
-                    else if (mazeWall.WallLine.End.X < _minXPoint)
-                    {
-                        _minXPoint = mazeWall.WallLine.End.X;
-                    }
-                    // Starting X point is greater than current maximum X point
-                    else if (mazeWall.WallLine.Start.X > _maxXPoint)
-                    {
-                        _maxXPoint = mazeWall.WallLine.Start.X;
-                    }
-                    // Ending X point is greater than current maximum X point
-                    else if (mazeWall.WallLine.End.X > _maxXPoint)
-                    {
-                        _maxXPoint = mazeWall.WallLine.End.X;
-                    }
-                    // Starting Y point is less than current minimum Y point
-                    else if (mazeWall.WallLine.Start.Y < _minYPoint)
-                    {
-                        _minYPoint = mazeWall.WallLine.Start.Y;
-                    }
-                    // Ending Y point is less than current minimum Y point
-                    else if (mazeWall.WallLine.End.Y < _minYPoint)
-                    {
-                        _minYPoint = mazeWall.WallLine.End.Y;
-                    }
-                    // Starting Y point is greater than current maximum Y point
-                    else if (mazeWall.WallLine.Start.Y > _maxYPoint)
-                    {
-                        _maxYPoint = mazeWall.WallLine.Start.Y;
-                    }
-                    // Ending Y point is greater than current maximum Y point
-                    else if (mazeWall.WallLine.End.Y > _maxYPoint)
-                    {
-                        _maxYPoint = mazeWall.WallLine.End.Y;
-                    }
-                }
-            }
-
-            public int DetermineNicheId(double location)
-            {
-                return _gridDensity*(int) (_gridDensity*(location - _minXPoint)/(0.01*_maxXPoint - _minXPoint)) +
-                       (int) (_gridDensity*(location - _minYPoint)/(_maxYPoint - _minYPoint));
-            }
-        }
+        #endregion
     }
 }

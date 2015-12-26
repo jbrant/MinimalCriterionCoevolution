@@ -156,8 +156,8 @@ namespace SharpNeat.Utility
                 // Run evaluation and set fitness/auxiliary fitness
                 FitnessInfo fitnessInfo = phenomeEvaluator.Evaluate(phenome, currentGeneration, enableBridging,
                     evaluationLogger, genomeXml);
-                genome.EvaluationInfo.SetFitness(fitnessInfo._fitness);
-                genome.EvaluationInfo.AuxFitnessArr = fitnessInfo._auxFitnessArr;
+                genome.EvaluationInfo.SetFitness(fitnessInfo.Fitness);
+                genome.EvaluationInfo.AuxFitnessArr = fitnessInfo.AuxFitnessArr;
             }
         }
 
@@ -205,8 +205,8 @@ namespace SharpNeat.Utility
 
                 FitnessInfo fitnessInfo = phenomeEvaluator.Evaluate(phenome, currentGeneration, enableBridging,
                     evaluationLogger, genomeXml);
-                genome.EvaluationInfo.SetFitness(fitnessInfo._fitness);
-                genome.EvaluationInfo.AuxFitnessArr = fitnessInfo._auxFitnessArr;
+                genome.EvaluationInfo.SetFitness(fitnessInfo.Fitness);
+                genome.EvaluationInfo.AuxFitnessArr = fitnessInfo.AuxFitnessArr;
             }
         }
 
@@ -241,8 +241,8 @@ namespace SharpNeat.Utility
             }
 
             // Update the fitness as the behavioral novelty
-            genome.EvaluationInfo.SetFitness(fitnessInfo._fitness);
-            genome.EvaluationInfo.AuxFitnessArr = fitnessInfo._auxFitnessArr;
+            genome.EvaluationInfo.SetFitness(fitnessInfo.Fitness);
+            genome.EvaluationInfo.AuxFitnessArr = fitnessInfo.AuxFitnessArr;
         }
 
         /// <summary>
@@ -288,8 +288,8 @@ namespace SharpNeat.Utility
             }
 
             // Update the genome fitness as the randomly generated double
-            genome.EvaluationInfo.SetFitness(fitnessInfo._fitness);
-            genome.EvaluationInfo.AuxFitnessArr = fitnessInfo._auxFitnessArr;
+            genome.EvaluationInfo.SetFitness(fitnessInfo.Fitness);
+            genome.EvaluationInfo.AuxFitnessArr = fitnessInfo.AuxFitnessArr;
         }
 
         private static string decodeGenomeToXmlString(TGenome genome)
