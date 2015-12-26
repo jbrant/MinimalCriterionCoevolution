@@ -109,7 +109,13 @@ namespace SharpNeat.EvolutionAlgorithms
             // Initialize the genome evalutor
             GenomeEvaluator.Initialize();
 
-            // TODO: Need to do an initial evaluation and best genome update for population here on non-initialized algorithms
+            // If the population has not yet undergone intialization evaluations, 
+            // run them through a cycle of evaluations now and update the best genome
+            if (GenomeList.Any(genome => genome.EvaluationInfo.EvaluationCount <= 0))
+            {
+                GenomeEvaluator.Evaluate(GenomeList, CurrentGeneration);
+                UpdateBestGenomeWithoutSpeciation(false, false);
+            }
         }
 
         /// <summary>

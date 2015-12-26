@@ -27,14 +27,21 @@ namespace SharpNeat.EvolutionAlgorithms
         #region Instance Fields
 
         /// <summary>
-        ///     The number of genomes to generate, evaluate, and remove in a single "generation".
+        ///     The proportion (percentage) of genomes to produce offspring in a single "generation".  In other words,
+        ///     a certain percentage of the niche population will be selected for reproduction; the exact number will vary based on
+        ///     the niche size.
         /// </summary>
-        private readonly int _batchSize;
+        private readonly double _reproductionProportion;
+
+        /// <summary>
+        ///     The number of genomes that can "reside" within a single niche.
+        /// </summary>
+        private readonly uint _nicheCapacity;
 
         /// <summary>
         ///     The genome populations in each niche.
         /// </summary>
-        private Dictionary<uint, List<TGenome>> _nichePopulations;
+        private readonly Dictionary<uint, List<TGenome>> _nichePopulations;
 
         #endregion
 
@@ -46,22 +53,25 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </summary>
         /// <param name="offspringCount">The number of offspring to produce.</param>
         /// <returns>The list of offspring.</returns>
-        private List<TGenome> CreateOffspring(int offspringCount)
+        private List<TGenome> CreateOffspring(List<TGenome> nichePopulation)
         {
-            List<TGenome> offspringList = new List<TGenome>(offspringCount);
+            // Calculate the number of offspring to be generated from the given niche population
+            int numOffspring = nichePopulation.Count* (int)_reproductionProportion;
+
+            List<TGenome> offspringList = new List<TGenome>(numOffspring);
 
             // Get the parent genomes
-            List<TGenome> parentList = ((List<TGenome>) GenomeList).GetRange(0, offspringCount);
+            List<TGenome> parentList = nichePopulation.GetRange(0, numOffspring);
 
             // Remove the parents from the queue
-            ((List<TGenome>) GenomeList).RemoveRange(0, offspringCount);
+            nichePopulation.RemoveRange(0, numOffspring);
 
             // Generate an offspring asexually for each parent genome (this is not done asexually because depending on the batch size, 
             // we may not be able to have genomes from the same species mate)
             offspringList.AddRange(parentList.Select(parentGenome => parentGenome.CreateOffspring(CurrentGeneration)));
 
             // Move the parents who replaced offspring to the back of the queue (list)
-            ((List<TGenome>) GenomeList).AddRange(parentList);
+            nichePopulation.AddRange(parentList);
 
             return offspringList;
         }
@@ -109,7 +119,37 @@ namespace SharpNeat.EvolutionAlgorithms
             // Initialize the genome evalutor
             GenomeEvaluator.Initialize();
 
-            // TODO: Need to do an initial evaluation and best genome update for population here on non-initialized algorithms
+            // If the population has not yet undergone intialization evaluations, 
+            // run them through a cycle of evaluations now and update the best genome
+            if (GenomeList.Any(genome => genome.EvaluationInfo.EvaluationCount <= 0))
+            {
+                GenomeEvaluator.Evaluate(GenomeList, CurrentGeneration);
+                UpdateBestGenomeWithoutSpeciation(false, false);
+            }
+
+            // Populate niche map with population of genomes that are specific to that niche
+            foreach (TGenome genome in GenomeList)
+            {
+                // If the dictionary does not currently contain a sub-population for the niche to which 
+                // the current genome is assigned, create one and add that genome as the founding member
+                if (_nichePopulations.ContainsKey(genome.EvaluationInfo.NicheId) == false)
+                {
+                    _nichePopulations.Add(genome.EvaluationInfo.NicheId, new List<TGenome> {genome});
+                }
+                // Otherwise, if the assigned niche is below maximum capacity, get the existing sub-population 
+                // for the niche and add the genome to that population
+                else if (_nichePopulations[genome.EvaluationInfo.NicheId].Count < _nicheCapacity)
+                {
+                    _nichePopulations[genome.EvaluationInfo.NicheId].Add(genome);
+                }
+
+                // If the niche is full, the genome has nowhere to be placed and is therefore not assigned 
+                // and will be removed from the population (in reality, this will probably never happen)
+                else
+                {
+                    GenomeList.Remove(genome);
+                }
+            }
         }
 
         /// <summary>
@@ -120,43 +160,10 @@ namespace SharpNeat.EvolutionAlgorithms
             // Produce offspring from each niche and evaluate
             foreach (KeyValuePair<uint, List<TGenome>> nichePopulation in _nichePopulations)
             {
-                
+                List<TGenome> childGenomes = CreateOffspring(nichePopulation.Value);
             }
 
-            // Get the initial batch size as the minimum of the batch size or the size of the population.
-            // When we're first starting, the population will likely be smaller than the desired batch size.
-            int curBatchSize = Math.Min(_batchSize, GenomeList.Count);
-
-            // Produce number of offspring equivalent to the given batch size
-            List<TGenome> childGenomes = CreateOffspring(curBatchSize);
-
-            // First evaluate the offspring batch with bridging disabled
-            GenomeEvaluator.Evaluate(childGenomes, CurrentGeneration);
             
-            // Remove child genomes that are not viable
-            childGenomes.RemoveAll(genome => genome.EvaluationInfo.IsViable == false);
-
-            // If the population cap has been exceeded, remove oldest genomes to keep population size constant
-            if ((GenomeList.Count + childGenomes.Count) > PopulationSize)
-            {
-                // Calculate number of genomes to remove
-                int genomesToRemove = (GenomeList.Count + childGenomes.Count) - PopulationSize;
-
-                // Remove the above-computed number of oldest genomes from the population
-                RemoveOldestGenomes(genomesToRemove);
-            }
-
-            // Add new children
-            (GenomeList as List<TGenome>)?.AddRange(childGenomes);
-
-            // Update the total offspring count based on the number of *viable* offspring produced
-            Statistics._totalOffspringCount = (ulong) childGenomes.Count;
-
-            // Update stats and store reference to best genome.
-            UpdateBestGenomeWithoutSpeciation(false, false);
-            UpdateStats(false);
-
-            Debug.Assert(GenomeList.Count <= PopulationSize);
 
             // If there is a logger defined, log the generation stats
             EvolutionLogger?.LogRow(GetLoggableElements(_logFieldEnabledMap),
@@ -179,18 +186,18 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </param>
         public QueueingNichedNeatEvolutionAlgorithm(IDataLogger logger = null, RunPhase runPhase = RunPhase.Primary)
             : this(
-                new NullComplexityRegulationStrategy(), 10, runPhase, logger)
+                new NullComplexityRegulationStrategy(), 0.2, 100, runPhase, logger)
         {
             SpeciationStrategy = new KMeansClusteringStrategy<TGenome>(new ManhattanDistanceMetric());
             ComplexityRegulationStrategy = new NullComplexityRegulationStrategy();
-            _batchSize = 10;
         }
 
         /// <summary>
         ///     Constructs steady state evolution algorithm with the given NEAT parameters and complexity regulation strategy.
         /// </summary>
         /// <param name="complexityRegulationStrategy">The complexity regulation strategy.</param>
-        /// <param name="batchSize">The batch size of offspring to produce, evaluate, and remove.</param>
+        /// <param name="reproductionProportion">The percentage of individuals from each niche to reproduce offspring.</param>
+        /// <param name="nicheCapacity">The number of genomes that can "reside" within a single niche.</param>
         /// <param name="runPhase">
         ///     The experiment phase indicating whether this is an initialization process or the primary
         ///     algorithm.
@@ -199,15 +206,18 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <param name="logFieldEnabledMap">Dictionary of logging fields that can be dynamically enabled or disabled.</param>
         public QueueingNichedNeatEvolutionAlgorithm(
             IComplexityRegulationStrategy complexityRegulationStrategy,
-            int batchSize,
+            double reproductionProportion,
+            uint nicheCapacity,
             RunPhase runPhase = RunPhase.Primary,
             IDataLogger logger = null, IDictionary<FieldElement, bool> logFieldEnabledMap = null)
         {
             ComplexityRegulationStrategy = complexityRegulationStrategy;
-            _batchSize = batchSize;
+            _reproductionProportion = reproductionProportion;
+            _nicheCapacity = nicheCapacity;
             EvolutionLogger = logger;
             RunPhase = runPhase;
             _logFieldEnabledMap = logFieldEnabledMap;
+            _nichePopulations = new Dictionary<uint, List<TGenome>>();
         }
 
         /// <summary>
@@ -215,7 +225,8 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </summary>
         /// <param name="eaParams">The NEAT algorithm parameters.</param>
         /// <param name="complexityRegulationStrategy">The complexity regulation strategy.</param>
-        /// <param name="batchSize">The batch size of offspring to produce, evaluate, and remove.</param>
+        /// <param name="reproductionProportion">The percentage of individuals from each niche to reproduce offspring.</param>
+        /// <param name="nicheCapacity">The number of genomes that can "reside" within a single niche.</param>
         /// <param name="runPhase">
         ///     The experiment phase indicating whether this is an initialization process or the primary
         ///     algorithm.
@@ -224,15 +235,18 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <param name="logFieldEnabledMap">Dictionary of logging fields that can be dynamically enabled or disabled.</param>
         public QueueingNichedNeatEvolutionAlgorithm(NeatEvolutionAlgorithmParameters eaParams,
             IComplexityRegulationStrategy complexityRegulationStrategy,
-            int batchSize,
+            double reproductionProportion,
+            uint nicheCapacity,
             RunPhase runPhase = RunPhase.Primary,
             IDataLogger logger = null, IDictionary<FieldElement, bool> logFieldEnabledMap = null) : base(eaParams)
         {
             ComplexityRegulationStrategy = complexityRegulationStrategy;
-            _batchSize = batchSize;
+            _reproductionProportion = reproductionProportion;
+            _nicheCapacity = nicheCapacity;
             EvolutionLogger = logger;
             RunPhase = runPhase;
             _logFieldEnabledMap = logFieldEnabledMap;
+            _nichePopulations = new Dictionary<uint, List<TGenome>>();
         }
 
         #endregion
