@@ -131,6 +131,13 @@ namespace SharpNeat.Core
                 return SelectionType.Queueing;
             }
 
+            // Check if queueing with niching selection specified
+            if ("QueueingWithNiching".Equals(strSelectionType, StringComparison.InvariantCultureIgnoreCase) ||
+                "Queueing with Niching".Equals(strSelectionType, StringComparison.InvariantCultureIgnoreCase))
+            {
+                return SelectionType.QueueingWithNiching;
+            }
+
             // If nothing matches, return generational selection
             return SelectionType.Generational;
         }

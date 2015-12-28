@@ -42,7 +42,7 @@ namespace SharpNeat.Domains.MazeNavigation
         {
             // Set all properties
             Name = name;
-            DefaultPopulationSize = XmlUtils.GetValueAsInt(xmlConfig, "PopulationSize");
+            DefaultPopulationSize = XmlUtils.TryGetValueAsInt(xmlConfig, "PopulationSize") ?? default(int);
             Description = XmlUtils.GetValueAsString(xmlConfig, "Description");
 
             // Set all internal class variables
@@ -56,12 +56,7 @@ namespace SharpNeat.Domains.MazeNavigation
             MaxRestarts = XmlUtils.TryGetValueAsInt(xmlConfig, "MaxRestarts");
 
             // Set evolution/genome parameters
-            NeatEvolutionAlgorithmParameters = new NeatEvolutionAlgorithmParameters
-            {
-                SpecieCount = XmlUtils.GetValueAsInt(xmlConfig, "SpecieCount"),
-                InterspeciesMatingProportion = XmlUtils.GetValueAsDouble(xmlConfig,
-                    "InterspeciesMatingProbability")
-            };
+            NeatEvolutionAlgorithmParameters = ExperimentUtils.ReadNeatEvolutionAlgorithmParameters(xmlConfig);
             NeatGenomeParameters = ExperimentUtils.ReadNeatGenomeParameters(xmlConfig);
             NeatGenomeParameters.FeedforwardOnly = _activationScheme.AcyclicNetwork;
 
@@ -249,7 +244,7 @@ namespace SharpNeat.Domains.MazeNavigation
         /// <summary>
         ///     The default population size for the experiment.
         /// </summary>
-        public int DefaultPopulationSize { get; private set; }
+        public int DefaultPopulationSize { get; protected set; }
 
         /// <summary>
         ///     The NEAT parameters to use for the experiment.

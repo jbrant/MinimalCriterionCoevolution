@@ -241,6 +241,28 @@ namespace SharpNeat.Domains
         }
 
         /// <summary>
+        ///     Reads NEAT evolution algorithm parameters from the configuration file.
+        /// </summary>
+        /// <param name="xmlConfig">The reference to the XML configuration file.</param>
+        /// <returns>An initialized NEAT evolution algorithm parameters object.</returns>
+        public static NeatEvolutionAlgorithmParameters ReadNeatEvolutionAlgorithmParameters(XmlElement xmlConfig)
+        {
+            // Create new NEAT EA parameters with default values
+            return new NeatEvolutionAlgorithmParameters
+            {
+                SpecieCount = XmlUtils.TryGetValueAsInt(xmlConfig, "SpecieCount") ?? default(int),
+                ElitismProportion = XmlUtils.TryGetValueAsDouble(xmlConfig, "ElitismProportion") ?? default(double),
+                SelectionProportion = XmlUtils.TryGetValueAsDouble(xmlConfig, "SelectionProportion") ?? default(double),
+                OffspringAsexualProportion =
+                    XmlUtils.TryGetValueAsDouble(xmlConfig, "OffspringAsexualProbability") ?? default(double),
+                OffspringSexualProportion =
+                    XmlUtils.TryGetValueAsDouble(xmlConfig, "OffspringSexualProbability") ?? default(double),
+                InterspeciesMatingProportion =
+                    XmlUtils.TryGetValueAsDouble(xmlConfig, "InterspeciesMatingProbability") ?? default(double)
+            };
+        }
+
+        /// <summary>
         ///     Reads NEAT evolution algorithm parameters from the database.
         /// </summary>
         /// <param name="experimentDictionary">Reference to the experiment dictionary table.</param>

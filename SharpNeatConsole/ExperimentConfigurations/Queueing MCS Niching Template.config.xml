@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Config>
   <SearchAlgorithm>MinimalCriteriaSearch</SearchAlgorithm>
-  <SelectionAlgorithm>Queueing</SelectionAlgorithm>
+  <SelectionAlgorithm>QueueingWithNiching</SelectionAlgorithm>
   <PopulationSize>250</PopulationSize>
   <SpecieCount>15</SpecieCount>
   <InterspeciesMatingProbability>0.001</InterspeciesMatingProbability>
@@ -10,11 +10,12 @@
   </Activation>
   <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>
   <ComplexityThreshold>30</ComplexityThreshold>
-  <OffspringBatchSize>50</OffspringBatchSize>
   <PopulationEvaluationFrequency>30</PopulationEvaluationFrequency>
   <MaxEvaluations>1000000</MaxEvaluations>
   <MaxRestarts>10</MaxRestarts>
   <DecodeGenomesToXml>false</DecodeGenomesToXml>
+  <GridDensity>20</GridDensity>
+  <ReproductionProportion>0.2</ReproductionProportion>
   <GenomeConfig>
     <InitialConnectionProportion>1</InitialConnectionProportion>
     <WeightMutationProbability>0.5</WeightMutationProbability>
@@ -36,8 +37,7 @@
   <MaxTimesteps>400</MaxTimesteps>
   <MinSuccessDistance>5</MinSuccessDistance>
   <MaxDistanceToTarget>300</MaxDistanceToTarget>
-  <MazeVariant>HardMaze</MazeVariant>
-  <GridDensity>20</GridDensity>
+  <MazeVariant>HardMaze</MazeVariant>    
   <InitializationAlgorithmConfig>
     <SearchAlgorithm>NoveltySearch</SearchAlgorithm>
     <SelectionAlgorithm>SteadyState</SelectionAlgorithm>

@@ -53,7 +53,7 @@ namespace SharpNeat.Utility
                 // Decode the genome to its XML representation
                 if (decodeGenomeToXml)
                 {
-                    genomeXml = decodeGenomeToXmlString(genome);
+                    genomeXml = DecodeGenomeToXmlString(genome);
                 }
 
                 // Evaluate the behavior, update the genome's behavior characterization, calculate the distance to the domain objective,
@@ -63,6 +63,7 @@ namespace SharpNeat.Utility
                 genome.EvaluationInfo.BehaviorCharacterization = behaviorInfo.Behaviors;
                 genome.EvaluationInfo.ObjectiveDistance = behaviorInfo.ObjectiveDistance;
                 genome.EvaluationInfo.IsViable = behaviorInfo.DoesBehaviorSatisfyMinimalCriteria;
+                genome.EvaluationInfo.NicheId = behaviorInfo.NicheId;
             }
         }
 
@@ -106,7 +107,7 @@ namespace SharpNeat.Utility
                 // Decode the genome to its XML representation
                 if (decodeGenomeToXml)
                 {
-                    genomeXml = decodeGenomeToXmlString(genome);
+                    genomeXml = DecodeGenomeToXmlString(genome);
                 }
 
                 // Evaluate the behavior, update the genome's behavior characterization, calculate the distance to the domain objective,
@@ -116,6 +117,7 @@ namespace SharpNeat.Utility
                 genome.EvaluationInfo.BehaviorCharacterization = behaviorInfo.Behaviors;
                 genome.EvaluationInfo.ObjectiveDistance = behaviorInfo.ObjectiveDistance;
                 genome.EvaluationInfo.IsViable = behaviorInfo.DoesBehaviorSatisfyMinimalCriteria;
+                genome.EvaluationInfo.NicheId = behaviorInfo.NicheId;
             }
         }
 
@@ -150,7 +152,7 @@ namespace SharpNeat.Utility
                 // Decode the genome to its XML representation
                 if (decodeGenomeToXml)
                 {
-                    genomeXml = decodeGenomeToXmlString(genome);
+                    genomeXml = DecodeGenomeToXmlString(genome);
                 }
 
                 // Run evaluation and set fitness/auxiliary fitness
@@ -158,6 +160,7 @@ namespace SharpNeat.Utility
                     evaluationLogger, genomeXml);
                 genome.EvaluationInfo.SetFitness(fitnessInfo.Fitness);
                 genome.EvaluationInfo.AuxFitnessArr = fitnessInfo.AuxFitnessArr;
+                genome.EvaluationInfo.NicheId = fitnessInfo.NicheId;
             }
         }
 
@@ -200,13 +203,14 @@ namespace SharpNeat.Utility
                 // Decode the genome to its XML representation
                 if (decodeGenomeToXml)
                 {
-                    genomeXml = decodeGenomeToXmlString(genome);
+                    genomeXml = DecodeGenomeToXmlString(genome);
                 }
 
                 FitnessInfo fitnessInfo = phenomeEvaluator.Evaluate(phenome, currentGeneration, enableBridging,
                     evaluationLogger, genomeXml);
                 genome.EvaluationInfo.SetFitness(fitnessInfo.Fitness);
                 genome.EvaluationInfo.AuxFitnessArr = fitnessInfo.AuxFitnessArr;
+                genome.EvaluationInfo.NicheId = fitnessInfo.NicheId;
             }
         }
 
@@ -243,6 +247,7 @@ namespace SharpNeat.Utility
             // Update the fitness as the behavioral novelty
             genome.EvaluationInfo.SetFitness(fitnessInfo.Fitness);
             genome.EvaluationInfo.AuxFitnessArr = fitnessInfo.AuxFitnessArr;
+            genome.EvaluationInfo.NicheId = fitnessInfo.NicheId;
         }
 
         /// <summary>
@@ -292,7 +297,7 @@ namespace SharpNeat.Utility
             genome.EvaluationInfo.AuxFitnessArr = fitnessInfo.AuxFitnessArr;
         }
 
-        private static string decodeGenomeToXmlString(TGenome genome)
+        private static string DecodeGenomeToXmlString(TGenome genome)
         {
             // Serialize the genome to XML
             StringWriter genomeSw = new StringWriter();

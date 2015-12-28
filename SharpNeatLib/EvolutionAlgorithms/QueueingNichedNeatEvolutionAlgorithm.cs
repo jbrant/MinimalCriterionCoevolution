@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using SharpNeat.Core;
 using SharpNeat.DistanceMetrics;
@@ -51,12 +50,12 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     Creates the specified number of offspring asexually using the desired offspring count as a gauge for the FIFO
         ///     parent selection (it's a one-to-one mapping).
         /// </summary>
-        /// <param name="offspringCount">The number of offspring to produce.</param>
+        /// <param name="nichePopulation">The current population of the niche under consideration.</param>
         /// <returns>The list of offspring.</returns>
         private List<TGenome> CreateOffspring(List<TGenome> nichePopulation)
         {
             // Calculate the number of offspring to be generated from the given niche population
-            int numOffspring = nichePopulation.Count* (int)_reproductionProportion;
+            int numOffspring = Math.Max(1, (int) (nichePopulation.Count*_reproductionProportion));
 
             List<TGenome> offspringList = new List<TGenome>(numOffspring);
 
@@ -77,22 +76,61 @@ namespace SharpNeat.EvolutionAlgorithms
         }
 
         /// <summary>
-        ///     Removes the specified number of oldest genomes from the population.
+        ///     Inserts a genome into the appropriate niche sub-population.
         /// </summary>
-        /// <param name="numGenomesToRemove">The number of oldest genomes to remove from the population.</param>
-        private void RemoveOldestGenomes(int numGenomesToRemove)
+        /// <param name="genome">The genome to be inserted.</param>
+        /// <param name="isInitialization">
+        ///     Indicates whether this is being invoked as part of the algorithm initialization process
+        ///     or as part of the primary loop.
+        /// </param>
+        private void AddGenomeToNiche(TGenome genome, bool isInitialization)
         {
-            // Sort the population by age (oldest to youngest)
-            IEnumerable<TGenome> ageSortedPopulation =
-                ((List<TGenome>) GenomeList).OrderBy(g => g.BirthGeneration).AsParallel();
-
-            // Select the specified number of oldest genomes
-            IEnumerable<TGenome> oldestGenomes = ageSortedPopulation.Take(numGenomesToRemove);
-
-            // Remove the oldest genomes from the population
-            foreach (TGenome oldestGenome in oldestGenomes)
+            // If the dictionary does not currently contain a sub-population for the niche to which 
+            // the current genome is assigned, create one and add that genome as the founding member
+            if (_nichePopulations.ContainsKey(genome.EvaluationInfo.NicheId) == false)
             {
-                ((List<TGenome>) GenomeList).Remove(oldestGenome);
+                _nichePopulations.Add(genome.EvaluationInfo.NicheId, new List<TGenome> {genome});
+            }
+
+            // Otherwise, if this is part of the algorithm primary loop (i.e. we're just mapping genomes into niches 
+            // regardless of size to be resized later) or if this is part of the initialization process AND the assigned 
+            // niche is below maximum capacity, get the existing sub-population for the niche and add the genome to that population
+            else if (isInitialization == false || _nichePopulations[genome.EvaluationInfo.NicheId].Count < _nicheCapacity)
+            {
+                _nichePopulations[genome.EvaluationInfo.NicheId].Add(genome);
+            }
+
+            // If the niche is full, the genome has nowhere to be placed and is therefore not assigned 
+            // and will be removed from the population (this will only fire during initialization)
+            else
+            {
+                GenomeList.Remove(genome);
+            }
+        }
+
+        /// <summary>
+        ///     Removes the oldest genomes from each niche sub-population if that niche has exceeded its capacity.
+        /// </summary>
+        private void RemoveOldestGenomes()
+        {
+            foreach (KeyValuePair<uint, List<TGenome>> nichePopulation in _nichePopulations)
+            {
+                // Sort the population by age (oldest to youngest)
+                IEnumerable<TGenome> ageSortedNichePopulation =
+                    nichePopulation.Value.OrderBy(g => g.BirthGeneration).AsParallel();
+
+                // Select the requisitive number of oldest genomes proportional to the amount 
+                // by which the niche capacity is exceeded (if the niche capacity has not been exceeded,
+                // there will be zero genomes selected for removal)
+                IEnumerable<TGenome> oldestNicheGenomes =
+                    ageSortedNichePopulation.Take(Math.Max(0, (int) (nichePopulation.Value.Count - _nicheCapacity)));
+
+                // Remove the oldest genomes from the niche population and from the global population
+                foreach (TGenome oldestNicheGenome in oldestNicheGenomes)
+                {
+                    nichePopulation.Value.Remove(oldestNicheGenome);
+                    ((List<TGenome>) GenomeList).Remove(oldestNicheGenome);
+                }
             }
         }
 
@@ -130,40 +168,48 @@ namespace SharpNeat.EvolutionAlgorithms
             // Populate niche map with population of genomes that are specific to that niche
             foreach (TGenome genome in GenomeList)
             {
-                // If the dictionary does not currently contain a sub-population for the niche to which 
-                // the current genome is assigned, create one and add that genome as the founding member
-                if (_nichePopulations.ContainsKey(genome.EvaluationInfo.NicheId) == false)
-                {
-                    _nichePopulations.Add(genome.EvaluationInfo.NicheId, new List<TGenome> {genome});
-                }
-                // Otherwise, if the assigned niche is below maximum capacity, get the existing sub-population 
-                // for the niche and add the genome to that population
-                else if (_nichePopulations[genome.EvaluationInfo.NicheId].Count < _nicheCapacity)
-                {
-                    _nichePopulations[genome.EvaluationInfo.NicheId].Add(genome);
-                }
-
-                // If the niche is full, the genome has nowhere to be placed and is therefore not assigned 
-                // and will be removed from the population (in reality, this will probably never happen)
-                else
-                {
-                    GenomeList.Remove(genome);
-                }
+                AddGenomeToNiche(genome, true);
             }
         }
 
         /// <summary>
-        ///     Progress forward by one evaluation. Perform one iteration of the evolution algorithm.
+        ///     Perform one iteration of the evolution algorithm.
         /// </summary>
         protected override void PerformOneGeneration()
         {
-            // Produce offspring from each niche and evaluate
+            // Initialize new list of child genomes
+            List<TGenome> childGenomes = new List<TGenome>();
+
+            // Produce offspring from each niche and add them to the list of child genomes
             foreach (KeyValuePair<uint, List<TGenome>> nichePopulation in _nichePopulations)
             {
-                List<TGenome> childGenomes = CreateOffspring(nichePopulation.Value);
+                childGenomes.AddRange(CreateOffspring(nichePopulation.Value));
             }
 
-            
+            // Evaluate all of the children
+            GenomeEvaluator.Evaluate(childGenomes, CurrentGeneration);
+
+            // Remove child genomes that are not viable
+            childGenomes.RemoveAll(genome => genome.EvaluationInfo.IsViable == false);
+
+            // Add genomes to the global population
+            (GenomeList as List<TGenome>)?.AddRange(childGenomes);
+
+            // Insert children into the appropriate niches
+            foreach (TGenome childGenome in childGenomes)
+            {
+                AddGenomeToNiche(childGenome, false);
+            }
+
+            // Remove oldest from niches if they exceed niche capacity
+            RemoveOldestGenomes();
+
+            // Update the total offspring count based on the number of *viable* offspring produced
+            Statistics._totalOffspringCount = (ulong) childGenomes.Count;
+
+            // Update stats and store reference to best genome.
+            UpdateBestGenomeWithoutSpeciation(false, false);
+            UpdateStats(false);
 
             // If there is a logger defined, log the generation stats
             EvolutionLogger?.LogRow(GetLoggableElements(_logFieldEnabledMap),
