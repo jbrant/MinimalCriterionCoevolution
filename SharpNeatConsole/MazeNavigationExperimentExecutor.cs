@@ -305,7 +305,7 @@ namespace SharpNeatConsole
                 _executionLogger.Error(string.Format("Experiment {0}, Run {1} of {2} failed to initialize",
                     experimentName,
                     runIdx + 1, numRuns));
-                return;
+                Environment.Exit(0);
             }
 
             _executionLogger.Info(string.Format(

@@ -146,7 +146,7 @@ namespace SharpNeat.Core
         /// <summary>
         ///     The behavioral niche into which the genome is mapped.
         /// </summary>
-        public uint NicheId { get; set; }
+        public int NicheId { get; set; }
 
         #endregion
 

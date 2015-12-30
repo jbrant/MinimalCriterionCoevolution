@@ -137,7 +137,7 @@ namespace SharpNeat.Domains.MazeNavigation
         /// <param name="maxTimeSteps">The maximum number of time steps in a single simulation.</param>
         /// <param name="gridDensity">The density of the niche grid.</param>
         public MazeNavigationWorldFactory(MazeVariant mazeVariant, int minSuccessDistance,
-            int maxDistanceToTarget, int maxTimeSteps, uint gridDensity)
+            int maxDistanceToTarget, int maxTimeSteps, int gridDensity)
             : this(mazeVariant, minSuccessDistance, maxDistanceToTarget, maxTimeSteps, 0, 0)
         {
             // Instantiate the grid of behavioral niches

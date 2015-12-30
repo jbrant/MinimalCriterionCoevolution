@@ -1,56 +1,70 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Config>
-  <SearchAlgorithm>MinimalCriteriaSearch</SearchAlgorithm>
+  <SearchAlgorithm>Minimal Criteria Search</SearchAlgorithm>
   <SelectionAlgorithm>Queueing</SelectionAlgorithm>
-  <PopulationSize>250</PopulationSize>
-  <SpecieCount>10</SpecieCount>
+  <PopulationSize>1000</PopulationSize>
   <InterspeciesMatingProbability>0.001</InterspeciesMatingProbability>
   <Activation>
     <Scheme>Acyclic</Scheme>
   </Activation>
   <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>
   <ComplexityThreshold>30</ComplexityThreshold>
-  <OffspringBatchSize>20</OffspringBatchSize>
-  <PopulationEvaluationFrequency>30</PopulationEvaluationFrequency>
+  <OffspringBatchSize>50</OffspringBatchSize>
+  <PopulationEvaluationFrequency>
+  </PopulationEvaluationFrequency>
   <MaxEvaluations>1000000</MaxEvaluations>
-  <DecodeGenomesToXml>true</DecodeGenomesToXml>
+  <MaxRestarts>10</MaxRestarts>
+  <DecodeGenomesToXml>False</DecodeGenomesToXml>
+  <SeedGenomeCount>200</SeedGenomeCount>
   <GenomeConfig>
     <InitialConnectionProportion>1</InitialConnectionProportion>
-    <WeightMutationProbability>0.6</WeightMutationProbability>
-    <AddConnnectionProbability>0.1</AddConnnectionProbability>
+    <WeightMutationProbability>0.7</WeightMutationProbability>
+    <AddConnnectionProbability>0.01</AddConnnectionProbability>
     <AddNodeProbability>0.005</AddNodeProbability>
     <DeleteConnectionProbability>0.001</DeleteConnectionProbability>
     <ConnectionWeightRange>1</ConnectionWeightRange>
   </GenomeConfig>
   <BehaviorConfig>
-    <BehaviorCharacterization>EndPoint</BehaviorCharacterization>
+    <BehaviorCharacterization>End Point</BehaviorCharacterization>
     <MinimalCriteriaConfig>
-      <MinimalCriteriaConstraint>EuclideanDistance</MinimalCriteriaConstraint>
+      <MinimalCriteriaConstraint>Euclidean Distance</MinimalCriteriaConstraint>
       <XStart>36</XStart>
       <YStart>184</YStart>
-      <MinimumRequiredDistance>200</MinimumRequiredDistance>
+      <!--<MinimumMileage>16000</MinimumMileage>-->
+      <MinimumRequiredDistance>150</MinimumRequiredDistance>
     </MinimalCriteriaConfig>
   </BehaviorConfig>
-  <NearestNeighbors>15</NearestNeighbors>
   <MaxTimesteps>400</MaxTimesteps>
   <MinSuccessDistance>5</MinSuccessDistance>
   <MaxDistanceToTarget>300</MaxDistanceToTarget>
-  <MazeVariant>HardMaze</MazeVariant>
+  <MazeVariant>Hard Maze</MazeVariant>
+  <BridgingMagnitude>0</BridgingMagnitude>
+  <BridgingApplications>0</BridgingApplications>
   <InitializationAlgorithmConfig>
-    <SearchAlgorithm>NoveltySearch</SearchAlgorithm>
-    <SelectionAlgorithm>SteadyState</SelectionAlgorithm>
+    <SearchAlgorithm>Novelty Search</SearchAlgorithm>
+    <SelectionAlgorithm>Steady State</SelectionAlgorithm>
+    <PopulationSize>250</PopulationSize>
+    <SpecieCount>10</SpecieCount>
     <OffspringBatchSize>20</OffspringBatchSize>
     <PopulationEvaluationFrequency>30</PopulationEvaluationFrequency>
     <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>
     <ComplexityThreshold>30</ComplexityThreshold>
-    <DecodeGenomesToXml>true</DecodeGenomesToXml>
+    <DecodeGenomesToXml>false</DecodeGenomesToXml>
+    <GenomeConfig>
+      <InitialConnectionProportion>1</InitialConnectionProportion>
+      <WeightMutationProbability>0.6</WeightMutationProbability>
+      <AddConnnectionProbability>0.1</AddConnnectionProbability>
+      <AddNodeProbability>0.005</AddNodeProbability>
+      <DeleteConnectionProbability>0.001</DeleteConnectionProbability>
+      <ConnectionWeightRange>5</ConnectionWeightRange>
+    </GenomeConfig>
     <InitBehaviorConfig>
-      <BehaviorCharacterization>EndPoint</BehaviorCharacterization>
+      <BehaviorCharacterization>End Point</BehaviorCharacterization>
       <MinimalCriteriaConfig>
-        <MinimalCriteriaConstraint>EuclideanDistance</MinimalCriteriaConstraint>
+        <MinimalCriteriaConstraint>Euclidean Distance</MinimalCriteriaConstraint>
         <XStart>36</XStart>
         <YStart>184</YStart>
-        <MinimumRequiredDistance>200</MinimumRequiredDistance>
+        <MinimumRequiredDistance>150</MinimumRequiredDistance>
       </MinimalCriteriaConfig>
     </InitBehaviorConfig>
     <NearestNeighbors>15</NearestNeighbors>

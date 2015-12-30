@@ -73,7 +73,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         /// <param name="initializationEvaluations">The number of evaluations that were expended during intialization.</param>
         /// <param name="gridDensity">The density of the niche grid.</param>
         internal MazeNavigationMCSEvaluator(int maxDistanceToTarget, int maxTimesteps, MazeVariant mazeVariant,
-            int minSuccessDistance, IBehaviorCharacterizationFactory behaviorCharacterizationFactory, uint gridDensity,
+            int minSuccessDistance, IBehaviorCharacterizationFactory behaviorCharacterizationFactory, int gridDensity,
             ulong initializationEvaluations = 0)
         {
             _behaviorCharacterizationFactory = behaviorCharacterizationFactory;

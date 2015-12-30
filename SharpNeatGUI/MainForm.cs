@@ -1457,7 +1457,29 @@ namespace SharpNeatGUI
                     UpdateGuiState_EaStats();
 
                     // Write entry to log window.
-                    __log.Info(string.Format("gen={0:N0} bestFitness={1:N6}", _ea.CurrentGeneration, _ea.Statistics._maxFitness));
+                    if (_ea.CurrentChampGenome != null)
+                    {
+                        double champGenomeAuxFitness = _ea.CurrentChampGenome.EvaluationInfo.AuxFitnessArr.Length > 0
+                            ? _ea.CurrentChampGenome.EvaluationInfo.AuxFitnessArr[0]._value
+                            : 0;
+
+                        if (champGenomeAuxFitness > 0)
+                        {
+                            __log.Info(
+                                string.Format("gen={0:N0} bestFitness={1:N6} bestAuxFitness={2:N6}",
+                                    _ea.CurrentGeneration, _ea.CurrentChampGenome.EvaluationInfo.Fitness, champGenomeAuxFitness));
+                        }
+                        else
+                        {
+                            __log.Info(string.Format("gen={0:N0} champFitness={1:N6}",
+                                _ea.CurrentGeneration, _ea.CurrentChampGenome.EvaluationInfo.Fitness));
+                        }
+                    }
+                    else
+                    {
+                        __log.Info(string.Format("gen={0:N0} maxFitness={1:N6}",
+                            _ea.CurrentGeneration, _ea.Statistics._maxFitness));
+                    }
 
                     // Check if we should save the champ genome to a file.
                     NeatGenome champGenome = _ea.CurrentChampGenome;

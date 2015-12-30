@@ -2,25 +2,24 @@
 <Config>
   <SearchAlgorithm>MinimalCriteriaSearch</SearchAlgorithm>
   <SelectionAlgorithm>QueueingWithNiching</SelectionAlgorithm>
-  <PopulationSize>250</PopulationSize>
-  <SpecieCount>15</SpecieCount>
+  <NicheCapacity>100</NicheCapacity>
   <InterspeciesMatingProbability>0.001</InterspeciesMatingProbability>
   <Activation>
     <Scheme>Acyclic</Scheme>
   </Activation>
   <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>
   <ComplexityThreshold>30</ComplexityThreshold>
-  <PopulationEvaluationFrequency>30</PopulationEvaluationFrequency>
   <MaxEvaluations>1000000</MaxEvaluations>
-  <MaxRestarts>10</MaxRestarts>
+  <MaxRestarts>0</MaxRestarts>
   <DecodeGenomesToXml>false</DecodeGenomesToXml>
   <GridDensity>20</GridDensity>
   <ReproductionProportion>0.2</ReproductionProportion>
+  <SeedGenomeCount>100</SeedGenomeCount>
   <GenomeConfig>
     <InitialConnectionProportion>1</InitialConnectionProportion>
-    <WeightMutationProbability>0.5</WeightMutationProbability>
-    <AddConnnectionProbability>0.05</AddConnnectionProbability>
-    <AddNodeProbability>0.01</AddNodeProbability>
+    <WeightMutationProbability>0.9</WeightMutationProbability>
+    <AddConnnectionProbability>0.01</AddConnnectionProbability>
+    <AddNodeProbability>0.005</AddNodeProbability>
     <DeleteConnectionProbability>0.001</DeleteConnectionProbability>
     <ConnectionWeightRange>1</ConnectionWeightRange>
   </GenomeConfig>
@@ -33,14 +32,15 @@
       <MinimumRequiredDistance>150</MinimumRequiredDistance>
     </MinimalCriteriaConfig>
   </BehaviorConfig>
-  <NearestNeighbors>15</NearestNeighbors>
   <MaxTimesteps>400</MaxTimesteps>
   <MinSuccessDistance>5</MinSuccessDistance>
   <MaxDistanceToTarget>300</MaxDistanceToTarget>
-  <MazeVariant>HardMaze</MazeVariant>    
+  <MazeVariant>HardMaze</MazeVariant>
   <InitializationAlgorithmConfig>
     <SearchAlgorithm>NoveltySearch</SearchAlgorithm>
     <SelectionAlgorithm>SteadyState</SelectionAlgorithm>
+    <PopulationSize>250</PopulationSize>
+    <SpecieCount>10</SpecieCount>
     <OffspringBatchSize>20</OffspringBatchSize>
     <PopulationEvaluationFrequency>30</PopulationEvaluationFrequency>
     <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>

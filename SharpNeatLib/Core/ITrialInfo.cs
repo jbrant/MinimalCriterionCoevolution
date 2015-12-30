@@ -9,6 +9,6 @@
         ///     The genotypic, phenotypic, or behavioral niche into which the organism under evaluation maps based on the
         ///     evaluation.
         /// </summary>
-        uint NicheId { get; set; }
+        int NicheId { get; set; }
     }
 }

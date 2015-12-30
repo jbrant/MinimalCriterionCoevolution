@@ -76,7 +76,7 @@ namespace SharpNeat.Core
         ///     The genotypic, phenotypic, or behavioral niche into which the organism under evaluation maps based on the
         ///     evaluation.
         /// </summary>
-        public uint NicheId { get; set; }
+        public int NicheId { get; set; }
 
         #endregion
     }

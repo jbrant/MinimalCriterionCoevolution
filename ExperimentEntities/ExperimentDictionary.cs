@@ -97,6 +97,13 @@ namespace ExperimentEntities
         public Nullable<int> Initialization_MCS_BridgingApplications { get; set; }
         public Nullable<int> Primary_MCS_BridgingApplications { get; set; }
         public int MaxRestarts { get; set; }
+        public int NumSeedGenomes { get; set; }
+        public Nullable<int> Initialization_NicheCapacity { get; set; }
+        public Nullable<int> Initialization_NicheGridDensity { get; set; }
+        public Nullable<double> Initialization_ReproductionProportion { get; set; }
+        public Nullable<int> Primary_NicheCapacity { get; set; }
+        public Nullable<int> Primary_NicheGridDensity { get; set; }
+        public Nullable<double> Primary_ReproductionProportion { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<NoveltyExperimentOrganismStateData> NoveltyExperimentOrganismStateDatas { get; set; }

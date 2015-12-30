@@ -35,12 +35,12 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <summary>
         ///     The number of genomes that can "reside" within a single niche.
         /// </summary>
-        private readonly uint _nicheCapacity;
+        private readonly int _nicheCapacity;
 
         /// <summary>
         ///     The genome populations in each niche.
         /// </summary>
-        private readonly Dictionary<uint, List<TGenome>> _nichePopulations;
+        private readonly Dictionary<int, List<TGenome>> _nichePopulations;
 
         #endregion
 
@@ -113,7 +113,7 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </summary>
         private void RemoveOldestGenomes()
         {
-            foreach (KeyValuePair<uint, List<TGenome>> nichePopulation in _nichePopulations)
+            foreach (KeyValuePair<int, List<TGenome>> nichePopulation in _nichePopulations)
             {
                 // Sort the population by age (oldest to youngest)
                 IEnumerable<TGenome> ageSortedNichePopulation =
@@ -123,7 +123,7 @@ namespace SharpNeat.EvolutionAlgorithms
                 // by which the niche capacity is exceeded (if the niche capacity has not been exceeded,
                 // there will be zero genomes selected for removal)
                 IEnumerable<TGenome> oldestNicheGenomes =
-                    ageSortedNichePopulation.Take(Math.Max(0, (int) (nichePopulation.Value.Count - _nicheCapacity)));
+                    ageSortedNichePopulation.Take(Math.Max(0, nichePopulation.Value.Count - _nicheCapacity));
 
                 // Remove the oldest genomes from the niche population and from the global population
                 foreach (TGenome oldestNicheGenome in oldestNicheGenomes)
@@ -166,7 +166,8 @@ namespace SharpNeat.EvolutionAlgorithms
             }
 
             // Populate niche map with population of genomes that are specific to that niche
-            foreach (TGenome genome in GenomeList)
+            // (this is iterating over a copy of the genome list because the contents could be modified within the loop)
+            foreach (TGenome genome in GenomeList.ToList())
             {
                 AddGenomeToNiche(genome, true);
             }
@@ -181,7 +182,7 @@ namespace SharpNeat.EvolutionAlgorithms
             List<TGenome> childGenomes = new List<TGenome>();
 
             // Produce offspring from each niche and add them to the list of child genomes
-            foreach (KeyValuePair<uint, List<TGenome>> nichePopulation in _nichePopulations)
+            foreach (KeyValuePair<int, List<TGenome>> nichePopulation in _nichePopulations)
             {
                 childGenomes.AddRange(CreateOffspring(nichePopulation.Value));
             }
@@ -253,7 +254,7 @@ namespace SharpNeat.EvolutionAlgorithms
         public QueueingNichedNeatEvolutionAlgorithm(
             IComplexityRegulationStrategy complexityRegulationStrategy,
             double reproductionProportion,
-            uint nicheCapacity,
+            int nicheCapacity,
             RunPhase runPhase = RunPhase.Primary,
             IDataLogger logger = null, IDictionary<FieldElement, bool> logFieldEnabledMap = null)
         {
@@ -263,7 +264,7 @@ namespace SharpNeat.EvolutionAlgorithms
             EvolutionLogger = logger;
             RunPhase = runPhase;
             _logFieldEnabledMap = logFieldEnabledMap;
-            _nichePopulations = new Dictionary<uint, List<TGenome>>();
+            _nichePopulations = new Dictionary<int, List<TGenome>>();
         }
 
         /// <summary>
@@ -282,7 +283,7 @@ namespace SharpNeat.EvolutionAlgorithms
         public QueueingNichedNeatEvolutionAlgorithm(NeatEvolutionAlgorithmParameters eaParams,
             IComplexityRegulationStrategy complexityRegulationStrategy,
             double reproductionProportion,
-            uint nicheCapacity,
+            int nicheCapacity,
             RunPhase runPhase = RunPhase.Primary,
             IDataLogger logger = null, IDictionary<FieldElement, bool> logFieldEnabledMap = null) : base(eaParams)
         {
@@ -292,7 +293,7 @@ namespace SharpNeat.EvolutionAlgorithms
             EvolutionLogger = logger;
             RunPhase = runPhase;
             _logFieldEnabledMap = logFieldEnabledMap;
-            _nichePopulations = new Dictionary<uint, List<TGenome>>();
+            _nichePopulations = new Dictionary<int, List<TGenome>>();
         }
 
         #endregion

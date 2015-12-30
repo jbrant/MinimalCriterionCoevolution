@@ -159,15 +159,15 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             // Create genome decoder.
             IGenomeDecoder<NeatGenome, IBlackBox> genomeDecoder = CreateGenomeDecoder();
 
-            IGenomeEvaluator<NeatGenome> fitnessEvaluator =
-                new SerialGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
-                    SelectionType.Queueing, SearchType.MinimalCriteriaSearch, _evaluationDataLogger,
-                    SerializeGenomeToXml);
-
 //            IGenomeEvaluator<NeatGenome> fitnessEvaluator =
-//                new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
+//                new SerialGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
 //                    SelectionType.Queueing, SearchType.MinimalCriteriaSearch, _evaluationDataLogger,
 //                    SerializeGenomeToXml);
+
+            IGenomeEvaluator<NeatGenome> fitnessEvaluator =
+                new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigationEvaluator,
+                    SelectionType.Queueing, SearchType.MinimalCriteriaSearch, _evaluationDataLogger,
+                    SerializeGenomeToXml);
 
             // Initialize the evolution algorithm.
             ea.Initialize(fitnessEvaluator, genomeFactory, seedPopulation, DefaultPopulationSize,

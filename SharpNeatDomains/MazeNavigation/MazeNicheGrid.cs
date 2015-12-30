@@ -16,7 +16,7 @@ namespace SharpNeat.Domains.MazeNavigation
         /// <summary>
         ///     Density of grid points (used to scale ending position into appropriate niche grid location).
         /// </summary>
-        private readonly uint _gridDensity;
+        private readonly int _gridDensity;
 
         /// <summary>
         ///     Maximum X point.
@@ -43,7 +43,7 @@ namespace SharpNeat.Domains.MazeNavigation
         /// </summary>
         /// <param name="gridDensity">The density of the grid overlay.</param>
         /// <param name="mazeWalls">The collection of walls in the maze.</param>
-        public MazeNicheGrid(uint gridDensity, List<Wall> mazeWalls)
+        public MazeNicheGrid(int gridDensity, List<Wall> mazeWalls)
         {
             _gridDensity = gridDensity;
 
@@ -104,10 +104,10 @@ namespace SharpNeat.Domains.MazeNavigation
         /// </summary>
         /// <param name="location">The ending location.</param>
         /// <returns>The integer ID of the niche in which the ending location resides.</returns>
-        public uint DetermineNicheId(DoublePoint location)
+        public int DetermineNicheId(DoublePoint location)
         {
-            return _gridDensity*(uint) (_gridDensity*(location.X - _minXPoint)/((0.01 + _maxXPoint) - _minXPoint)) +
-                   (uint) (_gridDensity*(location.Y - _minYPoint)/(_maxYPoint - _minYPoint));
+            return _gridDensity*(int) (_gridDensity*(location.X - _minXPoint)/((0.01 + _maxXPoint) - _minXPoint)) +
+                   (int) (_gridDensity*(location.Y - _minYPoint)/(_maxYPoint - _minYPoint));
         }
     }
 }

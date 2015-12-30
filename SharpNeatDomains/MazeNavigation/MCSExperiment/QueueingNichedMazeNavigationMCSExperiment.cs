@@ -17,14 +17,13 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 {
     public class QueueingNichedMazeNavigationMCSExperiment : BaseMazeNavigationExperiment
     {
-        private int _batchSize;
         private IBehaviorCharacterizationFactory _behaviorCharacterizationFactory;
         private IDataLogger _evaluationDataLogger;
         private IDataLogger _evolutionDataLogger;
         private IDictionary<FieldElement, bool> _experimentLogFieldEnableMap;
-        private uint _gridDensity;
+        private int _gridDensity;
         private NoveltySearchMazeNavigationInitializer _mazeNavigationInitializer;
-        private uint _nicheCapacity;
+        private int _nicheCapacity;
         private double _reproductionProportion;
         private int _seedGenomeCount;
 
@@ -38,9 +37,9 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                 "BehaviorConfig");
 
             // Read in niching specific parameters (niche grid density, reproduction proportion, and niche capacity)
-            _gridDensity = XmlUtils.GetValueAsUInt(xmlConfig, "GridDensity");
+            _gridDensity = XmlUtils.GetValueAsInt(xmlConfig, "GridDensity");
             _reproductionProportion = XmlUtils.GetValueAsDouble(xmlConfig, "ReproductionProportion");
-            _nicheCapacity = XmlUtils.GetValueAsUInt(xmlConfig, "NicheCapacity");
+            _nicheCapacity = XmlUtils.GetValueAsInt(xmlConfig, "NicheCapacity");
 
             // Read in the number of seed genomes to generate to bootstrap the primary algorithm
             _seedGenomeCount = XmlUtils.GetValueAsInt(xmlConfig, "SeedGenomeCount");
@@ -87,14 +86,13 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             _behaviorCharacterizationFactory = ExperimentUtils.ReadBehaviorCharacterizationFactory(
                 experimentDictionary, true);
 
-            // Read in number of offspring to produce in a single batch
-            _batchSize = experimentDictionary.Primary_OffspringBatchSize ?? default(int);
+            // Read in niching specific parameters (niche grid density, reproduction proportion, and niche capacity)
+            _gridDensity = experimentDictionary.Primary_NicheGridDensity ?? default(int);
+            _reproductionProportion = experimentDictionary.Primary_ReproductionProportion ?? default(double);
+            _nicheCapacity = experimentDictionary.Primary_NicheCapacity ?? default(int);
 
-            // TODO: Read niche grid density from the database
-            // TODO: Read reproduction proportion from the database
-            // TODO: Read niche capacity from the database
-
-            // TODO: Read seed genome count from the database
+            // Read in the number of seed genomes to generate to bootstrap the primary algorithm
+            _seedGenomeCount = experimentDictionary.NumSeedGenomes;
 
             // Read in log file path/name
             _evolutionDataLogger = new McsExperimentEvaluationEntityDataLogger(experimentDictionary.ExperimentName);

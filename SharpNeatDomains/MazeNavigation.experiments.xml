@@ -219,7 +219,7 @@
     <Config>
       <SearchAlgorithm>MinimalCriteriaSearch</SearchAlgorithm>
       <SelectionAlgorithm>Queueing</SelectionAlgorithm>
-      <PopulationSize>10000</PopulationSize>      
+      <PopulationSize>1000</PopulationSize>      
       <InterspeciesMatingProbability>0.001</InterspeciesMatingProbability>
       <Activation>
         <Scheme>Acyclic</Scheme>
@@ -235,7 +235,7 @@
         <InitialConnectionProportion>1</InitialConnectionProportion>
         <WeightMutationProbability>0.9</WeightMutationProbability>
         <AddConnnectionProbability>0.01</AddConnnectionProbability>
-        <AddNodeProbability>0.002</AddNodeProbability>
+        <AddNodeProbability>0.005</AddNodeProbability>
         <DeleteConnectionProbability>0.001</DeleteConnectionProbability>
         <ConnectionWeightRange>1</ConnectionWeightRange>
       </GenomeConfig>
@@ -253,8 +253,8 @@
       <MinSuccessDistance>5</MinSuccessDistance>
       <MaxDistanceToTarget>300</MaxDistanceToTarget>
       <MazeVariant>HardMaze</MazeVariant>
-      <BridgingMagnitude>5</BridgingMagnitude>
-      <BridgingApplications>20</BridgingApplications>
+      <BridgingMagnitude>0</BridgingMagnitude>
+      <BridgingApplications>0</BridgingApplications>
       <InitializationAlgorithmConfig>
         <SearchAlgorithm>NoveltySearch</SearchAlgorithm>
         <SelectionAlgorithm>SteadyState</SelectionAlgorithm>
