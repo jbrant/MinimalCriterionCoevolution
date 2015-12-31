@@ -210,7 +210,7 @@ namespace SharpNeat.EvolutionAlgorithms
 
             // Update stats and store reference to best genome.
             UpdateBestGenomeWithoutSpeciation(false, false);
-            UpdateStats(false);
+            UpdateStats(false, false);
 
             // If there is a logger defined, log the generation stats
             EvolutionLogger?.LogRow(GetLoggableElements(_logFieldEnabledMap),

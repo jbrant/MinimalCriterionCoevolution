@@ -123,7 +123,7 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </summary>
         protected override void PerformOneGeneration()
         {
-            bool useAuxFitnessForBestGenome = false;
+            bool useAuxFitness = false;
 
             // Get the initial batch size as the minimum of the batch size or the size of the population.
             // When we're first starting, the population will likely be smaller than the desired batch size.
@@ -156,7 +156,7 @@ namespace SharpNeat.EvolutionAlgorithms
                 // If bridging was enabled, the primary fitness is now the fitness with bridging, which doesn't
                 // really give an indication of the inherent capabilities of the genome.  Therefore, the champ
                 // genome info needs to be set using the non-bridging fitness (which is now in the aux fitness)
-                useAuxFitnessForBestGenome = true;
+                useAuxFitness = true;
             }
 
             // Remove child genomes that are not viable
@@ -179,8 +179,8 @@ namespace SharpNeat.EvolutionAlgorithms
             Statistics._totalOffspringCount = (ulong) childGenomes.Count;
 
             // Update stats and store reference to best genome.
-            UpdateBestGenomeWithoutSpeciation(false, useAuxFitnessForBestGenome);
-            UpdateStats(false);
+            UpdateBestGenomeWithoutSpeciation(false, useAuxFitness);
+            UpdateStats(false, useAuxFitness);
 
             Debug.Assert(GenomeList.Count <= PopulationSize);
 

@@ -176,7 +176,7 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <summary>
         ///     Updates the NeatAlgorithmStats object.
         /// </summary>
-        protected void UpdateStats(bool updateSpeciesStats)
+        protected void UpdateStats(bool updateSpeciesStats, bool useAuxFitness)
         {
             Statistics._generation = CurrentGeneration;
             Statistics._totalEvaluationCount = GenomeEvaluator.EvaluationCount;
@@ -199,19 +199,25 @@ namespace SharpNeat.EvolutionAlgorithms
             }
 
             // Fitness and complexity stats.
-            var totalFitness = GenomeList[0].EvaluationInfo.Fitness;
+            var totalFitness = useAuxFitness
+                ? GenomeList[0].EvaluationInfo.AuxFitnessArr[0]._value
+                : GenomeList[0].EvaluationInfo.Fitness;
             var totalComplexity = GenomeList[0].Complexity;
             var maxComplexity = totalComplexity;
 
             var count = GenomeList.Count;
             for (var i = 1; i < count; i++)
             {
-                totalFitness += GenomeList[i].EvaluationInfo.Fitness;
+                totalFitness += useAuxFitness
+                    ? GenomeList[i].EvaluationInfo.AuxFitnessArr[0]._value
+                    : GenomeList[i].EvaluationInfo.Fitness;
                 totalComplexity += GenomeList[i].Complexity;
                 maxComplexity = Math.Max(maxComplexity, GenomeList[i].Complexity);
             }
 
-            Statistics._maxFitness = CurrentChampGenome.EvaluationInfo.Fitness;
+            Statistics._maxFitness = useAuxFitness
+                ? CurrentChampGenome.EvaluationInfo.AuxFitnessArr[0]._value
+                : CurrentChampGenome.EvaluationInfo.Fitness;
             Statistics._meanFitness = totalFitness/count;
 
             Statistics._maxComplexity = maxComplexity;
@@ -220,11 +226,15 @@ namespace SharpNeat.EvolutionAlgorithms
             if (updateSpeciesStats)
             {
                 // Specie champs mean fitness.
-                var totalSpecieChampFitness = SpecieList[0].GenomeList[0].EvaluationInfo.Fitness;
+                var totalSpecieChampFitness = useAuxFitness
+                    ? SpecieList[0].GenomeList[0].EvaluationInfo.AuxFitnessArr[0]._value
+                    : SpecieList[0].GenomeList[0].EvaluationInfo.Fitness;
                 var specieCount = SpecieList.Count;
                 for (var i = 1; i < specieCount; i++)
                 {
-                    totalSpecieChampFitness += SpecieList[i].GenomeList[0].EvaluationInfo.Fitness;
+                    totalSpecieChampFitness += useAuxFitness
+                        ? SpecieList[i].GenomeList[0].EvaluationInfo.AuxFitnessArr[0]._value
+                        : SpecieList[i].GenomeList[0].EvaluationInfo.Fitness;
                 }
                 Statistics._meanSpecieChampFitness = totalSpecieChampFitness/specieCount;
             }

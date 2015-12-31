@@ -102,7 +102,7 @@ namespace SharpNeat.EvolutionAlgorithms
 
             // Update stats and store reference to best genome.
             UpdateBestGenome();
-            UpdateStats(true);
+            UpdateStats(true, false);
 
             // Update the novelty archive parameters (if exists) and reset for next generation
             AbstractNoveltyArchive?.UpdateArchiveParameters();
