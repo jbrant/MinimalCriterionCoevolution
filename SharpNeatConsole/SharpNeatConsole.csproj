@@ -184,9 +184,7 @@
     <Content Include="ExperimentConfigurations\McsExperiments\Niching\Queueing MCS with Niching - No MC 4.config.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="ExperimentConfigurations\McsExperiments\Niching\Queueing MCS with Niching 1.config.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Niching\Queueing MCS with Niching 1.config.xml" />
     <Content Include="ExperimentConfigurations\McsExperiments\Niching\Queueing MCS with Niching 10.config.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -217,9 +215,7 @@
     <Content Include="ExperimentConfigurations\McsExperiments\Niching\Queueing MCS with Niching 19.config.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="ExperimentConfigurations\McsExperiments\Niching\Queueing MCS with Niching 2.config.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Niching\Queueing MCS with Niching 2.config.xml" />
     <Content Include="ExperimentConfigurations\McsExperiments\Niching\Queueing MCS with Niching 20.config.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -445,24 +441,14 @@
     <Content Include="ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 65.config.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 66.config.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 67.config.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 68.config.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 69.config.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 66.config.xml" />
+    <Content Include="ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 67.config.xml" />
+    <Content Include="ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 68.config.xml" />
+    <Content Include="ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 69.config.xml" />
     <Content Include="ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 7.config.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 70.config.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 70.config.xml" />
     <Content Include="ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 71.config.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
