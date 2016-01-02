@@ -38,8 +38,10 @@ namespace SharpNeat.Domains.MazeNavigation
         private IBehaviorCharacterizationFactory _behaviorCharacterizationFactory;
         private string _complexityRegulationStrategyDefinition;
         private int? _complexityThreshold;
+        private IGenomeDecoder<NeatGenome, IBlackBox> _genomeDecoder;
         private IGenomeFactory<NeatGenome> _genomeFactory;
         private AbstractNeatEvolutionAlgorithm<NeatGenome> _initializationEa;
+        private List<NeatGenome> _initialPopulation;
         private int _maxDistanceToTarget;
         private int _maxGenerationArchiveAddition;
         private int _maxGenerationsWithoutArchiveAddition;
@@ -48,7 +50,9 @@ namespace SharpNeat.Domains.MazeNavigation
         private int _minSuccessDistance;
         private int _nearestNeighbors;
         private NeatEvolutionAlgorithmParameters _neatEvolutionAlgorithmParameters;
+        private ParallelOptions _parallelOptions;
         private int _populationEvaluationFrequency;
+        private ulong _startingEvaluations;
 
         /// <summary>
         ///     Initialization algorithm constructor.
@@ -207,6 +211,11 @@ namespace SharpNeat.Domains.MazeNavigation
         public void InitializeAlgorithm(ParallelOptions parallelOptions, List<NeatGenome> genomeList,
             IGenomeDecoder<NeatGenome, IBlackBox> genomeDecoder, ulong startingEvaluations)
         {
+            _parallelOptions = parallelOptions;
+            _initialPopulation = genomeList;
+            _startingEvaluations = startingEvaluations;
+            _genomeDecoder = genomeDecoder;
+
             // Create distance metric. Mismatched genes have a fixed distance of 10; for matched genes the distance is their weigth difference.
             IDistanceMetric distanceMetric = new ManhattanDistanceMetric(1.0, 0.0, 10.0);
             ISpeciationStrategy<NeatGenome> speciationStrategy =
@@ -295,12 +304,20 @@ namespace SharpNeat.Domains.MazeNavigation
         public List<NeatGenome> EvolveViableGenomes(int numViableGenomes, bool useObjectiveDistanceFitness,
             out ulong totalEvaluations)
         {
+            totalEvaluations = 0;
             HashSet<NeatGenome> viableGenomes = new HashSet<NeatGenome>();
 
             // Rerun algorithm until the specified number of *distinct* genomes are found, which all
             // satisfy the minimal criteria
             do
             {
+                // If the maximum allowable evaluations were exceeded, just re-initialize the algorithm and re-run
+                if (totalEvaluations >= _maxEvaluations)
+                {
+                    // Re-initialize the algorithm
+                    InitializeAlgorithm(_parallelOptions, _initialPopulation, _genomeDecoder, _startingEvaluations);
+                }
+
                 // Start the algorithm
                 _initializationEa.StartContinue();
 
