@@ -9,7 +9,7 @@
   </Activation>
   <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>
   <ComplexityThreshold>30</ComplexityThreshold>
-  <OffspringBatchSize>20</OffspringBatchSize>
+  <OffspringBatchSize>50</OffspringBatchSize>
   <PopulationEvaluationFrequency>
   </PopulationEvaluationFrequency>
   <MaxEvaluations>1000000</MaxEvaluations>
@@ -22,7 +22,7 @@
     <AddConnnectionProbability>0.005</AddConnnectionProbability>
     <AddNodeProbability>0.01</AddNodeProbability>
     <DeleteConnectionProbability>0.001</DeleteConnectionProbability>
-    <ConnectionWeightRange>1</ConnectionWeightRange>
+    <ConnectionWeightRange>5</ConnectionWeightRange>
   </GenomeConfig>
   <BehaviorConfig>
     <BehaviorCharacterization>End Point</BehaviorCharacterization>
@@ -31,7 +31,7 @@
       <XStart>36</XStart>
       <YStart>184</YStart>
       <!--<MinimumMileage>16000</MinimumMileage>-->
-      <MinimumRequiredDistance>150</MinimumRequiredDistance>
+      <MinimumRequiredDistance>175</MinimumRequiredDistance>
     </MinimalCriteriaConfig>
   </BehaviorConfig>
   <MaxTimesteps>400</MaxTimesteps>
@@ -39,12 +39,12 @@
   <MaxDistanceToTarget>300</MaxDistanceToTarget>
   <MazeVariant>Hard Maze</MazeVariant>
   <BridgingMagnitude>5</BridgingMagnitude>
-  <BridgingApplications>150</BridgingApplications>
+  <BridgingApplications>50</BridgingApplications>
   <InitializationAlgorithmConfig>
     <SearchAlgorithm>Novelty Search</SearchAlgorithm>
     <SelectionAlgorithm>Steady State</SelectionAlgorithm>
     <PopulationSize>250</PopulationSize>
-    <SpecieCount>10</SpecieCount>
+    <SpecieCount>15</SpecieCount>
     <OffspringBatchSize>20</OffspringBatchSize>
     <PopulationEvaluationFrequency>30</PopulationEvaluationFrequency>
     <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>

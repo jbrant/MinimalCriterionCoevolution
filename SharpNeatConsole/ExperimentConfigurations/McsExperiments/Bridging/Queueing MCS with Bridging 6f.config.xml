@@ -9,7 +9,7 @@
   </Activation>
   <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>
   <ComplexityThreshold>30</ComplexityThreshold>
-  <OffspringBatchSize>20</OffspringBatchSize>
+  <OffspringBatchSize>50</OffspringBatchSize>
   <PopulationEvaluationFrequency>
   </PopulationEvaluationFrequency>
   <MaxEvaluations>1000000</MaxEvaluations>
@@ -22,7 +22,7 @@
     <AddConnnectionProbability>0.005</AddConnnectionProbability>
     <AddNodeProbability>0.01</AddNodeProbability>
     <DeleteConnectionProbability>0.001</DeleteConnectionProbability>
-    <ConnectionWeightRange>1</ConnectionWeightRange>
+    <ConnectionWeightRange>5</ConnectionWeightRange>
   </GenomeConfig>
   <BehaviorConfig>
     <BehaviorCharacterization>End Point</BehaviorCharacterization>
@@ -39,12 +39,12 @@
   <MaxDistanceToTarget>300</MaxDistanceToTarget>
   <MazeVariant>Hard Maze</MazeVariant>
   <BridgingMagnitude>5</BridgingMagnitude>
-  <BridgingApplications>2</BridgingApplications>
+  <BridgingApplications>100</BridgingApplications>
   <InitializationAlgorithmConfig>
     <SearchAlgorithm>Novelty Search</SearchAlgorithm>
     <SelectionAlgorithm>Steady State</SelectionAlgorithm>
     <PopulationSize>250</PopulationSize>
-    <SpecieCount>10</SpecieCount>
+    <SpecieCount>15</SpecieCount>
     <OffspringBatchSize>20</OffspringBatchSize>
     <PopulationEvaluationFrequency>30</PopulationEvaluationFrequency>
     <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>
@@ -64,7 +64,7 @@
         <MinimalCriteriaConstraint>Euclidean Distance</MinimalCriteriaConstraint>
         <XStart>36</XStart>
         <YStart>184</YStart>
-        <MinimumRequiredDistance>175</MinimumRequiredDistance>
+        <MinimumRequiredDistance>150</MinimumRequiredDistance>
       </MinimalCriteriaConfig>
     </InitBehaviorConfig>
     <NearestNeighbors>15</NearestNeighbors>
