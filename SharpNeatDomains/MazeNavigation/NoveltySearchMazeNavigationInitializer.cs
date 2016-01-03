@@ -304,7 +304,7 @@ namespace SharpNeat.Domains.MazeNavigation
         public List<NeatGenome> EvolveViableGenomes(int numViableGenomes, bool useObjectiveDistanceFitness,
             out ulong totalEvaluations)
         {
-            totalEvaluations = 0;
+            ulong curEvaluations = 0;
             HashSet<NeatGenome> viableGenomes = new HashSet<NeatGenome>();
 
             // Rerun algorithm until the specified number of *distinct* genomes are found, which all
@@ -312,10 +312,11 @@ namespace SharpNeat.Domains.MazeNavigation
             do
             {
                 // If the maximum allowable evaluations were exceeded, just re-initialize the algorithm and re-run
-                if (totalEvaluations >= _maxEvaluations)
+                if (curEvaluations >= _maxEvaluations)
                 {
                     // Re-initialize the algorithm
-                    InitializeAlgorithm(_parallelOptions, _initialPopulation, _genomeDecoder, _startingEvaluations);
+                    InitializeAlgorithm(_parallelOptions, _initialPopulation, _genomeDecoder,
+                        _startingEvaluations + curEvaluations);
                 }
 
                 // Start the algorithm
@@ -335,7 +336,7 @@ namespace SharpNeat.Domains.MazeNavigation
                     _initializationEa.GenomeList.Where(curGenome => curGenome.EvaluationInfo.IsViable).ToList());
 
                 // Update the total number of evaluations
-                totalEvaluations = _initializationEa.CurrentEvaluations;
+                curEvaluations = (_initializationEa.CurrentEvaluations - _startingEvaluations);
             } while (viableGenomes.Count < numViableGenomes);
 
             // Ensure that the initialization algorithm was able to find the requested number of viable genomes
@@ -344,6 +345,9 @@ namespace SharpNeat.Domains.MazeNavigation
                 throw new SharpNeatException(
                     "MCS initialization algorithm failed to find the requested number of viable genomes.");
             }
+
+            // Set the total number of evaluations that were executed as part of the initialization process
+            totalEvaluations = _initializationEa.CurrentEvaluations;
 
             // If flag is set, replace fitness on all viable genomes with objective distance
             // (they will currently be based on behavioral novelty)
