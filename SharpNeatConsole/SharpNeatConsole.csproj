@@ -148,55 +148,153 @@
     <Content Include="ExperimentConfigurations\AutomaticExperiment.config.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 1a.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 1b.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 1c.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 1d.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 1e.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 1f.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 1g.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 2a.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 2b.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 2c.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 2d.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 2e.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 2f.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 2g.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 10a.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 10b.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 10c.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 10d.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 10e.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 10f.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 10g.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 11a.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 11b.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 11c.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 11d.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 11e.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 11f.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 11g.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 12a.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 12b.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 12c.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 12d.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 12e.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 12f.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 12g.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 13a.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 13b.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 13c.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 13d.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 13e.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 13f.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 13g.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 14a.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 14b.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 14c.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 14d.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 14e.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 14f.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 14g.config.xml" />
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 1a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 1b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 1c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 1d.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 1e.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 1f.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 1g.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 2a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 2b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 2c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 2d.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 2e.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 2f.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 2g.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 10a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 10b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 10c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 10d.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 10e.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 10f.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 10g.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 11a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 11b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 11c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 11d.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 11e.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 11f.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 11g.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 12a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 12b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 12c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 12d.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 12e.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 12f.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 12g.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 13a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 13b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 13c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 13d.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 13e.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 13f.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 13g.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 14a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 14b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 14c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 14d.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 14e.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 14f.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 14g.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 1a.config.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -344,24 +442,60 @@
     <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 7g.config.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 8a.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 8b.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 8c.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 8d.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 8e.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 8f.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 8g.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 9a.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 9b.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 9c.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 9d.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 9e.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 9f.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 9g.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Niching - No MC 1.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Niching - No MC 2.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Niching - No MC 3.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Niching - No MC 4.config.xml" />
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 8a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 8b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 8c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 8d.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 8e.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 8f.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 8g.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 9a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 9b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 9c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 9d.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 9e.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 9f.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 9g.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Niching - No MC 1.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Niching - No MC 2.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Niching - No MC 3.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Niching - No MC 4.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="ExperimentConfigurations\McsExperiments\Niching\Queueing MCS with Niching - No MC 1.config.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
