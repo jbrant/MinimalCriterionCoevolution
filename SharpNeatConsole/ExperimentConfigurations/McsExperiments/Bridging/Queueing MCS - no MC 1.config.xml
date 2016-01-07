@@ -1,16 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Config>
   <SearchAlgorithm>Minimal Criteria Search</SearchAlgorithm>
-  <SelectionAlgorithm>Queueing with Niching</SelectionAlgorithm>
-  <PopulationSize>20000</PopulationSize>
+  <SelectionAlgorithm>Queueing</SelectionAlgorithm>
+  <PopulationSize>1000</PopulationSize>
   <InterspeciesMatingProbability>0.001</InterspeciesMatingProbability>
   <Activation>
     <Scheme>Acyclic</Scheme>
   </Activation>
   <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>
   <ComplexityThreshold>30</ComplexityThreshold>
-  <OffspringBatchSize>
-  </OffspringBatchSize>
+  <OffspringBatchSize>50</OffspringBatchSize>
   <PopulationEvaluationFrequency>
   </PopulationEvaluationFrequency>
   <MaxEvaluations>1000000</MaxEvaluations>
@@ -20,8 +19,8 @@
   <GenomeConfig>
     <InitialConnectionProportion>1</InitialConnectionProportion>
     <WeightMutationProbability>0.9</WeightMutationProbability>
-    <AddConnnectionProbability>0.01</AddConnnectionProbability>
-    <AddNodeProbability>0.005</AddNodeProbability>
+    <AddConnnectionProbability>0.005</AddConnnectionProbability>
+    <AddNodeProbability>0.01</AddNodeProbability>
     <DeleteConnectionProbability>0.001</DeleteConnectionProbability>
     <ConnectionWeightRange>5</ConnectionWeightRange>
   </GenomeConfig>
@@ -32,7 +31,7 @@
       <XStart>36</XStart>
       <YStart>184</YStart>
       <!--<MinimumMileage>16000</MinimumMileage>-->
-      <MinimumRequiredDistance>125</MinimumRequiredDistance>
+      <MinimumRequiredDistance>0</MinimumRequiredDistance>
     </MinimalCriteriaConfig>
   </BehaviorConfig>
   <MaxTimesteps>400</MaxTimesteps>
@@ -65,7 +64,7 @@
         <MinimalCriteriaConstraint>Euclidean Distance</MinimalCriteriaConstraint>
         <XStart>36</XStart>
         <YStart>184</YStart>
-        <MinimumRequiredDistance>125</MinimumRequiredDistance>
+        <MinimumRequiredDistance>0</MinimumRequiredDistance>
       </MinimalCriteriaConfig>
     </InitBehaviorConfig>
     <NearestNeighbors>15</NearestNeighbors>

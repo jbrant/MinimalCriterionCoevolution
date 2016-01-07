@@ -2,18 +2,20 @@
 <Config>
   <SearchAlgorithm>Minimal Criteria Search</SearchAlgorithm>
   <SelectionAlgorithm>Queueing with Niching</SelectionAlgorithm>
-  <NicheCapacity>50</NicheCapacity>
+  <PopulationSize>20000</PopulationSize>
   <InterspeciesMatingProbability>0.001</InterspeciesMatingProbability>
   <Activation>
     <Scheme>Acyclic</Scheme>
   </Activation>
   <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>
   <ComplexityThreshold>30</ComplexityThreshold>
+  <OffspringBatchSize>
+  </OffspringBatchSize>
+  <PopulationEvaluationFrequency>
+  </PopulationEvaluationFrequency>
   <MaxEvaluations>1000000</MaxEvaluations>
   <MaxRestarts>10</MaxRestarts>
   <DecodeGenomesToXml>False</DecodeGenomesToXml>
-  <GridDensity>20</GridDensity>
-  <ReproductionProportion>0.2</ReproductionProportion>
   <SeedGenomeCount>200</SeedGenomeCount>
   <GenomeConfig>
     <InitialConnectionProportion>1</InitialConnectionProportion>
@@ -29,6 +31,7 @@
       <MinimalCriteriaConstraint>Euclidean Distance</MinimalCriteriaConstraint>
       <XStart>36</XStart>
       <YStart>184</YStart>
+      <!--<MinimumMileage>16000</MinimumMileage>-->
       <MinimumRequiredDistance>50</MinimumRequiredDistance>
     </MinimalCriteriaConfig>
   </BehaviorConfig>
@@ -36,11 +39,13 @@
   <MinSuccessDistance>5</MinSuccessDistance>
   <MaxDistanceToTarget>300</MaxDistanceToTarget>
   <MazeVariant>Hard Maze</MazeVariant>
+  <BridgingMagnitude>0</BridgingMagnitude>
+  <BridgingApplications>0</BridgingApplications>
   <InitializationAlgorithmConfig>
     <SearchAlgorithm>Novelty Search</SearchAlgorithm>
     <SelectionAlgorithm>Steady State</SelectionAlgorithm>
     <PopulationSize>250</PopulationSize>
-    <SpecieCount>10</SpecieCount>
+    <SpecieCount>15</SpecieCount>
     <OffspringBatchSize>20</OffspringBatchSize>
     <PopulationEvaluationFrequency>30</PopulationEvaluationFrequency>
     <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>
