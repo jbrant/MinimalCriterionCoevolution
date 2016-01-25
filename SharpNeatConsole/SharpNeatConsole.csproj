@@ -118,8 +118,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="NoveltyExperimentExecutor.cs" />
-    <Compile Include="ProgramExample.cs" />
-    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MazeNavigationExperimentExecutor.cs" />
   </ItemGroup>

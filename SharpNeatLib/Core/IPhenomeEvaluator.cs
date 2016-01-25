@@ -17,6 +17,12 @@
  * along with SharpNEAT.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#region
+
+using System.Collections.Generic;
+
+#endregion
+
 namespace SharpNeat.Core
 {
     /// <summary>
@@ -47,6 +53,13 @@ namespace SharpNeat.Core
         ///     Initializes state variables in the phenome evalutor.
         /// </summary>
         void Initialize(IDataLogger evaluationLogger);
+
+        /// <summary>
+        ///     Update the evaluator based on some characteristic of the given population.
+        /// </summary>
+        /// <typeparam name="TGenome">The genome type parameter.</typeparam>
+        /// <param name="population">The current population.</param>
+        void Update<TGenome>(List<TGenome> population);
 
         /// <summary>
         ///     Reset the internal state of the evaluation scheme if any exists.

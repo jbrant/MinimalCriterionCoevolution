@@ -1,5 +1,7 @@
 ﻿#region
 
+using System;
+using System.Collections.Generic;
 using SharpNeat.Core;
 using SharpNeat.Domains.MazeNavigation.Components;
 using SharpNeat.Phenomes;
@@ -117,6 +119,16 @@ namespace SharpNeat.Domains.MazeNavigation.MCNSExperiment
         {
             evaluationLogger?.LogHeader(
                 _mazeWorldFactory.CreateMazeNavigationWorld().GetLoggableElements());
+        }
+
+        /// <summary>
+        ///     Update the evaluator based on some characteristic of the given population.
+        /// </summary>
+        /// <typeparam name="TGenome">The genome type parameter.</typeparam>
+        /// <param name="population">The current population.</param>
+        public void Update<TGenome>(List<TGenome> population)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>

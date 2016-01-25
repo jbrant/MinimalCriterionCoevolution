@@ -36,6 +36,8 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </summary>
         private readonly bool _isBridgingEnabled;
 
+        private readonly bool _isDynamicMinimalCriteria;
+
         #endregion
 
         #region Private Methods
@@ -124,6 +126,12 @@ namespace SharpNeat.EvolutionAlgorithms
         protected override void PerformOneGeneration()
         {
             bool useAuxFitness = false;
+
+            // TODO: Need to update this to update after a user-definable number of batches and implement the actual process
+            if (_isDynamicMinimalCriteria && CurrentGeneration%25 == 0)
+            {
+                
+            }
 
             // Get the initial batch size as the minimum of the batch size or the size of the population.
             // When we're first starting, the population will likely be smaller than the desired batch size.

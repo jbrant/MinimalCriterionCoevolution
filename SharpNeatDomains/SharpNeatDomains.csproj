@@ -155,11 +155,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="ThreeParity\ThreeParityEvaluator.cs" />
-    <Compile Include="ThreeParity\ThreeParityExperiment.cs" />
     <Compile Include="XmlUtils.cs" />
-    <Compile Include="Xor\XorBlackBoxEvaluator.cs" />
-    <Compile Include="Xor\XorExperiment.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ExperimentEntities\ExperimentEntities.csproj">

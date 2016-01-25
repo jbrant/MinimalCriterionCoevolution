@@ -1,6 +1,7 @@
 ﻿#region
 
 using System;
+using System.Collections.Generic;
 using SharpNeat.Core;
 
 #endregion
@@ -43,6 +44,16 @@ namespace SharpNeat.MinimalCriterias
             _startXPosition = xLocation;
             _startYPosition = yLocation;
             _minimumDistanceTraveled = minimumDistanceTraveled;
+        }
+
+        /// <summary>
+        ///     Updates the minimal criteria based on the (harmonic) mean distance of the population from the starting location.
+        /// </summary>
+        /// <typeparam name="TGenome">Genome type parameter.</typeparam>
+        /// <param name="population">The current population.</param>
+        public void UpdateMinimalCriteria<TGenome>(List<TGenome> population)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
