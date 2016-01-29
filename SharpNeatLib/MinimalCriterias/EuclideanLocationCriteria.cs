@@ -58,7 +58,7 @@ namespace SharpNeat.MinimalCriterias
         /// </summary>
         /// <typeparam name="TGenome">Genome type parameter.</typeparam>
         /// <param name="population">The current population.</param>
-        public void UpdateMinimalCriteria<TGenome>(List<TGenome> population)
+        public void UpdateMinimalCriteria<TGenome>(List<TGenome> population) where TGenome : class, IGenome<TGenome>
         {
             throw new NotImplementedException();
         }

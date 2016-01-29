@@ -142,6 +142,15 @@ namespace SharpNeat.Core
         }
 
         /// <summary>
+        ///     Update the genome evaluator based on some characteristic of the given population.
+        /// </summary>
+        /// <param name="population">The current population.</param>
+        public void Update(List<TGenome> population)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         ///     Evaluates a list of genomes. Here we decode each genome in series using the contained
         ///     IGenomeDecoder and evaluate the resulting TPhenome using the contained IPhenomeEvaluator.
         /// </summary>

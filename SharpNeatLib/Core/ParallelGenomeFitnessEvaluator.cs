@@ -19,6 +19,7 @@
 
 #region
 
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using SharpNeat.Utility;
@@ -161,6 +162,15 @@ namespace SharpNeat.Core
         public void Cleanup()
         {
             _evaluationLogger?.Close();
+        }
+
+        /// <summary>
+        ///     Update the genome evaluator based on some characteristic of the given population.
+        /// </summary>
+        /// <param name="population">The current population.</param>
+        public void Update(List<TGenome> population)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>

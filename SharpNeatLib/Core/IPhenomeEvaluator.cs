@@ -59,7 +59,7 @@ namespace SharpNeat.Core
         /// </summary>
         /// <typeparam name="TGenome">The genome type parameter.</typeparam>
         /// <param name="population">The current population.</param>
-        void Update<TGenome>(List<TGenome> population);
+        void Update<TGenome>(List<TGenome> population) where TGenome : class, IGenome<TGenome>;
 
         /// <summary>
         ///     Reset the internal state of the evaluation scheme if any exists.

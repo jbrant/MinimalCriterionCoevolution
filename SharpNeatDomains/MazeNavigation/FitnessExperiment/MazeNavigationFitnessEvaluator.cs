@@ -115,7 +115,7 @@ namespace SharpNeat.Domains.MazeNavigation
         /// </summary>
         /// <typeparam name="TGenome">The genome type parameter.</typeparam>
         /// <param name="population">The current population.</param>
-        public void Update<TGenome>(List<TGenome> population)
+        public void Update<TGenome>(List<TGenome> population) where TGenome : class, IGenome<TGenome>
         {
             throw new NotImplementedException();
         }

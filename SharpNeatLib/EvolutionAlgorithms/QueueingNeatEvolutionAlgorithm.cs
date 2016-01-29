@@ -36,7 +36,10 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </summary>
         private readonly bool _isBridgingEnabled;
 
-        private readonly bool _isDynamicMinimalCriteria;
+        /// <summary>
+        /// Flag that indicates whether the minimal criteria is dynamically updating.
+        /// </summary>
+        private readonly bool _isDynamicMinimalCriteria = true;
 
         #endregion
 
@@ -127,10 +130,24 @@ namespace SharpNeat.EvolutionAlgorithms
         {
             bool useAuxFitness = false;
 
-            // TODO: Need to update this to update after a user-definable number of batches and implement the actual process
-            if (_isDynamicMinimalCriteria && CurrentGeneration%25 == 0)
+            // TODO: Need to implement the actual process
+            // If the minimal criteria is dynamic and the population size has been reached, then determine
+            // the new minimal criteria
+            if (_isDynamicMinimalCriteria && CurrentGeneration % 25 == 0)
             {
-                
+                // TODO: Perhaps the MC should also be randomly perturbed (between 0 and current mean) if it hasn't changed in a certain amount of time
+
+                // Update the minimal criteria and disposition each genome as viable or not
+                // given the new minimal criteria
+                GenomeEvaluator.Update(GenomeList as List<TGenome>);
+
+                if ((GenomeList as List<TGenome>).Count(genome => genome.EvaluationInfo.IsViable == true) == 0)
+                {
+                    Console.WriteLine("What is going on...");
+                }
+
+                // Remove individuals from the queue who do not meet the updated minimal criteria
+                (GenomeList as List<TGenome>).RemoveAll(genome => genome.EvaluationInfo.IsViable == false);
             }
 
             // Get the initial batch size as the minimum of the batch size or the size of the population.

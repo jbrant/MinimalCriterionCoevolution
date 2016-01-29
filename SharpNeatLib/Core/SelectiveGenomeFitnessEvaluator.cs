@@ -104,6 +104,15 @@ namespace SharpNeat.Core
         }
 
         /// <summary>
+        ///     Update the genome evaluator based on some characteristic of the given population.
+        /// </summary>
+        /// <param name="population">The current population.</param>
+        public void Update(List<TGenome> population)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         ///     Evaluates a list of genomes. Here we select the genomes to be evaluated before invoking
         ///     _innerFitnessEvaluator to evaluate them.
         /// </summary>

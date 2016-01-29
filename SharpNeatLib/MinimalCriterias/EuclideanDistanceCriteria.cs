@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using SharpNeat.Core;
 
 #endregion
@@ -19,11 +20,6 @@ namespace SharpNeat.MinimalCriterias
         private const int EuclideanDimensions = 2;
 
         /// <summary>
-        ///     The minimum distance that the candidate agent had to travel to be considered viable.
-        /// </summary>
-        private readonly double _minimumDistanceTraveled;
-
-        /// <summary>
         ///     The x-component of the starting position.
         /// </summary>
         private readonly double _startXPosition;
@@ -32,6 +28,11 @@ namespace SharpNeat.MinimalCriterias
         ///     The y-component of the starting position;
         /// </summary>
         private readonly double _startYPosition;
+
+        /// <summary>
+        ///     The minimum distance that the candidate agent had to travel to be considered viable.
+        /// </summary>
+        private double _minimumDistanceTraveled;
 
         /// <summary>
         ///     Constructor for the euclidean distance minimal criteria.
@@ -51,9 +52,56 @@ namespace SharpNeat.MinimalCriterias
         /// </summary>
         /// <typeparam name="TGenome">Genome type parameter.</typeparam>
         /// <param name="population">The current population.</param>
-        public void UpdateMinimalCriteria<TGenome>(List<TGenome> population)
+        public void UpdateMinimalCriteria<TGenome>(List<TGenome> population) where TGenome : class, IGenome<TGenome>
         {
-            throw new NotImplementedException();
+            // TODO: Calculate the harmonic mean of the distance from the starting location for all individuals in the population
+
+            // Update the minimal criteria to be the mean of the distance from the starting location over
+            // every genome in the population
+
+            double[] distances = new double[population.Count];
+
+            for (int i = 0; i < distances.Count(); i++)
+            {
+                distances[i] =
+                    Math.Sqrt(Math.Pow(population[i].EvaluationInfo.BehaviorCharacterization[0] - _startXPosition, 2) +
+                              Math.Pow(population[i].EvaluationInfo.BehaviorCharacterization[1] - _startYPosition, 2));
+            }
+
+            double newMean = distances.Sum()/population.Count;
+
+            int numSatisfied = 0;
+            foreach (double distance in distances)
+            {
+                if (Math.Round(distance, 6) >= Math.Round(newMean, 6))
+                {
+                    numSatisfied++;
+                }
+            }
+
+            if (numSatisfied == 0)
+            {
+                Console.WriteLine("This should not be happening");
+            }
+
+            _minimumDistanceTraveled = population.Count/
+                                       population.Sum(
+                                           genome =>
+                                               1/
+                                               Math.Sqrt(
+                                                   Math.Pow(
+                                                       genome.EvaluationInfo.BehaviorCharacterization[0] -
+                                                       _startXPosition, 2) +
+                                                   Math.Pow(
+                                                       genome.EvaluationInfo.BehaviorCharacterization[1] -
+                                                       _startYPosition, 2)));
+
+            /*_minimumDistanceTraveled =
+                population.Sum(
+                    genome =>
+                        Math.Sqrt(Math.Pow(genome.EvaluationInfo.BehaviorCharacterization[0] - _startXPosition, 2) +
+                                  Math.Pow(genome.EvaluationInfo.BehaviorCharacterization[1] - _startYPosition, 2)))/
+                           population.Count;*/
         }
 
         /// <summary>
@@ -80,7 +128,7 @@ namespace SharpNeat.MinimalCriterias
                 Math.Sqrt(Math.Pow(endXPosition - _startXPosition, 2) + Math.Pow(endYPosition - _startYPosition, 2));
 
             // Only return true if the distance is at least the minimum required distance
-            return distance >= _minimumDistanceTraveled;
+            return Math.Round(distance, 6) >= Math.Round(_minimumDistanceTraveled, 6);
         }
     }
 }

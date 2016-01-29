@@ -1,4 +1,10 @@
-﻿namespace SharpNeat.Core
+﻿#region
+
+using System.Collections.Generic;
+
+#endregion
+
+namespace SharpNeat.Core
 {
     /// <summary>
     ///     Interface for behavior characterization factory.  Behavior characterization factories construct new behavior
@@ -19,5 +25,13 @@
         /// <param name="minimalCriteria"></param>
         /// <returns>The constructed behavior characterization with the specified minimal criteria.</returns>
         IBehaviorCharacterization CreateBehaviorCharacterization(IMinimalCriteria minimalCriteria);
+
+        /// <summary>
+        ///     Calls the update procedure on the minimal criteria stored within the behavior characterization factory.
+        /// </summary>
+        /// <typeparam name="TGenome">Genome type parameter.</typeparam>
+        /// <param name="population">The current population.</param>
+        void UpdateBehaviorCharacterizationMinimalCriteria<TGenome>(List<TGenome> population)
+            where TGenome : class, IGenome<TGenome>;
     }
 }

@@ -1,6 +1,5 @@
 ﻿#region
 
-using System;
 using System.Collections.Generic;
 using SharpNeat.Core;
 using SharpNeat.Domains.MazeNavigation.Components;
@@ -224,9 +223,24 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         /// </summary>
         /// <typeparam name="TGenome">The genome type parameter.</typeparam>
         /// <param name="population">The current population.</param>
-        public void Update<TGenome>(List<TGenome> population)
+        public void Update<TGenome>(List<TGenome> population) where TGenome : class, IGenome<TGenome>
         {
-            throw new NotImplementedException();
+            // Calculate the new minimal criteria
+            _behaviorCharacterizationFactory.UpdateBehaviorCharacterizationMinimalCriteria(population);
+
+            // Disposition all genomes in the current population based on the new minimal criteria
+            IBehaviorCharacterization behaviorCharacterization =
+                _behaviorCharacterizationFactory.CreateBehaviorCharacterization();
+            foreach (TGenome genome in population)
+            {
+                genome.EvaluationInfo.IsViable =
+                    behaviorCharacterization.IsMinimalCriteriaSatisfied(
+                        new BehaviorInfo(new[]
+                        {
+                            genome.EvaluationInfo.BehaviorCharacterization[0],
+                            genome.EvaluationInfo.BehaviorCharacterization[1]
+                        }));
+            }
         }
 
         /// <summary>

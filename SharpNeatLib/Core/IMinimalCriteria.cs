@@ -16,7 +16,7 @@ namespace SharpNeat.Core
         /// </summary>
         /// <typeparam name="TGenome">Genome type parameter.</typeparam>
         /// <param name="population">The current population.</param>
-        void UpdateMinimalCriteria<TGenome>(List<TGenome> population);
+        void UpdateMinimalCriteria<TGenome>(List<TGenome> population) where TGenome : class, IGenome<TGenome>;
 
         /// <summary>
         ///     Evaluates whether the given behavior characterization satisfies the minimal criteria.

@@ -1,5 +1,6 @@
 ﻿#region
 
+using System.Collections.Generic;
 using SharpNeat.Core;
 
 #endregion
@@ -43,6 +44,17 @@ namespace SharpNeat.Behaviors
         public IBehaviorCharacterization CreateBehaviorCharacterization(IMinimalCriteria minimalCriteria)
         {
             return new TrajectoryBehaviorCharacterization(minimalCriteria);
+        }
+
+        /// <summary>
+        ///     Calls the update procedure on the minimal criteria stored within the behavior characterization factory.
+        /// </summary>
+        /// <typeparam name="TGenome">Genome type parameter.</typeparam>
+        /// <param name="population">The current population.</param>
+        public void UpdateBehaviorCharacterizationMinimalCriteria<TGenome>(List<TGenome> population)
+            where TGenome : class, IGenome<TGenome>
+        {
+            _minimalCriteria.UpdateMinimalCriteria(population);
         }
     }
 }

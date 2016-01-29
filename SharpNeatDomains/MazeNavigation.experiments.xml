@@ -219,7 +219,7 @@
     <Config>
       <SearchAlgorithm>MinimalCriteriaSearch</SearchAlgorithm>
       <SelectionAlgorithm>Queueing</SelectionAlgorithm>
-      <PopulationSize>1000</PopulationSize>      
+      <PopulationSize>5000</PopulationSize>      
       <InterspeciesMatingProbability>0.001</InterspeciesMatingProbability>
       <Activation>
         <Scheme>Acyclic</Scheme>
@@ -234,8 +234,8 @@
       <GenomeConfig>
         <InitialConnectionProportion>1</InitialConnectionProportion>
         <WeightMutationProbability>0.9</WeightMutationProbability>
-        <AddConnnectionProbability>0.01</AddConnnectionProbability>
-        <AddNodeProbability>0.005</AddNodeProbability>
+        <AddConnnectionProbability>0.05</AddConnnectionProbability>
+        <AddNodeProbability>0.01</AddNodeProbability>
         <DeleteConnectionProbability>0.001</DeleteConnectionProbability>
         <ConnectionWeightRange>1</ConnectionWeightRange>
       </GenomeConfig>
@@ -246,7 +246,7 @@
           <XStart>36</XStart>
           <YStart>184</YStart>
           <!--<MinimumMileage>16000</MinimumMileage>-->
-          <MinimumRequiredDistance>125</MinimumRequiredDistance>
+          <MinimumRequiredDistance>0</MinimumRequiredDistance>
         </MinimalCriteriaConfig>
       </BehaviorConfig>
       <MaxTimesteps>400</MaxTimesteps>
@@ -279,7 +279,7 @@
             <MinimalCriteriaConstraint>EuclideanDistance</MinimalCriteriaConstraint>
             <XStart>36</XStart>
             <YStart>184</YStart>
-            <MinimumRequiredDistance>125</MinimumRequiredDistance>
+            <MinimumRequiredDistance>0</MinimumRequiredDistance>
           </MinimalCriteriaConfig>
         </InitBehaviorConfig>
         <NearestNeighbors>15</NearestNeighbors>

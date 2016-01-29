@@ -43,6 +43,12 @@ namespace SharpNeat.Core
         void Cleanup();
 
         /// <summary>
+        ///     Update the genome evaluator based on some characteristic of the given population.
+        /// </summary>
+        /// <param name="population">The current population.</param>
+        void Update(List<TGenome> population);
+
+        /// <summary>
         ///     Evaluates the fitness or behavioral novelty of a list of genomes.
         /// </summary>
         /// <param name="genomeList">The list of genomes under evaluation.</param>
