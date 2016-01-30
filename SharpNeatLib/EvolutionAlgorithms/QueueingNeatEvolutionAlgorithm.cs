@@ -133,7 +133,7 @@ namespace SharpNeat.EvolutionAlgorithms
             // TODO: Need to implement the actual process
             // If the minimal criteria is dynamic and the population size has been reached, then determine
             // the new minimal criteria
-            if (_isDynamicMinimalCriteria && CurrentGeneration % 25 == 0)
+            if (_isDynamicMinimalCriteria && CurrentGeneration % 10 == 0)
             {
                 // TODO: Perhaps the MC should also be randomly perturbed (between 0 and current mean) if it hasn't changed in a certain amount of time
 

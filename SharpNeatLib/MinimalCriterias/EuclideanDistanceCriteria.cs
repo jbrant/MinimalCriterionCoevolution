@@ -20,6 +20,11 @@ namespace SharpNeat.MinimalCriterias
         private const int EuclideanDimensions = 2;
 
         /// <summary>
+        ///     The random number generator which generates new MCs when the current one gets stuck.
+        /// </summary>
+        private readonly Random _randomNumGenerator = new Random();
+
+        /// <summary>
         ///     The x-component of the starting position.
         /// </summary>
         private readonly double _startXPosition;
@@ -33,6 +38,11 @@ namespace SharpNeat.MinimalCriterias
         ///     The minimum distance that the candidate agent had to travel to be considered viable.
         /// </summary>
         private double _minimumDistanceTraveled;
+
+        /// <summary>
+        ///     The number of times the minimal criteria has been updated without a significant change in that criteria.
+        /// </summary>
+        private int _numUpdateCyclesWithoutChange;
 
         /// <summary>
         ///     Constructor for the euclidean distance minimal criteria.
@@ -54,54 +64,39 @@ namespace SharpNeat.MinimalCriterias
         /// <param name="population">The current population.</param>
         public void UpdateMinimalCriteria<TGenome>(List<TGenome> population) where TGenome : class, IGenome<TGenome>
         {
-            // TODO: Calculate the harmonic mean of the distance from the starting location for all individuals in the population
-
             // Update the minimal criteria to be the mean of the distance from the starting location over
             // every genome in the population
+            double newMC = population.Sum(
+                genome =>
+                    Math.Sqrt(Math.Pow(genome.EvaluationInfo.BehaviorCharacterization[0] - _startXPosition, 2) +
+                              Math.Pow(genome.EvaluationInfo.BehaviorCharacterization[1] - _startYPosition, 2)))/
+                           population.Count;
 
-            double[] distances = new double[population.Count];
+            bool isCriteriaChangeMarginal = Math.Abs(newMC - _minimumDistanceTraveled) < 1;
 
-            for (int i = 0; i < distances.Count(); i++)
+            // If the distance between the new MC and the previous MC is marginal and the number of updates
+            // without a modification to the MC has been surpassed, reset the MC
+            // TODO: This MC margin of error might need to be parameterized
+            if (isCriteriaChangeMarginal && _numUpdateCyclesWithoutChange >= 3)
             {
-                distances[i] =
-                    Math.Sqrt(Math.Pow(population[i].EvaluationInfo.BehaviorCharacterization[0] - _startXPosition, 2) +
-                              Math.Pow(population[i].EvaluationInfo.BehaviorCharacterization[1] - _startYPosition, 2));
+                // TODO: Pick a random MC somewhere between 0 and the current MC
+                //newMC = _randomNumGenerator.Next(0, (int) _minimumDistanceTraveled);
+                newMC = 0;
+
+                // Reset the number of MC update cycles without an MC change to 0
+                _numUpdateCyclesWithoutChange = 0;
             }
 
-            double newMean = distances.Sum()/population.Count;
-
-            int numSatisfied = 0;
-            foreach (double distance in distances)
+            // Otherwise, if the change is marginal but the requisite number of update cycles with no change has
+            // not been surpassed, then just increment the number of update cycles with no MC change
+            else if (isCriteriaChangeMarginal)
             {
-                if (Math.Round(distance, 6) >= Math.Round(newMean, 6))
-                {
-                    numSatisfied++;
-                }
+                // Increment the number of MC update cycles that resulted in no change to the MC
+                _numUpdateCyclesWithoutChange++;
             }
-
-            if (numSatisfied == 0)
-            {
-                Console.WriteLine("This should not be happening");
-            }
-
-            _minimumDistanceTraveled = population.Count/
-                                       population.Sum(
-                                           genome =>
-                                               1/
-                                               Math.Sqrt(
-                                                   Math.Pow(
-                                                       genome.EvaluationInfo.BehaviorCharacterization[0] -
-                                                       _startXPosition, 2) +
-                                                   Math.Pow(
-                                                       genome.EvaluationInfo.BehaviorCharacterization[1] -
-                                                       _startYPosition, 2)));
-
-            /*_minimumDistanceTraveled =
-                population.Sum(
-                    genome =>
-                        Math.Sqrt(Math.Pow(genome.EvaluationInfo.BehaviorCharacterization[0] - _startXPosition, 2) +
-                                  Math.Pow(genome.EvaluationInfo.BehaviorCharacterization[1] - _startYPosition, 2)))/
-                           population.Count;*/
+            
+            // Assign the minimal criteria
+            _minimumDistanceTraveled = newMC;
         }
 
         /// <summary>
@@ -128,7 +123,8 @@ namespace SharpNeat.MinimalCriterias
                 Math.Sqrt(Math.Pow(endXPosition - _startXPosition, 2) + Math.Pow(endYPosition - _startYPosition, 2));
 
             // Only return true if the distance is at least the minimum required distance
-            return Math.Round(distance, 6) >= Math.Round(_minimumDistanceTraveled, 6);
+            return Math.Round(distance) >= Math.Round(_minimumDistanceTraveled);
+            //return Math.Round(distance, 6) >= Math.Round(_minimumDistanceTraveled, 6);
         }
     }
 }

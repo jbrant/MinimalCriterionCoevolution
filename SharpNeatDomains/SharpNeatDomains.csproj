@@ -132,6 +132,7 @@
     <Compile Include="MazeNavigation\MCNSExperiment\SteadyStateMazeNavigationMCNSExperiment.cs" />
     <Compile Include="MazeNavigation\MCSExperiment\MazeNavigationMCSEvaluator.cs" />
     <Compile Include="MazeNavigation\MCSExperiment\MazeNavigationMCSInitializationEvaluator.cs" />
+    <Compile Include="MazeNavigation\MCSExperiment\QueueingMazeNavigationDynamicMCSExperiment.cs" />
     <Compile Include="MazeNavigation\MCSExperiment\QueueingNichedMazeNavigationMCSExperiment.cs" />
     <Compile Include="MazeNavigation\MCSExperiment\QueueingMazeNavigationMCSExperiment.cs" />
     <Compile Include="MazeNavigation\MCSExperiment\SteadyStateMazeNavigationMCSExperiment.cs" />
