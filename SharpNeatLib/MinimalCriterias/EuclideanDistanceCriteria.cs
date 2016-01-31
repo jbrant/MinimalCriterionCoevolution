@@ -20,6 +20,11 @@ namespace SharpNeat.MinimalCriterias
         private const int EuclideanDimensions = 2;
 
         /// <summary>
+        ///     The maximum allowed number of update cycles without a change to the minimal criteria.
+        /// </summary>
+        private readonly double? _maxUpdateCyclesWithoutChange;
+
+        /// <summary>
         ///     The random number generator which generates new MCs when the current one gets stuck.
         /// </summary>
         private readonly Random _randomNumGenerator = new Random();
@@ -37,7 +42,7 @@ namespace SharpNeat.MinimalCriterias
         /// <summary>
         ///     The minimum distance that the candidate agent had to travel to be considered viable.
         /// </summary>
-        private double _minimumDistanceTraveled;
+        private double _minimumDistanceFromOrigin;
 
         /// <summary>
         ///     The number of times the minimal criteria has been updated without a significant change in that criteria.
@@ -49,12 +54,28 @@ namespace SharpNeat.MinimalCriterias
         /// </summary>
         /// <param name="xLocation">The x-component of the starting position.</param>
         /// <param name="yLocation">The y-component of the starting position.</param>
-        /// <param name="minimumDistanceTraveled"></param>
-        public EuclideanDistanceCriteria(double xLocation, double yLocation, double minimumDistanceTraveled)
+        /// <param name="minimumDistanceFromOrigin"></param>
+        public EuclideanDistanceCriteria(double xLocation, double yLocation, double minimumDistanceFromOrigin)
         {
             _startXPosition = xLocation;
             _startYPosition = yLocation;
-            _minimumDistanceTraveled = minimumDistanceTraveled;
+            _minimumDistanceFromOrigin = minimumDistanceFromOrigin;
+        }
+
+        /// <summary>
+        ///     Constructor for the euclidean distance minimal criteria.
+        /// </summary>
+        /// <param name="xLocation">The x-component of the starting position.</param>
+        /// <param name="yLocation">The y-component of the starting position.</param>
+        /// <param name="minimumDistanceFromOrigin"></param>
+        /// <param name="maxUpdateCyclesWithoutChange">
+        ///     The maximum number of calls to update the minimal criteria that don't result
+        ///     in a significant change allowed (i.e. before the minimal criteria is forcibly modified).
+        /// </param>
+        public EuclideanDistanceCriteria(double xLocation, double yLocation, double minimumDistanceFromOrigin,
+            double? maxUpdateCyclesWithoutChange) : this(xLocation, yLocation, minimumDistanceFromOrigin)
+        {
+            _maxUpdateCyclesWithoutChange = maxUpdateCyclesWithoutChange;
         }
 
         /// <summary>
@@ -72,16 +93,15 @@ namespace SharpNeat.MinimalCriterias
                               Math.Pow(genome.EvaluationInfo.BehaviorCharacterization[1] - _startYPosition, 2)))/
                            population.Count;
 
-            bool isCriteriaChangeMarginal = Math.Abs(newMC - _minimumDistanceTraveled) < 1;
+            bool isCriteriaChangeMarginal = Math.Abs(newMC - _minimumDistanceFromOrigin) < 1;
 
             // If the distance between the new MC and the previous MC is marginal and the number of updates
             // without a modification to the MC has been surpassed, reset the MC
-            // TODO: This MC margin of error might need to be parameterized
-            if (isCriteriaChangeMarginal && _numUpdateCyclesWithoutChange >= 3)
+            if (_maxUpdateCyclesWithoutChange != null && isCriteriaChangeMarginal &&
+                _numUpdateCyclesWithoutChange >= _maxUpdateCyclesWithoutChange)
             {
-                // TODO: Pick a random MC somewhere between 0 and the current MC
-                //newMC = _randomNumGenerator.Next(0, (int) _minimumDistanceTraveled);
-                newMC = 0;
+                // Pick a random MC somewhere between 0 and the current MC
+                newMC = _randomNumGenerator.Next(0, (int) _minimumDistanceFromOrigin);
 
                 // Reset the number of MC update cycles without an MC change to 0
                 _numUpdateCyclesWithoutChange = 0;
@@ -89,14 +109,14 @@ namespace SharpNeat.MinimalCriterias
 
             // Otherwise, if the change is marginal but the requisite number of update cycles with no change has
             // not been surpassed, then just increment the number of update cycles with no MC change
-            else if (isCriteriaChangeMarginal)
+            else if (_maxUpdateCyclesWithoutChange != null && isCriteriaChangeMarginal)
             {
                 // Increment the number of MC update cycles that resulted in no change to the MC
                 _numUpdateCyclesWithoutChange++;
             }
-            
+
             // Assign the minimal criteria
-            _minimumDistanceTraveled = newMC;
+            _minimumDistanceFromOrigin = newMC;
         }
 
         /// <summary>
@@ -123,8 +143,16 @@ namespace SharpNeat.MinimalCriterias
                 Math.Sqrt(Math.Pow(endXPosition - _startXPosition, 2) + Math.Pow(endYPosition - _startYPosition, 2));
 
             // Only return true if the distance is at least the minimum required distance
-            return Math.Round(distance) >= Math.Round(_minimumDistanceTraveled);
-            //return Math.Round(distance, 6) >= Math.Round(_minimumDistanceTraveled, 6);
+            return Math.Round(distance) >= Math.Round(_minimumDistanceFromOrigin);
+        }
+
+        /// <summary>
+        ///     Returns the scalar value of the minimal criteria.
+        /// </summary>
+        /// <returns>The scalar value of the minimal criteria.</returns>
+        public dynamic GetMinimalCriteriaValue()
+        {
+            return _minimumDistanceFromOrigin;
         }
     }
 }

@@ -235,11 +235,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             {
                 genome.EvaluationInfo.IsViable =
                     behaviorCharacterization.IsMinimalCriteriaSatisfied(
-                        new BehaviorInfo(new[]
-                        {
-                            genome.EvaluationInfo.BehaviorCharacterization[0],
-                            genome.EvaluationInfo.BehaviorCharacterization[1]
-                        }));
+                        new BehaviorInfo(genome.EvaluationInfo.BehaviorCharacterization));
             }
         }
 
@@ -248,6 +244,23 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         /// </summary>
         public void Reset()
         {
+        }
+
+        /// <summary>
+        ///     Returns MazeNavigatorMCSEvaluator loggable elements.
+        /// </summary>
+        /// <param name="logFieldEnableMap">
+        ///     Dictionary of logging fields that can be enabled or disabled based on the specification
+        ///     of the calling routine.
+        /// </param>
+        /// <returns>The loggable elements for MazeNavigatorMCSEvaluator.</returns>
+        public List<LoggableElement> GetLoggableElements(IDictionary<FieldElement, bool> logFieldEnableMap = null)
+        {
+            return new List<LoggableElement>
+            {
+                new LoggableElement(EvolutionFieldElements.MinimalCriteriaThreshold,
+                    _behaviorCharacterizationFactory.GetMinimalCriteriaScalarValue())
+            };
         }
 
         #endregion

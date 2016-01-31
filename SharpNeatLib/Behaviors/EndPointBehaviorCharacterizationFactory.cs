@@ -55,5 +55,14 @@ namespace SharpNeat.Behaviors
         {
             _minimalCriteria.UpdateMinimalCriteria(population);
         }
+
+        /// <summary>
+        ///     Returns the scalar value of the minimal criteria.
+        /// </summary>
+        /// <returns>The scalar value of the minimal criteria.</returns>
+        public dynamic GetMinimalCriteriaScalarValue()
+        {
+            return _minimalCriteria.GetMinimalCriteriaValue();
+        }
     }
 }

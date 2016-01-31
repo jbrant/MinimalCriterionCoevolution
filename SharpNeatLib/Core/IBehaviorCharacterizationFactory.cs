@@ -33,5 +33,11 @@ namespace SharpNeat.Core
         /// <param name="population">The current population.</param>
         void UpdateBehaviorCharacterizationMinimalCriteria<TGenome>(List<TGenome> population)
             where TGenome : class, IGenome<TGenome>;
+
+        /// <summary>
+        ///     Returns the scalar value of the minimal criteria.
+        /// </summary>
+        /// <returns>The scalar value of the minimal criteria.</returns>
+        dynamic GetMinimalCriteriaScalarValue();
     }
 }

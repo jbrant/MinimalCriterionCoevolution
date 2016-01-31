@@ -84,5 +84,20 @@ namespace SharpNeat.MinimalCriterias
             // Return false if the location falls outside of the bounds of the min/max x and y locations
             return !(xLocation < _xMin) && !(xLocation > _xMax) && !(yLocation < _yMin) && !(yLocation > _yMax);
         }
+
+        /// <summary>
+        ///     Returns the scalar value of the minimal criteria.
+        /// </summary>
+        /// <returns>The scalar value of the minimal criteria.</returns>
+        public dynamic GetMinimalCriteriaValue()
+        {
+            return new[]
+            {
+                _xMin,
+                _yMin,
+                _xMax,
+                _yMax
+            };
+        }
     }
 }

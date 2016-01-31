@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using SharpNeat.Core;
 using SharpNeat.Domains.MazeNavigation.Components;
+using SharpNeat.Loggers;
 using SharpNeat.Phenomes;
 using SharpNeat.Utility;
 
@@ -123,6 +124,19 @@ namespace SharpNeat.Domains.MazeNavigation.RandomExperiment
         /// </summary>
         public void Reset()
         {
+        }
+
+        /// <summary>
+        ///     Returns MazeNavigationRandomEvaluator loggable elements.
+        /// </summary>
+        /// <param name="logFieldEnableMap">
+        ///     Dictionary of logging fields that can be enabled or disabled based on the specification
+        ///     of the calling routine.
+        /// </param>
+        /// <returns>The loggable elements for MazeNavigationRandomEvaluator.</returns>
+        public List<LoggableElement> GetLoggableElements(IDictionary<FieldElement, bool> logFieldEnableMap = null)
+        {
+            return null;
         }
 
         #endregion

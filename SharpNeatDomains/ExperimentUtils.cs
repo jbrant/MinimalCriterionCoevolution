@@ -457,10 +457,12 @@ namespace SharpNeat.Domains
                         yStart = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "YStart");
                         double minimumDistanceTraveled = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig,
                             "MinimumRequiredDistance");
+                        double? maxUpdateCyclesWithoutChange = XmlUtils.TryGetValueAsInt(xmlMinimalCriteriaConfig,
+                            "MaxUpdateCyclesWithoutChange");
 
                         // Set the euclidean distance minimal criteria on the behavior characterization
                         minimalCriteria = new EuclideanDistanceCriteria(xStart, yStart,
-                            minimumDistanceTraveled);
+                            minimumDistanceTraveled, maxUpdateCyclesWithoutChange);
 
                         break;
 

@@ -1,6 +1,7 @@
 ﻿#region
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml;
 using ExperimentEntities;
 using SharpNeat.Core;
@@ -18,9 +19,13 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
     {
         private int _batchSize;
         private IBehaviorCharacterizationFactory _behaviorCharacterizationFactory;
+        private int _bridgingApplications;
+        private int _bridgingMagnitude;
         private IDataLogger _evaluationDataLogger;
         private IDataLogger _evolutionDataLogger;
         private IDictionary<FieldElement, bool> _experimentLogFieldEnableMap;
+        private int _minimalCriteriaUpdateInterval;
+        private int _seedGenomeCount;
 
         public override void Initialize(string name, XmlElement xmlConfig, IDataLogger evolutionDataLogger,
             IDataLogger evaluationDataLogger)
@@ -33,6 +38,16 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 
             // Read in number of offspring to produce in a single batch
             _batchSize = XmlUtils.GetValueAsInt(xmlConfig, "OffspringBatchSize");
+
+            // Read in the minimal criteria update interval
+            _minimalCriteriaUpdateInterval = XmlUtils.GetValueAsInt(xmlConfig, "MinimalCriteriaUpdateInterval");
+
+            // Read in the bridging magnitude and number of applications
+            _bridgingMagnitude = XmlUtils.TryGetValueAsInt(xmlConfig, "BridgingMagnitude") ?? default(int);
+            _bridgingApplications = XmlUtils.TryGetValueAsInt(xmlConfig, "BridgingApplications") ?? default(int);
+
+            // Read in the number of seed genomes to generate to bootstrap the primary algorithm
+            _seedGenomeCount = XmlUtils.GetValueAsInt(xmlConfig, "SeedGenomeCount");
 
             // Read in log file path/name
             _evolutionDataLogger = evolutionDataLogger ??
@@ -47,6 +62,12 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             if (SerializeGenomeToXml)
             {
                 _experimentLogFieldEnableMap.Add(EvolutionFieldElements.ChampGenomeXml, true);
+            }
+
+            // Enable or disable primary fitness logging (causing utilization of auxiliary fitness)
+            if (_bridgingMagnitude > 0)
+            {
+                _experimentLogFieldEnableMap.Add(EvolutionFieldElements.ChampGenomeFitness, false);
             }
         }
 
@@ -80,7 +101,10 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         public override INeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(
             IGenomeFactory<NeatGenome> genomeFactory,
             List<NeatGenome> genomeList, ulong startingEvaluations)
-        {            
+        {
+            // Extract the specified number of seed genomes from the randomly generated population
+            List<NeatGenome> seedPopulation = genomeList.Take(_seedGenomeCount).ToList();
+
             // Create complexity regulation strategy.
             var complexityRegulationStrategy =
                 ExperimentUtils.CreateComplexityRegulationStrategy(ComplexityRegulationStrategy, Complexitythreshold);
@@ -88,13 +112,14 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             // Create the evolution algorithm.
             AbstractNeatEvolutionAlgorithm<NeatGenome> ea =
                 new QueueingNeatEvolutionAlgorithm<NeatGenome>(NeatEvolutionAlgorithmParameters,
-                    complexityRegulationStrategy, _batchSize, RunPhase.Primary, false,
-                    _evolutionDataLogger, _experimentLogFieldEnableMap);
+                    complexityRegulationStrategy, _batchSize, RunPhase.Primary, (_bridgingMagnitude > 0),
+                    true, _evolutionDataLogger, _experimentLogFieldEnableMap, _minimalCriteriaUpdateInterval);
 
             // Create IBlackBox evaluator.
             IPhenomeEvaluator<IBlackBox, BehaviorInfo> mazeNavigationEvaluator =
                 new MazeNavigationMCSEvaluator(MaxDistanceToTarget, MaxTimesteps,
-                    MazeVariant, MinSuccessDistance, _behaviorCharacterizationFactory);
+                    MazeVariant, MinSuccessDistance, _behaviorCharacterizationFactory, _bridgingMagnitude,
+                    _bridgingApplications);
 
             // Create genome decoder.
             IGenomeDecoder<NeatGenome, IBlackBox> genomeDecoder = CreateGenomeDecoder();
@@ -110,7 +135,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                     SerializeGenomeToXml);
 
             // Initialize the evolution algorithm.
-            ea.Initialize(fitnessEvaluator, genomeFactory, genomeList, DefaultPopulationSize,
+            ea.Initialize(fitnessEvaluator, genomeFactory, seedPopulation, DefaultPopulationSize,
                 null, MaxEvaluations + startingEvaluations);
 
             // Finished. Return the evolution algorithm

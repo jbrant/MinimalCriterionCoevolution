@@ -175,6 +175,19 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         {
         }
 
+        /// <summary>
+        ///     Returns MazeNavigationMCSInitializationEvaluator loggable elements.
+        /// </summary>
+        /// <param name="logFieldEnableMap">
+        ///     Dictionary of logging fields that can be enabled or disabled based on the specification
+        ///     of the calling routine.
+        /// </param>
+        /// <returns>The loggable elements for MazeNavigationMCSInitializationEvaluator.</returns>
+        public List<LoggableElement> GetLoggableElements(IDictionary<FieldElement, bool> logFieldEnableMap = null)
+        {
+            return null;
+        }
+
         #endregion
     }
 }

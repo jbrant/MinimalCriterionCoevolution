@@ -37,9 +37,15 @@ namespace SharpNeat.EvolutionAlgorithms
         private readonly bool _isBridgingEnabled;
 
         /// <summary>
-        /// Flag that indicates whether the minimal criteria is dynamically updating.
+        ///     Flag that indicates whether the minimal criteria is dynamically updating.
         /// </summary>
-        private readonly bool _isDynamicMinimalCriteria = true;
+        private readonly bool _isDynamicMinimalCriteria;
+
+        /// <summary>
+        ///     The number of generations/batches between updates to the minimal criteria.  This value is only used when the
+        ///     minimal criteria is changing (dynamically) throughout evolution.
+        /// </summary>
+        private readonly int _mcUpdateInterval;
 
         #endregion
 
@@ -130,24 +136,16 @@ namespace SharpNeat.EvolutionAlgorithms
         {
             bool useAuxFitness = false;
 
-            // TODO: Need to implement the actual process
-            // If the minimal criteria is dynamic and the population size has been reached, then determine
-            // the new minimal criteria
-            if (_isDynamicMinimalCriteria && CurrentGeneration % 10 == 0)
+            // If the minimal criteria is dynamic and the MC update interval has been reached, 
+            // then determine the new minimal criteria
+            if (_isDynamicMinimalCriteria && CurrentGeneration%_mcUpdateInterval == 0)
             {
-                // TODO: Perhaps the MC should also be randomly perturbed (between 0 and current mean) if it hasn't changed in a certain amount of time
-
                 // Update the minimal criteria and disposition each genome as viable or not
                 // given the new minimal criteria
                 GenomeEvaluator.Update(GenomeList as List<TGenome>);
 
-                if ((GenomeList as List<TGenome>).Count(genome => genome.EvaluationInfo.IsViable == true) == 0)
-                {
-                    Console.WriteLine("What is going on...");
-                }
-
                 // Remove individuals from the queue who do not meet the updated minimal criteria
-                (GenomeList as List<TGenome>).RemoveAll(genome => genome.EvaluationInfo.IsViable == false);
+                (GenomeList as List<TGenome>)?.RemoveAll(genome => genome.EvaluationInfo.IsViable == false);
             }
 
             // Get the initial batch size as the minimum of the batch size or the size of the population.
@@ -229,14 +227,24 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     algorithm.
         /// </param>
         /// <param name="isBridgingEnabled">Flag that indicates whether bridging is enabled.</param>
+        /// <param name="isDynamicMinimalCriteria">
+        ///     Flag that indicates whether the minimal criteria is automatically/dynamically
+        ///     determined.
+        /// </param>
+        /// <param name="mcUpdateInterval">
+        ///     The number of batches/generations that are permitted to elapse between updates to the
+        ///     minimal criteria.
+        /// </param>
         public QueueingNeatEvolutionAlgorithm(IDataLogger logger = null, RunPhase runPhase = RunPhase.Primary,
-            bool isBridgingEnabled = false)
+            bool isBridgingEnabled = false, bool isDynamicMinimalCriteria = false, int mcUpdateInterval = 0)
             : this(
-                new NullComplexityRegulationStrategy(), 10, runPhase, isBridgingEnabled, logger)
+                new NullComplexityRegulationStrategy(), 10, runPhase, isBridgingEnabled, isDynamicMinimalCriteria,
+                logger)
         {
             SpeciationStrategy = new KMeansClusteringStrategy<TGenome>(new ManhattanDistanceMetric());
             ComplexityRegulationStrategy = new NullComplexityRegulationStrategy();
             _batchSize = 10;
+            _mcUpdateInterval = mcUpdateInterval;
         }
 
         /// <summary>
@@ -249,21 +257,33 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     algorithm.
         /// </param>
         /// <param name="isBridgingEnabled">Flag that indicates whether bridging is enabled.</param>
+        /// <param name="isDynamicMinimalCriteria">
+        ///     Flag that indicates whether the minimal criteria is automatically/dynamically
+        ///     determined.
+        /// </param>
         /// <param name="logger">The data logger (optional).</param>
         /// <param name="logFieldEnabledMap">Dictionary of logging fields that can be dynamically enabled or disabled.</param>
+        /// <param name="mcUpdateInterval">
+        ///     The number of batches/generations that are permitted to elapse between updates to the
+        ///     minimal criteria.
+        /// </param>
         public QueueingNeatEvolutionAlgorithm(
             IComplexityRegulationStrategy complexityRegulationStrategy,
             int batchSize,
             RunPhase runPhase = RunPhase.Primary,
             bool isBridgingEnabled = false,
-            IDataLogger logger = null, IDictionary<FieldElement, bool> logFieldEnabledMap = null)
+            bool isDynamicMinimalCriteria = false,
+            IDataLogger logger = null, IDictionary<FieldElement, bool> logFieldEnabledMap = null,
+            int mcUpdateInterval = 0)
         {
             ComplexityRegulationStrategy = complexityRegulationStrategy;
             _batchSize = batchSize;
             EvolutionLogger = logger;
             RunPhase = runPhase;
             _isBridgingEnabled = isBridgingEnabled;
+            _isDynamicMinimalCriteria = isDynamicMinimalCriteria;
             _logFieldEnabledMap = logFieldEnabledMap;
+            _mcUpdateInterval = mcUpdateInterval;
         }
 
         /// <summary>
@@ -277,21 +297,33 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     algorithm.
         /// </param>
         /// <param name="isBridgingEnabled">Flag that indicates whether bridging is enabled.</param>
+        /// <param name="isDynamicMinimalCriteria">
+        ///     Flag that indicates whether the minimal criteria is automatically/dynamically
+        ///     determined.
+        /// </param>
         /// <param name="logger">The data logger (optional).</param>
         /// <param name="logFieldEnabledMap">Dictionary of logging fields that can be dynamically enabled or disabled.</param>
+        /// <param name="mcUpdateInterval">
+        ///     The number of batches/generations that are permitted to elapse between updates to the
+        ///     minimal criteria.
+        /// </param>
         public QueueingNeatEvolutionAlgorithm(NeatEvolutionAlgorithmParameters eaParams,
             IComplexityRegulationStrategy complexityRegulationStrategy,
             int batchSize,
             RunPhase runPhase = RunPhase.Primary,
             bool isBridgingEnabled = false,
-            IDataLogger logger = null, IDictionary<FieldElement, bool> logFieldEnabledMap = null) : base(eaParams)
+            bool isDynamicMinimalCriteria = false,
+            IDataLogger logger = null, IDictionary<FieldElement, bool> logFieldEnabledMap = null,
+            int mcUpdateInterval = 0) : base(eaParams)
         {
             ComplexityRegulationStrategy = complexityRegulationStrategy;
             _batchSize = batchSize;
             EvolutionLogger = logger;
             RunPhase = runPhase;
             _isBridgingEnabled = isBridgingEnabled;
+            _isDynamicMinimalCriteria = isDynamicMinimalCriteria;
             _logFieldEnabledMap = logFieldEnabledMap;
+            _mcUpdateInterval = mcUpdateInterval;
         }
 
         #endregion

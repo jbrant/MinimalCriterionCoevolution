@@ -24,5 +24,11 @@ namespace SharpNeat.Core
         /// <param name="behaviorInfo">The behavior info.</param>
         /// <returns>Boolean value indicating whether the given behavior characterization satisfies the minimal criteria.</returns>
         bool DoesCharacterizationSatisfyMinimalCriteria(BehaviorInfo behaviorInfo);
+
+        /// <summary>
+        ///     Returns the scalar value of the minimal criteria.
+        /// </summary>
+        /// <returns>The scalar value of the minimal criteria.</returns>
+        dynamic GetMinimalCriteriaValue();
     }
 }
