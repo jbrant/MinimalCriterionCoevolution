@@ -256,11 +256,15 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         /// <returns>The loggable elements for MazeNavigatorMCSEvaluator.</returns>
         public List<LoggableElement> GetLoggableElements(IDictionary<FieldElement, bool> logFieldEnableMap = null)
         {
-            return new List<LoggableElement>
-            {
-                new LoggableElement(EvolutionFieldElements.MinimalCriteriaThreshold,
-                    _behaviorCharacterizationFactory.GetMinimalCriteriaScalarValue())
-            };
+            return (logFieldEnableMap != null &&
+                    logFieldEnableMap.ContainsKey(EvolutionFieldElements.MinimalCriteriaThreshold) &&
+                    logFieldEnableMap[EvolutionFieldElements.MinimalCriteriaThreshold])
+                ? new List<LoggableElement>
+                {
+                    new LoggableElement(EvolutionFieldElements.MinimalCriteriaThreshold,
+                        _behaviorCharacterizationFactory.GetMinimalCriteriaScalarValue())
+                }
+                : null;
         }
 
         #endregion

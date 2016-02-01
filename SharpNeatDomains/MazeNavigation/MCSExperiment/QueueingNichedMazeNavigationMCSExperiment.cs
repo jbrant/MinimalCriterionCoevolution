@@ -25,7 +25,6 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         private NoveltySearchMazeNavigationInitializer _mazeNavigationInitializer;
         private int _nicheCapacity;
         private double _reproductionProportion;
-        private int _seedGenomeCount;
 
         public override void Initialize(string name, XmlElement xmlConfig, IDataLogger evolutionDataLogger,
             IDataLogger evaluationDataLogger)
@@ -42,7 +41,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             _nicheCapacity = XmlUtils.GetValueAsInt(xmlConfig, "NicheCapacity");
 
             // Read in the number of seed genomes to generate to bootstrap the primary algorithm
-            _seedGenomeCount = XmlUtils.GetValueAsInt(xmlConfig, "SeedGenomeCount");
+            SeedGenomeCount = XmlUtils.GetValueAsInt(xmlConfig, "SeedGenomeCount");
 
             // Read in log file path/name
             _evolutionDataLogger = evolutionDataLogger ??
@@ -92,7 +91,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             _nicheCapacity = experimentDictionary.Primary_NicheCapacity ?? default(int);
 
             // Read in the number of seed genomes to generate to bootstrap the primary algorithm
-            _seedGenomeCount = experimentDictionary.NumSeedGenomes;
+            SeedGenomeCount = experimentDictionary.NumSeedGenomes;
 
             // Read in log file path/name
             _evolutionDataLogger = new McsExperimentEvaluationEntityDataLogger(experimentDictionary.ExperimentName);
@@ -137,7 +136,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                 CreateGenomeDecoder(), startingEvaluations);
 
             // Run the initialization algorithm until the requested number of viable seed genomes are found
-            List<NeatGenome> seedPopulation = _mazeNavigationInitializer.EvolveViableGenomes(_seedGenomeCount, true,
+            List<NeatGenome> seedPopulation = _mazeNavigationInitializer.EvolveViableGenomes(SeedGenomeCount, true,
                 out initializationEvaluations);
 
             // Create complexity regulation strategy.

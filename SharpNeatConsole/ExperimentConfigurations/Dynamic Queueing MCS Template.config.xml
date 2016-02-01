@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Config>
+  <SearchAlgorithm>MinimalCriteriaSearch</SearchAlgorithm>
+  <SelectionAlgorithm>Queueing</SelectionAlgorithm>
+  <PopulationSize>5000</PopulationSize>
+  <InterspeciesMatingProbability>0.001</InterspeciesMatingProbability>
+  <Activation>
+    <Scheme>Acyclic</Scheme>
+  </Activation>
+  <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>
+  <ComplexityThreshold>30</ComplexityThreshold>
+  <OffspringBatchSize>50</OffspringBatchSize>
+  <MaxEvaluations>1000000</MaxEvaluations>
+  <MaxRestarts>0</MaxRestarts>
+  <DecodeGenomesToXml>false</DecodeGenomesToXml>
+  <SeedGenomeCount>200</SeedGenomeCount>
+  <GenomeConfig>
+    <InitialConnectionProportion>1</InitialConnectionProportion>
+    <WeightMutationProbability>0.9</WeightMutationProbability>
+    <AddConnnectionProbability>0.005</AddConnnectionProbability>
+    <AddNodeProbability>0.01</AddNodeProbability>
+    <DeleteConnectionProbability>0.001</DeleteConnectionProbability>
+    <ConnectionWeightRange>5</ConnectionWeightRange>
+  </GenomeConfig>
+  <BehaviorConfig>
+    <BehaviorCharacterization>EndPoint</BehaviorCharacterization>
+    <MinimalCriteriaConfig>
+      <MinimalCriteriaConstraint>EuclideanDistance</MinimalCriteriaConstraint>
+      <XStart>36</XStart>
+      <YStart>184</YStart>
+      <MinimumRequiredDistance>0</MinimumRequiredDistance>
+      <MaxUpdateCyclesWithoutChange>10</MaxUpdateCyclesWithoutChange>
+    </MinimalCriteriaConfig>
+  </BehaviorConfig>
+  <MaxTimesteps>400</MaxTimesteps>
+  <MinSuccessDistance>5</MinSuccessDistance>
+  <MaxDistanceToTarget>300</MaxDistanceToTarget>
+  <MazeVariant>HardMaze</MazeVariant>
+  <MinimalCriteriaUpdateInterval>25</MinimalCriteriaUpdateInterval>
+  <BridgingMagnitude>0</BridgingMagnitude>
+  <BridgingApplications>0</BridgingApplications>
+  <Description>
+    This is the maze navigation experiment used in the original novelty search papers (citation needed).
+  </Description>
+</Config>

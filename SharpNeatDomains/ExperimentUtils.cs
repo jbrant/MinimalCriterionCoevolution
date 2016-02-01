@@ -457,12 +457,13 @@ namespace SharpNeat.Domains
                         yStart = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "YStart");
                         double minimumDistanceTraveled = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig,
                             "MinimumRequiredDistance");
-                        double? maxUpdateCyclesWithoutChange = XmlUtils.TryGetValueAsInt(xmlMinimalCriteriaConfig,
-                            "MaxUpdateCyclesWithoutChange");
+                        double? maxDistanceUpdateCyclesWithoutChange =
+                            XmlUtils.TryGetValueAsInt(xmlMinimalCriteriaConfig,
+                                "MaxUpdateCyclesWithoutChange");
 
                         // Set the euclidean distance minimal criteria on the behavior characterization
                         minimalCriteria = new EuclideanDistanceCriteria(xStart, yStart,
-                            minimumDistanceTraveled, maxUpdateCyclesWithoutChange);
+                            minimumDistanceTraveled, maxDistanceUpdateCyclesWithoutChange);
 
                         break;
 
@@ -472,9 +473,13 @@ namespace SharpNeat.Domains
                         xStart = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "XStart");
                         yStart = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "YStart");
                         double minimumMileage = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "MinimumMileage");
+                        double? maxMileageUpdateCyclesWithoutChange = XmlUtils.TryGetValueAsInt(
+                            xmlMinimalCriteriaConfig,
+                            "MaxUpdateCyclesWithoutChange");
 
                         // Set the mileage minimal criteria on the behavior characterization
-                        minimalCriteria = new MileageCriteria(xStart, yStart, minimumMileage);
+                        minimalCriteria = new MileageCriteria(xStart, yStart, minimumMileage,
+                            maxMileageUpdateCyclesWithoutChange);
 
                         break;
                 }

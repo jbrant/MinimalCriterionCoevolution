@@ -247,6 +247,11 @@ namespace SharpNeat.Domains.MazeNavigation
         public int DefaultPopulationSize { get; protected set; }
 
         /// <summary>
+        ///     The number of genomes in the initial population.
+        /// </summary>
+        public int SeedGenomeCount { get; protected set; }
+
+        /// <summary>
         ///     The NEAT parameters to use for the experiment.
         /// </summary>
         public NeatEvolutionAlgorithmParameters NeatEvolutionAlgorithmParameters { get; private set; }

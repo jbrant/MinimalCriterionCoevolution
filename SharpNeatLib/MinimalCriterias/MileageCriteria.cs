@@ -22,7 +22,7 @@ namespace SharpNeat.MinimalCriterias
         /// <summary>
         ///     The maximum allowed number of update cycles without a change to the minimal criteria.
         /// </summary>
-        private readonly double? _maxUpdateCyclesWithoutChange = 5;
+        private readonly double? _maxUpdateCyclesWithoutChange;
 
         /// <summary>
         ///     The random number generator which generates new MCs when the current one gets stuck.
@@ -63,6 +63,22 @@ namespace SharpNeat.MinimalCriterias
         }
 
         /// <summary>
+        ///     Constructor for the mileage minimal criteria.
+        /// </summary>
+        /// <param name="startingXLocation">The x-component of the starting position.</param>
+        /// <param name="startingYLocation">The y-component of the starting position.</param>
+        /// <param name="minimumMileage">The minimum mileage that an agent has to travel.</param>
+        /// <param name="maxUpdateCyclesWithoutChange">
+        ///     The maximum number of calls to update the minimal criteria that don't result
+        ///     in a significant change allowed (i.e. before the minimal criteria is forcibly modified).
+        /// </param>
+        public MileageCriteria(double startingXLocation, double startingYLocation, double minimumMileage,
+            double? maxUpdateCyclesWithoutChange) : this(startingXLocation, startingYLocation, minimumMileage)
+        {
+            _maxUpdateCyclesWithoutChange = maxUpdateCyclesWithoutChange;
+        }
+
+        /// <summary>
         ///     Updates the minimal criteria based on characteristics of the current population.
         /// </summary>
         /// <typeparam name="TGenome">Genome type parameter.</typeparam>
@@ -73,8 +89,9 @@ namespace SharpNeat.MinimalCriterias
             double newMileageMc =
                 population.Sum(
                     genome =>
-                        CalculateIndividualMileage(new BehaviorInfo(genome.EvaluationInfo.BehaviorCharacterization))) / population.Count;
-            
+                        CalculateIndividualMileage(new BehaviorInfo(genome.EvaluationInfo.BehaviorCharacterization)))/
+                population.Count;
+
             // If the change between the two mileage criterias is less than 1 unit, then it is considered marginal
             bool isCriteriaChangeMarginal = Math.Abs(newMileageMc - _minimumMileage) < 1;
 
@@ -84,7 +101,7 @@ namespace SharpNeat.MinimalCriterias
                 _numUpdateCyclesWithoutChange >= _maxUpdateCyclesWithoutChange)
             {
                 // Pick a random MC somewhere between 0 and the current MC
-                newMileageMc = _randomNumGenerator.Next(0, (int)_minimumMileage);
+                newMileageMc = _randomNumGenerator.Next(0, (int) _minimumMileage);
 
                 // Reset the number of MC update cycles without an MC change to 0
                 _numUpdateCyclesWithoutChange = 0;

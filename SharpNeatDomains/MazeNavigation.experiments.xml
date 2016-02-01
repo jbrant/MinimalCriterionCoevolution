@@ -291,12 +291,12 @@
           <MaxGenerationsWithoutArchiveAddition>10</MaxGenerationsWithoutArchiveAddition>
         </NoveltyConfig>        
       </InitializationAlgorithmConfig>
-      <!--<LoggingConfig>
+      <LoggingConfig>
         <Type>Evolution</Type>
         <Destination>File</Destination>
-        <LogFile>C:\\Users\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Novelty Search\Experiments\\EvolutionData.csv</LogFile>
+        <LogFile>C:\\Users\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Minimal Criteria Search\ExperimentData\\EvolutionData.csv</LogFile>
       </LoggingConfig>
-      <LoggingConfig>
+      <!--<LoggingConfig>
         <Type>Evaluation</Type>
         <Destination>File</Destination>
         <LogFile>C:\\Users\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Novelty Search\Experiments\\EvaluationData.csv</LogFile>
@@ -420,8 +420,8 @@
       <GenomeConfig>
         <InitialConnectionProportion>1</InitialConnectionProportion>
         <WeightMutationProbability>0.9</WeightMutationProbability>
-        <AddConnnectionProbability>0.01</AddConnnectionProbability>
-        <AddNodeProbability>0.001</AddNodeProbability>
+        <AddConnnectionProbability>0.005</AddConnnectionProbability>
+        <AddNodeProbability>0.01</AddNodeProbability>
         <DeleteConnectionProbability>0.001</DeleteConnectionProbability>
         <ConnectionWeightRange>5</ConnectionWeightRange>
       </GenomeConfig>
@@ -450,16 +450,16 @@
       <MazeVariant>HardMaze</MazeVariant>
       <MinimalCriteriaUpdateInterval>25</MinimalCriteriaUpdateInterval>
       <BridgingMagnitude>0</BridgingMagnitude>
-      <BridgingApplications>0</BridgingApplications>
-      <!--<LoggingConfig>
+      <BridgingApplications></BridgingApplications>
+      <LoggingConfig>
         <Type>Evolution</Type>
         <Destination>File</Destination>
-        <LogFile>C:\\Users\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Novelty Search\Experiments\\EvolutionData.csv</LogFile>
+        <LogFile>C:\\Users\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Minimal Criteria Search\ExperimentData\\EvolutionData.csv</LogFile>
       </LoggingConfig>
-      <LoggingConfig>
+      <!--<LoggingConfig>
         <Type>Evaluation</Type>
         <Destination>File</Destination>
-        <LogFile>C:\\Users\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Novelty Search\Experiments\\EvaluationData.csv</LogFile>
+        <LogFile>C:\\Users\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Minimal Criteria Search\ExperimentData\\EvaluationData.csv</LogFile>
       </LoggingConfig>-->
       <Description>
         This is the maze navigation experiment used in the original novelty search papers (citation needed).

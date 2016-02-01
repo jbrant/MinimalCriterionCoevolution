@@ -24,7 +24,6 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         private IDataLogger _evolutionDataLogger;
         private IDictionary<FieldElement, bool> _experimentLogFieldEnableMap;
         private NoveltySearchMazeNavigationInitializer _mazeNavigationInitializer;
-        private int _seedGenomeCount;
 
         public override void Initialize(string name, XmlElement xmlConfig, IDataLogger evolutionDataLogger,
             IDataLogger evaluationDataLogger)
@@ -43,7 +42,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             _bridgingApplications = XmlUtils.TryGetValueAsInt(xmlConfig, "BridgingApplications") ?? default(int);
 
             // Read in the number of seed genomes to generate to bootstrap the primary algorithm
-            _seedGenomeCount = XmlUtils.GetValueAsInt(xmlConfig, "SeedGenomeCount");
+            SeedGenomeCount = XmlUtils.GetValueAsInt(xmlConfig, "SeedGenomeCount");
 
             // Read in log file path/name
             _evolutionDataLogger = evolutionDataLogger ??
@@ -137,7 +136,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                 CreateGenomeDecoder(), startingEvaluations);
 
             // Run the initialization algorithm until the requested number of viable seed genomes are found
-            List<NeatGenome> seedPopulation = _mazeNavigationInitializer.EvolveViableGenomes(_seedGenomeCount, true,
+            List<NeatGenome> seedPopulation = _mazeNavigationInitializer.EvolveViableGenomes(SeedGenomeCount, true,
                 out initializationEvaluations);
 
             // Create complexity regulation strategy.

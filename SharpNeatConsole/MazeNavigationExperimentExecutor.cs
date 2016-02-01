@@ -40,15 +40,17 @@ namespace SharpNeatConsole
             // Instantiate the execution logger
             _executionLogger = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-            if (args == null || args.Length < 4)
+            if (args == null || args.Length < 5)
             {
                 _executionLogger.Error(
-                    "The following invocation is required for a file source/destination:");
+                    "The following invocations are supported for a file source/destination:");
                 _executionLogger.Error(
-                    "SharpNeatConsole.exe <Experiment source (file)> <seed population directory> <# of runs> <experiment config directory> <output file directory> <experiment names>");
+                    "SharpNeatConsole.exe <Experiment source (file)> <seed population directory> <# of runs> <experiment config directory> <output file directory> <enable organism state logging> <experiment names>");
+                _executionLogger.Error(
+                    "SharpNeatConsole.exe <Experiment source (file)> generate_population <# of runs> <experiment config directory> <output file directory> <enable organism state logging> <experiment names>");
                 _executionLogger.Error("The following invocation is required for a database source/destination:");
                 _executionLogger.Error(
-                    "SharpNeatConsole.exe <Experiment source (database)> <seed population directory> <# of runs> <experiment names>");
+                    "SharpNeatConsole.exe <Experiment source (database)> <seed population directory> <# of runs> <enable organism state logging> <experiment names>");
                 Environment.Exit(0);
             }
 
@@ -70,36 +72,47 @@ namespace SharpNeatConsole
             string experimentConfigurationDirectory = "file".Equals(executionSource) ? args[3] : null;
             string outputFileDirectory = "file".Equals(executionSource) ? args[4] : null;
 
-            if (Directory.Exists(seedPopulationFileDirectory) == false)
+            // Read flag indicating whether or not to output organism state data
+            bool writeOrganismStateData = args[5] == "true";
+
+            // Make sure that the experiment configuration directory actually exists (if one is being used)
+            if (seedPopulationFileDirectory.Equals("generate_population") == false &&
+                Directory.Exists(seedPopulationFileDirectory) == false)
             {
                 _executionLogger.Error(string.Format("The given seed population file directory [{0}] does not exist",
                     seedPopulationFileDirectory));
                 Environment.Exit(0);
             }
 
-            // Read in the seed population files
-            // Note that two assumptions are made here
-            // 1. Files can be naturally sorted and match the naming convention "*Run01", "*Run02", etc.
-            // 2. The number of files in the directory matches the number of runs (this is checked for below)
-            string[] seedPopulationFiles = Directory.GetFiles(seedPopulationFileDirectory);
+            // Array of initial genome population files
+            string[] seedPopulationFiles = null;
 
-            // Make sure that the appropriate number of seed population have been specified
-            if (seedPopulationFiles.Count() < numRuns)
+            if (seedPopulationFileDirectory.Equals("generate_population") == false)
             {
-                _executionLogger.Error(
-                    string.Format(
-                        "Number of seed population files [{0}] not sufficient for the specified number of runs [{1}]",
-                        seedPopulationFiles.Count(), numRuns));
-                Environment.Exit(0);
+                // Read in the seed population files
+                // Note that two assumptions are made here
+                // 1. Files can be naturally sorted and match the naming convention "*Run01", "*Run02", etc.
+                // 2. The number of files in the directory matches the number of runs (this is checked for below)
+                seedPopulationFiles = Directory.GetFiles(seedPopulationFileDirectory);
+
+                // Make sure that the appropriate number of seed population have been specified
+                if (seedPopulationFiles.Count() < numRuns)
+                {
+                    _executionLogger.Error(
+                        string.Format(
+                            "Number of seed population files [{0}] not sufficient for the specified number of runs [{1}]",
+                            seedPopulationFiles.Count(), numRuns));
+                    Environment.Exit(0);
+                }
             }
 
             // The default offset for the experiment names in the argument list
-            int experimentNameOffset = 3;
+            int experimentNameOffset = 4;
 
             if ("file".Equals(executionSource))
             {
                 // Offset by 4 to make room for experiment configuration directory parameter
-                experimentNameOffset = 5;
+                experimentNameOffset = 6;
             }
 
             // Create experiment names array with the defined size
@@ -119,8 +132,7 @@ namespace SharpNeatConsole
                 {
                     // Execute file-based experiment
                     ExecuteFileBasedExperiment(experimentConfigurationDirectory, outputFileDirectory, curExperimentName,
-                        numRuns,
-                        seedPopulationFiles);
+                        numRuns, seedPopulationFiles, writeOrganismStateData);
                 }
                 else
                 {
@@ -139,9 +151,10 @@ namespace SharpNeatConsole
         /// <param name="experimentName">The name of the experiment to execute.</param>
         /// <param name="numRuns">The number of runs to execute for that experiment.</param>
         /// <param name="seedPopulationFiles">The seed population XML file names.</param>
+        /// <param name="writeOrganismStateData">Flag indicating whether organism state data should be written to an output file.</param>
         private static void ExecuteFileBasedExperiment(string experimentConfigurationDirectory, string logFileDirectory,
             string experimentName,
-            int numRuns, string[] seedPopulationFiles)
+            int numRuns, string[] seedPopulationFiles, bool writeOrganismStateData)
         {
             if (Directory.Exists(experimentConfigurationDirectory) == false)
             {
@@ -181,10 +194,11 @@ namespace SharpNeatConsole
                     new FileDataLogger(string.Format("{0}\\{1} - Run{2} - Evolution.csv", logFileDirectory,
                         experimentName,
                         runIdx + 1));
-                IDataLogger evaluationDataLogger =
-                    new FileDataLogger(string.Format("{0}\\{1} - Run{2} - Evaluation.csv", logFileDirectory,
+                IDataLogger evaluationDataLogger = writeOrganismStateData
+                    ? new FileDataLogger(string.Format("{0}\\{1} - Run{2} - Evaluation.csv", logFileDirectory,
                         experimentName,
-                        runIdx + 1));
+                        runIdx + 1))
+                    : null;
 
                 // Initialize new steady state novelty experiment
                 experiment.Initialize(experimentName, xmlConfig.DocumentElement, evolutionDataLogger,
@@ -200,12 +214,29 @@ namespace SharpNeatConsole
 
                 do
                 {
-                    // Open and load population XML file.
-                    using (XmlReader xr = XmlReader.Create(seedPopulationFiles[runIdx]))
+                    // If there were seed population files specified, read them in
+                    if (seedPopulationFiles != null)
                     {
-                        _genomeList = experiment.LoadPopulation(xr);
+                        // Open and load population XML file.
+                        using (XmlReader xr = XmlReader.Create(seedPopulationFiles[runIdx]))
+                        {
+                            _genomeList = experiment.LoadPopulation(xr);
+                        }
+
+                        // Grab the specified genome factory on the first genome in the list
+                        _genomeFactory = _genomeList[0].GenomeFactory;
                     }
-                    _genomeFactory = _genomeList[0].GenomeFactory;
+
+                    // Otherwise, generate the starting population
+                    else
+                    {
+                        // Create a new genome factory
+                        _genomeFactory = experiment.CreateGenomeFactory();
+
+                        // Generate the initial population
+                        _genomeList = _genomeFactory.CreateGenomeList(experiment.SeedGenomeCount, 0);
+                    }
+
                     _executionLogger.Info(string.Format("Loaded [{0}] genomes as initial population.", _genomeList.Count));
 
                     _executionLogger.Info("Kicking off Experiment initialization/execution");
@@ -222,7 +253,7 @@ namespace SharpNeatConsole
 
                 // Close the data loggers
                 evolutionDataLogger.Close();
-                evaluationDataLogger.Close();
+                evaluationDataLogger?.Close();
             }
         }
 
@@ -246,7 +277,7 @@ namespace SharpNeatConsole
             // Determine which experiment to execute
             BaseMazeNavigationExperiment experiment =
                 DetermineMazeNavigationExperiment(experimentConfiguration.Primary_SearchAlgorithmName,
-                    experimentConfiguration.Primary_SelectionAlgorithmName);
+                    experimentConfiguration.Primary_SelectionAlgorithmName, false);
 
             // Execute the experiment for the specified number of runs
             for (int runIdx = 0; runIdx < numRuns; runIdx++)
@@ -367,6 +398,7 @@ namespace SharpNeatConsole
             // Get the search and selection algorithm types
             string searchAlgorithm = XmlUtils.TryGetValueAsString(xmlConfig, "SearchAlgorithm");
             string selectionAlgorithm = XmlUtils.TryGetValueAsString(xmlConfig, "SelectionAlgorithm");
+            bool isDynamicMC = XmlUtils.TryGetValueAsInt(xmlConfig, "MinimalCriteriaUpdateInterval") != null;
 
             // Make sure both the search algorithm and selection algorithm have been set in the configuration file
             if (searchAlgorithm == null || selectionAlgorithm == null)
@@ -377,7 +409,7 @@ namespace SharpNeatConsole
             }
 
             // Get the appropriate experiment class
-            return DetermineMazeNavigationExperiment(searchAlgorithm, selectionAlgorithm);
+            return DetermineMazeNavigationExperiment(searchAlgorithm, selectionAlgorithm, isDynamicMC);
         }
 
         /// <summary>
@@ -387,7 +419,7 @@ namespace SharpNeatConsole
         /// <param name="selectionAlgorithmName">The selection algorithm to run.</param>
         /// <returns></returns>
         private static BaseMazeNavigationExperiment DetermineMazeNavigationExperiment(string searchAlgorithmName,
-            string selectionAlgorithmName)
+            string selectionAlgorithmName, bool isDynamicMC)
         {
             // Extract the corresponding search and selection algorithm domain types
             SearchType searchType = AlgorithmTypeUtil.ConvertStringToSearchType(searchAlgorithmName);
@@ -421,6 +453,10 @@ namespace SharpNeatConsole
                     if (SelectionType.QueueingWithNiching.Equals(selectionType))
                     {
                         return new QueueingNichedMazeNavigationMCSExperiment();
+                    }
+                    if (SelectionType.Queueing.Equals(selectionType) && isDynamicMC)
+                    {
+                        return new QueueingMazeNavigationDynamicMCSExperiment();
                     }
                     return new QueueingMazeNavigationMCSExperiment();
 

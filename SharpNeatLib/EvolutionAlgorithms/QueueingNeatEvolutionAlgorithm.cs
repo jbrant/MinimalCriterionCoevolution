@@ -114,8 +114,10 @@ namespace SharpNeat.EvolutionAlgorithms
             EvolutionLogger?.UpdateRunPhase(RunPhase);
 
             // Write out the header
-            EvolutionLogger?.LogHeader(GetLoggableElements(), Statistics.GetLoggableElements(),
-                (CurrentChampGenome as NeatGenome)?.GetLoggableElements());
+            EvolutionLogger?.LogHeader(GetLoggableElements(_logFieldEnabledMap),
+                Statistics.GetLoggableElements(_logFieldEnabledMap),
+                GenomeEvaluator.GetLoggableElements(_logFieldEnabledMap),
+                (GenomeList[0] as NeatGenome)?.GetLoggableElements(_logFieldEnabledMap));
 
             // Initialize the genome evalutor
             GenomeEvaluator.Initialize();
@@ -209,6 +211,7 @@ namespace SharpNeat.EvolutionAlgorithms
 
             // If there is a logger defined, log the generation stats
             EvolutionLogger?.LogRow(GetLoggableElements(_logFieldEnabledMap),
+                GenomeEvaluator.GetLoggableElements(_logFieldEnabledMap),
                 Statistics.GetLoggableElements(_logFieldEnabledMap),
                 (CurrentChampGenome as NeatGenome)?.GetLoggableElements(_logFieldEnabledMap));
         }

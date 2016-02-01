@@ -25,7 +25,6 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         private IDataLogger _evolutionDataLogger;
         private IDictionary<FieldElement, bool> _experimentLogFieldEnableMap;
         private int _minimalCriteriaUpdateInterval;
-        private int _seedGenomeCount;
 
         public override void Initialize(string name, XmlElement xmlConfig, IDataLogger evolutionDataLogger,
             IDataLogger evaluationDataLogger)
@@ -47,7 +46,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             _bridgingApplications = XmlUtils.TryGetValueAsInt(xmlConfig, "BridgingApplications") ?? default(int);
 
             // Read in the number of seed genomes to generate to bootstrap the primary algorithm
-            _seedGenomeCount = XmlUtils.GetValueAsInt(xmlConfig, "SeedGenomeCount");
+            SeedGenomeCount = XmlUtils.GetValueAsInt(xmlConfig, "SeedGenomeCount");
 
             // Read in log file path/name
             _evolutionDataLogger = evolutionDataLogger ??
@@ -69,6 +68,9 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             {
                 _experimentLogFieldEnableMap.Add(EvolutionFieldElements.ChampGenomeFitness, false);
             }
+
+            // Log the MC threshold since it is dynamic
+            _experimentLogFieldEnableMap.Add(EvolutionFieldElements.MinimalCriteriaThreshold, true);
         }
 
         public override void Initialize(ExperimentDictionary experimentDictionary)
@@ -103,7 +105,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             List<NeatGenome> genomeList, ulong startingEvaluations)
         {
             // Extract the specified number of seed genomes from the randomly generated population
-            List<NeatGenome> seedPopulation = genomeList.Take(_seedGenomeCount).ToList();
+            List<NeatGenome> seedPopulation = genomeList.Take(SeedGenomeCount).ToList();
 
             // Create complexity regulation strategy.
             var complexityRegulationStrategy =

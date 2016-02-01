@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using SharpNeat.Loggers;
 using SharpNeat.NoveltyArchives;
 using SharpNeat.Utility;
 
@@ -316,6 +317,19 @@ namespace SharpNeat.Core
             bool runSimulation = true, bool enableBridging = false)
         {
             _batchEvaluationMethod(genomesToEvaluate, population, currentGeneration, runSimulation, enableBridging);
+        }
+
+        /// <summary>
+        ///     Returns ParallelGenomeBehaviorEvaluator loggable elements.
+        /// </summary>
+        /// <param name="logFieldEnableMap">
+        ///     Dictionary of logging fields that can be enabled or disabled based on the specification
+        ///     of the calling routine.
+        /// </param>
+        /// <returns>The loggable elements for ParallelGenomeBehaviorEvaluator.</returns>
+        public List<LoggableElement> GetLoggableElements(IDictionary<FieldElement, bool> logFieldEnableMap = null)
+        {
+            return _phenomeEvaluator.GetLoggableElements(logFieldEnableMap);
         }
 
         #endregion
