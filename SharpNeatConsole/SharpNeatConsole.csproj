@@ -488,60 +488,168 @@
     <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 9g.config.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 10a.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 10b.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 10c.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 11a.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 11b.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 11c.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 12a.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 12b.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 12c.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 13a.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 13b.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 13c.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 14a.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 14b.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 14c.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 15a.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 15b.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 15c.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 16a.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 16b.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 16c.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 17a.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 17b.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 17c.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 18a.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 18b.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 18c.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 1a.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 1b.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 1c.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 2a.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 2b.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 2c.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 3a.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 3b.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 3c.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 4a.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 4b.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 4c.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 5a.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 5b.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 5c.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 6a.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 6b.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 6c.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 7a.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 7b.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 7c.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 8a.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 8b.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 8c.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 9a.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 9b.config.xml" />
-    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 9c.config.xml" />
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 10a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 10b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 10c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 11a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 11b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 11c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 12a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 12b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 12c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 13a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 13b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 13c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 14a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 14b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 14c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 15a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 15b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 15c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 16a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 16b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 16c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 17a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 17b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 17c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 18a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 18b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 18c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 1a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 1b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 1c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 2a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 2b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 2c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 3a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 3b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 3c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 4a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 4b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 4c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 5a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 5b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 5c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 6a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 6b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 6c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 7a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 7b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 7c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 8a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 8b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 8c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 9a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 9b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 9c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="ExperimentConfigurations\McsExperiments\Niching\Queueing MCS with Niching - No MC 1.config.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

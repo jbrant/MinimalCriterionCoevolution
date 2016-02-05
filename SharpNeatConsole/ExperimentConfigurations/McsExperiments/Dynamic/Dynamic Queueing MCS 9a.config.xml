@@ -3,7 +3,7 @@
   <SearchAlgorithm>Minimal Criteria Search</SearchAlgorithm>
   <SelectionAlgorithm>Queueing</SelectionAlgorithm>
   <PopulationSize>5000</PopulationSize>
-  <InterspeciesMatingProbability>0.001</InterspeciesMatingProbability>
+  <InterspeciesMatingProbability>0</InterspeciesMatingProbability>
   <Activation>
     <Scheme>Acyclic</Scheme>
   </Activation>
@@ -29,6 +29,7 @@
       <XStart>36</XStart>
       <YStart>184</YStart>
       <MinimumRequiredDistance>0</MinimumRequiredDistance>
+      <MinimumMileage>0</MinimumMileage>
       <MaxUpdateCyclesWithoutChange>
       </MaxUpdateCyclesWithoutChange>
     </MinimalCriteriaConfig>
