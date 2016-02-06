@@ -230,7 +230,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 
             // Disposition all genomes in the current population based on the new minimal criteria  
             IBehaviorCharacterization behaviorCharacterization =
-                _behaviorCharacterizationFactory.CreateBehaviorCharacterization();
+                _behaviorCharacterizationFactory.CreateBehaviorCharacterization(true);
             foreach (TGenome genome in population)
             {
                 genome.EvaluationInfo.IsViable =

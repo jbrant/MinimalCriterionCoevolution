@@ -32,7 +32,17 @@ namespace SharpNeat.Behaviors
         /// <returns>Constructed end-point behavior characterization.</returns>
         public IBehaviorCharacterization CreateBehaviorCharacterization()
         {
-            return new EndPointBehaviorCharacterization(_minimalCriteria);
+            return new EndPointBehaviorCharacterization(_minimalCriteria, false);
+        }
+
+        /// <summary>
+        ///     Constructs a new end-point behavior characterization with the minimal criteria held by the factory (if applicable)
+        ///     and a flag indicating whether the minimal criteria is permitted to be reversed when determining viability.
+        /// </summary>
+        /// <returns>Constructed end-point behavior characterization.</returns>
+        public IBehaviorCharacterization CreateBehaviorCharacterization(bool allowReverseCriteria)
+        {
+            return new EndPointBehaviorCharacterization(_minimalCriteria, allowReverseCriteria);
         }
 
         /// <summary>
@@ -42,7 +52,7 @@ namespace SharpNeat.Behaviors
         /// <returns>Constructed end-point behavior characterization with the custom minimal criteria.</returns>
         public IBehaviorCharacterization CreateBehaviorCharacterization(IMinimalCriteria minimalCriteria)
         {
-            return new EndPointBehaviorCharacterization(minimalCriteria);
+            return new EndPointBehaviorCharacterization(minimalCriteria, false);
         }
 
         /// <summary>

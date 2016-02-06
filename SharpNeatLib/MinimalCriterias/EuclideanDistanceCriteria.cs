@@ -49,6 +49,8 @@ namespace SharpNeat.MinimalCriterias
         /// </summary>
         private int _numUpdateCyclesWithoutChange;
 
+        private bool _reverseMinimalCriteria;
+
         /// <summary>
         ///     Constructor for the euclidean distance minimal criteria.
         /// </summary>
@@ -85,6 +87,8 @@ namespace SharpNeat.MinimalCriterias
         /// <param name="population">The current population.</param>
         public void UpdateMinimalCriteria<TGenome>(List<TGenome> population) where TGenome : class, IGenome<TGenome>
         {
+            _reverseMinimalCriteria = false;
+
             // Update the minimal criteria to be the mean of the distance from the starting location over
             // every genome in the population
             double newMC = population.Sum(
@@ -101,10 +105,26 @@ namespace SharpNeat.MinimalCriterias
                 _numUpdateCyclesWithoutChange >= _maxUpdateCyclesWithoutChange)
             {
                 // Pick a random MC somewhere between 0 and the current MC
-                newMC = _randomNumGenerator.Next(0, (int) _minimumDistanceFromOrigin);
+                //newMC = _randomNumGenerator.Next(0, (int) _minimumDistanceFromOrigin);
+                foreach (TGenome genome in population)
+                {
+                    double distanceFromStart =
+                        Math.Sqrt(Math.Pow(genome.EvaluationInfo.BehaviorCharacterization[0] - _startXPosition, 2) +
+                                  Math.Pow(genome.EvaluationInfo.BehaviorCharacterization[1] - _startYPosition, 2));
+
+                    if (distanceFromStart < newMC)
+                    {
+                        newMC = distanceFromStart;
+                    }
+                }
+
+                // Increment MC by 1 so something matches it
+                newMC++;
 
                 // Reset the number of MC update cycles without an MC change to 0
                 _numUpdateCyclesWithoutChange = 0;
+
+                //_reverseMinimalCriteria = true;
             }
 
             // Otherwise, if the change is marginal but the requisite number of update cycles with no change has
@@ -124,8 +144,12 @@ namespace SharpNeat.MinimalCriterias
         ///     that was traversed.
         /// </summary>
         /// <param name="behaviorInfo">The behavior info indicating the ending position of the agent.</param>
+        /// <param name="allowCriteriaReversal">
+        ///     Permits reversing the minimal criteria (such that only those who do *not* meet the
+        ///     minimal criteria are valid).
+        /// </param>
         /// <returns>Boolean value indicating whether the given behavior characterization satisfies the minimal criteria.</returns>
-        public bool DoesCharacterizationSatisfyMinimalCriteria(BehaviorInfo behaviorInfo)
+        public bool DoesCharacterizationSatisfyMinimalCriteria(BehaviorInfo behaviorInfo, bool allowCriteriaReversal)
         {
             // If the behavior dimensionality doesn't match, we can't compare it
             if (behaviorInfo.Behaviors.Length != EuclideanDimensions)
@@ -142,8 +166,10 @@ namespace SharpNeat.MinimalCriterias
             double distance =
                 Math.Sqrt(Math.Pow(endXPosition - _startXPosition, 2) + Math.Pow(endYPosition - _startYPosition, 2));
 
+            bool isMinimalCriteriaSatisifed = Math.Round(distance) >= Math.Round(_minimumDistanceFromOrigin);
+
             // Only return true if the distance is at least the minimum required distance
-            return Math.Round(distance) >= Math.Round(_minimumDistanceFromOrigin);
+            return (allowCriteriaReversal && _reverseMinimalCriteria) ? !isMinimalCriteriaSatisifed : isMinimalCriteriaSatisifed;
         }
 
         /// <summary>

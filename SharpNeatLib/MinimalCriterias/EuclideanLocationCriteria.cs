@@ -67,8 +67,12 @@ namespace SharpNeat.MinimalCriterias
         ///     Evalutes whether the given (presumably euclidean) behavior characterization satisfies the minimal criteria.
         /// </summary>
         /// <param name="behaviorInfo">The behavior info in euclidean space.</param>
+        /// <param name="allowCriteriaReversal">
+        ///     Permits reversing the minimal criteria (such that only those who do *not* meet the
+        ///     minimal criteria are valid).
+        /// </param>
         /// <returns>Boolean value indicating whether the given behavior characterization satisfies the minimal criteria.</returns>
-        public bool DoesCharacterizationSatisfyMinimalCriteria(BehaviorInfo behaviorInfo)
+        public bool DoesCharacterizationSatisfyMinimalCriteria(BehaviorInfo behaviorInfo, bool allowCriteriaReversal)
         {
             // If the behavior dimensionality doesn't match, we can't compare it
             if (behaviorInfo.Behaviors.Length != EuclideanDimensions)

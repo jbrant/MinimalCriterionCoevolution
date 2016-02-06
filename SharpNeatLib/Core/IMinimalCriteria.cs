@@ -22,8 +22,12 @@ namespace SharpNeat.Core
         ///     Evaluates whether the given behavior characterization satisfies the minimal criteria.
         /// </summary>
         /// <param name="behaviorInfo">The behavior info.</param>
+        /// <param name="allowCriteriaReversal">
+        ///     Permits reversing the minimal criteria (such that only those who do *not* meet the
+        ///     minimal criteria are valid).
+        /// </param>
         /// <returns>Boolean value indicating whether the given behavior characterization satisfies the minimal criteria.</returns>
-        bool DoesCharacterizationSatisfyMinimalCriteria(BehaviorInfo behaviorInfo);
+        bool DoesCharacterizationSatisfyMinimalCriteria(BehaviorInfo behaviorInfo, bool allowCriteriaReversal);
 
         /// <summary>
         ///     Returns the scalar value of the minimal criteria.

@@ -124,8 +124,12 @@ namespace SharpNeat.MinimalCriterias
         ///     as the distance transited between any two consecutive timesteps).
         /// </summary>
         /// <param name="behaviorInfo">The behavior info indicating the full trajectory of the agent.</param>
+        /// <param name="allowCriteriaReversal">
+        ///     Permits reversing the minimal criteria (such that only those who do *not* meet the
+        ///     minimal criteria are valid).
+        /// </param>
         /// <returns>Boolean value indicating whether the given behavior characterization satisfies the minimal criteria.</returns>
-        public bool DoesCharacterizationSatisfyMinimalCriteria(BehaviorInfo behaviorInfo)
+        public bool DoesCharacterizationSatisfyMinimalCriteria(BehaviorInfo behaviorInfo, bool allowCriteriaReversal)
         {
             // If the behavior dimensionality doesn't align with the specified dimensionality, we can't compare it
             if (behaviorInfo.Behaviors.Length%EuclideanDimensions != 0)

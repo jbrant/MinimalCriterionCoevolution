@@ -20,6 +20,14 @@ namespace SharpNeat.Core
         IBehaviorCharacterization CreateBehaviorCharacterization();
 
         /// <summary>
+        ///     Generates a behavior characterization of the appropriate type with the pre-specified minimal criteria (if
+        ///     applicable) and flag indicating whether reversing the viability criteria is permitted.
+        /// </summary>
+        /// <param name="allowReverseCriteria">Flag indicating whether reversal of the minimal criteria is permitted.</param>
+        /// <returns></returns>
+        IBehaviorCharacterization CreateBehaviorCharacterization(bool allowReverseCriteria);
+
+        /// <summary>
         ///     Generates a behavior characterization of the appropriate type with the given minimal criteria.
         /// </summary>
         /// <param name="minimalCriteria"></param>
