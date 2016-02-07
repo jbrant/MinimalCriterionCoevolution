@@ -35,9 +35,14 @@ namespace SharpNeat.Domains
         EuclideanLocation,
 
         /// <summary>
-        ///     Indicates the euclidean distance minimal criteria.
+        ///     Indicates the fixed point euclidean distance minimal criteria.
         /// </summary>
-        EuclideanDistance,
+        FixedPointEuclideanDistance,
+
+        /// <summary>
+        ///     Indicates the population centroid euclidean distance criteria.
+        /// </summary>
+        PopulationCentroidEuclideanDistance,
 
         /// <summary>
         ///     Indicates the mileage minimal criteria.
@@ -78,10 +83,18 @@ namespace SharpNeat.Domains
             {
                 return MinimalCriteriaType.EuclideanLocation;
             }
-            if ("EuclideanDistance".Equals(strMinimalCriteria, StringComparison.InvariantCultureIgnoreCase) ||
-                "Euclidean Distance".Equals(strMinimalCriteria, StringComparison.InvariantCultureIgnoreCase))
+            if ("FixedPointEuclideanDistance".Equals(strMinimalCriteria, StringComparison.InvariantCultureIgnoreCase) ||
+                "Fixed Point Euclidean Distance".Equals(strMinimalCriteria, StringComparison.InvariantCultureIgnoreCase))
             {
-                return MinimalCriteriaType.EuclideanDistance;
+                return MinimalCriteriaType.FixedPointEuclideanDistance;
+            }
+            if (
+                "PopulationCentroidEuclideanDistance".Equals(strMinimalCriteria,
+                    StringComparison.InvariantCultureIgnoreCase) ||
+                "Population Centroid Euclidean Distance".Equals(strMinimalCriteria,
+                    StringComparison.InvariantCultureIgnoreCase))
+            {
+                return MinimalCriteriaType.PopulationCentroidEuclideanDistance;
             }
 
             return MinimalCriteriaType.Mileage;

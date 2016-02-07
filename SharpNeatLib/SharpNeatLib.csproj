@@ -116,7 +116,8 @@
     <Compile Include="Loggers\NoveltyExperimentOrganismStateEntityDataLogger.cs" />
     <Compile Include="Loggers\NoveltyExperimentEvaluationEntityDataLogger.cs" />
     <Compile Include="Loggers\FieldElement.cs" />
-    <Compile Include="MinimalCriterias\EuclideanDistanceCriteria.cs" />
+    <Compile Include="MinimalCriterias\PopulationCentroidEuclideanDistanceCriteria.cs" />
+    <Compile Include="MinimalCriterias\FixedPointEuclideanDistanceCriteria.cs" />
     <Compile Include="MinimalCriterias\EuclideanLocationCriteria.cs" />
     <Compile Include="MinimalCriterias\MileageCriteria.cs" />
     <Compile Include="NoveltyArchives\AbstractNoveltyArchive.cs" />

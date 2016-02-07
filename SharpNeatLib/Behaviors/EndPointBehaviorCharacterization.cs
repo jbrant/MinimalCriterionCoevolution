@@ -14,12 +14,6 @@ namespace SharpNeat.Behaviors
     public class EndPointBehaviorCharacterization : IBehaviorCharacterization
     {
         /// <summary>
-        ///     Allows the minimal criteria to be reversed such that only those who do *not* meet the minimal criteria are
-        ///     considered viable.  This merely allows the instance MC itself to apply this functionality if internally enabled.
-        /// </summary>
-        private readonly bool _allowReverseCriteria;
-
-        /// <summary>
         ///     The minimal criteria which the behavior must meet in order to be considered viable.
         /// </summary>
         private readonly IMinimalCriteria _minimalCriteria;
@@ -42,11 +36,9 @@ namespace SharpNeat.Behaviors
         ///     whether minimal criteria reversal should be allowed.
         /// </summary>
         /// <param name="minimalCriteria"></param>
-        /// <param name="allowReverseCriteria">Flag indicating whether minimal criteria reversal should be allowed.</param>
         public EndPointBehaviorCharacterization(IMinimalCriteria minimalCriteria, bool allowReverseCriteria)
         {
             _minimalCriteria = minimalCriteria;
-            _allowReverseCriteria = allowReverseCriteria;
         }
 
         /// <summary>
@@ -71,7 +63,7 @@ namespace SharpNeat.Behaviors
         public bool IsMinimalCriteriaSatisfied(BehaviorInfo behaviorInfo)
         {
             // If there is no minimal criteria, then by definition it has been met
-            return _minimalCriteria?.DoesCharacterizationSatisfyMinimalCriteria(behaviorInfo, _allowReverseCriteria) ??
+            return _minimalCriteria?.DoesCharacterizationSatisfyMinimalCriteria(behaviorInfo) ??
                    true;
         }
 

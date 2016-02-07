@@ -14,12 +14,6 @@ namespace SharpNeat.Behaviors
     public class TrajectoryBehaviorCharacterization : IBehaviorCharacterization
     {
         /// <summary>
-        ///     Allows the minimal criteria to be reversed such that only those who do *not* meet the minimal criteria are
-        ///     considered viable.  This merely allows the instance MC itself to apply this functionality if internally enabled.
-        /// </summary>
-        private readonly bool _allowReverseCriteria;
-
-        /// <summary>
         ///     The double array of behaviors.  Since this is a trajectory characterization, it will contain the position of the
         ///     agent for each time step.
         /// </summary>
@@ -43,10 +37,9 @@ namespace SharpNeat.Behaviors
         ///     whether minimal criteria reversal should be allowed.
         /// </summary>
         /// <param name="minimalCriteria"></param>
-        public TrajectoryBehaviorCharacterization(IMinimalCriteria minimalCriteria, bool allowReverseCriteria) : this()
+        public TrajectoryBehaviorCharacterization(IMinimalCriteria minimalCriteria) : this()
         {
             _minimalCriteria = minimalCriteria;
-            _allowReverseCriteria = allowReverseCriteria;
         }
 
         /// <summary>
@@ -70,7 +63,7 @@ namespace SharpNeat.Behaviors
         public bool IsMinimalCriteriaSatisfied(BehaviorInfo behaviorInfo)
         {
             // If there is no minimal criteria, then by definition it has been met
-            return _minimalCriteria?.DoesCharacterizationSatisfyMinimalCriteria(behaviorInfo, _allowReverseCriteria) ??
+            return _minimalCriteria?.DoesCharacterizationSatisfyMinimalCriteria(behaviorInfo) ??
                    true;
         }
 

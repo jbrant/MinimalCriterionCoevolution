@@ -26,7 +26,7 @@
   <BehaviorConfig>
     <BehaviorCharacterization>EndPoint</BehaviorCharacterization>
     <MinimalCriteriaConfig>
-      <MinimalCriteriaConstraint>EuclideanDistance</MinimalCriteriaConstraint>
+      <MinimalCriteriaConstraint>FixedPointEuclideanDistance</MinimalCriteriaConstraint>
       <XStart>36</XStart>
       <YStart>184</YStart>
       <!--<MinimumMileage>16000</MinimumMileage>-->
@@ -59,7 +59,7 @@
     <InitBehaviorConfig>
       <BehaviorCharacterization>EndPoint</BehaviorCharacterization>
       <MinimalCriteriaConfig>
-        <MinimalCriteriaConstraint>EuclideanDistance</MinimalCriteriaConstraint>
+        <MinimalCriteriaConstraint>FixedPointEuclideanDistance</MinimalCriteriaConstraint>
         <XStart>36</XStart>
         <YStart>184</YStart>
         <MinimumRequiredDistance>150</MinimumRequiredDistance>

@@ -450,7 +450,7 @@ namespace SharpNeat.Domains
 
                         break;
 
-                    case MinimalCriteriaType.EuclideanDistance:
+                    case MinimalCriteriaType.FixedPointEuclideanDistance:
 
                         // Read in the starting coordinates and the minimum required distance traveled
                         xStart = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "XStart");
@@ -461,9 +461,20 @@ namespace SharpNeat.Domains
                             XmlUtils.TryGetValueAsInt(xmlMinimalCriteriaConfig,
                                 "MaxUpdateCyclesWithoutChange");
 
-                        // Set the euclidean distance minimal criteria on the behavior characterization
-                        minimalCriteria = new EuclideanDistanceCriteria(xStart, yStart,
+                        // Set the fixed point euclidean distance minimal criteria on the behavior characterization
+                        minimalCriteria = new FixedPointEuclideanDistanceCriteria(xStart, yStart,
                             minimumDistanceTraveled, maxDistanceUpdateCyclesWithoutChange);
+
+                        break;
+
+                    case MinimalCriteriaType.PopulationCentroidEuclideanDistance:
+
+                        // Read in the starting minimum required distance (if applicable)
+                        double minimuCentroidDistance = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig,
+                            "MinimumRequiredDistance");
+
+                        // Set the population centroid euclidean distance criteria on the behavior characterization
+                        minimalCriteria = new PopulationCentroidEuclideanDistanceCriteria(minimuCentroidDistance);
 
                         break;
 
@@ -535,7 +546,7 @@ namespace SharpNeat.Domains
 
                     break;
 
-                case MinimalCriteriaType.EuclideanDistance:
+                case MinimalCriteriaType.FixedPointEuclideanDistance:
 
                     // Read in the starting coordinates and the minimum required distance traveled
                     xStart = isPrimary
@@ -549,7 +560,7 @@ namespace SharpNeat.Domains
                         : experiment.Initialization_MCS_MinimalCriteriaThreshold ?? default(double);
 
                     // Set the euclidean distance minimal criteria on the behavior characterization
-                    minimalCriteria = new EuclideanDistanceCriteria(xStart, yStart,
+                    minimalCriteria = new FixedPointEuclideanDistanceCriteria(xStart, yStart,
                         minimumDistanceTraveled);
 
                     break;

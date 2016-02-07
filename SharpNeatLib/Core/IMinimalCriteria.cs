@@ -9,7 +9,7 @@ namespace SharpNeat.Core
     /// <summary>
     ///     Interface for minimal criterion specifications.
     /// </summary>
-    public interface IMinimalCriteria
+    public interface IMinimalCriteria : ILoggable
     {
         /// <summary>
         ///     Updates the minimal criteria based on characteristics of the current population.
@@ -22,17 +22,7 @@ namespace SharpNeat.Core
         ///     Evaluates whether the given behavior characterization satisfies the minimal criteria.
         /// </summary>
         /// <param name="behaviorInfo">The behavior info.</param>
-        /// <param name="allowCriteriaReversal">
-        ///     Permits reversing the minimal criteria (such that only those who do *not* meet the
-        ///     minimal criteria are valid).
-        /// </param>
         /// <returns>Boolean value indicating whether the given behavior characterization satisfies the minimal criteria.</returns>
-        bool DoesCharacterizationSatisfyMinimalCriteria(BehaviorInfo behaviorInfo, bool allowCriteriaReversal);
-
-        /// <summary>
-        ///     Returns the scalar value of the minimal criteria.
-        /// </summary>
-        /// <returns>The scalar value of the minimal criteria.</returns>
-        dynamic GetMinimalCriteriaValue();
+        bool DoesCharacterizationSatisfyMinimalCriteria(BehaviorInfo behaviorInfo);
     }
 }

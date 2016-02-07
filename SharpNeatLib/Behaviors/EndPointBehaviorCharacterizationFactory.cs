@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using SharpNeat.Core;
+using SharpNeat.Loggers;
 
 #endregion
 
@@ -36,16 +37,6 @@ namespace SharpNeat.Behaviors
         }
 
         /// <summary>
-        ///     Constructs a new end-point behavior characterization with the minimal criteria held by the factory (if applicable)
-        ///     and a flag indicating whether the minimal criteria is permitted to be reversed when determining viability.
-        /// </summary>
-        /// <returns>Constructed end-point behavior characterization.</returns>
-        public IBehaviorCharacterization CreateBehaviorCharacterization(bool allowReverseCriteria)
-        {
-            return new EndPointBehaviorCharacterization(_minimalCriteria, allowReverseCriteria);
-        }
-
-        /// <summary>
         ///     Constructs a new end-point behavior characterization with the specified minimal criteria.
         /// </summary>
         /// <param name="minimalCriteria">The custom minimal criteria to set on the behavior characterization.</param>
@@ -67,12 +58,26 @@ namespace SharpNeat.Behaviors
         }
 
         /// <summary>
-        ///     Returns the scalar value of the minimal criteria.
+        ///     Returns EndPointBehaviorCharacterizationFactory loggable elements.
         /// </summary>
-        /// <returns>The scalar value of the minimal criteria.</returns>
-        public dynamic GetMinimalCriteriaScalarValue()
+        /// <param name="logFieldEnableMap">
+        ///     Dictionary of logging fields that can be enabled or disabled based on the specification
+        ///     of the calling routine.
+        /// </param>
+        /// <returns>The loggable elements for EndPointBehaviorCharacterizationFactory.</returns>
+        public List<LoggableElement> GetLoggableElements(IDictionary<FieldElement, bool> logFieldEnableMap = null)
         {
-            return _minimalCriteria.GetMinimalCriteriaValue();
+            return _minimalCriteria.GetLoggableElements(logFieldEnableMap);
+        }
+
+        /// <summary>
+        ///     Constructs a new end-point behavior characterization with the minimal criteria held by the factory (if applicable)
+        ///     and a flag indicating whether the minimal criteria is permitted to be reversed when determining viability.
+        /// </summary>
+        /// <returns>Constructed end-point behavior characterization.</returns>
+        public IBehaviorCharacterization CreateBehaviorCharacterization(bool allowReverseCriteria)
+        {
+            return new EndPointBehaviorCharacterization(_minimalCriteria, allowReverseCriteria);
         }
     }
 }

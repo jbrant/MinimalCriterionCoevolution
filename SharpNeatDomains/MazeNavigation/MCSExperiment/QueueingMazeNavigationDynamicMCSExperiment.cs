@@ -69,8 +69,10 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                 _experimentLogFieldEnableMap.Add(EvolutionFieldElements.ChampGenomeFitness, false);
             }
 
-            // Log the MC threshold since it is dynamic
+            // Log the MC threshold and location since it is dynamic
             _experimentLogFieldEnableMap.Add(EvolutionFieldElements.MinimalCriteriaThreshold, true);
+            _experimentLogFieldEnableMap.Add(EvolutionFieldElements.MinimalCriteriaPointX, true);
+            _experimentLogFieldEnableMap.Add(EvolutionFieldElements.MinimalCriteriaPointY, true);
         }
 
         public override void Initialize(ExperimentDictionary experimentDictionary)

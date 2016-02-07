@@ -4,15 +4,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using SharpNeat.Core;
+using SharpNeat.Loggers;
 
 #endregion
 
 namespace SharpNeat.MinimalCriterias
 {
     /// <summary>
-    ///     Defines the calculations for determining whether a given behavior satisfies the euclidean distance criteria.
+    ///     Defines the calculations for determining whether a given behavior satisfies the euclidean distance criteria from a
+    ///     fixed point.
     /// </summary>
-    public class EuclideanDistanceCriteria : IMinimalCriteria
+    public class FixedPointEuclideanDistanceCriteria : IMinimalCriteria
     {
         /// <summary>
         ///     Hard-coded number of dimensions in euclidean space.
@@ -49,15 +51,13 @@ namespace SharpNeat.MinimalCriterias
         /// </summary>
         private int _numUpdateCyclesWithoutChange;
 
-        private bool _reverseMinimalCriteria;
-
         /// <summary>
         ///     Constructor for the euclidean distance minimal criteria.
         /// </summary>
         /// <param name="xLocation">The x-component of the starting position.</param>
         /// <param name="yLocation">The y-component of the starting position.</param>
         /// <param name="minimumDistanceFromOrigin"></param>
-        public EuclideanDistanceCriteria(double xLocation, double yLocation, double minimumDistanceFromOrigin)
+        public FixedPointEuclideanDistanceCriteria(double xLocation, double yLocation, double minimumDistanceFromOrigin)
         {
             _startXPosition = xLocation;
             _startYPosition = yLocation;
@@ -74,7 +74,7 @@ namespace SharpNeat.MinimalCriterias
         ///     The maximum number of calls to update the minimal criteria that don't result
         ///     in a significant change allowed (i.e. before the minimal criteria is forcibly modified).
         /// </param>
-        public EuclideanDistanceCriteria(double xLocation, double yLocation, double minimumDistanceFromOrigin,
+        public FixedPointEuclideanDistanceCriteria(double xLocation, double yLocation, double minimumDistanceFromOrigin,
             double? maxUpdateCyclesWithoutChange) : this(xLocation, yLocation, minimumDistanceFromOrigin)
         {
             _maxUpdateCyclesWithoutChange = maxUpdateCyclesWithoutChange;
@@ -87,8 +87,6 @@ namespace SharpNeat.MinimalCriterias
         /// <param name="population">The current population.</param>
         public void UpdateMinimalCriteria<TGenome>(List<TGenome> population) where TGenome : class, IGenome<TGenome>
         {
-            _reverseMinimalCriteria = false;
-
             // Update the minimal criteria to be the mean of the distance from the starting location over
             // every genome in the population
             double newMC = population.Sum(
@@ -106,25 +104,9 @@ namespace SharpNeat.MinimalCriterias
             {
                 // Pick a random MC somewhere between 0 and the current MC
                 newMC = _randomNumGenerator.Next(0, (int) _minimumDistanceFromOrigin);
-                /*foreach (TGenome genome in population)
-                {
-                    double distanceFromStart =
-                        Math.Sqrt(Math.Pow(genome.EvaluationInfo.BehaviorCharacterization[0] - _startXPosition, 2) +
-                                  Math.Pow(genome.EvaluationInfo.BehaviorCharacterization[1] - _startYPosition, 2));
-
-                    if (distanceFromStart < newMC)
-                    {
-                        newMC = distanceFromStart;
-                    }
-                }*/
-
-                // Increment MC by 1 so something matches it
-                //newMC++;
 
                 // Reset the number of MC update cycles without an MC change to 0
                 _numUpdateCyclesWithoutChange = 0;
-
-                //_reverseMinimalCriteria = true;
             }
 
             // Otherwise, if the change is marginal but the requisite number of update cycles with no change has
@@ -149,7 +131,7 @@ namespace SharpNeat.MinimalCriterias
         ///     minimal criteria are valid).
         /// </param>
         /// <returns>Boolean value indicating whether the given behavior characterization satisfies the minimal criteria.</returns>
-        public bool DoesCharacterizationSatisfyMinimalCriteria(BehaviorInfo behaviorInfo, bool allowCriteriaReversal)
+        public bool DoesCharacterizationSatisfyMinimalCriteria(BehaviorInfo behaviorInfo)
         {
             // If the behavior dimensionality doesn't match, we can't compare it
             if (behaviorInfo.Behaviors.Length != EuclideanDimensions)
@@ -166,19 +148,28 @@ namespace SharpNeat.MinimalCriterias
             double distance =
                 Math.Sqrt(Math.Pow(endXPosition - _startXPosition, 2) + Math.Pow(endYPosition - _startYPosition, 2));
 
-            bool isMinimalCriteriaSatisifed = Math.Round(distance) >= Math.Round(_minimumDistanceFromOrigin);
-
             // Only return true if the distance is at least the minimum required distance
-            return (allowCriteriaReversal && _reverseMinimalCriteria) ? !isMinimalCriteriaSatisifed : isMinimalCriteriaSatisifed;
+            return Math.Round(distance) >= Math.Round(_minimumDistanceFromOrigin);
         }
 
         /// <summary>
-        ///     Returns the scalar value of the minimal criteria.
+        ///     Returns FixedPointEuclideanDistanceCriteria loggable elements.
         /// </summary>
-        /// <returns>The scalar value of the minimal criteria.</returns>
-        public dynamic GetMinimalCriteriaValue()
+        /// <param name="logFieldEnableMap">
+        ///     Dictionary of logging fields that can be enabled or disabled based on the specification
+        ///     of the calling routine.
+        /// </param>
+        /// <returns>The loggable elements for FixedPointEuclideanDistanceCriteria.</returns>
+        public List<LoggableElement> GetLoggableElements(IDictionary<FieldElement, bool> logFieldEnableMap = null)
         {
-            return _minimumDistanceFromOrigin;
+            return (logFieldEnableMap != null &&
+                    logFieldEnableMap.ContainsKey(EvolutionFieldElements.MinimalCriteriaThreshold) &&
+                    logFieldEnableMap[EvolutionFieldElements.MinimalCriteriaThreshold])
+                ? new List<LoggableElement>
+                {
+                    new LoggableElement(EvolutionFieldElements.MinimalCriteriaThreshold, _minimumDistanceFromOrigin)
+                }
+                : null;
         }
     }
 }

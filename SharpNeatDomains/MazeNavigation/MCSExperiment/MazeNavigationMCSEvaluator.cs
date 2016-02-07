@@ -230,7 +230,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 
             // Disposition all genomes in the current population based on the new minimal criteria  
             IBehaviorCharacterization behaviorCharacterization =
-                _behaviorCharacterizationFactory.CreateBehaviorCharacterization(true);
+                _behaviorCharacterizationFactory.CreateBehaviorCharacterization();
             foreach (TGenome genome in population)
             {
                 genome.EvaluationInfo.IsViable =
@@ -256,15 +256,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         /// <returns>The loggable elements for MazeNavigatorMCSEvaluator.</returns>
         public List<LoggableElement> GetLoggableElements(IDictionary<FieldElement, bool> logFieldEnableMap = null)
         {
-            return (logFieldEnableMap != null &&
-                    logFieldEnableMap.ContainsKey(EvolutionFieldElements.MinimalCriteriaThreshold) &&
-                    logFieldEnableMap[EvolutionFieldElements.MinimalCriteriaThreshold])
-                ? new List<LoggableElement>
-                {
-                    new LoggableElement(EvolutionFieldElements.MinimalCriteriaThreshold,
-                        _behaviorCharacterizationFactory.GetMinimalCriteriaScalarValue())
-                }
-                : null;
+            return _behaviorCharacterizationFactory.GetLoggableElements(logFieldEnableMap);
         }
 
         #endregion

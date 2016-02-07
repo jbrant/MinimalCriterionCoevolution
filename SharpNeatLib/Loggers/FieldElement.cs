@@ -15,40 +15,42 @@
         public static readonly FieldElement TotalOffspringCount = new FieldElement(6, "Total Offspring Count");
         public static readonly FieldElement PopulationSize = new FieldElement(7, "Population Size");
         public static readonly FieldElement MinimalCriteriaThreshold = new FieldElement(8, "Minimal Criteria Threshold");
-        public static readonly FieldElement MaxFitness = new FieldElement(9, "Max Fitness");
-        public static readonly FieldElement MeanFitness = new FieldElement(10, "Mean Fitness");
-        public static readonly FieldElement MeanSpecieChampFitness = new FieldElement(11, "Mean Specie Champ Fitness");
-        public static readonly FieldElement MaxComplexity = new FieldElement(12, "Max Complexity");
-        public static readonly FieldElement MeanComplexity = new FieldElement(13, "Mean Complexity");
-        public static readonly FieldElement MinSpecieSize = new FieldElement(14, "Min Specie Size");
-        public static readonly FieldElement MaxSpecieSize = new FieldElement(15, "Max Specie Size");
-        public static readonly FieldElement TotalEvaluations = new FieldElement(16, "Total Evaluations");
-        public static readonly FieldElement EvaluationsPerSecond = new FieldElement(17, "Evaluations per Second");
-        public static readonly FieldElement ChampGenomeGenomeId = new FieldElement(18, "Champ Genome ID");
-        public static readonly FieldElement ChampGenomeFitness = new FieldElement(19, "Champ Genome Fitness");
+        public static readonly FieldElement MinimalCriteriaPointX = new FieldElement(9, "Minimal Criteria Point X");
+        public static readonly FieldElement MinimalCriteriaPointY = new FieldElement(10, "Minimal Criteria Point Y");
+        public static readonly FieldElement MaxFitness = new FieldElement(11, "Max Fitness");
+        public static readonly FieldElement MeanFitness = new FieldElement(12, "Mean Fitness");
+        public static readonly FieldElement MeanSpecieChampFitness = new FieldElement(13, "Mean Specie Champ Fitness");
+        public static readonly FieldElement MaxComplexity = new FieldElement(14, "Max Complexity");
+        public static readonly FieldElement MeanComplexity = new FieldElement(15, "Mean Complexity");
+        public static readonly FieldElement MinSpecieSize = new FieldElement(16, "Min Specie Size");
+        public static readonly FieldElement MaxSpecieSize = new FieldElement(17, "Max Specie Size");
+        public static readonly FieldElement TotalEvaluations = new FieldElement(18, "Total Evaluations");
+        public static readonly FieldElement EvaluationsPerSecond = new FieldElement(19, "Evaluations per Second");
+        public static readonly FieldElement ChampGenomeGenomeId = new FieldElement(20, "Champ Genome ID");
+        public static readonly FieldElement ChampGenomeFitness = new FieldElement(21, "Champ Genome Fitness");
 
-        public static readonly FieldElement ChampGenomeBirthGeneration = new FieldElement(20,
+        public static readonly FieldElement ChampGenomeBirthGeneration = new FieldElement(22,
             "Champ Genome Birth Generation");
 
-        public static readonly FieldElement ChampGenomeConnectionGeneCount = new FieldElement(21,
+        public static readonly FieldElement ChampGenomeConnectionGeneCount = new FieldElement(23,
             "Champ Genome Connection Gene Count");
 
-        public static readonly FieldElement ChampGenomeNeuronGeneCount = new FieldElement(22,
+        public static readonly FieldElement ChampGenomeNeuronGeneCount = new FieldElement(24,
             "Champ Genome Neuron Gene Count");
 
-        public static readonly FieldElement ChampGenomeTotalGeneCount = new FieldElement(23,
+        public static readonly FieldElement ChampGenomeTotalGeneCount = new FieldElement(25,
             "Champ Genome Total Gene Count");
 
-        public static readonly FieldElement ChampGenomeEvaluationCount = new FieldElement(24,
+        public static readonly FieldElement ChampGenomeEvaluationCount = new FieldElement(26,
             "Champ Genome Evaluation Count");
 
-        public static readonly FieldElement ChampGenomeBehaviorX = new FieldElement(25, "Champ Genome Behavior X");
-        public static readonly FieldElement ChampGenomeBehaviorY = new FieldElement(26, "Champ Genome Behavior Y");
+        public static readonly FieldElement ChampGenomeBehaviorX = new FieldElement(27, "Champ Genome Behavior X");
+        public static readonly FieldElement ChampGenomeBehaviorY = new FieldElement(28, "Champ Genome Behavior Y");
 
-        public static readonly FieldElement ChampGenomeDistanceToTarget = new FieldElement(27,
+        public static readonly FieldElement ChampGenomeDistanceToTarget = new FieldElement(29,
             "Champ Genome Distance to Target");
 
-        public static readonly FieldElement ChampGenomeXml = new FieldElement(28, "Champ Genome XML");
+        public static readonly FieldElement ChampGenomeXml = new FieldElement(30, "Champ Genome XML");
     }
 
     public class EvaluationFieldElements

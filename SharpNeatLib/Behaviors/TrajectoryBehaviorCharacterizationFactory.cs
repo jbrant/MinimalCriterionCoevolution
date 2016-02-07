@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using SharpNeat.Core;
+using SharpNeat.Loggers;
 
 #endregion
 
@@ -33,17 +34,7 @@ namespace SharpNeat.Behaviors
         /// <returns>Constructed trajectory behavior characterization.</returns>
         public IBehaviorCharacterization CreateBehaviorCharacterization()
         {
-            return new TrajectoryBehaviorCharacterization(_minimalCriteria, false);
-        }
-
-        /// <summary>
-        ///     Constructs a new end-point behavior characterization with the minimal criteria held by the factory (if applicable)
-        ///     and a flag indicating whether the minimal criteria is permitted to be reversed when determining viability.
-        /// </summary>
-        /// <returns>Constructed end-point behavior characterization.</returns>
-        public IBehaviorCharacterization CreateBehaviorCharacterization(bool allowReverseCriteria)
-        {
-            return new TrajectoryBehaviorCharacterization(_minimalCriteria, allowReverseCriteria);
+            return new TrajectoryBehaviorCharacterization(_minimalCriteria);
         }
 
         /// <summary>
@@ -53,7 +44,7 @@ namespace SharpNeat.Behaviors
         /// <returns>Constructed trajectory behavior characterization with the custom minimal criteria.</returns>
         public IBehaviorCharacterization CreateBehaviorCharacterization(IMinimalCriteria minimalCriteria)
         {
-            return new TrajectoryBehaviorCharacterization(minimalCriteria, false);
+            return new TrajectoryBehaviorCharacterization(minimalCriteria);
         }
 
         /// <summary>
@@ -68,12 +59,16 @@ namespace SharpNeat.Behaviors
         }
 
         /// <summary>
-        ///     Returns the scalar value of the minimal criteria.
+        ///     Returns TrajectoryBehaviorCharacterizationFactory loggable elements.
         /// </summary>
-        /// <returns>The scalar value of the minimal criteria.</returns>
-        public dynamic GetMinimalCriteriaScalarValue()
+        /// <param name="logFieldEnableMap">
+        ///     Dictionary of logging fields that can be enabled or disabled based on the specification
+        ///     of the calling routine.
+        /// </param>
+        /// <returns>The loggable elements for TrajectoryBehaviorCharacterizationFactory.</returns>
+        public List<LoggableElement> GetLoggableElements(IDictionary<FieldElement, bool> logFieldEnableMap = null)
         {
-            return _minimalCriteria.GetMinimalCriteriaValue();
+            return _minimalCriteria.GetLoggableElements(logFieldEnableMap);
         }
     }
 }

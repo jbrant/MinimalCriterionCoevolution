@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using SharpNeat.Core;
+using SharpNeat.Loggers;
 
 #endregion
 
@@ -129,7 +130,7 @@ namespace SharpNeat.MinimalCriterias
         ///     minimal criteria are valid).
         /// </param>
         /// <returns>Boolean value indicating whether the given behavior characterization satisfies the minimal criteria.</returns>
-        public bool DoesCharacterizationSatisfyMinimalCriteria(BehaviorInfo behaviorInfo, bool allowCriteriaReversal)
+        public bool DoesCharacterizationSatisfyMinimalCriteria(BehaviorInfo behaviorInfo)
         {
             // If the behavior dimensionality doesn't align with the specified dimensionality, we can't compare it
             if (behaviorInfo.Behaviors.Length%EuclideanDimensions != 0)
@@ -143,12 +144,23 @@ namespace SharpNeat.MinimalCriterias
         }
 
         /// <summary>
-        ///     Returns the scalar value of the minimal criteria.
+        ///     Returns MileageCriteria loggable elements.
         /// </summary>
-        /// <returns>The scalar value of the minimal criteria.</returns>
-        public dynamic GetMinimalCriteriaValue()
+        /// <param name="logFieldEnableMap">
+        ///     Dictionary of logging fields that can be enabled or disabled based on the specification
+        ///     of the calling routine.
+        /// </param>
+        /// <returns>The loggable elements for MileageCriteria.</returns>
+        public List<LoggableElement> GetLoggableElements(IDictionary<FieldElement, bool> logFieldEnableMap = null)
         {
-            return _minimumMileage;
+            return (logFieldEnableMap != null &&
+                    logFieldEnableMap.ContainsKey(EvolutionFieldElements.MinimalCriteriaThreshold) &&
+                    logFieldEnableMap[EvolutionFieldElements.MinimalCriteriaThreshold])
+                ? new List<LoggableElement>
+                {
+                    new LoggableElement(EvolutionFieldElements.MinimalCriteriaThreshold, _minimumMileage)
+                }
+                : null;
         }
 
         /// <summary>
