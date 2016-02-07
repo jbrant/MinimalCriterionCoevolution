@@ -650,6 +650,72 @@
     <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 9c.config.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 10a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 10b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 11a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 11b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 1a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 1b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 2a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 2b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 3a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 3b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 4a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 4b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 5a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 5b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 6a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 6b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 7a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 7b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 8a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 8b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 9a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 9b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="ExperimentConfigurations\McsExperiments\Niching\Queueing MCS with Niching - No MC 1.config.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
