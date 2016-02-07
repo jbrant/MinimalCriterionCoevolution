@@ -105,8 +105,8 @@ namespace SharpNeat.MinimalCriterias
                 _numUpdateCyclesWithoutChange >= _maxUpdateCyclesWithoutChange)
             {
                 // Pick a random MC somewhere between 0 and the current MC
-                //newMC = _randomNumGenerator.Next(0, (int) _minimumDistanceFromOrigin);
-                foreach (TGenome genome in population)
+                newMC = _randomNumGenerator.Next(0, (int) _minimumDistanceFromOrigin);
+                /*foreach (TGenome genome in population)
                 {
                     double distanceFromStart =
                         Math.Sqrt(Math.Pow(genome.EvaluationInfo.BehaviorCharacterization[0] - _startXPosition, 2) +
@@ -116,10 +116,10 @@ namespace SharpNeat.MinimalCriterias
                     {
                         newMC = distanceFromStart;
                     }
-                }
+                }*/
 
                 // Increment MC by 1 so something matches it
-                newMC++;
+                //newMC++;
 
                 // Reset the number of MC update cycles without an MC change to 0
                 _numUpdateCyclesWithoutChange = 0;
