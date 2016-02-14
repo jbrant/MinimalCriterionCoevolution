@@ -7,8 +7,11 @@ using System.Xml;
 using ExperimentEntities;
 using SharpNeat.Core;
 using SharpNeat.Decoders;
+using SharpNeat.Decoders.HyperNeat;
 using SharpNeat.EvolutionAlgorithms;
+using SharpNeat.Genomes.HyperNeat;
 using SharpNeat.Genomes.Neat;
+using SharpNeat.Network;
 using SharpNeat.Phenomes;
 
 namespace SharpNeat.Domains.MazeEnvironmentTest
@@ -37,6 +40,8 @@ namespace SharpNeat.Domains.MazeEnvironmentTest
 
         private ParallelOptions _parallelOptions;
 
+        private int _substrateResolution;
+
         public void Initialize(string name, XmlElement xmlConfig, IDataLogger evolutionDataLogger = null,
             IDataLogger evaluationDataLogger = null)
         {
@@ -49,7 +54,9 @@ namespace SharpNeat.Domains.MazeEnvironmentTest
             Description = XmlUtils.TryGetValueAsString(xmlConfig, "Description");
             _parallelOptions = ExperimentUtils.ReadParallelOptions(xmlConfig);
 
-
+            _substrateResolution = XmlUtils.GetValueAsInt(xmlConfig, "Resolution");
+            NeatEvolutionAlgorithmParameters = new NeatEvolutionAlgorithmParameters();
+            NeatGenomeParameters = new NeatGenomeParameters();
         }
 
         public void Initialize(ExperimentDictionary databaseContext)
@@ -59,22 +66,42 @@ namespace SharpNeat.Domains.MazeEnvironmentTest
 
         public List<NeatGenome> LoadPopulation(XmlReader xr)
         {
-            throw new NotImplementedException();
+            NeatGenomeFactory genomeFactory = (NeatGenomeFactory)CreateGenomeFactory();
+            return NeatGenomeXmlIO.ReadCompleteGenomeList(xr, false, genomeFactory);
         }
 
         public void SavePopulation(XmlWriter xw, IList<NeatGenome> genomeList)
         {
-            throw new NotImplementedException();
+            NeatGenomeXmlIO.WriteComplete(xw, genomeList, true);
         }
 
         public IGenomeDecoder<NeatGenome, IBlackBox> CreateGenomeDecoder()
         {
-            throw new NotImplementedException();
+            int numPixels = _substrateResolution*_substrateResolution;
+
+            int xEnd = _substrateResolution/2;
+            int yEnd = xEnd;
+            int xStart = (_substrateResolution / 2) * -1;
+            int yStart = xStart;
+
+            SubstrateNodeSet inputLayer = new SubstrateNodeSet(numPixels);
+
+            uint inputId = 1, outputId = (uint)numPixels + 1;
+
+            for (int x = xStart; x <= xEnd; x++)
+            {
+                for (int y = yStart; y <= yEnd; y++, inputId++)
+                {
+                    inputLayer.NodeList.Add(new SubstrateNode(inputId, new double[] {x, y}));
+                }
+            }
+
+            return null;
         }
 
         public IGenomeFactory<NeatGenome> CreateGenomeFactory()
         {
-            throw new NotImplementedException();
+            return new CppnGenomeFactory(InputCount, OutputCount, DefaultActivationFunctionLibrary.CreateLibraryCppn(), NeatGenomeParameters);
         }
 
         public INeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm()
