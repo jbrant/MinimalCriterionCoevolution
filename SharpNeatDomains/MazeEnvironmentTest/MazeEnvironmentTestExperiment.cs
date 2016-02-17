@@ -8,11 +8,14 @@ using ExperimentEntities;
 using SharpNeat.Core;
 using SharpNeat.Decoders;
 using SharpNeat.Decoders.HyperNeat;
+using SharpNeat.Decoders.Neat;
 using SharpNeat.EvolutionAlgorithms;
+using SharpNeat.EvolutionAlgorithms.ComplexityRegulation;
 using SharpNeat.Genomes.HyperNeat;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Network;
 using SharpNeat.Phenomes;
+using RunPhase = SharpNeat.Core.RunPhase;
 
 namespace SharpNeat.Domains.MazeEnvironmentTest
 {
@@ -37,10 +40,9 @@ namespace SharpNeat.Domains.MazeEnvironmentTest
         protected int? Complexitythreshold;
 
         private NetworkActivationScheme _activationScheme;
-
         private ParallelOptions _parallelOptions;
-
         private int _substrateResolution;
+        private int _batchSize;
 
         public void Initialize(string name, XmlElement xmlConfig, IDataLogger evolutionDataLogger = null,
             IDataLogger evaluationDataLogger = null)
@@ -77,26 +79,7 @@ namespace SharpNeat.Domains.MazeEnvironmentTest
 
         public IGenomeDecoder<NeatGenome, IBlackBox> CreateGenomeDecoder()
         {
-            int numPixels = _substrateResolution*_substrateResolution;
-
-            int xEnd = _substrateResolution/2;
-            int yEnd = xEnd;
-            int xStart = (_substrateResolution / 2) * -1;
-            int yStart = xStart;
-
-            SubstrateNodeSet inputLayer = new SubstrateNodeSet(numPixels);
-
-            uint inputId = 1, outputId = (uint)numPixels + 1;
-
-            for (int x = xStart; x <= xEnd; x++)
-            {
-                for (int y = yStart; y <= yEnd; y++, inputId++)
-                {
-                    inputLayer.NodeList.Add(new SubstrateNode(inputId, new double[] {x, y}));
-                }
-            }
-
-            return null;
+            return new NeatGenomeDecoder(_activationScheme);
         }
 
         public IGenomeFactory<NeatGenome> CreateGenomeFactory()
@@ -106,17 +89,29 @@ namespace SharpNeat.Domains.MazeEnvironmentTest
 
         public INeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm()
         {
-            throw new NotImplementedException();
+            return CreateEvolutionAlgorithm(DefaultPopulationSize);
         }
 
         public INeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(int populationSize)
         {
-            throw new NotImplementedException();
+            IGenomeFactory<NeatGenome> genomeFactory = CreateGenomeFactory();
+
+            List<NeatGenome> genomeList = genomeFactory.CreateGenomeList(populationSize, 0);
+
+            return CreateEvolutionAlgorithm(genomeFactory, genomeList);
         }
 
         public INeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(IGenomeFactory<NeatGenome> genomeFactory, List<NeatGenome> genomeList)
         {
-            throw new NotImplementedException();
+            IComplexityRegulationStrategy complexityRegulationStrategy = ExperimentUtils.CreateComplexityRegulationStrategy(ComplexityRegulationStrategy, Complexitythreshold);
+
+            AbstractNeatEvolutionAlgorithm<NeatGenome> ea =
+                new QueueingNeatEvolutionAlgorithm<NeatGenome>(NeatEvolutionAlgorithmParameters,
+                    complexityRegulationStrategy, _batchSize);
+
+            // TODO: Create the network evaluator
+
+            IGenomeDecoder<NeatGenome, IBlackBox> genomeDecoder = CreateGenomeDecoder();
         }
 
         public INeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(IGenomeFactory<NeatGenome> genomeFactory, List<NeatGenome> genomeList,
@@ -127,12 +122,12 @@ namespace SharpNeat.Domains.MazeEnvironmentTest
 
         public AbstractGenomeView CreateGenomeView()
         {
-            throw new NotImplementedException();
+            return new CppnGenomeView(DefaultActivationFunctionLibrary.CreateLibraryCppn());
         }
 
         public AbstractDomainView CreateDomainView()
         {
-            throw new NotImplementedException();
+            return null;
         }
     }
 }
