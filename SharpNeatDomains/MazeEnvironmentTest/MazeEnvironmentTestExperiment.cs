@@ -112,6 +112,8 @@ namespace SharpNeat.Domains.MazeEnvironmentTest
             // TODO: Create the network evaluator
 
             IGenomeDecoder<NeatGenome, IBlackBox> genomeDecoder = CreateGenomeDecoder();
+
+            return null;
         }
 
         public INeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(IGenomeFactory<NeatGenome> genomeFactory, List<NeatGenome> genomeList,
