@@ -14,7 +14,7 @@ namespace MazeGenerationTester
     internal class Program
     {
         private const bool _useDirect = false;
-        private const int _mazeSideLength = 100;
+        private const int _mazeSideLength = 200;
 
         private static void Main(string[] args)
         {
@@ -41,7 +41,7 @@ namespace MazeGenerationTester
                     }
                 }
             }
-            testPopulation = new QueuePopulation(100, new MazePositiveIndirectChromosome(_mazeSideLength, 20, 100),
+            testPopulation = new QueuePopulation(100, new MazePositiveIndirectChromosome(_mazeSideLength, 80, 100),
                 testFitnessFunction, new RouletteWheelSelection());
 
             for (int loopCnt = 0; loopCnt < 1000; loopCnt++)
@@ -88,7 +88,7 @@ namespace MazeGenerationTester
 
         private static void WriteImage_IndirectPositiveEncoding(string imageName, Tuple<int, int>[] contents)
         {
-            Pen blackPen = new Pen(Color.Black, 1);
+            Pen blackPen = new Pen(Color.Black, 2);
 
             // Create square environment
             Bitmap imageBitmap = new Bitmap(_mazeSideLength, _mazeSideLength);
@@ -104,7 +104,7 @@ namespace MazeGenerationTester
             List<Barrier> barrierList =
                 (from pair in contents where pair != null select new Barrier(pair.Item1, pair.Item2, _mazeSideLength))
                     .ToList();
-
+            
             // Modify barrier endpoints where applicable if barrier is not penetrating
             foreach (Barrier barrier in barrierList)
             {
