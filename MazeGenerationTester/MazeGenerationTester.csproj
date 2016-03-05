@@ -76,15 +76,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Barrier.cs" />
-    <Compile Include="ExampleFitnessFunction.cs" />
-    <Compile Include="MazePositiveIndirectChromosome.cs" />
-    <Compile Include="MazeDirectChromosome.cs" />
+    <Compile Include="FitnessBasedMaze\Barrier.cs" />
+    <Compile Include="FitnessBasedMaze\ExampleFitnessFunction.cs" />
+    <Compile Include="FitnessBasedMaze\MazePositiveIndirectChromosome.cs" />
+    <Compile Include="FitnessBasedMaze\MazeDirectChromosome.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueuePopulation.cs" />
-    <Compile Include="RecursiveDivisionMazeGeneration.cs" />
-    <Compile Include="RecursiveDivisionRunner.cs" />
+    <Compile Include="RecursiveDivision\Direction.cs" />
+    <Compile Include="RecursiveDivision\Line2D.cs" />
+    <Compile Include="RecursiveDivision\MazeRoom.cs" />
+    <Compile Include="RecursiveDivision\MazeUtility.cs" />
+    <Compile Include="RecursiveDivision\Orientation.cs" />
+    <Compile Include="RecursiveDivision\RecursiveDivisionMazeGeneration.cs" />
+    <Compile Include="RecursiveDivision\RecursiveDivisionMazeGenerationDepthFirst.cs" />
+    <Compile Include="RecursiveDivision\RecursiveMazeGenerationBreadthFirst.cs" />
+    <Compile Include="RecursiveDivision_Old\RecursiveDivisionRunner.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
