@@ -18,15 +18,15 @@ namespace MazeGenerationTester
         {
             if (isBreadthFirst)
             {
-                int numIterations = 400;
-                int imageScaleMultiplier = 15;
+                int numIterations = 3;
+                int imageScaleMultiplier = 16;
 
                 RecursiveMazeGenerationBreadthFirst mazeGenerationBreadthFirst =
                     new RecursiveMazeGenerationBreadthFirst(Width, Height, RandomNumGenerator);
 
                 mazeGenerationBreadthFirst.RunBreadthFirstGeneration(numIterations);
 
-                MazeUtility.DisplayMaze(mazeGenerationBreadthFirst.Grid);
+                //MazeUtility.DisplayMaze(mazeGenerationBreadthFirst.Grid);
 
                 MazeUtility.PrintBitmapMaze(
                     MazeUtility.ExtractLineSegments(mazeGenerationBreadthFirst.Grid, imageScaleMultiplier),

@@ -107,8 +107,11 @@
     <Compile Include="Core\IMinimalCriteria.cs" />
     <Compile Include="Core\INoveltyArchive.cs" />
     <Compile Include="Core\RunPhase.cs" />
+    <Compile Include="Decoders\Maze\MazeDecoder.cs" />
     <Compile Include="EvolutionAlgorithms\QueueingNichedNeatEvolutionAlgorithm.cs" />
     <Compile Include="EvolutionAlgorithms\QueueingNeatEvolutionAlgorithm.cs" />
+    <Compile Include="Genomes\Maze\MazeGenome.cs" />
+    <Compile Include="Genomes\Maze\MazeGenomeFactory.cs" />
     <Compile Include="Loggers\AbstractEntityDataLogger.cs" />
     <Compile Include="Loggers\LoggingParameters.cs" />
     <Compile Include="Loggers\McsExperimentEvaluationEntityDataLogger.cs" />
@@ -250,6 +253,10 @@
     <Compile Include="Network\ActivationFunctions\Unipolar\SteepenedSigmoid.cs" />
     <Compile Include="Network\ActivationFunctions\Unipolar\SteepenedSigmoidApproximation.cs" />
     <Compile Include="Phenomes\MappingSignalArray.cs" />
+    <Compile Include="Phenomes\Mazes\WallDirection.cs" />
+    <Compile Include="Phenomes\Mazes\MazeGrid.cs" />
+    <Compile Include="Phenomes\Mazes\MazeRoom.cs" />
+    <Compile Include="Phenomes\Mazes\WallOrientation.cs" />
     <Compile Include="Phenomes\NeuralNets\AcyclicNetwork\FastAcyclicNetwork.cs" />
     <Compile Include="Phenomes\NeuralNets\AcyclicNetwork\LayerInfo.cs" />
     <Compile Include="Phenomes\NeuralNets\CyclicNetwork\Connection.cs" />
@@ -337,6 +344,7 @@
       <Name>ExperimentEntities</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

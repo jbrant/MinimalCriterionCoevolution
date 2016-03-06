@@ -44,12 +44,6 @@ namespace MazeGenerationTester.RecursiveDivision
             int xPassageLocation = xWallLocation + (isHorizontal ? _randomNumGenerator.Next(_width) : 0);
             int yPassageLocation = yWallLocation + (isHorizontal ? 0 : _randomNumGenerator.Next(_height));
 
-            // TODO: Choose a random length
-            /*int passageLength = isHorizontal
-                ? _randomNumGenerator.Next(10, Math.Max(10, _width - (xPassageLocation - xWallLocation)))
-                : _randomNumGenerator.Next(10, Math.Max(10, _height - (yPassageLocation - yWallLocation)));*/
-            //int passageLength = 30;
-
             // Determine wall directional components
             int xDirection = isHorizontal ? 1 : 0;
             int yDirection = isHorizontal ? 0 : 1;
@@ -65,8 +59,6 @@ namespace MazeGenerationTester.RecursiveDivision
             {
                 // If the current cell isn't in the defined passage, place a wall segment there
                 if (xWallLocation != xPassageLocation || yWallLocation != yPassageLocation)
-                //if ((xWallLocation < xPassageLocation || xWallLocation > xPassageLocation + passageLength) ||
-                //    (yWallLocation < yPassageLocation || yWallLocation > yPassageLocation + passageLength))
                 {
                     // Bitwise or with perpendicular direction to get appropriate wall
                     grid[yWallLocation, xWallLocation] |= (int)perpendicularDirection;
