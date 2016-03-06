@@ -112,6 +112,7 @@
     <Compile Include="EvolutionAlgorithms\QueueingNeatEvolutionAlgorithm.cs" />
     <Compile Include="Genomes\Maze\MazeGenome.cs" />
     <Compile Include="Genomes\Maze\MazeGenomeFactory.cs" />
+    <Compile Include="Genomes\Maze\MazeGenomeParameters.cs" />
     <Compile Include="Loggers\AbstractEntityDataLogger.cs" />
     <Compile Include="Loggers\LoggingParameters.cs" />
     <Compile Include="Loggers\McsExperimentEvaluationEntityDataLogger.cs" />

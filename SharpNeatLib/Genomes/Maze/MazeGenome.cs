@@ -1,7 +1,9 @@
 ﻿#region
 
 using System;
+using System.Collections.Generic;
 using SharpNeat.Core;
+using SharpNeat.Phenomes.Mazes;
 
 #endregion
 
@@ -9,9 +11,16 @@ namespace SharpNeat.Genomes.Maze
 {
     public class MazeGenome : IGenome<MazeGenome>
     {
+        #region Instance Variables
+
+        private readonly MazeGenomeFactory _genomeFactory;
+
+        #endregion
+
         #region Maze Genome Constructors
 
-        public MazeGenome(MazeGenomeFactory genomeFactory, uint id, uint birthGeneration, double wallStartLocation, double passageStartLocation)
+        public MazeGenome(MazeGenomeFactory genomeFactory, uint id, uint birthGeneration, double wallStartLocation,
+            double passageStartLocation)
         {
             // Set the genome factory
             _genomeFactory = genomeFactory;
@@ -26,6 +35,9 @@ namespace SharpNeat.Genomes.Maze
 
             // Create new evaluation info with no fitness history
             EvaluationInfo = new EvaluationInfo(0);
+
+            // Instantiate new gene list
+            GeneList = new List<MazeRoom>();
         }
 
         public MazeGenome(MazeGenome copyFrom, uint id, uint birthGeneration)
@@ -38,6 +50,7 @@ namespace SharpNeat.Genomes.Maze
             _genomeFactory = copyFrom._genomeFactory;
             WallStartLocation = copyFrom.WallStartLocation;
             PassageStartLocation = copyFrom.PassageStartLocation;
+            GeneList = new List<MazeRoom>(copyFrom.GeneList);
             EvaluationInfo = new EvaluationInfo(copyFrom.EvaluationInfo.FitnessHistoryLength);
         }
 
@@ -73,11 +86,7 @@ namespace SharpNeat.Genomes.Maze
 
         public double PassageStartLocation { get; }
 
-        #endregion
-
-        #region Instance Variables
-
-        private MazeGenomeFactory _genomeFactory;
+        public List<MazeRoom> GeneList { get; }
 
         #endregion
 
@@ -96,6 +105,11 @@ namespace SharpNeat.Genomes.Maze
         #endregion
 
         #region Maze Genome Methods
+
+        private void Mutate()
+        {
+            
+        }
 
         #endregion
     }
