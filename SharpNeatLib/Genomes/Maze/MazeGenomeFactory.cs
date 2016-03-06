@@ -11,8 +11,14 @@ namespace SharpNeat.Genomes.Maze
 {
     public class MazeGenomeFactory : IGenomeFactory<MazeGenome>
     {
-        private readonly UInt32IdGenerator _genomeIdGenerator;
-        private readonly FastRandom _rng = new FastRandom();
+        #region Constructors
+
+        public MazeGenomeFactory()
+        {
+            MazeGenomeParameters = new MazeGenomeParameters();
+        }
+
+        #endregion
 
         #region Maze Genome Factory Methods
 
@@ -41,6 +47,14 @@ namespace SharpNeat.Genomes.Maze
 
         #endregion
 
+        #region Maze Genome Factory Properties
+
+        public readonly FastRandom Rng = new FastRandom();
+
+        public MazeGenomeParameters MazeGenomeParameters { get; }
+
+        #endregion
+
         #region Interface Methods
 
         public List<MazeGenome> CreateGenomeList(int length, uint birthGeneration)
@@ -60,7 +74,7 @@ namespace SharpNeat.Genomes.Maze
             List<MazeGenome> genomeList = new List<MazeGenome>(length);
 
             // Add an exact copy of the seed to the list.
-            MazeGenome newGenome = CreateGenomeCopy(seedGenome, _genomeIdGenerator.NextId, birthGeneration);
+            MazeGenome newGenome = CreateGenomeCopy(seedGenome, GenomeIdGenerator.NextId, birthGeneration);
             genomeList.Add(newGenome);
 
             // For the remainder we create mutated offspring from the seed.
@@ -80,7 +94,7 @@ namespace SharpNeat.Genomes.Maze
 
             // Create a copy of the list so that we can shuffle the items without modifying the original list.
             seedGenomeList = new List<MazeGenome>(seedGenomeList);
-            Utilities.Shuffle(seedGenomeList, _rng);
+            Utilities.Shuffle(seedGenomeList, Rng);
 
             // Make exact copies of seed genomes and insert them into our new genome list.
             List<MazeGenome> genomeList = new List<MazeGenome>(length);
@@ -89,7 +103,7 @@ namespace SharpNeat.Genomes.Maze
             for (int seedIdx = 0; idx < length && seedIdx < seedCount; idx++, seedIdx++)
             {
                 // Add an exact copy of the seed to the list.
-                MazeGenome newGenome = CreateGenomeCopy(seedGenomeList[seedIdx], _genomeIdGenerator.NextId,
+                MazeGenome newGenome = CreateGenomeCopy(seedGenomeList[seedIdx], GenomeIdGenerator.NextId,
                     birthGeneration);
                 genomeList.Add(newGenome);
             }
@@ -107,7 +121,7 @@ namespace SharpNeat.Genomes.Maze
 
         public MazeGenome CreateGenome(uint birthGeneration)
         {
-            return CreateGenome(_genomeIdGenerator.NextId, birthGeneration, _rng.NextDouble(), _rng.NextDouble());
+            return CreateGenome(GenomeIdGenerator.NextId, birthGeneration, Rng.NextDouble(), Rng.NextDouble());
         }
 
         public bool CheckGenomeType(MazeGenome genome)
