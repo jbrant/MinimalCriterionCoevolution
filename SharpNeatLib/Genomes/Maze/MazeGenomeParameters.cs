@@ -11,7 +11,7 @@ namespace SharpNeat.Genomes.Maze
         #region Instance Fields
 
         // Roulette wheel for the two mutation probabilities
-        private readonly RouletteWheelLayout _rouletteWheelLayout;
+        public readonly RouletteWheelLayout RouletteWheelLayout;
 
         #endregion
 
@@ -37,9 +37,10 @@ namespace SharpNeat.Genomes.Maze
             MutateWallStartLocationProbability = DefaultMutateWallStartLocationProbability;
             MutatePassageStartLocationProbability = DefaultMutatePassageStartLocationProbability;
             MutateAddWallProbability = DefaultMutateAddWallProbability;
+            PerturbanceMagnitude = DefaultPerturbanceMagnitude;
 
             // Create a new roulette wheel layout with the default probabilities
-            _rouletteWheelLayout = CreateRouletteWheelLayout();
+            RouletteWheelLayout = CreateRouletteWheelLayout();
         }
 
         public MazeGenomeParameters(MazeGenomeParameters copyFrom)
@@ -47,8 +48,9 @@ namespace SharpNeat.Genomes.Maze
             MutateWallStartLocationProbability = copyFrom.MutateWallStartLocationProbability;
             MutatePassageStartLocationProbability = copyFrom.MutatePassageStartLocationProbability;
             MutateAddWallProbability = copyFrom.MutateAddWallProbability;
+            PerturbanceMagnitude = copyFrom.PerturbanceMagnitude;
 
-            _rouletteWheelLayout = new RouletteWheelLayout(copyFrom._rouletteWheelLayout);
+            RouletteWheelLayout = new RouletteWheelLayout(copyFrom.RouletteWheelLayout);
         }
 
         #endregion
@@ -60,6 +62,9 @@ namespace SharpNeat.Genomes.Maze
         private const double DefaultMutatePassageStartLocationProbability = 0.1;
         private const double DefaultMutateAddWallProbability = 0.01;
 
+        // Default perturbance magnitude
+        private const double DefaultPerturbanceMagnitude = 0.2;
+
         #endregion
 
         #region Properties
@@ -70,6 +75,9 @@ namespace SharpNeat.Genomes.Maze
         public double MutatePassageStartLocationProbability { get; }
 
         public double MutateAddWallProbability { get; }
+
+        // Perturbance magnitude
+        public double PerturbanceMagnitude { get; }
 
         #endregion
     }

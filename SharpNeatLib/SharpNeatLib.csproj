@@ -110,6 +110,7 @@
     <Compile Include="Decoders\Maze\MazeDecoder.cs" />
     <Compile Include="EvolutionAlgorithms\QueueingNichedNeatEvolutionAlgorithm.cs" />
     <Compile Include="EvolutionAlgorithms\QueueingNeatEvolutionAlgorithm.cs" />
+    <Compile Include="Genomes\Maze\MazeGene.cs" />
     <Compile Include="Genomes\Maze\MazeGenome.cs" />
     <Compile Include="Genomes\Maze\MazeGenomeFactory.cs" />
     <Compile Include="Genomes\Maze\MazeGenomeParameters.cs" />
@@ -254,6 +255,7 @@
     <Compile Include="Network\ActivationFunctions\Unipolar\SteepenedSigmoid.cs" />
     <Compile Include="Network\ActivationFunctions\Unipolar\SteepenedSigmoidApproximation.cs" />
     <Compile Include="Phenomes\MappingSignalArray.cs" />
+    <Compile Include="Phenomes\Mazes\MazeWall.cs" />
     <Compile Include="Phenomes\Mazes\WallDirection.cs" />
     <Compile Include="Phenomes\Mazes\MazeGrid.cs" />
     <Compile Include="Phenomes\Mazes\MazeRoom.cs" />
