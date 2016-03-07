@@ -22,17 +22,16 @@ namespace SharpNeat.Genomes.Maze
 
         #region Maze Genome Factory Methods
 
-        public MazeGenome CreateGenome(uint id, uint birthGeneration, double wallStartLocation,
-            double passageStartLocation)
+        public MazeGenome CreateGenome(uint id, uint birthGeneration)
         {
-            return new MazeGenome(this, id, birthGeneration, wallStartLocation, passageStartLocation);
+            return new MazeGenome(this, id, birthGeneration);
         }
 
         public MazeGenome CreateGenomeCopy(MazeGenome copyFrom, uint id, uint birthGeneration)
         {
             return new MazeGenome(copyFrom, id, birthGeneration);
         }
-
+        
         #endregion
 
         #region Interface Properties
@@ -121,7 +120,7 @@ namespace SharpNeat.Genomes.Maze
 
         public MazeGenome CreateGenome(uint birthGeneration)
         {
-            return CreateGenome(GenomeIdGenerator.NextId, birthGeneration, Rng.NextDouble(), Rng.NextDouble());
+            return CreateGenome(GenomeIdGenerator.NextId, birthGeneration);
         }
 
         public bool CheckGenomeType(MazeGenome genome)

@@ -8,53 +8,41 @@ namespace SharpNeat.Phenomes.Mazes
 {
     public class MazeRoom
     {
-        private readonly WallOrientation _bisectionOrientation;
-        private readonly int _height;
-        private readonly Random _randomNumGenerator;
-        private readonly int _width;
-        private readonly int _x;
-        private readonly int _y;
+        #region Constructors
 
-        public MazeRoom(int x, int y, int width, int height, Random randomNumGenerator)
+        public MazeRoom(int x, int y, int width, int height)
         {
             _x = x;
             _y = y;
             _width = width;
             _height = height;
-            _randomNumGenerator = randomNumGenerator;
-
-            // Determine the orientation of the separator wall within the room
-            if (width < height)
-            {
-                _bisectionOrientation = WallOrientation.Horizontal;
-            }
-            if (height < width)
-            {
-                _bisectionOrientation = WallOrientation.Vertical;
-            }
-            _bisectionOrientation = randomNumGenerator.Next(2) == 0
-                ? WallOrientation.Horizontal
-                : WallOrientation.Vertical;
         }
 
-        public Tuple<MazeRoom, MazeRoom> DivideRoom(int[,] grid)
+        #endregion
+
+        #region Public Methods
+
+        public Tuple<MazeRoom, MazeRoom> DivideRoom(int[,] grid, double unscaledWallLocation,
+            double unscaledPassageLocation, bool isHorizontalDefaultOrientation)
         {
             // Short circuit if we can't subdivide anymore
-            if (_width < 2 || _height < 2)
+            if (_width < MinimumWidth || _height < MinimumHeight)
                 return null;
 
             // Determine orientation
-            bool isHorizontal = _bisectionOrientation == WallOrientation.Horizontal;
+            bool isHorizontal = DetermineWallOrientation(isHorizontalDefaultOrientation) == WallOrientation.Horizontal;
 
             // Determine starting location of wall
-            // TODO: This will be evolved
-            int xWallLocation = _x + (isHorizontal ? 0 : _randomNumGenerator.Next(_width - 2));
-            int yWallLocation = _y + (isHorizontal ? _randomNumGenerator.Next(_height - 2) : 0);
+            // TODO: The wall location will be evolved
+            int xWallLocation = _x +
+                                (isHorizontal ? 0 : Math.Max(0, (int) ((_width*unscaledWallLocation) - MinimumWidth)));
+            int yWallLocation = _y +
+                                (isHorizontal ? Math.Max(0, (int) ((_height*unscaledWallLocation) - MinimumHeight)) : 0);
 
             // Determine the location of the passage
-            // TODO: This along with passage length will be evolved
-            int xPassageLocation = xWallLocation + (isHorizontal ? _randomNumGenerator.Next(_width) : 0);
-            int yPassageLocation = yWallLocation + (isHorizontal ? 0 : _randomNumGenerator.Next(_height));
+            // TODO: The passage location will be evolved
+            int xPassageLocation = xWallLocation + (isHorizontal ? (int) (_width*unscaledPassageLocation) : 0);
+            int yPassageLocation = yWallLocation + (isHorizontal ? 0 : (int) (_height*unscaledPassageLocation));
 
             // Determine wall directional components
             int xDirection = isHorizontal ? 1 : 0;
@@ -86,7 +74,7 @@ namespace SharpNeat.Phenomes.Mazes
             int newHeight = isHorizontal ? yWallLocation - _y + 1 : _height;
 
             // Recurse down top/left subfield
-            MazeRoom newRoom1 = new MazeRoom(_x, _y, newWidth, newHeight, _randomNumGenerator);
+            MazeRoom newRoom1 = new MazeRoom(_x, _y, newWidth, newHeight);
 
             // Assign new x/y coordinates for bottom/right part of maze
             int offsetX = isHorizontal ? _x : xWallLocation + 1;
@@ -97,9 +85,52 @@ namespace SharpNeat.Phenomes.Mazes
             newHeight = isHorizontal ? _y + _height - yWallLocation - 1 : _height;
 
             // Recurse down bottom/right subfield
-            MazeRoom newRoom2 = new MazeRoom(offsetX, offsetY, newWidth, newHeight, _randomNumGenerator);
+            MazeRoom newRoom2 = new MazeRoom(offsetX, offsetY, newWidth, newHeight);
 
             return new Tuple<MazeRoom, MazeRoom>(newRoom1, newRoom2);
         }
+
+        #endregion
+
+        #region Private Methods
+
+        private WallOrientation DetermineWallOrientation(bool isHorizontalDefaultOrientation)
+        {
+            // Adopt random orientation seed set on genome
+            WallOrientation bisectionOrientation = isHorizontalDefaultOrientation
+                ? WallOrientation.Horizontal
+                : WallOrientation.Vertical;
+
+            // Determine the orientation of the separator wall within the room
+            if (_width < _height)
+            {
+                bisectionOrientation = WallOrientation.Horizontal;
+            }
+            else if (_height < _width)
+            {
+                bisectionOrientation = WallOrientation.Vertical;
+            }
+
+            return bisectionOrientation;
+        }
+
+        #endregion
+
+        #region Constants
+
+        private const int MinimumWidth = 2;
+        private const int MinimumHeight = 2;
+
+        #endregion
+
+        #region Instance Variables
+
+        private readonly WallOrientation _bisectionOrientation;
+        private readonly int _height;
+        private readonly int _width;
+        private readonly int _x;
+        private readonly int _y;
+
+        #endregion
     }
 }

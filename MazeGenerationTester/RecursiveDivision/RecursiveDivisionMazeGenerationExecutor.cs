@@ -9,8 +9,8 @@ namespace MazeGenerationTester
 {
     public class RecursiveDivisionMazeGenerationExecutor
     {
-        private const int Width = 20;
-        private const int Height = 20;
+        private const int Width = 1000;
+        private const int Height = 1000;
         private const bool isBreadthFirst = true;
         private static readonly Random RandomNumGenerator = new Random(12345678);
 
@@ -18,7 +18,7 @@ namespace MazeGenerationTester
         {
             if (isBreadthFirst)
             {
-                int numIterations = 3;
+                int numIterations = 5000000;
                 int imageScaleMultiplier = 16;
 
                 RecursiveMazeGenerationBreadthFirst mazeGenerationBreadthFirst =
