@@ -7,12 +7,17 @@ using System.Collections.Generic;
 
 namespace SharpNeat.Phenomes.Mazes
 {
+    /// <summary>
+    ///     The maze grid encapsulates the entire maze, including borders and all of the walls.  It can be scaled up from the
+    ///     original resolution used during evolution.
+    /// </summary>
     public class MazeGrid
     {
         #region Constructors
 
         /// <summary>
-        /// Constructor which accepts the dimensions of the resulting maze along with the multiplier indicating the scale increase (or decrease).
+        ///     Constructor which accepts the dimensions of the resulting maze along with the multiplier indicating the scale
+        ///     increase (or decrease).
         /// </summary>
         /// <param name="mazeWidth">The width of the maze.</param>
         /// <param name="mazeHeight">The height of the maze.</param>
@@ -30,21 +35,11 @@ namespace SharpNeat.Phenomes.Mazes
 
         #endregion
 
-        #region Properties
-
-        /// <summary>
-        /// The list of walls in the maze.
-        /// </summary>
-        public List<MazeWall> Walls { get; }
-  
-        public int[,] MazeArray { get; private set; }
-
-        #endregion
-
         #region Public Methods
 
         /// <summary>
-        /// Converts the maze space matrix (which indicates what type of wall is at each intersection in the 2D maze) to a list of horizontal and vertical walls.
+        ///     Converts the maze space matrix (which indicates what type of wall is at each intersection in the 2D maze) to a list
+        ///     of horizontal and vertical walls.
         /// </summary>
         /// <param name="mazeGridArray"></param>
         public void ConvertGridArrayToWalls(int[,] mazeGridArray)
@@ -60,10 +55,21 @@ namespace SharpNeat.Phenomes.Mazes
 
         #endregion
 
+        #region Properties
+
+        /// <summary>
+        ///     The list of walls in the maze.
+        /// </summary>
+        public List<MazeWall> Walls { get; }
+
+        public int[,] MazeArray { get; private set; }
+
+        #endregion
+
         #region Private Methods
 
         /// <summary>
-        /// Generates the walls that bound the maze (i.e. the borders).
+        ///     Generates the walls that bound the maze (i.e. the borders).
         /// </summary>
         private void GenerateBorderWalls()
         {
@@ -83,7 +89,7 @@ namespace SharpNeat.Phenomes.Mazes
         }
 
         /// <summary>
-        /// Parses the maze grid matrix in a rowwise manner, extracting the horizontal walls.
+        ///     Parses the maze grid matrix in a row-wise manner, extracting the horizontal walls.
         /// </summary>
         /// <param name="mazeGridArray">The grid array which is being parsed.</param>
         private void ExtractHorizontalWalls(int[,] mazeGridArray)
@@ -110,7 +116,8 @@ namespace SharpNeat.Phenomes.Mazes
                     else if (mazeGridArray[curRow, curCol] != (int) WallOrientation.Horizontal &&
                              mazeGridArray[curRow, curCol] != (int) WallOrientation.Both && curHorizontalLine != null)
                     {
-                        curHorizontalLine.EndMazePoint = new MazePoint(curCol*_scaleMultiplier, (curRow + 1)*_scaleMultiplier);
+                        curHorizontalLine.EndMazePoint = new MazePoint(curCol*_scaleMultiplier,
+                            (curRow + 1)*_scaleMultiplier);
                         Walls.Add(curHorizontalLine);
                         curHorizontalLine = null;
                     }
@@ -127,6 +134,10 @@ namespace SharpNeat.Phenomes.Mazes
             }
         }
 
+        /// <summary>
+        ///     Parses the maze grid matrix in a column-wise manner, extracting the vertical walls.
+        /// </summary>
+        /// <param name="mazeGridArray">The grid array which is being parsed.</param>
         private void ExtractVerticalWalls(int[,] mazeGridArray)
         {
             // Get all of the vertical lines
@@ -136,6 +147,8 @@ namespace SharpNeat.Phenomes.Mazes
 
                 for (int curRow = 0; curRow < _mazeHeight; curRow++)
                 {
+                    // Handle the start point of a line segment 
+                    // (current cell is vertical and a new vertical line hasn't yet been established)
                     if ((mazeGridArray[curRow, curCol] == (int) WallOrientation.Vertical ||
                          mazeGridArray[curRow, curCol] == (int) WallOrientation.Both) && curVerticalLine == null)
                     {
@@ -145,6 +158,8 @@ namespace SharpNeat.Phenomes.Mazes
                                 new MazePoint((curCol + 1)*_scaleMultiplier, curRow*_scaleMultiplier)
                         };
                     }
+                    // Otherwise, if we've been tracking a vertical line and the current position contains neither a vertical line segment 
+                    // nor a combination of a horizontal and vertical line, then record this as the maze ending point and null out the current line
                     else if (mazeGridArray[curRow, curCol] != (int) WallOrientation.Vertical &&
                              mazeGridArray[curRow, curCol] != (int) WallOrientation.Both && curVerticalLine != null)
                     {
@@ -155,9 +170,12 @@ namespace SharpNeat.Phenomes.Mazes
                     }
                 }
 
+                // If we've reached the end of the current row but we're still tracking a vertical line, then this must be its
+                // end point since it can't protrude outside of the maze walls
                 if (curVerticalLine != null)
                 {
-                    curVerticalLine.EndMazePoint = new MazePoint((curCol + 1)*_scaleMultiplier, _mazeHeight*_scaleMultiplier);
+                    curVerticalLine.EndMazePoint = new MazePoint((curCol + 1)*_scaleMultiplier,
+                        _mazeHeight*_scaleMultiplier);
                     Walls.Add(curVerticalLine);
                 }
             }
@@ -167,8 +185,11 @@ namespace SharpNeat.Phenomes.Mazes
 
         #region Instance Variables
 
+        // The maze dimensions
         private readonly int _mazeWidth;
         private readonly int _mazeHeight;
+
+        // The amount by which to scale up the size of the maze
         private readonly int _scaleMultiplier;
 
         #endregion
