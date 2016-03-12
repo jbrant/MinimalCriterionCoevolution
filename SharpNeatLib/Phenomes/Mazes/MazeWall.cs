@@ -10,23 +10,23 @@
 
         public MazeWall(int xStart, int yStart, int xEnd, int yEnd)
         {
-            StartPoint = new Point(xStart, yStart);
-            EndPoint = new Point(xEnd, yEnd);
+            StartMazePoint = new MazePoint(xStart, yStart);
+            EndMazePoint = new MazePoint(xEnd, yEnd);
         }
 
         #endregion
 
         #region Properties
 
-        public Point StartPoint { get; set; }
-        public Point EndPoint { get; set; }
+        public MazePoint StartMazePoint { get; set; }
+        public MazePoint EndMazePoint { get; set; }
 
         #endregion
     }
 
-    public struct Point
+    public struct MazePoint
     {
-        public Point(int x, int y)
+        public MazePoint(int x, int y)
         {
             X = x;
             Y = y;

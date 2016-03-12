@@ -63,8 +63,8 @@ namespace SharpNeat.Domains
         public static BehaviorCharacterizationType ConvertStringToBehavioralCharacterization(
             String strBehavioralCharacterization)
         {
-            if ("EndPoint".Equals(strBehavioralCharacterization, StringComparison.InvariantCultureIgnoreCase) ||
-                "End Point".Equals(strBehavioralCharacterization, StringComparison.InvariantCultureIgnoreCase))
+            if ("EndMazePoint".Equals(strBehavioralCharacterization, StringComparison.InvariantCultureIgnoreCase) ||
+                "End MazePoint".Equals(strBehavioralCharacterization, StringComparison.InvariantCultureIgnoreCase))
             {
                 return BehaviorCharacterizationType.EndPoint;
             }
@@ -84,7 +84,7 @@ namespace SharpNeat.Domains
                 return MinimalCriteriaType.EuclideanLocation;
             }
             if ("FixedPointEuclideanDistance".Equals(strMinimalCriteria, StringComparison.InvariantCultureIgnoreCase) ||
-                "Fixed Point Euclidean Distance".Equals(strMinimalCriteria, StringComparison.InvariantCultureIgnoreCase))
+                "Fixed MazePoint Euclidean Distance".Equals(strMinimalCriteria, StringComparison.InvariantCultureIgnoreCase))
             {
                 return MinimalCriteriaType.FixedPointEuclideanDistance;
             }

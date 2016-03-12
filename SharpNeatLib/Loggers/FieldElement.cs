@@ -15,8 +15,8 @@
         public static readonly FieldElement TotalOffspringCount = new FieldElement(6, "Total Offspring Count");
         public static readonly FieldElement PopulationSize = new FieldElement(7, "Population Size");
         public static readonly FieldElement MinimalCriteriaThreshold = new FieldElement(8, "Minimal Criteria Threshold");
-        public static readonly FieldElement MinimalCriteriaPointX = new FieldElement(9, "Minimal Criteria Point X");
-        public static readonly FieldElement MinimalCriteriaPointY = new FieldElement(10, "Minimal Criteria Point Y");
+        public static readonly FieldElement MinimalCriteriaPointX = new FieldElement(9, "Minimal Criteria MazePoint X");
+        public static readonly FieldElement MinimalCriteriaPointY = new FieldElement(10, "Minimal Criteria MazePoint Y");
         public static readonly FieldElement MaxFitness = new FieldElement(11, "Max Fitness");
         public static readonly FieldElement MeanFitness = new FieldElement(12, "Mean Fitness");
         public static readonly FieldElement MeanSpecieChampFitness = new FieldElement(13, "Mean Specie Champ Fitness");

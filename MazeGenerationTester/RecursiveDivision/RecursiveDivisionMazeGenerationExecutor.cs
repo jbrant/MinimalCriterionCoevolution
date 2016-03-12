@@ -9,16 +9,17 @@ namespace MazeGenerationTester
 {
     public class RecursiveDivisionMazeGenerationExecutor
     {
-        private const int Width = 1000;
-        private const int Height = 1000;
+        private const int Width = 20;
+        private const int Height = 20;
         private const bool isBreadthFirst = true;
-        private static readonly Random RandomNumGenerator = new Random(12345678);
+        //private static readonly Random RandomNumGenerator = new Random(12345678);
+        private static readonly Random RandomNumGenerator = new Random();
 
         public static void Main(string[] args)
         {
             if (isBreadthFirst)
             {
-                int numIterations = 5000000;
+                int numIterations = 50;
                 int imageScaleMultiplier = 16;
 
                 RecursiveMazeGenerationBreadthFirst mazeGenerationBreadthFirst =
@@ -26,7 +27,7 @@ namespace MazeGenerationTester
 
                 mazeGenerationBreadthFirst.RunBreadthFirstGeneration(numIterations);
 
-                //MazeUtility.DisplayMaze(mazeGenerationBreadthFirst.Grid);
+                MazeUtility.DisplayMaze(mazeGenerationBreadthFirst.Grid);
 
                 MazeUtility.PrintBitmapMaze(
                     MazeUtility.ExtractLineSegments(mazeGenerationBreadthFirst.Grid, imageScaleMultiplier),
