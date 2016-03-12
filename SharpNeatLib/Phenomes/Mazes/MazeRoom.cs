@@ -6,10 +6,22 @@ using System;
 
 namespace SharpNeat.Phenomes.Mazes
 {
+    /// <summary>
+    ///     The maze room encapsulates a single room or "subfield" within the maze.  This room can then be further subdivided
+    ///     until the minimum allowed resolution is reached.
+    /// </summary>
     public class MazeRoom
     {
         #region Constructors
 
+        /// <summary>
+        ///     Constructor which takes the origin X and Y coordinates as well as the width and height dimensions of the maze or
+        ///     subfield.
+        /// </summary>
+        /// <param name="x">The horizontal component of the starting coordinate.</param>
+        /// <param name="y">The vertical component of the starting coordinate.</param>
+        /// <param name="width">The width of the maze/subfield.</param>
+        /// <param name="height">The height of the maze/subfield.</param>
         public MazeRoom(int x, int y, int width, int height)
         {
             _x = x;
@@ -22,6 +34,24 @@ namespace SharpNeat.Phenomes.Mazes
 
         #region Public Methods
 
+        /// <summary>
+        ///     Divides the maze or subfield (room) into two component subfields based on the given wall location and passage
+        ///     location (which are evolved out of context and must be scaled to the dimensions of the containing subfield).
+        /// </summary>
+        /// <param name="grid">
+        ///     The matrix of the current genotypic maze state and the structural components (horizontal/vertical
+        ///     walls, both, or none) that are at each possible position.
+        /// </param>
+        /// <param name="unscaledWallLocation">
+        ///     The location of the new dividing wall.  This is a real number between 0 and 1 which
+        ///     must be normalized to the appropriate range for the containing subfield.
+        /// </param>
+        /// <param name="unscaledPassageLocation">
+        ///     The location of the new dividing wall passage.  This is a real number between 0
+        ///     and 1 which must be normalized to the appropriate range for the containing subfield.
+        /// </param>
+        /// <param name="isHorizontalDefaultOrientation">Indicator for whether the dividing line is horizontal or vertical.</param>
+        /// <returns>The two subfields that were created as a result of the subfield division.</returns>
         public Tuple<MazeRoom, MazeRoom> DivideRoom(int[,] grid, double unscaledWallLocation,
             double unscaledPassageLocation, bool isHorizontalDefaultOrientation)
         {
@@ -35,14 +65,17 @@ namespace SharpNeat.Phenomes.Mazes
             // Determine starting location of wall
             // TODO: The wall location will be evolved
             int xWallLocation = _x +
-                                (isHorizontal ? 0 : Math.Max(0, (int) ((_width*unscaledWallLocation) - MinimumWidth)));
+                                (isHorizontal ? 0 : Math.Max(0, (int) ((_width - MinimumWidth)*unscaledWallLocation)));
             int yWallLocation = _y +
-                                (isHorizontal ? Math.Max(0, (int) ((_height*unscaledWallLocation) - MinimumHeight)) : 0);
+                                (isHorizontal ? Math.Max(0, (int) ((_height - MinimumHeight)*unscaledWallLocation)) : 0);
 
-            // Determine the location of the passage
+            // Determine the location of the passage 
+            // (location can be no further out than width or height minus 1 to prevent passage starting at the wall end point)
             // TODO: The passage location will be evolved
-            int xPassageLocation = xWallLocation + (isHorizontal ? (int) (_width*unscaledPassageLocation) : 0);
-            int yPassageLocation = yWallLocation + (isHorizontal ? 0 : (int) (_height*unscaledPassageLocation));
+            int xPassageLocation = xWallLocation +
+                                   (isHorizontal ? Math.Min((_width - 1), (int) (_width*unscaledPassageLocation)) : 0);
+            int yPassageLocation = yWallLocation +
+                                   (isHorizontal ? 0 : Math.Min(_height - 1, (int) (_height*unscaledPassageLocation)));
 
             // Determine wall directional components
             int xDirection = isHorizontal ? 1 : 0;
@@ -94,6 +127,15 @@ namespace SharpNeat.Phenomes.Mazes
 
         #region Private Methods
 
+        /// <summary>
+        ///     Determines whether the dividing wall should be horizontal or vertical based on the comparitive width and height of
+        ///     the subfield under consideration.
+        /// </summary>
+        /// <param name="isHorizontalDefaultOrientation">
+        ///     Each gene in the genome carries an indicator of preferred orientation.  If
+        ///     the dimensions are equal (i.e. the subfield is a square), this randomly selected orientation will be used.
+        /// </param>
+        /// <returns>The orientation of the dividing wall.</returns>
         private WallOrientation DetermineWallOrientation(bool isHorizontalDefaultOrientation)
         {
             // Adopt random orientation seed set on genome
@@ -118,6 +160,7 @@ namespace SharpNeat.Phenomes.Mazes
 
         #region Constants
 
+        // The minimum width and height of the maze
         private const int MinimumWidth = 2;
         private const int MinimumHeight = 2;
 
@@ -125,9 +168,11 @@ namespace SharpNeat.Phenomes.Mazes
 
         #region Instance Variables
 
-        private readonly WallOrientation _bisectionOrientation;
+        // The dimensions of the maze or subfield
         private readonly int _height;
         private readonly int _width;
+
+        //  The starting X and Y position of the maze of subfield
         private readonly int _x;
         private readonly int _y;
 

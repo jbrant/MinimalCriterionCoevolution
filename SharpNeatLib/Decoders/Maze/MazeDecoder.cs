@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using SharpNeat.Core;
 using SharpNeat.Genomes.Maze;
 using SharpNeat.Phenomes.Mazes;
@@ -11,12 +10,22 @@ using SharpNeat.Phenomes.Mazes;
 
 namespace SharpNeat.Decoders.Maze
 {
-    internal class MazeDecoder : IGenomeDecoder<MazeGenome, MazeGrid>
+    /// <summary>
+    ///     The maze decoder translates a given maze genome into its phenotypic representation - a collection of 2D liens which
+    ///     constitute the maze walls and are scaled to the desired size/resolution.
+    /// </summary>
+    public class MazeDecoder : IGenomeDecoder<MazeGenome, MazeGrid>
     {
         #region Interface Methods
 
+        /// <summary>
+        ///     Decodes a given maze genome into its phenotypic maze grid, which specifies the lines (walls) in two dimensional
+        ///     space.
+        /// </summary>
+        /// <param name="genome">The maze genome to decode.</param>
+        /// <returns>The maze grid phenotype, which can be directly plotted or fed to an agent for navigation.</returns>
         public MazeGrid Decode(MazeGenome genome)
-        {            
+        {
             Queue<MazeRoom> mazeRoomQueue = new Queue<MazeRoom>();
             int[,] unscaledGrid = new int[_mazeBoundaryHeight, _mazeBoundaryWidth];
 
@@ -41,42 +50,54 @@ namespace SharpNeat.Decoders.Maze
                     mazeRoomQueue.Enqueue(subRooms.Item1);
                     mazeRoomQueue.Enqueue(subRooms.Item2);
                 }
-                else
-                {
-                    // Otherwise, break out of the loop because we can't subdivide anymore
-                    break;
-                }
             }
 
-            return null;
+            // Convert to walls and scale to the desired lengths
+            maze.ConvertGridArrayToWalls(unscaledGrid);
+
+            return maze;
         }
 
         #endregion
 
         #region Instance variables
 
+        // The height of the maze
         private readonly int _mazeBoundaryHeight;
+
+        // The width of the maze
         private readonly int _mazeBoundaryWidth;
+
+        // The amount by which to scale the size/length of the walls in the phenotype maze
         private readonly int _scaleMultiplier;
 
         #endregion
 
         #region Constructors
 
-        public MazeDecoder(int mazeBoundaryHeight, int mazeBoundaryWidth) : this(mazeBoundaryHeight, mazeBoundaryWidth, 1)
+        /// <summary>
+        ///     Constructor which accepts only the maze dimensions and assumes no scaling in the phenotype.
+        /// </summary>
+        /// <param name="mazeBoundaryHeight">The maze height.</param>
+        /// <param name="mazeBoundaryWidth">The maze width.</param>
+        public MazeDecoder(int mazeBoundaryHeight, int mazeBoundaryWidth)
+            : this(mazeBoundaryHeight, mazeBoundaryWidth, 1)
         {
         }
 
+        /// <summary>
+        ///     Constructor which accepts only the maze dimensions as well as the scaling multiplier to scale the maze phenotype
+        ///     walls as desired.
+        /// </summary>
+        /// <param name="mazeBoundaryHeight">The maze height.</param>
+        /// <param name="mazeBoundaryWidth">The maze width.</param>
+        /// <param name="scaleMultiplier">The scaling factor for the phenotypic maze.</param>
         public MazeDecoder(int mazeBoundaryHeight, int mazeBoundaryWidth, int scaleMultiplier)
         {
             _mazeBoundaryHeight = mazeBoundaryHeight;
             _mazeBoundaryWidth = mazeBoundaryWidth;
             _scaleMultiplier = scaleMultiplier;
         }
-
-        #endregion
-
-        #region Private Methods
 
         #endregion
     }

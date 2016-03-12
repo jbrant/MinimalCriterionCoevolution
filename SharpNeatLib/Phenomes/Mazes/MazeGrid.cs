@@ -11,6 +11,12 @@ namespace SharpNeat.Phenomes.Mazes
     {
         #region Constructors
 
+        /// <summary>
+        /// Constructor which accepts the dimensions of the resulting maze along with the multiplier indicating the scale increase (or decrease).
+        /// </summary>
+        /// <param name="mazeWidth">The width of the maze.</param>
+        /// <param name="mazeHeight">The height of the maze.</param>
+        /// <param name="scaleMultiplier">The multiplier dictating the increase (or decrease) in maze size.</param>
         public MazeGrid(int mazeWidth, int mazeHeight, int scaleMultiplier)
         {
             Walls = new List<MazeWall>();
@@ -26,14 +32,25 @@ namespace SharpNeat.Phenomes.Mazes
 
         #region Properties
 
+        /// <summary>
+        /// The list of walls in the maze.
+        /// </summary>
         public List<MazeWall> Walls { get; }
+  
+        public int[,] MazeArray { get; private set; }
 
         #endregion
 
         #region Public Methods
 
+        /// <summary>
+        /// Converts the maze space matrix (which indicates what type of wall is at each intersection in the 2D maze) to a list of horizontal and vertical walls.
+        /// </summary>
+        /// <param name="mazeGridArray"></param>
         public void ConvertGridArrayToWalls(int[,] mazeGridArray)
         {
+            MazeArray = mazeGridArray;
+
             // Extract all of the horizontal walls
             ExtractHorizontalWalls(mazeGridArray);
 
@@ -45,6 +62,9 @@ namespace SharpNeat.Phenomes.Mazes
 
         #region Private Methods
 
+        /// <summary>
+        /// Generates the walls that bound the maze (i.e. the borders).
+        /// </summary>
         private void GenerateBorderWalls()
         {
             // Add bottom border
@@ -62,6 +82,10 @@ namespace SharpNeat.Phenomes.Mazes
                 (_mazeHeight*_scaleMultiplier)));
         }
 
+        /// <summary>
+        /// Parses the maze grid matrix in a rowwise manner, extracting the horizontal walls.
+        /// </summary>
+        /// <param name="mazeGridArray">The grid array which is being parsed.</param>
         private void ExtractHorizontalWalls(int[,] mazeGridArray)
         {
             // Get all of the horizontal lines
@@ -78,21 +102,25 @@ namespace SharpNeat.Phenomes.Mazes
                     {
                         curHorizontalLine = new MazeWall
                         {
-                            StartPoint = new Point(curCol*_scaleMultiplier, (curRow + 1)*_scaleMultiplier)
+                            StartMazePoint = new MazePoint(curCol*_scaleMultiplier, (curRow + 1)*_scaleMultiplier)
                         };
                     }
+                    // Otherwise, if we've been tracking a horizontal line and the current position contains neither a horizontal line segment 
+                    // nor a combination of a horizontal and vertical line, then record this as the maze ending point and null out the current line
                     else if (mazeGridArray[curRow, curCol] != (int) WallOrientation.Horizontal &&
                              mazeGridArray[curRow, curCol] != (int) WallOrientation.Both && curHorizontalLine != null)
                     {
-                        curHorizontalLine.EndPoint = new Point(curCol*_scaleMultiplier, (curRow + 1)*_scaleMultiplier);
+                        curHorizontalLine.EndMazePoint = new MazePoint(curCol*_scaleMultiplier, (curRow + 1)*_scaleMultiplier);
                         Walls.Add(curHorizontalLine);
                         curHorizontalLine = null;
                     }
                 }
 
+                // If we've reached the end of the current row but we're still tracking a horizontal line, then this must be its
+                // end point since it can't protrude outside of the maze walls
                 if (curHorizontalLine != null)
                 {
-                    curHorizontalLine.EndPoint = new Point(_mazeWidth*_scaleMultiplier,
+                    curHorizontalLine.EndMazePoint = new MazePoint(_mazeWidth*_scaleMultiplier,
                         (curRow + 1)*_scaleMultiplier);
                     Walls.Add(curHorizontalLine);
                 }
@@ -113,14 +141,14 @@ namespace SharpNeat.Phenomes.Mazes
                     {
                         curVerticalLine = new MazeWall
                         {
-                            StartPoint =
-                                new Point((curCol + 1)*_scaleMultiplier, curRow*_scaleMultiplier)
+                            StartMazePoint =
+                                new MazePoint((curCol + 1)*_scaleMultiplier, curRow*_scaleMultiplier)
                         };
                     }
                     else if (mazeGridArray[curRow, curCol] != (int) WallOrientation.Vertical &&
                              mazeGridArray[curRow, curCol] != (int) WallOrientation.Both && curVerticalLine != null)
                     {
-                        curVerticalLine.EndPoint = new Point((curCol + 1)*_scaleMultiplier,
+                        curVerticalLine.EndMazePoint = new MazePoint((curCol + 1)*_scaleMultiplier,
                             Math.Max(1, curRow)*_scaleMultiplier);
                         Walls.Add(curVerticalLine);
                         curVerticalLine = null;
@@ -129,7 +157,7 @@ namespace SharpNeat.Phenomes.Mazes
 
                 if (curVerticalLine != null)
                 {
-                    curVerticalLine.EndPoint = new Point((curCol + 1)*_scaleMultiplier, _mazeHeight*_scaleMultiplier);
+                    curVerticalLine.EndMazePoint = new MazePoint((curCol + 1)*_scaleMultiplier, _mazeHeight*_scaleMultiplier);
                     Walls.Add(curVerticalLine);
                 }
             }

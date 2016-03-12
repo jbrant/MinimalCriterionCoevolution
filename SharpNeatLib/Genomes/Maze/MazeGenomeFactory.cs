@@ -9,35 +9,62 @@ using SharpNeat.Utility;
 
 namespace SharpNeat.Genomes.Maze
 {
+    /// <summary>
+    ///     The maze genome factory handles the construction of new genomes during algorithm initialization and reproduction.
+    /// </summary>
     public class MazeGenomeFactory : IGenomeFactory<MazeGenome>
     {
         #region Constructors
 
+        /// <summary>
+        ///     Maze Genome Factory default constructor.
+        /// </summary>
         public MazeGenomeFactory()
         {
             MazeGenomeParameters = new MazeGenomeParameters();
+            GenomeIdGenerator = new UInt32IdGenerator();
         }
 
         #endregion
 
         #region Maze Genome Factory Methods
 
+        /// <summary>
+        ///     Creates a new maze genome with the given genome ID and birth generation.
+        /// </summary>
+        /// <param name="id">The unqiue genome ID.</param>
+        /// <param name="birthGeneration">The birth generation.</param>
+        /// <returns>The newly constructed maze genome.</returns>
         public MazeGenome CreateGenome(uint id, uint birthGeneration)
         {
             return new MazeGenome(this, id, birthGeneration);
         }
 
+        /// <summary>
+        ///     Creates a new maze genome, copying all properties from an existing maze genome except for the unique genome ID and
+        ///     the birth generation.
+        /// </summary>
+        /// <param name="copyFrom">The genome to copy.</param>
+        /// <param name="id">The unique genome ID.</param>
+        /// <param name="birthGeneration">The birth generation.</param>
+        /// <returns>The newly constructed (mostly identical) genome.</returns>
         public MazeGenome CreateGenomeCopy(MazeGenome copyFrom, uint id, uint birthGeneration)
         {
             return new MazeGenome(copyFrom, id, birthGeneration);
         }
-        
+
         #endregion
 
         #region Interface Properties
 
-        public UInt32IdGenerator GenomeIdGenerator { get; private set; }
+        /// <summary>
+        ///     Unique ID generator for maze genomes.
+        /// </summary>
+        public UInt32IdGenerator GenomeIdGenerator { get; }
 
+        /// <summary>
+        ///     NOT USED (but required by interface).
+        /// </summary>
         public int SearchMode
         {
             get { throw new NotImplementedException(); }
@@ -48,14 +75,27 @@ namespace SharpNeat.Genomes.Maze
 
         #region Maze Genome Factory Properties
 
+        /// <summary>
+        ///     Random number generator.
+        /// </summary>
         public readonly FastRandom Rng = new FastRandom();
 
+        /// <summary>
+        ///     Parameters which control maze genome evolution.
+        /// </summary>
         public MazeGenomeParameters MazeGenomeParameters { get; }
 
         #endregion
 
         #region Interface Methods
 
+        /// <summary>
+        ///     Creates a list of new maze genomes, the cardinality of which is specified by the length parameter.  All of the new
+        ///     genomes will be assigned the given birth generation.
+        /// </summary>
+        /// <param name="length">The number of genomes to create.</param>
+        /// <param name="birthGeneration">The birth generation for all of the genomes.</param>
+        /// <returns>The newly created genomes.</returns>
         public List<MazeGenome> CreateGenomeList(int length, uint birthGeneration)
         {
             List<MazeGenome> genomeList = new List<MazeGenome>(length);
@@ -68,6 +108,15 @@ namespace SharpNeat.Genomes.Maze
             return genomeList;
         }
 
+        /// <summary>
+        ///     Creates a list of new maze genomes, the cardinality of which is specified by the length parameter.  All of the new
+        ///     genomes will be assigned the given birth generation.  A seed genome will also be used as a template for the new
+        ///     genomes.
+        /// </summary>
+        /// <param name="length">The number of genomes to create.</param>
+        /// <param name="birthGeneration">The birth generation for all of the genomes.</param>
+        /// <param name="seedGenome">The seed genome to use as a template.</param>
+        /// <returns>The newly created genomes.</returns>
         public List<MazeGenome> CreateGenomeList(int length, uint birthGeneration, MazeGenome seedGenome)
         {
             List<MazeGenome> genomeList = new List<MazeGenome>(length);
@@ -84,6 +133,15 @@ namespace SharpNeat.Genomes.Maze
             return genomeList;
         }
 
+        /// <summary>
+        ///     Creates a list of new maze genomes, the cardinality of which is specified by the length parameter.  All of the new
+        ///     genomes will be assigned the given birth generation.  The list of seed genomes will be used as templates for all of
+        ///     the newly created genomes.
+        /// </summary>
+        /// <param name="length">The number of genomes to create.</param>
+        /// <param name="birthGeneration">The birth generation for all of the genomes.</param>
+        /// <param name="seedGenomeList">The seed genomes to use as templates.</param>
+        /// <returns>The newly created genomes.</returns>
         public List<MazeGenome> CreateGenomeList(int length, uint birthGeneration, List<MazeGenome> seedGenomeList)
         {
             if (seedGenomeList.Count == 0)
@@ -118,11 +176,21 @@ namespace SharpNeat.Genomes.Maze
             return genomeList;
         }
 
+        /// <summary>
+        ///     Creates a new genome with the given birth generation.
+        /// </summary>
+        /// <param name="birthGeneration">The genome birth generation.</param>
+        /// <returns>The newly created genome.</returns>
         public MazeGenome CreateGenome(uint birthGeneration)
         {
             return CreateGenome(GenomeIdGenerator.NextId, birthGeneration);
         }
 
+        /// <summary>
+        ///     NOT IMPLEMENTED (but required by the interface).
+        /// </summary>
+        /// <param name="genome"></param>
+        /// <returns></returns>
         public bool CheckGenomeType(MazeGenome genome)
         {
             throw new NotImplementedException();
