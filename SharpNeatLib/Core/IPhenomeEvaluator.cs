@@ -62,6 +62,13 @@ namespace SharpNeat.Core
         void Update<TGenome>(List<TGenome> population) where TGenome : class, IGenome<TGenome>;
 
         /// <summary>
+        ///     Updates the environment or other evaluation criteria against which the phenomes under evaluation are being
+        ///     compared.  This is typically used in a coevolutionary context.
+        /// </summary>
+        /// <param name="evaluatorPhenomes">The new phenomes to compare against.</param>
+        void UpdateEvaluatorPhenotypes(IEnumerable<object> evaluatorPhenomes);
+
+        /// <summary>
         ///     Reset the internal state of the evaluation scheme if any exists.
         /// </summary>
         void Reset();

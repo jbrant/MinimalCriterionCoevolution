@@ -21,7 +21,6 @@
 
 using System;
 using System.Collections.Generic;
-using SharpNeat.NoveltyArchives;
 
 #endregion
 
@@ -30,8 +29,9 @@ namespace SharpNeat.Core
     /// <summary>
     ///     A generic interface for evolution algorithm classes.
     /// </summary>
-    public interface IEvolutionAlgorithm<TGenome>
-        where TGenome : class, IGenome<TGenome>
+    public interface ICoevolutionAlgorithmContainer<TGenome1, TGenome2>
+        where TGenome1 : class, IGenome<TGenome1>
+        where TGenome2 : class, IGenome<TGenome2>
     {
         /// <summary>
         ///     Gets the current generation.
@@ -52,18 +52,7 @@ namespace SharpNeat.Core
         ///     Gets the current execution/run state of the IEvolutionAlgorithm.
         /// </summary>
         RunState RunState { get; }
-
-        /// <summary>
-        ///     Gets the population's current champion genome.
-        /// </summary>
-        TGenome CurrentChampGenome { get; }
-
-        /// <summary>
-        ///     Gets a list of all current genomes. The current population of genomes. These genomes
-        ///     are also divided into the species available through the SpeciesList property.
-        /// </summary>
-        IList<TGenome> GenomeList { get; }
-
+        
         /// <summary>
         ///     Gets a value indicating whether some goal fitness has been achieved and that the algorithm has therefore stopped.
         /// </summary>
@@ -80,39 +69,30 @@ namespace SharpNeat.Core
         event EventHandler PausedEvent;
 
         /// <summary>
-        ///     Initializes the evolution algorithm with the provided IGenomeFitnessEvaluator, IGenomeFactory
-        ///     and an initial population of genomes.
+        ///     Initializes the evolution algorithms with the provided IGenomeFitnessEvaluator, IGenomeFactory
+        ///     and an initial population of genomes for both populations.
         /// </summary>
-        void Initialize(IGenomeEvaluator<TGenome> genomeFitnessEvaluator,
-            IGenomeFactory<TGenome> genomeFactory,
-            List<TGenome> genomeList,
+        void Initialize(IGenomeEvaluator<TGenome1> genomeFitnessEvaluator1,
+            IGenomeFactory<TGenome1> genomeFactory1,
+            List<TGenome1> genomeList1,
+            IGenomeEvaluator<TGenome2> genomeFitnessEvaluator2,
+            IGenomeFactory<TGenome2> genomeFactory2,
+            List<TGenome2> genomeList2,
             int? maxGenerations,
-            ulong? maxEvaluations,
-            AbstractNoveltyArchive<TGenome> abstractNoveltyArchive);
+            ulong? maxEvaluations);
 
         /// <summary>
-        ///     Initializes the evolution algorithm with the provided IGenomeFitnessEvaluator, IGenomeFactory
-        ///     and an initial population of genomes, and also enforces a target (maximum) population size.  Note that this assumes
-        ///     a variable size population.
+        ///     Initializes the evolution algorithms with the provided IGenomeFitnessEvaluator
+        ///     and an IGenomeFactory that can be used to create two initial populations of genomes.
         /// </summary>
-        void Initialize(IGenomeEvaluator<TGenome> genomeFitnessEvaluator,
-            IGenomeFactory<TGenome> genomeFactory,
-            List<TGenome> genomeList,
-            int targetPopulationSize,
+        void Initialize(IGenomeEvaluator<TGenome1> genomeFitnessEvaluator1,
+            IGenomeFactory<TGenome1> genomeFactory1,
+            int populationSize1,
+            IGenomeEvaluator<TGenome2> genomeFitnessEvaluator2,
+            IGenomeFactory<TGenome2> genomeFactory2,
+            int populationSize2,
             int? maxGenerations,
-            ulong? maxEvaluations,
-            AbstractNoveltyArchive<TGenome> abstractNoveltyArchive);
-
-        /// <summary>
-        ///     Initializes the evolution algorithm with the provided IGenomeFitnessEvaluator
-        ///     and an IGenomeFactory that can be used to create an initial population of genomes.
-        /// </summary>
-        void Initialize(IGenomeEvaluator<TGenome> genomeFitnessEvaluator,
-            IGenomeFactory<TGenome> genomeFactory,
-            int populationSize,
-            int? maxGenerations,
-            ulong? maxEvaluations,
-            AbstractNoveltyArchive<TGenome> abstractNoveltyArchive);
+            ulong? maxEvaluations);
 
         /// <summary>
         ///     Starts the algorithm running. The algorithm will switch to the Running state from either
@@ -141,11 +121,5 @@ namespace SharpNeat.Core
         ///     UpdateEvent - doing so will result in deadlocked threads.
         /// </summary>
         void RequestPauseAndWait();
-
-        /// <summary>
-        ///     Progresses the algorithm forward by one generation, performing one generation or cycle of the evolutionary
-        ///     algorithm.
-        /// </summary>
-        void PerformOneGeneration();
     }
 }

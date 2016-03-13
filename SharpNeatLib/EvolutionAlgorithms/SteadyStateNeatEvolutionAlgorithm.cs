@@ -30,7 +30,7 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <summary>
         ///     Progress forward by one evaluation. Perform one iteration of the evolution algorithm.
         /// </summary>
-        protected override void PerformOneGeneration()
+        public override void PerformOneGeneration()
         {
             // Re-evaluate the fitness of the population after the specified number of evaluations have elapsed
             if (CurrentGeneration%_populationEvaluationFrequency == 0)

@@ -176,7 +176,7 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <summary>
         ///     Perform one iteration of the evolution algorithm.
         /// </summary>
-        protected override void PerformOneGeneration()
+        public override void PerformOneGeneration()
         {
             // Initialize new list of child genomes
             List<TGenome> childGenomes = new List<TGenome>();

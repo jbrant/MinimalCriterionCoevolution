@@ -113,6 +113,16 @@ namespace SharpNeat.Core
             throw new NotImplementedException();
         }
 
+        public void UpdateEvaluationBaseline(IEnumerable<object> comparisonPhenomes)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<object> DecodeGenomes(IList<TGenome> genomeList)
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         ///     Evaluates a list of genomes. Here we select the genomes to be evaluated before invoking
         ///     _innerFitnessEvaluator to evaluate them.

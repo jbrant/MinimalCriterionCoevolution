@@ -1,6 +1,7 @@
 ﻿#region
 
 using System.Collections.Generic;
+using SharpNeat.Phenomes;
 
 #endregion
 
@@ -48,6 +49,20 @@ namespace SharpNeat.Core
         /// <param name="population">The current population.</param>
         void Update(List<TGenome> population);
 
+        /// <summary>
+        ///     Updates the environment or other evaluation criteria against which the evaluated genomes are being compared.  This
+        ///     is typically used in a coevoluationary context.
+        /// </summary>
+        /// <param name="comparisonPhenomes">The phenomes against which the evaluation is being carried out.</param>
+        void UpdateEvaluationBaseline(IEnumerable<object> comparisonPhenomes);
+
+        /// <summary>
+        ///     Decodes a list of genomes to their corresponding phenotypes.
+        /// </summary>
+        /// <param name="genomeList">The list of genomes to decode.</param>
+        /// <returns></returns>
+        IEnumerable<object> DecodeGenomes(IList<TGenome> genomeList);
+        
         /// <summary>
         ///     Evaluates the fitness or behavioral novelty of a list of genomes.
         /// </summary>

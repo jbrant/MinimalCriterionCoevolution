@@ -1,5 +1,6 @@
 ﻿#region
 
+using System;
 using System.Collections.Generic;
 using SharpNeat.Core;
 using SharpNeat.Domains.MazeNavigation.Components;
@@ -237,6 +238,26 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                     behaviorCharacterization.IsMinimalCriteriaSatisfied(
                         new BehaviorInfo(genome.EvaluationInfo.BehaviorCharacterization));
             }
+        }
+
+        /// <summary>
+        ///     Updates the environment or other evaluation criteria against which the phenomes under evaluation are being
+        ///     compared.  This is typically used in a coevolutionary context.
+        /// </summary>
+        /// <param name="evaluatorPhenomes">The new phenomes to compare against.</param>
+        public void UpdateEvaluatorPhenotypes(IEnumerable<object> evaluatorPhenomes)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        ///     Updates the environment or other evaluation criteria against which the phenomes under evaluation are being
+        ///     compared.  This is typically used in a coevolutionary context.
+        /// </summary>
+        /// <param name="evaluatorPhenomes">The new phenomes to compare against.</param>
+        public void UpdateEvaluatorPhenotypes(IEnumerable<IBlackBox> evaluatorPhenomes)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>

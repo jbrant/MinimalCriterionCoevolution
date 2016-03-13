@@ -37,7 +37,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCNSExperiment
         }
 
         #endregion
-        
+
         #region Private members
 
         /// <summary>
@@ -128,6 +128,16 @@ namespace SharpNeat.Domains.MazeNavigation.MCNSExperiment
         /// <typeparam name="TGenome">The genome type parameter.</typeparam>
         /// <param name="population">The current population.</param>
         public void Update<TGenome>(List<TGenome> population) where TGenome : class, IGenome<TGenome>
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        ///     Updates the environment or other evaluation criteria against which the phenomes under evaluation are being
+        ///     compared.  This is typically used in a coevolutionary context.
+        /// </summary>
+        /// <param name="evaluatorPhenomes">The new phenomes to compare against.</param>
+        public void UpdateEvaluatorPhenotypes(IEnumerable<object> evaluatorPhenomes)
         {
             throw new NotImplementedException();
         }

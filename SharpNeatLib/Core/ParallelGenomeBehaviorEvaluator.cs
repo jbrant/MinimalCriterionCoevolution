@@ -286,6 +286,26 @@ namespace SharpNeat.Core
         }
 
         /// <summary>
+        ///     Updates the environment or other evaluation criteria against which the evaluated genomes are being compared.  This
+        ///     is typically used in a coevoluationary context.
+        /// </summary>
+        /// <param name="comparisonPhenomes">The phenomes against which the evaluation is being carried out.</param>
+        public void UpdateEvaluationBaseline(IEnumerable<object> comparisonPhenomes)
+        {
+            _phenomeEvaluator.UpdateEvaluatorPhenotypes((IEnumerable<TPhenome>) comparisonPhenomes);
+        }
+
+        /// <summary>
+        ///     Decodes a list of genomes to their corresponding phenotypes.
+        /// </summary>
+        /// <param name="genomeList">The list of genomes to decode.</param>
+        /// <returns>The decoded phenomes.</returns>
+        public IEnumerable<object> DecodeGenomes(IList<TGenome> genomeList)
+        {
+            return EvaluationUtils<TGenome, TPhenome>.DecodeGenomes(genomeList, _genomeDecoder);
+        }
+
+        /// <summary>
         ///     Evaluates a list of genomes. Here we decode each genome in using the contained IGenomeDecoder
         ///     and evaluate the resulting TPhenome using the contained IPhenomeEvaluator.
         /// </summary>

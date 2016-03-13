@@ -297,6 +297,37 @@ namespace SharpNeat.Utility
             genome.EvaluationInfo.AuxFitnessArr = fitnessInfo.AuxFitnessArr;
         }
 
+        /// <summary>
+        ///     Decodes all of the genomes in the given list to their respective phenotypes.
+        /// </summary>
+        /// <param name="genomeList">The list of genomes to decode.</param>
+        /// <param name="genomeDecoder">The decoder to use.</param>
+        /// <returns>The decoded list of phenotypes.</returns>
+        public static IList<TPhenome> DecodeGenomes(IList<TGenome> genomeList,
+            IGenomeDecoder<TGenome, TPhenome> genomeDecoder)
+        {
+            IList<TPhenome> decodedPhenomes = new List<TPhenome>(genomeList.Count);
+
+            foreach (TGenome genome in genomeList)
+            {
+                // Try to get the cached (already decoded) phenome if it exists
+                TPhenome curPhenome = (TPhenome) genome.CachedPhenome;
+
+                // If there's not a decoded phenome cached, we have to decode it
+                if (null == curPhenome)
+                {
+                    // Decode the phenome and store a ref against the genome.
+                    curPhenome = genomeDecoder.Decode(genome);
+                    genome.CachedPhenome = curPhenome;
+                }
+
+                // Add the phenome to the list of decoded phenomes
+                decodedPhenomes.Add(curPhenome);
+            }
+
+            return decodedPhenomes;
+        }
+
         private static string DecodeGenomeToXmlString(TGenome genome)
         {
             // Serialize the genome to XML

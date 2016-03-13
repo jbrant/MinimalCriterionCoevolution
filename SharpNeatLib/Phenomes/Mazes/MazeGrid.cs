@@ -11,7 +11,7 @@ namespace SharpNeat.Phenomes.Mazes
     ///     The maze grid encapsulates the entire maze, including borders and all of the walls.  It can be scaled up from the
     ///     original resolution used during evolution.
     /// </summary>
-    public class MazeGrid
+    public class MazeGrid : IPhenome
     {
         #region Constructors
 
