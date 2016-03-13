@@ -1,5 +1,6 @@
 ﻿#region
 
+using System;
 using System.Collections.Generic;
 using SharpNeat.Core;
 using SharpNeat.Loggers;
@@ -16,8 +17,8 @@ namespace SharpNeat.Domains.MazeEnvironmentTest
         /// </summary>
         private readonly object _evaluationLock = new object();
 
-        private readonly int _xStart, _xEnd, _yStart, _yEnd;
         private readonly double _pixelExpressionThreshold;
+        private readonly int _xStart, _xEnd, _yStart, _yEnd;
 
         public List<LoggableElement> GetLoggableElements(IDictionary<FieldElement, bool> logFieldEnableMap = null)
         {
@@ -87,6 +88,16 @@ namespace SharpNeat.Domains.MazeEnvironmentTest
 
         public void Update<TGenome>(List<TGenome> population) where TGenome : class, IGenome<TGenome>
         {
+        }
+
+        /// <summary>
+        ///     Updates the environment or other evaluation criteria against which the phenomes under evaluation are being
+        ///     compared.  This is typically used in a coevolutionary context.
+        /// </summary>
+        /// <param name="evaluatorPhenomes">The new phenomes to compare against.</param>
+        public void UpdateEvaluatorPhenotypes(IEnumerable<object> evaluatorPhenomes)
+        {
+            throw new NotImplementedException();
         }
 
         public void Reset()

@@ -48,7 +48,7 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <summary>
         ///     Progress forward by one generation. Perform one generation/iteration of the evolution algorithm.
         /// </summary>
-        protected override void PerformOneGeneration()
+        public override void PerformOneGeneration()
         {
             // Calculate statistics for each specie (mean fitness, target size, number of offspring to produce etc.)
             int offspringCount;

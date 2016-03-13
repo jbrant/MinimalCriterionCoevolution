@@ -134,7 +134,7 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <summary>
         ///     Progress forward by one evaluation. Perform one iteration of the evolution algorithm.
         /// </summary>
-        protected override void PerformOneGeneration()
+        public override void PerformOneGeneration()
         {
             bool useAuxFitness = false;
 

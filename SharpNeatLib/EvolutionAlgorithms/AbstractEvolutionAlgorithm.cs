@@ -464,7 +464,7 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <summary>
         ///     Progress forward by one generation. Perform one generation/cycle of the evolution algorithm.
         /// </summary>
-        protected abstract void PerformOneGeneration();
+        public abstract void PerformOneGeneration();
 
         #endregion
     }

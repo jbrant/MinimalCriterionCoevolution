@@ -169,6 +169,26 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         }
 
         /// <summary>
+        ///     Updates the environment or other evaluation criteria against which the phenomes under evaluation are being
+        ///     compared.  This is typically used in a coevolutionary context.
+        /// </summary>
+        /// <param name="evaluatorPhenomes">The new phenomes to compare against.</param>
+        public void UpdateEvaluatorPhenotypes(IEnumerable<object> evaluatorPhenomes)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        ///     Updates the environment or other evaluation criteria against which the phenomes under evaluation are being
+        ///     compared.  This is typically used in a coevolutionary context.
+        /// </summary>
+        /// <param name="evaluatorPhenomes">The new phenomes to compare against.</param>
+        public void UpdateEvaluatorPhenotypes(IEnumerable<IBlackBox> evaluatorPhenomes)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         ///     Resets the internal state of the evaluation scheme.  This may not be needed for the maze navigation task.
         /// </summary>
         public void Reset()

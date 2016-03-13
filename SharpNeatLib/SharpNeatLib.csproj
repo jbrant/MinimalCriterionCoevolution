@@ -104,11 +104,12 @@
     <Compile Include="Core\BehaviorInfo.cs" />
     <Compile Include="Core\CoordinateVector.cs" />
     <Compile Include="Core\IBehaviorCharacterizationFactory.cs" />
+    <Compile Include="Core\ICoevolutionAlgorithmContainer.cs" />
     <Compile Include="Core\IMinimalCriteria.cs" />
     <Compile Include="Core\INoveltyArchive.cs" />
     <Compile Include="Core\RunPhase.cs" />
     <Compile Include="Decoders\Maze\MazeDecoder.cs" />
-    <Compile Include="EvolutionAlgorithms\AbstractCoEvolutionAlgorithm.cs" />
+    <Compile Include="EvolutionAlgorithms\CoevolutionAlgorithmContainer.cs" />
     <Compile Include="EvolutionAlgorithms\QueueingNichedNeatEvolutionAlgorithm.cs" />
     <Compile Include="EvolutionAlgorithms\QueueingNeatEvolutionAlgorithm.cs" />
     <Compile Include="Genomes\Maze\MazeGene.cs" />
@@ -242,6 +243,7 @@
     <Compile Include="Network\NodeConnectivityData.cs" />
     <Compile Include="Network\NodeList.cs" />
     <Compile Include="Phenomes\IBlackBox.cs" />
+    <Compile Include="Phenomes\IPhenome.cs" />
     <Compile Include="Phenomes\ISignalArray.cs" />
     <Compile Include="Network\ActivationFunctions\Bipolar\BipolarSigmoid.cs" />
     <Compile Include="Network\ActivationFunctions\Bipolar\BipolarGaussian.cs" />
