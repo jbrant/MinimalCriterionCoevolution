@@ -24,7 +24,7 @@
     <ConnectionWeightRange>1</ConnectionWeightRange>
   </GenomeConfig>
   <BehaviorConfig>
-    <BehaviorCharacterization>EndMazePoint</BehaviorCharacterization>
+    <BehaviorCharacterization>EndMazeStructurePoint</BehaviorCharacterization>
     <MinimalCriteriaConfig>
       <MinimalCriteriaConstraint>EuclideanDistance</MinimalCriteriaConstraint>
       <XStart>36</XStart>
@@ -57,7 +57,7 @@
       <ConnectionWeightRange>1</ConnectionWeightRange>
     </GenomeConfig>
     <InitBehaviorConfig>
-      <BehaviorCharacterization>EndMazePoint</BehaviorCharacterization>
+      <BehaviorCharacterization>EndMazeStructurePoint</BehaviorCharacterization>
       <MinimalCriteriaConfig>
         <MinimalCriteriaConstraint>EuclideanDistance</MinimalCriteriaConstraint>
         <XStart>36</XStart>

@@ -10,7 +10,7 @@ namespace SharpNeat.Phenomes.Mazes
     ///     The maze room encapsulates a single room or "subfield" within the maze.  This room can then be further subdivided
     ///     until the minimum allowed resolution is reached.
     /// </summary>
-    public class MazeRoom
+    public class MazeStructureRoom
     {
         #region Constructors
 
@@ -22,7 +22,7 @@ namespace SharpNeat.Phenomes.Mazes
         /// <param name="y">The vertical component of the starting coordinate.</param>
         /// <param name="width">The width of the maze/subfield.</param>
         /// <param name="height">The height of the maze/subfield.</param>
-        public MazeRoom(int x, int y, int width, int height)
+        public MazeStructureRoom(int x, int y, int width, int height)
         {
             _x = x;
             _y = y;
@@ -52,7 +52,7 @@ namespace SharpNeat.Phenomes.Mazes
         /// </param>
         /// <param name="isHorizontalDefaultOrientation">Indicator for whether the dividing line is horizontal or vertical.</param>
         /// <returns>The two subfields that were created as a result of the subfield division.</returns>
-        public Tuple<MazeRoom, MazeRoom> DivideRoom(int[,] grid, double unscaledWallLocation,
+        public Tuple<MazeStructureRoom, MazeStructureRoom> DivideRoom(int[,] grid, double unscaledWallLocation,
             double unscaledPassageLocation, bool isHorizontalDefaultOrientation)
         {
             // Short circuit if we can't subdivide anymore
@@ -107,7 +107,7 @@ namespace SharpNeat.Phenomes.Mazes
             int newHeight = isHorizontal ? yWallLocation - _y + 1 : _height;
 
             // Recurse down top/left subfield
-            MazeRoom newRoom1 = new MazeRoom(_x, _y, newWidth, newHeight);
+            MazeStructureRoom newRoom1 = new MazeStructureRoom(_x, _y, newWidth, newHeight);
 
             // Assign new x/y coordinates for bottom/right part of maze
             int offsetX = isHorizontal ? _x : xWallLocation + 1;
@@ -118,9 +118,9 @@ namespace SharpNeat.Phenomes.Mazes
             newHeight = isHorizontal ? _y + _height - yWallLocation - 1 : _height;
 
             // Recurse down bottom/right subfield
-            MazeRoom newRoom2 = new MazeRoom(offsetX, offsetY, newWidth, newHeight);
+            MazeStructureRoom newRoom2 = new MazeStructureRoom(offsetX, offsetY, newWidth, newHeight);
 
-            return new Tuple<MazeRoom, MazeRoom>(newRoom1, newRoom2);
+            return new Tuple<MazeStructureRoom, MazeStructureRoom>(newRoom1, newRoom2);
         }
 
         #endregion

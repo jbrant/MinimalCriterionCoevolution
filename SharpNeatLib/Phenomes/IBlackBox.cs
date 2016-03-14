@@ -33,7 +33,7 @@ namespace SharpNeat.Phenomes
     /// of its input and output characteristics. Almost anything might occasionally be referred to as a black box -
     /// a transistor, an algorithm, humans, the Internet.
     /// </summary>
-    public interface IBlackBox : IPhenome
+    public interface IBlackBox
     {
         /// <summary>
         /// Gets the number of inputs to the blackbox. This is assumed to be fixed for the lifetime of the IBlackBox.

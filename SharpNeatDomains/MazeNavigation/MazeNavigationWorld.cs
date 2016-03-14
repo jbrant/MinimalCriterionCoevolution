@@ -17,43 +17,6 @@ namespace SharpNeat.Domains.MazeNavigation
     /// <typeparam name="TTrialInfo">Information about a trial through the maze.</typeparam>
     public class MazeNavigationWorld<TTrialInfo> : ILoggable
     {
-        #region Constructors
-
-        /// <summary>
-        ///     Creates the maze navigation world (environment) given the experiment parameters.
-        /// </summary>
-        /// <param name="walls">The walls in the maze environemnt.</param>
-        /// <param name="mazeNicheGrid">Metadata about the grid of niches overlaying the maze.</param>
-        /// <param name="navigatorLocation">The starting location of the maze navigator.</param>
-        /// <param name="goalLocation">The location of the goal (target).</param>
-        /// <param name="minSuccessDistance">The minimum distance from the target for the trial to be considered a success.</param>
-        /// <param name="maxDistanceToTarget">The maximum distance from the target possible.</param>
-        /// <param name="maxTimeSteps">The maximum number of time steps to run a given trial.</param>
-        /// <param name="numBridgingApplications">The number of times to apply bridging during a given trial.</param>
-        /// ///
-        /// <param name="behaviorCharacterization">The behavior characterization for a navigator.</param>
-        public MazeNavigationWorld(List<Wall> walls, MazeNicheGrid mazeNicheGrid, DoublePoint navigatorLocation,
-            DoublePoint goalLocation,
-            int minSuccessDistance,
-            int maxDistanceToTarget, int maxTimeSteps,
-            int numBridgingApplications,
-            IBehaviorCharacterization behaviorCharacterization = null)
-        {
-            _walls = walls;
-            _goalLocation = goalLocation;
-            _minSuccessDistance = minSuccessDistance;
-            _maxDistanceToTarget = maxDistanceToTarget;
-            _maxTimesteps = maxTimeSteps;
-            _behaviorCharacterization = behaviorCharacterization;
-            _numBridgingApplications = numBridgingApplications;
-            _mazeNicheGrid = mazeNicheGrid;
-
-            // Instantiate the navigator
-            _navigator = new MazeNavigator(navigatorLocation);
-        }
-
-        #endregion
-
         #region Private methods
 
         /// <summary>
@@ -90,6 +53,60 @@ namespace SharpNeat.Domains.MazeNavigation
 
             // Move the navigator to the new position (i.e. execute a single timestep)
             _navigator.Move(_walls, _goalLocation, isBridgingTimestep, ref curBridgingApplications);
+        }
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        ///     Creates the maze navigation world (environment) given the experiment parameters.
+        /// </summary>
+        /// <param name="walls">The walls in the maze environemnt.</param>
+        /// <param name="mazeNicheGrid">Metadata about the grid of niches overlaying the maze.</param>
+        /// <param name="navigatorLocation">The starting location of the maze navigator.</param>
+        /// <param name="goalLocation">The location of the goal (target).</param>
+        /// <param name="minSuccessDistance">The minimum distance from the target for the trial to be considered a success.</param>
+        /// <param name="maxDistanceToTarget">The maximum distance from the target possible.</param>
+        /// <param name="maxTimeSteps">The maximum number of time steps to run a given trial.</param>
+        /// <param name="numBridgingApplications">The number of times to apply bridging during a given trial.</param>
+        /// <param name="behaviorCharacterization">The behavior characterization for a navigator.</param>
+        public MazeNavigationWorld(List<Wall> walls, MazeNicheGrid mazeNicheGrid, DoublePoint navigatorLocation,
+            DoublePoint goalLocation,
+            int minSuccessDistance,
+            int maxDistanceToTarget, int maxTimeSteps,
+            int numBridgingApplications,
+            IBehaviorCharacterization behaviorCharacterization = null)
+        {
+            _walls = walls;
+            _goalLocation = goalLocation;
+            _minSuccessDistance = minSuccessDistance;
+            _maxDistanceToTarget = maxDistanceToTarget;
+            _maxTimesteps = maxTimeSteps;
+            _behaviorCharacterization = behaviorCharacterization;
+            _numBridgingApplications = numBridgingApplications;
+            _mazeNicheGrid = mazeNicheGrid;
+
+            // Instantiate the navigator
+            _navigator = new MazeNavigator(navigatorLocation);
+        }
+
+        /// <summary>
+        ///     Creates the maze navigation world, omitting the maze niche grid, maximum distance to the target (required for
+        ///     fitness-based evaluations), and number of bridging applications.
+        /// </summary>
+        /// <param name="walls">The walls in the maze environemnt.</param>
+        /// <param name="navigatorLocation">The starting location of the maze navigator.</param>
+        /// <param name="goalLocation">The location of the goal (target).</param>
+        /// <param name="minSuccessDistance">The minimum distance from the target for the trial to be considered a success.</param>
+        /// <param name="maxTimeSteps">The maximum number of time steps to run a given trial.</param>
+        /// <param name="behaviorCharacterization">The behavior characterization for a navigator.</param>
+        public MazeNavigationWorld(List<Wall> walls, DoublePoint navigatorLocation, DoublePoint goalLocation,
+            int minSuccessDistance, int maxTimeSteps, IBehaviorCharacterization behaviorCharacterization)
+            : this(
+                walls, new MazeNicheGrid(), navigatorLocation, goalLocation, minSuccessDistance, 0, maxTimeSteps, 0,
+                behaviorCharacterization)
+        {
         }
 
         #endregion

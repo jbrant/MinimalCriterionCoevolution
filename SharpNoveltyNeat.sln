@@ -31,6 +31,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpNeatLibTests", "SharpN
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MazeGenerationTester", "MazeGenerationTester\MazeGenerationTester.csproj", "{DAAF9F2F-2C58-4DD4-8A54-E3BC84D548F6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpNeatDomainsTests", "SharpNeatDomainsTests\SharpNeatDomainsTests.csproj", "{2D4DBF9E-8B65-483B-A57D-055401586892}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -233,6 +235,26 @@ Global
 		{DAAF9F2F-2C58-4DD4-8A54-E3BC84D548F6}.Release|x64.Build.0 = Release|Any CPU
 		{DAAF9F2F-2C58-4DD4-8A54-E3BC84D548F6}.Release|x86.ActiveCfg = Release|Any CPU
 		{DAAF9F2F-2C58-4DD4-8A54-E3BC84D548F6}.Release|x86.Build.0 = Release|Any CPU
+		{2D4DBF9E-8B65-483B-A57D-055401586892}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D4DBF9E-8B65-483B-A57D-055401586892}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D4DBF9E-8B65-483B-A57D-055401586892}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{2D4DBF9E-8B65-483B-A57D-055401586892}.Debug|ARM.Build.0 = Debug|Any CPU
+		{2D4DBF9E-8B65-483B-A57D-055401586892}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{2D4DBF9E-8B65-483B-A57D-055401586892}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{2D4DBF9E-8B65-483B-A57D-055401586892}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{2D4DBF9E-8B65-483B-A57D-055401586892}.Debug|x64.Build.0 = Debug|Any CPU
+		{2D4DBF9E-8B65-483B-A57D-055401586892}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2D4DBF9E-8B65-483B-A57D-055401586892}.Debug|x86.Build.0 = Debug|Any CPU
+		{2D4DBF9E-8B65-483B-A57D-055401586892}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D4DBF9E-8B65-483B-A57D-055401586892}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D4DBF9E-8B65-483B-A57D-055401586892}.Release|ARM.ActiveCfg = Release|Any CPU
+		{2D4DBF9E-8B65-483B-A57D-055401586892}.Release|ARM.Build.0 = Release|Any CPU
+		{2D4DBF9E-8B65-483B-A57D-055401586892}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{2D4DBF9E-8B65-483B-A57D-055401586892}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{2D4DBF9E-8B65-483B-A57D-055401586892}.Release|x64.ActiveCfg = Release|Any CPU
+		{2D4DBF9E-8B65-483B-A57D-055401586892}.Release|x64.Build.0 = Release|Any CPU
+		{2D4DBF9E-8B65-483B-A57D-055401586892}.Release|x86.ActiveCfg = Release|Any CPU
+		{2D4DBF9E-8B65-483B-A57D-055401586892}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

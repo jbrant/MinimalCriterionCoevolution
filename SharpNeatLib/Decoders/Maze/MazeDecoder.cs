@@ -14,7 +14,7 @@ namespace SharpNeat.Decoders.Maze
     ///     The maze decoder translates a given maze genome into its phenotypic representation - a collection of 2D liens which
     ///     constitute the maze walls and are scaled to the desired size/resolution.
     /// </summary>
-    public class MazeDecoder : IGenomeDecoder<MazeGenome, MazeGrid>
+    public class MazeDecoder : IGenomeDecoder<MazeGenome, MazeStructure>
     {
         #region Interface Methods
 
@@ -24,22 +24,22 @@ namespace SharpNeat.Decoders.Maze
         /// </summary>
         /// <param name="genome">The maze genome to decode.</param>
         /// <returns>The maze grid phenotype, which can be directly plotted or fed to an agent for navigation.</returns>
-        public MazeGrid Decode(MazeGenome genome)
+        public MazeStructure Decode(MazeGenome genome)
         {
-            Queue<MazeRoom> mazeRoomQueue = new Queue<MazeRoom>();
+            Queue<MazeStructureRoom> mazeRoomQueue = new Queue<MazeStructureRoom>();
             int[,] unscaledGrid = new int[_mazeBoundaryHeight, _mazeBoundaryWidth];
 
             // Initialize new maze (phenotype)
-            MazeGrid maze = new MazeGrid(_mazeBoundaryWidth, _mazeBoundaryHeight, _scaleMultiplier);
+            MazeStructure maze = new MazeStructure(_mazeBoundaryWidth, _mazeBoundaryHeight, _scaleMultiplier);
 
             // Queue up the first "room" (which will encompass the entirety of the maze grid)
-            mazeRoomQueue.Enqueue(new MazeRoom(0, 0, _mazeBoundaryWidth, _mazeBoundaryHeight));
+            mazeRoomQueue.Enqueue(new MazeStructureRoom(0, 0, _mazeBoundaryWidth, _mazeBoundaryHeight));
 
             // Iterate through all of the genes, generating 
             foreach (MazeGene mazeGene in genome.GeneList)
             {
                 // Dequeue a room and run division on it
-                Tuple<MazeRoom, MazeRoom> subRooms = mazeRoomQueue.Dequeue()
+                Tuple<MazeStructureRoom, MazeStructureRoom> subRooms = mazeRoomQueue.Dequeue()
                     .DivideRoom(unscaledGrid, mazeGene.WallLocation,
                         mazeGene.PassageLocation,
                         mazeGene.OrientationSeed);

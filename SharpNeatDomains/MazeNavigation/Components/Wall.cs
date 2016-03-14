@@ -6,31 +6,6 @@
     /// </summary>
     public class Wall
     {
-        #region Constructors
-
-        /// <summary>
-        ///     Wall constructor.
-        /// </summary>
-        /// <param name="wallLine">The 2D line segment representing the start and end point of the wall.</param>
-        /// <param name="leftApproachAdjustmentCoefficient">
-        ///     The direction in which to adjust the heading given an approach from the
-        ///     west.
-        /// </param>
-        /// <param name="rightApproachAdjustmentCoefficient">
-        ///     The direction in which to adjust the heading given an approach from the
-        ///     east.
-        /// </param>
-        /// <param name="headingAdjustmentMagnitude">The "amount" (magnitude) in degrees by which the heading should be adjusted.</param>
-        public Wall(DoubleLine wallLine, int leftApproachAdjustmentCoefficient, int rightApproachAdjustmentCoefficient,
-            int headingAdjustmentMagnitude)
-        {
-            WallLine = wallLine;
-            _leftApproachAdjustment = leftApproachAdjustmentCoefficient*headingAdjustmentMagnitude;
-            _rightApproachAdjustment = rightApproachAdjustmentCoefficient*headingAdjustmentMagnitude;
-        }
-
-        #endregion
-
         #region Wall Properties
 
         /// <summary>
@@ -75,6 +50,39 @@
             }
 
             return adjustedHeading;
+        }
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        ///     Wall constructor which accepts online the line definition.
+        /// </summary>
+        /// <param name="wallLine">The line representing a wall in the maze.</param>
+        public Wall(DoubleLine wallLine) : this(wallLine, 0, 0, 0)
+        {
+        }
+
+        /// <summary>
+        ///     Wall constructor which accepts the wall line as well as heading adjustments.
+        /// </summary>
+        /// <param name="wallLine">The 2D line segment representing the start and end point of the wall.</param>
+        /// <param name="leftApproachAdjustmentCoefficient">
+        ///     The direction in which to adjust the heading given an approach from the
+        ///     west.
+        /// </param>
+        /// <param name="rightApproachAdjustmentCoefficient">
+        ///     The direction in which to adjust the heading given an approach from the
+        ///     east.
+        /// </param>
+        /// <param name="headingAdjustmentMagnitude">The "amount" (magnitude) in degrees by which the heading should be adjusted.</param>
+        public Wall(DoubleLine wallLine, int leftApproachAdjustmentCoefficient, int rightApproachAdjustmentCoefficient,
+            int headingAdjustmentMagnitude)
+        {
+            WallLine = wallLine;
+            _leftApproachAdjustment = leftApproachAdjustmentCoefficient*headingAdjustmentMagnitude;
+            _rightApproachAdjustment = rightApproachAdjustmentCoefficient*headingAdjustmentMagnitude;
         }
 
         #endregion
