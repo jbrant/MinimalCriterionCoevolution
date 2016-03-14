@@ -25,7 +25,7 @@
     <ConnectionWeightRange>5</ConnectionWeightRange>
   </GenomeConfig>
   <BehaviorConfig>
-    <BehaviorCharacterization>End MazePoint</BehaviorCharacterization>
+    <BehaviorCharacterization>End MazeStructurePoint</BehaviorCharacterization>
     <MinimalCriteriaConfig>
       <MinimalCriteriaConstraint>Population Centroid Euclidean Distance</MinimalCriteriaConstraint>
       <XStart>0</XStart>

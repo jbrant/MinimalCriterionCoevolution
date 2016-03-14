@@ -4,14 +4,14 @@
     ///     The maze wall encapsulates the start and end of a particular wall.  The maze itself can contain 0 or more maze
     ///     walls.
     /// </summary>
-    public class MazeWall
+    public class MazeStructureWall
     {
         #region Constructors
 
         /// <summary>
         ///     Default constructor for a maze wall.
         /// </summary>
-        public MazeWall()
+        public MazeStructureWall()
         {
         }
 
@@ -22,10 +22,10 @@
         /// <param name="yStart">Y start coordinate.</param>
         /// <param name="xEnd">X end coordinate.</param>
         /// <param name="yEnd">Y end coordinate.</param>
-        public MazeWall(int xStart, int yStart, int xEnd, int yEnd)
+        public MazeStructureWall(int xStart, int yStart, int xEnd, int yEnd)
         {
-            StartMazePoint = new MazePoint(xStart, yStart);
-            EndMazePoint = new MazePoint(xEnd, yEnd);
+            StartMazeStructurePoint = new MazeStructurePoint(xStart, yStart);
+            EndMazeStructurePoint = new MazeStructurePoint(xEnd, yEnd);
         }
 
         #endregion
@@ -35,12 +35,12 @@
         /// <summary>
         ///     Starting point of the maze wall.
         /// </summary>
-        public MazePoint StartMazePoint { get; set; }
+        public MazeStructurePoint StartMazeStructurePoint { get; set; }
 
         /// <summary>
         ///     Ending point of the maze wall.
         /// </summary>
-        public MazePoint EndMazePoint { get; set; }
+        public MazeStructurePoint EndMazeStructurePoint { get; set; }
 
         #endregion
     }
@@ -48,14 +48,14 @@
     /// <summary>
     ///     The maze point struct contains the X and Y coordinates of the start or end of a maze wall.
     /// </summary>
-    public struct MazePoint
+    public struct MazeStructurePoint
     {
         /// <summary>
         ///     Constructor accept the X and Y coordinates of the new point.
         /// </summary>
         /// <param name="x">The X coordinate.</param>
         /// <param name="y">The Y coordinate.</param>
-        public MazePoint(int x, int y)
+        public MazeStructurePoint(int x, int y)
         {
             X = x;
             Y = y;

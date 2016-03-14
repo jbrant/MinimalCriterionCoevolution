@@ -113,6 +113,8 @@
     <Compile Include="MathUtils.cs" />
     <Compile Include="MazeEnvironmentTest\MazeEnvironmentTestEvaluator.cs" />
     <Compile Include="MazeEnvironmentTest\MazeEnvironmentTestExperiment.cs" />
+    <Compile Include="MazeNavigation\CoevolutionMCSExperiment\MazeEnvironmentMCSEvaluator.cs" />
+    <Compile Include="MazeNavigation\CoevolutionMCSExperiment\MazeNavigatorMCSEvaluator.cs" />
     <Compile Include="MazeNavigation\Components\MazeNavigator.cs" />
     <Compile Include="MazeNavigation\Components\MazeVariant.cs" />
     <Compile Include="MazeNavigation\Components\PieSliceSensorArray.cs" />
@@ -122,6 +124,7 @@
     <Compile Include="MazeNavigation\FitnessExperiment\MazeNavigationFitnessExperiment.cs" />
     <Compile Include="MazeNavigation\FitnessExperiment\MazeNavigationFitnessEvaluator.cs" />
     <Compile Include="MazeNavigation\BaseMazeNavigationExperiment.cs" />
+    <Compile Include="MazeNavigation\MazeConfiguration.cs" />
     <Compile Include="MazeNavigation\MazeNavigationView.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -139,6 +142,7 @@
     <Compile Include="MazeNavigation\MCSExperiment\QueueingNichedMazeNavigationMCSExperiment.cs" />
     <Compile Include="MazeNavigation\MCSExperiment\QueueingMazeNavigationMCSExperiment.cs" />
     <Compile Include="MazeNavigation\MCSExperiment\SteadyStateMazeNavigationMCSExperiment.cs" />
+    <Compile Include="MazeNavigation\MultiMazeNavigationWorldFactory.cs" />
     <Compile Include="MazeNavigation\NoveltyExperiment\GenerationalMazeNavigationNoveltyExperiment.cs" />
     <Compile Include="MazeNavigation\NoveltyExperiment\MazeNavigationNoveltyEvaluator.cs" />
     <Compile Include="MazeNavigation\NoveltyExperiment\SteadyStateMazeNavigationNoveltyExperiment.cs" />

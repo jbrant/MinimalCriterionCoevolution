@@ -35,7 +35,7 @@ namespace SharpNeat.Decoders.Maze.Tests
             // Create the maze decoder
             MazeDecoder mazeDecoder = new MazeDecoder(20, 20);
 
-            MazeGrid mazeGrid = mazeDecoder.Decode(mazeGenome);
+            MazeStructure mazeGrid = mazeDecoder.Decode(mazeGenome);
 
             //DisplayMaze(mazeGrid.MazeArray);
         }
@@ -59,7 +59,7 @@ namespace SharpNeat.Decoders.Maze.Tests
             // Create the maze decoder
             MazeDecoder mazeDecoder = new MazeDecoder(20, 20, scaleMultiplier);
 
-            MazeGrid mazeGrid = mazeDecoder.Decode(mazeGenome);
+            MazeStructure mazeGrid = mazeDecoder.Decode(mazeGenome);
 
             DisplayMaze(mazeGrid.MazeArray);
 
@@ -117,7 +117,7 @@ namespace SharpNeat.Decoders.Maze.Tests
             }
         }
 
-        private void PrintBitmapMaze(List<MazeWall> walls, int mazeWidth, int mazeHeight)
+        private void PrintBitmapMaze(List<MazeStructureWall> walls, int mazeWidth, int mazeHeight)
         {
             Pen blackPen = new Pen(Color.Black, 0.0001f);
             Bitmap mazeBitmap = new Bitmap(mazeWidth + 1, mazeHeight + 1);
@@ -131,11 +131,11 @@ namespace SharpNeat.Decoders.Maze.Tests
                 graphics.FillEllipse(Brushes.Red, mazeWidth - 10, mazeHeight - 10, 5, 5);
             }
 
-            foreach (MazeWall wall in walls)
+            foreach (MazeStructureWall wall in walls)
             {
                 using (Graphics graphics = Graphics.FromImage(mazeBitmap))
                 {
-                    graphics.DrawLine(blackPen, new Point(wall.StartMazePoint.X, wall.StartMazePoint.Y) , new Point(wall.EndMazePoint.X, wall.EndMazePoint.Y));
+                    graphics.DrawLine(blackPen, new Point(wall.StartMazeStructurePoint.X, wall.StartMazeStructurePoint.Y) , new Point(wall.EndMazeStructurePoint.X, wall.EndMazeStructurePoint.Y));
                 }
             }
 

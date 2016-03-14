@@ -19,7 +19,7 @@
     <AddNodeProbability>0.005</AddNodeProbability>
   </GenomeConfig>
   <BehaviorConfig>
-    <BehaviorCharacterization>EndMazePoint</BehaviorCharacterization>
+    <BehaviorCharacterization>EndMazeStructurePoint</BehaviorCharacterization>
   </BehaviorConfig>
   <NearestNeighbors>15</NearestNeighbors>
   <NoveltyConfig>

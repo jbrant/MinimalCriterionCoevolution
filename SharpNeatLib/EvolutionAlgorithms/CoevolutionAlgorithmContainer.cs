@@ -11,14 +11,31 @@ using SharpNeat.Core;
 
 namespace SharpNeat.EvolutionAlgorithms
 {
+    /// <summary>
+    ///     The coevolution algorithm container encapsulates and manages the execution of two coevolving populations driven by
+    ///     two entirely separate algorithms and potentially, separate encodings.  Note that this stands in contrast to more
+    ///     typical coevolution setups wherein two populations of agents are coevolving, but they share identical encodings and
+    ///     similar evaluation criteria.  This configuration is intended two allow the coevolution of radically different
+    ///     constructs, such as coevolving agents with their environment.
+    /// </summary>
+    /// <typeparam name="TGenome1">The genome type for the first population.</typeparam>
+    /// <typeparam name="TGenome2">The genome type for the second population.</typeparam>
     public class CoevolutionAlgorithmContainer<TGenome1, TGenome2> : ICoevolutionAlgorithmContainer<TGenome1, TGenome2>
         where TGenome1 : class, IGenome<TGenome1>
         where TGenome2 : class, IGenome<TGenome2>
     {
-        private static readonly ILog __log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        /// <summary>
+        ///     Event logger for the coevolution container.
+        /// </summary>
+        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
         #region Constructors
 
+        /// <summary>
+        ///     Constructor for the coevolution algorithm container, recording the two component evolutionary algorithms.
+        /// </summary>
+        /// <param name="algorithm1">The evolutionary algorithm for the first population.</param>
+        /// <param name="algorithm2">The evolutionary algorithm for the second population.</param>
         public CoevolutionAlgorithmContainer(IEvolutionAlgorithm<TGenome1> algorithm1,
             IEvolutionAlgorithm<TGenome2> algorithm2)
         {
@@ -50,8 +67,14 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </summary>
         private readonly AutoResetEvent _awaitRestartEvent = new AutoResetEvent(false);
 
+        /// <summary>
+        ///     The evolutionary algorithm for the first population.
+        /// </summary>
         private readonly IEvolutionAlgorithm<TGenome1> _evolutionAlgorithm1;
 
+        /// <summary>
+        ///     The evolutionary algorithm for the second population.
+        /// </summary>
         private readonly IEvolutionAlgorithm<TGenome2> _evolutionAlgorithm2;
 
         /// <summary>
@@ -95,28 +118,61 @@ namespace SharpNeat.EvolutionAlgorithms
 
         #region Properties
 
+        /// <summary>
+        ///     The current generation.
+        /// </summary>
         public uint CurrentGeneration { get; protected set; }
 
+        /// <summary>
+        ///     The current number of evaluations that have been executed.
+        /// </summary>
         public ulong CurrentEvaluations { get; protected set; }
 
+        /// <summary>
+        ///     The update scheme for controlling when updates are passed back to the caller.
+        /// </summary>
         public UpdateScheme UpdateScheme { get; set; }
 
+        /// <summary>
+        ///     The current state of execution (e.g. read, running, paused, etc.).
+        /// </summary>
         public RunState RunState { get; protected set; }
 
+        /// <summary>
+        ///     Boolean flag which indicates whether a terminating condition has been reached.
+        /// </summary>
         public bool StopConditionSatisfied { get; protected set; }
 
         #endregion
 
         #region Events
 
+        /// <summary>
+        ///     Notifies listeners that some state change has occured.
+        /// </summary>
         public event EventHandler UpdateEvent;
 
+        /// <summary>
+        ///     Notifies listeners that the algorithm has paused.
+        /// </summary>
         public event EventHandler PausedEvent;
 
         #endregion
 
         #region Public Methods
 
+        /// <summary>
+        ///     Initializes the evolutionary algorithms for the two populations as well as state variables within the container.
+        ///     Note that this initializer expects a preconstructed list of genomes.
+        /// </summary>
+        /// <param name="genomeFitnessEvaluator1">The genome evaluator for the first population.</param>
+        /// <param name="genomeFactory1">The genome factory for the first population.</param>
+        /// <param name="genomeList1">The initial members of the first population.</param>
+        /// <param name="genomeFitnessEvaluator2">The genome evaluator for the second population.</param>
+        /// <param name="genomeFactory2">The genome factory for the second population.</param>
+        /// <param name="genomeList2">The initial members of the second population.</param>
+        /// <param name="maxGenerations">The maximum number of generations.</param>
+        /// <param name="maxEvaluations">The maximum number of evaluations.</param>
         public void Initialize(IGenomeEvaluator<TGenome1> genomeFitnessEvaluator1,
             IGenomeFactory<TGenome1> genomeFactory1, List<TGenome1> genomeList1,
             IGenomeEvaluator<TGenome2> genomeFitnessEvaluator2, IGenomeFactory<TGenome2> genomeFactory2,
@@ -133,6 +189,21 @@ namespace SharpNeat.EvolutionAlgorithms
             InitializeContainer(genomeFitnessEvaluator1, genomeFitnessEvaluator2, maxGenerations, maxEvaluations);
         }
 
+        /// <summary>
+        ///     Initializes the evolutionary algorithms for the two populations as well as state variables within the container.
+        ///     Note that this initializer expects a preconstructed list of genomes.  Additionally, a maximum population size is
+        ///     specified, which bounds the growth of populations whose size is variable.
+        /// </summary>
+        /// <param name="genomeFitnessEvaluator1">The genome evaluator for the first population.</param>
+        /// <param name="genomeFactory1">The genome factory for the first population.</param>
+        /// <param name="genomeList1">The initial members of the first population.</param>
+        /// <param name="maxPopulationsize1">The upper bound on the first population size.</param>
+        /// <param name="genomeFitnessEvaluator2">The genome evaluator for the second population.</param>
+        /// <param name="genomeFactory2">The genome factory for the second population.</param>
+        /// <param name="genomeList2">The initial members of the second population.</param>
+        /// <param name="maxPopulationSize2">The upper bound on the second population size.</param>
+        /// <param name="maxGenerations">The maximum number of generations.</param>
+        /// <param name="maxEvaluations">The maximum number of evaluations.</param>
         public void Initialize(IGenomeEvaluator<TGenome1> genomeFitnessEvaluator1,
             IGenomeFactory<TGenome1> genomeFactory1, List<TGenome1> genomeList1, int maxPopulationsize1,
             IGenomeEvaluator<TGenome2> genomeFitnessEvaluator2, IGenomeFactory<TGenome2> genomeFactory2,
@@ -149,6 +220,19 @@ namespace SharpNeat.EvolutionAlgorithms
             InitializeContainer(genomeFitnessEvaluator1, genomeFitnessEvaluator2, maxGenerations, maxEvaluations);
         }
 
+        /// <summary>
+        ///     Initializes the evolutionary algorithms for the two populations as well as state variables within the container.
+        ///     This initializer expects the size of both populations to be specified (not the population itself given) so it can
+        ///     hand off population generation to the individual EA initializers.
+        /// </summary>
+        /// <param name="genomeFitnessEvaluator1">The genome evaluator for the first population.</param>
+        /// <param name="genomeFactory1">The genome factory for the first population.</param>
+        /// <param name="populationSize1">The size of the first population.</param>
+        /// <param name="genomeFitnessEvaluator2">The genome evaluator for the second population.</param>
+        /// <param name="genomeFactory2">The genome factory for the second population.</param>
+        /// <param name="populationSize2">The size of the second population.</param>
+        /// <param name="maxGenerations">The maximum number of generations.</param>
+        /// <param name="maxEvaluations">The maximum number of evaluations.</param>
         public void Initialize(IGenomeEvaluator<TGenome1> genomeFitnessEvaluator1,
             IGenomeFactory<TGenome1> genomeFactory1, int populationSize1,
             IGenomeEvaluator<TGenome2> genomeFitnessEvaluator2, IGenomeFactory<TGenome2> genomeFactory2,
@@ -165,6 +249,10 @@ namespace SharpNeat.EvolutionAlgorithms
             InitializeContainer(genomeFitnessEvaluator1, genomeFitnessEvaluator2, maxGenerations, maxEvaluations);
         }
 
+        /// <summary>
+        ///     Starts the algorithm running. The algorithm will switch to the Running state from either
+        ///     the Ready or Paused states.
+        /// </summary>
         public void StartContinue()
         {
             // RunState must be Ready or Paused.
@@ -188,7 +276,7 @@ namespace SharpNeat.EvolutionAlgorithms
             else if (RunState.Running == RunState)
             {
                 // Already running. Log a warning.
-                __log.Warn("StartContinue() called but algorithm is already running.");
+                Log.Warn("StartContinue() called but algorithm is already running.");
             }
             else
             {
@@ -197,6 +285,10 @@ namespace SharpNeat.EvolutionAlgorithms
             }
         }
 
+        /// <summary>
+        ///     Resets the algorithm by marking it as terminated, closing the logger, and cleaning up the state of the genome
+        ///     evaluators.
+        /// </summary>
         public void Reset()
         {
             // Reset run state to terminated
@@ -215,6 +307,11 @@ namespace SharpNeat.EvolutionAlgorithms
             _algorithmThread = null;
         }
 
+        /// <summary>
+        ///     Requests that the algorithm pauses but doesn't wait for the algorithm thread to stop.
+        ///     The algorithm thread will pause when it is next convenient to do so, and will notify
+        ///     listeners via an UpdateEvent.
+        /// </summary>
         public void RequestPause()
         {
             if (RunState.Running == RunState)
@@ -223,10 +320,17 @@ namespace SharpNeat.EvolutionAlgorithms
             }
             else
             {
-                __log.Warn("RequestPause() called but algorithm is not running.");
+                Log.Warn("RequestPause() called but algorithm is not running.");
             }
         }
 
+        /// <summary>
+        ///     Request that the algorithm pause and waits for the algorithm to do so. The algorithm
+        ///     thread will pause when it is next convenient to do so and notifies any UpdateEvent
+        ///     listeners prior to returning control to the caller. Therefore it's generally a bad idea
+        ///     to call this method from a GUI thread that also has code that may be called by the
+        ///     UpdateEvent - doing so will result in deadlocked threads.
+        /// </summary>
         public void RequestPauseAndWait()
         {
             if (RunState.Running == RunState)
@@ -238,7 +342,7 @@ namespace SharpNeat.EvolutionAlgorithms
             }
             else
             {
-                __log.Warn("RequestPauseAndWait() called but algorithm is not running.");
+                Log.Warn("RequestPauseAndWait() called but algorithm is not running.");
             }
         }
 
@@ -246,6 +350,13 @@ namespace SharpNeat.EvolutionAlgorithms
 
         #region Private Methods
 
+        /// <summary>
+        ///     Sets state values needed by this container during the initialization process.
+        /// </summary>
+        /// <param name="genomeEvaluator1">Reference to the genome evaluator for the first population.</param>
+        /// <param name="genomeEvaluator2">Reference to the genome evaluator for the second population.</param>
+        /// <param name="maxGenerations">The maximum number of generations.</param>
+        /// <param name="maxEvaluations">The maximum number of evaluations.</param>
         private void InitializeContainer(IGenomeEvaluator<TGenome1> genomeEvaluator1,
             IGenomeEvaluator<TGenome2> genomeEvaluator2, int? maxGenerations, ulong? maxEvaluations)
         {
@@ -279,7 +390,7 @@ namespace SharpNeat.EvolutionAlgorithms
 
                     // Execute the first algorithm for one evaluation cycle
                     _evolutionAlgorithm1.PerformOneGeneration();
-                    
+
                     // Execute the second algorithm for one evaluation cycle
                     _evolutionAlgorithm2.PerformOneGeneration();
 
@@ -295,7 +406,32 @@ namespace SharpNeat.EvolutionAlgorithms
 
                     // Set the current number of evaluations 
                     // (this after the algorithm has run so we have the correct number for this iteration)
-                    CurrentEvaluations = GenomeEvaluator.EvaluationCount;
+                    // TODO: We may want to end up splitting this out to be a separate count per EA
+                    CurrentEvaluations = GenomeEvaluator1.EvaluationCount + GenomeEvaluator2.EvaluationCount;
+
+                    // Set genome evaluator stop condition satisfied if either evaluator indicates such
+                    StopConditionSatisfied = GenomeEvaluator1.StopConditionSatisfied ||
+                                             GenomeEvaluator2.StopConditionSatisfied;
+
+                    // Check if a pause has been requested. 
+                    // Access to the flag is not thread synchronized, but it doesn't really matter if
+                    // we miss it being set and perform one other generation before pausing.
+                    if (_pauseRequestFlag || StopConditionSatisfied ||
+                        CurrentGeneration >= _maxGenerations || GenomeEvaluator1.EvaluationCount >= _maxEvaluations ||
+                        GenomeEvaluator1.EvaluationCount >= _maxEvaluations)
+                    {
+                        // Signal to any waiting thread that we are pausing
+                        _awaitPauseEvent.Set();
+
+                        // Reset the flag. Update RunState and notify any listeners of the state change.
+                        _pauseRequestFlag = false;
+                        RunState = RunState.Paused;
+                        OnUpdateEvent();
+                        OnPausedEvent();
+
+                        // Wait indefinitely for a signal to wake up and continue.
+                        _awaitRestartEvent.WaitOne();
+                    }
                 }
             }
             catch (ThreadAbortException)
@@ -331,7 +467,7 @@ namespace SharpNeat.EvolutionAlgorithms
                 }
                 catch (Exception ex)
                 {
-                    __log.Error("UpdateEvent listener threw exception", ex);
+                    Log.Error("UpdateEvent listener threw exception", ex);
                 }
             }
         }
@@ -359,7 +495,7 @@ namespace SharpNeat.EvolutionAlgorithms
                 }
                 catch (Exception ex)
                 {
-                    __log.Error("PausedEvent listener threw exception", ex);
+                    Log.Error("PausedEvent listener threw exception", ex);
                 }
             }
         }

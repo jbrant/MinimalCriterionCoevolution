@@ -258,10 +258,10 @@
     <Compile Include="Network\ActivationFunctions\Unipolar\SteepenedSigmoid.cs" />
     <Compile Include="Network\ActivationFunctions\Unipolar\SteepenedSigmoidApproximation.cs" />
     <Compile Include="Phenomes\MappingSignalArray.cs" />
-    <Compile Include="Phenomes\Mazes\MazeWall.cs" />
+    <Compile Include="Phenomes\Mazes\MazeStructureWall.cs" />
     <Compile Include="Phenomes\Mazes\WallDirection.cs" />
-    <Compile Include="Phenomes\Mazes\MazeGrid.cs" />
-    <Compile Include="Phenomes\Mazes\MazeRoom.cs" />
+    <Compile Include="Phenomes\Mazes\MazeStructure.cs" />
+    <Compile Include="Phenomes\Mazes\MazeStructureRoom.cs" />
     <Compile Include="Phenomes\Mazes\WallOrientation.cs" />
     <Compile Include="Phenomes\NeuralNets\AcyclicNetwork\FastAcyclicNetwork.cs" />
     <Compile Include="Phenomes\NeuralNets\AcyclicNetwork\LayerInfo.cs" />

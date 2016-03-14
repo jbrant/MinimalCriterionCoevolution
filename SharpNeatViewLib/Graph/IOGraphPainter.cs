@@ -208,7 +208,7 @@ namespace SharpNeat.View.Graph
                 tgtSide = 1;
             }
 
-        //--- MazePoint B.
+        //--- MazeStructurePoint B.
             // The line AB is a connection leg emerging from the base of a node. To visually seperate multiple legs
             // the first leg has a gentle gradient (almost horizontal) and each successive leg has a steeper gradient.
             // Once a vertical gradient has been reached each sucessive leg is made longer.
@@ -233,13 +233,13 @@ namespace SharpNeat.View.Graph
             int yDelta = (int)(lenAB * slope);
             Point b = new Point(srcPos.X + xDelta, srcPos.Y + yDelta);
 
-        //--- MazePoint C.
+        //--- MazeStructurePoint C.
             // Line BC is a horizontal line from the end of the leg AB.
             int lenBC = (int)(2f * slopePre * state._backConnectionLegLength);
             xDelta = lenBC * srcSide;
             Point c = new Point(b.X + xDelta, b.Y);
 
-        //--- MazePoint E. Equivalent to point B but emerging from the target node.
+        //--- MazeStructurePoint E. Equivalent to point B but emerging from the target node.
             slopePre = SlopeInit + (SlopeIncr * tgtConIdx);
 
             // Leg length.
@@ -255,7 +255,7 @@ namespace SharpNeat.View.Graph
             yDelta = -(int)(lenEF * slope);
             Point e = new Point(tgtPos.X + xDelta, tgtPos.Y + yDelta);
 
-        //--- MazePoint D. Equivalent to point C but on the target end of the connection.
+        //--- MazeStructurePoint D. Equivalent to point C but on the target end of the connection.
             int lenDE = (int)(2f * slopePre * state._backConnectionLegLength);
             xDelta = lenDE * tgtSide;
             Point d = new Point(e.X + xDelta, e.Y);
