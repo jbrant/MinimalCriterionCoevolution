@@ -99,6 +99,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ExperimentDataDataSet.xsd</DependentUpon>
     </Compile>
+    <Compile Include="ICoevolutionExperiment.cs" />
     <Compile Include="IGuiNeatExperiment.cs" />
     <Compile Include="IntLine.cs" />
     <Compile Include="IntPoint.cs" />
@@ -113,6 +114,7 @@
     <Compile Include="MathUtils.cs" />
     <Compile Include="MazeEnvironmentTest\MazeEnvironmentTestEvaluator.cs" />
     <Compile Include="MazeEnvironmentTest\MazeEnvironmentTestExperiment.cs" />
+    <Compile Include="MazeNavigation\CoevolutionMCSExperiment\CoevolutionMazeNavigationMCSExperiment.cs" />
     <Compile Include="MazeNavigation\CoevolutionMCSExperiment\MazeEnvironmentMCSEvaluator.cs" />
     <Compile Include="MazeNavigation\CoevolutionMCSExperiment\MazeNavigatorMCSEvaluator.cs" />
     <Compile Include="MazeNavigation\Components\MazeNavigator.cs" />
