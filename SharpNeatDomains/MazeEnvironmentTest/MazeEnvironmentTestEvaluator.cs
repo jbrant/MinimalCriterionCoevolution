@@ -28,7 +28,7 @@ namespace SharpNeat.Domains.MazeEnvironmentTest
         public ulong EvaluationCount { get; private set; }
         public bool StopConditionSatisfied { get; private set; }
 
-        public BehaviorInfo Evaluate(IBlackBox phenome, uint currentGeneration, bool isBridgingEvaluation,
+        public BehaviorInfo Evaluate(IBlackBox agent, uint currentGeneration, bool isBridgingEvaluation,
             IDataLogger evaluationLogger,
             string genomeXml)
         {
@@ -41,25 +41,25 @@ namespace SharpNeat.Domains.MazeEnvironmentTest
             }
 
             // Reset the overall network state
-            phenome.ResetState();
+            agent.ResetState();
 
             for (int x = _xStart; x <= _xEnd; x++)
             {
                 for (int y = _yStart; y <= _yEnd; y++)
                 {
                     // Reset the input array
-                    phenome.InputSignalArray.Reset();
+                    agent.InputSignalArray.Reset();
 
                     // TODO: These inputs probably need to be normalized
                     // Load up the inputs with the coordinate
-                    phenome.InputSignalArray[0] = x;
-                    phenome.InputSignalArray[1] = y;
+                    agent.InputSignalArray[0] = x;
+                    agent.InputSignalArray[1] = y;
 
                     // Activate the network
-                    phenome.Activate();
+                    agent.Activate();
 
                     // Translate and apply the output (which will be the pixel intensity)
-                    double curOutput = phenome.OutputSignalArray[0];
+                    double curOutput = agent.OutputSignalArray[0];
 
                     // TODO: Threshold the output such that the pixel is expressed if it exceeds a certain value
                 }

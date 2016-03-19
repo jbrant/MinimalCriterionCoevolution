@@ -26,7 +26,7 @@ using System.Collections.Generic;
 namespace SharpNeat.Core
 {
     /// <summary>
-    ///     Generic interface for phenome evaluation classes.
+    ///     Generic interface for agent evaluation classes.
     ///     Evaluates and assigns a fitness to individual TPhenome's.
     /// </summary>
     public interface IPhenomeEvaluator<in TPhenome, out TTrialInfo> : ILoggable
@@ -44,13 +44,13 @@ namespace SharpNeat.Core
         bool StopConditionSatisfied { get; }
 
         /// <summary>
-        ///     EvaluateFitness the provided phenome and return its fitness score.
+        ///     EvaluateFitness the provided agent and return its fitness score.
         /// </summary>
-        TTrialInfo Evaluate(TPhenome phenome, uint currentGeneration, bool isBridgingEvaluation,
+        TTrialInfo Evaluate(TPhenome agent, uint currentGeneration, bool isBridgingEvaluation,
             IDataLogger evaluationLogger, string genomeXml);
 
         /// <summary>
-        ///     Initializes state variables in the phenome evalutor.
+        ///     Initializes state variables in the agent evalutor.
         /// </summary>
         void Initialize(IDataLogger evaluationLogger);
 

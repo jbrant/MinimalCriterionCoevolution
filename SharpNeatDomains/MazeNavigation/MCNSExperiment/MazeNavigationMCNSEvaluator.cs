@@ -70,15 +70,15 @@ namespace SharpNeat.Domains.MazeNavigation.MCNSExperiment
         #region Public methods
 
         /// <summary>
-        ///     Runs a phenome (i.e. maze navigator brain) through a single maze trial.
+        ///     Runs a agent (i.e. maze navigator brain) through a single maze trial.
         /// </summary>
-        /// <param name="phenome">The maze navigator brain (ANN).</param>
+        /// <param name="agent">The maze navigator brain (ANN).</param>
         /// <param name="currentGeneration">The current generation or evaluation batch.</param>
         /// <param name="isBridgingEvaluation">Indicates whether bridging is enabled for this evaluation.</param>
         /// <param name="evaluationLogger">Reference to the evaluation logger.</param>
         /// <param name="genomeXml">The string-representation of the genome (for logging purposes).</param>
         /// <returns>A behavior info (which is a type of behavior-based trial information).</returns>
-        public BehaviorInfo Evaluate(IBlackBox phenome, uint currentGeneration, bool isBridgingEvaluation,
+        public BehaviorInfo Evaluate(IBlackBox agent, uint currentGeneration, bool isBridgingEvaluation,
             IDataLogger evaluationLogger, string genomeXml)
         {
             // Increment evaluation count
@@ -96,7 +96,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCNSExperiment
                 _mazeWorldFactory.CreateMazeNavigationWorld(behaviorCharacterization);
 
             // Run a single trial
-            BehaviorInfo trialInfo = world.RunTrial(phenome, SearchType.MinimalCriteriaNoveltySearch,
+            BehaviorInfo trialInfo = world.RunTrial(agent, SearchType.MinimalCriteriaNoveltySearch,
                 out stopConditionSatisfied);
 
             // Check if the current location satisfies the minimal criteria
