@@ -104,6 +104,27 @@ namespace SharpNeat.Domains.MazeNavigation
                 mazeConfig.GoalLocation, _minSuccessDistance, _maxTimesteps, behaviorCharacterization);
         }
 
+        /// <summary>
+        ///     Constructs a new maze navigation world using the given maze structure and behavior characterization.
+        /// </summary>
+        /// <param name="mazeStructure">The maze structure to convert into a maze configuration.</param>
+        /// <param name="behaviorCharacterization">
+        ///     The way in which an agents behavior is characterized (i.e. end point,
+        ///     trajectory, etc.).
+        /// </param>
+        /// <returns>A constructed maze navigation world ready for evaluation.</returns>
+        public MazeNavigationWorld<TTrialInfo> CreateMazeNavigationWorld(MazeStructure mazeStructure,
+            IBehaviorCharacterization behaviorCharacterization)
+        {
+            // Build the single maze configuration
+            MazeConfiguration mazeConfig = new MazeConfiguration(ExtractMazeWalls(mazeStructure.Walls),
+                ExtractStartEndPoint(mazeStructure.StartLocation), ExtractStartEndPoint(mazeStructure.TargetLocation));
+
+            // Create maze navigation world and return
+            return new MazeNavigationWorld<TTrialInfo>(mazeConfig.Walls, mazeConfig.NavigatorLocation,
+                mazeConfig.GoalLocation, _minSuccessDistance, _maxTimesteps, behaviorCharacterization);
+        }
+
         #endregion
 
         #region Private Methods

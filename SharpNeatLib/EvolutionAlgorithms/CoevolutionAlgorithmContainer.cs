@@ -395,6 +395,8 @@ namespace SharpNeat.EvolutionAlgorithms
                     _evolutionAlgorithm2.PerformOneGeneration();
 
                     // TODO: We probably need to udpate the cached phenotypes on both algorithms here
+                    GenomeEvaluator1.UpdateEvaluationBaseline(_evolutionAlgorithm2.GenomeList);
+                    GenomeEvaluator2.UpdateEvaluationBaseline(_evolutionAlgorithm1.GenomeList);
 
                     // Send update to the calling routine if time
                     if (UpdateTest())
