@@ -28,6 +28,7 @@ using SharpNeat.Core;
 using SharpNeat.Decoders;
 using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.EvolutionAlgorithms.ComplexityRegulation;
+using SharpNeat.Genomes.Maze;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Loggers;
 using SharpNeat.MinimalCriterias;
@@ -198,6 +199,60 @@ namespace SharpNeat.Domains
                 if (connectionWeightRange != null)
                 {
                     genomeParameters.ConnectionWeightRange = connectionWeightRange ?? default(double);
+                }
+            }
+
+            return genomeParameters;
+        }
+
+        /// <summary>
+        ///     Read maze genome parameter settings from the configuration file.
+        /// </summary>
+        /// <param name="xmlConfig">The reference to the XML configuration file.</param>
+        /// <returns>An initialized maze genome parameters object.</returns>
+        public static MazeGenomeParameters ReadMazeGenomeParameters(XmlElement xmlConfig)
+        {
+            // Create new NEAT genome parameters with default values
+            MazeGenomeParameters genomeParameters = new MazeGenomeParameters();
+
+            // Get root of neat genome configuration section
+            XmlNodeList nodeList = xmlConfig.GetElementsByTagName("GenomeConfig", "");
+
+            // Note that if there are multiple defined (such as would be the case with an experiment that uses multiple EAs), 
+            // the first one is used here, which will accurately correspond to the current algorithm under consideration
+            if (nodeList.Count >= 1)
+            {
+                // Convert to an XML element
+                XmlElement xmlMazeGenomeConfig = nodeList[0] as XmlElement;
+
+                // Read all of the applicable parameters in
+                double? wallStartMutationProbability = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
+                    "MutateWallStartLocationProbability");
+                double? passageStartMutationProbability = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
+                    "MutatePassageStartLocationProbability");
+                double? addWallProbability = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
+                    "MutateAddWallProbability");
+                double? perturbanceMagnitude = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
+                    "PerturbanceMagnitude");
+
+                // Set each if it's specified in the configuration (otherwise, accept the default)
+                if (wallStartMutationProbability != null)
+                {
+                    genomeParameters.MutateWallStartLocationProbability = wallStartMutationProbability ??
+                                                                          default(double);
+                }
+                if (passageStartMutationProbability != null)
+                {
+                    genomeParameters.MutatePassageStartLocationProbability = passageStartMutationProbability ??
+                                                                             default(double);
+                }
+                if (addWallProbability != null)
+                {
+                    genomeParameters.MutateAddWallProbability = addWallProbability ?? default(double);
+                }
+                if (perturbanceMagnitude != null)
+                {
+                    genomeParameters.PerturbanceMagnitude = perturbanceMagnitude ?? default(double);
                 }
             }
 

@@ -90,22 +90,22 @@ namespace SharpNeat.Genomes.Maze
         ///     The probability of mutating the position of a wall in the maze.
         /// </summary>
         // Mutation probabilities
-        public double MutateWallStartLocationProbability { get; }
+        public double MutateWallStartLocationProbability { get; set; }
 
         /// <summary>
         ///     The probability of mutating the position of the passage within a given maze wall.
         /// </summary>
-        public double MutatePassageStartLocationProbability { get; }
+        public double MutatePassageStartLocationProbability { get; set; }
 
         /// <summary>
         ///     The probability of adding a new wall to the maze.
         /// </summary>
-        public double MutateAddWallProbability { get; }
+        public double MutateAddWallProbability { get; set; }
 
         /// <summary>
         ///     The magnitude of the mutation (only applies to wall and passage position mutations).
         /// </summary>
-        public double PerturbanceMagnitude { get; }
+        public double PerturbanceMagnitude { get; set; }
 
         #endregion
     }
