@@ -243,7 +243,6 @@
     <Compile Include="Network\NodeConnectivityData.cs" />
     <Compile Include="Network\NodeList.cs" />
     <Compile Include="Phenomes\IBlackBox.cs" />
-    <Compile Include="Phenomes\IPhenome.cs" />
     <Compile Include="Phenomes\ISignalArray.cs" />
     <Compile Include="Network\ActivationFunctions\Bipolar\BipolarSigmoid.cs" />
     <Compile Include="Network\ActivationFunctions\Bipolar\BipolarGaussian.cs" />

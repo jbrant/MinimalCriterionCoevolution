@@ -161,7 +161,7 @@ namespace SharpNeat.Domains.MazeNavigation
             var genomeFactory = CreateGenomeFactory();
 
             // Create an initial population of randomly generated genomes.
-            var genomeList = genomeFactory.CreateGenomeList(DefaultPopulationSize, 0);
+            var genomeList = genomeFactory.CreateGenomeList(populationSize, 0);
 
             // Create evolution algorithm.
             return CreateEvolutionAlgorithm(genomeFactory, genomeList);
