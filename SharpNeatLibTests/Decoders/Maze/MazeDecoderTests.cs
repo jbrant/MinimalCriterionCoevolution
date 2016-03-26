@@ -1,25 +1,24 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SharpNeat.Decoders.Maze;
-using System;
+﻿#region
+
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Drawing;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SharpNeat.Genomes.Maze;
 using SharpNeat.Phenomes.Mazes;
-using System.Drawing;
+
+#endregion
 
 namespace SharpNeat.Decoders.Maze.Tests
 {
-    [TestClass()]
+    [TestClass]
     public class MazeDecoderTests
     {
-        [TestMethod()]
+        [TestMethod]
         public void HardCodedGenomeDecodeTest()
         {
             // Mock up maze genome (just use null genome factory)
-            MazeGenome mazeGenome = new MazeGenome((MazeGenomeFactory)null, 1, 1);
+            MazeGenome mazeGenome = new MazeGenome((MazeGenomeFactory) null, 1, 1);
 
             // Add some genes
             mazeGenome.GeneList.Add(new MazeGene(0.6, 0.3, false));
@@ -40,7 +39,7 @@ namespace SharpNeat.Decoders.Maze.Tests
             //DisplayMaze(mazeGrid.MazeArray);
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void MutatedGenomeDecodeTest()
         {
             int scaleMultiplier = 16;
@@ -48,15 +47,6 @@ namespace SharpNeat.Decoders.Maze.Tests
             // Mock up maze genome (just use null genome factory)
             MazeGenome mazeGenome = new MazeGenome(new MazeGenomeFactory(), 1, 1);
 
-            uint birthGeneration = 1;
-
-            do
-            {
-                // Generate an offspring (perform mutation)
-                mazeGenome.CreateOffspring(++birthGeneration);
-            } while (mazeGenome.GeneList.Count < 200);
-            
-            // Create the maze decoder
             MazeDecoder mazeDecoder = new MazeDecoder(20, 20, scaleMultiplier);
 
             MazeStructure mazeGrid = mazeDecoder.Decode(mazeGenome);
@@ -65,7 +55,31 @@ namespace SharpNeat.Decoders.Maze.Tests
 
             mazeGrid.ConvertGridArrayToWalls(mazeGrid.MazeArray);
 
-            PrintBitmapMaze(mazeGrid.Walls, 20 * scaleMultiplier, 20 * scaleMultiplier);
+            uint birthGeneration = 1;
+
+            do
+            {
+                // Generate an offspring (perform mutation)
+                mazeGenome.CreateOffspring(++birthGeneration);
+
+                if (birthGeneration%100 == 0)
+                {
+                    mazeGrid = mazeDecoder.Decode(mazeGenome);
+
+                    PrintBitmapMaze(mazeGrid.Walls, 20*scaleMultiplier, 20*scaleMultiplier, (int) birthGeneration);
+                }
+            } while (birthGeneration < 1000000);
+
+            // Create the maze decoder
+            mazeDecoder = new MazeDecoder(20, 20, scaleMultiplier);
+
+            mazeGrid = mazeDecoder.Decode(mazeGenome);
+
+            DisplayMaze(mazeGrid.MazeArray);
+
+            mazeGrid.ConvertGridArrayToWalls(mazeGrid.MazeArray);
+
+            //PrintBitmapMaze(mazeGrid.Walls, 20 * scaleMultiplier, 20 * scaleMultiplier);
         }
 
         private void DisplayMaze(int[,] grid)
@@ -75,7 +89,7 @@ namespace SharpNeat.Decoders.Maze.Tests
 
             // Write top border itself 
             // (note that this is doubled for display purposes - to have both '|' and '_' character in same "cell")
-            for (int i = 0; i < (grid.GetLength(0) * 2 - 1); i++)
+            for (int i = 0; i < (grid.GetLength(0)*2 - 1); i++)
             {
                 Debug.Write("_");
             }
@@ -96,16 +110,16 @@ namespace SharpNeat.Decoders.Maze.Tests
                     bool isBottom = curRowNum + 1 >= grid.GetLength(0);
 
                     // Southern wall is enabled if one is specified in the grid or this is the bottom row
-                    bool isSouthernWall = (grid[curRowNum, curColNum] & (int)WallDirection.South) != 0 || isBottom;
+                    bool isSouthernWall = (grid[curRowNum, curColNum] & (int) WallDirection.South) != 0 || isBottom;
 
                     // Enable the southern wall at the second half of the current cell if its still part of the same line
                     // (this prevents gaps due to doubling the number of columns for display purposes)
                     bool isInternalSouthernWall = curColNum + 1 < grid.GetLength(1) &&
-                                                  (grid[curRowNum, curColNum + 1] & (int)WallDirection.South) != 0 ||
+                                                  (grid[curRowNum, curColNum + 1] & (int) WallDirection.South) != 0 ||
                                                   isBottom;
 
                     // Eastern wall is enabled if specified on the cell or if this is the last column in the grid
-                    bool isEasternWall = (grid[curRowNum, curColNum] & (int)WallDirection.East) != 0 ||
+                    bool isEasternWall = (grid[curRowNum, curColNum] & (int) WallDirection.East) != 0 ||
                                          curColNum + 1 >= grid.GetLength(1);
 
                     Debug.Write(isSouthernWall ? "_" : " ");
@@ -117,7 +131,7 @@ namespace SharpNeat.Decoders.Maze.Tests
             }
         }
 
-        private void PrintBitmapMaze(List<MazeStructureWall> walls, int mazeWidth, int mazeHeight)
+        private void PrintBitmapMaze(List<MazeStructureWall> walls, int mazeWidth, int mazeHeight, int birthGeneration)
         {
             Pen blackPen = new Pen(Color.Black, 0.0001f);
             Bitmap mazeBitmap = new Bitmap(mazeWidth + 1, mazeHeight + 1);
@@ -135,11 +149,13 @@ namespace SharpNeat.Decoders.Maze.Tests
             {
                 using (Graphics graphics = Graphics.FromImage(mazeBitmap))
                 {
-                    graphics.DrawLine(blackPen, new Point(wall.StartMazeStructurePoint.X, wall.StartMazeStructurePoint.Y) , new Point(wall.EndMazeStructurePoint.X, wall.EndMazeStructurePoint.Y));
+                    graphics.DrawLine(blackPen,
+                        new Point(wall.StartMazeStructurePoint.X, wall.StartMazeStructurePoint.Y),
+                        new Point(wall.EndMazeStructurePoint.X, wall.EndMazeStructurePoint.Y));
                 }
             }
 
-            mazeBitmap.Save("RecursiveDivision_TestImage.bmp");
+            mazeBitmap.Save("RecursiveDivision_TestImage_" + birthGeneration + ".bmp");
         }
     }
 }
