@@ -216,7 +216,7 @@ namespace SharpNeat.Domains
             MazeGenomeParameters genomeParameters = new MazeGenomeParameters();
 
             // Get root of neat genome configuration section
-            XmlNodeList nodeList = xmlConfig.GetElementsByTagName("GenomeConfig", "");
+            XmlNodeList nodeList = xmlConfig.GetElementsByTagName("MazeGenomeConfig", "");
 
             // Note that if there are multiple defined (such as would be the case with an experiment that uses multiple EAs), 
             // the first one is used here, which will accurately correspond to the current algorithm under consideration

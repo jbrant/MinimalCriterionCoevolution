@@ -48,7 +48,7 @@
       <MinSuccessDistance>5</MinSuccessDistance>
       <MaxDistanceToTarget>300</MaxDistanceToTarget>
       <MazeVariant>HardMaze</MazeVariant>
-      <BehaviorCharacterization>EndMazeStructurePoint</BehaviorCharacterization>
+      <BehaviorCharacterization>EndMazePoint</BehaviorCharacterization>
       <NearestNeighbors>15</NearestNeighbors>
       <ArchiveAdditionThreshold>6</ArchiveAdditionThreshold>
       <ArchiveThresholdDecreaseMultiplier>0.95</ArchiveThresholdDecreaseMultiplier>
@@ -85,7 +85,7 @@
         <ConnectionWeightRange>1</ConnectionWeightRange>
       </GenomeConfig>
       <BehaviorConfig>
-        <BehaviorCharacterization>EndMazeStructurePoint</BehaviorCharacterization>
+        <BehaviorCharacterization>EndMazePoint</BehaviorCharacterization>
       </BehaviorConfig>
       <NearestNeighbors>15</NearestNeighbors>
       <NoveltyConfig>                
@@ -137,7 +137,7 @@
         <AddNodeProbability>0.005</AddNodeProbability>
       </GenomeConfig>
       <BehaviorConfig>
-        <BehaviorCharacterization>EndMazeStructurePoint</BehaviorCharacterization>
+        <BehaviorCharacterization>EndMazePoint</BehaviorCharacterization>
         <MinimalCriteriaConfig>
           <MinimalCriteriaConstraint>EuclideanLocation</MinimalCriteriaConstraint>
           <XMin>6</XMin>
@@ -240,7 +240,7 @@
         <ConnectionWeightRange>1</ConnectionWeightRange>
       </GenomeConfig>
       <BehaviorConfig>
-        <BehaviorCharacterization>EndMazeStructurePoint</BehaviorCharacterization>
+        <BehaviorCharacterization>EndMazePoint</BehaviorCharacterization>
         <MinimalCriteriaConfig>
           <MinimalCriteriaConstraint>FixedPointEuclideanDistance</MinimalCriteriaConstraint>
           <XStart>36</XStart>
@@ -274,7 +274,7 @@
           <ConnectionWeightRange>1</ConnectionWeightRange>
         </GenomeConfig>
         <InitBehaviorConfig>
-          <BehaviorCharacterization>EndMazeStructurePoint</BehaviorCharacterization>
+          <BehaviorCharacterization>EndMazePoint</BehaviorCharacterization>
           <MinimalCriteriaConfig>
             <MinimalCriteriaConstraint>FixedPointEuclideanDistance</MinimalCriteriaConstraint>
             <XStart>36</XStart>
@@ -335,7 +335,7 @@
         <ConnectionWeightRange>1</ConnectionWeightRange>
       </GenomeConfig>
       <BehaviorConfig>
-        <BehaviorCharacterization>EndMazeStructurePoint</BehaviorCharacterization>
+        <BehaviorCharacterization>EndMazePoint</BehaviorCharacterization>
         <MinimalCriteriaConfig>
           <MinimalCriteriaConstraint>FixedPointEuclideanDistance</MinimalCriteriaConstraint>
           <XStart>36</XStart>
@@ -366,7 +366,7 @@
           <ConnectionWeightRange>1</ConnectionWeightRange>
         </GenomeConfig>
         <InitBehaviorConfig>
-          <BehaviorCharacterization>EndMazeStructurePoint</BehaviorCharacterization>
+          <BehaviorCharacterization>EndMazePoint</BehaviorCharacterization>
           <MinimalCriteriaConfig>
             <MinimalCriteriaConstraint>FixedPointEuclideanDistance</MinimalCriteriaConstraint>
             <XStart>36</XStart>
@@ -436,7 +436,7 @@
         </MinimalCriteriaConfig>
       </BehaviorConfig>-->
       <BehaviorConfig>
-        <BehaviorCharacterization>EndMazeStructurePoint</BehaviorCharacterization>
+        <BehaviorCharacterization>EndMazePoint</BehaviorCharacterization>
         <MinimalCriteriaConfig>
           <MinimalCriteriaConstraint>PopulationCentroidEuclideanDistance</MinimalCriteriaConstraint>
           <MinimumRequiredDistance>0</MinimumRequiredDistance>
@@ -470,6 +470,46 @@
       </LoggingConfig>-->
       <Description>
         This is the maze navigation experiment used in the original novelty search papers (citation needed).
+      </Description>
+    </Config>
+  </Experiment>
+
+  <Experiment name="Maze Navigation - Coevolution MCS (Queueing NEAT)">
+    <AssemblyPath>SharpNeatDomains.dll</AssemblyPath>
+    <ClassName>SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment.CoevolutionMazeNavigationMCSExperiment</ClassName>
+    <Config>
+      <PopulationSize1>100</PopulationSize1>
+      <PopulationSize2>100</PopulationSize2>
+      <Activation>
+        <Scheme>Acyclic</Scheme>
+      </Activation>
+      <MaxDegreeOfParallelism>1</MaxDegreeOfParallelism>
+      <GenomeConfig>
+        <InitialConnectionProportion>1</InitialConnectionProportion>
+        <WeightMutationProbability>0.9</WeightMutationProbability>
+        <AddConnnectionProbability>0.005</AddConnnectionProbability>
+        <AddNodeProbability>0.01</AddNodeProbability>
+        <DeleteConnectionProbability>0.001</DeleteConnectionProbability>
+        <ConnectionWeightRange>5</ConnectionWeightRange>
+      </GenomeConfig>
+      <MazeGenomeConfig>
+        <MutateWallStartLocationProbability>0.1</MutateWallStartLocationProbability>
+        <MutatePassageStartLocationProbability>0.05</MutatePassageStartLocationProbability>
+        <MutateAddWallProbability>0.01</MutateAddWallProbability>
+        <PerturbanceMagnitude>0.5</PerturbanceMagnitude>
+      </MazeGenomeConfig>
+      <BehaviorConfig>
+        <BehaviorCharacterization>EndMazePoint</BehaviorCharacterization>
+      </BehaviorConfig>
+      <OffspringBatchSize>10</OffspringBatchSize>
+      <MaxEvaluations>100</MaxEvaluations>
+      <MaxTimesteps>400</MaxTimesteps>
+      <MinSuccessDistance>5</MinSuccessDistance>
+      <NumMazesSolvedCriteria>1</NumMazesSolvedCriteria>
+      <NumAgentsSolvedCriteria>1</NumAgentsSolvedCriteria>
+      <NumAgentsFailedCriteria>1</NumAgentsFailedCriteria>
+      <Description>
+        Coevolutionary MCS Maze navigation experiment, evolving both maze navigators and the mazes themselves.
       </Description>
     </Config>
   </Experiment>
