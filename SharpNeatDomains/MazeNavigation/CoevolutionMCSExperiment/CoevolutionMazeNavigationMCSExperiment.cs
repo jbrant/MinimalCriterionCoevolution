@@ -5,10 +5,13 @@ using System.Threading.Tasks;
 using System.Xml;
 using SharpNeat.Core;
 using SharpNeat.Decoders;
+using SharpNeat.Decoders.Maze;
+using SharpNeat.Decoders.Neat;
 using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.Genomes.Maze;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Phenomes;
+using SharpNeat.Phenomes.Mazes;
 
 #endregion
 
@@ -48,6 +51,11 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             _maxTimesteps = XmlUtils.GetValueAsInt(xmlConfig, "MaxTimesteps");
             _minSuccessDistance = XmlUtils.GetValueAsInt(xmlConfig, "MinSuccessDistance");
 
+            // Get success/failure criteria constraints
+            _numMazeSuccessCriteria = XmlUtils.GetValueAsInt(xmlConfig, "NumMazesSolvedCriteria");
+            _numAgentSuccessCriteria = XmlUtils.GetValueAsInt(xmlConfig, "NumAgentsSolvedCriteria");
+            _numAgentFailedCriteria = XmlUtils.GetValueAsInt(xmlConfig, "NumAgentsFailedCriteria");
+
             // TODO: Setup logging here
         }
 
@@ -86,10 +94,43 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
                 new QueueingNeatEvolutionAlgorithm<NeatGenome>(new NeatEvolutionAlgorithmParameters(), null, _batchSize);
 
             // Create the maze queueing evolution algorithm
-            AbstractEvolutionAlgorithm<MazeGenome> mazeEvolutionAlgorithm = new QueueingNeatEvolutionAlgorithm<MazeGenome>(new NeatEvolutionAlgorithmParameters(), null, _batchSize);
+            AbstractEvolutionAlgorithm<MazeGenome> mazeEvolutionAlgorithm =
+                new QueueingNeatEvolutionAlgorithm<MazeGenome>(new NeatEvolutionAlgorithmParameters(), null, _batchSize);
 
-            // Create navigator evaluator
-            IPhenomeEvaluator<IBlackBox, BehaviorInfo> navigatorEvaluator = new MazeNavigatorMCSEvaluator(_maxTimesteps, _minSuccessDistance, _behaviorCharacterizationFactory, );
+            // Create the maze phenome evaluator
+            IPhenomeEvaluator<MazeStructure, BehaviorInfo> mazeEvaluator = new MazeEnvironmentMCSEvaluator(
+                _maxTimesteps,
+                _minSuccessDistance, _behaviorCharacterizationFactory, _numAgentSuccessCriteria, _numAgentFailedCriteria);
+
+            // Create navigator phenome evaluator
+            IPhenomeEvaluator<IBlackBox, BehaviorInfo> navigatorEvaluator = new MazeNavigatorMCSEvaluator(
+                _maxTimesteps, _minSuccessDistance, _behaviorCharacterizationFactory, _numMazeSuccessCriteria);
+
+            // Create maze genome decoder
+            IGenomeDecoder<MazeGenome, MazeStructure> mazeGenomeDecoder = new MazeDecoder(_mazeHeight, _mazeWidth);
+
+            // Create navigator genome decoder
+            IGenomeDecoder<NeatGenome, IBlackBox> navigatorGenomeDecoder = new NeatGenomeDecoder(_activationScheme);
+
+            // Create the maze genome evaluator
+            IGenomeEvaluator<MazeGenome> mazeFitnessEvaluator =
+                new SerialGenomeBehaviorEvaluator<MazeGenome, MazeStructure>(mazeGenomeDecoder, mazeEvaluator,
+                    SelectionType.Queueing, SearchType.MinimalCriteriaSearch);
+
+            // Create navigator genome evaluator
+            IGenomeEvaluator<NeatGenome> navigatorFitnessEvaluator =
+                new SerialGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(navigatorGenomeDecoder, navigatorEvaluator,
+                    SelectionType.Queueing, SearchType.MinimalCriteriaSearch);
+
+            // Create the coevolution container
+            ICoevolutionAlgorithmContainer<NeatGenome, MazeGenome> coevolutionAlgorithmContainer =
+                new CoevolutionAlgorithmContainer<NeatGenome, MazeGenome>(neatEvolutionAlgorithm, mazeEvolutionAlgorithm);
+
+            // Initialize the container and component algorithms
+            coevolutionAlgorithmContainer.Initialize(navigatorFitnessEvaluator, genomeFactory1, genomeList1,
+                mazeFitnessEvaluator, genomeFactory2, genomeList2, _maxGenerations, _maxEvaluations);
+
+            return coevolutionAlgorithmContainer;
         }
 
         #endregion
@@ -107,8 +148,6 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
         #endregion
 
         #region Instance Variables
-
-        //private NeatEvolutionAlgorithmParameters _neatEvolutionAlgorithmParameters;
 
         /// <summary>
         ///     The activation scheme (i.e. cyclic or acyclic).
@@ -174,6 +213,33 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
         ///     The minimum distance to the target required in order to have "solved" the maze.
         /// </summary>
         private int _minSuccessDistance;
+
+        /// <summary>
+        ///     The minimum number of mazes that the agent under evaluation must solve in order to meet the minimal criteria.
+        /// </summary>
+        private int _numMazeSuccessCriteria;
+
+        /// <summary>
+        ///     The minimum number of agents that must solve the maze under evaluation in order to meet this portion of the minimal
+        ///     criteria.
+        /// </summary>
+        private int _numAgentSuccessCriteria;
+
+        /// <summary>
+        ///     The minimum number of agents that must fail to solve the maze under evaluation in order to meet this portion of the
+        ///     minimal criteria.
+        /// </summary>
+        private int _numAgentFailedCriteria;
+
+        /// <summary>
+        ///     The width of the evolved maze environments.
+        /// </summary>
+        private int _mazeHeight;
+
+        /// <summary>
+        ///     The height of the evolved maze environments.
+        /// </summary>
+        private int _mazeWidth;
 
         #endregion
     }
