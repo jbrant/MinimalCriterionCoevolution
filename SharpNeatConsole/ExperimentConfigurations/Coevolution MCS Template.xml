@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Config>
+  <PopulationSize1>100</PopulationSize1>
+  <PopulationSize2>100</PopulationSize2>
+  <Activation>
+    <Scheme>Acyclic</Scheme>
+  </Activation>
+  <MaxDegreeOfParallelism>1</MaxDegreeOfParallelism>
+  <GenomeConfig>
+    <InitialConnectionProportion>1</InitialConnectionProportion>
+    <WeightMutationProbability>0.9</WeightMutationProbability>
+    <AddConnnectionProbability>0.005</AddConnnectionProbability>
+    <AddNodeProbability>0.01</AddNodeProbability>
+    <DeleteConnectionProbability>0.001</DeleteConnectionProbability>
+    <ConnectionWeightRange>5</ConnectionWeightRange>
+  </GenomeConfig>
+  <MazeGenomeConfig>
+    <MutateWallStartLocationProbability>0.1</MutateWallStartLocationProbability>
+    <MutatePassageStartLocationProbability>0.05</MutatePassageStartLocationProbability>
+    <MutateAddWallProbability>0.01</MutateAddWallProbability>
+    <PerturbanceMagnitude>0.5</PerturbanceMagnitude>
+  </MazeGenomeConfig>
+  <BehaviorConfig>
+    <BehaviorCharacterization>EndMazePoint</BehaviorCharacterization>
+  </BehaviorConfig>
+  <OffspringBatchSize>10</OffspringBatchSize>
+  <MaxEvaluations>100</MaxEvaluations>
+  <MaxTimesteps>400</MaxTimesteps>
+  <MinSuccessDistance>5</MinSuccessDistance>
+  <NumMazesSolvedCriteria>1</NumMazesSolvedCriteria>
+  <NumAgentsSolvedCriteria>1</NumAgentsSolvedCriteria>
+  <NumAgentsFailedCriteria>1</NumAgentsFailedCriteria>
+  <Description>
+    Coevolutionary MCS Maze navigation experiment, evolving both maze navigators and the mazes themselves.
+  </Description>
+</Config>
