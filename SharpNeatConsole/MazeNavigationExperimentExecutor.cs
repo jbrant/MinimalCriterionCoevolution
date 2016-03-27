@@ -13,6 +13,7 @@ using log4net.Config;
 using SharpNeat.Core;
 using SharpNeat.Domains;
 using SharpNeat.Domains.MazeNavigation;
+using SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment;
 using SharpNeat.Domains.MazeNavigation.FitnessExperiment;
 using SharpNeat.Domains.MazeNavigation.MCNSExperiment;
 using SharpNeat.Domains.MazeNavigation.MCSExperiment;
@@ -25,12 +26,28 @@ using SharpNeat.Loggers;
 
 namespace SharpNeatConsole
 {
+    public enum ExecutionParameter
+    {
+        ExperimentSource,
+        NumRuns,
+        GeneratePopulation,
+        SeedPopulationDirectory,
+        ExperimentConfigDirectory,
+        OutputFileDirectory,
+        LogOrganismStateData,
+        IsCoevolution,
+        ExperimentNames
+    }
+
     public class MazeNavigationExperimentExecutor
     {
         private static IGenomeFactory<NeatGenome> _genomeFactory;
         private static List<NeatGenome> _genomeList;
         private static INeatEvolutionAlgorithm<NeatGenome> _ea;
         private static ILog _executionLogger;
+
+        private static readonly Dictionary<ExecutionParameter, String> _executionConfiguration =
+            new Dictionary<ExecutionParameter, string>();
 
         private static void Main(string[] args)
         {
@@ -40,60 +57,31 @@ namespace SharpNeatConsole
             // Instantiate the execution logger
             _executionLogger = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-            if (args == null || args.Length < 5)
-            {
-                _executionLogger.Error(
-                    "The following invocations are supported for a file source/destination:");
-                _executionLogger.Error(
-                    "SharpNeatConsole.exe <Experiment source (file)> <seed population directory> <# of runs> <experiment config directory> <output file directory> <enable organism state logging> <experiment names>");
-                _executionLogger.Error(
-                    "SharpNeatConsole.exe <Experiment source (file)> generate_population <# of runs> <experiment config directory> <output file directory> <enable organism state logging> <experiment names>");
-                _executionLogger.Error("The following invocation is required for a database source/destination:");
-                _executionLogger.Error(
-                    "SharpNeatConsole.exe <Experiment source (database)> <seed population directory> <# of runs> <enable organism state logging> <experiment names>");
+            // Extract the execution parameters and check for any errors (exit application if any found)
+            if (parseAndValidateConfiguration(args) == false)
                 Environment.Exit(0);
-            }
-
-            if ("file".Equals(args[0].ToLowerInvariant()) == false &&
-                "database".Equals(args[0].ToLowerInvariant()) == false)
-            {
-                _executionLogger.Error("Argument 1 is the source type, which should be either \"File\" or \"Database\"");
-                Environment.Exit(0);
-            }
 
             // Set the execution source (file or database)
-            string executionSource = args[0].ToLowerInvariant();
+            string executionSource = _executionConfiguration[ExecutionParameter.ExperimentSource].ToLowerInvariant();
 
-            // Read seed populuation file and number of runs
-            string seedPopulationFileDirectory = args[1];
-            int numRuns = Int32.Parse(args[2]);
+            // Read number of runs
+            int numRuns = Int32.Parse(_executionConfiguration[ExecutionParameter.NumRuns]);
 
-            // Read experiment configuration directory and log file output directory (only applicable if file-based)
-            string experimentConfigurationDirectory = "file".Equals(executionSource) ? args[3] : null;
-            string outputFileDirectory = "file".Equals(executionSource) ? args[4] : null;
-
-            // Read flag indicating whether or not to output organism state data
-            bool writeOrganismStateData = args[5] == "true";
-
-            // Make sure that the experiment configuration directory actually exists (if one is being used)
-            if (seedPopulationFileDirectory.Equals("generate_population") == false &&
-                Directory.Exists(seedPopulationFileDirectory) == false)
-            {
-                _executionLogger.Error(string.Format("The given seed population file directory [{0}] does not exist",
-                    seedPopulationFileDirectory));
-                Environment.Exit(0);
-            }
+            // Determine whether to log organism state data
+            bool logOrganismStateData = _executionConfiguration.ContainsKey(ExecutionParameter.LogOrganismStateData) &&
+                                        Boolean.Parse(_executionConfiguration[ExecutionParameter.LogOrganismStateData]);
 
             // Array of initial genome population files
             string[] seedPopulationFiles = null;
 
-            if (seedPopulationFileDirectory.Equals("generate_population") == false)
+            if (Boolean.Parse(_executionConfiguration[ExecutionParameter.GeneratePopulation]) == false)
             {
                 // Read in the seed population files
                 // Note that two assumptions are made here
                 // 1. Files can be naturally sorted and match the naming convention "*Run01", "*Run02", etc.
                 // 2. The number of files in the directory matches the number of runs (this is checked for below)
-                seedPopulationFiles = Directory.GetFiles(seedPopulationFileDirectory);
+                seedPopulationFiles =
+                    Directory.GetFiles(_executionConfiguration[ExecutionParameter.SeedPopulationDirectory]);
 
                 // Make sure that the appropriate number of seed population have been specified
                 if (seedPopulationFiles.Count() < numRuns)
@@ -106,40 +94,221 @@ namespace SharpNeatConsole
                 }
             }
 
-            // The default offset for the experiment names in the argument list
-            int experimentNameOffset = 4;
-
-            if ("file".Equals(executionSource))
-            {
-                // Offset by 4 to make room for experiment configuration directory parameter
-                experimentNameOffset = 6;
-            }
-
-            // Create experiment names array with the defined size
-            string[] experimentNames = new string[args.Length - experimentNameOffset];
-
-            // Read all experiments
-            for (int cnt = 0; cnt < experimentNames.Length; cnt++)
-            {
-                experimentNames[cnt] = args[cnt + experimentNameOffset];
-            }
+            // Extract the experiment names
+            string[] experimentNames = _executionConfiguration[ExecutionParameter.ExperimentNames].Split(',');
 
             foreach (string curExperimentName in experimentNames)
             {
                 _executionLogger.Info(string.Format("Executing Experiment {0}", curExperimentName));
 
-                if ("file".Equals(executionSource))
+                // If these are non-coevolution experiments, proceed as normal using the base maze navigator experiment configuration
+                if (Boolean.Parse(_executionConfiguration[ExecutionParameter.IsCoevolution]) == false)
                 {
-                    // Execute file-based experiment
-                    ExecuteFileBasedExperiment(experimentConfigurationDirectory, outputFileDirectory, curExperimentName,
-                        numRuns, seedPopulationFiles, writeOrganismStateData);
+                    if ("file".Equals(executionSource))
+                    {
+                        // Execute file-based experiment
+                        ExecuteFileBasedExperiment(
+                            _executionConfiguration[ExecutionParameter.ExperimentConfigDirectory],
+                            _executionConfiguration[ExecutionParameter.OutputFileDirectory], curExperimentName,
+                            numRuns, seedPopulationFiles, logOrganismStateData);
+                    }
+                    else
+                    {
+                        // Execute database-based experiment
+                        ExecuteDatabaseBasedExperiment(curExperimentName, numRuns, seedPopulationFiles);
+                    }
                 }
+                // Otherwise, use the coevolution container interface
                 else
                 {
-                    // Execute database-based experiment
-                    ExecuteDatabaseBasedExperiment(curExperimentName, numRuns, seedPopulationFiles);
+                    if ("file".Equals(executionSource))
+                    {
+                        // Execute file-based coevolution experiment
+                        ExecuteFileBasedCoevolutionExperiment(
+                            _executionConfiguration[ExecutionParameter.ExperimentConfigDirectory],
+                            _executionConfiguration[ExecutionParameter.OutputFileDirectory], curExperimentName, numRuns,
+                            seedPopulationFiles, logOrganismStateData);
+                    }
+                    else
+                    {
+                        throw new NotImplementedException(
+                            "Database-based coevolution executor has not been implemented!");
+                    }
                 }
             }
+        }
+
+        /// <summary>
+        ///     Populates the execution configuration and checks for any errors in said configuration.
+        /// </summary>
+        /// <param name="executionArguments">The arguments with which the experiment executor is being invoked.</param>
+        /// <returns>Boolean status indicating whether parsing the configuration suceeded.</returns>
+        private static bool parseAndValidateConfiguration(string[] executionArguments)
+        {
+            bool isConfigurationValid = executionArguments != null;
+
+            // Only continue if there are execution arguments
+            if (executionArguments != null && executionArguments.Length > 0)
+            {
+                foreach (string executionArgument in executionArguments)
+                {
+                    ExecutionParameter curParameter;
+
+                    // Get the key/value pair
+                    string[] parameterValuePair = executionArgument.Split('=');
+
+                    // Attempt to parse the current parameter
+                    isConfigurationValid = Enum.TryParse(parameterValuePair[0], true, out curParameter);
+
+                    // If the current parameter is not valid, break out of the loop and return
+                    if (isConfigurationValid == false)
+                    {
+                        _executionLogger.Error(string.Format("[{0}] is not a valid configuration parameter.",
+                            parameterValuePair[0]));
+                        break;
+                    }
+
+                    // If the parameter is valid but it already exists in the map, break out of the loop and return
+                    if (_executionConfiguration.ContainsKey(curParameter))
+                    {
+                        _executionLogger.Error(
+                            string.Format(
+                                "Ambiguous configuration - parameter [{0}] has been specified more than once.",
+                                curParameter));
+                        break;
+                    }
+
+                    switch (curParameter)
+                    {
+                        // Ensure that experiment source is either file or database
+                        case ExecutionParameter.ExperimentSource:
+                            if ("file".Equals(parameterValuePair[1].ToLowerInvariant()) == false &&
+                                "database".Equals(parameterValuePair[1].ToLowerInvariant()) == false)
+                            {
+                                _executionLogger.Error(
+                                    string.Format("The value for parameter [{0}] must be either file or database.",
+                                        curParameter));
+                                isConfigurationValid = false;
+                            }
+                            break;
+
+                        // Ensure that a valid number of runs was specified
+                        case ExecutionParameter.NumRuns:
+                            int testInt;
+                            if (Int32.TryParse(parameterValuePair[1], out testInt) == false)
+                            {
+                                _executionLogger.Error(string.Format(
+                                    "The value for parameter [{0}] must be an integer.",
+                                    curParameter));
+                                isConfigurationValid = false;
+                            }
+                            break;
+
+                        // Ensure that valid boolean values were given
+                        case ExecutionParameter.GeneratePopulation:
+                        case ExecutionParameter.LogOrganismStateData:
+                        case ExecutionParameter.IsCoevolution:
+                            bool testBool;
+                            if (Boolean.TryParse(parameterValuePair[1], out testBool) == false)
+                            {
+                                _executionLogger.Error(string.Format("The value for parameter [{0}] must be a boolean.",
+                                    curParameter));
+                                isConfigurationValid = false;
+                            }
+                            break;
+
+                        // Ensure that the seed population and experiments configuration directories actually exist
+                        case ExecutionParameter.SeedPopulationDirectory:
+                        case ExecutionParameter.ExperimentConfigDirectory:
+                            if (Directory.Exists(parameterValuePair[1]) == false)
+                            {
+                                _executionLogger.Error(
+                                    string.Format("The given experiment configuration directory [{0}] does not exist",
+                                        parameterValuePair[1]));
+                                isConfigurationValid = false;
+                            }
+                            break;
+                    }
+
+                    // If all else checks out, add the parameter to the map
+                    _executionConfiguration.Add(curParameter, parameterValuePair[1]);
+                }
+            }
+            // If there are no execution arguments, the configuration is invalid
+            else
+            {
+                isConfigurationValid = false;
+            }
+
+            // If the per-parameter configuration is valid but not a full list of parameters were specified, makes sure the necessary ones are present
+            if (isConfigurationValid && (_executionConfiguration.Count ==
+                                         Enum.GetNames(typeof (ExecutionParameter)).Length) == false)
+            {
+                // Check for existence of experiment source
+                if (_executionConfiguration.ContainsKey(ExecutionParameter.ExperimentSource) == false)
+                {
+                    _executionLogger.Error(string.Format("Parameter [{0}] must be specified.",
+                        ExecutionParameter.ExperimentSource));
+                    isConfigurationValid = false;
+                }
+
+                // Check for existence of experiment names
+                if (_executionConfiguration.ContainsKey(ExecutionParameter.ExperimentNames) == false)
+                {
+                    _executionLogger.Error(string.Format("Parameter [{0}] must be specified.",
+                        ExecutionParameter.ExperimentNames));
+                    isConfigurationValid = false;
+                }
+
+                // Check for existence of number of runs
+                if (_executionConfiguration.ContainsKey(ExecutionParameter.NumRuns) == false)
+                {
+                    _executionLogger.Error(string.Format("Parameter [{0}] must be specified.",
+                        ExecutionParameter.NumRuns));
+                    isConfigurationValid = false;
+                }
+
+                // Check for existence of output file directory
+                if (_executionConfiguration.ContainsKey(ExecutionParameter.OutputFileDirectory) == false)
+                {
+                    _executionLogger.Error(string.Format("Parameter [{0}] must be specified.",
+                        ExecutionParameter.OutputFileDirectory));
+                    isConfigurationValid = false;
+                }
+
+                // If this is a file-based experiment, then the experiment configuration directory must be specified
+                if ("file".Equals(_executionConfiguration[ExecutionParameter.ExperimentSource].ToLowerInvariant()) &&
+                    _executionConfiguration.ContainsKey(ExecutionParameter.ExperimentConfigDirectory) == false)
+                {
+                    _executionLogger.Error(string.Format("Parameter [{0}] must be specified.",
+                        ExecutionParameter.ExperimentConfigDirectory));
+                    isConfigurationValid = false;
+                }
+
+                // If the executor is told not to generate the population, then the seed population directory must be specified
+                if (Convert.ToBoolean(_executionConfiguration[ExecutionParameter.GeneratePopulation]) == false &&
+                    _executionConfiguration.ContainsKey(ExecutionParameter.SeedPopulationDirectory) == false)
+                {
+                    _executionLogger.Error(
+                        "If the executor is being run without generating a population, the directory containing the seed population must be specified.");
+                    isConfigurationValid = false;
+                }
+            }
+
+            // If there's still no problem with the configuration, go ahead and return valid
+            if (isConfigurationValid) return true;
+
+            // Log the boiler plate instructions when an invalid configuration is encountered
+            _executionLogger.Error("The experiment executor invocation must take the following form:");
+            _executionLogger.Error(
+                string.Format(
+                    "SharpNeatConsole.exe {0}=[{9}] {1}=[{11}] {2}=[{10}] {3}=[{12}] {4}=[{12}] {5}=[{12}] {6}=[{10}] {7}=[{10}] {8}=[{13}]",
+                    "ExperimentSource", "NumRuns", "GeneratePopulation", "SeedPopulationDirectory",
+                    "ExperimentConfigDirectory", "OutputFileDirectory", "LogOrganismStateData", "IsCoevolution",
+                    "ExperimentNames", "file|database", "true|false", "# runs", "directory", "experiment,experiment,..."));
+
+            // If we've reached this point, the configuration is indeed invalid
+            return false;
         }
 
         /// <summary>
@@ -156,14 +325,6 @@ namespace SharpNeatConsole
             string experimentName,
             int numRuns, string[] seedPopulationFiles, bool writeOrganismStateData)
         {
-            if (Directory.Exists(experimentConfigurationDirectory) == false)
-            {
-                _executionLogger.Error(string.Format(
-                    "The given experiment configuration directory [{0}] does not exist",
-                    experimentConfigurationDirectory));
-                Environment.Exit(0);
-            }
-
             // Read in the configuration files that match the given experiment name (should only be 1 file)
             string[] experimentConfigurationFiles = Directory.GetFiles(experimentConfigurationDirectory,
                 string.Format("{0}.*", experimentName));
@@ -200,7 +361,7 @@ namespace SharpNeatConsole
                         runIdx + 1))
                     : null;
 
-                // Initialize new steady state novelty experiment
+                // Initialize new experiment
                 experiment.Initialize(experimentName, xmlConfig.DocumentElement, evolutionDataLogger,
                     evaluationDataLogger);
 
@@ -318,6 +479,115 @@ namespace SharpNeatConsole
 
             // Dispose of the database context
             experimentContext.Dispose();
+        }
+
+        /// <summary>
+        ///     Executes all runs of a given coevolution experiment using a configuration file as the configuration source and
+        ///     generated flat files as the result destination.
+        /// </summary>
+        /// <param name="experimentConfigurationDirectory">The directory containing the XML experiment configuration file.</param>
+        /// <param name="logFileDirectory">The directory into which to write the evolution/evaluation log files.</param>
+        /// <param name="experimentName">The name of the experiment to execute.</param>
+        /// <param name="numRuns">The number of runs to execute for that experiment.</param>
+        /// <param name="seedPopulationFiles">The seed population XML file names.</param>
+        /// <param name="writeOrganismStateData">Flag indicating whether organism state data should be written to an output file.</param>
+        private static void ExecuteFileBasedCoevolutionExperiment(string experimentConfigurationDirectory,
+            string logFileDirectory,
+            string experimentName,
+            int numRuns, string[] seedPopulationFiles, bool writeOrganismStateData)
+        {
+            // Read in the configuration files that match the given experiment name (should only be 1 file)
+            string[] experimentConfigurationFiles = Directory.GetFiles(experimentConfigurationDirectory,
+                string.Format("{0}.*", experimentName));
+
+            // Make sure there's only one configuration file that matches the experiment name
+            // (otherwise, we don't know for sure which configuration to use)
+            if (experimentConfigurationFiles.Count() != 1)
+            {
+                _executionLogger.Error(
+                    string.Format(
+                        "Experiment configuration ambiguous: expeted a single possible configuration, but found {0} possible configurations",
+                        experimentConfigurationFiles.Count()));
+                Environment.Exit(0);
+            }
+
+            // Instantiate XML reader for configuration file
+            XmlDocument xmlConfig = new XmlDocument();
+            xmlConfig.Load(experimentConfigurationFiles[0]);
+
+            // Determine which experiment to execute
+            // TODO: If there are more coevolution experiments added, we'll have to figure out which experiment to run dynamically
+            ICoevolutionExperiment experiment = new CoevolutionMazeNavigationMCSExperiment();
+
+            // Execute the experiment for the specified number of runs
+            for (int runIdx = 0; runIdx < numRuns; runIdx++)
+            {
+                // Initialize the data loggers for the given run
+                IDataLogger evolutionDataLogger =
+                    new FileDataLogger(string.Format("{0}\\{1} - Run{2} - Evolution.csv", logFileDirectory,
+                        experimentName,
+                        runIdx + 1));
+                IDataLogger evaluationDataLogger = writeOrganismStateData
+                    ? new FileDataLogger(string.Format("{0}\\{1} - Run{2} - Evaluation.csv", logFileDirectory,
+                        experimentName,
+                        runIdx + 1))
+                    : null;
+
+                // Initialize new experiment
+                experiment.Initialize(experimentName, xmlConfig.DocumentElement, evolutionDataLogger,
+                    evaluationDataLogger);
+
+                _executionLogger.Info(string.Format("Initialized experiment {0}.", experiment.GetType()));
+
+                // This will hold the number of evaluations executed for each "attempt" of the EA within the current run
+                ulong curEvaluations = 0;
+
+                // This will hold the number of restarts of the algorithm
+                int curRestarts = 0;
+
+                do
+                {
+                    // If there were seed population files specified, read them in
+                    if (seedPopulationFiles != null)
+                    {
+                        // Open and load population XML file.
+                        using (XmlReader xr = XmlReader.Create(seedPopulationFiles[runIdx]))
+                        {
+                            _genomeList = experiment.LoadPopulation(xr);
+                        }
+
+                        // Grab the specified genome factory on the first genome in the list
+                        _genomeFactory = _genomeList[0].GenomeFactory;
+                    }
+
+                    // Otherwise, generate the starting population
+                    else
+                    {
+                        // Create a new genome factory
+                        _genomeFactory = experiment.CreateGenomeFactory();
+
+                        // Generate the initial population
+                        _genomeList = _genomeFactory.CreateGenomeList(experiment.SeedGenomeCount, 0);
+                    }
+
+                    _executionLogger.Info(string.Format("Loaded [{0}] genomes as initial population.", _genomeList.Count));
+
+                    _executionLogger.Info("Kicking off Experiment initialization/execution");
+
+                    // Kick off the experiment run
+                    RunExperiment(experimentName, experiment, numRuns, runIdx, curEvaluations);
+
+                    // Increment the evaluations
+                    curEvaluations = _ea.CurrentEvaluations;
+
+                    // Increment the restart count
+                    curRestarts++;
+                } while (_ea.StopConditionSatisfied == false && experiment.MaxRestarts >= curRestarts);
+
+                // Close the data loggers
+                evolutionDataLogger.Close();
+                evaluationDataLogger?.Close();
+            }
         }
 
         private static void RunExperiment(string experimentName, BaseMazeNavigationExperiment experiment, int numRuns,
