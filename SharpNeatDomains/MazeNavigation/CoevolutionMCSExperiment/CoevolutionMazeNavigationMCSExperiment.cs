@@ -1,5 +1,6 @@
 ﻿#region
 
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Xml;
@@ -21,6 +22,16 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
     {
         #region Public Methods
 
+        public IGenomeFactory<NeatGenome> CreateAgentGenomeFactory()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IGenomeFactory<MazeGenome> CreateMazeGenomeFactory()
+        {
+            throw new NotImplementedException();
+        }
+
         public void Initialize(string name, XmlElement xmlConfig, IDataLogger evolutionDataLogger = null,
             IDataLogger evaluationDataLogger = null)
         {
@@ -37,8 +48,10 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             _mazeGenomeParameters = ExperimentUtils.ReadMazeGenomeParameters(xmlConfig);
 
             // Configure evolutionary algorithm parameters
-            DefaultPopulationSize1 = XmlUtils.TryGetValueAsInt(xmlConfig, "PopulationSize1") ?? default(int);
-            DefaultPopulationSize2 = XmlUtils.TryGetValueAsInt(xmlConfig, "PopulationSize2") ?? default(int);
+            AgentDefaultPopulationSize = XmlUtils.GetValueAsInt(xmlConfig, "AgentPopulationSize");
+            MazeDefaultPopulationSize = XmlUtils.GetValueAsInt(xmlConfig, "MazePopulationSize");
+            AgentSeedGenomeCount = XmlUtils.GetValueAsInt(xmlConfig, "AgentSeedPopulationSize");
+            MazeSeedGenomeCount = XmlUtils.GetValueAsInt(xmlConfig, "MazeSeedPopulationSize");
             _behaviorCharacterizationFactory = ExperimentUtils.ReadBehaviorCharacterizationFactory(xmlConfig,
                 "BehaviorConfig");
             _batchSize = XmlUtils.GetValueAsInt(xmlConfig, "OffspringBatchSize");
@@ -61,7 +74,7 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
 
         public ICoevolutionAlgorithmContainer<NeatGenome, MazeGenome> CreateCoevolutionAlgorithmContainer()
         {
-            return CreateCoevolutionAlgorithmContainer(DefaultPopulationSize1, DefaultPopulationSize2);
+            return CreateCoevolutionAlgorithmContainer(AgentDefaultPopulationSize, MazeDefaultPopulationSize);
         }
 
         public ICoevolutionAlgorithmContainer<NeatGenome, MazeGenome> CreateCoevolutionAlgorithmContainer(
@@ -141,9 +154,13 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
 
         public string Description { get; private set; }
 
-        public int DefaultPopulationSize1 { get; private set; }
+        public int AgentDefaultPopulationSize { get; private set; }
 
-        public int DefaultPopulationSize2 { get; private set; }
+        public int MazeDefaultPopulationSize { get; private set; }
+
+        public int AgentSeedGenomeCount { get; private set; }
+
+        public int MazeSeedGenomeCount { get; private set; }
 
         #endregion
 

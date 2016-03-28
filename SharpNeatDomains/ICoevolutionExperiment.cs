@@ -27,14 +27,36 @@ namespace SharpNeat.Domains
         string Description { get; }
 
         /// <summary>
-        ///     Gets the default first population size to use for the experiment.
+        ///     Gets the default agent population size to use for the experiment.
         /// </summary>
-        int DefaultPopulationSize1 { get; }
+        int AgentDefaultPopulationSize { get; }
 
         /// <summary>
-        ///     Gets the default second population size to use for the experiment.
+        ///     Gets the default maze population size to use for the experiment.
         /// </summary>
-        int DefaultPopulationSize2 { get; }
+        int MazeDefaultPopulationSize { get; }
+
+        /// <summary>
+        ///     The number of genomes in the initial agent population.
+        /// </summary>
+        int AgentSeedGenomeCount { get; }
+
+        /// <summary>
+        ///     The number of genomes in the initial maze population.
+        /// </summary>
+        int MazeSeedGenomeCount { get; }
+
+        /// <summary>
+        ///     Create an agent genome factory for the experiment.
+        /// </summary>
+        /// <returns>An initialized agent genome factory.</returns>
+        IGenomeFactory<NeatGenome> CreateAgentGenomeFactory();
+
+        /// <summary>
+        ///     Create a maze genome factory for the experiment.
+        /// </summary>
+        /// <returns>An initialized maze genome factory.</returns>
+        IGenomeFactory<MazeGenome> CreateMazeGenomeFactory();
 
         /// <summary>
         ///     Initialize the experiment with some optional XML configutation data.
