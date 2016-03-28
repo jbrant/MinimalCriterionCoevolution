@@ -19,6 +19,7 @@ using SharpNeat.Domains.MazeNavigation.MCNSExperiment;
 using SharpNeat.Domains.MazeNavigation.MCSExperiment;
 using SharpNeat.Domains.MazeNavigation.NoveltyExperiment;
 using SharpNeat.Domains.MazeNavigation.RandomExperiment;
+using SharpNeat.Genomes.Maze;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Loggers;
 
@@ -41,9 +42,8 @@ namespace SharpNeatConsole
 
     public class MazeNavigationExperimentExecutor
     {
-        private static IGenomeFactory<NeatGenome> _genomeFactory;
-        private static List<NeatGenome> _genomeList;
         private static INeatEvolutionAlgorithm<NeatGenome> _ea;
+        private static ICoevolutionAlgorithmContainer<NeatGenome, MazeGenome> _coevolutionEaContainer;
         private static ILog _executionLogger;
 
         private static readonly Dictionary<ExecutionParameter, String> _executionConfiguration =
@@ -58,7 +58,7 @@ namespace SharpNeatConsole
             _executionLogger = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
             // Extract the execution parameters and check for any errors (exit application if any found)
-            if (parseAndValidateConfiguration(args) == false)
+            if (ParseAndValidateConfiguration(args) == false)
                 Environment.Exit(0);
 
             // Set the execution source (file or database)
@@ -143,7 +143,7 @@ namespace SharpNeatConsole
         /// </summary>
         /// <param name="executionArguments">The arguments with which the experiment executor is being invoked.</param>
         /// <returns>Boolean status indicating whether parsing the configuration suceeded.</returns>
-        private static bool parseAndValidateConfiguration(string[] executionArguments)
+        private static bool ParseAndValidateConfiguration(string[] executionArguments)
         {
             bool isConfigurationValid = executionArguments != null;
 
@@ -375,35 +375,38 @@ namespace SharpNeatConsole
 
                 do
                 {
+                    IGenomeFactory<NeatGenome> genomeFactory;
+                    List<NeatGenome> genomeList;
+
                     // If there were seed population files specified, read them in
                     if (seedPopulationFiles != null)
                     {
                         // Open and load population XML file.
                         using (XmlReader xr = XmlReader.Create(seedPopulationFiles[runIdx]))
                         {
-                            _genomeList = experiment.LoadPopulation(xr);
+                            genomeList = experiment.LoadPopulation(xr);
                         }
 
                         // Grab the specified genome factory on the first genome in the list
-                        _genomeFactory = _genomeList[0].GenomeFactory;
+                        genomeFactory = genomeList[0].GenomeFactory;
                     }
 
                     // Otherwise, generate the starting population
                     else
                     {
                         // Create a new genome factory
-                        _genomeFactory = experiment.CreateGenomeFactory();
+                        genomeFactory = experiment.CreateGenomeFactory();
 
                         // Generate the initial population
-                        _genomeList = _genomeFactory.CreateGenomeList(experiment.SeedGenomeCount, 0);
+                        genomeList = genomeFactory.CreateGenomeList(experiment.SeedGenomeCount, 0);
                     }
 
-                    _executionLogger.Info(string.Format("Loaded [{0}] genomes as initial population.", _genomeList.Count));
+                    _executionLogger.Info(string.Format("Loaded [{0}] genomes as initial population.", genomeList.Count));
 
                     _executionLogger.Info("Kicking off Experiment initialization/execution");
 
                     // Kick off the experiment run
-                    RunExperiment(experimentName, experiment, numRuns, runIdx, curEvaluations);
+                    RunExperiment(genomeFactory, genomeList, experimentName, experiment, numRuns, runIdx, curEvaluations);
 
                     // Increment the evaluations
                     curEvaluations = _ea.CurrentEvaluations;
@@ -456,18 +459,20 @@ namespace SharpNeatConsole
 
                 do
                 {
+                    List<NeatGenome> genomeList;
+
                     // Open and load population XML file.
                     using (XmlReader xr = XmlReader.Create(seedPopulationFiles[runIdx]))
                     {
-                        _genomeList = experiment.LoadPopulation(xr);
+                        genomeList = experiment.LoadPopulation(xr);
                     }
-                    _genomeFactory = _genomeList[0].GenomeFactory;
-                    _executionLogger.Info(string.Format("Loaded [{0}] genomes as initial population.", _genomeList.Count));
+                    IGenomeFactory<NeatGenome> genomeFactory = genomeList[0].GenomeFactory;
+                    _executionLogger.Info(string.Format("Loaded [{0}] genomes as initial population.", genomeList.Count));
 
                     _executionLogger.Info("Kicking off Experiment initialization/execution");
 
                     // Kick off the experiment run
-                    RunExperiment(experimentName, experiment, numRuns, runIdx, curEvaluations);
+                    RunExperiment(genomeFactory, genomeList, experimentName, experiment, numRuns, runIdx, curEvaluations);
 
                     // Increment the evaluations
                     curEvaluations = _ea.CurrentEvaluations;
@@ -539,50 +544,37 @@ namespace SharpNeatConsole
 
                 _executionLogger.Info(string.Format("Initialized experiment {0}.", experiment.GetType()));
 
-                // This will hold the number of evaluations executed for each "attempt" of the EA within the current run
-                ulong curEvaluations = 0;
-
-                // This will hold the number of restarts of the algorithm
-                int curRestarts = 0;
-
                 do
                 {
                     // If there were seed population files specified, read them in
-                    if (seedPopulationFiles != null)
+                    if (Boolean.Parse(_executionConfiguration[ExecutionParameter.GeneratePopulation]) == false)
                     {
-                        // Open and load population XML file.
-                        using (XmlReader xr = XmlReader.Create(seedPopulationFiles[runIdx]))
-                        {
-                            _genomeList = experiment.LoadPopulation(xr);
-                        }
-
-                        // Grab the specified genome factory on the first genome in the list
-                        _genomeFactory = _genomeList[0].GenomeFactory;
+                        // TODO: Need to implement ability to load maze seed genomes
+                        throw new NotImplementedException("Currently unable to read in serialized maze genomes.");
                     }
 
                     // Otherwise, generate the starting population
-                    else
-                    {
-                        // Create a new genome factory
-                        _genomeFactory = experiment.CreateGenomeFactory();
+                    // Create a new agent genome factory
+                    var agentGenomeFactory = experiment.CreateAgentGenomeFactory();
 
-                        // Generate the initial population
-                        _genomeList = _genomeFactory.CreateGenomeList(experiment.SeedGenomeCount, 0);
-                    }
+                    // Create a new maze genome factory
+                    var mazeGenomeFactory = experiment.CreateMazeGenomeFactory();
 
-                    _executionLogger.Info(string.Format("Loaded [{0}] genomes as initial population.", _genomeList.Count));
+                    // Generate the initial agent population
+                    var agentGenomeList = agentGenomeFactory.CreateGenomeList(experiment.AgentSeedGenomeCount, 0);
+
+                    // Generate the initial maze population
+                    var mazeGenomeList = mazeGenomeFactory.CreateGenomeList(experiment.MazeSeedGenomeCount, 0);
+
+                    _executionLogger.Info(string.Format("Loaded [{0}] genomes as initial population.",
+                        agentGenomeList.Count));
 
                     _executionLogger.Info("Kicking off Experiment initialization/execution");
 
                     // Kick off the experiment run
-                    RunExperiment(experimentName, experiment, numRuns, runIdx, curEvaluations);
-
-                    // Increment the evaluations
-                    curEvaluations = _ea.CurrentEvaluations;
-
-                    // Increment the restart count
-                    curRestarts++;
-                } while (_ea.StopConditionSatisfied == false && experiment.MaxRestarts >= curRestarts);
+                    RunExperiment(agentGenomeFactory, mazeGenomeFactory, agentGenomeList, mazeGenomeList, experimentName,
+                        experiment, numRuns, runIdx);
+                } while (_ea.StopConditionSatisfied == false);
 
                 // Close the data loggers
                 evolutionDataLogger.Close();
@@ -590,7 +582,21 @@ namespace SharpNeatConsole
             }
         }
 
-        private static void RunExperiment(string experimentName, BaseMazeNavigationExperiment experiment, int numRuns,
+        /// <summary>
+        ///     Executes a single run of the given experiment.
+        /// </summary>
+        /// <param name="genomeFactory">The factory for producing NEAT genomes.</param>
+        /// <param name="genomeList">The list of initial genomes (population).</param>
+        /// <param name="experimentName">The name of the experiment to execute.</param>
+        /// <param name="experiment">Reference to the initialized experiment.</param>
+        /// <param name="numRuns">Total number of runs being executed.</param>
+        /// <param name="runIdx">The current run being executed.</param>
+        /// <param name="startingEvaluation">
+        ///     The number of evaluations from which execution is starting (this is only applicable in
+        ///     the event of a restart).
+        /// </param>
+        private static void RunExperiment(IGenomeFactory<NeatGenome> genomeFactory, List<NeatGenome> genomeList,
+            string experimentName, BaseMazeNavigationExperiment experiment, int numRuns,
             int runIdx, ulong startingEvaluation)
         {
             // Trap initialization exceptions (which, if applicable, could be due to initialization algorithm not
@@ -598,7 +604,7 @@ namespace SharpNeatConsole
             try
             {
                 // Create evolution algorithm and attach update event.
-                _ea = experiment.CreateEvolutionAlgorithm(_genomeFactory, _genomeList, startingEvaluation);
+                _ea = experiment.CreateEvolutionAlgorithm(genomeFactory, genomeList, startingEvaluation);
                 _ea.UpdateEvent += ea_UpdateEvent;
             }
             catch (Exception)
@@ -617,6 +623,39 @@ namespace SharpNeatConsole
             _ea.StartContinue();
 
             while (RunState.Terminated != _ea.RunState && RunState.Paused != _ea.RunState)
+            {
+                Thread.Sleep(2000);
+            }
+        }
+
+        /// <summary>
+        ///     Executes a single run of the given coevolution experiment.
+        /// </summary>
+        /// <param name="genomeFactory">The factory for producing NEAT genomes.</param>
+        /// <param name="genomeList">The list of initial genomes (population).</param>
+        /// <param name="experimentName">The name of the coevolution experiment to execute.</param>
+        /// <param name="experiment">Reference to the initialized experiment.</param>
+        /// <param name="numRuns">Total number of runs being executed.</param>
+        /// <param name="runIdx">The current run being executed.</param>
+        private static void RunExperiment(IGenomeFactory<NeatGenome> agentGenomeFactory,
+            IGenomeFactory<MazeGenome> mazeGenomeFactory, List<NeatGenome> agentGenomeList,
+            List<MazeGenome> mazeGenomeList, string experimentName, ICoevolutionExperiment experiment, int numRuns,
+            int runIdx)
+        {
+            // Create evolution algorithm and attach update event.
+            _coevolutionEaContainer = experiment.CreateCoevolutionAlgorithmContainer(agentGenomeFactory,
+                mazeGenomeFactory, agentGenomeList,
+                mazeGenomeList);
+            _coevolutionEaContainer.UpdateEvent += coevolutionContainer_UpdateEvent;
+
+            _executionLogger.Info(string.Format("Executing Experiment {0}, Run {1} of {2}", experimentName, runIdx + 1,
+                numRuns));
+
+            // Start algorithm (it will run on a background thread).
+            _coevolutionEaContainer.StartContinue();
+
+            while (RunState.Terminated != _coevolutionEaContainer.RunState &&
+                   RunState.Paused != _coevolutionEaContainer.RunState)
             {
                 Thread.Sleep(2000);
             }
@@ -655,6 +694,10 @@ namespace SharpNeatConsole
                     _ea.CurrentGeneration,
                     _ea.CurrentEvaluations, _ea.Statistics._maxFitness));
             }
+        }
+
+        private static void coevolutionContainer_UpdateEvent(object sender, EventArgs e)
+        {
         }
 
         /// <summary>

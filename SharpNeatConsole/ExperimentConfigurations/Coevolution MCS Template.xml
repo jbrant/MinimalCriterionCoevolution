@@ -2,6 +2,8 @@
 <Config>
   <PopulationSize1>100</PopulationSize1>
   <PopulationSize2>100</PopulationSize2>
+  <SeedPopulationSize1>10</SeedPopulationSize1>
+  <SeedPopulationSize2>10</SeedPopulationSize2>
   <Activation>
     <Scheme>Acyclic</Scheme>
   </Activation>

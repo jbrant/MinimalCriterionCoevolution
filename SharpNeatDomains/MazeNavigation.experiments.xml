@@ -478,8 +478,10 @@
     <AssemblyPath>SharpNeatDomains.dll</AssemblyPath>
     <ClassName>SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment.CoevolutionMazeNavigationMCSExperiment</ClassName>
     <Config>
-      <PopulationSize1>100</PopulationSize1>
-      <PopulationSize2>100</PopulationSize2>
+      <AgentPopulationSize>100</AgentPopulationSize>
+      <MazePopulationSize>100</MazePopulationSize>
+      <AgentSeedPopulationSize>10</AgentSeedPopulationSize>
+      <MazeSeedPopulationSize>10</MazeSeedPopulationSize>
       <Activation>
         <Scheme>Acyclic</Scheme>
       </Activation>
