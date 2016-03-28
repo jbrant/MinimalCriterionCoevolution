@@ -84,7 +84,7 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
         #region Public Methods
 
         /// <summary>
-        ///     Runs a agent (i.e. the maze navigator) through a collection of mazes until the minimal criteria is satisfied.
+        ///     Runs an agent (i.e. the maze navigator) through a collection of mazes until the minimal criteria is satisfied.
         /// </summary>
         /// <param name="agent">The maze navigator brain (ANN).</param>
         /// <param name="currentGeneration">The current generation or evaluation batch.</param>
@@ -160,7 +160,18 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
         /// <param name="evaluationLogger">The evaluation logger.</param>
         public void Initialize(IDataLogger evaluationLogger)
         {
-            throw new NotImplementedException();
+            // Set the run phase
+            evaluationLogger?.UpdateRunPhase(RunPhase.Primary);
+
+            // Log the header
+            evaluationLogger?.LogHeader(new List<LoggableElement>
+            {
+                new LoggableElement(EvaluationFieldElements.Generation, 0),
+                new LoggableElement(EvaluationFieldElements.EvaluationCount, EvaluationCount),
+                new LoggableElement(EvaluationFieldElements.StopConditionSatisfied, StopConditionSatisfied),
+                new LoggableElement(EvaluationFieldElements.RunPhase, RunPhase.Initialization),
+                new LoggableElement(EvaluationFieldElements.IsViable, false)
+            }, _multiMazeWorldFactory.CreateMazeNavigationWorld(new MazeStructure(0, 0, 1), null).GetLoggableElements());
         }
 
         /// <summary>
@@ -176,7 +187,7 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
         /// <summary>
         ///     Updates the collection of mazes to use for future evaluations.
         /// </summary>
-        /// <param name="evaluatorPhenomes"></param>
+        /// <param name="evaluatorPhenomes">The complete collection of available mazes.</param>
         public void UpdateEvaluatorPhenotypes(IEnumerable<object> evaluatorPhenomes)
         {
             _multiMazeWorldFactory.SetMazeConfigurations((IList<MazeStructure>) evaluatorPhenomes);

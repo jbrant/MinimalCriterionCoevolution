@@ -507,6 +507,8 @@
       <MaxEvaluations>100</MaxEvaluations>
       <MaxTimesteps>400</MaxTimesteps>
       <MinSuccessDistance>5</MinSuccessDistance>
+      <MazeHeight>20</MazeHeight>
+      <MazeWidth>20</MazeWidth>
       <NumMazesSolvedCriteria>1</NumMazesSolvedCriteria>
       <NumAgentsSolvedCriteria>1</NumAgentsSolvedCriteria>
       <NumAgentsFailedCriteria>1</NumAgentsFailedCriteria>

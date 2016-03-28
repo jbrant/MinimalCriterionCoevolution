@@ -1,6 +1,5 @@
 ﻿#region
 
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Xml;
@@ -24,12 +23,12 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
 
         public IGenomeFactory<NeatGenome> CreateAgentGenomeFactory()
         {
-            throw new NotImplementedException();
+            return new NeatGenomeFactory(AnnInputCount, AnnOutputCount, _neatGenomeParameters);
         }
 
         public IGenomeFactory<MazeGenome> CreateMazeGenomeFactory()
         {
-            throw new NotImplementedException();
+            return new MazeGenomeFactory();
         }
 
         public void Initialize(string name, XmlElement xmlConfig, IDataLogger evolutionDataLogger = null,
@@ -63,6 +62,8 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             // Set experiment-specific parameters
             _maxTimesteps = XmlUtils.GetValueAsInt(xmlConfig, "MaxTimesteps");
             _minSuccessDistance = XmlUtils.GetValueAsInt(xmlConfig, "MinSuccessDistance");
+            _mazeHeight = XmlUtils.GetValueAsInt(xmlConfig, "MazeHeight");
+            _mazeWidth = XmlUtils.GetValueAsInt(xmlConfig, "MazeWidth");
 
             // Get success/failure criteria constraints
             _numMazeSuccessCriteria = XmlUtils.GetValueAsInt(xmlConfig, "NumMazesSolvedCriteria");
@@ -81,7 +82,7 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             int populationSize1, int populationSize2)
         {
             // Create a genome factory for the NEAT genomes
-            IGenomeFactory<NeatGenome> neatGenomeFactory = new NeatGenomeFactory(_annInputCount, _annOutputCount,
+            IGenomeFactory<NeatGenome> neatGenomeFactory = new NeatGenomeFactory(AnnInputCount, AnnOutputCount,
                 _neatGenomeParameters);
 
             // Create a genome factory for the maze genomes
@@ -194,12 +195,12 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
         /// <summary>
         ///     The number of neural network inputs.
         /// </summary>
-        private int _annInputCount;
+        private const int AnnInputCount = 10;
 
         /// <summary>
         ///     The number of neural network outputs.
         /// </summary>
-        private int _annOutputCount;
+        private const int AnnOutputCount = 2;
 
         /// <summary>
         ///     The number of individuals to be evaluated in a single evaluation "batch".
