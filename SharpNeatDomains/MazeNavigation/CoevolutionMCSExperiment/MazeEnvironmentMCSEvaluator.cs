@@ -94,6 +94,18 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
 
         #region Public Methods
 
+        /// <summary>
+        ///     Runs a collection of agents through a maze until the minimal criteria is satisfied.
+        /// </summary>
+        /// <param name="mazeStructure">
+        ///     The structure of the maze under evaluation (namely, the walls in said maze, their passages,
+        ///     and the start/goal locations).
+        /// </param>
+        /// <param name="currentGeneration">The current generation or evaluation batch.</param>
+        /// <param name="isBridgingEvaluation">Indicates whether bridging is enabled for this evaluation (not applicable).</param>
+        /// <param name="evaluationLogger">Reference to the evaluation logger.</param>
+        /// <param name="genomeXml">The string-representation of the genome (for logging purposes).</param>
+        /// <returns>A behavior info (which is a type of behavior-based trial information).</returns>
         public BehaviorInfo Evaluate(MazeStructure mazeStructure, uint currentGeneration, bool isBridgingEvaluation,
             IDataLogger evaluationLogger, string genomeXml)
         {
@@ -162,25 +174,60 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             return trialInfo;
         }
 
+        /// <summary>
+        ///     Initializes the logger and writes header.
+        /// </summary>
+        /// <param name="evaluationLogger">The evaluation logger.</param>
         public void Initialize(IDataLogger evaluationLogger)
         {
-            throw new NotImplementedException();
+            // Set the run phase
+            evaluationLogger?.UpdateRunPhase(RunPhase.Primary);
+
+            // Log the header
+            evaluationLogger?.LogHeader(new List<LoggableElement>
+            {
+                new LoggableElement(EvaluationFieldElements.Generation, 0),
+                new LoggableElement(EvaluationFieldElements.EvaluationCount, EvaluationCount),
+                new LoggableElement(EvaluationFieldElements.StopConditionSatisfied, StopConditionSatisfied),
+                new LoggableElement(EvaluationFieldElements.RunPhase, RunPhase.Initialization),
+                new LoggableElement(EvaluationFieldElements.IsViable, false)
+            }, _multiMazeWorldFactory.CreateMazeNavigationWorld(new MazeStructure(0, 0, 1), null).GetLoggableElements());
         }
 
+        /// <summary>
+        ///     Update the evaluator based on some characteristic of the given population.
+        /// </summary>
+        /// <typeparam name="TGenome">The genome type parameter.</typeparam>
+        /// <param name="population">The current population.</param>
         public void Update<TGenome>(List<TGenome> population) where TGenome : class, IGenome<TGenome>
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        ///     Updates the collection of maze navigators to use for future evaluations.
+        /// </summary>
+        /// <param name="evaluatorPhenomes">The complete collection of available maze navigators.</param>
         public void UpdateEvaluatorPhenotypes(IEnumerable<object> evaluatorPhenomes)
         {
             _mazeNavigators = (IList<IBlackBox>) evaluatorPhenomes;
         }
 
+        /// <summary>
+        ///     Resets the internal state of the evaluation scheme.  This may not be needed for the maze navigation task.
+        /// </summary>
         public void Reset()
         {
         }
 
+        /// <summary>
+        ///     Returns MazeEnvironmentMCSEvaluator loggable elements.
+        /// </summary>
+        /// <param name="logFieldEnableMap">
+        ///     Dictionary of logging fields that can be enabled or disabled based on the specification
+        ///     of the calling routine.
+        /// </param>
+        /// <returns>The loggable elements for MazeEnvironmentMCSEvaluator.</returns>
         public List<LoggableElement> GetLoggableElements(IDictionary<FieldElement, bool> logFieldEnableMap = null)
         {
             return _behaviorCharacterizationFactory.GetLoggableElements(logFieldEnableMap);

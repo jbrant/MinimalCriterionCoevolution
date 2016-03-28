@@ -29,7 +29,7 @@ namespace SharpNeat.Core
         public BehaviorInfo(double[] behaviors)
         {
             Behaviors = behaviors;
-            DoesBehaviorSatisfyMinimalCriteria = true;
+            DoesBehaviorSatisfyMinimalCriteria = false;
         }
 
         #endregion

@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Config>
-  <PopulationSize1>100</PopulationSize1>
-  <PopulationSize2>100</PopulationSize2>
-  <SeedPopulationSize1>10</SeedPopulationSize1>
-  <SeedPopulationSize2>10</SeedPopulationSize2>
+  <AgentPopulationSize>100</AgentPopulationSize>
+  <MazePopulationSize>100</MazePopulationSize>
+  <AgentSeedPopulationSize>10</AgentSeedPopulationSize>
+  <MazeSeedPopulationSize>10</MazeSeedPopulationSize>
   <Activation>
     <Scheme>Acyclic</Scheme>
   </Activation>
@@ -29,6 +29,8 @@
   <MaxEvaluations>100</MaxEvaluations>
   <MaxTimesteps>400</MaxTimesteps>
   <MinSuccessDistance>5</MinSuccessDistance>
+  <MazeHeight>20</MazeHeight>
+  <MazeWidth>20</MazeWidth>
   <NumMazesSolvedCriteria>1</NumMazesSolvedCriteria>
   <NumAgentsSolvedCriteria>1</NumAgentsSolvedCriteria>
   <NumAgentsFailedCriteria>1</NumAgentsFailedCriteria>
