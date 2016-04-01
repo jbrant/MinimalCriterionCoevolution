@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Config>
-  <AgentPopulationSize>100</AgentPopulationSize>
+  <AgentPopulationSize>1000</AgentPopulationSize>
   <MazePopulationSize>100</MazePopulationSize>
-  <AgentSeedPopulationSize>10</AgentSeedPopulationSize>
-  <MazeSeedPopulationSize>10</MazeSeedPopulationSize>
+  <AgentSeedGenomeCount>500</AgentSeedGenomeCount>
+  <MazeSeedGenomeCount>1</MazeSeedGenomeCount>
   <Activation>
     <Scheme>Acyclic</Scheme>
   </Activation>
@@ -24,16 +24,33 @@
   </MazeGenomeConfig>
   <BehaviorConfig>
     <BehaviorCharacterization>EndMazePoint</BehaviorCharacterization>
-  </BehaviorConfig>
+  </BehaviorConfig>  
   <OffspringBatchSize>10</OffspringBatchSize>
   <MaxEvaluations>100</MaxEvaluations>
   <MaxTimesteps>400</MaxTimesteps>
   <MinSuccessDistance>5</MinSuccessDistance>
   <MazeHeight>20</MazeHeight>
   <MazeWidth>20</MazeWidth>
+  <MazeScaleMultiplier>16</MazeScaleMultiplier>
   <NumMazesSolvedCriteria>1</NumMazesSolvedCriteria>
   <NumAgentsSolvedCriteria>1</NumAgentsSolvedCriteria>
   <NumAgentsFailedCriteria>1</NumAgentsFailedCriteria>
+  <InitializationAlgorithmConfig>
+    <PopulationSize>200</PopulationSize>
+    <GenomeConfig>
+      <InitialConnectionProportion>1</InitialConnectionProportion>
+      <WeightMutationProbability>0.9</WeightMutationProbability>
+      <AddConnnectionProbability>0.005</AddConnnectionProbability>
+      <AddNodeProbability>0.01</AddNodeProbability>
+      <DeleteConnectionProbability>0.001</DeleteConnectionProbability>
+      <ConnectionWeightRange>5</ConnectionWeightRange>
+    </GenomeConfig>
+    <SpecieCount>15</SpecieCount>
+    <SelectionProportion>0.2</SelectionProportion>
+    <OffspringAsexualProbability>0.5</OffspringAsexualProbability>
+    <OffspringSexualProbability>0.5</OffspringSexualProbability>
+    <InterspeciesMatingProbability>0.001</InterspeciesMatingProbability>
+  </InitializationAlgorithmConfig>
   <Description>
     Coevolutionary MCS Maze navigation experiment, evolving both maze navigators and the mazes themselves.
   </Description>

@@ -19,9 +19,17 @@ namespace SharpNeat.Genomes.Maze
         /// <summary>
         ///     Maze Genome Factory default constructor.
         /// </summary>
-        public MazeGenomeFactory()
+        public MazeGenomeFactory() : this(new MazeGenomeParameters())
         {
-            MazeGenomeParameters = new MazeGenomeParameters();
+        }
+
+        /// <summary>
+        ///     Maze Genome Factory constructor which takes custom maze genome parameters.
+        /// </summary>
+        /// <param name="mazeGenomeParameters">The maze genome parameters.</param>
+        public MazeGenomeFactory(MazeGenomeParameters mazeGenomeParameters)
+        {
+            MazeGenomeParameters = mazeGenomeParameters;
             GenomeIdGenerator = new UInt32IdGenerator();
         }
 

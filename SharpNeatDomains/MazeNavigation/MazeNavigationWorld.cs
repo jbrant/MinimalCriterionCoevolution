@@ -92,6 +92,25 @@ namespace SharpNeat.Domains.MazeNavigation
         }
 
         /// <summary>
+        ///     Creates the maze navigation world, omitting the maze niche grid and number of bridging applications.
+        /// </summary>
+        /// <param name="walls">The walls in the maze environemnt.</param>
+        /// <param name="navigatorLocation">The starting location of the maze navigator.</param>
+        /// <param name="goalLocation">The location of the goal (target).</param>
+        /// <param name="minSuccessDistance">The minimum distance from the target for the trial to be considered a success.</param>
+        /// <param name="maxDistanceToTarget">The maximum distance from the target possible.</param>
+        /// <param name="maxTimeSteps">The maximum number of time steps to run a given trial.</param>
+        /// <param name="behaviorCharacterization">The behavior characterization for a navigator.</param>
+        public MazeNavigationWorld(List<Wall> walls, DoublePoint navigatorLocation, DoublePoint goalLocation,
+            int minSuccessDistance, int maxDistanceToTarget, int maxTimeSteps,
+            IBehaviorCharacterization behaviorCharacterization)
+            : this(
+                walls, new MazeNicheGrid(), navigatorLocation, goalLocation, minSuccessDistance, maxDistanceToTarget,
+                maxTimeSteps, 0)
+        {
+        }
+
+        /// <summary>
         ///     Creates the maze navigation world, omitting the maze niche grid, maximum distance to the target (required for
         ///     fitness-based evaluations), and number of bridging applications.
         /// </summary>

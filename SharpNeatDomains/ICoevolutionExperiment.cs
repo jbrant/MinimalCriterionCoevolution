@@ -59,6 +59,16 @@ namespace SharpNeat.Domains
         IGenomeFactory<MazeGenome> CreateMazeGenomeFactory();
 
         /// <summary>
+        ///     Save a population of agent genomes to an XmlWriter.
+        /// </summary>
+        void SaveAgentPopulation(XmlWriter xw, IList<NeatGenome> agentGenomeList);
+
+        /// <summary>
+        ///     Save a population of maze genomes to an XmlWriter.
+        /// </summary>
+        void SaveMazePopulation(XmlWriter xw, IList<MazeGenome> mazeGenomeList);
+
+        /// <summary>
         ///     Initialize the experiment with some optional XML configutation data.
         /// </summary>
         void Initialize(string name, XmlElement xmlConfig, IDataLogger evolutionDataLogger = null,

@@ -8,7 +8,8 @@ using System.Collections.Generic;
 namespace SharpNeat.Phenomes.Mazes
 {
     /// <summary>
-    ///     The maze structure encapsulates the entire maze, including borders and all of the walls.  It can be scaled up from the
+    ///     The maze structure encapsulates the entire maze, including borders and all of the walls.  It can be scaled up from
+    ///     the
     ///     original resolution used during evolution.
     /// </summary>
     public class MazeStructure
@@ -28,6 +29,10 @@ namespace SharpNeat.Phenomes.Mazes
             _mazeWidth = mazeWidth;
             _mazeHeight = mazeHeight;
             _scaleMultiplier = scaleMultiplier;
+
+            // Set the scaled maze width and height
+            ScaledMazeHeight = mazeHeight*scaleMultiplier;
+            ScaledMazeWidth = mazeWidth*scaleMultiplier;
 
             // Initialize bounding walls
             GenerateBorderWalls();
@@ -75,6 +80,16 @@ namespace SharpNeat.Phenomes.Mazes
         /// </summary>
         public MazeStructurePoint TargetLocation { get; private set; }
 
+        /// <summary>
+        ///     The scaled height of the maze.
+        /// </summary>
+        public int ScaledMazeHeight { get; }
+
+        /// <summary>
+        ///     The scaled width of the maze.
+        /// </summary>
+        public int ScaledMazeWidth { get; }
+
         public int[,] MazeArray { get; private set; }
 
         #endregion
@@ -87,18 +102,16 @@ namespace SharpNeat.Phenomes.Mazes
         private void GenerateBorderWalls()
         {
             // Add bottom border
-            Walls.Add(new MazeStructureWall(0, 0, (_mazeWidth*_scaleMultiplier), 0));
+            Walls.Add(new MazeStructureWall(0, 0, ScaledMazeWidth, 0));
 
             // Add left border
-            Walls.Add(new MazeStructureWall(0, 0, 0, (_mazeHeight*_scaleMultiplier)));
+            Walls.Add(new MazeStructureWall(0, 0, 0, ScaledMazeHeight));
 
             // Add right border
-            Walls.Add(new MazeStructureWall((_mazeWidth*_scaleMultiplier), 0, (_mazeWidth*_scaleMultiplier),
-                (_mazeHeight*_scaleMultiplier)));
+            Walls.Add(new MazeStructureWall(ScaledMazeWidth, 0, ScaledMazeWidth, ScaledMazeHeight));
 
             // Add top border
-            Walls.Add(new MazeStructureWall(0, (_mazeHeight*_scaleMultiplier), (_mazeWidth*_scaleMultiplier),
-                (_mazeHeight*_scaleMultiplier)));
+            Walls.Add(new MazeStructureWall(0, ScaledMazeHeight, ScaledMazeWidth, ScaledMazeHeight));
         }
 
         /// <summary>
@@ -111,7 +124,8 @@ namespace SharpNeat.Phenomes.Mazes
             StartLocation = new MazeStructurePoint(_scaleMultiplier/2, _scaleMultiplier/2);
 
             // Set the target location to be in the bottom right corner of the maze
-            TargetLocation = new MazeStructurePoint(_mazeWidth - (_scaleMultiplier/2), _mazeHeight - (_scaleMultiplier/2));
+            TargetLocation = new MazeStructurePoint(ScaledMazeWidth - (_scaleMultiplier/2),
+                ScaledMazeHeight - (_scaleMultiplier/2));
         }
 
         /// <summary>
@@ -134,7 +148,8 @@ namespace SharpNeat.Phenomes.Mazes
                     {
                         curHorizontalLine = new MazeStructureWall
                         {
-                            StartMazeStructurePoint = new MazeStructurePoint(curCol*_scaleMultiplier, (curRow + 1)*_scaleMultiplier)
+                            StartMazeStructurePoint =
+                                new MazeStructurePoint(curCol*_scaleMultiplier, (curRow + 1)*_scaleMultiplier)
                         };
                     }
                     // Otherwise, if we've been tracking a horizontal line and the current position contains neither a horizontal line segment 

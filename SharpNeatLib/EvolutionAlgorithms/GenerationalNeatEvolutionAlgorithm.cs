@@ -124,7 +124,7 @@ namespace SharpNeat.EvolutionAlgorithms
 
             // TODO: More checks.
             Debug.Assert(GenomeList.Count == PopulationSize);
-            
+
             // If there is a logger defined, log the generation stats
             EvolutionLogger?.LogRow(GetLoggableElements(), Statistics.GetLoggableElements(),
                 (CurrentChampGenome as NeatGenome)?.GetLoggableElements());
@@ -167,11 +167,15 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     (KMeansClusteringStrategy with ManhattanDistanceMetric) and complexity regulation strategy
         ///     (NullComplexityRegulationStrategy).
         /// </summary>
+        /// <param name="runPhase">
+        ///     The experiment phase indicating whether this is an initialization process or the primary
+        ///     algorithm.
+        /// </param>
         /// <param name="logger">The data logger (optional).</param>
-        public GenerationalNeatEvolutionAlgorithm(IDataLogger logger = null)
+        public GenerationalNeatEvolutionAlgorithm(RunPhase runPhase = RunPhase.Primary, IDataLogger logger = null)
             : this(
                 new KMeansClusteringStrategy<TGenome>(new ManhattanDistanceMetric()),
-                new NullComplexityRegulationStrategy(), logger)
+                new NullComplexityRegulationStrategy(), runPhase, logger)
         {
         }
 
@@ -180,12 +184,17 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     strategy (KMeansClusteringStrategy with ManhattanDistanceMetric) and default complexity regulation strategy
         ///     (NullComplexityRegulationStrategy).
         /// </summary>
+        /// <param name="runPhase">
+        ///     The experiment phase indicating whether this is an initialization process or the primary
+        ///     algorithm.
+        /// </param>
         /// <param name="eaParams">The NEAT parameters to use for controlling evolution.</param>
         /// <param name="logger">The data logger (optional).</param>
-        public GenerationalNeatEvolutionAlgorithm(NeatEvolutionAlgorithmParameters eaParams, IDataLogger logger = null)
+        public GenerationalNeatEvolutionAlgorithm(NeatEvolutionAlgorithmParameters eaParams,
+            RunPhase runPhase = RunPhase.Primary, IDataLogger logger = null)
             : this(
                 eaParams, new KMeansClusteringStrategy<TGenome>(new ManhattanDistanceMetric()),
-                new NullComplexityRegulationStrategy(), logger)
+                new NullComplexityRegulationStrategy(), runPhase, logger)
         {
         }
 
@@ -195,14 +204,19 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </summary>
         /// <param name="speciationStrategy">The strategy to use for controlling NEAT speciation.</param>
         /// <param name="complexityRegulationStrategy">The strategy to use for complexing and simplifying NEAT networks.</param>
+        /// <param name="runPhase">
+        ///     The experiment phase indicating whether this is an initialization process or the primary
+        ///     algorithm.
+        /// </param>
         /// <param name="logger">The data logger (optional).</param>
         public GenerationalNeatEvolutionAlgorithm(ISpeciationStrategy<TGenome> speciationStrategy,
-            IComplexityRegulationStrategy complexityRegulationStrategy,
+            IComplexityRegulationStrategy complexityRegulationStrategy, RunPhase runPhase = RunPhase.Primary,
             IDataLogger logger = null)
         {
             SpeciationStrategy = speciationStrategy;
             ComplexityRegulationStrategy = complexityRegulationStrategy;
             EvolutionLogger = logger;
+            RunPhase = runPhase;
         }
 
         /// <summary>
@@ -211,15 +225,20 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <param name="eaParams">The NEAT parameters to use for controlling evolution.</param>
         /// <param name="speciationStrategy">The strategy to use for controlling NEAT speciation.</param>
         /// <param name="complexityRegulationStrategy">The strategy to use for complexing and simplifying NEAT networks.</param>
+        /// <param name="runPhase">
+        ///     The experiment phase indicating whether this is an initialization process or the primary
+        ///     algorithm.
+        /// </param>
         /// <param name="logger">The data logger (optional).</param>
         public GenerationalNeatEvolutionAlgorithm(NeatEvolutionAlgorithmParameters eaParams,
             ISpeciationStrategy<TGenome> speciationStrategy,
-            IComplexityRegulationStrategy complexityRegulationStrategy,
+            IComplexityRegulationStrategy complexityRegulationStrategy, RunPhase runPhase = RunPhase.Primary,
             IDataLogger logger = null) : base(eaParams)
         {
             SpeciationStrategy = speciationStrategy;
             ComplexityRegulationStrategy = complexityRegulationStrategy;
             EvolutionLogger = logger;
+            RunPhase = runPhase;
         }
 
         #endregion
