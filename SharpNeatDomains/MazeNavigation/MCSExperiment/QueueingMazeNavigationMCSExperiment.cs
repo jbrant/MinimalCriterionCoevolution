@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Xml;
 using ExperimentEntities;
 using SharpNeat.Core;
+using SharpNeat.Domains.MazeNavigation.Bootstrappers;
 using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Loggers;

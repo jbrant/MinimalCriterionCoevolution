@@ -3,41 +3,55 @@
 using System;
 using System.Collections.Generic;
 using SharpNeat.Core;
-using SharpNeat.Domains.MazeNavigation.Components;
 using SharpNeat.Loggers;
 using SharpNeat.Phenomes;
+using SharpNeat.Phenomes.Mazes;
 
 #endregion
 
-namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
+namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
 {
     /// <summary>
-    ///     Defines evaluation rules and process for an initialization evaluation of the minimal criteria search (MCS)
-    ///     algorithm.
+    ///     Defines evaluation rules and process for an initialization evaluation of the fitness algorithm.
     /// </summary>
-    internal class MazeNavigationMCSInitializationEvaluator : IPhenomeEvaluator<IBlackBox, BehaviorInfo>
+    public class MazeNavigatorFitnessInitializationEvaluator : IPhenomeEvaluator<IBlackBox, FitnessInfo>
     {
-        #region Constructor
+        #region Constructors
 
         /// <summary>
-        ///     MCS Initialization Evaluator constructor.
+        ///     Maze Navigator fitness initialization evaluator constructor.
         /// </summary>
-        /// <param name="maxDistanceToTarget">The maximum distance possible from the target location.</param>
         /// <param name="maxTimesteps">The maximum number of time steps in a single simulation.</param>
-        /// <param name="mazeVariant">The maze environment used for the simulation.</param>
         /// <param name="minSuccessDistance">The minimum distance from the target to be considered a successful run.</param>
-        /// <param name="behaviorCharacterizationFactory">The initialized behavior characterization factory.</param>
-        /// <param name="startingEvaluations">Number of evaluations that have been executed prior to this run.</param>
-        internal MazeNavigationMCSInitializationEvaluator(int maxDistanceToTarget, int maxTimesteps,
-            MazeVariant mazeVariant, int minSuccessDistance,
-            IBehaviorCharacterizationFactory behaviorCharacterizationFactory, ulong startingEvaluations)
+        /// <param name="maxDistanceToTarget">The maximum distance from the target possible.</param>
+        /// <param name="startingEvaluations">The number of evaluations from which the evaluator is starting (defaults to 0).</param>
+        public MazeNavigatorFitnessInitializationEvaluator(int maxTimesteps, int minSuccessDistance,
+            int maxDistanceToTarget, ulong startingEvaluations = 0)
         {
-            _behaviorCharacterizationFactory = behaviorCharacterizationFactory;
             EvaluationCount = startingEvaluations;
 
-            // Create the maze world factory
-            _mazeWorldFactory = new MazeNavigationWorldFactory<BehaviorInfo>(mazeVariant, minSuccessDistance,
-                maxDistanceToTarget, maxTimesteps);
+            // Create factory for generating mazes
+            _multiMazeWorldFactory = new MultiMazeNavigationWorldFactory<FitnessInfo>(maxTimesteps, minSuccessDistance,
+                maxDistanceToTarget);
+        }
+
+        /// <summary>
+        ///     Maze Navigator fitness initialization evaluator constructor.
+        /// </summary>
+        /// <param name="maxTimesteps">The maximum number of time steps in a single simulation.</param>
+        /// <param name="minSuccessDistance">The minimum distance from the target to be considered a successful run.</param>
+        /// <param name="maxDistanceToTarget">The maximum distance from the target possible.</param>
+        /// <param name="initialMazeStructure">
+        ///     The maze structure with which to seed the list of maze structures in the maze
+        ///     factory.
+        /// </param>
+        /// <param name="startingEvaluations">The number of evaluations from which the evaluator is starting (defaults to 0).</param>
+        public MazeNavigatorFitnessInitializationEvaluator(int maxTimesteps, int minSuccessDistance,
+            int maxDistanceToTarget, MazeStructure initialMazeStructure, ulong startingEvaluations = 0)
+            : this(maxTimesteps, minSuccessDistance, maxDistanceToTarget, startingEvaluations)
+        {
+            // Add initial maze structure
+            _multiMazeWorldFactory.SetMazeConfigurations(new List<MazeStructure>(1) {initialMazeStructure});
         }
 
         #endregion
@@ -45,14 +59,9 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         #region Private members
 
         /// <summary>
-        ///     The behavior characterization factory.
+        ///     The multi maze navigation world factory.
         /// </summary>
-        private readonly IBehaviorCharacterizationFactory _behaviorCharacterizationFactory;
-
-        /// <summary>
-        ///     The maze navigation world factory.
-        /// </summary>
-        private readonly MazeNavigationWorldFactory<BehaviorInfo> _mazeWorldFactory;
+        private readonly MultiMazeNavigationWorldFactory<FitnessInfo> _multiMazeWorldFactory;
 
         /// <summary>
         ///     Lock object for synchronizing evaluation counter increments.
@@ -83,12 +92,12 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         /// </summary>
         /// <param name="agent">The maze navigator brain (ANN).</param>
         /// <param name="currentGeneration">The current generation or evaluation batch.</param>
-        /// <param name="isBridgingEvaluation">Indicates whether bridging is enabled for this evaluation.</param>
         /// <param name="evaluationLogger">Reference to the evaluation logger.</param>
         /// <param name="genomeXml">The string-representation of the genome (for logging purposes).</param>
-        /// <returns>A behavior info (which is a type of behavior-based trial information).</returns>
-        public BehaviorInfo Evaluate(IBlackBox agent, uint currentGeneration, bool isBridgingEvaluation,
-            IDataLogger evaluationLogger, string genomeXml)
+        /// <returns>A fitness info (which is a function of the euclidean distance to the target).</returns>
+        public FitnessInfo Evaluate(IBlackBox agent, uint currentGeneration, bool isBridgi,
+            IDataLogger evaluationLogger,
+            string genomeXml)
         {
             ulong threadLocalEvaluationCount;
             lock (_evaluationLock)
@@ -100,39 +109,24 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             // Default the stop condition satisfied to false
             bool goalReached = false;
 
-            // Generate new behavior characterization
-            IBehaviorCharacterization behaviorCharacterization =
-                _behaviorCharacterizationFactory.CreateBehaviorCharacterization();
-
             // Instantiate the maze world
-            MazeNavigationWorld<BehaviorInfo> world =
-                _mazeWorldFactory.CreateMazeNavigationWorld(behaviorCharacterization);
+            MazeNavigationWorld<FitnessInfo> world = _multiMazeWorldFactory.CreateMazeNavigationWorld();
 
             // Run a single trial
-            BehaviorInfo trialInfo = world.RunTrial(agent, SearchType.NoveltySearch, out goalReached);
+            FitnessInfo trialInfo = world.RunTrial(agent, SearchType.Fitness, out goalReached);
 
-            // Set the objective distance
-            trialInfo.ObjectiveDistance = world.GetDistanceToTarget();
+            // Set the stop condition to the outcome
+            StopConditionSatisfied = goalReached;
 
-            // Check if the current location satisfies the minimal criteria
-            if (behaviorCharacterization.IsMinimalCriteriaSatisfied(trialInfo) == false)
-            {
-                trialInfo.DoesBehaviorSatisfyMinimalCriteria = false;
-            }
-
-            // If the navigator reached the goal or if the minimal criteria has been satisfied, then stop the experiment
-            if (trialInfo.DoesBehaviorSatisfyMinimalCriteria)
-                StopConditionSatisfied = true;
-
-            // Log the trial information
+            // Log trial information (only log for non-bridging evaluations)
             evaluationLogger?.LogRow(new List<LoggableElement>
             {
                 new LoggableElement(EvaluationFieldElements.Generation, currentGeneration),
-                new LoggableElement(EvaluationFieldElements.EvaluationCount, threadLocalEvaluationCount),
+                new LoggableElement(EvaluationFieldElements.EvaluationCount, EvaluationCount),
                 new LoggableElement(EvaluationFieldElements.StopConditionSatisfied, StopConditionSatisfied),
-                new LoggableElement(EvaluationFieldElements.RunPhase, RunPhase.Initialization),
-                new LoggableElement(EvaluationFieldElements.IsViable, trialInfo.DoesBehaviorSatisfyMinimalCriteria)
-            }, world.GetLoggableElements());
+                new LoggableElement(EvaluationFieldElements.RunPhase, RunPhase.Primary)
+            },
+                world.GetLoggableElements());
 
             return trialInfo;
         }
@@ -154,8 +148,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                 new LoggableElement(EvaluationFieldElements.StopConditionSatisfied, StopConditionSatisfied),
                 new LoggableElement(EvaluationFieldElements.RunPhase, RunPhase.Initialization),
                 new LoggableElement(EvaluationFieldElements.IsViable, false)
-            },
-                _mazeWorldFactory.CreateMazeNavigationWorld().GetLoggableElements());
+            }, _multiMazeWorldFactory.CreateMazeNavigationWorld(new MazeStructure(0, 0, 1), null).GetLoggableElements());
         }
 
         /// <summary>
@@ -177,7 +170,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         {
             throw new NotImplementedException();
         }
-        
+
         /// <summary>
         ///     Resets the internal state of the evaluation scheme.  This may not be needed for the maze navigation task.
         /// </summary>

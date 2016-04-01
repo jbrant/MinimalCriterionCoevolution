@@ -52,7 +52,7 @@ namespace SharpNeat.Core
         ///     Gets the current execution/run state of the IEvolutionAlgorithm.
         /// </summary>
         RunState RunState { get; }
-        
+
         /// <summary>
         ///     Gets a value indicating whether some goal fitness has been achieved and that the algorithm has therefore stopped.
         /// </summary>
@@ -78,6 +78,21 @@ namespace SharpNeat.Core
             IGenomeEvaluator<TGenome2> genomeFitnessEvaluator2,
             IGenomeFactory<TGenome2> genomeFactory2,
             List<TGenome2> genomeList2,
+            int? maxGenerations,
+            ulong? maxEvaluations);
+
+        /// <summary>
+        ///     Initializes the evolution algorithms with the provided IGenomeFitnessEvaluator, IGenomeFactory
+        ///     and an initial population of genomes for both populations as well as the maximum population size.
+        /// </summary>
+        void Initialize(IGenomeEvaluator<TGenome1> genomeFitnessEvaluator1,
+            IGenomeFactory<TGenome1> genomeFactory1,
+            List<TGenome1> genomeList1,
+            int maxPopulationSize1,
+            IGenomeEvaluator<TGenome2> genomeFitnessEvaluator2,
+            IGenomeFactory<TGenome2> genomeFactory2,
+            List<TGenome2> genomeList2,
+            int maxPopulationSize2,
             int? maxGenerations,
             ulong? maxEvaluations);
 

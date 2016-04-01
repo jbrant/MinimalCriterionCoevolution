@@ -19,30 +19,44 @@ namespace SharpNeat.Domains.MazeNavigation
     public class MultiMazeNavigationWorldFactory<TTrialInfo>
         where TTrialInfo : class, ITrialInfo
     {
-        #region Constructors
-
-        /// <summary>
-        ///     Constructor which sets the given maximum number of timesteps and minimum distance for success.
-        /// </summary>
-        /// <param name="maxTimesteps">The maximum number of timesteps for trials through the mazes.</param>
-        /// <param name="minSuccessDistance">The minimum distance from the target location to be considered a success.</param>
-        public MultiMazeNavigationWorldFactory(int maxTimesteps, int minSuccessDistance)
-        {
-            _maxTimesteps = maxTimesteps;
-            _minSuccessDistance = minSuccessDistance;
-
-            // Initialize the internal collection of maze configurations
-            _mazeConfigurations = new ConcurrentDictionary<int, MazeConfiguration>();
-        }
-
-        #endregion
-
         #region Properties
 
         /// <summary>
         ///     The total number of distinct mazes that the factory can currently produce.
         /// </summary>
         public int NumMazes { get; private set; }
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        ///     Constructor which sets the given maximum number of timesteps, minimum distance for success, and maximum distance to
+        ///     target.
+        /// </summary>
+        /// <param name="maxTimesteps">The maximum number of timesteps for trials through the mazes.</param>
+        /// <param name="minSuccessDistance">The minimum distance from the target location to be considered a success.</param>
+        /// <param name="maxDistanceToTarget">The maximum distance possible from the target location.</param>
+        public MultiMazeNavigationWorldFactory(int maxTimesteps, int minSuccessDistance, int maxDistanceToTarget)
+        {
+            _maxTimesteps = maxTimesteps;
+            _minSuccessDistance = minSuccessDistance;
+            _maxDistanceToTarget = maxDistanceToTarget;
+
+            // Initialize the internal collection of maze configurations
+            _mazeConfigurations = new ConcurrentDictionary<int, MazeConfiguration>();
+        }
+
+        /// <summary>
+        ///     Constructor which sets the given maximum number of timesteps and minimum distance for success and omits the maximum
+        ///     distance to target.
+        /// </summary>
+        /// <param name="maxTimesteps">The maximum number of timesteps for trials through the mazes.</param>
+        /// <param name="minSuccessDistance">The minimum distance from the target location to be considered a success.</param>
+        public MultiMazeNavigationWorldFactory(int maxTimesteps, int minSuccessDistance)
+            : this(maxTimesteps, minSuccessDistance, 0)
+        {
+        }
 
         #endregion
 
@@ -101,7 +115,8 @@ namespace SharpNeat.Domains.MazeNavigation
 
             // Create maze navigation world and return
             return new MazeNavigationWorld<TTrialInfo>(mazeConfig.Walls, mazeConfig.NavigatorLocation,
-                mazeConfig.GoalLocation, _minSuccessDistance, _maxTimesteps, behaviorCharacterization);
+                mazeConfig.GoalLocation, _minSuccessDistance, _maxDistanceToTarget, _maxTimesteps,
+                behaviorCharacterization);
         }
 
         /// <summary>
@@ -122,7 +137,21 @@ namespace SharpNeat.Domains.MazeNavigation
 
             // Create maze navigation world and return
             return new MazeNavigationWorld<TTrialInfo>(mazeConfig.Walls, mazeConfig.NavigatorLocation,
-                mazeConfig.GoalLocation, _minSuccessDistance, _maxTimesteps, behaviorCharacterization);
+                mazeConfig.GoalLocation, _minSuccessDistance, _maxDistanceToTarget, _maxTimesteps,
+                behaviorCharacterization);
+        }
+
+        /// <summary>
+        ///     Constructs a new maze navigation world with a null behavior characterization reference and using the first maze
+        ///     configuration in the collection of maze configurations.
+        /// </summary>
+        /// <returns>A constructed maze navigation world ready for evaluation.</returns>
+        public MazeNavigationWorld<TTrialInfo> CreateMazeNavigationWorld()
+        {
+            return new MazeNavigationWorld<TTrialInfo>(_mazeConfigurations[_currentHashKeys[0]].Walls,
+                _mazeConfigurations[_currentHashKeys[0]].NavigatorLocation,
+                _mazeConfigurations[_currentHashKeys[0]].GoalLocation, _minSuccessDistance, _maxDistanceToTarget,
+                _maxTimesteps, null);
         }
 
         #endregion
@@ -175,6 +204,11 @@ namespace SharpNeat.Domains.MazeNavigation
         ///     Minimum distance from the target for the evaluation to be considered a success.
         /// </summary>
         private readonly int _minSuccessDistance;
+
+        /// <summary>
+        ///     Maximum distance to the target (i.e. goal location).
+        /// </summary>
+        private readonly int _maxDistanceToTarget;
 
         /// <summary>
         ///     Stores collection of maze configurations, indexed by an integer hash code which corresponds to the hash of their

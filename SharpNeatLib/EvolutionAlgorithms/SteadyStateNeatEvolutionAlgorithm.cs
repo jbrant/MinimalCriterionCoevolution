@@ -116,6 +116,10 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     manhattan distance and null complexity regulation strategy.
         /// </summary>
         /// <param name="logger">The data logger (optional).</param>
+        /// <param name="runPhase">
+        ///     The experiment phase indicating whether this is an initialization process or the primary
+        ///     algorithm.
+        /// </param>
         public SteadyStateNeatEvolutionAlgorithm(IDataLogger logger = null, RunPhase runPhase = RunPhase.Primary)
             : this(
                 new KMeansClusteringStrategy<TGenome>(new ManhattanDistanceMetric()),
@@ -131,7 +135,6 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     Constructs steady state evolution algorithm with the given NEAT parameters, speciation strategy, and complexity
         ///     regulation strategy.
         /// </summary>
-        /// <param name="eaParams">The NEAT algorithm parameters.</param>
         /// <param name="speciationStrategy">The speciation strategy.</param>
         /// <param name="complexityRegulationStrategy">The complexity regulation strategy.</param>
         /// <param name="batchSize">The batch size of offspring to produce, evaluate, and remove.</param>

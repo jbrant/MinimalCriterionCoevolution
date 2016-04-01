@@ -99,6 +99,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ExperimentDataDataSet.xsd</DependentUpon>
     </Compile>
+    <Compile Include="MazeNavigation\Bootstrappers\MazeNavigationInitializer.cs" />
+    <Compile Include="MazeNavigation\Bootstrappers\FitnessCoevolutionMazeNavigationInitializer.cs" />
     <Compile Include="ICoevolutionExperiment.cs" />
     <Compile Include="IGuiNeatExperiment.cs" />
     <Compile Include="IntLine.cs" />
@@ -117,6 +119,7 @@
     <Compile Include="MazeNavigation\CoevolutionMCSExperiment\CoevolutionMazeNavigationMCSExperiment.cs" />
     <Compile Include="MazeNavigation\CoevolutionMCSExperiment\MazeEnvironmentMCSEvaluator.cs" />
     <Compile Include="MazeNavigation\CoevolutionMCSExperiment\MazeNavigatorMCSEvaluator.cs" />
+    <Compile Include="MazeNavigation\CoevolutionMCSExperiment\MazeNavigatorFitnessInitializationEvaluator.cs" />
     <Compile Include="MazeNavigation\Components\MazeNavigator.cs" />
     <Compile Include="MazeNavigation\Components\MazeVariant.cs" />
     <Compile Include="MazeNavigation\Components\PieSliceSensorArray.cs" />
@@ -148,7 +151,7 @@
     <Compile Include="MazeNavigation\NoveltyExperiment\GenerationalMazeNavigationNoveltyExperiment.cs" />
     <Compile Include="MazeNavigation\NoveltyExperiment\MazeNavigationNoveltyEvaluator.cs" />
     <Compile Include="MazeNavigation\NoveltyExperiment\SteadyStateMazeNavigationNoveltyExperiment.cs" />
-    <Compile Include="MazeNavigation\NoveltySearchMazeNavigationInitializer.cs" />
+    <Compile Include="MazeNavigation\Bootstrappers\NoveltySearchMazeNavigationInitializer.cs" />
     <Compile Include="MazeNavigation\RandomExperiment\MazeNavigationRandomEvaluator.cs" />
     <Compile Include="MazeNavigation\RandomExperiment\QueueingMazeNavigationRandomExperiment.cs" />
     <Compile Include="MazeNavigation\RandomExperiment\SteadyStateMazeNavigationRandomExperiment.cs" />
