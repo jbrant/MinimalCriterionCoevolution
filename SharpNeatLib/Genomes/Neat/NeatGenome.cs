@@ -1016,7 +1016,7 @@ namespace SharpNeat.Genomes.Neat
             // from the replaced connection (so it's functionally the same connection, but the ID is new). Ideally
             // we want the functionality of the new structure to match as closely as possible the replaced connection,
             // but that depends on the neuron activation function. As a cheap/quick approximation we make the second 
-            // connection's weight full strength (_genomeFactory.NeatGenomeParameters.ConnectionWeightRange). This
+            // connection's weight full strength (GenomeFactory.NeatGenomeParameters.ConnectionWeightRange). This
             // maps the range 0..1 being output from the new neuron to something close to 0.5..1.0 when using a unipolar
             // sigmoid (depending on exact sigmoid function in use). Weaker weights reduce that range, ultimately a zero
             // weight always gives an output of 0.5 for a unipolar sigmoid.
