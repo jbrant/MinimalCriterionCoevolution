@@ -73,6 +73,15 @@ namespace SharpNeat.Utility
         }
 
         /// <summary>
+        /// Read the named attribute and parse its string value as a boolean.
+        /// </summary>
+        public static bool ReadAttributeAsBool(XmlReader xr, string attrName)
+        {
+            string valStr = xr.GetAttribute(attrName);
+            return bool.Parse(valStr);
+        }
+
+        /// <summary>
         /// Read the named attribute and parse its string value as an integer.
         /// </summary>
         public static int ReadAttributeAsInt(XmlReader xr, string attrName)

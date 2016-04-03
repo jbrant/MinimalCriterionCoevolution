@@ -187,9 +187,14 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
                 SaveAgentPopulation(xw, seedAgentPopulation);
             }
 
+            using (XmlWriter xw = XmlWriter.Create("StartingMazeGenome.xml", new XmlWriterSettings() {Indent = true}))
+            {
+                SaveMazePopulation(xw, genomeList2);
+            }
+
             // Create the NEAT (i.e. navigator) queueing evolution algorithm
             AbstractEvolutionAlgorithm<NeatGenome> neatEvolutionAlgorithm =
-                new QueueingNeatEvolutionAlgorithm<NeatGenome>(new NeatEvolutionAlgorithmParameters(), null, _batchSize);
+            new QueueingNeatEvolutionAlgorithm<NeatGenome>(new NeatEvolutionAlgorithmParameters(), null, _batchSize);
 
             // Create the maze queueing evolution algorithm
             AbstractEvolutionAlgorithm<MazeGenome> mazeEvolutionAlgorithm =

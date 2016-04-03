@@ -15,20 +15,18 @@ namespace SharpNeat.Genomes.Maze
     /// </summary>
     public class MazeGenome : IGenome<MazeGenome>
     {
-        #region Instance Variables
-
-        // Reference to the maze genome factory (for the purposes of creating offspring)
-        private readonly MazeGenomeFactory _genomeFactory;
-
-        #endregion
-
         #region Maze Properties
+
+        /// <summary>
+        ///     Reference to the maze genome factory (for the purposes of creating offspring).
+        /// </summary>
+        public MazeGenomeFactory GenomeFactory { get; set; }
 
         /// <summary>
         ///     The list of maze genes composing the genome (each gene encodes the un-normalized location of a wall in the maze and
         ///     its passage).
         /// </summary>
-        public List<MazeGene> GeneList { get; }
+        public IList<MazeGene> GeneList { get; }
 
         #endregion
 
@@ -43,7 +41,7 @@ namespace SharpNeat.Genomes.Maze
         public MazeGenome(MazeGenomeFactory genomeFactory, uint id, uint birthGeneration)
         {
             // Set the genome factory
-            _genomeFactory = genomeFactory;
+            GenomeFactory = genomeFactory;
 
             // Set the unique genome ID and the birth generation
             Id = id;
@@ -70,9 +68,23 @@ namespace SharpNeat.Genomes.Maze
             BirthGeneration = birthGeneration;
 
             // Copy the other parameters off of the given genome
-            _genomeFactory = copyFrom._genomeFactory;
+            GenomeFactory = copyFrom.GenomeFactory;
             GeneList = copyFrom.GeneList;
             EvaluationInfo = new EvaluationInfo(copyFrom.EvaluationInfo.FitnessHistoryLength);
+        }
+
+        /// <summary>
+        ///     Constructor which constructs a new maze genome with the given unique identifier, birth generation, and list of wall
+        ///     genes.
+        /// </summary>
+        /// <param name="genomeFactory">Reference to the genome factory.</param>
+        /// <param name="id">The unique identifier of the new maze genome.</param>
+        /// <param name="birthGeneration">The birth generation.</param>
+        /// <param name="geneList">The list of wall genes.</param>
+        public MazeGenome(MazeGenomeFactory genomeFactory, uint id, uint birthGeneration, IList<MazeGene> geneList)
+            : this(genomeFactory, id, birthGeneration)
+        {
+            GeneList = geneList;
         }
 
         #endregion
@@ -133,7 +145,7 @@ namespace SharpNeat.Genomes.Maze
         public MazeGenome CreateOffspring(uint birthGeneration)
         {
             // Make a new genome that is a copy of this one but with a new genome ID
-            MazeGenome offspring = _genomeFactory.CreateGenomeCopy(this, _genomeFactory.GenomeIdGenerator.NextId,
+            MazeGenome offspring = GenomeFactory.CreateGenomeCopy(this, GenomeFactory.GenomeIdGenerator.NextId,
                 birthGeneration);
 
             // Mutate the new genome
@@ -165,8 +177,8 @@ namespace SharpNeat.Genomes.Maze
         private void Mutate()
         {
             // Get random mutation to perform
-            int outcome = RouletteWheel.SingleThrow(_genomeFactory.MazeGenomeParameters.RouletteWheelLayout,
-                _genomeFactory.Rng);
+            int outcome = RouletteWheel.SingleThrow(GenomeFactory.MazeGenomeParameters.RouletteWheelLayout,
+                GenomeFactory.Rng);
 
             switch (outcome)
             {
@@ -194,12 +206,12 @@ namespace SharpNeat.Genomes.Maze
             // Iterate through each gene (wall) and probabilistically shift its location
             foreach (MazeGene mazeGene in GeneList)
             {
-                if (_genomeFactory.Rng.NextDouble() <
-                    _genomeFactory.MazeGenomeParameters.MutateWallStartLocationProbability)
+                if (GenomeFactory.Rng.NextDouble() <
+                    GenomeFactory.MazeGenomeParameters.MutateWallStartLocationProbability)
                 {
                     mazeGene.WallLocation = BoundStartLocation(mazeGene.WallLocation +
-                                                               (((_genomeFactory.Rng.NextDouble()*2) - 1)*
-                                                                _genomeFactory.MazeGenomeParameters
+                                                               (((GenomeFactory.Rng.NextDouble()*2) - 1)*
+                                                                GenomeFactory.MazeGenomeParameters
                                                                     .PerturbanceMagnitude));
                 }
             }
@@ -218,12 +230,12 @@ namespace SharpNeat.Genomes.Maze
             // Iterate through each gene (wall) and probabilistically shift its passage location
             foreach (MazeGene mazeGene in GeneList)
             {
-                if (_genomeFactory.Rng.NextDouble() <
-                    _genomeFactory.MazeGenomeParameters.MutatePassageStartLocationProbability)
+                if (GenomeFactory.Rng.NextDouble() <
+                    GenomeFactory.MazeGenomeParameters.MutatePassageStartLocationProbability)
                 {
                     mazeGene.PassageLocation = BoundStartLocation(mazeGene.PassageLocation +
-                                                                  (((_genomeFactory.Rng.NextDouble()*2) - 1)*
-                                                                   _genomeFactory.MazeGenomeParameters
+                                                                  (((GenomeFactory.Rng.NextDouble()*2) - 1)*
+                                                                   GenomeFactory.MazeGenomeParameters
                                                                        .PerturbanceMagnitude));
                 }
             }
@@ -235,11 +247,11 @@ namespace SharpNeat.Genomes.Maze
         private void MutateAddWall()
         {
             // Generate new wall and passage start locations
-            double newWallStartLocation = _genomeFactory.Rng.NextDoubleNonZero();
-            double newPassageStartLocation = _genomeFactory.Rng.NextDoubleNonZero();
+            double newWallStartLocation = GenomeFactory.Rng.NextDoubleNonZero();
+            double newPassageStartLocation = GenomeFactory.Rng.NextDoubleNonZero();
 
             // Add new gene to the genome
-            GeneList.Add(new MazeGene(newWallStartLocation, newPassageStartLocation, _genomeFactory.Rng.NextBool()));
+            GeneList.Add(new MazeGene(newWallStartLocation, newPassageStartLocation, GenomeFactory.Rng.NextBool()));
         }
 
         /// <summary>

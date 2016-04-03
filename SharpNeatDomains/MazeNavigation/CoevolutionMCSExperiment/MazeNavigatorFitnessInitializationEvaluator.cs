@@ -116,7 +116,8 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             FitnessInfo trialInfo = world.RunTrial(agent, SearchType.Fitness, out goalReached);
 
             // Set the stop condition to the outcome
-            StopConditionSatisfied = goalReached;
+            if (goalReached)
+                StopConditionSatisfied = true;
 
             // Log trial information (only log for non-bridging evaluations)
             evaluationLogger?.LogRow(new List<LoggableElement>
