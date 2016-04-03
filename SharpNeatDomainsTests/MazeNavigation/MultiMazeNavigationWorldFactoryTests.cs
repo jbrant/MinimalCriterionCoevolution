@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SharpNeat.Core;
+using SharpNeat.Genomes.Maze;
 using SharpNeat.Phenomes.Mazes;
 
 namespace SharpNeat.Domains.MazeNavigation.Tests
@@ -64,6 +65,13 @@ namespace SharpNeat.Domains.MazeNavigation.Tests
 
             // Ensure that no longer extant maze was removed
             Debug.Assert(factory.NumMazes == 4);
+        }
+
+        [TestMethod()]
+        public void VerifyBootstrappedStateTest()
+        {
+            // Read in maze genome
+            
         }
     }
 }
