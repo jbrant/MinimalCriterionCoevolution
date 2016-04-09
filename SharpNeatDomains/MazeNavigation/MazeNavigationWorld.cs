@@ -106,7 +106,7 @@ namespace SharpNeat.Domains.MazeNavigation
             IBehaviorCharacterization behaviorCharacterization)
             : this(
                 walls, new MazeNicheGrid(), navigatorLocation, goalLocation, minSuccessDistance, maxDistanceToTarget,
-                maxTimeSteps, 0)
+                maxTimeSteps, 0, behaviorCharacterization)
         {
         }
 
@@ -271,13 +271,6 @@ namespace SharpNeat.Domains.MazeNavigation
 
                 // Extract the behavior info object
                 trialInfo = new BehaviorInfo(_behaviorCharacterization.GetBehaviorCharacterizationAsArray());
-            }
-
-            // TODO: Remove this
-            double tempDistance = GetDistanceToTarget();
-            if (tempDistance < 20)
-            {
-                Debug.WriteLine("Distance to goal: {0}", tempDistance);
             }
 
             // Determine the behavioral niche in which the navigator ended

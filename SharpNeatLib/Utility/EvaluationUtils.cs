@@ -161,6 +161,7 @@ namespace SharpNeat.Utility
                 genome.EvaluationInfo.SetFitness(fitnessInfo.Fitness);
                 genome.EvaluationInfo.AuxFitnessArr = fitnessInfo.AuxFitnessArr;
                 genome.EvaluationInfo.NicheId = fitnessInfo.NicheId;
+                genome.EvaluationInfo.ObjectiveDistance = fitnessInfo.ObjectiveDistance;
             }
         }
 
@@ -211,6 +212,7 @@ namespace SharpNeat.Utility
                 genome.EvaluationInfo.SetFitness(fitnessInfo.Fitness);
                 genome.EvaluationInfo.AuxFitnessArr = fitnessInfo.AuxFitnessArr;
                 genome.EvaluationInfo.NicheId = fitnessInfo.NicheId;
+                genome.EvaluationInfo.ObjectiveDistance = fitnessInfo.ObjectiveDistance;
             }
         }
 

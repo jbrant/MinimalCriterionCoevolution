@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
 using System.Threading;
 using log4net;
@@ -143,6 +144,28 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </summary>
         public bool StopConditionSatisfied { get; protected set; }
 
+        /// <summary>
+        ///     The current champion genome from the first population.
+        /// </summary>
+        public TGenome1 Population1CurrentChampGenome => _evolutionAlgorithm1.CurrentChampGenome;
+
+        /// <summary>
+        ///     The current champion genome from the second population.
+        /// </summary>
+        public TGenome2 Population2CurrentChampGenome => _evolutionAlgorithm2.CurrentChampGenome;
+
+        /// <summary>
+        ///     Descriptive statistics for the first population.
+        /// </summary>
+        public NeatAlgorithmStats Population1Statistics
+            => ((AbstractNeatEvolutionAlgorithm<TGenome1>) _evolutionAlgorithm1).Statistics;
+
+        /// <summary>
+        ///     Descriptive statistics for the second population.
+        /// </summary>
+        public NeatAlgorithmStats Population2Statistics
+            => ((AbstractNeatEvolutionAlgorithm<TGenome2>) _evolutionAlgorithm2).Statistics;
+
         #endregion
 
         #region Events
@@ -187,6 +210,10 @@ namespace SharpNeat.EvolutionAlgorithms
 
             // Set the required local references to the genome evaluators
             InitializeContainer(genomeFitnessEvaluator1, genomeFitnessEvaluator2, maxGenerations, maxEvaluations);
+
+            // Set update scheme and run state to ready
+            UpdateScheme = new UpdateScheme(new TimeSpan(0, 0, 1));
+            RunState = RunState.Ready;
         }
 
         /// <summary>
@@ -218,6 +245,10 @@ namespace SharpNeat.EvolutionAlgorithms
 
             // Set the required local references to the genome evaluators
             InitializeContainer(genomeFitnessEvaluator1, genomeFitnessEvaluator2, maxGenerations, maxEvaluations);
+
+            // Set update scheme and run state to ready
+            UpdateScheme = new UpdateScheme(new TimeSpan(0, 0, 1));
+            RunState = RunState.Ready;
         }
 
         /// <summary>
@@ -247,6 +278,10 @@ namespace SharpNeat.EvolutionAlgorithms
 
             // Set the required local references to the genome evaluators
             InitializeContainer(genomeFitnessEvaluator1, genomeFitnessEvaluator2, maxGenerations, maxEvaluations);
+
+            // Set update scheme and run state to ready
+            UpdateScheme = new UpdateScheme(new TimeSpan(0, 0, 1));
+            RunState = RunState.Ready;
         }
 
         /// <summary>
@@ -366,8 +401,8 @@ namespace SharpNeat.EvolutionAlgorithms
             _maxEvaluations = maxEvaluations;
 
             // Update each evaluator with the phenotypes of the other population
-            genomeEvaluator1.UpdateEvaluationBaseline(_evolutionAlgorithm2.GenomeList);
-            genomeEvaluator2.UpdateEvaluationBaseline(_evolutionAlgorithm1.GenomeList);
+            genomeEvaluator1.UpdateEvaluationBaseline(genomeEvaluator2.DecodeGenomes(_evolutionAlgorithm2.GenomeList));
+            genomeEvaluator2.UpdateEvaluationBaseline(genomeEvaluator1.DecodeGenomes(_evolutionAlgorithm1.GenomeList));
         }
 
         /// <summary>
@@ -385,18 +420,22 @@ namespace SharpNeat.EvolutionAlgorithms
                 // or the stop condition is satisfied
                 for (;;)
                 {
-                    // Increment the current generation
+                    // Increment the centralized current generation as well as the individual EA ones
                     CurrentGeneration++;
+                    _evolutionAlgorithm1.CurrentGeneration++;
+                    _evolutionAlgorithm2.CurrentGeneration++;
 
                     // Execute the first algorithm for one evaluation cycle
                     _evolutionAlgorithm1.PerformOneGeneration();
 
                     // Execute the second algorithm for one evaluation cycle
                     _evolutionAlgorithm2.PerformOneGeneration();
-
+                    
                     // TODO: We probably need to udpate the cached phenotypes on both algorithms here
-                    GenomeEvaluator1.UpdateEvaluationBaseline(_evolutionAlgorithm2.GenomeList);
-                    GenomeEvaluator2.UpdateEvaluationBaseline(_evolutionAlgorithm1.GenomeList);
+                    GenomeEvaluator1.UpdateEvaluationBaseline(
+                        GenomeEvaluator2.DecodeGenomes(_evolutionAlgorithm2.GenomeList));
+                    GenomeEvaluator2.UpdateEvaluationBaseline(
+                        GenomeEvaluator1.DecodeGenomes(_evolutionAlgorithm1.GenomeList));
 
                     // Send update to the calling routine if time
                     if (UpdateTest())
@@ -420,7 +459,7 @@ namespace SharpNeat.EvolutionAlgorithms
                     // we miss it being set and perform one other generation before pausing.
                     if (_pauseRequestFlag || StopConditionSatisfied ||
                         CurrentGeneration >= _maxGenerations || GenomeEvaluator1.EvaluationCount >= _maxEvaluations ||
-                        GenomeEvaluator1.EvaluationCount >= _maxEvaluations)
+                        GenomeEvaluator2.EvaluationCount >= _maxEvaluations)
                     {
                         // Signal to any waiting thread that we are pausing
                         _awaitPauseEvent.Set();

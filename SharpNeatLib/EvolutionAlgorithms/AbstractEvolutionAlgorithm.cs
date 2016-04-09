@@ -117,7 +117,7 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <summary>
         ///     Gets the current generation.
         /// </summary>
-        public uint CurrentGeneration { get; protected set; }
+        public uint CurrentGeneration { get; set; }
 
         /// <summary>
         ///     Gets the current number of evaluations executed.

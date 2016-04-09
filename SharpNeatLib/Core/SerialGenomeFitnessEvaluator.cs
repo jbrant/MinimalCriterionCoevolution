@@ -159,7 +159,7 @@ namespace SharpNeat.Core
         /// <param name="comparisonPhenomes">The phenomes against which the evaluation is being carried out.</param>
         public void UpdateEvaluationBaseline(IEnumerable<object> comparisonPhenomes)
         {
-            _phenomeEvaluator.UpdateEvaluatorPhenotypes((IEnumerable<TPhenome>) comparisonPhenomes);
+            _phenomeEvaluator.UpdateEvaluatorPhenotypes(comparisonPhenomes);
         }
 
         /// <summary>

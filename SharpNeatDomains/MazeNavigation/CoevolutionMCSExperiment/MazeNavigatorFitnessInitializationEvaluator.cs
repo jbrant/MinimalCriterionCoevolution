@@ -95,7 +95,7 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
         /// <param name="evaluationLogger">Reference to the evaluation logger.</param>
         /// <param name="genomeXml">The string-representation of the genome (for logging purposes).</param>
         /// <returns>A fitness info (which is a function of the euclidean distance to the target).</returns>
-        public FitnessInfo Evaluate(IBlackBox agent, uint currentGeneration, bool isBridgi,
+        public FitnessInfo Evaluate(IBlackBox agent, uint currentGeneration, bool isBridgingEvaluation,
             IDataLogger evaluationLogger,
             string genomeXml)
         {
@@ -114,6 +114,9 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
 
             // Run a single trial
             FitnessInfo trialInfo = world.RunTrial(agent, SearchType.Fitness, out goalReached);
+
+            // Set the objective distance
+            trialInfo.ObjectiveDistance = world.GetDistanceToTarget();
 
             // Set the stop condition to the outcome
             if (goalReached)

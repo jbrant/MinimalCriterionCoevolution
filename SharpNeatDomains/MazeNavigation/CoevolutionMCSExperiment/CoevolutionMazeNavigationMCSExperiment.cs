@@ -54,7 +54,7 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
         /// </summary>
         public void SaveMazePopulation(XmlWriter xw, IList<MazeGenome> mazeGenomeList)
         {
-            throw new NotImplementedException();
+            MazeGenomeXmlIO.WriteComplete(xw, mazeGenomeList);
         }
 
         /// <summary>
@@ -76,8 +76,8 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             _serializeGenomeToXml = XmlUtils.TryGetValueAsBool(xmlConfig, "DecodeGenomesToXml") ?? false;
 
             // Set the genome parameters
-            //_neatEvolutionAlgorithmParameters = ExperimentUtils.ReadNeatEvolutionAlgorithmParameters(xmlConfig);
             _neatGenomeParameters = ExperimentUtils.ReadNeatGenomeParameters(xmlConfig);
+            _neatGenomeParameters.FeedforwardOnly = _activationScheme.AcyclicNetwork;
             _mazeGenomeParameters = ExperimentUtils.ReadMazeGenomeParameters(xmlConfig);
 
             // Configure evolutionary algorithm parameters
@@ -182,16 +182,12 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             List<NeatGenome> seedAgentPopulation =
                 _mazeNavigationInitializer.EvolveViableGenomes(out initializationEvaluations);
 
-            using (XmlWriter xw = XmlWriter.Create("ViableSeedGenomes.xml", new XmlWriterSettings() {Indent = true}))
+            // Set dummy fitness so that seed maze(s) will be marked as evaluated
+            foreach (MazeGenome mazeGenome in genomeList2)
             {
-                SaveAgentPopulation(xw, seedAgentPopulation);
+                mazeGenome.EvaluationInfo.SetFitness(0);
             }
-
-            using (XmlWriter xw = XmlWriter.Create("StartingMazeGenome.xml", new XmlWriterSettings() {Indent = true}))
-            {
-                SaveMazePopulation(xw, genomeList2);
-            }
-
+            
             // Create the NEAT (i.e. navigator) queueing evolution algorithm
             AbstractEvolutionAlgorithm<NeatGenome> neatEvolutionAlgorithm =
             new QueueingNeatEvolutionAlgorithm<NeatGenome>(new NeatEvolutionAlgorithmParameters(), null, _batchSize);
@@ -210,11 +206,12 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
                 _maxTimesteps, _minSuccessDistance, _behaviorCharacterizationFactory, _numMazeSuccessCriteria);
 
             // Create maze genome decoder
-            IGenomeDecoder<MazeGenome, MazeStructure> mazeGenomeDecoder = new MazeDecoder(_mazeHeight, _mazeWidth);
+            IGenomeDecoder<MazeGenome, MazeStructure> mazeGenomeDecoder = new MazeDecoder(_mazeHeight, _mazeWidth, _mazeScaleMultiplier);
 
             // Create navigator genome decoder
             IGenomeDecoder<NeatGenome, IBlackBox> navigatorGenomeDecoder = new NeatGenomeDecoder(_activationScheme);
 
+            /*
             // Create the maze genome evaluator
             IGenomeEvaluator<MazeGenome> mazeFitnessEvaluator =
                 new SerialGenomeBehaviorEvaluator<MazeGenome, MazeStructure>(mazeGenomeDecoder, mazeEvaluator,
@@ -223,6 +220,17 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             // Create navigator genome evaluator
             IGenomeEvaluator<NeatGenome> navigatorFitnessEvaluator =
                 new SerialGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(navigatorGenomeDecoder, navigatorEvaluator,
+                    SelectionType.Queueing, SearchType.MinimalCriteriaSearch);
+            */
+
+            // Create the maze genome evaluator
+            IGenomeEvaluator<MazeGenome> mazeFitnessEvaluator =
+                new ParallelGenomeBehaviorEvaluator<MazeGenome, MazeStructure>(mazeGenomeDecoder, mazeEvaluator,
+                    SelectionType.Queueing, SearchType.MinimalCriteriaSearch);
+
+            // Create navigator genome evaluator
+            IGenomeEvaluator<NeatGenome> navigatorFitnessEvaluator =
+                new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(navigatorGenomeDecoder, navigatorEvaluator,
                     SelectionType.Queueing, SearchType.MinimalCriteriaSearch);
 
             // Create the coevolution container

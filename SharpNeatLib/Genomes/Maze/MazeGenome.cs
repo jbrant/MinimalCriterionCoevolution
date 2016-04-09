@@ -69,7 +69,7 @@ namespace SharpNeat.Genomes.Maze
 
             // Copy the other parameters off of the given genome
             GenomeFactory = copyFrom.GenomeFactory;
-            GeneList = copyFrom.GeneList;
+            GeneList = new List<MazeGene>(copyFrom.GeneList);
             EvaluationInfo = new EvaluationInfo(copyFrom.EvaluationInfo.FitnessHistoryLength);
         }
 
@@ -112,11 +112,12 @@ namespace SharpNeat.Genomes.Maze
         public EvaluationInfo EvaluationInfo { get; }
 
         /// <summary>
-        ///     NOT USED (required by interface).
+        ///     Computes the complexity of the maze genome.
         /// </summary>
         public double Complexity
         {
-            get { throw new NotImplementedException(); }
+            // TODO: Need to figure out how to compute maze complexity
+            get { return GeneList.Count; }
         }
 
         /// <summary>
@@ -176,6 +177,14 @@ namespace SharpNeat.Genomes.Maze
         /// </summary>
         private void Mutate()
         {
+            // If there are not yet any walls to mutate, the mutation will be to add a wall
+            // (otherwise, the resulting maze will be exactly the same structure)
+            if (GeneList.Count <= 0)
+            {
+                MutateAddWall();
+                return;
+            }
+
             // Get random mutation to perform
             int outcome = RouletteWheel.SingleThrow(GenomeFactory.MazeGenomeParameters.RouletteWheelLayout,
                 GenomeFactory.Rng);
@@ -199,6 +208,8 @@ namespace SharpNeat.Genomes.Maze
         /// </summary>
         private void MutateWallStartLocations()
         {
+            bool mutationOccurred = false;
+
             // Don't try to mutate if the gene list is empty
             if (GeneList.Count <= 0)
                 return;
@@ -213,7 +224,21 @@ namespace SharpNeat.Genomes.Maze
                                                                (((GenomeFactory.Rng.NextDouble()*2) - 1)*
                                                                 GenomeFactory.MazeGenomeParameters
                                                                     .PerturbanceMagnitude));
+                    mutationOccurred = true;
                 }
+            }
+
+            // Ensure that a mutation actually occurs
+            if (mutationOccurred == false)
+            {
+                // Select a random gene to mutate
+                MazeGene mazeGene = GeneList[GenomeFactory.Rng.Next(GeneList.Count)];
+
+                // Perform mutation
+                mazeGene.WallLocation = BoundStartLocation(mazeGene.WallLocation +
+                                                           (((GenomeFactory.Rng.NextDouble()*2) - 1)*
+                                                            GenomeFactory.MazeGenomeParameters
+                                                                .PerturbanceMagnitude));
             }
         }
 
@@ -223,6 +248,8 @@ namespace SharpNeat.Genomes.Maze
         /// </summary>
         private void MutatePassageStartLocations()
         {
+            bool mutationOccurred = false;
+
             // Don't try to mutate if the gene list is empty
             if (GeneList.Count <= 0)
                 return;
@@ -237,7 +264,21 @@ namespace SharpNeat.Genomes.Maze
                                                                   (((GenomeFactory.Rng.NextDouble()*2) - 1)*
                                                                    GenomeFactory.MazeGenomeParameters
                                                                        .PerturbanceMagnitude));
+
+                    mutationOccurred = true;
                 }
+            }
+
+            // Ensure that a mutation actually occurs
+            if (mutationOccurred == false)
+            {
+                // Select a random gene to mutate
+                MazeGene mazeGene = GeneList[GenomeFactory.Rng.Next(GeneList.Count)];
+
+                mazeGene.PassageLocation = BoundStartLocation(mazeGene.WallLocation +
+                                                              (((GenomeFactory.Rng.NextDouble()*2) - 1)*
+                                                               GenomeFactory.MazeGenomeParameters
+                                                                   .PerturbanceMagnitude));
             }
         }
 
