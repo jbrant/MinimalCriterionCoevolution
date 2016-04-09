@@ -574,7 +574,7 @@ namespace SharpNeatConsole
                     // Kick off the experiment run
                     RunExperiment(agentGenomeFactory, mazeGenomeFactory, agentGenomeList, mazeGenomeList, experimentName,
                         experiment, numRuns, runIdx);
-                } while (_ea.StopConditionSatisfied == false);
+                } while (_coevolutionEaContainer.StopConditionSatisfied == false);
 
                 // Close the data loggers
                 evolutionDataLogger.Close();
@@ -631,8 +631,10 @@ namespace SharpNeatConsole
         /// <summary>
         ///     Executes a single run of the given coevolution experiment.
         /// </summary>
-        /// <param name="genomeFactory">The factory for producing NEAT genomes.</param>
-        /// <param name="genomeList">The list of initial genomes (population).</param>
+        /// <param name="agentGenomeFactory">The factory for producing NEAT genomes.</param>
+        /// <param name="mazeGenomeFactory">The factory for producing maze genomes.</param>
+        /// <param name="agentGenomeList">The list of initial agent genomes (navigator population).</param>
+        /// <param name="mazeGenomeList">The list of initial maze genomes (maze population).</param>
         /// <param name="experimentName">The name of the coevolution experiment to execute.</param>
         /// <param name="experiment">Reference to the initialized experiment.</param>
         /// <param name="numRuns">Total number of runs being executed.</param>
@@ -642,11 +644,21 @@ namespace SharpNeatConsole
             List<MazeGenome> mazeGenomeList, string experimentName, ICoevolutionExperiment experiment, int numRuns,
             int runIdx)
         {
-            // Create evolution algorithm and attach update event.
-            _coevolutionEaContainer = experiment.CreateCoevolutionAlgorithmContainer(agentGenomeFactory,
-                mazeGenomeFactory, agentGenomeList,
-                mazeGenomeList);
-            _coevolutionEaContainer.UpdateEvent += coevolutionContainer_UpdateEvent;
+            try
+            {
+                // Create evolution algorithm and attach update event.
+                _coevolutionEaContainer = experiment.CreateCoevolutionAlgorithmContainer(agentGenomeFactory,
+                    mazeGenomeFactory, agentGenomeList,
+                    mazeGenomeList);
+                _coevolutionEaContainer.UpdateEvent += coevolutionContainer_UpdateEvent;
+            }
+            catch (Exception)
+            {
+                _executionLogger.Error(string.Format("Experiment {0}, Run {1} of {2} failed to initialize",
+                    experimentName,
+                    runIdx + 1, numRuns));
+                Environment.Exit(0);
+            }
 
             _executionLogger.Info(string.Format("Executing Experiment {0}, Run {1} of {2}", experimentName, runIdx + 1,
                 numRuns));
@@ -698,6 +710,18 @@ namespace SharpNeatConsole
 
         private static void coevolutionContainer_UpdateEvent(object sender, EventArgs e)
         {
+            if (_coevolutionEaContainer.Population1CurrentChampGenome != null &&
+                _coevolutionEaContainer.Population2CurrentChampGenome != null)
+            {
+                _executionLogger.Info(
+                    string.Format(
+                        "Generation={0:N0} Evaluations={1:N0} Population1BestFitness={2:N2} Population1MaxComplexity={3:N2} Population2BestFitness={4:N2}, Population2MaxComplexity={5:N2}",
+                        _coevolutionEaContainer.CurrentGeneration, _coevolutionEaContainer.CurrentEvaluations,
+                        _coevolutionEaContainer.Population1CurrentChampGenome.EvaluationInfo.Fitness,
+                        _coevolutionEaContainer.Population1Statistics._maxComplexity,
+                        _coevolutionEaContainer.Population2CurrentChampGenome.EvaluationInfo.Fitness,
+                        _coevolutionEaContainer.Population2Statistics._maxComplexity));
+            }
         }
 
         /// <summary>

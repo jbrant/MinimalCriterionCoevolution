@@ -36,7 +36,7 @@ namespace SharpNeat.Core
         /// <summary>
         ///     Gets the current generation.
         /// </summary>
-        uint CurrentGeneration { get; }
+        uint CurrentGeneration { get; set; }
 
         /// <summary>
         ///     Gets the current number of evaluations executed.

@@ -78,6 +78,11 @@ namespace SharpNeat.Core
         /// </summary>
         public int NicheId { get; set; }
 
+        /// <summary>
+        ///     Indicates the distance (in a euclidean since or otherwise) to the objective (i.e. target).
+        /// </summary>
+        public double ObjectiveDistance { get; set; }
+
         #endregion
     }
 }

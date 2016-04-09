@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using SharpNeat.EvolutionAlgorithms;
 
 #endregion
 
@@ -57,6 +58,26 @@ namespace SharpNeat.Core
         ///     Gets a value indicating whether some goal fitness has been achieved and that the algorithm has therefore stopped.
         /// </summary>
         bool StopConditionSatisfied { get; }
+
+        /// <summary>
+        ///     The current champion genome from the first population.
+        /// </summary>
+        TGenome1 Population1CurrentChampGenome { get; }
+
+        /// <summary>
+        ///     The current champion genome from the second population.
+        /// </summary>
+        TGenome2 Population2CurrentChampGenome { get; }
+
+        /// <summary>
+        ///     Descriptive statistics for the first population.
+        /// </summary>
+        NeatAlgorithmStats Population1Statistics { get; }
+
+        /// <summary>
+        ///     Descriptive statistics for the second population.
+        /// </summary>
+        NeatAlgorithmStats Population2Statistics { get; }
 
         /// <summary>
         ///     Notifies listeners that some state change has occured.
