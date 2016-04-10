@@ -1,6 +1,5 @@
 ﻿#region
 
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Xml;
@@ -12,6 +11,7 @@ using SharpNeat.Domains.MazeNavigation.Bootstrappers;
 using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.Genomes.Maze;
 using SharpNeat.Genomes.Neat;
+using SharpNeat.Loggers;
 using SharpNeat.Phenomes;
 using SharpNeat.Phenomes.Mazes;
 
@@ -106,6 +106,9 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             _numAgentFailedCriteria = XmlUtils.GetValueAsInt(xmlConfig, "NumAgentsFailedCriteria");
 
             // TODO: Setup logging here
+            // Read in log file path/name
+            _evolutionDataLogger = evolutionDataLogger ??
+                                   ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Evolution);
 
             // Initialize the initialization algorithm
             _mazeNavigationInitializer = new FitnessCoevolutionMazeNavigationInitializer();
@@ -187,10 +190,10 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             {
                 mazeGenome.EvaluationInfo.SetFitness(0);
             }
-            
+
             // Create the NEAT (i.e. navigator) queueing evolution algorithm
             AbstractEvolutionAlgorithm<NeatGenome> neatEvolutionAlgorithm =
-            new QueueingNeatEvolutionAlgorithm<NeatGenome>(new NeatEvolutionAlgorithmParameters(), null, _batchSize);
+                new QueueingNeatEvolutionAlgorithm<NeatGenome>(new NeatEvolutionAlgorithmParameters(), null, _batchSize);
 
             // Create the maze queueing evolution algorithm
             AbstractEvolutionAlgorithm<MazeGenome> mazeEvolutionAlgorithm =
@@ -206,32 +209,21 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
                 _maxTimesteps, _minSuccessDistance, _behaviorCharacterizationFactory, _numMazeSuccessCriteria);
 
             // Create maze genome decoder
-            IGenomeDecoder<MazeGenome, MazeStructure> mazeGenomeDecoder = new MazeDecoder(_mazeHeight, _mazeWidth, _mazeScaleMultiplier);
+            IGenomeDecoder<MazeGenome, MazeStructure> mazeGenomeDecoder = new MazeDecoder(_mazeHeight, _mazeWidth,
+                _mazeScaleMultiplier);
 
             // Create navigator genome decoder
             IGenomeDecoder<NeatGenome, IBlackBox> navigatorGenomeDecoder = new NeatGenomeDecoder(_activationScheme);
-
-            /*
-            // Create the maze genome evaluator
-            IGenomeEvaluator<MazeGenome> mazeFitnessEvaluator =
-                new SerialGenomeBehaviorEvaluator<MazeGenome, MazeStructure>(mazeGenomeDecoder, mazeEvaluator,
-                    SelectionType.Queueing, SearchType.MinimalCriteriaSearch);
-
-            // Create navigator genome evaluator
-            IGenomeEvaluator<NeatGenome> navigatorFitnessEvaluator =
-                new SerialGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(navigatorGenomeDecoder, navigatorEvaluator,
-                    SelectionType.Queueing, SearchType.MinimalCriteriaSearch);
-            */
-
+            
             // Create the maze genome evaluator
             IGenomeEvaluator<MazeGenome> mazeFitnessEvaluator =
                 new ParallelGenomeBehaviorEvaluator<MazeGenome, MazeStructure>(mazeGenomeDecoder, mazeEvaluator,
-                    SelectionType.Queueing, SearchType.MinimalCriteriaSearch);
+                    SelectionType.Queueing, SearchType.MinimalCriteriaSearch, _parallelOptions);
 
             // Create navigator genome evaluator
             IGenomeEvaluator<NeatGenome> navigatorFitnessEvaluator =
                 new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(navigatorGenomeDecoder, navigatorEvaluator,
-                    SelectionType.Queueing, SearchType.MinimalCriteriaSearch);
+                    SelectionType.Queueing, SearchType.MinimalCriteriaSearch, _parallelOptions);
 
             // Create the coevolution container
             ICoevolutionAlgorithmContainer<NeatGenome, MazeGenome> coevolutionAlgorithmContainer =
@@ -384,6 +376,11 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
         ///     The multiplier for scaling the maze to larger sizes.
         /// </summary>
         private int _mazeScaleMultiplier;
+
+        /// <summary>
+        ///     Logs statistics about populations for every batch.
+        /// </summary>
+        private IDataLogger _evolutionDataLogger;
 
         #endregion
     }

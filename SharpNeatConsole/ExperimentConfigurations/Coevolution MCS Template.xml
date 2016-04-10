@@ -7,7 +7,7 @@
   <Activation>
     <Scheme>Acyclic</Scheme>
   </Activation>
-  <MaxDegreeOfParallelism>1</MaxDegreeOfParallelism>
+  <!--<MaxDegreeOfParallelism>1</MaxDegreeOfParallelism>-->
   <GenomeConfig>
     <InitialConnectionProportion>1</InitialConnectionProportion>
     <WeightMutationProbability>0.9</WeightMutationProbability>
@@ -25,9 +25,9 @@
   <BehaviorConfig>
     <BehaviorCharacterization>EndPoint</BehaviorCharacterization>
   </BehaviorConfig>  
-  <OffspringBatchSize>10</OffspringBatchSize>
+  <OffspringBatchSize>50</OffspringBatchSize>
   <MaxEvaluations>100000000</MaxEvaluations>
-  <MaxTimesteps>400</MaxTimesteps>
+  <MaxTimesteps>600</MaxTimesteps>
   <MinSuccessDistance>5</MinSuccessDistance>
   <MazeHeight>20</MazeHeight>
   <MazeWidth>20</MazeWidth>
@@ -51,6 +51,11 @@
     <OffspringSexualProbability>0.5</OffspringSexualProbability>
     <InterspeciesMatingProbability>0.001</InterspeciesMatingProbability>
   </InitializationAlgorithmConfig>
+  <LoggingConfig>
+    <Type>Evolution</Type>
+    <Destination>File</Destination>
+    <LogFile>C:\\Users\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Minimal Criteria Search\ExperimentData\\EvolutionData.csv</LogFile>
+  </LoggingConfig>
   <Description>
     Coevolutionary MCS Maze navigation experiment, evolving both maze navigators and the mazes themselves.
   </Description>
