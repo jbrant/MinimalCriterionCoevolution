@@ -123,6 +123,31 @@ namespace SharpNeat.Core
 
         /// <summary>
         ///     Construct with the provided IGenomeDecoder and IPhenomeEvaluator.
+        ///     Phenome caching is enabled by default and the evaluation logger is optional.
+        ///     The number of parallel threads defaults to Environment.ProcessorCount.
+        /// </summary>
+        /// <param name="genomeDecoder">The genome decoder to use.</param>
+        /// <param name="phenomeEvaluator">The phenome evaluator.</param>
+        /// <param name="selectionType">The selection algorithm type.</param>
+        /// <param name="searchType">The search algorithm type.</param>
+        /// <param name="parallelOptions">Controls the number of parallel evaluations.</param>
+        /// <param name="evaluationLogger">A reference to the evaluation data logger (optional).</param>
+        /// <param name="decodeGenomeToXml">
+        ///     Whether a genome should be decoded to its XML string representation (generally used to
+        ///     support logging).
+        /// </param>
+        public ParallelGenomeBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
+            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, SelectionType selectionType,
+            SearchType searchType, ParallelOptions parallelOptions, IDataLogger evaluationLogger = null,
+            bool decodeGenomeToXml = false)
+            : this(
+                genomeDecoder, phenomeEvaluator, selectionType, searchType, parallelOptions, true, 0, null,
+                evaluationLogger, decodeGenomeToXml)
+        {
+        }
+
+        /// <summary>
+        ///     Construct with the provided IGenomeDecoder and IPhenomeEvaluator.
         ///     Phenome caching is enabled by default.
         ///     The number of parallel threads defaults to Environment.ProcessorCount.
         /// </summary>
