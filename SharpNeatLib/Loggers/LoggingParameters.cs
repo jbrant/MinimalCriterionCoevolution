@@ -22,6 +22,11 @@ namespace SharpNeat.Loggers
         Evaluation,
 
         /// <summary>
+        ///     A logger that records the genome definitions of the extant population at periodic intervals.
+        /// </summary>
+        PopulationGenomes,
+
+        /// <summary>
         ///     A "null" logger (doesn't log anything).
         /// </summary>
         None
@@ -65,6 +70,12 @@ namespace SharpNeat.Loggers
                 .Equals(strLoggingType, StringComparison.InvariantCultureIgnoreCase))
             {
                 return LoggingType.Evaluation;
+            }
+            // Check if this is population genomes logging
+            if (LoggingType.PopulationGenomes.ToString()
+                .Equals(strLoggingType, StringComparison.InvariantCultureIgnoreCase))
+            {
+                return LoggingType.PopulationGenomes;
             }
 
             // Otherwise, it's null (no logging)

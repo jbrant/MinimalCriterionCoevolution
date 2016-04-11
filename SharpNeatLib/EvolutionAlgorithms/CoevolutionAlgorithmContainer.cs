@@ -2,11 +2,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Reflection;
 using System.Threading;
 using log4net;
 using SharpNeat.Core;
+using SharpNeat.Loggers;
 
 #endregion
 
@@ -21,7 +21,7 @@ namespace SharpNeat.EvolutionAlgorithms
     /// </summary>
     /// <typeparam name="TGenome1">The genome type for the first population.</typeparam>
     /// <typeparam name="TGenome2">The genome type for the second population.</typeparam>
-    public class CoevolutionAlgorithmContainer<TGenome1, TGenome2> : ICoevolutionAlgorithmContainer<TGenome1, TGenome2>
+    public class CoevolutionAlgorithmContainer<TGenome1, TGenome2> : ICoevolutionAlgorithmContainer<TGenome1, TGenome2>, ILoggable
         where TGenome1 : class, IGenome<TGenome1>
         where TGenome2 : class, IGenome<TGenome2>
     {
@@ -37,11 +37,16 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </summary>
         /// <param name="algorithm1">The evolutionary algorithm for the first population.</param>
         /// <param name="algorithm2">The evolutionary algorithm for the second population.</param>
+        /// <param name="population1GenomeLogger">Genome logger for the first population.</param>
+        /// <param name="population2GenomeLogger">Genome logger for the second population.</param>
         public CoevolutionAlgorithmContainer(IEvolutionAlgorithm<TGenome1> algorithm1,
-            IEvolutionAlgorithm<TGenome2> algorithm2)
+            IEvolutionAlgorithm<TGenome2> algorithm2, IDataLogger population1GenomeLogger = null,
+            IDataLogger population2GenomeLogger = null)
         {
             _evolutionAlgorithm1 = algorithm1;
             _evolutionAlgorithm2 = algorithm2;
+            _population1GenomeLogger = population1GenomeLogger;
+            _population2GenomeLogger = population2GenomeLogger;
         }
 
         #endregion
@@ -101,9 +106,14 @@ namespace SharpNeat.EvolutionAlgorithms
         private ulong? _maxEvaluations;
 
         /// <summary>
-        ///     Logs evolution data from classes that implement ILoggable.
+        ///     Logger for periodically writing out genome XML for the first population.
         /// </summary>
-        protected IDataLogger EvolutionLogger;
+        private IDataLogger _population1GenomeLogger;
+
+        /// <summary>
+        ///     Logger for periodically writing out genome XML for the second population.
+        /// </summary>
+        private IDataLogger _population2GenomeLogger;
 
         /// <summary>
         ///     The genome evaluation scheme for the first evolution algorithm.
@@ -199,8 +209,7 @@ namespace SharpNeat.EvolutionAlgorithms
         public void Initialize(IGenomeEvaluator<TGenome1> genomeFitnessEvaluator1,
             IGenomeFactory<TGenome1> genomeFactory1, List<TGenome1> genomeList1,
             IGenomeEvaluator<TGenome2> genomeFitnessEvaluator2, IGenomeFactory<TGenome2> genomeFactory2,
-            List<TGenome2> genomeList2, int? maxGenerations,
-            ulong? maxEvaluations)
+            List<TGenome2> genomeList2, int? maxGenerations, ulong? maxEvaluations)
         {
             // Initialize both evolutionary algorithms
             _evolutionAlgorithm1.Initialize(genomeFitnessEvaluator1, genomeFactory1, genomeList1, maxGenerations,
@@ -329,8 +338,9 @@ namespace SharpNeat.EvolutionAlgorithms
             // Reset run state to terminated
             RunState = RunState.Terminated;
 
-            // Close the evolution logger
-            EvolutionLogger?.Close();
+            // Close the individual algorithm evolution loggers
+            _evolutionAlgorithm1.CleanupLoggers();
+            _evolutionAlgorithm2.CleanupLoggers();
 
             // Cleanup genome evaluator 1
             GenomeEvaluator1.Cleanup();
@@ -379,6 +389,20 @@ namespace SharpNeat.EvolutionAlgorithms
             {
                 Log.Warn("RequestPauseAndWait() called but algorithm is not running.");
             }
+        }
+
+        /// <summary>
+        ///     Returns CoevolutionAlgorithmContainer LoggableElements.
+        /// </summary>
+        /// <param name="logFieldEnableMap">
+        ///     Dictionary of logging fields that can be enabled or disabled based on the specification
+        ///     of the calling routine.
+        /// </param>
+        /// <returns>The LoggableElements for CoevolutionAlgorithmContainer.</returns>
+        public List<LoggableElement> GetLoggableElements(IDictionary<FieldElement, bool> logFieldEnableMap = null)
+        {
+            
+            throw new NotImplementedException();
         }
 
         #endregion
@@ -430,7 +454,7 @@ namespace SharpNeat.EvolutionAlgorithms
 
                     // Execute the second algorithm for one evaluation cycle
                     _evolutionAlgorithm2.PerformOneGeneration();
-                    
+
                     // TODO: We probably need to udpate the cached phenotypes on both algorithms here
                     GenomeEvaluator1.UpdateEvaluationBaseline(
                         GenomeEvaluator2.DecodeGenomes(_evolutionAlgorithm2.GenomeList));
@@ -525,8 +549,9 @@ namespace SharpNeat.EvolutionAlgorithms
                 {
                     PausedEvent(this, EventArgs.Empty);
 
-                    // Close the evolution logger
-                    EvolutionLogger?.Close();
+                    // Close the individual algorithm evolution loggers
+                    _evolutionAlgorithm1.CleanupLoggers();
+                    _evolutionAlgorithm2.CleanupLoggers();
 
                     // Cleanup genome evaluator 1
                     GenomeEvaluator1.Cleanup();

@@ -466,6 +466,15 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </summary>
         public abstract void PerformOneGeneration();
 
+        /// <summary>
+        ///     Closes or otherwise dispositions logger references that are held open by the implementing EA class.
+        /// </summary>
+        public void CleanupLoggers()
+        {
+            // Close the evolution logger
+            EvolutionLogger?.Close();
+        }
+
         #endregion
     }
 }

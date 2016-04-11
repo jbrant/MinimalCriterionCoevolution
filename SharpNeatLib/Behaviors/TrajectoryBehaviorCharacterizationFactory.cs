@@ -68,7 +68,7 @@ namespace SharpNeat.Behaviors
         /// <returns>The loggable elements for TrajectoryBehaviorCharacterizationFactory.</returns>
         public List<LoggableElement> GetLoggableElements(IDictionary<FieldElement, bool> logFieldEnableMap = null)
         {
-            return _minimalCriteria.GetLoggableElements(logFieldEnableMap);
+            return _minimalCriteria?.GetLoggableElements(logFieldEnableMap);
         }
     }
 }

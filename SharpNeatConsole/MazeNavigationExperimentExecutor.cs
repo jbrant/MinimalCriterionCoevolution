@@ -528,19 +528,26 @@ namespace SharpNeatConsole
             for (int runIdx = 0; runIdx < numRuns; runIdx++)
             {
                 // Initialize the data loggers for the given run
-                IDataLogger evolutionDataLogger =
-                    new FileDataLogger(string.Format("{0}\\{1} - Run{2} - Evolution.csv", logFileDirectory,
+                IDataLogger navigatorDataLogger =
+                    new FileDataLogger(string.Format("{0}\\{1} - Run{2} - NavigatorEvolution.csv", logFileDirectory,
                         experimentName,
                         runIdx + 1));
-                IDataLogger evaluationDataLogger = writeOrganismStateData
-                    ? new FileDataLogger(string.Format("{0}\\{1} - Run{2} - Evaluation.csv", logFileDirectory,
+                IDataLogger navigatorGenomesLogger =
+                    new FileDataLogger(string.Format("{0}\\{1} - Run{2} - NavigatorGenomes.csv", logFileDirectory,
                         experimentName,
-                        runIdx + 1))
-                    : null;
+                        runIdx + 1));
+                IDataLogger mazeDataLogger =
+                    new FileDataLogger(string.Format("{0}\\{1} - Run{2} - MazeEvolution.csv", logFileDirectory,
+                        experimentName,
+                        runIdx + 1));
+                IDataLogger mazeGenomesLogger =
+                    new FileDataLogger(string.Format("{0}\\{1} - Run{2} - MazeGenomes.csv", logFileDirectory,
+                        experimentName,
+                        runIdx + 1));
 
                 // Initialize new experiment
-                experiment.Initialize(experimentName, xmlConfig.DocumentElement, evolutionDataLogger,
-                    evaluationDataLogger);
+                experiment.Initialize(experimentName, xmlConfig.DocumentElement, navigatorDataLogger,
+                    navigatorGenomesLogger, mazeDataLogger, mazeGenomesLogger);
 
                 _executionLogger.Info(string.Format("Initialized experiment {0}.", experiment.GetType()));
 
@@ -577,8 +584,10 @@ namespace SharpNeatConsole
                 } while (_coevolutionEaContainer.StopConditionSatisfied == false);
 
                 // Close the data loggers
-                evolutionDataLogger.Close();
-                evaluationDataLogger?.Close();
+                navigatorDataLogger.Close();
+                navigatorGenomesLogger.Close();
+                mazeDataLogger.Close();
+                mazeGenomesLogger.Close();
             }
         }
 

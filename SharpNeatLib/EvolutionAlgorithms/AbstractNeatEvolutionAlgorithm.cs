@@ -63,9 +63,18 @@ namespace SharpNeat.EvolutionAlgorithms
         {
             return new List<LoggableElement>
             {
-                new LoggableElement(EvolutionFieldElements.SpecieCount, SpecieList?.Count),
-                new LoggableElement(EvolutionFieldElements.RunPhase, RunPhase),
-                new LoggableElement(EvolutionFieldElements.PopulationSize, GenomeList.Count)
+                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.SpecieCount) == true &&
+                 logFieldEnableMap[EvolutionFieldElements.SpecieCount])
+                    ? new LoggableElement(EvolutionFieldElements.SpecieCount, SpecieList?.Count)
+                    : null,
+                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.RunPhase) == true &&
+                 logFieldEnableMap[EvolutionFieldElements.RunPhase])
+                    ? new LoggableElement(EvolutionFieldElements.RunPhase, RunPhase)
+                    : null,
+                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.PopulationSize) == true &&
+                 logFieldEnableMap[EvolutionFieldElements.PopulationSize])
+                    ? new LoggableElement(EvolutionFieldElements.PopulationSize, GenomeList.Count)
+                    : null
             };
         }
 
@@ -203,6 +212,7 @@ namespace SharpNeat.EvolutionAlgorithms
                 ? GenomeList[0].EvaluationInfo.AuxFitnessArr[0]._value
                 : GenomeList[0].EvaluationInfo.Fitness;
             var totalComplexity = GenomeList[0].Complexity;
+            var minComplexity = totalComplexity;
             var maxComplexity = totalComplexity;
 
             var count = GenomeList.Count;
@@ -212,6 +222,7 @@ namespace SharpNeat.EvolutionAlgorithms
                     ? GenomeList[i].EvaluationInfo.AuxFitnessArr[0]._value
                     : GenomeList[i].EvaluationInfo.Fitness;
                 totalComplexity += GenomeList[i].Complexity;
+                minComplexity = Math.Min(minComplexity, GenomeList[i].Complexity);
                 maxComplexity = Math.Max(maxComplexity, GenomeList[i].Complexity);
             }
 
@@ -220,6 +231,7 @@ namespace SharpNeat.EvolutionAlgorithms
                 : CurrentChampGenome.EvaluationInfo.Fitness;
             Statistics._meanFitness = totalFitness/count;
 
+            Statistics._minComplexity = minComplexity;
             Statistics._maxComplexity = maxComplexity;
             Statistics._meanComplexity = totalComplexity/count;
 

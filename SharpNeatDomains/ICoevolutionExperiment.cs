@@ -61,18 +61,29 @@ namespace SharpNeat.Domains
         /// <summary>
         ///     Save a population of agent genomes to an XmlWriter.
         /// </summary>
+        /// <param name="xw">Reference to the XML writer.</param>
+        /// <param name="agentGenomeList">The list of navigator genomes to write.</param>
         void SaveAgentPopulation(XmlWriter xw, IList<NeatGenome> agentGenomeList);
 
         /// <summary>
         ///     Save a population of maze genomes to an XmlWriter.
         /// </summary>
+        /// <param name="xw">Reference to the XML writer.</param>
+        /// <param name="mazeGenomeList">The list of maze genomes to write.</param>
         void SaveMazePopulation(XmlWriter xw, IList<MazeGenome> mazeGenomeList);
 
         /// <summary>
         ///     Initialize the experiment with some optional XML configutation data.
         /// </summary>
-        void Initialize(string name, XmlElement xmlConfig, IDataLogger evolutionDataLogger = null,
-            IDataLogger evaluationDataLogger = null);
+        /// <param name="name">The name of the experiment.</param>
+        /// <param name="xmlConfig">The experiment XML configuration file.</param>
+        /// <param name="population1EvolutionLogger">The population 1 evolution logger.</param>
+        /// <param name="population1GenomeLogger">The population 1 genome logger.</param>
+        /// <param name="population2EvolutionLogger">The population 2 evolution logger.</param>
+        /// <param name="population2GenomeLogger">The population 2 genome logger.</param>
+        void Initialize(string name, XmlElement xmlConfig, IDataLogger population1EvolutionLogger = null,
+            IDataLogger population1GenomeLogger = null, IDataLogger population2EvolutionLogger = null,
+            IDataLogger population2GenomeLogger = null);
 
         /// <summary>
         ///     Creates and returns a coevolution algorithm container, which encapsulates two evolutionary algorithms.  This

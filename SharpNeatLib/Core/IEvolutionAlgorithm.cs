@@ -147,5 +147,10 @@ namespace SharpNeat.Core
         ///     algorithm.
         /// </summary>
         void PerformOneGeneration();
+
+        /// <summary>
+        ///     Closes or otherwise dispositions logger references that are held open by the implementing EA class.
+        /// </summary>
+        void CleanupLoggers();
     }
 }

@@ -63,43 +63,55 @@ namespace SharpNeat.Genomes.Neat
             // Add all loggable elements except for behavior characterization
             List<LoggableElement> loggableElements = new List<LoggableElement>
             {
-                new LoggableElement(EvolutionFieldElements.ChampGenomeGenomeId, Id),
-                new LoggableElement(EvolutionFieldElements.ChampGenomeBirthGeneration, BirthGeneration),
-                new LoggableElement(EvolutionFieldElements.ChampGenomeNeuronGeneCount, NeuronGeneList.Count),
-                new LoggableElement(EvolutionFieldElements.ChampGenomeConnectionGeneCount,
-                    ConnectionGeneList.Count),
-                new LoggableElement(EvolutionFieldElements.ChampGenomeTotalGeneCount,
-                    NeuronGeneList.Count + ConnectionGeneList.Count),
-                new LoggableElement(EvolutionFieldElements.ChampGenomeEvaluationCount,
-                    EvaluationInfo.EvaluationCount),
-                new LoggableElement(EvolutionFieldElements.ChampGenomeDistanceToTarget, EvaluationInfo.ObjectiveDistance)
+                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.ChampGenomeGenomeId) == true &&
+                 logFieldEnableMap[EvolutionFieldElements.ChampGenomeGenomeId])
+                    ? new LoggableElement(EvolutionFieldElements.ChampGenomeGenomeId, Id)
+                    : null,
+                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.ChampGenomeBirthGeneration) == true &&
+                 logFieldEnableMap[EvolutionFieldElements.ChampGenomeBirthGeneration])
+                    ? new LoggableElement(EvolutionFieldElements.ChampGenomeBirthGeneration, BirthGeneration)
+                    : null,
+                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.ChampGenomeNeuronGeneCount) == true &&
+                 logFieldEnableMap[EvolutionFieldElements.ChampGenomeNeuronGeneCount])
+                    ? new LoggableElement(EvolutionFieldElements.ChampGenomeNeuronGeneCount, NeuronGeneList.Count)
+                    : null,
+                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.ChampGenomeConnectionGeneCount) == true &&
+                 logFieldEnableMap[EvolutionFieldElements.ChampGenomeConnectionGeneCount])
+                    ? new LoggableElement(EvolutionFieldElements.ChampGenomeConnectionGeneCount,
+                        ConnectionGeneList.Count)
+                    : null,
+                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.ChampGenomeTotalGeneCount) == true &&
+                 logFieldEnableMap[EvolutionFieldElements.ChampGenomeTotalGeneCount])
+                    ? new LoggableElement(EvolutionFieldElements.ChampGenomeTotalGeneCount,
+                        NeuronGeneList.Count + ConnectionGeneList.Count)
+                    : null,
+                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.ChampGenomeEvaluationCount) == true &&
+                 logFieldEnableMap[EvolutionFieldElements.ChampGenomeEvaluationCount])
+                    ? new LoggableElement(EvolutionFieldElements.ChampGenomeEvaluationCount,
+                        EvaluationInfo.EvaluationCount)
+                    : null,
+                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.ChampGenomeDistanceToTarget) == true &&
+                 logFieldEnableMap[EvolutionFieldElements.ChampGenomeDistanceToTarget])
+                    ? new LoggableElement(EvolutionFieldElements.ChampGenomeDistanceToTarget,
+                        EvaluationInfo.ObjectiveDistance)
+                    : null,
+                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.ChampGenomeFitness) == true &&
+                 logFieldEnableMap[EvolutionFieldElements.ChampGenomeFitness])
+                    ? new LoggableElement(EvolutionFieldElements.ChampGenomeFitness, EvaluationInfo.Fitness)
+                    : null
             };
-
-            // If champ genome primary fitness logging is explicitly disabled, then log the auxiliary fitness
-            if (logFieldEnableMap != null && logFieldEnableMap.ContainsKey(EvolutionFieldElements.ChampGenomeFitness) &&
-                logFieldEnableMap[EvolutionFieldElements.ChampGenomeFitness] == false)
-            {
-                loggableElements.Add(new LoggableElement(EvolutionFieldElements.ChampGenomeFitness,
-                    EvaluationInfo.AuxFitnessArr[0]._value));
-            }
-            else
-            {
-                loggableElements.Add(new LoggableElement(EvolutionFieldElements.ChampGenomeFitness,
-                    EvaluationInfo.Fitness));
-            }
 
             // Add all behavior characteriazation elements as a separate column
             if (EvaluationInfo.BehaviorCharacterization != null)
             {
-                loggableElements.Add(new LoggableElement(EvolutionFieldElements.ChampGenomeBehaviorX,
-                    EvaluationInfo.BehaviorCharacterization[0]));
-                loggableElements.Add(new LoggableElement(EvolutionFieldElements.ChampGenomeBehaviorY,
-                    EvaluationInfo.BehaviorCharacterization[1]));
-            }
-            else
-            {
-                loggableElements.Add(new LoggableElement(EvolutionFieldElements.ChampGenomeBehaviorX, null));
-                loggableElements.Add(new LoggableElement(EvolutionFieldElements.ChampGenomeBehaviorY, null));
+                if ((logFieldEnableMap?.ContainsKey(EvolutionFieldElements.ChampGenomeBehaviorX) == true &&
+                     logFieldEnableMap[EvolutionFieldElements.ChampGenomeBehaviorX]))
+                    loggableElements.Add(new LoggableElement(EvolutionFieldElements.ChampGenomeBehaviorX,
+                        EvaluationInfo.BehaviorCharacterization[0]));
+                if ((logFieldEnableMap?.ContainsKey(EvolutionFieldElements.ChampGenomeBehaviorY) == true &&
+                     logFieldEnableMap[EvolutionFieldElements.ChampGenomeBehaviorY]))
+                    loggableElements.Add(new LoggableElement(EvolutionFieldElements.ChampGenomeBehaviorY,
+                        EvaluationInfo.BehaviorCharacterization[1]));
             }
 
             // Only log champ genome XML if explicitly specified

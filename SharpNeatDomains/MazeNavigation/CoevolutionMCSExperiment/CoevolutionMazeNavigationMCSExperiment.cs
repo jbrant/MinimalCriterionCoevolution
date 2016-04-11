@@ -63,10 +63,13 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
         /// </summary>
         /// <param name="name">The name of the experiment.</param>
         /// <param name="xmlConfig">The reference to the XML configuration file.</param>
-        /// <param name="evolutionDataLogger">The evolution data logger.</param>
-        /// <param name="evaluationDataLogger">The evaluation data logger.</param>
-        public void Initialize(string name, XmlElement xmlConfig, IDataLogger evolutionDataLogger = null,
-            IDataLogger evaluationDataLogger = null)
+        /// <param name="navigatorEvolutionLogger">The navigator evolution data logger.</param>
+        /// <param name="navigatorGenomeLogger">The navigator genome logger.</param>
+        /// <param name="mazeEvolutionLogger">The maze evolution data logger.</param>
+        /// <param name="mazeGenomeLogger">The maze genome logger.</param>
+        public void Initialize(string name, XmlElement xmlConfig, IDataLogger navigatorEvolutionLogger = null,
+            IDataLogger navigatorGenomeLogger = null, IDataLogger mazeEvolutionLogger = null,
+            IDataLogger mazeGenomeLogger = null)
         {
             // Set boiler plate properties
             Name = name;
@@ -87,7 +90,8 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             MazeSeedGenomeCount = XmlUtils.GetValueAsInt(xmlConfig, "MazeSeedGenomeCount");
             _behaviorCharacterizationFactory = ExperimentUtils.ReadBehaviorCharacterizationFactory(xmlConfig,
                 "BehaviorConfig");
-            _batchSize = XmlUtils.GetValueAsInt(xmlConfig, "OffspringBatchSize");
+            _navigatorBatchSize = XmlUtils.GetValueAsInt(xmlConfig, "NavigatorOffspringBatchSize");
+            _mazeBatchSize = XmlUtils.GetValueAsInt(xmlConfig, "MazeOffspringBatchSize");
 
             // Set run-time bounding parameters
             _maxGenerations = XmlUtils.TryGetValueAsInt(xmlConfig, "MaxGenerations");
@@ -105,10 +109,48 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             _numAgentSuccessCriteria = XmlUtils.GetValueAsInt(xmlConfig, "NumAgentsSolvedCriteria");
             _numAgentFailedCriteria = XmlUtils.GetValueAsInt(xmlConfig, "NumAgentsFailedCriteria");
 
-            // TODO: Setup logging here
             // Read in log file path/name
-            _evolutionDataLogger = evolutionDataLogger ??
-                                   ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Evolution);
+            _navigatorEvolutionDataLogger = navigatorEvolutionLogger ??
+                                            ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Evolution,
+                                                "NavigatorLoggingConfig");
+            _navigatorPopulationGenomesDataLogger = navigatorGenomeLogger ??
+                                                    ExperimentUtils.ReadDataLogger(xmlConfig,
+                                                        LoggingType.PopulationGenomes, "NavigatorLoggingConfig");
+            _mazeEvolutionDataLogger = mazeEvolutionLogger ??
+                                       ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Evolution,
+                                           "MazeLoggingConfig");
+            _mazePopulationGenomesDataLogger = mazeGenomeLogger ??
+                                               ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.PopulationGenomes,
+                                                   "MazeLoggingConfig");
+            
+            // Create new evolution field elements map with all fields enabled
+            _logFieldEnableMap = EvolutionFieldElements.PopulateEvolutionFieldElementsEnableMap();
+
+            // Disable logging fields not relevant to coevolution experiment            
+            _logFieldEnableMap[EvolutionFieldElements.RunPhase] = false;
+            _logFieldEnableMap[EvolutionFieldElements.SpecieCount] = false;
+            _logFieldEnableMap[EvolutionFieldElements.AsexualOffspringCount] = false;
+            _logFieldEnableMap[EvolutionFieldElements.SexualOffspringCount] = false;
+            _logFieldEnableMap[EvolutionFieldElements.InterspeciesOffspringCount] = false;
+            _logFieldEnableMap[EvolutionFieldElements.MinimalCriteriaThreshold] = false;
+            _logFieldEnableMap[EvolutionFieldElements.MinimalCriteriaPointX] = false;
+            _logFieldEnableMap[EvolutionFieldElements.MinimalCriteriaPointY] = false;
+            _logFieldEnableMap[EvolutionFieldElements.MaxFitness] = false;
+            _logFieldEnableMap[EvolutionFieldElements.MeanFitness] = false;
+            _logFieldEnableMap[EvolutionFieldElements.MeanSpecieChampFitness] = false;
+            _logFieldEnableMap[EvolutionFieldElements.MinSpecieSize] = false;
+            _logFieldEnableMap[EvolutionFieldElements.MaxSpecieSize] = false;
+            _logFieldEnableMap[EvolutionFieldElements.ChampGenomeGenomeId] = false;
+            _logFieldEnableMap[EvolutionFieldElements.ChampGenomeFitness] = false;
+            _logFieldEnableMap[EvolutionFieldElements.ChampGenomeBirthGeneration] = false;
+            _logFieldEnableMap[EvolutionFieldElements.ChampGenomeConnectionGeneCount] = false;
+            _logFieldEnableMap[EvolutionFieldElements.ChampGenomeNeuronGeneCount] = false;
+            _logFieldEnableMap[EvolutionFieldElements.ChampGenomeTotalGeneCount] = false;
+            _logFieldEnableMap[EvolutionFieldElements.ChampGenomeEvaluationCount] = false;
+            _logFieldEnableMap[EvolutionFieldElements.ChampGenomeBehaviorX] = false;
+            _logFieldEnableMap[EvolutionFieldElements.ChampGenomeBehaviorY] = false;
+            _logFieldEnableMap[EvolutionFieldElements.ChampGenomeDistanceToTarget] = false;
+            _logFieldEnableMap[EvolutionFieldElements.ChampGenomeXml] = false;
 
             // Initialize the initialization algorithm
             _mazeNavigationInitializer = new FitnessCoevolutionMazeNavigationInitializer();
@@ -193,11 +235,14 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
 
             // Create the NEAT (i.e. navigator) queueing evolution algorithm
             AbstractEvolutionAlgorithm<NeatGenome> neatEvolutionAlgorithm =
-                new QueueingNeatEvolutionAlgorithm<NeatGenome>(new NeatEvolutionAlgorithmParameters(), null, _batchSize);
+                new QueueingNeatEvolutionAlgorithm<NeatGenome>(new NeatEvolutionAlgorithmParameters(), null,
+                    _navigatorBatchSize, RunPhase.Primary, false, false, _navigatorEvolutionDataLogger,
+                    _logFieldEnableMap);
 
             // Create the maze queueing evolution algorithm
             AbstractEvolutionAlgorithm<MazeGenome> mazeEvolutionAlgorithm =
-                new QueueingNeatEvolutionAlgorithm<MazeGenome>(new NeatEvolutionAlgorithmParameters(), null, _batchSize);
+                new QueueingNeatEvolutionAlgorithm<MazeGenome>(new NeatEvolutionAlgorithmParameters(), null,
+                    _mazeBatchSize, RunPhase.Primary, false, false, _mazeEvolutionDataLogger, _logFieldEnableMap);
 
             // Create the maze phenome evaluator
             IPhenomeEvaluator<MazeStructure, BehaviorInfo> mazeEvaluator = new MazeEnvironmentMCSEvaluator(
@@ -214,7 +259,7 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
 
             // Create navigator genome decoder
             IGenomeDecoder<NeatGenome, IBlackBox> navigatorGenomeDecoder = new NeatGenomeDecoder(_activationScheme);
-            
+
             // Create the maze genome evaluator
             IGenomeEvaluator<MazeGenome> mazeFitnessEvaluator =
                 new ParallelGenomeBehaviorEvaluator<MazeGenome, MazeStructure>(mazeGenomeDecoder, mazeEvaluator,
@@ -227,7 +272,8 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
 
             // Create the coevolution container
             ICoevolutionAlgorithmContainer<NeatGenome, MazeGenome> coevolutionAlgorithmContainer =
-                new CoevolutionAlgorithmContainer<NeatGenome, MazeGenome>(neatEvolutionAlgorithm, mazeEvolutionAlgorithm);
+                new CoevolutionAlgorithmContainer<NeatGenome, MazeGenome>(neatEvolutionAlgorithm, mazeEvolutionAlgorithm,
+                    _navigatorPopulationGenomesDataLogger, _mazePopulationGenomesDataLogger);
 
             // Initialize the container and component algorithms
             coevolutionAlgorithmContainer.Initialize(navigatorFitnessEvaluator, genomeFactory1, seedAgentPopulation,
@@ -311,9 +357,14 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
         private const int AnnOutputCount = 2;
 
         /// <summary>
-        ///     The number of individuals to be evaluated in a single evaluation "batch".
+        ///     The number of maze navigators to be evaluated in a single evaluation "batch".
         /// </summary>
-        private int _batchSize;
+        private int _navigatorBatchSize;
+
+        /// <summary>
+        ///     The number of mazes to be evaluated in a single evaluation "batch".
+        /// </summary>
+        private int _mazeBatchSize;
 
         /// <summary>
         ///     The factory used for producing behavior characterizations.
@@ -378,9 +429,29 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
         private int _mazeScaleMultiplier;
 
         /// <summary>
-        ///     Logs statistics about populations for every batch.
+        ///     Logs statistics about the navigator populations for every batch.
         /// </summary>
-        private IDataLogger _evolutionDataLogger;
+        private IDataLogger _navigatorEvolutionDataLogger;
+
+        /// <summary>
+        ///     Logs the XML definitions of the extant navigator population on a periodic basis.
+        /// </summary>
+        private IDataLogger _navigatorPopulationGenomesDataLogger;
+
+        /// <summary>
+        ///     Logs statistics about the maze populations for every batch.
+        /// </summary>
+        private IDataLogger _mazeEvolutionDataLogger;
+
+        /// <summary>
+        ///     Logs the XML definitions of the extant maze population on a periodic basis.
+        /// </summary>
+        private IDataLogger _mazePopulationGenomesDataLogger;
+
+        /// <summary>
+        ///     Dictionary which indicates logger fields to be enabled/disabled.
+        /// </summary>
+        private IDictionary<FieldElement, bool> _logFieldEnableMap;
 
         #endregion
     }

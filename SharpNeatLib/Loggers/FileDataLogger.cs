@@ -146,9 +146,12 @@ namespace SharpNeat.Loggers
                 combinedElements.AddRange(loggableElementList);
             }
 
+            // Remove all null from combined list
+            combinedElements.RemoveAll(item => item == null);
+
             // Sort the elements so that everything logged is kept in the same order
             combinedElements.Sort();
-
+            
             return combinedElements;
         }
 

@@ -63,21 +63,66 @@ namespace SharpNeat.EvolutionAlgorithms
         {
             return new List<LoggableElement>
             {
-                new LoggableElement(EvolutionFieldElements.Generation, _generation),
-                new LoggableElement(EvolutionFieldElements.TotalEvaluations, _totalEvaluationCount),
-                new LoggableElement(EvolutionFieldElements.EvaluationsPerSecond, _evaluationsPerSec),
-                new LoggableElement(EvolutionFieldElements.MaxFitness, _maxFitness),
-                new LoggableElement(EvolutionFieldElements.MeanFitness, _meanFitness),
-                new LoggableElement(EvolutionFieldElements.MeanSpecieChampFitness, _meanSpecieChampFitness),
-                new LoggableElement(EvolutionFieldElements.MaxComplexity, _maxComplexity),
-                new LoggableElement(EvolutionFieldElements.MeanComplexity, _meanComplexity),
-                new LoggableElement(EvolutionFieldElements.TotalOffspringCount, _totalOffspringCount),
-                new LoggableElement(EvolutionFieldElements.AsexualOffspringCount, _asexualOffspringCount),
-                new LoggableElement(EvolutionFieldElements.SexualOffspringCount, _sexualOffspringCount),
-                new LoggableElement(EvolutionFieldElements.InterspeciesOffspringCount,
-                    _interspeciesOffspringCount),
-                new LoggableElement(EvolutionFieldElements.MinSpecieSize, _minSpecieSize),
-                new LoggableElement(EvolutionFieldElements.MaxSpecieSize, _maxSpecieSize)
+                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.Generation) == true &&
+                 logFieldEnableMap[EvolutionFieldElements.Generation])
+                    ? new LoggableElement(EvolutionFieldElements.Generation, _generation)
+                    : null,
+                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.TotalEvaluations) == true &&
+                 logFieldEnableMap[EvolutionFieldElements.TotalEvaluations])
+                    ? new LoggableElement(EvolutionFieldElements.TotalEvaluations, _totalEvaluationCount)
+                    : null,
+                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.EvaluationsPerSecond) == true &&
+                 logFieldEnableMap[EvolutionFieldElements.EvaluationsPerSecond])
+                    ? new LoggableElement(EvolutionFieldElements.EvaluationsPerSecond, _evaluationsPerSec)
+                    : null,
+                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MaxFitness) == true &&
+                 logFieldEnableMap[EvolutionFieldElements.MaxFitness])
+                    ? new LoggableElement(EvolutionFieldElements.MaxFitness, _maxFitness)
+                    : null,
+                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MeanFitness) == true &&
+                 logFieldEnableMap[EvolutionFieldElements.MeanFitness])
+                    ? new LoggableElement(EvolutionFieldElements.MeanFitness, _meanFitness)
+                    : null,
+                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MeanSpecieChampFitness) == true &&
+                 logFieldEnableMap[EvolutionFieldElements.MeanSpecieChampFitness])
+                    ? new LoggableElement(EvolutionFieldElements.MeanSpecieChampFitness, _meanSpecieChampFitness)
+                    : null,
+                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MinComplexity) == true &&
+                 logFieldEnableMap[EvolutionFieldElements.MinComplexity])
+                    ? new LoggableElement(EvolutionFieldElements.MinComplexity, _minComplexity)
+                    : null,
+                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MaxComplexity) == true &&
+                 logFieldEnableMap[EvolutionFieldElements.MaxComplexity])
+                    ? new LoggableElement(EvolutionFieldElements.MaxComplexity, _maxComplexity)
+                    : null,
+                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MeanComplexity) == true &&
+                 logFieldEnableMap[EvolutionFieldElements.MeanComplexity])
+                    ? new LoggableElement(EvolutionFieldElements.MeanComplexity, _meanComplexity)
+                    : null,
+                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.TotalOffspringCount) == true &&
+                 logFieldEnableMap[EvolutionFieldElements.TotalOffspringCount])
+                    ? new LoggableElement(EvolutionFieldElements.TotalOffspringCount, _totalOffspringCount)
+                    : null,
+                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.AsexualOffspringCount) == true &&
+                 logFieldEnableMap[EvolutionFieldElements.AsexualOffspringCount])
+                    ? new LoggableElement(EvolutionFieldElements.AsexualOffspringCount, _asexualOffspringCount)
+                    : null,
+                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.SexualOffspringCount) == true &&
+                 logFieldEnableMap[EvolutionFieldElements.SexualOffspringCount])
+                    ? new LoggableElement(EvolutionFieldElements.SexualOffspringCount, _sexualOffspringCount)
+                    : null,
+                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.InterspeciesOffspringCount) == true &&
+                 logFieldEnableMap[EvolutionFieldElements.InterspeciesOffspringCount])
+                    ? new LoggableElement(EvolutionFieldElements.InterspeciesOffspringCount, _interspeciesOffspringCount)
+                    : null,
+                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MinSpecieSize) == true &&
+                 logFieldEnableMap[EvolutionFieldElements.MinSpecieSize])
+                    ? new LoggableElement(EvolutionFieldElements.MinSpecieSize, _minSpecieSize)
+                    : null,
+                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MaxSpecieSize) == true &&
+                 logFieldEnableMap[EvolutionFieldElements.MaxSpecieSize])
+                    ? new LoggableElement(EvolutionFieldElements.MaxSpecieSize, _maxSpecieSize)
+                    : null
             };
 
             #endregion
@@ -132,6 +177,11 @@ namespace SharpNeat.EvolutionAlgorithms
         #endregion
 
         #region Complexity Stats
+
+        /// <summary>
+        ///     The complexity of the least complex genome.
+        /// </summary>
+        public double _minComplexity;
 
         /// <summary>
         ///     The complexity of the most complex genome.
