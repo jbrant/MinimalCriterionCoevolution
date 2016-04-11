@@ -390,14 +390,32 @@ namespace SharpNeat.Domains
                 "MaxGenerationsWithoutArchiveAddition");
         }
 
+        /// <summary>
+        ///     Reads the experiment logging configuration with the default top-level configuration element "LoggingConfig".
+        /// </summary>
+        /// <param name="xmlConfig">The reference to the XML configuration file.</param>
+        /// <param name="loggingType">The type of logging (evolution, evaluation, etc.).</param>
+        /// <returns>A constructed data logger.</returns>
         public static IDataLogger ReadDataLogger(XmlElement xmlConfig, LoggingType loggingType)
+        {
+            return ReadDataLogger(xmlConfig, loggingType, "LoggingConfig");
+        }
+
+        /// <summary>
+        ///     Reads the experiment logging configuration.
+        /// </summary>
+        /// <param name="xmlConfig">The reference to the XML configuration file.</param>
+        /// <param name="loggingType">The type of logging (evolution, evaluation, etc.).</param>
+        /// <param name="parentElementName">The name of the top-level logging configuration element.</param>
+        /// <returns>A constructed data logger.</returns>
+        public static IDataLogger ReadDataLogger(XmlElement xmlConfig, LoggingType loggingType, string parentElementName)
         {
             IDataLogger dataLogger = null;
             XmlElement xmlLoggingConfig = null;
             int cnt = 0;
 
             // Get root of novelty configuration section
-            XmlNodeList nodeList = xmlConfig.GetElementsByTagName("LoggingConfig", "");
+            XmlNodeList nodeList = xmlConfig.GetElementsByTagName(parentElementName, "");
 
             // Iterate through the list of logging configurations, finding one that matches the specified logging type
             foreach (XmlElement curXmlLoggingConfig in nodeList)

@@ -51,12 +51,12 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                                     ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Evaluation);
 
             // Setup the specific logging options based on parameters that are enabled/disabled
-            _experimentLogFieldEnableMap = new Dictionary<FieldElement, bool>();
+            _experimentLogFieldEnableMap = EvolutionFieldElements.PopulateEvolutionFieldElementsEnableMap();
 
             // Enable or disable genome XML logging
-            if (SerializeGenomeToXml)
+            if (SerializeGenomeToXml == false)
             {
-                _experimentLogFieldEnableMap.Add(EvolutionFieldElements.ChampGenomeXml, true);
+                _experimentLogFieldEnableMap.Add(EvolutionFieldElements.ChampGenomeXml, false);
             }
 
             // Initialize the initialization algorithm

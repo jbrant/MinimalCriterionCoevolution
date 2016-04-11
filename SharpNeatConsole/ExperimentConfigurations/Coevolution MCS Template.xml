@@ -24,8 +24,9 @@
   </MazeGenomeConfig>
   <BehaviorConfig>
     <BehaviorCharacterization>EndPoint</BehaviorCharacterization>
-  </BehaviorConfig>  
-  <OffspringBatchSize>50</OffspringBatchSize>
+  </BehaviorConfig>
+  <NavigatorOffspringBatchSize>50</NavigatorOffspringBatchSize>
+  <MazeOffspringBatchSize>10</MazeOffspringBatchSize>  
   <MaxEvaluations>100000000</MaxEvaluations>
   <MaxTimesteps>600</MaxTimesteps>
   <MinSuccessDistance>5</MinSuccessDistance>
@@ -51,11 +52,30 @@
     <OffspringSexualProbability>0.5</OffspringSexualProbability>
     <InterspeciesMatingProbability>0.001</InterspeciesMatingProbability>
   </InitializationAlgorithmConfig>
-  <LoggingConfig>
+  <NavigatorLoggingConfig>
     <Type>Evolution</Type>
     <Destination>File</Destination>
-    <LogFile>C:\\Users\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Minimal Criteria Search\ExperimentData\\EvolutionData.csv</LogFile>
-  </LoggingConfig>
+    <!--<LogFile>C:\\Users\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Minimal Criteria Search\ExperimentData\\NavigatorEvolutionData.csv</LogFile>-->
+    <LogFile>F:\\User Data\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Minimal Criteria Search\ExperimentData\\NavigatorEvolutionData.csv</LogFile>
+  </NavigatorLoggingConfig>
+  <NavigatorLoggingConfig>
+    <Type>PopulationGenomes</Type>
+    <Destination>File</Destination>
+    <!--<LogFile>C:\\Users\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Minimal Criteria Search\ExperimentData\\NavigatorPopulationGenomesData.csv</LogFile>-->
+    <LogFile>F:\\User Data\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Minimal Criteria Search\ExperimentData\\NavigatorPopulationGenomesData.csv</LogFile>
+  </NavigatorLoggingConfig>
+  <MazeLoggingConfig>
+    <Type>Evolution</Type>
+    <Destination>File</Destination>
+    <!--<LogFile>C:\\Users\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Minimal Criteria Search\ExperimentData\\MazeEvolutionData.csv</LogFile>-->
+    <LogFile>F:\\User Data\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Minimal Criteria Search\ExperimentData\\MazeEvolutionData.csv</LogFile>
+  </MazeLoggingConfig>
+  <MazeLoggingConfig>
+    <Type>PopulationGenomes</Type>
+    <Destination>File</Destination>
+    <!--<LogFile>C:\\Users\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Minimal Criteria Search\ExperimentData\\MazePopulationGenomesData.csv</LogFile>-->
+    <LogFile>F:\\User Data\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Minimal Criteria Search\ExperimentData\\MazePopulationGenomesData.csv</LogFile>
+    </MazeLoggingConfig>
   <Description>
     Coevolutionary MCS Maze navigation experiment, evolving both maze navigators and the mazes themselves.
   </Description>

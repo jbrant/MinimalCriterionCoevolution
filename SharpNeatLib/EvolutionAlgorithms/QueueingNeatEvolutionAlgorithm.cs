@@ -7,7 +7,6 @@ using System.Linq;
 using SharpNeat.Core;
 using SharpNeat.DistanceMetrics;
 using SharpNeat.EvolutionAlgorithms.ComplexityRegulation;
-using SharpNeat.Genomes.Maze;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Loggers;
 using SharpNeat.SpeciationStrategies;
@@ -157,7 +156,7 @@ namespace SharpNeat.EvolutionAlgorithms
 
             // Produce number of offspring equivalent to the given batch size
             List<TGenome> childGenomes = CreateOffspring(curBatchSize);
-            
+
             // First evaluate the offspring batch with bridging disabled
             GenomeEvaluator.Evaluate(childGenomes, CurrentGeneration);
 
@@ -183,6 +182,8 @@ namespace SharpNeat.EvolutionAlgorithms
                 // really give an indication of the inherent capabilities of the genome.  Therefore, the champ
                 // genome info needs to be set using the non-bridging fitness (which is now in the aux fitness)
                 useAuxFitness = true;
+
+                // TODO: If running bridging again, need to copy aux fitness back into main fitness property
             }
 
             // Remove child genomes that are not viable
@@ -250,7 +251,7 @@ namespace SharpNeat.EvolutionAlgorithms
             _batchSize = 10;
             _mcUpdateInterval = mcUpdateInterval;
         }
-
+        
         /// <summary>
         ///     Constructs steady state evolution algorithm with the given NEAT parameters and complexity regulation strategy.
         /// </summary>

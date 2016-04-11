@@ -1,7 +1,6 @@
 ﻿#region
 
 using System.Collections.Generic;
-using System.Diagnostics;
 using SharpNeat.Core;
 using SharpNeat.Domains.MazeNavigation.Components;
 using SharpNeat.Loggers;
@@ -193,9 +192,18 @@ namespace SharpNeat.Domains.MazeNavigation
         {
             return new List<LoggableElement>
             {
-                new LoggableElement(EvaluationFieldElements.DistanceToTarget, GetDistanceToTarget()),
-                new LoggableElement(EvaluationFieldElements.AgentXLocation, _navigator.Location.X),
-                new LoggableElement(EvaluationFieldElements.AgentYLocation, _navigator.Location.Y)
+                (logFieldEnableMap?.ContainsKey(EvaluationFieldElements.DistanceToTarget) == true &&
+                 logFieldEnableMap[EvaluationFieldElements.DistanceToTarget])
+                    ? new LoggableElement(EvaluationFieldElements.DistanceToTarget, GetDistanceToTarget())
+                    : null,
+                (logFieldEnableMap?.ContainsKey(EvaluationFieldElements.AgentXLocation) == true &&
+                 logFieldEnableMap[EvaluationFieldElements.AgentXLocation])
+                    ? new LoggableElement(EvaluationFieldElements.AgentXLocation, _navigator.Location.X)
+                    : null,
+                (logFieldEnableMap?.ContainsKey(EvaluationFieldElements.AgentYLocation) == true &&
+                 logFieldEnableMap[EvaluationFieldElements.AgentYLocation])
+                    ? new LoggableElement(EvaluationFieldElements.AgentYLocation, _navigator.Location.Y)
+                    : null
             };
         }
 
