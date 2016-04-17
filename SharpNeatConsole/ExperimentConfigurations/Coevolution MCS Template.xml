@@ -52,6 +52,7 @@
     <OffspringSexualProbability>0.5</OffspringSexualProbability>
     <InterspeciesMatingProbability>0.001</InterspeciesMatingProbability>
   </InitializationAlgorithmConfig>
+  <PopulationLoggingBatchInterval>5</PopulationLoggingBatchInterval>
   <NavigatorLoggingConfig>
     <Type>Evolution</Type>
     <Destination>File</Destination>

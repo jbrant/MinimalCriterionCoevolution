@@ -122,7 +122,7 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             _mazePopulationGenomesDataLogger = mazeGenomeLogger ??
                                                ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.PopulationGenomes,
                                                    "MazeLoggingConfig");
-            
+
             // Create new evolution field elements map with all fields enabled
             _logFieldEnableMap = EvolutionFieldElements.PopulateEvolutionFieldElementsEnableMap();
 
@@ -151,6 +151,9 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             _logFieldEnableMap[EvolutionFieldElements.ChampGenomeBehaviorY] = false;
             _logFieldEnableMap[EvolutionFieldElements.ChampGenomeDistanceToTarget] = false;
             _logFieldEnableMap[EvolutionFieldElements.ChampGenomeXml] = false;
+
+            // Read in the number of batches between population logging
+            _populationLoggingBatchInterval = XmlUtils.TryGetValueAsInt(xmlConfig, "PopulationLoggingBatchInterval");
 
             // Initialize the initialization algorithm
             _mazeNavigationInitializer = new FitnessCoevolutionMazeNavigationInitializer();
@@ -273,7 +276,9 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             // Create the coevolution container
             ICoevolutionAlgorithmContainer<NeatGenome, MazeGenome> coevolutionAlgorithmContainer =
                 new CoevolutionAlgorithmContainer<NeatGenome, MazeGenome>(neatEvolutionAlgorithm, mazeEvolutionAlgorithm,
-                    _navigatorPopulationGenomesDataLogger, _mazePopulationGenomesDataLogger);
+                    _navigatorPopulationGenomesDataLogger, _mazePopulationGenomesDataLogger,
+                    PopulationGenomesFieldElements.PopulatePopulationGenomesFieldElementsEnableMap(),
+                    _populationLoggingBatchInterval);
 
             // Initialize the container and component algorithms
             coevolutionAlgorithmContainer.Initialize(navigatorFitnessEvaluator, genomeFactory1, seedAgentPopulation,
@@ -452,6 +457,11 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
         ///     Dictionary which indicates logger fields to be enabled/disabled.
         /// </summary>
         private IDictionary<FieldElement, bool> _logFieldEnableMap;
+
+        /// <summary>
+        ///     Controls the number of batches between population definitions (i.e. genome XML) being logged.
+        /// </summary>
+        private int? _populationLoggingBatchInterval;
 
         #endregion
     }
