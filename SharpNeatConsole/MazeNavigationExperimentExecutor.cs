@@ -551,37 +551,34 @@ namespace SharpNeatConsole
 
                 _executionLogger.Info(string.Format("Initialized experiment {0}.", experiment.GetType()));
 
-                do
+                // If there were seed population files specified, read them in
+                if (Boolean.Parse(_executionConfiguration[ExecutionParameter.GeneratePopulation]) == false)
                 {
-                    // If there were seed population files specified, read them in
-                    if (Boolean.Parse(_executionConfiguration[ExecutionParameter.GeneratePopulation]) == false)
-                    {
-                        // TODO: Need to implement ability to load maze seed genomes
-                        throw new NotImplementedException("Currently unable to read in serialized maze genomes.");
-                    }
+                    // TODO: Need to implement ability to load maze seed genomes
+                    throw new NotImplementedException("Currently unable to read in serialized maze genomes.");
+                }
 
-                    // Otherwise, generate the starting population
-                    // Create a new agent genome factory
-                    var agentGenomeFactory = experiment.CreateAgentGenomeFactory();
+                // Otherwise, generate the starting population
+                // Create a new agent genome factory
+                var agentGenomeFactory = experiment.CreateAgentGenomeFactory();
 
-                    // Create a new maze genome factory
-                    var mazeGenomeFactory = experiment.CreateMazeGenomeFactory();
+                // Create a new maze genome factory
+                var mazeGenomeFactory = experiment.CreateMazeGenomeFactory();
 
-                    // Generate the initial agent population
-                    var agentGenomeList = agentGenomeFactory.CreateGenomeList(experiment.AgentSeedGenomeCount, 0);
+                // Generate the initial agent population
+                var agentGenomeList = agentGenomeFactory.CreateGenomeList(experiment.AgentSeedGenomeCount, 0);
 
-                    // Generate the initial maze population
-                    var mazeGenomeList = mazeGenomeFactory.CreateGenomeList(experiment.MazeSeedGenomeCount, 0);
+                // Generate the initial maze population
+                var mazeGenomeList = mazeGenomeFactory.CreateGenomeList(experiment.MazeSeedGenomeCount, 0);
 
-                    _executionLogger.Info(string.Format("Loaded [{0}] genomes as initial population.",
-                        agentGenomeList.Count));
+                _executionLogger.Info(string.Format("Loaded [{0}] genomes as initial population.",
+                    agentGenomeList.Count));
 
-                    _executionLogger.Info("Kicking off Experiment initialization/execution");
+                _executionLogger.Info("Kicking off Experiment initialization/execution");
 
-                    // Kick off the experiment run
-                    RunExperiment(agentGenomeFactory, mazeGenomeFactory, agentGenomeList, mazeGenomeList, experimentName,
-                        experiment, numRuns, runIdx);
-                } while (_coevolutionEaContainer.StopConditionSatisfied == false);
+                // Kick off the experiment run
+                RunExperiment(agentGenomeFactory, mazeGenomeFactory, agentGenomeList, mazeGenomeList, experimentName,
+                    experiment, numRuns, runIdx);
 
                 // Close the data loggers
                 navigatorDataLogger.Close();

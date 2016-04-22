@@ -17,9 +17,9 @@
     <ConnectionWeightRange>5</ConnectionWeightRange>
   </GenomeConfig>
   <MazeGenomeConfig>
-    <MutateWallStartLocationProbability>0.1</MutateWallStartLocationProbability>
+    <MutateWallStartLocationProbability>0.05</MutateWallStartLocationProbability>
     <MutatePassageStartLocationProbability>0.01</MutatePassageStartLocationProbability>
-    <MutateAddWallProbability>0.01</MutateAddWallProbability>
+    <MutateAddWallProbability>0.9</MutateAddWallProbability>
     <PerturbanceMagnitude>0.1</PerturbanceMagnitude>
   </MazeGenomeConfig>
   <BehaviorConfig>

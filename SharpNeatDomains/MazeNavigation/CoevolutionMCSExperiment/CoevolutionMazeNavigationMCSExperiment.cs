@@ -38,7 +38,7 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
         /// <returns>The constructed maze genome factory.</returns>
         public IGenomeFactory<MazeGenome> CreateMazeGenomeFactory()
         {
-            return new MazeGenomeFactory();
+            return new MazeGenomeFactory(_mazeGenomeParameters);
         }
 
         /// <summary>
