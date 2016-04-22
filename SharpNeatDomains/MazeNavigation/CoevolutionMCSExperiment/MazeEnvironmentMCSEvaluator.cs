@@ -137,7 +137,7 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
                 // Generate a new maze world
                 MazeNavigationWorld<BehaviorInfo> world = _multiMazeWorldFactory.CreateMazeNavigationWorld(
                     mazeStructure,
-                    behaviorCharacterization);
+                    behaviorCharacterization);                
 
                 // Run a single trial
                 trialInfo = world.RunTrial(_mazeNavigators[cnt], SearchType.MinimalCriteriaSearch, out goalReached);

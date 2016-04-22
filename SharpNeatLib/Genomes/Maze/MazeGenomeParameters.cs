@@ -12,15 +12,6 @@ namespace SharpNeat.Genomes.Maze
     /// </summary>
     public class MazeGenomeParameters
     {
-        #region Instance Fields
-
-        /// <summary>
-        ///     The roulette wheel layout enables probablistic selection of different mutation types.
-        /// </summary>
-        public readonly RouletteWheelLayout RouletteWheelLayout;
-
-        #endregion
-
         #region Private Methods
 
         /// <summary>
@@ -37,6 +28,30 @@ namespace SharpNeat.Genomes.Maze
             };
             return new RouletteWheelLayout(probabilities);
         }
+
+        #endregion
+
+        #region Instance Fields
+
+        /// <summary>
+        ///     The roulette wheel layout enables probablistic selection of different mutation types.
+        /// </summary>
+        public RouletteWheelLayout RouletteWheelLayout;
+
+        /// <summary>
+        ///     Backing field for wall start location mutation probability.
+        /// </summary>
+        private double _mutateWallStartLocationProbability;
+
+        /// <summary>
+        ///     Backing field for passage start location mutation probability.
+        /// </summary>
+        private double _mutatePassageStartLocationProbability;
+
+        /// <summary>
+        ///     Backing field for add wall mutation probability.
+        /// </summary>
+        private double _mutateAddWallProbability;
 
         #endregion
 
@@ -90,17 +105,41 @@ namespace SharpNeat.Genomes.Maze
         ///     The probability of mutating the position of a wall in the maze.
         /// </summary>
         // Mutation probabilities
-        public double MutateWallStartLocationProbability { get; set; }
+        public double MutateWallStartLocationProbability
+        {
+            get { return _mutateWallStartLocationProbability; }
+            set
+            {
+                _mutateWallStartLocationProbability = value;
+                RouletteWheelLayout = CreateRouletteWheelLayout();
+            }
+        }
 
         /// <summary>
         ///     The probability of mutating the position of the passage within a given maze wall.
         /// </summary>
-        public double MutatePassageStartLocationProbability { get; set; }
+        public double MutatePassageStartLocationProbability
+        {
+            get { return _mutatePassageStartLocationProbability; }
+            set
+            {
+                _mutatePassageStartLocationProbability = value;
+                RouletteWheelLayout = CreateRouletteWheelLayout();
+            }
+        }
 
         /// <summary>
         ///     The probability of adding a new wall to the maze.
         /// </summary>
-        public double MutateAddWallProbability { get; set; }
+        public double MutateAddWallProbability
+        {
+            get { return _mutateAddWallProbability; }
+            set
+            {
+                _mutateAddWallProbability = value;
+                RouletteWheelLayout = CreateRouletteWheelLayout();
+            }
+        }
 
         /// <summary>
         ///     The magnitude of the mutation (only applies to wall and passage position mutations).
