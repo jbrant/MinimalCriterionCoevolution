@@ -4,7 +4,7 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="7a682437cf1e4210bd191b9658988124" Name="Diagram1" ZoomLevel="88">
+      <Diagram DiagramId="7a682437cf1e4210bd191b9658988124" Name="All Entities" ZoomLevel="88">
         <EntityTypeShape EntityType="ExperimentDataModel.ExperimentDictionary" Width="4.625" PointX="5.875" PointY="0.5" />
         <EntityTypeShape EntityType="ExperimentDataModel.NoveltyExperimentOrganismStateData" Width="2.875" PointX="12.375" PointY="1.625" />
         <AssociationConnector Association="ExperimentDataModel.FK_NoveltyExperimentOrganismStateData_ExperimentDictionary" />
@@ -17,6 +17,37 @@
         <EntityTypeShape EntityType="ExperimentDataModel.RunPhase" Width="1.5" PointX="0.75" PointY="11.875" />
         <AssociationConnector Association="ExperimentDataModel.FK_MCSExperimentEvaluationData_RunPhase" />
         <AssociationConnector Association="ExperimentDataModel.FK_MCSExperimentOrganismStateData_RunPhase" />
+      </Diagram>
+      <Diagram DiagramId="0f2addc2c2e64c57ae361603d4595276" Name="MCS Experiment Model" >
+        <EntityTypeShape EntityType="ExperimentDataModel.ExperimentDictionary" Width="3.875" PointX="0.75" PointY="4" IsExpanded="false" />
+        <EntityTypeShape EntityType="ExperimentDataModel.MCSExperimentEvaluationData" Width="2.375" PointX="5.375" PointY="0.75" IsExpanded="false" />
+        <AssociationConnector Association="ExperimentDataModel.FK_MCSExperimentEvaluationData_ExperimentDictionary" />
+        <EntityTypeShape EntityType="ExperimentDataModel.MCSExperimentOrganismStateData" Width="2.75" PointX="5.375" PointY="2.75" IsExpanded="false" />
+        <AssociationConnector Association="ExperimentDataModel.FK_MCSExperimentOrganismStateData_ExperimentDictionary" />
+        <EntityTypeShape EntityType="ExperimentDataModel.RunPhase" Width="2.5" PointX="2.125" PointY="2.75" IsExpanded="false" />
+        <AssociationConnector Association="ExperimentDataModel.FK_MCSExperimentEvaluationData_RunPhase" />
+        <AssociationConnector Association="ExperimentDataModel.FK_MCSExperimentOrganismStateData_RunPhase" />
+      </Diagram>
+      <Diagram DiagramId="56ffa545771f4de9800523c953973887" Name="Novelty Search Experiment Model" >
+        <EntityTypeShape EntityType="ExperimentDataModel.ExperimentDictionary" Width="4.5" PointX="0.75" PointY="1.5" IsExpanded="false" />
+        <EntityTypeShape EntityType="ExperimentDataModel.NoveltyExperimentEvaluationData" Width="2.625" PointX="6" PointY="2" IsExpanded="false" />
+        <AssociationConnector Association="ExperimentDataModel.FK_NoveltyExperimentEvaluationData_ExperimentDictionary" />
+        <EntityTypeShape EntityType="ExperimentDataModel.NoveltyExperimentOrganismStateData" Width="3.125" PointX="6" PointY="0.875" IsExpanded="false" />
+        <AssociationConnector Association="ExperimentDataModel.FK_NoveltyExperimentOrganismStateData_ExperimentDictionary" />
+      </Diagram>
+      <Diagram DiagramId="f3bab535c2fa4fa6ba0a74e76d67658f" Name="Coevolution MCS Experiment Model" ZoomLevel="93" >
+        <EntityTypeShape EntityType="ExperimentDataModel.ExperimentDictionary" Width="4.375" PointX="9" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperimentDataModel.CoevolutionMCSMazeExperimentEvaluationData" Width="3.25" PointX="1.125" PointY="6.875" />
+        <EntityTypeShape EntityType="ExperimentDataModel.CoevolutionMCSMazeExperimentGenome" Width="3" PointX="1.375" PointY="2.75" />
+        <EntityTypeShape EntityType="ExperimentDataModel.CoevolutionMCSMazeNavigatorResult" Width="2.75" PointX="5.125" PointY="2.625" />
+        <EntityTypeShape EntityType="ExperimentDataModel.CoevolutionMCSNavigatorExperimentEvaluationData" Width="3.625" PointX="0.75" PointY="14.25" />
+        <EntityTypeShape EntityType="ExperimentDataModel.CoevolutionMCSNavigatorExperimentGenome" Width="3.125" PointX="1.25" PointY="11" />
+        <AssociationConnector Association="ExperimentDataModel.FK_CoevolutionMCSMazeNavigatorResults_CoevolutionMCSMazeExperimentGenomes" />
+        <AssociationConnector Association="ExperimentDataModel.FK_CoevolutionMCSMazeNavigatorResults_CoevolutionMCSNavigatorExperimentGenomes" />
+        <AssociationConnector Association="ExperimentDataModel.CoevolutionMCSNavigatorExperimentEvaluationDataExperimentDictionary" />
+        <AssociationConnector Association="ExperimentDataModel.CoevolutionMCSNavigatorExperimentGenomeExperimentDictionary" />
+        <AssociationConnector Association="ExperimentDataModel.ExperimentDictionaryCoevolutionMCSMazeExperimentGenome" />
+        <AssociationConnector Association="ExperimentDataModel.CoevolutionMCSMazeExperimentEvaluationDataExperimentDictionary" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

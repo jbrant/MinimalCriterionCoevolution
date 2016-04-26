@@ -96,7 +96,7 @@ namespace SharpNeat.Domains.MazeNavigation
             // Set experiment-specific parameters
             MaxTimesteps = experimentDictionary.MaxTimesteps;
             MinSuccessDistance = experimentDictionary.MinSuccessDistance;
-            MaxDistanceToTarget = experimentDictionary.MaxDistanceToTarget;
+            MaxDistanceToTarget = experimentDictionary.MaxDistanceToTarget ?? default(int);
             MazeVariant = MazeVariantUtil.convertStringToMazeVariant(experimentDictionary.ExperimentDomainName);
         }
 

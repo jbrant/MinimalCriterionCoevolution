@@ -31,5 +31,10 @@ namespace ExperimentEntities
         public virtual DbSet<MCSExperimentEvaluationData> MCSExperimentEvaluationDatas { get; set; }
         public virtual DbSet<MCSExperimentOrganismStateData> MCSExperimentOrganismStateDatas { get; set; }
         public virtual DbSet<RunPhase> RunPhases { get; set; }
+        public virtual DbSet<CoevolutionMCSMazeExperimentEvaluationData> CoevolutionMCSMazeExperimentEvaluationDatas { get; set; }
+        public virtual DbSet<CoevolutionMCSMazeExperimentGenome> CoevolutionMCSMazeExperimentGenomes { get; set; }
+        public virtual DbSet<CoevolutionMCSMazeNavigatorResult> CoevolutionMCSMazeNavigatorResults { get; set; }
+        public virtual DbSet<CoevolutionMCSNavigatorExperimentEvaluationData> CoevolutionMCSNavigatorExperimentEvaluationDatas { get; set; }
+        public virtual DbSet<CoevolutionMCSNavigatorExperimentGenome> CoevolutionMCSNavigatorExperimentGenomes { get; set; }
     }
 }
