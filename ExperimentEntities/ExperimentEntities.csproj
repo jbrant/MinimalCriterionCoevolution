@@ -56,6 +56,23 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Class1.cs" />
+    <Compile Include="CoevolutionMCSMazeExperimentEvaluationData.cs">
+      <DependentUpon>ExperimentModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="CoevolutionMCSMazeExperimentGenome.cs">
+      <DependentUpon>ExperimentModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="CoevolutionMCSMazeNavigatorResult.cs">
+      <DependentUpon>ExperimentModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="CoevolutionMCSNavigatorExperimentEvaluationData.cs">
+      <DependentUpon>ExperimentModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="CoevolutionMCSNavigatorExperimentGenome.cs">
+      <DependentUpon>ExperimentModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="ExperimentDbConfiguration.cs" />
+    <Compile Include="ExperimentDbExecutionStrategy.cs" />
     <Compile Include="ExperimentDictionary.cs">
       <DependentUpon>ExperimentModel.tt</DependentUpon>
     </Compile>
@@ -116,6 +133,9 @@
       <DependentUpon>ExperimentModel.edmx</DependentUpon>
       <LastGenOutput>ExperimentModel.cs</LastGenOutput>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

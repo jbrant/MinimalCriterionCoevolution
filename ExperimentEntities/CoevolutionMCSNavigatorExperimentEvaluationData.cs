@@ -12,29 +12,19 @@ namespace ExperimentEntities
     using System;
     using System.Collections.Generic;
     
-    public partial class MCSExperimentEvaluationData
+    public partial class CoevolutionMCSNavigatorExperimentEvaluationData
     {
         public int ExperimentDictionaryID { get; set; }
         public int Run { get; set; }
         public int Generation { get; set; }
         public int PopulationSize { get; set; }
-        public int OffspringCount { get; set; }
-        public int TotalEvaluations { get; set; }
-        public Nullable<int> EvaluationsPerSecond { get; set; }
-        public int ClosestGenomeID { get; set; }
-        public int ClosestGenomeConnectionGeneCount { get; set; }
-        public int ClosestGenomeNeuronGeneCount { get; set; }
-        public int ClosestGenomeTotalGeneCount { get; set; }
-        public Nullable<double> ClosestGenomeDistanceToTarget { get; set; }
-        public Nullable<double> ClosestGenomeEndPositionX { get; set; }
-        public Nullable<double> ClosestGenomeEndPositionY { get; set; }
-        public int RunPhase_FK { get; set; }
-        public string ClosestGenomeXml { get; set; }
+        public int ViableOffspringCount { get; set; }
+        public int MinComplexity { get; set; }
         public int MaxComplexity { get; set; }
         public double MeanComplexity { get; set; }
-        public Nullable<int> ViableOffspringCount { get; set; }
+        public int TotalEvaluations { get; set; }
+        public Nullable<int> EvaluationsPerSecond { get; set; }
     
         public virtual ExperimentDictionary ExperimentDictionary { get; set; }
-        public virtual RunPhase RunPhase { get; set; }
     }
 }

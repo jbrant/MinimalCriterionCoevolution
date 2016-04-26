@@ -125,8 +125,8 @@ namespace SharpNeat.Genomes.Maze
             // Find <Root>
             XmlIoUtils.MoveToElement(xr, false, __ElemRoot);
 
-            // Find <Networks>
-            XmlIoUtils.MoveToElement(xr, false, __ElemMazes);
+            // Find <Mazes>
+            XmlIoUtils.MoveToElement(xr, true, __ElemMazes);
 
             // Read mazes
             List<MazeGenome> genomeList = new List<MazeGenome>();
@@ -169,6 +169,18 @@ namespace SharpNeat.Genomes.Maze
         }
 
         /// <summary>
+        ///     Reads a single genome from a population from the given XML file.  This is typically used in cases where a
+        ///     population file is being read in, but it only contains one genome.
+        /// </summary>
+        /// <param name="xr">Reference to the XmlReader.</param>
+        /// <param name="genomeFactory">A MazeGenomeFactory to construct genomes against.</param>
+        /// <returns>Instantiated maze genome.</returns>
+        public static MazeGenome ReadSingleGenomeFromRoot(XmlReader xr, MazeGenomeFactory genomeFactory)
+        {
+            return ReadCompleteGenomeList(xr, genomeFactory)[0];
+        }
+
+        /// <summary>
         ///     Reads all of the components of a single maze genome from the given XML file.
         /// </summary>
         /// <param name="xr">Reference to the XmlReader.</param>
@@ -200,20 +212,25 @@ namespace SharpNeat.Genomes.Maze
                 // Re-scan for the root <Walls> element
                 XmlIoUtils.MoveToElement(xrSubtree, false);
 
-                // Move to first wall gene
-                XmlIoUtils.MoveToElement(xrSubtree, true, __ElemWall);
-
-                do
+                // Only continue if there are genes (i.e. walls) in the maze genome
+                if (xrSubtree.IsEmptyElement == false)
                 {
-                    // Read the wall, passage, and orientation information for the gene
-                    double relativeWallLocation = XmlIoUtils.ReadAttributeAsDouble(xrSubtree, __AttrRelativeWallLocation);
-                    double relativePassageLocation = XmlIoUtils.ReadAttributeAsDouble(xrSubtree,
-                        __AttrRelativePassageLocation);
-                    bool orientationSeed = XmlIoUtils.ReadAttributeAsBool(xrSubtree, __AttrOrientationSeed);
+                    // Move to first wall gene
+                    XmlIoUtils.MoveToElement(xrSubtree, true, __ElemWall);
 
-                    // Create a new maze gene and add it to the list
-                    genes.Add(new MazeGene(relativeWallLocation, relativePassageLocation, orientationSeed));
-                } while (xrSubtree.ReadToNextSibling(__ElemWall));
+                    do
+                    {
+                        // Read the wall, passage, and orientation information for the gene
+                        double relativeWallLocation = XmlIoUtils.ReadAttributeAsDouble(xrSubtree,
+                            __AttrRelativeWallLocation);
+                        double relativePassageLocation = XmlIoUtils.ReadAttributeAsDouble(xrSubtree,
+                            __AttrRelativePassageLocation);
+                        bool orientationSeed = XmlIoUtils.ReadAttributeAsBool(xrSubtree, __AttrOrientationSeed);
+
+                        // Create a new maze gene and add it to the list
+                        genes.Add(new MazeGene(relativeWallLocation, relativePassageLocation, orientationSeed));
+                    } while (xrSubtree.ReadToNextSibling(__ElemWall));
+                }
             }
 
             // Move the reader beyond the closing tags </Walls> and </Maze>.

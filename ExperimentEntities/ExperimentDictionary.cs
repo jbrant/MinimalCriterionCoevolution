@@ -21,6 +21,10 @@ namespace ExperimentEntities
             this.NoveltyExperimentEvaluationDatas = new HashSet<NoveltyExperimentEvaluationData>();
             this.MCSExperimentEvaluationDatas = new HashSet<MCSExperimentEvaluationData>();
             this.MCSExperimentOrganismStateDatas = new HashSet<MCSExperimentOrganismStateData>();
+            this.CoevolutionMCSNavigatorExperimentEvaluationDatas = new HashSet<CoevolutionMCSNavigatorExperimentEvaluationData>();
+            this.CoevolutionMCSNavigatorExperimentGenomes = new HashSet<CoevolutionMCSNavigatorExperimentGenome>();
+            this.CoevolutionMCSMazeExperimentGenomes = new HashSet<CoevolutionMCSMazeExperimentGenome>();
+            this.CoevolutionMCSMazeExperimentEvaluationDatas = new HashSet<CoevolutionMCSMazeExperimentEvaluationData>();
         }
     
         public int ExperimentDictionaryID { get; set; }
@@ -29,7 +33,7 @@ namespace ExperimentEntities
         public int MaxEvaluations { get; set; }
         public int MaxTimesteps { get; set; }
         public int MinSuccessDistance { get; set; }
-        public int MaxDistanceToTarget { get; set; }
+        public Nullable<int> MaxDistanceToTarget { get; set; }
         public string ExperimentDomainName { get; set; }
         public Nullable<int> Initialization_OffspringBatchSize { get; set; }
         public Nullable<int> Initialization_PopulationEvaluationFrequency { get; set; }
@@ -104,6 +108,45 @@ namespace ExperimentEntities
         public Nullable<int> Primary_NicheCapacity { get; set; }
         public Nullable<int> Primary_NicheGridDensity { get; set; }
         public Nullable<double> Primary_ReproductionProportion { get; set; }
+        public Nullable<int> PopulationLoggingBatchInterval { get; set; }
+        public int Primary_Maze_PopulationSize { get; set; }
+        public Nullable<double> Primary_Maze_MutateWallLocationProbability { get; set; }
+        public Nullable<double> Primary_Maze_MutatePassageLocationProbability { get; set; }
+        public Nullable<double> Primary_Maze_MutateAddWallProbability { get; set; }
+        public Nullable<double> Primary_Maze_PerturbanceMagnitude { get; set; }
+        public Nullable<int> Primary_Maze_MazeHeight { get; set; }
+        public Nullable<int> Primary_Maze_MazeWidth { get; set; }
+        public Nullable<int> Primary_Maze_MazeScaleMultiplier { get; set; }
+        public Nullable<int> Primary_Maze_OffspringBatchSize { get; set; }
+        public Nullable<int> Primary_Maze_PopulationEvaluationFrequency { get; set; }
+        public Nullable<int> Primary_Maze_NicheCapacity { get; set; }
+        public Nullable<int> Primary_Maze_NicheGridDensity { get; set; }
+        public Nullable<double> Primary_Maze_ReproductionProportion { get; set; }
+        public string Primary_Maze_ComplexityRegulationStrategy { get; set; }
+        public Nullable<int> Primary_Maze_ComplexityThreshold { get; set; }
+        public string Primary_Maze_SelectionAlgorithmName { get; set; }
+        public Nullable<int> Primary_Coevolution_MCS_SuccessMinimalCriteriaThreshold { get; set; }
+        public Nullable<int> Primary_Coevolution_MCS_FailureMinimalCriteriaThreshold { get; set; }
+        public Nullable<int> Primary_MCS_MinimalCriteriaUpdateInterval { get; set; }
+        public Nullable<int> Primary_MCS_MaxCriteriaUpdateCyclesWithoutChange { get; set; }
+        public string Primary_Maze_SearchAlgorithmName { get; set; }
+        public string Primary_Maze_BehaviorCharacterizationName { get; set; }
+        public Nullable<int> Primary_Maze_NoveltySearch_NearestNeighbors { get; set; }
+        public Nullable<int> Primary_Maze_NoveltySearch_ArchiveAdditionThreshold { get; set; }
+        public Nullable<double> Primary_Maze_NoveltySearch_ArchiveThresholdDecreaseMultiplier { get; set; }
+        public Nullable<double> Primary_Maze_NoveltySearch_ArchiveThresholdIncreaseMultiplier { get; set; }
+        public Nullable<int> Primary_Maze_NoveltySearch_MaxGenerationsWithArchiveAddition { get; set; }
+        public Nullable<int> Primary_Maze_NoveltySearch_MaxGenerationsWithoutArchiveAddition { get; set; }
+        public Nullable<double> Primary_Maze_MCS_MinimalCriteriaThreshold { get; set; }
+        public Nullable<int> Primary_Maze_Coevolution_MCS_SuccessMinimalCriteriaThreshold { get; set; }
+        public Nullable<int> Primary_Maze_Coevolution_MCS_FailureMinimalCriteriaThreshold { get; set; }
+        public Nullable<int> Primary_Maze_MCS_MinimalCriteriaUpdateInterval { get; set; }
+        public Nullable<int> Primary_Maze_MCS_MaxCriteriaUpdateCyclesWithoutChange { get; set; }
+        public Nullable<double> Primary_Maze_MCS_MinimalCriteriaStartX { get; set; }
+        public Nullable<double> Primary_Maze_MCS_MinimalCriteriaStartY { get; set; }
+        public string Primary_Maze_MCS_MinimalCriteriaName { get; set; }
+        public Nullable<int> Primary_Maze_MCS_BridgingMagnitude { get; set; }
+        public Nullable<int> Primary_Maze_MCS_BridgingApplications { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<NoveltyExperimentOrganismStateData> NoveltyExperimentOrganismStateDatas { get; set; }
@@ -113,5 +156,13 @@ namespace ExperimentEntities
         public virtual ICollection<MCSExperimentEvaluationData> MCSExperimentEvaluationDatas { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<MCSExperimentOrganismStateData> MCSExperimentOrganismStateDatas { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<CoevolutionMCSNavigatorExperimentEvaluationData> CoevolutionMCSNavigatorExperimentEvaluationDatas { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<CoevolutionMCSNavigatorExperimentGenome> CoevolutionMCSNavigatorExperimentGenomes { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<CoevolutionMCSMazeExperimentGenome> CoevolutionMCSMazeExperimentGenomes { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<CoevolutionMCSMazeExperimentEvaluationData> CoevolutionMCSMazeExperimentEvaluationDatas { get; set; }
     }
 }
