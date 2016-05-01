@@ -1,5 +1,6 @@
 ﻿#region
 
+using System;
 using System.Data.Entity;
 
 #endregion
@@ -18,7 +19,8 @@ namespace ExperimentEntities
         public ExperimentDbConfiguration()
         {
             // Register the experiment database execution strategy
-            SetExecutionStrategy("System.Data.SqlClient", () => new ExperimentDbExecutionStrategy());
+            SetExecutionStrategy("System.Data.SqlClient",
+                () => new ExperimentDbExecutionStrategy(100, new TimeSpan(200)));
         }
     }
 }
