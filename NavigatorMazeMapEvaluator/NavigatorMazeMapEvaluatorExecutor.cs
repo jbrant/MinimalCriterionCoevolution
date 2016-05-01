@@ -15,6 +15,11 @@ namespace NavigatorMazeMapEvaluator
 {
     internal class NavigatorMazeMapEvaluatorExecutor
     {
+        /// <summary>
+        ///     This is the number of records that are written to the database in one pass.
+        /// </summary>
+        private const int CommitPageSize = 1000;
+
         private static readonly Dictionary<ExecutionParameter, String> _executionConfiguration =
             new Dictionary<ExecutionParameter, string>();
 
@@ -62,6 +67,11 @@ namespace NavigatorMazeMapEvaluator
             // Process each experiment
             foreach (string experimentName in experimentNames)
             {
+                // Get the run from which to start execution (if specified)
+                int startingRun = _executionConfiguration.ContainsKey(ExecutionParameter.StartFromRun)
+                    ? Int32.Parse(_executionConfiguration[ExecutionParameter.StartFromRun])
+                    : 1;
+
                 // Lookup the current experiment configuration
                 ExperimentDictionary curExperimentConfiguration =
                     ExperimentDataHandler.LookupExperimentConfiguration(experimentName);
@@ -91,12 +101,20 @@ namespace NavigatorMazeMapEvaluator
                     curExperimentConfiguration.ExperimentName));
 
                 // Get the number of batches (generations) in the experiment
-                for (int curRun = 1; curRun <= numRuns; curRun++)
+                for (int curRun = startingRun; curRun <= numRuns; curRun++)
                 {
+                    // If we're not writing to the database, open the file writer
+                    if (writeResultsToDatabase == false)
+                    {
+                        ExperimentDataHandler.OpenFileWriter(
+                            Path.Combine(_executionConfiguration[ExecutionParameter.DataFileOutputDirectory],
+                                string.Format("{0} - Run{1}.csv", experimentName, curRun)));
+                    }
+
                     // Get the number of batches in the current run
                     IList<int> batchesWithGenomeData =
                         ExperimentDataHandler.GetBatchesWithGenomeData(
-                            curExperimentConfiguration.ExperimentDictionaryID, numRuns);
+                            curExperimentConfiguration.ExperimentDictionaryID, curRun);
 
                     _executionLogger.Info(string.Format("Executing analysis for run [{0}/{1}] with [{2}] batches",
                         curRun,
@@ -121,13 +139,10 @@ namespace NavigatorMazeMapEvaluator
                         // Evaluate all of the maze/navigator combinations in the batch
                         mapEvaluator.RunBatchEvaluation();
 
-                        if (writeResultsToDatabase)
-                        {
-                            // Save the evaluation results
-                            ExperimentDataHandler.WriteNavigatorMazeEvaluationData(
-                                curExperimentConfiguration.ExperimentDictionaryID, curRun, curBatch,
-                                mapEvaluator.EvaluationUnits);
-                        }
+                        // Save the evaluation results
+                        ExperimentDataHandler.WriteNavigatorMazeEvaluationData(
+                            curExperimentConfiguration.ExperimentDictionaryID, curRun, curBatch,
+                            mapEvaluator.EvaluationUnits, CommitPageSize, writeResultsToDatabase);
 
                         if (generateTrajectoryBitmaps)
                         {
@@ -138,7 +153,18 @@ namespace NavigatorMazeMapEvaluator
                                 curRun, curBatch, mapEvaluator.EvaluationUnits);
                         }
                     }
+
+                    // If we're not writing to the database, close the file writer since the run is over
+                    if (writeResultsToDatabase == false)
+                    {
+                        ExperimentDataHandler.CloseFileWriter();
+                    }
                 }
+
+                // Write a sentinel file to indicate analysis completion
+                if (writeResultsToDatabase == false)
+                    ExperimentDataHandler.WriteSentinelFile(
+                        Path.Combine(_executionConfiguration[ExecutionParameter.DataFileOutputDirectory], experimentName));
             }
         }
 
@@ -187,6 +213,7 @@ namespace NavigatorMazeMapEvaluator
                         // Ensure valid agent input/output neuron counts were specified
                         case ExecutionParameter.AgentNeuronInputCount:
                         case ExecutionParameter.AgentNeuronOutputCount:
+                        case ExecutionParameter.StartFromRun:
                             int testInt;
                             if (Int32.TryParse(parameterValuePair[1], out testInt) == false)
                             {
@@ -248,6 +275,16 @@ namespace NavigatorMazeMapEvaluator
                     isConfigurationValid = false;
                 }
 
+                // If we're logging to a flat file instead of the database, the output directory must be set
+                if ((_executionConfiguration.ContainsKey(ExecutionParameter.WriteResultsToDatabase) &&
+                     Convert.ToBoolean(_executionConfiguration[ExecutionParameter.WriteResultsToDatabase]) == false) &&
+                    _executionConfiguration.ContainsKey(ExecutionParameter.DataFileOutputDirectory) == false)
+                {
+                    _executionLogger.Error(
+                        "The data file output directory must be specified when writing results to a flat file instead of the database.");
+                    isConfigurationValid = false;
+                }
+
                 // If the executor is going to produce bitmap images, then the base output directory must be specified
                 if ((_executionConfiguration.ContainsKey(ExecutionParameter.GenerateAgentTrajectoryBitmaps) == false ||
                      Convert.ToBoolean(_executionConfiguration[ExecutionParameter.GenerateAgentTrajectoryBitmaps])) &&
@@ -266,9 +303,10 @@ namespace NavigatorMazeMapEvaluator
             _executionLogger.Error("The experiment executor invocation must take the following form:");
             _executionLogger.Error(
                 string.Format(
-                    "NavigatorMazeMapEvaluator.exe {0}=[{6}] {1}=[{7}] (Optional: {2}=[{8}]) (Optional: {3}=[{8}] {4}=[{9}]) {5}=[{10}]",
+                    "NavigatorMazeMapEvaluator.exe {0}=[{6}] {1}=[{7}] (Optional: {2}=[{8}]) (Optional: {3}=[{10}]) (Optional: {4}=[{9}] {5}=[{10}]) {6}=[{11}]",
                     ExecutionParameter.AgentNeuronInputCount, ExecutionParameter.AgentNeuronOutputCount,
-                    ExecutionParameter.WriteResultsToDatabase, ExecutionParameter.GenerateAgentTrajectoryBitmaps,
+                    ExecutionParameter.WriteResultsToDatabase, ExecutionParameter.DataFileOutputDirectory,
+                    ExecutionParameter.GenerateAgentTrajectoryBitmaps,
                     ExecutionParameter.BitmapOutputBaseDirectory, ExecutionParameter.ExperimentNames, "# Input Neurons",
                     "# Output Neurons", "true|false", "directory", "experiment,experiment,..."));
 

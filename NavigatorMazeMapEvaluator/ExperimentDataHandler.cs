@@ -1,6 +1,7 @@
 ﻿#region
 
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using ExperimentEntities;
 
@@ -9,10 +10,13 @@ using ExperimentEntities;
 namespace NavigatorMazeMapEvaluator
 {
     /// <summary>
-    ///     Provides methods for interfacing with and writing reuslts to the experiment database.
+    ///     Provides methods for interfacing with and writing reuslts to the experiment database or flat file.
     /// </summary>
     public static class ExperimentDataHandler
     {
+        private const string FileDelimiter = ",";
+        private static StreamWriter _fileWriter;
+
         /// <summary>
         ///     Looks up an experiment configuration given the unique experiment name.
         /// </summary>
@@ -146,38 +150,137 @@ namespace NavigatorMazeMapEvaluator
         }
 
         /// <summary>
+        ///     Writes the given evaluation results to the experiment database or to a flat file.
+        /// </summary>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <param name="batch">The batch number of the given run.</param>
+        /// <param name="evaluationUnits">The evaluation results to persist.</param>
+        /// <param name="commitPageSize">The number of records that are committed within a single batch/context.</param>
+        /// <param name="writeToDatabase">
+        ///     Indicates whether evaluation results should be written directly to the database or to a
+        ///     flat file.
+        /// </param>
+        public static void WriteNavigatorMazeEvaluationData(int experimentId, int run, int batch,
+            IList<MazeNavigatorEvaluationUnit> evaluationUnits, int commitPageSize, bool writeToDatabase)
+        {
+            // Write results to the database if the option has been specified
+            if (writeToDatabase)
+            {
+                WriteNavigatorMazeEvaluationDataToDatabase(experimentId, run, batch, evaluationUnits, commitPageSize);
+            }
+            // Otherwise, write to the flat file output
+            else
+            {
+                WriteNavigatorMazeEvaluationDataToFile(experimentId, run, batch, evaluationUnits);
+            }
+        }
+
+        /// <summary>
         ///     Writes the given evaluation results to the experiment database.
         /// </summary>
         /// <param name="experimentId">The experiment that was executed.</param>
         /// <param name="run">The run number of the given experiment.</param>
         /// <param name="batch">The batch number of the given run.</param>
         /// <param name="evaluationUnits">The evaluation results to persist.</param>
-        public static async void WriteNavigatorMazeEvaluationData(int experimentId, int run, int batch,
+        /// <param name="commitPageSize">The number of records that are committed within a single batch/context.</param>
+        private static void WriteNavigatorMazeEvaluationDataToDatabase(int experimentId, int run, int batch,
+            IList<MazeNavigatorEvaluationUnit> evaluationUnits, int commitPageSize)
+        {
+            // Page through the result set, committing each in the specified batch size
+            for (int curPage = 0; curPage <= evaluationUnits.Count/commitPageSize; curPage++)
+            {
+                IList<CoevolutionMCSMazeNavigatorResult> serializedResults =
+                    new List<CoevolutionMCSMazeNavigatorResult>(commitPageSize);
+
+                // Build a list of serialized results
+                foreach (
+                    MazeNavigatorEvaluationUnit evaluationUnit in
+                        evaluationUnits.Skip(curPage*commitPageSize).Take(commitPageSize))
+                {
+                    serializedResults.Add(new CoevolutionMCSMazeNavigatorResult
+                    {
+                        ExperimentDictionaryID = experimentId,
+                        Run = run,
+                        Generation = batch,
+                        MazeGenomeID = evaluationUnit.MazeId,
+                        NavigatorGenomeID = evaluationUnit.AgentId,
+                        IsMazeSolved = evaluationUnit.IsMazeSolved,
+                        NumTimesteps = evaluationUnit.NumTimesteps
+                    });
+                }
+
+                // Create a new context and persist the batch
+                using (ExperimentDataEntities context = new ExperimentDataEntities())
+                {
+                    // Auto-detect changes and save validation are switched off to speed things up
+                    context.Configuration.AutoDetectChangesEnabled = false;
+                    context.Configuration.ValidateOnSaveEnabled = false;
+
+                    context.CoevolutionMCSMazeNavigatorResults.AddRange(serializedResults);
+                    context.SaveChanges();
+                }
+            }
+        }
+
+        /// <summary>
+        ///     Opens the file stream writer.
+        /// </summary>
+        /// <param name="fileName">The name of the flat file to write into.</param>
+        public static void OpenFileWriter(string fileName)
+        {
+            // Open the stream writer
+            _fileWriter = new StreamWriter(fileName) {AutoFlush = true};
+        }
+
+        /// <summary>
+        ///     Closes the file stream writer.
+        /// </summary>
+        public static void CloseFileWriter()
+        {
+            _fileWriter.Close();
+            _fileWriter.Dispose();
+        }
+
+        /// <summary>
+        ///     Writes the given evaluation results to a flat file.
+        /// </summary>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <param name="batch">The batch number of the given run.</param>
+        /// <param name="evaluationUnits">The evaluation results to persist.</param>
+        private static void WriteNavigatorMazeEvaluationDataToFile(int experimentId, int run, int batch,
             IList<MazeNavigatorEvaluationUnit> evaluationUnits)
         {
-            IList<CoevolutionMCSMazeNavigatorResult> serializedResults =
-                new List<CoevolutionMCSMazeNavigatorResult>(evaluationUnits.Count);
-
-            // Convert each evaluation unit into an entity representation to be persisted
+            // Loop through the evaluation units and write each row
             foreach (MazeNavigatorEvaluationUnit evaluationUnit in evaluationUnits)
             {
-                serializedResults.Add(new CoevolutionMCSMazeNavigatorResult
+                _fileWriter.WriteLine(string.Join(FileDelimiter, new List<string>
                 {
-                    ExperimentDictionaryID = experimentId,
-                    Run = run,
-                    Generation = batch,
-                    MazeGenomeID = evaluationUnit.MazeId,
-                    NavigatorGenomeID = evaluationUnit.AgentId,
-                    IsMazeSolved = evaluationUnit.IsMazeSolved,
-                    NumTimesteps = evaluationUnit.NumTimesteps
-                });
+                    experimentId.ToString(),
+                    run.ToString(),
+                    batch.ToString(),
+                    evaluationUnit.MazeId.ToString(),
+                    evaluationUnit.AgentId.ToString(),
+                    evaluationUnit.IsMazeSolved.ToString(),
+                    evaluationUnit.NumTimesteps.ToString()
+                }));
             }
 
-            // Persist the evaluation results
-            using (ExperimentDataEntities context = new ExperimentDataEntities())
+            // Immediately flush to the log file
+            _fileWriter.Flush();
+        }
+
+        /// <summary>
+        ///     Writes empty "sentinel" file so that data transfer agent on cluster can easily identify that a given experiment is
+        ///     complete.
+        /// </summary>
+        /// <param name="experimentFilename">The base path and filename of the experiment under execution.</param>
+        public static void WriteSentinelFile(string experimentFilename)
+        {
+            // Write sentinel file to the given output directory
+            using (File.Create(string.Format("{0} - COMPLETE", experimentFilename)))
             {
-                context.CoevolutionMCSMazeNavigatorResults.AddRange(serializedResults);
-                await context.SaveChangesAsync();
             }
         }
     }

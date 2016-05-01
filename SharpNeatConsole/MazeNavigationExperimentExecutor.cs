@@ -31,6 +31,7 @@ namespace SharpNeatConsole
     {
         ExperimentSource,
         NumRuns,
+        StartFromRun,
         GeneratePopulation,
         SeedPopulationDirectory,
         ExperimentConfigDirectory,
@@ -64,8 +65,11 @@ namespace SharpNeatConsole
             // Set the execution source (file or database)
             string executionSource = _executionConfiguration[ExecutionParameter.ExperimentSource].ToLowerInvariant();
 
-            // Read number of runs
+            // Read number of runs and number of run to start from (if applicable)
             int numRuns = Int32.Parse(_executionConfiguration[ExecutionParameter.NumRuns]);
+            int startFromRun = _executionConfiguration.ContainsKey(ExecutionParameter.StartFromRun)
+                ? Int32.Parse(_executionConfiguration[ExecutionParameter.StartFromRun])
+                : 1;
 
             // Determine whether to log organism state data
             bool logOrganismStateData = _executionConfiguration.ContainsKey(ExecutionParameter.LogOrganismStateData) &&
@@ -127,7 +131,7 @@ namespace SharpNeatConsole
                         ExecuteFileBasedCoevolutionExperiment(
                             _executionConfiguration[ExecutionParameter.ExperimentConfigDirectory],
                             _executionConfiguration[ExecutionParameter.OutputFileDirectory], curExperimentName, numRuns,
-                            seedPopulationFiles, logOrganismStateData);
+                            startFromRun);
                     }
                     else
                     {
@@ -194,6 +198,7 @@ namespace SharpNeatConsole
 
                         // Ensure that a valid number of runs was specified
                         case ExecutionParameter.NumRuns:
+                        case ExecutionParameter.StartFromRun:
                             int testInt;
                             if (Int32.TryParse(parameterValuePair[1], out testInt) == false)
                             {
@@ -302,10 +307,11 @@ namespace SharpNeatConsole
             _executionLogger.Error("The experiment executor invocation must take the following form:");
             _executionLogger.Error(
                 string.Format(
-                    "SharpNeatConsole.exe {0}=[{9}] {1}=[{11}] {2}=[{10}] {3}=[{12}] {4}=[{12}] {5}=[{12}] {6}=[{10}] {7}=[{10}] {8}=[{13}]",
-                    "ExperimentSource", "NumRuns", "GeneratePopulation", "SeedPopulationDirectory",
+                    "SharpNeatConsole.exe {0}=[{10}] {1}=[{12}] {2}=[{13}] {3}=[{11}] {4}=[{14}] {5}=[{14}] {6}=[{14}] {7}=[{11}] {8}=[{11}] {9}=[{15}]",
+                    "ExperimentSource", "NumRuns", "StartFromRun", "GeneratePopulation", "SeedPopulationDirectory",
                     "ExperimentConfigDirectory", "OutputFileDirectory", "LogOrganismStateData", "IsCoevolution",
-                    "ExperimentNames", "file|database", "true|false", "# runs", "directory", "experiment,experiment,..."));
+                    "ExperimentNames", "file|database", "true|false", "# runs", "starting run #", "directory",
+                    "experiment,experiment,..."));
 
             // If we've reached this point, the configuration is indeed invalid
             return false;
@@ -494,12 +500,11 @@ namespace SharpNeatConsole
         /// <param name="logFileDirectory">The directory into which to write the evolution/evaluation log files.</param>
         /// <param name="experimentName">The name of the experiment to execute.</param>
         /// <param name="numRuns">The number of runs to execute for that experiment.</param>
-        /// <param name="seedPopulationFiles">The seed population XML file names.</param>
-        /// <param name="writeOrganismStateData">Flag indicating whether organism state data should be written to an output file.</param>
+        /// <param name="startFromRun">The run to start from (1 by default).</param>
         private static void ExecuteFileBasedCoevolutionExperiment(string experimentConfigurationDirectory,
             string logFileDirectory,
             string experimentName,
-            int numRuns, string[] seedPopulationFiles, bool writeOrganismStateData)
+            int numRuns, int startFromRun)
         {
             // Read in the configuration files that match the given experiment name (should only be 1 file)
             string[] experimentConfigurationFiles = Directory.GetFiles(experimentConfigurationDirectory,
@@ -525,25 +530,25 @@ namespace SharpNeatConsole
             ICoevolutionExperiment experiment = new CoevolutionMazeNavigationMCSExperiment();
 
             // Execute the experiment for the specified number of runs
-            for (int runIdx = 0; runIdx < numRuns; runIdx++)
+            for (int runIdx = startFromRun; runIdx <= numRuns; runIdx++)
             {
                 // Initialize the data loggers for the given run
                 IDataLogger navigatorDataLogger =
                     new FileDataLogger(string.Format("{0}\\{1} - Run{2} - NavigatorEvolution.csv", logFileDirectory,
                         experimentName,
-                        runIdx + 1));
+                        runIdx));
                 IDataLogger navigatorGenomesLogger =
                     new FileDataLogger(string.Format("{0}\\{1} - Run{2} - NavigatorGenomes.csv", logFileDirectory,
                         experimentName,
-                        runIdx + 1));
+                        runIdx));
                 IDataLogger mazeDataLogger =
                     new FileDataLogger(string.Format("{0}\\{1} - Run{2} - MazeEvolution.csv", logFileDirectory,
                         experimentName,
-                        runIdx + 1));
+                        runIdx));
                 IDataLogger mazeGenomesLogger =
                     new FileDataLogger(string.Format("{0}\\{1} - Run{2} - MazeGenomes.csv", logFileDirectory,
                         experimentName,
-                        runIdx + 1));
+                        runIdx));
 
                 // Initialize new experiment
                 experiment.Initialize(experimentName, xmlConfig.DocumentElement, navigatorDataLogger,
@@ -662,11 +667,11 @@ namespace SharpNeatConsole
             {
                 _executionLogger.Error(string.Format("Experiment {0}, Run {1} of {2} failed to initialize",
                     experimentName,
-                    runIdx + 1, numRuns));
+                    runIdx, numRuns));
                 Environment.Exit(0);
             }
 
-            _executionLogger.Info(string.Format("Executing Experiment {0}, Run {1} of {2}", experimentName, runIdx + 1,
+            _executionLogger.Info(string.Format("Executing Experiment {0}, Run {1} of {2}", experimentName, runIdx,
                 numRuns));
 
             // Start algorithm (it will run on a background thread).
