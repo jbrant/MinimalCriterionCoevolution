@@ -212,3 +212,5 @@ _Pvt_Extensions/
 ModelManifest.xml
 /SharpNeatConsole/ExperimentConfigurations/OutputTemp
 /ThirdPartyAssemblies
+/MazeGenomeGenerator/MazeGenomes
+/MazeGenomeGenerator/MazeImages
