@@ -20,7 +20,9 @@
 #region
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
 using System.Xml;
 using ExperimentEntities;
@@ -663,6 +665,18 @@ namespace SharpNeat.Domains
                     minimalCriteria);
 
             return behaviorCharacterizationFactory;
+        }
+
+        public static IList<MazeGenome> ReadSeedMazeGenomes(string seedMazePath)
+        {
+            // Get the attributes of the given path/file
+            FileAttributes fileAttributes = File.GetAttributes(seedMazePath);
+
+            // Determine whether this is a directory or a file
+            if ((fileAttributes & FileAttributes.Directory) == FileAttributes.Directory)
+            {
+                
+            }
         }
     }
 }

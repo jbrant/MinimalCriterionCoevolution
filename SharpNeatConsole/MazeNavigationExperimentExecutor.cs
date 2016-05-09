@@ -27,20 +27,72 @@ using SharpNeat.Loggers;
 
 namespace SharpNeatConsole
 {
+    /// <summary>
+    ///     Encapsulates and standardizes experiment execution parameters.
+    /// </summary>
     public enum ExecutionParameter
     {
+        /// <summary>
+        ///     The source of the experiment configuration and results (i.e. file or database).
+        /// </summary>
         ExperimentSource,
+
+        /// <summary>
+        ///     The number of experiment runs to execute.
+        /// </summary>
         NumRuns,
+
+        /// <summary>
+        ///     The run from which execution should begin.
+        /// </summary>
         StartFromRun,
+
+        /// <summary>
+        ///     Whether to generate the starting population or start with a predefined seed.
+        /// </summary>
         GeneratePopulation,
+
+        /// <summary>
+        ///     Directory containing the seed population of navigators.
+        /// </summary>
         SeedPopulationDirectory,
+
+        /// <summary>
+        ///     Directory containing the experiment configurations.
+        /// </summary>
         ExperimentConfigDirectory,
+
+        /// <summary>
+        ///     Directory into which to write experiment results.
+        /// </summary>
         OutputFileDirectory,
+
+        /// <summary>
+        ///     Whether or not to log detailed information about individual navigator evaluations.
+        /// </summary>
         LogOrganismStateData,
+
+        /// <summary>
+        ///     Flag indicating whether the experiment is coevolution-based.
+        /// </summary>
         IsCoevolution,
+
+        /// <summary>
+        ///     The path (directory and file name) of the seed maze.  This is only required/used in the case of coevolution
+        ///     experiments, and is strictly required for said experiments.
+        /// </summary>
+        SeedMazeFile,
+
+        /// <summary>
+        ///     The names of the experiments to execute (this will be matched up against the experiment configurations in the
+        ///     experiment configs directory).
+        /// </summary>
         ExperimentNames
     }
 
+    /// <summary>
+    ///     Handles automated, command-line execution for all maze navigation based experiments.
+    /// </summary>
     public class MazeNavigationExperimentExecutor
     {
         private static INeatEvolutionAlgorithm<NeatGenome> _ea;
@@ -137,6 +189,18 @@ namespace SharpNeatConsole
                     {
                         throw new NotImplementedException(
                             "Database-based coevolution executor has not been implemented!");
+                    }
+                }
+
+                // Write a sentinel file to indicate analysis completion
+                if ("file".Equals(executionSource))
+                {
+                    // Write sentinel file to the given output directory
+                    using (
+                        File.Create(string.Format("{0} - COMPLETE",
+                            Path.Combine(_executionConfiguration[ExecutionParameter.OutputFileDirectory],
+                                curExperimentName))))
+                    {
                     }
                 }
             }
@@ -298,6 +362,17 @@ namespace SharpNeatConsole
                         "If the executor is being run without generating a population, the directory containing the seed population must be specified.");
                     isConfigurationValid = false;
                 }
+
+                // If this is a coevolution experiment, the seed maze must be specified
+                if (_executionConfiguration.ContainsKey(ExecutionParameter.IsCoevolution) &&
+                    Convert.ToBoolean(_executionConfiguration[ExecutionParameter.IsCoevolution]) &&
+                    (_executionConfiguration.ContainsKey(ExecutionParameter.SeedMazeFile) == false ||
+                     _executionConfiguration[ExecutionParameter.SeedMazeFile] == null))
+                {
+                    _executionLogger.Error(
+                        "If a coevolution experiment is being executed, the full path and filename of the seed maze must be specified.");
+                    isConfigurationValid = false;
+                }
             }
 
             // If there's still no problem with the configuration, go ahead and return valid
@@ -307,10 +382,13 @@ namespace SharpNeatConsole
             _executionLogger.Error("The experiment executor invocation must take the following form:");
             _executionLogger.Error(
                 string.Format(
-                    "SharpNeatConsole.exe {0}=[{10}] {1}=[{12}] {2}=[{13}] {3}=[{11}] {4}=[{14}] {5}=[{14}] {6}=[{14}] {7}=[{11}] {8}=[{11}] {9}=[{15}]",
-                    "ExperimentSource", "NumRuns", "StartFromRun", "GeneratePopulation", "SeedPopulationDirectory",
-                    "ExperimentConfigDirectory", "OutputFileDirectory", "LogOrganismStateData", "IsCoevolution",
-                    "ExperimentNames", "file|database", "true|false", "# runs", "starting run #", "directory",
+                    "SharpNeatConsole.exe {0}=[{11}] {1}=[{13}] {2}=[{14}] {3}=[{12}] {4}=[{15}] {5}=[{15}] {6}=[{15}] {7}=[{12}] {8}=[{12}] {9}=[{16}] {10}=[{17}]",
+                    ExecutionParameter.ExperimentSource, ExecutionParameter.NumRuns, ExecutionParameter.StartFromRun,
+                    ExecutionParameter.GeneratePopulation, ExecutionParameter.SeedPopulationDirectory,
+                    ExecutionParameter.ExperimentConfigDirectory, ExecutionParameter.OutputFileDirectory,
+                    ExecutionParameter.LogOrganismStateData, ExecutionParameter.IsCoevolution,
+                    ExecutionParameter.SeedMazeFile, ExecutionParameter.ExperimentNames, "file|database",
+                    "true|false", "# runs", "starting run #", "directory", "maze genome file",
                     "experiment,experiment,..."));
 
             // If we've reached this point, the configuration is indeed invalid
@@ -526,8 +604,8 @@ namespace SharpNeatConsole
             xmlConfig.Load(experimentConfigurationFiles[0]);
 
             // Determine which experiment to execute
-            // TODO: If there are more coevolution experiments added, we'll have to figure out which experiment to run dynamically
-            ICoevolutionExperiment experiment = new CoevolutionMazeNavigationMCSExperiment();
+            BaseCoevolutionMazeNavigationExperiment experiment =
+                DetermineCoevolutionMazeNavigationExperiment(xmlConfig.DocumentElement);
 
             // Execute the experiment for the specified number of runs
             for (int runIdx = startFromRun; runIdx <= numRuns; runIdx++)
@@ -765,7 +843,8 @@ namespace SharpNeatConsole
         /// </summary>
         /// <param name="searchAlgorithmName">The search algorithm to run.</param>
         /// <param name="selectionAlgorithmName">The selection algorithm to run.</param>
-        /// <returns></returns>
+        /// <param name="isDynamicMC">Indicates whether or not the minimal criterion is dynamically changing.</param>
+        /// <returns>The applicable maze navigation experiment.</returns>
         private static BaseMazeNavigationExperiment DetermineMazeNavigationExperiment(string searchAlgorithmName,
             string selectionAlgorithmName, bool isDynamicMC)
         {
@@ -813,6 +892,49 @@ namespace SharpNeatConsole
                 default:
                     return new SteadyStateMazeNavigationRandomExperiment();
             }
+        }
+
+        /// <summary>
+        ///     Determine the coevolution maze navigation experiment to run based on the search and selection algorithms specified
+        ///     in the configuration file.
+        /// </summary>
+        /// <param name="xmlConfig">The reference to the root node of the XML configuration file.</param>
+        /// <returns>The appropriate maze navigation experiment class.</returns>
+        private static BaseCoevolutionMazeNavigationExperiment DetermineCoevolutionMazeNavigationExperiment(
+            XmlElement xmlConfig)
+        {
+            // Get the search and selection algorithm types
+            string searchAlgorithm = XmlUtils.TryGetValueAsString(xmlConfig, "SearchAlgorithm");
+            string selectionAlgorithm = XmlUtils.TryGetValueAsString(xmlConfig, "SelectionAlgorithm");
+
+            // Make sure both the search algorithm and selection algorithm have been set in the configuration file
+            if (searchAlgorithm == null || selectionAlgorithm == null)
+            {
+                _executionLogger.Error(
+                    "Both the search algorithm and selection algorithm must be specified in the XML configuration file.");
+                Environment.Exit(0);
+            }
+
+            // Get the appropriate experiment class
+            return DetermineCoevolutionMazeNavigationExperiment(searchAlgorithm, selectionAlgorithm);
+        }
+
+        /// <summary>
+        ///     Determines the coevolution maze navigation experiment to run based on the given search and selection algorithm.
+        /// </summary>
+        /// <param name="searchAlgorithmName">The search algorithm to run.</param>
+        /// <param name="selectionAlgorithmName">The selection algorithm to run.</param>
+        /// <returns>The applicable coevolution maze navigation experiment.</returns>
+        private static BaseCoevolutionMazeNavigationExperiment DetermineCoevolutionMazeNavigationExperiment(
+            string searchAlgorithmName, string selectionAlgorithmName)
+        {
+            // Extract the corresponding search and selection algorithm domain types
+            SearchType searchType = AlgorithmTypeUtil.ConvertStringToSearchType(searchAlgorithmName);
+            SelectionType selectionType = AlgorithmTypeUtil.ConvertStringToSelectionType(selectionAlgorithmName);
+
+            // Match up with the correct experiment
+            // TODO: Right now, there's only one type of coevolution experiment, but the multi-tiered queue concept would be another
+            return new CoevolutionMazeNavigationMCSExperiment();
         }
     }
 }

@@ -1252,6 +1252,7 @@
     <Content Include="ExperimentConfigurations\Queueing MCS Parameter Sweep Template.config.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="SeedMazes\GeneratedMaze_16_Genome.xml" />
     <Content Include="SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run01.pop.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -1334,6 +1335,7 @@
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

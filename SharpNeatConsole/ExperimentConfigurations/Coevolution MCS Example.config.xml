@@ -1,5 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Config>
+  <SearchAlgorithm>Minimal Criteria Search</SearchAlgorithm>
+  <SelectionAlgorithm>Queueing</SelectionAlgorithm>
   <AgentPopulationSize>1000</AgentPopulationSize>
   <MazePopulationSize>100</MazePopulationSize>
   <AgentSeedGenomeCount>500</AgentSeedGenomeCount>
@@ -7,7 +9,6 @@
   <Activation>
     <Scheme>Acyclic</Scheme>
   </Activation>
-  <!--<MaxDegreeOfParallelism>1</MaxDegreeOfParallelism>-->
   <GenomeConfig>
     <InitialConnectionProportion>1</InitialConnectionProportion>
     <WeightMutationProbability>0.9</WeightMutationProbability>
@@ -37,12 +38,14 @@
   <NumAgentsSolvedCriteria>1</NumAgentsSolvedCriteria>
   <NumAgentsFailedCriteria>1</NumAgentsFailedCriteria>
   <InitializationAlgorithmConfig>
-    <PopulationSize>200</PopulationSize>
+    <SearchAlgorithm>Novelty Search</SearchAlgorithm>
+    <SelectionAlgorithm>Steady State</SelectionAlgorithm>
+    <PopulationSize>250</PopulationSize>
     <GenomeConfig>
       <InitialConnectionProportion>1</InitialConnectionProportion>
-      <WeightMutationProbability>0.9</WeightMutationProbability>
-      <AddConnnectionProbability>0.005</AddConnnectionProbability>
-      <AddNodeProbability>0.01</AddNodeProbability>
+      <WeightMutationProbability>0.6</WeightMutationProbability>
+      <AddConnnectionProbability>0.1</AddConnnectionProbability>
+      <AddNodeProbability>0.05</AddNodeProbability>
       <DeleteConnectionProbability>0.001</DeleteConnectionProbability>
       <ConnectionWeightRange>5</ConnectionWeightRange>
     </GenomeConfig>
