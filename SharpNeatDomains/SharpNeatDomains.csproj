@@ -99,6 +99,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ExperimentDataDataSet.xsd</DependentUpon>
     </Compile>
+    <Compile Include="MazeNavigation\BaseCoevolutionMazeNavigationExperiment.cs" />
     <Compile Include="MazeNavigation\Bootstrappers\MazeNavigationInitializer.cs" />
     <Compile Include="MazeNavigation\Bootstrappers\FitnessCoevolutionMazeNavigationInitializer.cs" />
     <Compile Include="ICoevolutionExperiment.cs" />

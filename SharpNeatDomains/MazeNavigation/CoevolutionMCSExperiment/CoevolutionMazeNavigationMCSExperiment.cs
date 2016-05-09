@@ -1,10 +1,8 @@
 ﻿#region
 
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Xml;
 using SharpNeat.Core;
-using SharpNeat.Decoders;
 using SharpNeat.Decoders.Maze;
 using SharpNeat.Decoders.Neat;
 using SharpNeat.Domains.MazeNavigation.Bootstrappers;
@@ -19,43 +17,9 @@ using SharpNeat.Phenomes.Mazes;
 
 namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
 {
-    public class CoevolutionMazeNavigationMCSExperiment : ICoevolutionExperiment
+    public class CoevolutionMazeNavigationMCSExperiment : BaseCoevolutionMazeNavigationExperiment
     {
         #region Public Methods
-
-        /// <summary>
-        ///     Creates a new genome factory for maze navigator agents.
-        /// </summary>
-        /// <returns>The constructed agent genome factory.</returns>
-        public IGenomeFactory<NeatGenome> CreateAgentGenomeFactory()
-        {
-            return new NeatGenomeFactory(AnnInputCount, AnnOutputCount, _neatGenomeParameters);
-        }
-
-        /// <summary>
-        ///     Creates a new genome factory for mazes.
-        /// </summary>
-        /// <returns>The constructed maze genome factory.</returns>
-        public IGenomeFactory<MazeGenome> CreateMazeGenomeFactory()
-        {
-            return new MazeGenomeFactory(_mazeGenomeParameters);
-        }
-
-        /// <summary>
-        ///     Save a population of agent genomes to an XmlWriter.
-        /// </summary>
-        public void SaveAgentPopulation(XmlWriter xw, IList<NeatGenome> agentGenomeList)
-        {
-            NeatGenomeXmlIO.WriteComplete(xw, agentGenomeList, false);
-        }
-
-        /// <summary>
-        ///     Save a population of maze genomes to an XmlWriter.
-        /// </summary>
-        public void SaveMazePopulation(XmlWriter xw, IList<MazeGenome> mazeGenomeList)
-        {
-            MazeGenomeXmlIO.WriteComplete(xw, mazeGenomeList);
-        }
 
         /// <summary>
         ///     Initializes the coevolution maze navigation experiment by reading in all of the configuration parameters and
@@ -63,39 +27,20 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
         /// </summary>
         /// <param name="name">The name of the experiment.</param>
         /// <param name="xmlConfig">The reference to the XML configuration file.</param>
+        /// <param name="seedMazePath">The path to the genome file or directory containing the seed maze(s).</param>
         /// <param name="navigatorEvolutionLogger">The navigator evolution data logger.</param>
         /// <param name="navigatorGenomeLogger">The navigator genome logger.</param>
         /// <param name="mazeEvolutionLogger">The maze evolution data logger.</param>
         /// <param name="mazeGenomeLogger">The maze genome logger.</param>
-        public void Initialize(string name, XmlElement xmlConfig, IDataLogger navigatorEvolutionLogger = null,
+        public override void Initialize(string name, XmlElement xmlConfig, string seedMazePath,
+            IDataLogger navigatorEvolutionLogger = null,
             IDataLogger navigatorGenomeLogger = null, IDataLogger mazeEvolutionLogger = null,
             IDataLogger mazeGenomeLogger = null)
         {
-            // Set boiler plate properties
-            Name = name;
-            Description = XmlUtils.GetValueAsString(xmlConfig, "Description");
-            _activationScheme = ExperimentUtils.CreateActivationScheme(xmlConfig, "Activation");
-            _parallelOptions = ExperimentUtils.ReadParallelOptions(xmlConfig);
-            _serializeGenomeToXml = XmlUtils.TryGetValueAsBool(xmlConfig, "DecodeGenomesToXml") ?? false;
-
-            // Set the genome parameters
-            _neatGenomeParameters = ExperimentUtils.ReadNeatGenomeParameters(xmlConfig);
-            _neatGenomeParameters.FeedforwardOnly = _activationScheme.AcyclicNetwork;
-            _mazeGenomeParameters = ExperimentUtils.ReadMazeGenomeParameters(xmlConfig);
-
-            // Configure evolutionary algorithm parameters
-            AgentDefaultPopulationSize = XmlUtils.GetValueAsInt(xmlConfig, "AgentPopulationSize");
-            MazeDefaultPopulationSize = XmlUtils.GetValueAsInt(xmlConfig, "MazePopulationSize");
-            AgentSeedGenomeCount = XmlUtils.GetValueAsInt(xmlConfig, "AgentSeedGenomeCount");
-            MazeSeedGenomeCount = XmlUtils.GetValueAsInt(xmlConfig, "MazeSeedGenomeCount");
-            _behaviorCharacterizationFactory = ExperimentUtils.ReadBehaviorCharacterizationFactory(xmlConfig,
-                "BehaviorConfig");
-            _navigatorBatchSize = XmlUtils.GetValueAsInt(xmlConfig, "NavigatorOffspringBatchSize");
-            _mazeBatchSize = XmlUtils.GetValueAsInt(xmlConfig, "MazeOffspringBatchSize");
-
-            // Set run-time bounding parameters
-            _maxGenerations = XmlUtils.TryGetValueAsInt(xmlConfig, "MaxGenerations");
-            _maxEvaluations = XmlUtils.TryGetValueAsULong(xmlConfig, "MaxEvaluations");
+            // Initialize boiler plate parameters
+            base.Initialize(name, xmlConfig, seedMazePath, navigatorEvolutionLogger, navigatorGenomeLogger,
+                mazeEvolutionLogger,
+                mazeGenomeLogger);
 
             // Set experiment-specific parameters
             _maxTimesteps = XmlUtils.GetValueAsInt(xmlConfig, "MaxTimesteps");
@@ -108,6 +53,8 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             _numMazeSuccessCriteria = XmlUtils.GetValueAsInt(xmlConfig, "NumMazesSolvedCriteria");
             _numAgentSuccessCriteria = XmlUtils.GetValueAsInt(xmlConfig, "NumAgentsSolvedCriteria");
             _numAgentFailedCriteria = XmlUtils.GetValueAsInt(xmlConfig, "NumAgentsFailedCriteria");
+
+            // Read in seed maze
 
             // Read in log file path/name
             _navigatorEvolutionDataLogger = navigatorEvolutionLogger ??
@@ -167,7 +114,7 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             // (note that a new maze structure is created here for the sole purpose of extracting the maze dimensions and calculating max distance to target)
             _mazeNavigationInitializer.SetEnvironmentParameters(_maxTimesteps, _minSuccessDistance,
                 new MazeDecoder(_mazeHeight, _mazeWidth, _mazeScaleMultiplier).Decode(
-                    new MazeGenomeFactory(_mazeGenomeParameters).CreateGenome(0)));
+                    new MazeGenomeFactory(MazeGenomeParameters).CreateGenome(0)));
         }
 
         /// <summary>
@@ -175,7 +122,7 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
         ///     maze population sizes as the only configuration parameters.
         /// </summary>
         /// <returns>The instantiated coevolution algorithm container.</returns>
-        public ICoevolutionAlgorithmContainer<NeatGenome, MazeGenome> CreateCoevolutionAlgorithmContainer()
+        public override ICoevolutionAlgorithmContainer<NeatGenome, MazeGenome> CreateCoevolutionAlgorithmContainer()
         {
             return CreateCoevolutionAlgorithmContainer(AgentSeedGenomeCount, MazeSeedGenomeCount);
         }
@@ -186,15 +133,15 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
         /// <param name="populationSize1">The agent population size.</param>
         /// <param name="populationSize2">The maze population size.</param>
         /// <returns>The instantiated coevolution algorithm container.</returns>
-        public ICoevolutionAlgorithmContainer<NeatGenome, MazeGenome> CreateCoevolutionAlgorithmContainer(
+        public override ICoevolutionAlgorithmContainer<NeatGenome, MazeGenome> CreateCoevolutionAlgorithmContainer(
             int populationSize1, int populationSize2)
         {
             // Create a genome factory for the NEAT genomes
             IGenomeFactory<NeatGenome> neatGenomeFactory = new NeatGenomeFactory(AnnInputCount, AnnOutputCount,
-                _neatGenomeParameters);
+                NeatGenomeParameters);
 
             // Create a genome factory for the maze genomes
-            IGenomeFactory<MazeGenome> mazeGenomeFactory = new MazeGenomeFactory(_mazeGenomeParameters);
+            IGenomeFactory<MazeGenome> mazeGenomeFactory = new MazeGenomeFactory(MazeGenomeParameters);
 
             // Create an initial population of maze navigators
             List<NeatGenome> neatGenomeList = neatGenomeFactory.CreateGenomeList(populationSize1, 0);
@@ -216,15 +163,15 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
         /// <param name="genomeList1">The agent genome list.</param>
         /// <param name="genomeList2">The maze genome list.</param>
         /// <returns>The instantiated coevolution algorithm container.</returns>
-        public ICoevolutionAlgorithmContainer<NeatGenome, MazeGenome> CreateCoevolutionAlgorithmContainer(
+        public override ICoevolutionAlgorithmContainer<NeatGenome, MazeGenome> CreateCoevolutionAlgorithmContainer(
             IGenomeFactory<NeatGenome> genomeFactory1,
             IGenomeFactory<MazeGenome> genomeFactory2, List<NeatGenome> genomeList1, List<MazeGenome> genomeList2)
         {
             ulong initializationEvaluations;
 
             // Instantiate the internal initialization algorithm
-            _mazeNavigationInitializer.InitializeAlgorithm(_parallelOptions, genomeList1,
-                new NeatGenomeDecoder(_activationScheme), 0);
+            _mazeNavigationInitializer.InitializeAlgorithm(ParallelOptions, genomeList1,
+                new NeatGenomeDecoder(ActivationScheme), 0);
 
             // Run the initialization algorithm until the requested number of viable seed genomes are found
             List<NeatGenome> seedAgentPopulation =
@@ -239,39 +186,39 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             // Create the NEAT (i.e. navigator) queueing evolution algorithm
             AbstractEvolutionAlgorithm<NeatGenome> neatEvolutionAlgorithm =
                 new QueueingNeatEvolutionAlgorithm<NeatGenome>(new NeatEvolutionAlgorithmParameters(), null,
-                    _navigatorBatchSize, RunPhase.Primary, false, false, _navigatorEvolutionDataLogger,
+                    NavigatorBatchSize, RunPhase.Primary, false, false, _navigatorEvolutionDataLogger,
                     _logFieldEnableMap);
 
             // Create the maze queueing evolution algorithm
             AbstractEvolutionAlgorithm<MazeGenome> mazeEvolutionAlgorithm =
                 new QueueingNeatEvolutionAlgorithm<MazeGenome>(new NeatEvolutionAlgorithmParameters(), null,
-                    _mazeBatchSize, RunPhase.Primary, false, false, _mazeEvolutionDataLogger, _logFieldEnableMap);
+                    MazeBatchSize, RunPhase.Primary, false, false, _mazeEvolutionDataLogger, _logFieldEnableMap);
 
             // Create the maze phenome evaluator
             IPhenomeEvaluator<MazeStructure, BehaviorInfo> mazeEvaluator = new MazeEnvironmentMCSEvaluator(
                 _maxTimesteps,
-                _minSuccessDistance, _behaviorCharacterizationFactory, _numAgentSuccessCriteria, _numAgentFailedCriteria);
+                _minSuccessDistance, BehaviorCharacterizationFactory, _numAgentSuccessCriteria, _numAgentFailedCriteria);
 
             // Create navigator phenome evaluator
             IPhenomeEvaluator<IBlackBox, BehaviorInfo> navigatorEvaluator = new MazeNavigatorMCSEvaluator(
-                _maxTimesteps, _minSuccessDistance, _behaviorCharacterizationFactory, _numMazeSuccessCriteria);
+                _maxTimesteps, _minSuccessDistance, BehaviorCharacterizationFactory, _numMazeSuccessCriteria);
 
             // Create maze genome decoder
             IGenomeDecoder<MazeGenome, MazeStructure> mazeGenomeDecoder = new MazeDecoder(_mazeHeight, _mazeWidth,
                 _mazeScaleMultiplier);
 
             // Create navigator genome decoder
-            IGenomeDecoder<NeatGenome, IBlackBox> navigatorGenomeDecoder = new NeatGenomeDecoder(_activationScheme);
+            IGenomeDecoder<NeatGenome, IBlackBox> navigatorGenomeDecoder = new NeatGenomeDecoder(ActivationScheme);
 
             // Create the maze genome evaluator
             IGenomeEvaluator<MazeGenome> mazeFitnessEvaluator =
                 new ParallelGenomeBehaviorEvaluator<MazeGenome, MazeStructure>(mazeGenomeDecoder, mazeEvaluator,
-                    SelectionType.Queueing, SearchType.MinimalCriteriaSearch, _parallelOptions);
+                    SelectionType.Queueing, SearchType.MinimalCriteriaSearch, ParallelOptions);
 
             // Create navigator genome evaluator
             IGenomeEvaluator<NeatGenome> navigatorFitnessEvaluator =
                 new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(navigatorGenomeDecoder, navigatorEvaluator,
-                    SelectionType.Queueing, SearchType.MinimalCriteriaSearch, _parallelOptions);
+                    SelectionType.Queueing, SearchType.MinimalCriteriaSearch, ParallelOptions);
 
             // Create the coevolution container
             ICoevolutionAlgorithmContainer<NeatGenome, MazeGenome> coevolutionAlgorithmContainer =
@@ -283,113 +230,19 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             // Initialize the container and component algorithms
             coevolutionAlgorithmContainer.Initialize(navigatorFitnessEvaluator, genomeFactory1, seedAgentPopulation,
                 AgentDefaultPopulationSize, mazeFitnessEvaluator, genomeFactory2, genomeList2, MazeDefaultPopulationSize,
-                _maxGenerations, _maxEvaluations);
+                MaxGenerations, MaxEvaluations);
 
             return coevolutionAlgorithmContainer;
         }
 
         #endregion
 
-        #region Public Properties
-
-        /// <summary>
-        ///     The name of the experiment.
-        /// </summary>
-        public string Name { get; private set; }
-
-        /// <summary>
-        ///     The description of the experiment.
-        /// </summary>
-        public string Description { get; private set; }
-
-        /// <summary>
-        ///     The default (max) agent population size.
-        /// </summary>
-        public int AgentDefaultPopulationSize { get; private set; }
-
-        /// <summary>
-        ///     The default (max) maze population size.
-        /// </summary>
-        public int MazeDefaultPopulationSize { get; private set; }
-
-        /// <summary>
-        ///     The number of agent genomes in the agent seed population.
-        /// </summary>
-        public int AgentSeedGenomeCount { get; private set; }
-
-        /// <summary>
-        ///     The number of maze genomes in the maze seed population.
-        /// </summary>
-        public int MazeSeedGenomeCount { get; private set; }
-
-        #endregion
-
         #region Instance Variables
-
-        /// <summary>
-        ///     The activation scheme (i.e. cyclic or acyclic).
-        /// </summary>
-        private NetworkActivationScheme _activationScheme;
-
-        /// <summary>
-        ///     Switches between synchronous and asynchronous execution (with user-defined number of threads).
-        /// </summary>
-        private ParallelOptions _parallelOptions;
-
-        /// <summary>
-        ///     Dictates whether genome XML should be serialized and logged.
-        /// </summary>
-        private bool _serializeGenomeToXml;
-
-        /// <summary>
-        ///     The NEAT genome parameters to use for the experiment.
-        /// </summary>
-        private NeatGenomeParameters _neatGenomeParameters;
-
-        /// <summary>
-        ///     The maze genome parameters to use for the experiment.
-        /// </summary>
-        private MazeGenomeParameters _mazeGenomeParameters;
-
-        /// <summary>
-        ///     The number of neural network inputs.
-        /// </summary>
-        private const int AnnInputCount = 10;
-
-        /// <summary>
-        ///     The number of neural network outputs.
-        /// </summary>
-        private const int AnnOutputCount = 2;
-
-        /// <summary>
-        ///     The number of maze navigators to be evaluated in a single evaluation "batch".
-        /// </summary>
-        private int _navigatorBatchSize;
-
-        /// <summary>
-        ///     The number of mazes to be evaluated in a single evaluation "batch".
-        /// </summary>
-        private int _mazeBatchSize;
-
-        /// <summary>
-        ///     The factory used for producing behavior characterizations.
-        /// </summary>
-        private IBehaviorCharacterizationFactory _behaviorCharacterizationFactory;
 
         /// <summary>
         ///     Initialization algorithm for producing an initial population with the requisite number of viable genomes.
         /// </summary>
         private FitnessCoevolutionMazeNavigationInitializer _mazeNavigationInitializer;
-
-        /// <summary>
-        ///     The maximum number of evaluations allowed (optional).
-        /// </summary>
-        private ulong? _maxEvaluations;
-
-        /// <summary>
-        ///     The maximum number of generations allowed (optional).
-        /// </summary>
-        private int? _maxGenerations;
 
         /// <summary>
         ///     The maximum number of timesteps allowed for a single simulation.
