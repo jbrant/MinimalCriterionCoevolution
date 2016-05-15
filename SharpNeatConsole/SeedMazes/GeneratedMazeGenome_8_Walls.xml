@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Root>
+  <Mazes>
+    <Maze id="0" birthGen="0">
+      <Walls>
+        <Wall RelativeWallLocation="0.368571693714974" RelativePassageLocation="0.0598987248073792" OrientationSeed="True" />
+        <Wall RelativeWallLocation="0.440432869103007" RelativePassageLocation="0.375169356993944" OrientationSeed="True" />
+        <Wall RelativeWallLocation="0.838028935640132" RelativePassageLocation="0.0381600423893705" OrientationSeed="True" />
+        <Wall RelativeWallLocation="0.511854062560878" RelativePassageLocation="0.469604195314275" OrientationSeed="False" />
+        <Wall RelativeWallLocation="0.936148478154162" RelativePassageLocation="0.649287364282313" OrientationSeed="False" />
+        <Wall RelativeWallLocation="0.627020046872562" RelativePassageLocation="0.394174712893634" OrientationSeed="False" />
+      </Walls>
+    </Maze>
+  </Mazes>
+</Root>

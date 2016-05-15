@@ -1,10 +1,9 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Config>
   <SearchAlgorithm>Minimal Criteria Search</SearchAlgorithm>
   <SelectionAlgorithm>Queueing</SelectionAlgorithm>
-  <!--<MaxDegreeOfParallelism>1</MaxDegreeOfParallelism>-->
   <AgentPopulationSize>1000</AgentPopulationSize>
-  <MazePopulationSize>100</MazePopulationSize>
+  <MazePopulationSize>20</MazePopulationSize>
   <AgentSeedGenomeCount>500</AgentSeedGenomeCount>
   <MazeSeedGenomeCount>1</MazeSeedGenomeCount>
   <Activation>
@@ -13,23 +12,23 @@
   <GenomeConfig>
     <InitialConnectionProportion>1</InitialConnectionProportion>
     <WeightMutationProbability>0.9</WeightMutationProbability>
-    <AddConnnectionProbability>0.1</AddConnnectionProbability>
-    <AddNodeProbability>0.01</AddNodeProbability>
+    <AddConnnectionProbability>0.3</AddConnnectionProbability>
+    <AddNodeProbability>0.1</AddNodeProbability>
     <DeleteConnectionProbability>0.001</DeleteConnectionProbability>
     <ConnectionWeightRange>5</ConnectionWeightRange>
   </GenomeConfig>
   <MazeGenomeConfig>
-    <MutateWallStartLocationProbability>0.05</MutateWallStartLocationProbability>
+    <MutateWallStartLocationProbability>0.01</MutateWallStartLocationProbability>
     <MutatePassageStartLocationProbability>0.01</MutatePassageStartLocationProbability>
     <MutateAddWallProbability>0.9</MutateAddWallProbability>
     <PerturbanceMagnitude>0.1</PerturbanceMagnitude>
   </MazeGenomeConfig>
   <BehaviorConfig>
-    <BehaviorCharacterization>EndPoint</BehaviorCharacterization>
+    <BehaviorCharacterization>End Point</BehaviorCharacterization>
   </BehaviorConfig>
   <NavigatorOffspringBatchSize>50</NavigatorOffspringBatchSize>
-  <MazeOffspringBatchSize>10</MazeOffspringBatchSize>  
-  <MaxEvaluations>100000000</MaxEvaluations>
+  <MazeOffspringBatchSize>5</MazeOffspringBatchSize>
+  <MaxEvaluations>1000000</MaxEvaluations>
   <MaxTimesteps>600</MaxTimesteps>
   <MinSuccessDistance>5</MinSuccessDistance>
   <MazeHeight>20</MazeHeight>
@@ -41,20 +40,21 @@
   <InitializationAlgorithmConfig>
     <SearchAlgorithm>Novelty Search</SearchAlgorithm>
     <SelectionAlgorithm>Steady State</SelectionAlgorithm>
-    <!--<SearchAlgorithm>Fitness</SearchAlgorithm>
-    <SelectionAlgorithm>Generational</SelectionAlgorithm>-->
     <PopulationSize>250</PopulationSize>
     <SpecieCount>15</SpecieCount>
     <OffspringBatchSize>20</OffspringBatchSize>
     <PopulationEvaluationFrequency>30</PopulationEvaluationFrequency>
     <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>
     <ComplexityThreshold>30</ComplexityThreshold>
-    <DecodeGenomesToXml>false</DecodeGenomesToXml>
+    <SelectionProportion>0.2</SelectionProportion>
+    <OffspringAsexualProbability>0.5</OffspringAsexualProbability>
+    <OffspringSexualProbability>0.5</OffspringSexualProbability>
+    <InterspeciesMatingProbability>0.001</InterspeciesMatingProbability>
     <GenomeConfig>
       <InitialConnectionProportion>1</InitialConnectionProportion>
-      <WeightMutationProbability>0.7</WeightMutationProbability>
-      <AddConnnectionProbability>0.1</AddConnnectionProbability>
-      <AddNodeProbability>0.07</AddNodeProbability>
+      <WeightMutationProbability>0.9</WeightMutationProbability>
+      <AddConnnectionProbability>0.05</AddConnnectionProbability>
+      <AddNodeProbability>0.005</AddNodeProbability>
       <DeleteConnectionProbability>0.001</DeleteConnectionProbability>
       <ConnectionWeightRange>5</ConnectionWeightRange>
     </GenomeConfig>
@@ -70,31 +70,7 @@
       <MaxGenerationsWithoutArchiveAddition>10</MaxGenerationsWithoutArchiveAddition>
     </NoveltyConfig>
   </InitializationAlgorithmConfig>
-  <PopulationLoggingBatchInterval>5</PopulationLoggingBatchInterval>
-  <NavigatorLoggingConfig>
-    <Type>Evolution</Type>
-    <Destination>File</Destination>
-    <!--<LogFile>C:\\Users\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Minimal Criteria Search\ExperimentData\\NavigatorEvolutionData.csv</LogFile>-->
-    <LogFile>F:\\User Data\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Minimal Criteria Search\ExperimentData\\NavigatorEvolutionData.csv</LogFile>
-  </NavigatorLoggingConfig>
-  <NavigatorLoggingConfig>
-    <Type>PopulationGenomes</Type>
-    <Destination>File</Destination>
-    <!--<LogFile>C:\\Users\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Minimal Criteria Search\ExperimentData\\NavigatorPopulationGenomesData.csv</LogFile>-->
-    <LogFile>F:\\User Data\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Minimal Criteria Search\ExperimentData\\NavigatorPopulationGenomesData.csv</LogFile>
-  </NavigatorLoggingConfig>
-  <MazeLoggingConfig>
-    <Type>Evolution</Type>
-    <Destination>File</Destination>
-    <!--<LogFile>C:\\Users\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Minimal Criteria Search\ExperimentData\\MazeEvolutionData.csv</LogFile>-->
-    <LogFile>F:\\User Data\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Minimal Criteria Search\ExperimentData\\MazeEvolutionData.csv</LogFile>
-  </MazeLoggingConfig>
-  <MazeLoggingConfig>
-    <Type>PopulationGenomes</Type>
-    <Destination>File</Destination>
-    <!--<LogFile>C:\\Users\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Minimal Criteria Search\ExperimentData\\MazePopulationGenomesData.csv</LogFile>-->
-    <LogFile>F:\\User Data\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Minimal Criteria Search\ExperimentData\\MazePopulationGenomesData.csv</LogFile>
-    </MazeLoggingConfig>
+  <PopulationLoggingBatchInterval>10</PopulationLoggingBatchInterval>
   <Description>
     Coevolutionary MCS Maze navigation experiment, evolving both maze navigators and the mazes themselves.
   </Description>

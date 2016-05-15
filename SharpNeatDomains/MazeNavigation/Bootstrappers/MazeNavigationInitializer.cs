@@ -58,7 +58,7 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
                 "ComplexityRegulationStrategy");
             ComplexityThreshold = XmlUtils.TryGetValueAsInt(xmlConfig, "ComplexityThreshold");
         }
-
+        
         /// <summary>
         ///     Sets configuration variables specific to the maze navigation simulation.
         /// </summary>

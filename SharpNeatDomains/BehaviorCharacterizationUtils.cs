@@ -64,7 +64,7 @@ namespace SharpNeat.Domains
             String strBehavioralCharacterization)
         {
             if ("EndPoint".Equals(strBehavioralCharacterization, StringComparison.InvariantCultureIgnoreCase) ||
-                "EndPoint".Equals(strBehavioralCharacterization, StringComparison.InvariantCultureIgnoreCase))
+                "End Point".Equals(strBehavioralCharacterization, StringComparison.InvariantCultureIgnoreCase))
             {
                 return BehaviorCharacterizationType.EndPoint;
             }

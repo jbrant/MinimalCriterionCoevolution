@@ -59,7 +59,7 @@ namespace SharpNeat.Domains.MazeNavigation.Components
                 new RangeFinder(100, -45, 0),
                 new RangeFinder(100, 0, 0),
                 new RangeFinder(100, 45, 0),
-                new RangeFinder(100, 90, 0)
+                new RangeFinder(100, 90, 0)                
             };
 
             RadarArray = new PieSliceSensorArray();

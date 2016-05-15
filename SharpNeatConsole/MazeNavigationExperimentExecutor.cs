@@ -182,7 +182,8 @@ namespace SharpNeatConsole
                         // Execute file-based coevolution experiment
                         ExecuteFileBasedCoevolutionExperiment(
                             _executionConfiguration[ExecutionParameter.ExperimentConfigDirectory],
-                            _executionConfiguration[ExecutionParameter.OutputFileDirectory], curExperimentName, numRuns,
+                            _executionConfiguration[ExecutionParameter.OutputFileDirectory],
+                            _executionConfiguration[ExecutionParameter.SeedMazeFile], curExperimentName, numRuns,
                             startFromRun);
                     }
                     else
@@ -576,11 +577,12 @@ namespace SharpNeatConsole
         /// </summary>
         /// <param name="experimentConfigurationDirectory">The directory containing the XML experiment configuration file.</param>
         /// <param name="logFileDirectory">The directory into which to write the evolution/evaluation log files.</param>
+        /// <param name="seedMazePath">The path to the XML maze genome file or directory containing XML maze genome files.</param>
         /// <param name="experimentName">The name of the experiment to execute.</param>
         /// <param name="numRuns">The number of runs to execute for that experiment.</param>
         /// <param name="startFromRun">The run to start from (1 by default).</param>
         private static void ExecuteFileBasedCoevolutionExperiment(string experimentConfigurationDirectory,
-            string logFileDirectory,
+            string logFileDirectory, string seedMazePath,
             string experimentName,
             int numRuns, int startFromRun)
         {
@@ -643,19 +645,19 @@ namespace SharpNeatConsole
 
                 // Otherwise, generate the starting population
                 // Create a new agent genome factory
-                var agentGenomeFactory = experiment.CreateAgentGenomeFactory();
+                IGenomeFactory<NeatGenome> agentGenomeFactory = experiment.CreateAgentGenomeFactory();
 
                 // Create a new maze genome factory
-                var mazeGenomeFactory = experiment.CreateMazeGenomeFactory();
+                IGenomeFactory<MazeGenome> mazeGenomeFactory = experiment.CreateMazeGenomeFactory();
 
                 // Generate the initial agent population
-                var agentGenomeList = agentGenomeFactory.CreateGenomeList(experiment.AgentSeedGenomeCount, 0);
+                List<NeatGenome> agentGenomeList = agentGenomeFactory.CreateGenomeList(experiment.AgentSeedGenomeCount, 0);
 
-                // Generate the initial maze population
-                var mazeGenomeList = mazeGenomeFactory.CreateGenomeList(experiment.MazeSeedGenomeCount, 0);
+                // Read in the seed population
+                List<MazeGenome> mazeGenomeList = ExperimentUtils.ReadSeedMazeGenomes(seedMazePath, (MazeGenomeFactory) mazeGenomeFactory);
 
-                _executionLogger.Info(string.Format("Loaded [{0}] genomes as initial population.",
-                    agentGenomeList.Count));
+                _executionLogger.Info(string.Format("Loaded [{0}] navigator genomes and [{1}] seed maze genomes as initial populations.",
+                    agentGenomeList.Count, mazeGenomeList.Count));
 
                 _executionLogger.Info("Kicking off Experiment initialization/execution");
 
