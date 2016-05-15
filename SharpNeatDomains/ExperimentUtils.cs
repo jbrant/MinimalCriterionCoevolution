@@ -28,6 +28,7 @@ using System.Xml;
 using ExperimentEntities;
 using SharpNeat.Core;
 using SharpNeat.Decoders;
+using SharpNeat.Domains.MazeNavigation.Bootstrappers;
 using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.EvolutionAlgorithms.ComplexityRegulation;
 using SharpNeat.Genomes.Maze;
@@ -667,15 +668,80 @@ namespace SharpNeat.Domains
             return behaviorCharacterizationFactory;
         }
 
-        public static IList<MazeGenome> ReadSeedMazeGenomes(string seedMazePath)
+        /// <summary>
+        ///     Reads in seed maze genomes used to bootstrap coevolutionary experiments.
+        /// </summary>
+        /// <param name="seedMazePath">
+        ///     The path of the single maze genome or a directory containing multiple XML genome
+        ///     definitions.
+        /// </param>
+        /// <param name="mazeGenomeFactory">The maze genome factory to assign to each genome.</param>
+        /// <returns>The list of seed maze genomes.</returns>
+        public static List<MazeGenome> ReadSeedMazeGenomes(string seedMazePath, MazeGenomeFactory mazeGenomeFactory)
         {
+            string[] mazeGenomeFiles;
+            List<MazeGenome> mazeGenomes = new List<MazeGenome>();
+
             // Get the attributes of the given path/file
             FileAttributes fileAttributes = File.GetAttributes(seedMazePath);
 
             // Determine whether this is a directory or a file
             if ((fileAttributes & FileAttributes.Directory) == FileAttributes.Directory)
             {
-                
+                // Get all of the genome files in the directory
+                mazeGenomeFiles = Directory.GetFiles(seedMazePath, "*.xml");
+            }
+            else
+            {
+                // There's only one file, so make array length 1 and add that file
+                mazeGenomeFiles = new string[1];
+                mazeGenomeFiles[0] = seedMazePath;
+            }
+
+            // Read in each maze genome and add it to the list
+            foreach (string mazeGenomeFile in mazeGenomeFiles)
+            {
+                using (XmlReader xr = XmlReader.Create(mazeGenomeFile))
+                {
+                    // Read in the maze genome
+                    MazeGenome curMazeGenome = MazeGenomeXmlIO.ReadSingleGenomeFromRoot(xr, mazeGenomeFactory);
+
+                    // Assign the genome factory
+                    curMazeGenome.GenomeFactory = mazeGenomeFactory;
+
+                    // Add the genome to the list
+                    mazeGenomes.Add(curMazeGenome);
+                }
+            }
+
+            return mazeGenomes;
+        }
+
+        /// <summary>
+        ///     Determines which coevolution initializer to instantiate and return based on the initialization algorithm search
+        ///     type.
+        /// </summary>
+        /// <param name="xmlConfig">XML initialization configuration.</param>
+        /// <returns>The instantiated initializer.</returns>
+        public static CoevolutionMazeNavigationInitializer DetermineCoevolutionInitializer(XmlElement xmlConfig)
+        {
+            // Make sure that the XML configuration exists
+            if (xmlConfig == null)
+            {
+                throw new ArgumentException("Missing or invalid coevolution initialization configuration.");
+            }
+
+            // Extract the corresponding search and selection algorithm domain types
+            SearchType searchType =
+                AlgorithmTypeUtil.ConvertStringToSearchType(XmlUtils.TryGetValueAsString(xmlConfig, "SearchAlgorithm"));
+
+            // There's currently just two coevolution initializers: fitness and novelty search
+            switch (searchType)
+            {
+                case SearchType.Fitness:
+                    return new FitnessCoevolutionMazeNavigationInitializer();
+                default:
+                    return new NoveltySearchCoevolutionMazeNavigationInitializer();
             }
         }
     }

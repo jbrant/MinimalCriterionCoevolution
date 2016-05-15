@@ -26,7 +26,7 @@ namespace SharpNeat.Domains.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
-        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=localhost\\SQLEXPRESS;Initial Catalog=ExperimentData;Integrated Securi" +
+        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=JONATHAN-PC\\RESEARCH;Initial Catalog=ExperimentData;Integrated Securi" +
             "ty=True")]
         public string ExperimentDataConnectionString {
             get {

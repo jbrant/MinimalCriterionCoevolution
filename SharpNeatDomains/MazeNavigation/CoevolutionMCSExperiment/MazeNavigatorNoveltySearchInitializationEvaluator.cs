@@ -12,9 +12,9 @@ using SharpNeat.Phenomes.Mazes;
 namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
 {
     /// <summary>
-    ///     Defines evaluation rules and process for an initialization evaluation of the fitness algorithm.
+    ///     Defines evaluation rules and process for an initialization evaluation of the novelty search algorithm.
     /// </summary>
-    public class MazeNavigatorFitnessInitializationEvaluator : IPhenomeEvaluator<IBlackBox, FitnessInfo>
+    public class MazeNavigatorNoveltySearchInitializationEvaluator : IPhenomeEvaluator<IBlackBox, BehaviorInfo>
     {
         #region Constructors
 
@@ -24,14 +24,17 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
         /// <param name="maxTimesteps">The maximum number of time steps in a single simulation.</param>
         /// <param name="minSuccessDistance">The minimum distance from the target to be considered a successful run.</param>
         /// <param name="maxDistanceToTarget">The maximum distance from the target possible.</param>
+        /// <param name="behaviorCharacterizationFactory">The initialized behavior characterization factory.</param>
         /// <param name="startingEvaluations">The number of evaluations from which the evaluator is starting (defaults to 0).</param>
-        public MazeNavigatorFitnessInitializationEvaluator(int maxTimesteps, int minSuccessDistance,
-            int maxDistanceToTarget, ulong startingEvaluations = 0)
+        public MazeNavigatorNoveltySearchInitializationEvaluator(int maxTimesteps, int minSuccessDistance,
+            int maxDistanceToTarget, IBehaviorCharacterizationFactory behaviorCharacterizationFactory,
+            ulong startingEvaluations = 0)
         {
             EvaluationCount = startingEvaluations;
+            _behaviorCharacterizationFactory = behaviorCharacterizationFactory;
 
             // Create factory for generating mazes
-            _multiMazeWorldFactory = new MultiMazeNavigationWorldFactory<FitnessInfo>(maxTimesteps, minSuccessDistance,
+            _multiMazeWorldFactory = new MultiMazeNavigationWorldFactory<BehaviorInfo>(maxTimesteps, minSuccessDistance,
                 maxDistanceToTarget);
         }
 
@@ -45,10 +48,14 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
         ///     The maze structure with which to seed the list of maze structures in the maze
         ///     factory.
         /// </param>
+        /// <param name="behaviorCharacterizationFactory">The initialized behavior characterization factory.</param>
         /// <param name="startingEvaluations">The number of evaluations from which the evaluator is starting (defaults to 0).</param>
-        public MazeNavigatorFitnessInitializationEvaluator(int maxTimesteps, int minSuccessDistance,
-            int maxDistanceToTarget, MazeStructure initialMazeStructure, ulong startingEvaluations = 0)
-            : this(maxTimesteps, minSuccessDistance, maxDistanceToTarget, startingEvaluations)
+        public MazeNavigatorNoveltySearchInitializationEvaluator(int maxTimesteps, int minSuccessDistance,
+            int maxDistanceToTarget, MazeStructure initialMazeStructure,
+            IBehaviorCharacterizationFactory behaviorCharacterizationFactory, ulong startingEvaluations = 0)
+            : this(
+                maxTimesteps, minSuccessDistance, maxDistanceToTarget, behaviorCharacterizationFactory,
+                startingEvaluations)
         {
             // Add initial maze structure
             _multiMazeWorldFactory.SetMazeConfigurations(new List<MazeStructure>(1) {initialMazeStructure});
@@ -61,7 +68,12 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
         /// <summary>
         ///     The multi maze navigation world factory.
         /// </summary>
-        private readonly MultiMazeNavigationWorldFactory<FitnessInfo> _multiMazeWorldFactory;
+        private readonly MultiMazeNavigationWorldFactory<BehaviorInfo> _multiMazeWorldFactory;
+
+        /// <summary>
+        ///     The behavior characterization factory.
+        /// </summary>
+        private readonly IBehaviorCharacterizationFactory _behaviorCharacterizationFactory;
 
         /// <summary>
         ///     Lock object for synchronizing evaluation counter increments.
@@ -96,7 +108,7 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
         /// <param name="evaluationLogger">Reference to the evaluation logger.</param>
         /// <param name="genomeXml">The string-representation of the genome (for logging purposes).</param>
         /// <returns>A fitness info (which is a function of the euclidean distance to the target).</returns>
-        public FitnessInfo Evaluate(IBlackBox agent, uint currentGeneration, bool isBridgingEvaluation,
+        public BehaviorInfo Evaluate(IBlackBox agent, uint currentGeneration, bool isBridgingEvaluation,
             IDataLogger evaluationLogger,
             string genomeXml)
         {
@@ -110,11 +122,15 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             // Default the stop condition satisfied to false
             bool goalReached = false;
 
+            // Generate new behavior characterization
+            IBehaviorCharacterization behaviorCharacterization =
+                _behaviorCharacterizationFactory.CreateBehaviorCharacterization();
+
             // Instantiate the maze world
-            MazeNavigationWorld<FitnessInfo> world = _multiMazeWorldFactory.CreateMazeNavigationWorld();
+            MazeNavigationWorld<BehaviorInfo> world = _multiMazeWorldFactory.CreateMazeNavigationWorld(behaviorCharacterization);
 
             // Run a single trial
-            FitnessInfo trialInfo = world.RunTrial(agent, SearchType.Fitness, out goalReached);
+            BehaviorInfo trialInfo = world.RunTrial(agent, SearchType.NoveltySearch, out goalReached);
 
             // Set the objective distance
             trialInfo.ObjectiveDistance = world.GetDistanceToTarget();

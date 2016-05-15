@@ -27,18 +27,16 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
         /// </summary>
         /// <param name="name">The name of the experiment.</param>
         /// <param name="xmlConfig">The reference to the XML configuration file.</param>
-        /// <param name="seedMazePath">The path to the genome file or directory containing the seed maze(s).</param>
         /// <param name="navigatorEvolutionLogger">The navigator evolution data logger.</param>
         /// <param name="navigatorGenomeLogger">The navigator genome logger.</param>
         /// <param name="mazeEvolutionLogger">The maze evolution data logger.</param>
         /// <param name="mazeGenomeLogger">The maze genome logger.</param>
-        public override void Initialize(string name, XmlElement xmlConfig, string seedMazePath,
-            IDataLogger navigatorEvolutionLogger = null,
-            IDataLogger navigatorGenomeLogger = null, IDataLogger mazeEvolutionLogger = null,
-            IDataLogger mazeGenomeLogger = null)
+        public override void Initialize(string name, XmlElement xmlConfig,
+            IDataLogger navigatorEvolutionLogger = null, IDataLogger navigatorGenomeLogger = null,
+            IDataLogger mazeEvolutionLogger = null, IDataLogger mazeGenomeLogger = null)
         {
             // Initialize boiler plate parameters
-            base.Initialize(name, xmlConfig, seedMazePath, navigatorEvolutionLogger, navigatorGenomeLogger,
+            base.Initialize(name, xmlConfig, navigatorEvolutionLogger, navigatorGenomeLogger,
                 mazeEvolutionLogger,
                 mazeGenomeLogger);
 
@@ -53,8 +51,6 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             _numMazeSuccessCriteria = XmlUtils.GetValueAsInt(xmlConfig, "NumMazesSolvedCriteria");
             _numAgentSuccessCriteria = XmlUtils.GetValueAsInt(xmlConfig, "NumAgentsSolvedCriteria");
             _numAgentFailedCriteria = XmlUtils.GetValueAsInt(xmlConfig, "NumAgentsFailedCriteria");
-
-            // Read in seed maze
 
             // Read in log file path/name
             _navigatorEvolutionDataLogger = navigatorEvolutionLogger ??
@@ -103,7 +99,9 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             _populationLoggingBatchInterval = XmlUtils.TryGetValueAsInt(xmlConfig, "PopulationLoggingBatchInterval");
 
             // Initialize the initialization algorithm
-            _mazeNavigationInitializer = new FitnessCoevolutionMazeNavigationInitializer();
+            _mazeNavigationInitializer =
+                ExperimentUtils.DetermineCoevolutionInitializer(
+                    xmlConfig.GetElementsByTagName("InitializationAlgorithmConfig", "")[0] as XmlElement);
 
             // Setup initialization algorithm
             _mazeNavigationInitializer.SetAlgorithmParameters(
@@ -171,6 +169,7 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
 
             // Instantiate the internal initialization algorithm
             _mazeNavigationInitializer.InitializeAlgorithm(ParallelOptions, genomeList1,
+                new MazeDecoder(_mazeHeight, _mazeWidth, _mazeScaleMultiplier).Decode(genomeList2[0]),
                 new NeatGenomeDecoder(ActivationScheme), 0);
 
             // Run the initialization algorithm until the requested number of viable seed genomes are found
@@ -242,7 +241,7 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
         /// <summary>
         ///     Initialization algorithm for producing an initial population with the requisite number of viable genomes.
         /// </summary>
-        private FitnessCoevolutionMazeNavigationInitializer _mazeNavigationInitializer;
+        private CoevolutionMazeNavigationInitializer _mazeNavigationInitializer;
 
         /// <summary>
         ///     The maximum number of timesteps allowed for a single simulation.

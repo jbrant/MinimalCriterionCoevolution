@@ -77,12 +77,11 @@ namespace SharpNeat.Domains
         /// </summary>
         /// <param name="name">The name of the experiment.</param>
         /// <param name="xmlConfig">The experiment XML configuration file.</param>
-        /// <param name="seedMazePath">The path to the genome file containing the seed maze.</param>
         /// <param name="population1EvolutionLogger">The population 1 evolution logger.</param>
         /// <param name="population1GenomeLogger">The population 1 genome logger.</param>
         /// <param name="population2EvolutionLogger">The population 2 evolution logger.</param>
         /// <param name="population2GenomeLogger">The population 2 genome logger.</param>
-        void Initialize(string name, XmlElement xmlConfig, string seedMazePath,
+        void Initialize(string name, XmlElement xmlConfig,
             IDataLogger population1EvolutionLogger = null,
             IDataLogger population1GenomeLogger = null, IDataLogger population2EvolutionLogger = null,
             IDataLogger population2GenomeLogger = null);
