@@ -38,17 +38,21 @@ namespace SharpNeat.Decoders.Maze
             // Iterate through all of the genes, generating 
             foreach (MazeGene mazeGene in genome.GeneList)
             {
-                // Dequeue a room and run division on it
-                Tuple<MazeStructureRoom, MazeStructureRoom> subRooms = mazeRoomQueue.Dequeue()
-                    .DivideRoom(unscaledGrid, mazeGene.WallLocation,
-                        mazeGene.PassageLocation,
-                        mazeGene.OrientationSeed);
-
-                if (subRooms != null)
+                // Make sure there are rooms left in the queue before attempting to dequeue and bisect
+                if (mazeRoomQueue.Count > 0)
                 {
-                    // Get the two resulting sub rooms and enqueue both of them
-                    mazeRoomQueue.Enqueue(subRooms.Item1);
-                    mazeRoomQueue.Enqueue(subRooms.Item2);
+                    // Dequeue a room and run division on it
+                    Tuple<MazeStructureRoom, MazeStructureRoom> subRooms = mazeRoomQueue.Dequeue()
+                        .DivideRoom(unscaledGrid, mazeGene.WallLocation,
+                            mazeGene.PassageLocation,
+                            mazeGene.OrientationSeed);
+
+                    if (subRooms != null)
+                    {
+                        // Get the two resulting sub rooms and enqueue both of them
+                        mazeRoomQueue.Enqueue(subRooms.Item1);
+                        mazeRoomQueue.Enqueue(subRooms.Item2);
+                    }
                 }
             }
 
