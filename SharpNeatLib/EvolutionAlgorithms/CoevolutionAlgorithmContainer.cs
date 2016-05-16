@@ -2,15 +2,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Reflection;
 using System.Threading;
-using System.Xml;
 using log4net;
 using SharpNeat.Core;
-using SharpNeat.Genomes.Maze;
-using SharpNeat.Genomes.Neat;
 using SharpNeat.Loggers;
+using SharpNeat.Utility;
 
 #endregion
 
@@ -512,7 +509,7 @@ namespace SharpNeat.EvolutionAlgorithms
                                 _logFieldEnabledMap?.ContainsKey(PopulationGenomesFieldElements.GenomeXml) == true &&
                                 _logFieldEnabledMap[PopulationGenomesFieldElements.GenomeXml]
                                     ? new LoggableElement(PopulationGenomesFieldElements.GenomeXml,
-                                        GetGenomeXml(genome1))
+                                        XmlIoUtils.GetGenomeXml(genome1))
                                     : null
                             });
                         }
@@ -531,7 +528,7 @@ namespace SharpNeat.EvolutionAlgorithms
                                 _logFieldEnabledMap?.ContainsKey(PopulationGenomesFieldElements.GenomeXml) == true &&
                                 _logFieldEnabledMap[PopulationGenomesFieldElements.GenomeXml]
                                     ? new LoggableElement(PopulationGenomesFieldElements.GenomeXml,
-                                        GetGenomeXml(genome2))
+                                        XmlIoUtils.GetGenomeXml(genome2))
                                     : null
                             });
                         }
@@ -650,33 +647,6 @@ namespace SharpNeat.EvolutionAlgorithms
                     Log.Error("PausedEvent listener threw exception", ex);
                 }
             }
-        }
-
-        private string GetGenomeXml(object genome)
-        {
-            StringWriter genomeStringWriter = new StringWriter();
-
-            NeatGenome neatGenome = genome as NeatGenome;
-            if (neatGenome != null)
-            {
-                using (XmlTextWriter genomeTextWriter = new XmlTextWriter(genomeStringWriter))
-                {
-                    NeatGenomeXmlIO.WriteComplete(genomeTextWriter, neatGenome, false);
-                }
-            }
-            else
-            {
-                MazeGenome mazeGenome = genome as MazeGenome;
-                if (mazeGenome != null)
-                {
-                    using (XmlTextWriter genomeTextWriter = new XmlTextWriter(genomeStringWriter))
-                    {
-                        MazeGenomeXmlIO.WriteComplete(genomeTextWriter, mazeGenome);
-                    }
-                }
-            }
-
-            return genomeStringWriter.ToString();
         }
 
         #endregion

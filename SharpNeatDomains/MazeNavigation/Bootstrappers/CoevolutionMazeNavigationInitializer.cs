@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using SharpNeat.Core;
 using SharpNeat.Genomes.Neat;
+using SharpNeat.Loggers;
 using SharpNeat.Phenomes;
 using SharpNeat.Phenomes.Mazes;
 
@@ -19,6 +20,18 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
     public abstract class CoevolutionMazeNavigationInitializer : MazeNavigationInitializer
     {
         #region Public methods
+
+        /// <summary>
+        ///     Sets the data loggers for the initialization process.
+        /// </summary>
+        /// <param name="navigatorEvolutionDataLogger">The logger for evolution statistics.</param>
+        /// <param name="navigatorPopulationDataLogger">The logger for serializing navigator genomes.</param>
+        public void SetDataLoggers(IDataLogger navigatorEvolutionDataLogger,
+            IDataLogger navigatorPopulationDataLogger)
+        {
+            NavigatorEvolutionDataLogger = navigatorEvolutionDataLogger;
+            NavigatorPopulationDataLogger = navigatorPopulationDataLogger;
+        }
 
         /// <summary>
         ///     Constructs and initializes the maze navigator initialization algorithm (fitness using generational selection).
@@ -106,6 +119,16 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
         /// </summary>
         protected int MinUnsuccessfulAgentCount;
 
+        /// <summary>
+        ///     The logger for navigator evolution statistics.
+        /// </summary>
+        protected IDataLogger NavigatorEvolutionDataLogger;
+
+        /// <summary>
+        ///     The logger for serializing navigator genomes.
+        /// </summary>
+        protected IDataLogger NavigatorPopulationDataLogger;
+        
         #endregion
     }
 }

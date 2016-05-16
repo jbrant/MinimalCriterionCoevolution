@@ -91,7 +91,7 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
             // Create the initialization evolution algorithm.
             InitializationEa = new SteadyStateNeatEvolutionAlgorithm<NeatGenome>(NeatEvolutionAlgorithmParameters,
                 SpeciationStrategy, ComplexityRegulationStrategy, _batchSize, _populationEvaluationFrequency,
-                RunPhase.Initialization);
+                RunPhase.Initialization, NavigatorEvolutionDataLogger, NavigatorEvolutionLogFieldEnableMap);
 
             // Create IBlackBox evaluator.
             MazeNavigatorNoveltySearchInitializationEvaluator mazeNavigatorEvaluator =

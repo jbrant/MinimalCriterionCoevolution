@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Text;
 using System.Xml;
 using SharpNeat.Network;
@@ -292,6 +293,29 @@ namespace SharpNeat.Genomes.Neat
 
             // </Network>
             xw.WriteEndElement();
+        }
+
+        /// <summary>
+        ///     Serializes a NEAT genome into a string.
+        /// </summary>
+        /// <param name="neatGenome">The NEAT genome object to serialize.</param>
+        /// <returns>The serialized NEAT genome string.</returns>
+        public static string GetGenomeXml(NeatGenome neatGenome)
+        {
+            // Create a new string writer into which to write the genome XML
+            StringWriter genomeStringWriter = new StringWriter();
+
+            // Serialize the genome to XML, but write it into a string writer instead of outputting to a file
+            if (neatGenome != null)
+            {
+                using (XmlTextWriter genomeTextWriter = new XmlTextWriter(genomeStringWriter))
+                {
+                    WriteComplete(genomeTextWriter, neatGenome, false);
+                }
+            }
+
+            // Convert to a string representation and return
+            return genomeStringWriter.ToString();
         }
 
         #endregion

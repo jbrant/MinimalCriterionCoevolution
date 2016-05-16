@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Xml;
 using SharpNeat.Utility;
@@ -108,6 +109,29 @@ namespace SharpNeat.Genomes.Maze
 
             // </Maze>
             xw.WriteEndElement();
+        }
+
+        /// <summary>
+        ///     Serializes a maze genome into a string.
+        /// </summary>
+        /// <param name="mazeGenome">The maze genome object to serialize.</param>
+        /// <returns>The serialized maze genome string.</returns>
+        public static string GetGenomeXml(MazeGenome mazeGenome)
+        {
+            // Create a new string writer into which to write the genome XML
+            StringWriter genomeStringWriter = new StringWriter();
+
+            // Serialize the genome to XML, but write it into a string writer instead of outputting to a file
+            if (mazeGenome != null)
+            {
+                using (XmlTextWriter genomeTextWriter = new XmlTextWriter(genomeStringWriter))
+                {
+                    WriteComplete(genomeTextWriter, mazeGenome);
+                }
+            }
+
+            // Convert to a string representation and return
+            return genomeStringWriter.ToString();
         }
 
         #endregion

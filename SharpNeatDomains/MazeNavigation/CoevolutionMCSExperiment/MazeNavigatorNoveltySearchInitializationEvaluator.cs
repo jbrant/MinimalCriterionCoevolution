@@ -145,7 +145,7 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
                 new LoggableElement(EvaluationFieldElements.Generation, currentGeneration),
                 new LoggableElement(EvaluationFieldElements.EvaluationCount, EvaluationCount),
                 new LoggableElement(EvaluationFieldElements.StopConditionSatisfied, StopConditionSatisfied),
-                new LoggableElement(EvaluationFieldElements.RunPhase, RunPhase.Primary)
+                new LoggableElement(EvaluationFieldElements.RunPhase, RunPhase.Initialization)
             },
                 world.GetLoggableElements());
 
