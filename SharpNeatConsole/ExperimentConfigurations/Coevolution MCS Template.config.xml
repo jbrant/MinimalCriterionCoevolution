@@ -1,5 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Config>
+  <SearchAlgorithm></SearchAlgorithm>
+  <SelectionAlgorithm></SelectionAlgorithm>
   <AgentPopulationSize></AgentPopulationSize>
   <MazePopulationSize></MazePopulationSize>
   <AgentSeedGenomeCount></AgentSeedGenomeCount>
@@ -25,8 +27,9 @@
     <BehaviorCharacterization></BehaviorCharacterization>
   </BehaviorConfig>
   <NavigatorOffspringBatchSize></NavigatorOffspringBatchSize>
-  <MazeOffspringBatchSize></MazeOffspringBatchSize>  
+  <MazeOffspringBatchSize></MazeOffspringBatchSize>
   <MaxEvaluations></MaxEvaluations>
+  <MaxGenerations></MaxGenerations>
   <MaxTimesteps></MaxTimesteps>
   <MinSuccessDistance></MinSuccessDistance>
   <MazeHeight></MazeHeight>
@@ -36,7 +39,18 @@
   <NumAgentsSolvedCriteria></NumAgentsSolvedCriteria>
   <NumAgentsFailedCriteria></NumAgentsFailedCriteria>
   <InitializationAlgorithmConfig>
+    <SearchAlgorithm></SearchAlgorithm>
+    <SelectionAlgorithm></SelectionAlgorithm>
     <PopulationSize></PopulationSize>
+    <SpecieCount></SpecieCount>
+    <OffspringBatchSize></OffspringBatchSize>
+    <PopulationEvaluationFrequency></PopulationEvaluationFrequency>
+    <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>
+    <ComplexityThreshold>30</ComplexityThreshold>
+    <SelectionProportion>0.2</SelectionProportion>
+    <OffspringAsexualProbability>0.5</OffspringAsexualProbability>
+    <OffspringSexualProbability>0.5</OffspringSexualProbability>
+    <InterspeciesMatingProbability>0.001</InterspeciesMatingProbability>
     <GenomeConfig>
       <InitialConnectionProportion></InitialConnectionProportion>
       <WeightMutationProbability></WeightMutationProbability>
@@ -45,13 +59,19 @@
       <DeleteConnectionProbability></DeleteConnectionProbability>
       <ConnectionWeightRange></ConnectionWeightRange>
     </GenomeConfig>
-    <SpecieCount></SpecieCount>
-    <SelectionProportion></SelectionProportion>
-    <OffspringAsexualProbability></OffspringAsexualProbability>
-    <OffspringSexualProbability></OffspringSexualProbability>
-    <InterspeciesMatingProbability></InterspeciesMatingProbability>
+    <InitBehaviorConfig>
+      <BehaviorCharacterization></BehaviorCharacterization>
+    </InitBehaviorConfig>
+    <NearestNeighbors></NearestNeighbors>
+    <NoveltyConfig>
+      <ArchiveAdditionThreshold></ArchiveAdditionThreshold>
+      <ArchiveThresholdDecreaseMultiplier></ArchiveThresholdDecreaseMultiplier>
+      <ArchiveThresholdIncreaseMultiplier></ArchiveThresholdIncreaseMultiplier>
+      <MaxGenerationalArchiveAddition></MaxGenerationalArchiveAddition>
+      <MaxGenerationsWithoutArchiveAddition></MaxGenerationsWithoutArchiveAddition>
+    </NoveltyConfig>
   </InitializationAlgorithmConfig>
-  <PopulationLoggingBatchInterval></PopulationLoggingBatchInterval>  
+  <PopulationLoggingBatchInterval></PopulationLoggingBatchInterval>
   <Description>
     Coevolutionary MCS Maze navigation experiment, evolving both maze navigators and the mazes themselves.
   </Description>

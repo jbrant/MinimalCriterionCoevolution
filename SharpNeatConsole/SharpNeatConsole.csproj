@@ -147,7 +147,6 @@
     <Content Include="ExperimentConfigurations\AutomaticExperiment.config.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="ExperimentConfigurations\Coevolution MCS Template - New.config.xml" />
     <Content Include="ExperimentConfigurations\Coevolution MCS Example.config.xml" />
     <Content Include="ExperimentConfigurations\Coevolution MCS Template.config.xml" />
     <Content Include="ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS - no MC 1.config.xml">
@@ -1310,9 +1309,9 @@
     <Content Include="SeedMazes\GeneratedMaze_16_Genome.xml" />
     <Content Include="SeedMazes\GeneratedMazeGenome_0_Walls.xml" />
     <Content Include="SeedMazes\GeneratedMazeGenome_2_Walls.xml" />
-    <Content Include="SeedMazes\GeneratedMazeGenome_4_Walls.xml" />
     <Content Include="SeedMazes\GeneratedMazeGenome_3_Walls.xml" />
     <Content Include="SeedMazes\GeneratedMazeGenome_8_Walls.xml" />
+    <Content Include="SeedMazes\GeneratedMazeGenome_4_Walls.xml" />
     <Content Include="SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run01.pop.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

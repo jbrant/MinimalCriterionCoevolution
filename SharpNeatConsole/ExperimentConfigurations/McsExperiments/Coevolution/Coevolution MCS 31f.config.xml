@@ -28,7 +28,9 @@
   </BehaviorConfig>
   <NavigatorOffspringBatchSize>50</NavigatorOffspringBatchSize>
   <MazeOffspringBatchSize>5</MazeOffspringBatchSize>
-  <MaxEvaluations>1000000</MaxEvaluations>
+  <MaxEvaluations>
+  </MaxEvaluations>
+  <MaxGenerations>2000</MaxGenerations>
   <MaxTimesteps>600</MaxTimesteps>
   <MinSuccessDistance>5</MinSuccessDistance>
   <MazeHeight>20</MazeHeight>

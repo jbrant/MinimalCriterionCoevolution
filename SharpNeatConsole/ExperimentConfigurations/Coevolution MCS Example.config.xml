@@ -52,9 +52,9 @@
     <DecodeGenomesToXml>false</DecodeGenomesToXml>
     <GenomeConfig>
       <InitialConnectionProportion>1</InitialConnectionProportion>
-      <WeightMutationProbability>0.7</WeightMutationProbability>
-      <AddConnnectionProbability>0.1</AddConnnectionProbability>
-      <AddNodeProbability>0.07</AddNodeProbability>
+      <WeightMutationProbability>0.6</WeightMutationProbability>
+      <AddConnnectionProbability>0.9</AddConnnectionProbability>
+      <AddNodeProbability>0.9</AddNodeProbability>
       <DeleteConnectionProbability>0.001</DeleteConnectionProbability>
       <ConnectionWeightRange>5</ConnectionWeightRange>
     </GenomeConfig>
