@@ -49,6 +49,16 @@ namespace SharpNeat.EvolutionAlgorithms
         protected IDataLogger EvolutionLogger;
 
         /// <summary>
+        ///     Logs the genomic content of the extant population at the specified interval.
+        /// </summary>
+        protected IDataLogger PopulationLogger;
+
+        /// <summary>
+        ///     The interval for logging the contents of the extant population.
+        /// </summary>
+        protected int? PopulationLoggingInterval;
+
+        /// <summary>
         ///     The last generation during which the display/logging was updated.
         /// </summary>
         private uint _prevUpdateGeneration;
@@ -290,8 +300,9 @@ namespace SharpNeat.EvolutionAlgorithms
             // Reset run state to terminated
             RunState = RunState.Terminated;
 
-            // Close the evolution logger
+            // Close the loggers
             EvolutionLogger?.Close();
+            PopulationLogger?.Close();
 
             // Cleanup genome evaluator
             GenomeEvaluator.Cleanup();
@@ -448,8 +459,9 @@ namespace SharpNeat.EvolutionAlgorithms
                 {
                     PausedEvent(this, EventArgs.Empty);
 
-                    // Close the evolution logger
+                    // Close the loggers
                     EvolutionLogger?.Close();
+                    PopulationLogger?.Close();
 
                     // Cleanup genome evaluator
                     GenomeEvaluator.Cleanup();
@@ -471,8 +483,9 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </summary>
         public void CleanupLoggers()
         {
-            // Close the evolution logger
+            // Close the loggers
             EvolutionLogger?.Close();
+            PopulationLogger?.Close();
         }
 
         #endregion

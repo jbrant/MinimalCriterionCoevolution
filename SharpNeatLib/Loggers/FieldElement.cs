@@ -307,7 +307,7 @@ namespace SharpNeat.Loggers
         /// <summary>
         ///     The number of elements in this log file/table.
         /// </summary>
-        public static readonly int NumFieldElements = 9;
+        public static readonly int NumFieldElements = 3;
 
         /// <summary>
         ///     The generation in which the given population is extant.

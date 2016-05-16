@@ -69,7 +69,7 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             // Create new evolution field elements map with all fields enabled
             _logFieldEnableMap = EvolutionFieldElements.PopulateEvolutionFieldElementsEnableMap();
 
-            // Disable logging fields not relevant to coevolution experiment            
+            // Disable logging fields not relevant to coevolution experiment
             _logFieldEnableMap[EvolutionFieldElements.RunPhase] = false;
             _logFieldEnableMap[EvolutionFieldElements.SpecieCount] = false;
             _logFieldEnableMap[EvolutionFieldElements.AsexualOffspringCount] = false;
@@ -102,6 +102,10 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             _mazeNavigationInitializer =
                 ExperimentUtils.DetermineCoevolutionInitializer(
                     xmlConfig.GetElementsByTagName("InitializationAlgorithmConfig", "")[0] as XmlElement);
+
+            // Set the initialization loggers
+            _mazeNavigationInitializer.SetDataLoggers(_navigatorEvolutionDataLogger,
+                _navigatorPopulationGenomesDataLogger);
 
             // Setup initialization algorithm
             _mazeNavigationInitializer.SetAlgorithmParameters(

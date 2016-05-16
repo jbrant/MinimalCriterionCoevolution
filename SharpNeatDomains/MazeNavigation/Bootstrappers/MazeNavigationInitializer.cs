@@ -32,8 +32,8 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
 
         #endregion
 
-        #region Public properties
-
+        #region Public methods
+        
         /// <summary>
         ///     Constructs and initializes the initialization algorithm.
         /// </summary>
@@ -176,11 +176,7 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
         protected IComplexityRegulationStrategy ComplexityRegulationStrategy;
 
         #endregion
-
-        #region Public methods
-
-        #endregion
-
+       
         #region Private methods
 
         #endregion

@@ -457,15 +457,22 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </summary>
         protected virtual void Initialize()
         {
-            // Open the logger
+            // Open the loggers
             EvolutionLogger?.Open();
+            PopulationLogger?.Open();
 
             // Set the run phase on the logger
             EvolutionLogger?.UpdateRunPhase(RunPhase);
 
-            // Write out the header (for the champ genome, we don't care which genome is used)
+            // Write out the headers (for the champ genome, we don't care which genome is used)
             EvolutionLogger?.LogHeader(GetLoggableElements(), Statistics.GetLoggableElements(),
                 (GenomeList[0] as NeatGenome)?.GetLoggableElements());
+            PopulationLogger?.LogHeader(new List<LoggableElement>
+            {
+                new LoggableElement(PopulationGenomesFieldElements.Generation, null),
+                new LoggableElement(PopulationGenomesFieldElements.GenomeId, null),
+                new LoggableElement(PopulationGenomesFieldElements.GenomeXml, null)
+            });
 
             // Initialize the genome evalutor
             GenomeEvaluator.Initialize();
