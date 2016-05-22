@@ -8,6 +8,7 @@ using System.Reflection;
 using ExperimentEntities;
 using log4net;
 using log4net.Config;
+using RunPhase = SharpNeat.Core.RunPhase;
 
 #endregion
 
@@ -111,48 +112,42 @@ namespace NavigatorMazeMapEvaluator
                                 string.Format("{0} - Run{1}.csv", experimentName, curRun)));
                     }
 
-                    // Get the number of batches in the current run
+                    // Get the number of initialization batches in the current run
+                    IList<int> initializationBatchesWithGenomeData =
+                        ExperimentDataHandler.GetBatchesWithGenomeData(
+                            curExperimentConfiguration.ExperimentDictionaryID, curRun, RunPhase.Initialization);
+
+                    // If there was an initialization phase, analyze those results
+                    if (initializationBatchesWithGenomeData.Count > 0)
+                    {
+                        _executionLogger.Info(
+                            string.Format(
+                                "Executing initialization phase analysis for run [{0}/{1}] with [{2}] batches",
+                                curRun,
+                                numRuns, initializationBatchesWithGenomeData.Count));
+
+                        // Begin initialization phase results processing
+                        ProcessAndLogPerBatchResults(initializationBatchesWithGenomeData, RunPhase.Initialization,
+                            experimentParameters,
+                            inputNeuronCount, outputNeuronCount, curRun, numRuns, curExperimentConfiguration,
+                            writeResultsToDatabase, generateTrajectoryBitmaps, baseImageOutputDirectory);
+                    }
+
+                    // Get the number of primary batches in the current run
                     IList<int> batchesWithGenomeData =
                         ExperimentDataHandler.GetBatchesWithGenomeData(
-                            curExperimentConfiguration.ExperimentDictionaryID, curRun);
+                            curExperimentConfiguration.ExperimentDictionaryID, curRun, RunPhase.Primary);
 
-                    _executionLogger.Info(string.Format("Executing analysis for run [{0}/{1}] with [{2}] batches",
-                        curRun,
-                        numRuns, batchesWithGenomeData.Count));
+                    _executionLogger.Info(
+                        string.Format("Executing primary phase analysis for run [{0}/{1}] with [{2}] batches",
+                            curRun,
+                            numRuns, batchesWithGenomeData.Count));
 
-                    // Iterate through each batch and evaluate maze/navigator combinations
-                    foreach (int curBatch in batchesWithGenomeData)
-                    {
-                        // Create the maze/navigator map
-                        MapEvaluator mapEvaluator =
-                            new MapEvaluator(experimentParameters, inputNeuronCount, outputNeuronCount);
-
-                        _executionLogger.Info(string.Format("Executing analysis for batch [{0}] of run [{1}/{2}]",
-                            curBatch, curRun, numRuns));
-
-                        // Initialize the maze/navigator map with the serialized maze and navigator data (this does the parsing)
-                        mapEvaluator.Initialize(
-                            ExperimentDataHandler.GetMazeGenomeData(curExperimentConfiguration.ExperimentDictionaryID,
-                                curRun, curBatch), ExperimentDataHandler.GetNavigatorGenomeData(
-                                    curExperimentConfiguration.ExperimentDictionaryID, curRun, curBatch));
-
-                        // Evaluate all of the maze/navigator combinations in the batch
-                        mapEvaluator.RunBatchEvaluation();
-
-                        // Save the evaluation results
-                        ExperimentDataHandler.WriteNavigatorMazeEvaluationData(
-                            curExperimentConfiguration.ExperimentDictionaryID, curRun, curBatch,
-                            mapEvaluator.EvaluationUnits, CommitPageSize, writeResultsToDatabase);
-
-                        if (generateTrajectoryBitmaps)
-                        {
-                            // Generate bitmaps of trajectory for all successful trials
-                            ImageGenerationHandler.GenerateBitmapsForSuccessfulTrials(
-                                baseImageOutputDirectory, curExperimentConfiguration.ExperimentName,
-                                curExperimentConfiguration.ExperimentDictionaryID,
-                                curRun, curBatch, mapEvaluator.EvaluationUnits);
-                        }
-                    }
+                    // Begin primary phase results processing
+                    ProcessAndLogPerBatchResults(batchesWithGenomeData, RunPhase.Primary, experimentParameters,
+                        inputNeuronCount,
+                        outputNeuronCount, curRun, numRuns, curExperimentConfiguration, writeResultsToDatabase,
+                        generateTrajectoryBitmaps, baseImageOutputDirectory);
 
                     // If we're not writing to the database, close the file writer since the run is over
                     if (writeResultsToDatabase == false)
@@ -165,6 +160,82 @@ namespace NavigatorMazeMapEvaluator
                 if (writeResultsToDatabase == false)
                     ExperimentDataHandler.WriteSentinelFile(
                         Path.Combine(_executionConfiguration[ExecutionParameter.DataFileOutputDirectory], experimentName));
+            }
+        }
+
+        /// <summary>
+        ///     Runs post-hoc analysis for all batches in the given experiment/run.  This can be part of either the initialization
+        ///     or primary run phase.
+        /// </summary>
+        /// <param name="batchesWithGenomeData">The total number of batches containing genome data.</param>
+        /// <param name="runPhase">
+        ///     Indicates whether this is part of the initialization or primary run phase.
+        /// </param>
+        /// <param name="experimentParameters">Experiment configuration parameters.</param>
+        /// <param name="inputNeuronCount">Count of neurons in controller input layer.</param>
+        /// <param name="outputNeuronCount">Count of neurons in controller output layer.</param>
+        /// <param name="curRun">The run number.</param>
+        /// <param name="numRuns">The total number of runs.</param>
+        /// <param name="curExperimentConfiguration">The experiment configuration parameters.</param>
+        /// <param name="writeResultsToDatabase">
+        ///     Indicates whether to write results directly into a database (if not, results are
+        ///     written to a flat file).
+        /// </param>
+        /// <param name="generateTrajectoryBitmaps">
+        ///     Indicates whether bitmap files depicting the navigator trajectory should be
+        ///     written out.
+        /// </param>
+        /// <param name="baseImageOutputDirectory">The path to the output directory for the trajectory images.</param>
+        private static void ProcessAndLogPerBatchResults(IList<int> batchesWithGenomeData, RunPhase runPhase,
+            ExperimentParameters experimentParameters, int inputNeuronCount, int outputNeuronCount, int curRun,
+            int numRuns, ExperimentDictionary curExperimentConfiguration, bool writeResultsToDatabase,
+            bool generateTrajectoryBitmaps, string baseImageOutputDirectory)
+        {
+            IList<CoevolutionMCSMazeExperimentGenome> staticInitializationMazes = null;
+
+            // If this invocation is processing initialization results, just get the maze up front as it will remain
+            // the same throughout the initialization process
+            if (runPhase == RunPhase.Initialization)
+            {
+                staticInitializationMazes =
+                    ExperimentDataHandler.GetMazeGenomeData(curExperimentConfiguration.ExperimentDictionaryID,
+                        curRun, 0);
+            }
+
+            // Iterate through each batch and evaluate maze/navigator combinations
+            foreach (int curBatch in batchesWithGenomeData)
+            {
+                // Create the maze/navigator map
+                MapEvaluator mapEvaluator =
+                    new MapEvaluator(experimentParameters, inputNeuronCount, outputNeuronCount);
+
+                _executionLogger.Info(string.Format("Executing {0} run phase analysis for batch [{1}] of run [{2}/{3}]",
+                    runPhase, curBatch, curRun, numRuns));
+
+                // Initialize the maze/navigator map with the serialized maze and navigator data (this does the parsing)
+                mapEvaluator.Initialize(
+                    runPhase == RunPhase.Initialization
+                        ? staticInitializationMazes
+                        : ExperimentDataHandler.GetMazeGenomeData(curExperimentConfiguration.ExperimentDictionaryID,
+                            curRun, curBatch), ExperimentDataHandler.GetNavigatorGenomeData(
+                                curExperimentConfiguration.ExperimentDictionaryID, curRun, curBatch, runPhase));
+
+                // Evaluate all of the maze/navigator combinations in the batch
+                mapEvaluator.RunBatchEvaluation();
+
+                // Save the evaluation results
+                ExperimentDataHandler.WriteNavigatorMazeEvaluationData(
+                    curExperimentConfiguration.ExperimentDictionaryID, curRun, curBatch, runPhase,
+                    mapEvaluator.EvaluationUnits, CommitPageSize, writeResultsToDatabase);
+
+                if (generateTrajectoryBitmaps)
+                {
+                    // Generate bitmaps of trajectory for all successful trials
+                    ImageGenerationHandler.GenerateBitmapsForSuccessfulTrials(
+                        baseImageOutputDirectory, curExperimentConfiguration.ExperimentName,
+                        curExperimentConfiguration.ExperimentDictionaryID,
+                        curRun, curBatch, mapEvaluator.EvaluationUnits, runPhase);
+                }
             }
         }
 

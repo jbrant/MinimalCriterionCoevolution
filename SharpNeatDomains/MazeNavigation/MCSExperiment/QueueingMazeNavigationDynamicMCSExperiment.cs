@@ -117,7 +117,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             AbstractNeatEvolutionAlgorithm<NeatGenome> ea =
                 new QueueingNeatEvolutionAlgorithm<NeatGenome>(NeatEvolutionAlgorithmParameters,
                     complexityRegulationStrategy, _batchSize, RunPhase.Primary, (_bridgingMagnitude > 0),
-                    true, _evolutionDataLogger, _experimentLogFieldEnableMap, _minimalCriteriaUpdateInterval);
+                    true, _evolutionDataLogger, _experimentLogFieldEnableMap, null, null, _minimalCriteriaUpdateInterval);
 
             // Create IBlackBox evaluator.
             IPhenomeEvaluator<IBlackBox, BehaviorInfo> mazeNavigationEvaluator =

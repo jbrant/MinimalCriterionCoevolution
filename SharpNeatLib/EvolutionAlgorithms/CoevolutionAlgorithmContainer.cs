@@ -52,10 +52,7 @@ namespace SharpNeat.EvolutionAlgorithms
         {
             _evolutionAlgorithm1 = algorithm1;
             _evolutionAlgorithm2 = algorithm2;
-            _population1GenomeLogger = population1GenomeLogger;
-            _population2GenomeLogger = population2GenomeLogger;
             _logFieldEnabledMap = logFieldEnabledMap;
-            _populationLoggingBatchInterval = populationLoggingBatchInterval;
         }
 
         #endregion
@@ -113,17 +110,7 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     (whether the solution has been found or not).
         /// </summary>
         private ulong? _maxEvaluations;
-
-        /// <summary>
-        ///     Logger for periodically writing out genome XML for the first population.
-        /// </summary>
-        private readonly IDataLogger _population1GenomeLogger;
-
-        /// <summary>
-        ///     Logger for periodically writing out genome XML for the second population.
-        /// </summary>
-        private readonly IDataLogger _population2GenomeLogger;
-
+        
         /// <summary>
         ///     Specifies whether a given logger field is eanbled or disabled.
         /// </summary>
@@ -138,12 +125,7 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     The genome evaluation scheme for the second evolution algorithm.
         /// </summary>
         protected IGenomeEvaluator<TGenome2> GenomeEvaluator2;
-
-        /// <summary>
-        ///     Controls the number of batches between population definitions (i.e. genome XML) being logged.
-        /// </summary>
-        private readonly int? _populationLoggingBatchInterval;
-
+        
         #endregion
 
         #region Properties
@@ -366,11 +348,7 @@ namespace SharpNeat.EvolutionAlgorithms
 
             // Cleanup genome evaluator 2
             GenomeEvaluator2.Cleanup();
-
-            // Close population loggers
-            _population1GenomeLogger.Close();
-            _population2GenomeLogger.Close();
-
+            
             // Null out the internal thread
             _algorithmThread = null;
         }
@@ -436,17 +414,17 @@ namespace SharpNeat.EvolutionAlgorithms
             // Update each evaluator with the phenotypes of the other population
             genomeEvaluator1.UpdateEvaluationBaseline(genomeEvaluator2.DecodeGenomes(_evolutionAlgorithm2.GenomeList));
             genomeEvaluator2.UpdateEvaluationBaseline(genomeEvaluator1.DecodeGenomes(_evolutionAlgorithm1.GenomeList));
-
-            // Open the logger
-            _population1GenomeLogger?.Open();
-            _population2GenomeLogger?.Open();
-
+            
             // Build the loggable elements for the header
             List<LoggableElement> headerElements = new List<LoggableElement>
             {
                 _logFieldEnabledMap?.ContainsKey(PopulationGenomesFieldElements.Generation) == true &&
                 _logFieldEnabledMap[PopulationGenomesFieldElements.Generation]
                     ? new LoggableElement(PopulationGenomesFieldElements.Generation, null)
+                    : null,
+                _logFieldEnabledMap?.ContainsKey(PopulationGenomesFieldElements.RunPhase) == true &&
+                _logFieldEnabledMap[PopulationGenomesFieldElements.RunPhase]
+                    ? new LoggableElement(PopulationGenomesFieldElements.RunPhase, null)
                     : null,
                 _logFieldEnabledMap?.ContainsKey(PopulationGenomesFieldElements.GenomeId) == true &&
                 _logFieldEnabledMap[PopulationGenomesFieldElements.GenomeId]
@@ -456,11 +434,7 @@ namespace SharpNeat.EvolutionAlgorithms
                 _logFieldEnabledMap[PopulationGenomesFieldElements.GenomeXml]
                     ? new LoggableElement(PopulationGenomesFieldElements.GenomeXml, null)
                     : null
-            };
-
-            // Write out the header
-            _population1GenomeLogger?.LogHeader(headerElements);
-            _population2GenomeLogger?.LogHeader(headerElements);
+            };            
         }
 
         /// <summary>
@@ -488,52 +462,7 @@ namespace SharpNeat.EvolutionAlgorithms
 
                     // Execute the second algorithm for one evaluation cycle
                     _evolutionAlgorithm2.PerformOneGeneration();
-
-                    // If logging is enabled, only log at the specified interval or if this is the first generation/batch
-                    if (_populationLoggingBatchInterval != null &&
-                        (CurrentGeneration == 1 || CurrentGeneration%_populationLoggingBatchInterval == 0))
-                    {
-                        // Log the contents of both populations
-                        foreach (TGenome1 genome1 in _evolutionAlgorithm1.GenomeList)
-                        {
-                            _population1GenomeLogger?.LogRow(new List<LoggableElement>
-                            {
-                                _logFieldEnabledMap?.ContainsKey(PopulationGenomesFieldElements.Generation) == true &&
-                                _logFieldEnabledMap[PopulationGenomesFieldElements.Generation]
-                                    ? new LoggableElement(PopulationGenomesFieldElements.Generation, CurrentGeneration)
-                                    : null,
-                                _logFieldEnabledMap?.ContainsKey(PopulationGenomesFieldElements.GenomeId) == true &&
-                                _logFieldEnabledMap[PopulationGenomesFieldElements.GenomeId]
-                                    ? new LoggableElement(PopulationGenomesFieldElements.GenomeId, genome1.Id)
-                                    : null,
-                                _logFieldEnabledMap?.ContainsKey(PopulationGenomesFieldElements.GenomeXml) == true &&
-                                _logFieldEnabledMap[PopulationGenomesFieldElements.GenomeXml]
-                                    ? new LoggableElement(PopulationGenomesFieldElements.GenomeXml,
-                                        XmlIoUtils.GetGenomeXml(genome1))
-                                    : null
-                            });
-                        }
-                        foreach (TGenome2 genome2 in _evolutionAlgorithm2.GenomeList)
-                        {
-                            _population2GenomeLogger?.LogRow(new List<LoggableElement>
-                            {
-                                _logFieldEnabledMap?.ContainsKey(PopulationGenomesFieldElements.Generation) == true &&
-                                _logFieldEnabledMap[PopulationGenomesFieldElements.Generation]
-                                    ? new LoggableElement(PopulationGenomesFieldElements.Generation, CurrentGeneration)
-                                    : null,
-                                _logFieldEnabledMap?.ContainsKey(PopulationGenomesFieldElements.GenomeId) == true &&
-                                _logFieldEnabledMap[PopulationGenomesFieldElements.GenomeId]
-                                    ? new LoggableElement(PopulationGenomesFieldElements.GenomeId, genome2.Id)
-                                    : null,
-                                _logFieldEnabledMap?.ContainsKey(PopulationGenomesFieldElements.GenomeXml) == true &&
-                                _logFieldEnabledMap[PopulationGenomesFieldElements.GenomeXml]
-                                    ? new LoggableElement(PopulationGenomesFieldElements.GenomeXml,
-                                        XmlIoUtils.GetGenomeXml(genome2))
-                                    : null
-                            });
-                        }
-                    }
-
+                    
                     // TODO: We probably need to udpate the cached phenotypes on both algorithms here
                     GenomeEvaluator1.UpdateEvaluationBaseline(
                         GenomeEvaluator2.DecodeGenomes(_evolutionAlgorithm2.GenomeList));
@@ -636,11 +565,7 @@ namespace SharpNeat.EvolutionAlgorithms
                     GenomeEvaluator1.Cleanup();
 
                     // Cleanup genome evaluator 2
-                    GenomeEvaluator2.Cleanup();
-
-                    // Close population loggers
-                    _population1GenomeLogger.Close();
-                    _population2GenomeLogger.Close();
+                    GenomeEvaluator2.Cleanup();                    
                 }
                 catch (Exception ex)
                 {

@@ -24,7 +24,9 @@ namespace ExperimentEntities
         public double MeanComplexity { get; set; }
         public int TotalEvaluations { get; set; }
         public Nullable<int> EvaluationsPerSecond { get; set; }
+        public int RunPhase_FK { get; set; }
     
         public virtual ExperimentDictionary ExperimentDictionary { get; set; }
+        public virtual RunPhase RunPhase { get; set; }
     }
 }

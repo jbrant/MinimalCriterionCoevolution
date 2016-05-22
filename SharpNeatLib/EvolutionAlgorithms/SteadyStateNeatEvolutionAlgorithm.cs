@@ -102,6 +102,7 @@ namespace SharpNeat.EvolutionAlgorithms
                     PopulationLogger?.LogRow(new List<LoggableElement>
                     {
                         new LoggableElement(PopulationGenomesFieldElements.Generation, CurrentGeneration),
+                        new LoggableElement(PopulationGenomesFieldElements.RunPhase, RunPhase),
                         new LoggableElement(PopulationGenomesFieldElements.GenomeId, genome.Id),
                         new LoggableElement(PopulationGenomesFieldElements.GenomeXml, XmlIoUtils.GetGenomeXml(genome))
                     });

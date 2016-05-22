@@ -135,6 +135,12 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             // Set the objective distance
             trialInfo.ObjectiveDistance = world.GetDistanceToTarget();
 
+            // TODO: REMOVE THIS
+            if (trialInfo.ObjectiveDistance <= 5)
+            {
+                Console.Out.WriteLine("OBJECTIVE REACHED!!");
+            }
+
             // Set the stop condition to the outcome
             if (goalReached)
                 StopConditionSatisfied = true;
