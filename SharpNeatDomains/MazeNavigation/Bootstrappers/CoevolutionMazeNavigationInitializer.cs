@@ -5,10 +5,12 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Xml;
 using SharpNeat.Core;
+using SharpNeat.Genomes.Maze;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Loggers;
 using SharpNeat.Phenomes;
 using SharpNeat.Phenomes.Mazes;
+using SharpNeat.Utility;
 
 #endregion
 
@@ -26,11 +28,16 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
         /// </summary>
         /// <param name="navigatorEvolutionDataLogger">The logger for evolution statistics.</param>
         /// <param name="navigatorPopulationDataLogger">The logger for serializing navigator genomes.</param>
+        /// <param name="navigatorEvolutionLogFieldEnableMap">Indicates the enabled/disabled status of the evolution logger fields.</param>
+        /// <param name="populationLoggingInterval">The batch interval at which the current population is serialized to a file.</param>
         public void SetDataLoggers(IDataLogger navigatorEvolutionDataLogger,
-            IDataLogger navigatorPopulationDataLogger)
+            IDataLogger navigatorPopulationDataLogger,
+            IDictionary<FieldElement, bool> navigatorEvolutionLogFieldEnableMap, int? populationLoggingInterval)
         {
             NavigatorEvolutionDataLogger = navigatorEvolutionDataLogger;
             NavigatorPopulationDataLogger = navigatorPopulationDataLogger;
+            NavigatorEvolutionLogFieldEnableMap = navigatorEvolutionLogFieldEnableMap;
+            PopulationLoggingBatchInterval = populationLoggingInterval;
         }
 
         /// <summary>
@@ -100,6 +107,34 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
         /// <returns>The list of seed genomes that meet the minimal criteria.</returns>
         public abstract List<NeatGenome> EvolveViableGenomes(out ulong totalEvaluations);
 
+        /// <summary>
+        ///     Logs the static maze genome on which all initialization evaluations will be conducted.
+        /// </summary>
+        /// <param name="initializationMazeGenome">The initialization maze genome to log.</param>
+        /// <param name="mazeGenomeDataLogger">The maze data logger.</param>
+        public void LogStartingMazeGenome(MazeGenome initializationMazeGenome, IDataLogger mazeGenomeDataLogger)
+        {
+            // Open the logger
+            mazeGenomeDataLogger?.Open();
+
+            // Write the header
+            mazeGenomeDataLogger?.LogHeader(new List<LoggableElement>
+            {
+                new LoggableElement(PopulationGenomesFieldElements.Generation, null),
+                new LoggableElement(PopulationGenomesFieldElements.GenomeId, null),
+                new LoggableElement(PopulationGenomesFieldElements.GenomeXml, null)
+            });
+
+            // Write the genome XML
+            mazeGenomeDataLogger?.LogRow(new List<LoggableElement>
+            {
+                new LoggableElement(PopulationGenomesFieldElements.Generation, initializationMazeGenome.BirthGeneration),
+                new LoggableElement(PopulationGenomesFieldElements.GenomeId, initializationMazeGenome.Id),
+                new LoggableElement(PopulationGenomesFieldElements.GenomeXml,
+                    XmlIoUtils.GetGenomeXml(initializationMazeGenome))
+            });
+        }
+
         #endregion
 
         #region Protected members
@@ -128,7 +163,17 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
         ///     The logger for serializing navigator genomes.
         /// </summary>
         protected IDataLogger NavigatorPopulationDataLogger;
-        
+
+        /// <summary>
+        ///     Map indicating which evolution logger fields are enabled/disabled.
+        /// </summary>
+        protected IDictionary<FieldElement, bool> NavigatorEvolutionLogFieldEnableMap;
+
+        /// <summary>
+        ///     The number of batches to execute between logging the population genomic contents.
+        /// </summary>
+        protected int? PopulationLoggingBatchInterval;
+
         #endregion
     }
 }

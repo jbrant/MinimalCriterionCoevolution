@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using ExperimentEntities;
+using RunPhase = SharpNeat.Core.RunPhase;
 
 #endregion
 
@@ -82,16 +83,19 @@ namespace NavigatorMazeMapEvaluator
         /// </summary>
         /// <param name="experimentId">The experiment that was executed.</param>
         /// <param name="run">The run number of the given experiment.</param>
+        /// <param name="runPhase">The run phase (i.e. initialization or primary) for which to get the associated batches.</param>
         /// <returns>The collection of batch numbers in the given experiment/run that have associated genome data.</returns>
-        public static IList<int> GetBatchesWithGenomeData(int experimentId, int run)
+        public static IList<int> GetBatchesWithGenomeData(int experimentId, int run, RunPhase runPhase)
         {
             IList<int> batchesWithGenomeData;
 
             // Query for the distinct batches in the current run of the given experiment
             using (ExperimentDataEntities context = new ExperimentDataEntities())
             {
-                batchesWithGenomeData = context.CoevolutionMCSMazeExperimentGenomes.Where(
-                    expData => expData.ExperimentDictionaryID == experimentId && expData.Run == run)
+                batchesWithGenomeData = context.CoevolutionMCSNavigatorExperimentGenomes.Where(
+                    expData =>
+                        expData.ExperimentDictionaryID == experimentId && expData.Run == run &&
+                        expData.RunPhase.RunPhaseName == runPhase.ToString())
                     .Select(row => row.Generation)
                     .Distinct().ToList();
             }
@@ -130,9 +134,12 @@ namespace NavigatorMazeMapEvaluator
         /// <param name="experimentId">The experiment that was executed.</param>
         /// <param name="run">The run number of the given experiment.</param>
         /// <param name="batch">The batch number of the given run.</param>
+        /// <param name="runPhase">
+        ///     Indicates whether this is part of the initialization or primary experiment phase.
+        /// </param>
         /// <returns>The navigator genome data.</returns>
         public static IList<CoevolutionMCSNavigatorExperimentGenome> GetNavigatorGenomeData(int experimentId, int run,
-            int batch)
+            int batch, RunPhase runPhase)
         {
             IList<CoevolutionMCSNavigatorExperimentGenome> navigatorGenomes;
 
@@ -143,10 +150,29 @@ namespace NavigatorMazeMapEvaluator
                     context.CoevolutionMCSNavigatorExperimentGenomes.Where(
                         expData =>
                             expData.ExperimentDictionaryID == experimentId && expData.Run == run &&
-                            expData.Generation == batch).ToList();
+                            expData.Generation == batch && expData.RunPhase.RunPhaseName == runPhase.ToString()).ToList();
             }
 
             return navigatorGenomes;
+        }
+
+        /// <summary>
+        ///     Retrieves the primary key associated with the given run phase.
+        /// </summary>
+        /// <param name="runPhase">The run phase for which to lookup the key.</param>
+        /// <returns>The key (in the "RunPhase" database table) for the given run phase object.</returns>
+        private static int GetRunPhaseKey(RunPhase runPhase)
+        {
+            int runPhaseKey;
+
+            // Query for the run phase key
+            using (ExperimentDataEntities context = new ExperimentDataEntities())
+            {
+                runPhaseKey =
+                    context.RunPhases.First(runPhaseData => runPhaseData.RunPhaseName == runPhase.ToString()).RunPhaseID;
+            }
+
+            return runPhaseKey;
         }
 
         /// <summary>
@@ -155,24 +181,28 @@ namespace NavigatorMazeMapEvaluator
         /// <param name="experimentId">The experiment that was executed.</param>
         /// <param name="run">The run number of the given experiment.</param>
         /// <param name="batch">The batch number of the given run.</param>
+        /// <param name="runPhase">
+        ///     Indicates whether this is part of the initialization or primary experiment phase.
+        /// </param>
         /// <param name="evaluationUnits">The evaluation results to persist.</param>
         /// <param name="commitPageSize">The number of records that are committed within a single batch/context.</param>
         /// <param name="writeToDatabase">
         ///     Indicates whether evaluation results should be written directly to the database or to a
         ///     flat file.
         /// </param>
-        public static void WriteNavigatorMazeEvaluationData(int experimentId, int run, int batch,
+        public static void WriteNavigatorMazeEvaluationData(int experimentId, int run, int batch, RunPhase runPhase,
             IList<MazeNavigatorEvaluationUnit> evaluationUnits, int commitPageSize, bool writeToDatabase)
         {
             // Write results to the database if the option has been specified
             if (writeToDatabase)
             {
-                WriteNavigatorMazeEvaluationDataToDatabase(experimentId, run, batch, evaluationUnits, commitPageSize);
+                WriteNavigatorMazeEvaluationDataToDatabase(experimentId, run, batch, runPhase, evaluationUnits,
+                    commitPageSize);
             }
             // Otherwise, write to the flat file output
             else
             {
-                WriteNavigatorMazeEvaluationDataToFile(experimentId, run, batch, evaluationUnits);
+                WriteNavigatorMazeEvaluationDataToFile(experimentId, run, batch, runPhase, evaluationUnits);
             }
         }
 
@@ -182,9 +212,13 @@ namespace NavigatorMazeMapEvaluator
         /// <param name="experimentId">The experiment that was executed.</param>
         /// <param name="run">The run number of the given experiment.</param>
         /// <param name="batch">The batch number of the given run.</param>
+        /// <param name="runPhase">
+        ///     Indicates whether this is part of the initialization or primary experiment phase.
+        /// </param>
         /// <param name="evaluationUnits">The evaluation results to persist.</param>
         /// <param name="commitPageSize">The number of records that are committed within a single batch/context.</param>
         private static void WriteNavigatorMazeEvaluationDataToDatabase(int experimentId, int run, int batch,
+            RunPhase runPhase,
             IList<MazeNavigatorEvaluationUnit> evaluationUnits, int commitPageSize)
         {
             // Page through the result set, committing each in the specified batch size
@@ -192,6 +226,10 @@ namespace NavigatorMazeMapEvaluator
             {
                 IList<CoevolutionMCSMazeNavigatorResult> serializedResults =
                     new List<CoevolutionMCSMazeNavigatorResult>(commitPageSize);
+
+                // Go ahead and lookup the run phase key for all of the records
+                // (instead of hitting the database on every iteration of the below loop)
+                int runPhaseKey = GetRunPhaseKey(runPhase);
 
                 // Build a list of serialized results
                 foreach (
@@ -203,6 +241,7 @@ namespace NavigatorMazeMapEvaluator
                         ExperimentDictionaryID = experimentId,
                         Run = run,
                         Generation = batch,
+                        RunPhase_FK = runPhaseKey,
                         MazeGenomeID = evaluationUnit.MazeId,
                         NavigatorGenomeID = evaluationUnit.AgentId,
                         IsMazeSolved = evaluationUnit.IsMazeSolved,
@@ -248,8 +287,12 @@ namespace NavigatorMazeMapEvaluator
         /// <param name="experimentId">The experiment that was executed.</param>
         /// <param name="run">The run number of the given experiment.</param>
         /// <param name="batch">The batch number of the given run.</param>
+        /// <param name="runPhase">
+        ///     Indicates whether this is part of the initialization or primary experiment phase.
+        /// </param>
         /// <param name="evaluationUnits">The evaluation results to persist.</param>
         private static void WriteNavigatorMazeEvaluationDataToFile(int experimentId, int run, int batch,
+            RunPhase runPhase,
             IList<MazeNavigatorEvaluationUnit> evaluationUnits)
         {
             // Loop through the evaluation units and write each row
@@ -260,6 +303,7 @@ namespace NavigatorMazeMapEvaluator
                     experimentId.ToString(),
                     run.ToString(),
                     batch.ToString(),
+                    runPhase.ToString(),
                     evaluationUnit.MazeId.ToString(),
                     evaluationUnit.AgentId.ToString(),
                     evaluationUnit.IsMazeSolved.ToString(),

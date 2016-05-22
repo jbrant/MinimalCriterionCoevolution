@@ -30,7 +30,7 @@ namespace ExperimentEntities
         public int ExperimentDictionaryID { get; set; }
         public string ExperimentName { get; set; }
         public string ConfigurationFile { get; set; }
-        public int MaxEvaluations { get; set; }
+        public Nullable<int> MaxEvaluations { get; set; }
         public int MaxTimesteps { get; set; }
         public int MinSuccessDistance { get; set; }
         public Nullable<int> MaxDistanceToTarget { get; set; }
@@ -147,6 +147,7 @@ namespace ExperimentEntities
         public string Primary_Maze_MCS_MinimalCriteriaName { get; set; }
         public Nullable<int> Primary_Maze_MCS_BridgingMagnitude { get; set; }
         public Nullable<int> Primary_Maze_MCS_BridgingApplications { get; set; }
+        public Nullable<int> MaxGenerations { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<NoveltyExperimentOrganismStateData> NoveltyExperimentOrganismStateDatas { get; set; }

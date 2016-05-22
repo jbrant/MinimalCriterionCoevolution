@@ -21,8 +21,10 @@ namespace ExperimentEntities
         public int NavigatorGenomeID { get; set; }
         public bool IsMazeSolved { get; set; }
         public int NumTimesteps { get; set; }
+        public int RunPhase_FK { get; set; }
     
         public virtual CoevolutionMCSMazeExperimentGenome CoevolutionMCSMazeExperimentGenome { get; set; }
         public virtual CoevolutionMCSNavigatorExperimentGenome CoevolutionMCSNavigatorExperimentGenome { get; set; }
+        public virtual RunPhase RunPhase { get; set; }
     }
 }

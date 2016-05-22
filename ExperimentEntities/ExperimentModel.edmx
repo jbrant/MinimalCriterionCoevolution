@@ -42,6 +42,7 @@
             <PropertyRef Name="Generation" />
             <PropertyRef Name="MazeGenomeID" />
             <PropertyRef Name="NavigatorGenomeID" />
+            <PropertyRef Name="RunPhase_FK" />
           </Key>
           <Property Name="ExperimentDictionaryID" Type="int" Nullable="false" />
           <Property Name="Run" Type="int" Nullable="false" />
@@ -50,12 +51,14 @@
           <Property Name="NavigatorGenomeID" Type="int" Nullable="false" />
           <Property Name="IsMazeSolved" Type="bit" Nullable="false" />
           <Property Name="NumTimesteps" Type="int" Nullable="false" />
+          <Property Name="RunPhase_FK" Type="int" Nullable="false" />
         </EntityType>
         <EntityType Name="CoevolutionMCSNavigatorExperimentEvaluationData">
           <Key>
             <PropertyRef Name="ExperimentDictionaryID" />
             <PropertyRef Name="Run" />
             <PropertyRef Name="Generation" />
+            <PropertyRef Name="RunPhase_FK" />
           </Key>
           <Property Name="ExperimentDictionaryID" Type="int" Nullable="false" />
           <Property Name="Run" Type="int" Nullable="false" />
@@ -67,6 +70,7 @@
           <Property Name="MeanComplexity" Type="float" Nullable="false" />
           <Property Name="TotalEvaluations" Type="int" Nullable="false" />
           <Property Name="EvaluationsPerSecond" Type="int" />
+          <Property Name="RunPhase_FK" Type="int" Nullable="false" />
         </EntityType>
         <EntityType Name="CoevolutionMCSNavigatorExperimentGenomes">
           <Key>
@@ -74,12 +78,14 @@
             <PropertyRef Name="Run" />
             <PropertyRef Name="Generation" />
             <PropertyRef Name="GenomeID" />
+            <PropertyRef Name="RunPhase_FK" />
           </Key>
           <Property Name="ExperimentDictionaryID" Type="int" Nullable="false" />
           <Property Name="Run" Type="int" Nullable="false" />
           <Property Name="Generation" Type="int" Nullable="false" />
           <Property Name="GenomeID" Type="int" Nullable="false" />
           <Property Name="GenomeXml" Type="xml" Nullable="false" />
+          <Property Name="RunPhase_FK" Type="int" Nullable="false" />
         </EntityType>
         <EntityType Name="MCSExperimentEvaluationData">
           <Key>
@@ -209,12 +215,12 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
             
             
             
-            
           </Key>
           <Property Name="ExperimentDictionaryID" Type="int" Nullable="false" StoreGeneratedPattern="Identity" />
           <Property Name="ExperimentName" Type="varchar" MaxLength="100" Nullable="false" />
           <Property Name="ConfigurationFile" Type="varchar" MaxLength="150" />
-          <Property Name="MaxEvaluations" Type="int" Nullable="false" />
+          <Property Name="MaxEvaluations" Type="int" />
+          <Property Name="MaxGenerations" Type="int" />
           <Property Name="MaxRestarts" Type="int" Nullable="false" />
           <Property Name="NumSeedGenomes" Type="int" Nullable="false" />
           <Property Name="MaxTimesteps" Type="int" Nullable="false" />
@@ -332,39 +338,39 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <Property Name="Primary_Maze_MCS_BridgingMagnitude" Type="int" />
           <Property Name="Primary_Maze_MCS_BridgingApplications" Type="int" />
         </EntityType>
-        <Association Name="FK_CoevolutionMCSMazeNavigatorResults_CoevolutionMCSMazeExperimentGenomes">
-          <End Role="CoevolutionMCSMazeExperimentGenomes" Type="Self.CoevolutionMCSMazeExperimentGenomes" Multiplicity="1" />
+        <Association Name="FK_CoevolutionMCSMazeNavigatorResults_RunPhase">
+          <End Role="RunPhase" Type="Self.RunPhase" Multiplicity="1" />
           <End Role="CoevolutionMCSMazeNavigatorResults" Type="Self.CoevolutionMCSMazeNavigatorResults" Multiplicity="*" />
           <ReferentialConstraint>
-            <Principal Role="CoevolutionMCSMazeExperimentGenomes">
-              <PropertyRef Name="ExperimentDictionaryID" />
-              <PropertyRef Name="Run" />
-              <PropertyRef Name="Generation" />
-              <PropertyRef Name="GenomeID" />
+            <Principal Role="RunPhase">
+              <PropertyRef Name="RunPhaseID" />
             </Principal>
             <Dependent Role="CoevolutionMCSMazeNavigatorResults">
-              <PropertyRef Name="ExperimentDictionaryID" />
-              <PropertyRef Name="Run" />
-              <PropertyRef Name="Generation" />
-              <PropertyRef Name="MazeGenomeID" />
+              <PropertyRef Name="RunPhase_FK" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_CoevolutionMCSMazeNavigatorResults_CoevolutionMCSNavigatorExperimentGenomes">
-          <End Role="CoevolutionMCSNavigatorExperimentGenomes" Type="Self.CoevolutionMCSNavigatorExperimentGenomes" Multiplicity="1" />
-          <End Role="CoevolutionMCSMazeNavigatorResults" Type="Self.CoevolutionMCSMazeNavigatorResults" Multiplicity="*" />
+        <Association Name="FK_CoevolutionMCSNavigatorExperimentEvaluationData_RunPhase">
+          <End Role="RunPhase" Type="Self.RunPhase" Multiplicity="1" />
+          <End Role="CoevolutionMCSNavigatorExperimentEvaluationData" Type="Self.CoevolutionMCSNavigatorExperimentEvaluationData" Multiplicity="*" />
           <ReferentialConstraint>
-            <Principal Role="CoevolutionMCSNavigatorExperimentGenomes">
-              <PropertyRef Name="ExperimentDictionaryID" />
-              <PropertyRef Name="Run" />
-              <PropertyRef Name="Generation" />
-              <PropertyRef Name="GenomeID" />
+            <Principal Role="RunPhase">
+              <PropertyRef Name="RunPhaseID" />
             </Principal>
-            <Dependent Role="CoevolutionMCSMazeNavigatorResults">
-              <PropertyRef Name="ExperimentDictionaryID" />
-              <PropertyRef Name="Run" />
-              <PropertyRef Name="Generation" />
-              <PropertyRef Name="MazeGenomeID" />
+            <Dependent Role="CoevolutionMCSNavigatorExperimentEvaluationData">
+              <PropertyRef Name="RunPhase_FK" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_CoevolutionMCSNavigatorExperimentGenomes_RunPhase">
+          <End Role="RunPhase" Type="Self.RunPhase" Multiplicity="1" />
+          <End Role="CoevolutionMCSNavigatorExperimentGenomes" Type="Self.CoevolutionMCSNavigatorExperimentGenomes" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="RunPhase">
+              <PropertyRef Name="RunPhaseID" />
+            </Principal>
+            <Dependent Role="CoevolutionMCSNavigatorExperimentGenomes">
+              <PropertyRef Name="RunPhase_FK" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -409,6 +415,7 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
     [ExperimentDictionary_vw].[ExperimentName] AS [ExperimentName], 
     [ExperimentDictionary_vw].[ConfigurationFile] AS [ConfigurationFile], 
     [ExperimentDictionary_vw].[MaxEvaluations] AS [MaxEvaluations], 
+    [ExperimentDictionary_vw].[MaxGenerations] AS [MaxGenerations], 
     [ExperimentDictionary_vw].[MaxRestarts] AS [MaxRestarts], 
     [ExperimentDictionary_vw].[NumSeedGenomes] AS [NumSeedGenomes], 
     [ExperimentDictionary_vw].[MaxTimesteps] AS [MaxTimesteps], 
@@ -527,13 +534,17 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
     [ExperimentDictionary_vw].[Primary_Maze_MCS_BridgingApplications] AS [Primary_Maze_MCS_BridgingApplications]
     FROM [dbo].[ExperimentDictionary_vw] AS [ExperimentDictionary_vw]</DefiningQuery>
           </EntitySet>
-          <AssociationSet Name="FK_CoevolutionMCSMazeNavigatorResults_CoevolutionMCSMazeExperimentGenomes" Association="Self.FK_CoevolutionMCSMazeNavigatorResults_CoevolutionMCSMazeExperimentGenomes">
-            <End Role="CoevolutionMCSMazeExperimentGenomes" EntitySet="CoevolutionMCSMazeExperimentGenomes" />
+          <AssociationSet Name="FK_CoevolutionMCSMazeNavigatorResults_RunPhase" Association="Self.FK_CoevolutionMCSMazeNavigatorResults_RunPhase">
+            <End Role="RunPhase" EntitySet="RunPhase" />
             <End Role="CoevolutionMCSMazeNavigatorResults" EntitySet="CoevolutionMCSMazeNavigatorResults" />
           </AssociationSet>
-          <AssociationSet Name="FK_CoevolutionMCSMazeNavigatorResults_CoevolutionMCSNavigatorExperimentGenomes" Association="Self.FK_CoevolutionMCSMazeNavigatorResults_CoevolutionMCSNavigatorExperimentGenomes">
+          <AssociationSet Name="FK_CoevolutionMCSNavigatorExperimentEvaluationData_RunPhase" Association="Self.FK_CoevolutionMCSNavigatorExperimentEvaluationData_RunPhase">
+            <End Role="RunPhase" EntitySet="RunPhase" />
+            <End Role="CoevolutionMCSNavigatorExperimentEvaluationData" EntitySet="CoevolutionMCSNavigatorExperimentEvaluationData" />
+          </AssociationSet>
+          <AssociationSet Name="FK_CoevolutionMCSNavigatorExperimentGenomes_RunPhase" Association="Self.FK_CoevolutionMCSNavigatorExperimentGenomes_RunPhase">
+            <End Role="RunPhase" EntitySet="RunPhase" />
             <End Role="CoevolutionMCSNavigatorExperimentGenomes" EntitySet="CoevolutionMCSNavigatorExperimentGenomes" />
-            <End Role="CoevolutionMCSMazeNavigatorResults" EntitySet="CoevolutionMCSMazeNavigatorResults" />
           </AssociationSet>
           <AssociationSet Name="FK_MCSExperimentEvaluationData_RunPhase" Association="Self.FK_MCSExperimentEvaluationData_RunPhase">
             <End Role="RunPhase" EntitySet="RunPhase" />
@@ -608,6 +619,18 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
             <End Role="CoevolutionMCSMazeExperimentEvaluationData" EntitySet="CoevolutionMCSMazeExperimentEvaluationDatas" />
             <End Role="ExperimentDictionary" EntitySet="ExperimentDictionaries" />
           </AssociationSet>
+          <AssociationSet Name="FK_CoevolutionMCSNavigatorExperimentEvaluationData_RunPhase" Association="ExperimentDataModel.FK_CoevolutionMCSNavigatorExperimentEvaluationData_RunPhase">
+            <End Role="RunPhase" EntitySet="RunPhases" />
+            <End Role="CoevolutionMCSNavigatorExperimentEvaluationData" EntitySet="CoevolutionMCSNavigatorExperimentEvaluationDatas" />
+          </AssociationSet>
+          <AssociationSet Name="FK_CoevolutionMCSNavigatorExperimentGenomes_RunPhase" Association="ExperimentDataModel.FK_CoevolutionMCSNavigatorExperimentGenomes_RunPhase">
+            <End Role="RunPhase" EntitySet="RunPhases" />
+            <End Role="CoevolutionMCSNavigatorExperimentGenome" EntitySet="CoevolutionMCSNavigatorExperimentGenomes" />
+          </AssociationSet>
+          <AssociationSet Name="FK_CoevolutionMCSMazeNavigatorResults_RunPhase" Association="ExperimentDataModel.FK_CoevolutionMCSMazeNavigatorResults_RunPhase">
+            <End Role="RunPhase" EntitySet="RunPhases" />
+            <End Role="CoevolutionMCSMazeNavigatorResult" EntitySet="CoevolutionMCSMazeNavigatorResults" />
+          </AssociationSet>
         </EntityContainer>
         <EntityType Name="ExperimentDictionary">
           <Key>
@@ -616,7 +639,7 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <Property Name="ExperimentDictionaryID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="ExperimentName" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
           <Property Name="ConfigurationFile" Type="String" MaxLength="150" FixedLength="false" Unicode="false" />
-          <Property Name="MaxEvaluations" Type="Int32" Nullable="false" />
+          <Property Name="MaxEvaluations" Type="Int32" />
           <Property Name="MaxTimesteps" Type="Int32" Nullable="false" />
           <Property Name="MinSuccessDistance" Type="Int32" Nullable="false" />
           <Property Name="MaxDistanceToTarget" Type="Int32" />
@@ -741,6 +764,7 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <NavigationProperty Name="CoevolutionMCSNavigatorExperimentGenomes" Relationship="ExperimentDataModel.CoevolutionMCSNavigatorExperimentGenomeExperimentDictionary" FromRole="ExperimentDictionary" ToRole="CoevolutionMCSNavigatorExperimentGenome" />
           <NavigationProperty Name="CoevolutionMCSMazeExperimentGenomes" Relationship="ExperimentDataModel.ExperimentDictionaryCoevolutionMCSMazeExperimentGenome" FromRole="ExperimentDictionary" ToRole="CoevolutionMCSMazeExperimentGenome" />
           <NavigationProperty Name="CoevolutionMCSMazeExperimentEvaluationDatas" Relationship="ExperimentDataModel.CoevolutionMCSMazeExperimentEvaluationDataExperimentDictionary" FromRole="ExperimentDictionary" ToRole="CoevolutionMCSMazeExperimentEvaluationData" />
+          <Property Name="MaxGenerations" Type="Int32" />
         </EntityType>
         <EntityType Name="NoveltyExperimentOrganismStateData">
           <Key>
@@ -899,6 +923,9 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <NavigationProperty Name="MCSExperimentEvaluationDatas" Relationship="ExperimentDataModel.FK_MCSExperimentEvaluationData_RunPhase" FromRole="RunPhase" ToRole="MCSExperimentEvaluationData" />
           <NavigationProperty Name="MCSExperimentOrganismStateDatas" Relationship="ExperimentDataModel.FK_MCSExperimentOrganismStateData_RunPhase" FromRole="RunPhase" ToRole="MCSExperimentOrganismStateData" />
           <Property Name="RunPhaseName" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="CoevolutionMCSNavigatorExperimentEvaluationDatas" Relationship="ExperimentDataModel.FK_CoevolutionMCSNavigatorExperimentEvaluationData_RunPhase" FromRole="RunPhase" ToRole="CoevolutionMCSNavigatorExperimentEvaluationData" />
+          <NavigationProperty Name="CoevolutionMCSNavigatorExperimentGenomes" Relationship="ExperimentDataModel.FK_CoevolutionMCSNavigatorExperimentGenomes_RunPhase" FromRole="RunPhase" ToRole="CoevolutionMCSNavigatorExperimentGenome" />
+          <NavigationProperty Name="CoevolutionMCSMazeNavigatorResults" Relationship="ExperimentDataModel.FK_CoevolutionMCSMazeNavigatorResults_RunPhase" FromRole="RunPhase" ToRole="CoevolutionMCSMazeNavigatorResult" />
         </EntityType>
         <Association Name="FK_MCSExperimentEvaluationData_RunPhase">
           <End Type="ExperimentDataModel.RunPhase" Role="RunPhase" Multiplicity="1" />
@@ -964,6 +991,7 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
             <PropertyRef Name="Generation" />
             <PropertyRef Name="MazeGenomeID" />
             <PropertyRef Name="NavigatorGenomeID" />
+            <PropertyRef Name="RunPhase_FK" />
           </Key>
           <Property Name="ExperimentDictionaryID" Type="Int32" Nullable="false" />
           <Property Name="Run" Type="Int32" Nullable="false" />
@@ -974,12 +1002,15 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <Property Name="NumTimesteps" Type="Int32" Nullable="false" />
           <NavigationProperty Name="CoevolutionMCSMazeExperimentGenome" Relationship="ExperimentDataModel.FK_CoevolutionMCSMazeNavigatorResults_CoevolutionMCSMazeExperimentGenomes" FromRole="CoevolutionMCSMazeNavigatorResult" ToRole="CoevolutionMCSMazeExperimentGenome" />
           <NavigationProperty Name="CoevolutionMCSNavigatorExperimentGenome" Relationship="ExperimentDataModel.FK_CoevolutionMCSMazeNavigatorResults_CoevolutionMCSNavigatorExperimentGenomes" FromRole="CoevolutionMCSMazeNavigatorResult" ToRole="CoevolutionMCSNavigatorExperimentGenome" />
+          <Property Name="RunPhase_FK" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="RunPhase" Relationship="ExperimentDataModel.FK_CoevolutionMCSMazeNavigatorResults_RunPhase" FromRole="CoevolutionMCSMazeNavigatorResult" ToRole="RunPhase" />
         </EntityType>
         <EntityType Name="CoevolutionMCSNavigatorExperimentEvaluationData">
           <Key>
             <PropertyRef Name="ExperimentDictionaryID" />
             <PropertyRef Name="Run" />
             <PropertyRef Name="Generation" />
+            <PropertyRef Name="RunPhase_FK" />
           </Key>
           <Property Name="ExperimentDictionaryID" Type="Int32" Nullable="false" />
           <Property Name="Run" Type="Int32" Nullable="false" />
@@ -992,6 +1023,8 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <Property Name="TotalEvaluations" Type="Int32" Nullable="false" />
           <Property Name="EvaluationsPerSecond" Type="Int32" />
           <NavigationProperty Name="ExperimentDictionary" Relationship="ExperimentDataModel.CoevolutionMCSNavigatorExperimentEvaluationDataExperimentDictionary" FromRole="CoevolutionMCSNavigatorExperimentEvaluationData" ToRole="ExperimentDictionary" />
+          <Property Name="RunPhase_FK" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="RunPhase" Relationship="ExperimentDataModel.FK_CoevolutionMCSNavigatorExperimentEvaluationData_RunPhase" FromRole="CoevolutionMCSNavigatorExperimentEvaluationData" ToRole="RunPhase" />
         </EntityType>
         <EntityType Name="CoevolutionMCSNavigatorExperimentGenome">
           <Key>
@@ -999,6 +1032,7 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
             <PropertyRef Name="Run" />
             <PropertyRef Name="Generation" />
             <PropertyRef Name="GenomeID" />
+            <PropertyRef Name="RunPhase_FK" />
           </Key>
           <Property Name="ExperimentDictionaryID" Type="Int32" Nullable="false" />
           <Property Name="Run" Type="Int32" Nullable="false" />
@@ -1007,6 +1041,8 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <Property Name="GenomeXml" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
           <NavigationProperty Name="CoevolutionMCSMazeNavigatorResults" Relationship="ExperimentDataModel.FK_CoevolutionMCSMazeNavigatorResults_CoevolutionMCSNavigatorExperimentGenomes" FromRole="CoevolutionMCSNavigatorExperimentGenome" ToRole="CoevolutionMCSMazeNavigatorResult" />
           <NavigationProperty Name="ExperimentDictionary" Relationship="ExperimentDataModel.CoevolutionMCSNavigatorExperimentGenomeExperimentDictionary" FromRole="CoevolutionMCSNavigatorExperimentGenome" ToRole="ExperimentDictionary" />
+          <Property Name="RunPhase_FK" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="RunPhase" Relationship="ExperimentDataModel.FK_CoevolutionMCSNavigatorExperimentGenomes_RunPhase" FromRole="CoevolutionMCSNavigatorExperimentGenome" ToRole="RunPhase" />
         </EntityType>
         <Association Name="FK_CoevolutionMCSMazeNavigatorResults_CoevolutionMCSMazeExperimentGenomes">
           <End Type="ExperimentDataModel.CoevolutionMCSMazeExperimentGenome" Role="CoevolutionMCSMazeExperimentGenome" Multiplicity="1" />
@@ -1035,12 +1071,14 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
               <PropertyRef Name="Run" />
               <PropertyRef Name="Generation" />
               <PropertyRef Name="GenomeID" />
+              <PropertyRef Name="RunPhase_FK" />
             </Principal>
             <Dependent Role="CoevolutionMCSMazeNavigatorResult">
               <PropertyRef Name="ExperimentDictionaryID" />
               <PropertyRef Name="Run" />
               <PropertyRef Name="Generation" />
               <PropertyRef Name="MazeGenomeID" />
+              <PropertyRef Name="RunPhase_FK" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -1092,6 +1130,42 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_CoevolutionMCSNavigatorExperimentEvaluationData_RunPhase">
+          <End Type="ExperimentDataModel.RunPhase" Role="RunPhase" Multiplicity="1" />
+          <End Type="ExperimentDataModel.CoevolutionMCSNavigatorExperimentEvaluationData" Role="CoevolutionMCSNavigatorExperimentEvaluationData" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="RunPhase">
+              <PropertyRef Name="RunPhaseID" />
+            </Principal>
+            <Dependent Role="CoevolutionMCSNavigatorExperimentEvaluationData">
+              <PropertyRef Name="RunPhase_FK" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_CoevolutionMCSNavigatorExperimentGenomes_RunPhase">
+          <End Type="ExperimentDataModel.RunPhase" Role="RunPhase" Multiplicity="1" />
+          <End Type="ExperimentDataModel.CoevolutionMCSNavigatorExperimentGenome" Role="CoevolutionMCSNavigatorExperimentGenome" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="RunPhase">
+              <PropertyRef Name="RunPhaseID" />
+            </Principal>
+            <Dependent Role="CoevolutionMCSNavigatorExperimentGenome">
+              <PropertyRef Name="RunPhase_FK" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_CoevolutionMCSMazeNavigatorResults_RunPhase">
+          <End Type="ExperimentDataModel.RunPhase" Role="RunPhase" Multiplicity="1" />
+          <End Type="ExperimentDataModel.CoevolutionMCSMazeNavigatorResult" Role="CoevolutionMCSMazeNavigatorResult" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="RunPhase">
+              <PropertyRef Name="RunPhaseID" />
+            </Principal>
+            <Dependent Role="CoevolutionMCSMazeNavigatorResult">
+              <PropertyRef Name="RunPhase_FK" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -1101,6 +1175,7 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <EntitySetMapping Name="ExperimentDictionaries">
             <EntityTypeMapping TypeName="ExperimentDataModel.ExperimentDictionary">
               <MappingFragment StoreEntitySet="ExperimentDictionary_vw">
+                <ScalarProperty Name="MaxGenerations" ColumnName="MaxGenerations" />
                 <ScalarProperty Name="Primary_Maze_MCS_BridgingApplications" ColumnName="Primary_Maze_MCS_BridgingApplications" />
                 <ScalarProperty Name="Primary_Maze_MCS_BridgingMagnitude" ColumnName="Primary_Maze_MCS_BridgingMagnitude" />
                 <ScalarProperty Name="Primary_Maze_MCS_MinimalCriteriaName" ColumnName="Primary_Maze_MCS_MinimalCriteriaName" />
@@ -1349,6 +1424,7 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <EntitySetMapping Name="CoevolutionMCSMazeNavigatorResults">
             <EntityTypeMapping TypeName="ExperimentDataModel.CoevolutionMCSMazeNavigatorResult">
               <MappingFragment StoreEntitySet="CoevolutionMCSMazeNavigatorResults">
+                <ScalarProperty Name="RunPhase_FK" ColumnName="RunPhase_FK" />
                 <ScalarProperty Name="NumTimesteps" ColumnName="NumTimesteps" />
                 <ScalarProperty Name="IsMazeSolved" ColumnName="IsMazeSolved" />
                 <ScalarProperty Name="NavigatorGenomeID" ColumnName="NavigatorGenomeID" />
@@ -1362,6 +1438,7 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <EntitySetMapping Name="CoevolutionMCSNavigatorExperimentEvaluationDatas">
             <EntityTypeMapping TypeName="ExperimentDataModel.CoevolutionMCSNavigatorExperimentEvaluationData">
               <MappingFragment StoreEntitySet="CoevolutionMCSNavigatorExperimentEvaluationData">
+                <ScalarProperty Name="RunPhase_FK" ColumnName="RunPhase_FK" />
                 <ScalarProperty Name="EvaluationsPerSecond" ColumnName="EvaluationsPerSecond" />
                 <ScalarProperty Name="TotalEvaluations" ColumnName="TotalEvaluations" />
                 <ScalarProperty Name="MeanComplexity" ColumnName="MeanComplexity" />
@@ -1378,6 +1455,7 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <EntitySetMapping Name="CoevolutionMCSNavigatorExperimentGenomes">
             <EntityTypeMapping TypeName="ExperimentDataModel.CoevolutionMCSNavigatorExperimentGenome">
               <MappingFragment StoreEntitySet="CoevolutionMCSNavigatorExperimentGenomes">
+                <ScalarProperty Name="RunPhase_FK" ColumnName="RunPhase_FK" />
                 <ScalarProperty Name="GenomeXml" ColumnName="GenomeXml" />
                 <ScalarProperty Name="GenomeID" ColumnName="GenomeID" />
                 <ScalarProperty Name="Generation" ColumnName="Generation" />

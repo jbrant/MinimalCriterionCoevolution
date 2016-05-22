@@ -5,6 +5,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using SharpNeat.Core;
 using SharpNeat.Phenomes.Mazes;
 
 #endregion
@@ -25,13 +26,14 @@ namespace NavigatorMazeMapEvaluator
         /// <param name="run">The run during which the trial took place.</param>
         /// <param name="batch">The batch during which the trial took place.</param>
         /// <param name="evaluationUnits">The maze/agent combinations to trace.</param>
+        /// <param name="runPhase">The run phase (initialization or primary) for the current set of trials.</param>
         public static void GenerateBitmapsForSuccessfulTrials(string baseDirectory, string experimentName,
             int experimentId, int run,
-            int batch, IList<MazeNavigatorEvaluationUnit> evaluationUnits)
+            int batch, IList<MazeNavigatorEvaluationUnit> evaluationUnits, RunPhase runPhase)
         {
             // Construct the output directory path
             string outputDirectory = Path.Combine(baseDirectory, experimentName,
-                string.Format("Run {0}", run), string.Format("Batch {0}", batch));
+                string.Format("Run {0}", run), runPhase.ToString(), string.Format("Batch {0}", batch));
 
             // Create the output directory if it doesn't yet exist
             if (Directory.Exists(outputDirectory) == false)

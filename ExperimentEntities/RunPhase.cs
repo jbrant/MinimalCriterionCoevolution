@@ -19,6 +19,9 @@ namespace ExperimentEntities
         {
             this.MCSExperimentEvaluationDatas = new HashSet<MCSExperimentEvaluationData>();
             this.MCSExperimentOrganismStateDatas = new HashSet<MCSExperimentOrganismStateData>();
+            this.CoevolutionMCSNavigatorExperimentEvaluationDatas = new HashSet<CoevolutionMCSNavigatorExperimentEvaluationData>();
+            this.CoevolutionMCSNavigatorExperimentGenomes = new HashSet<CoevolutionMCSNavigatorExperimentGenome>();
+            this.CoevolutionMCSMazeNavigatorResults = new HashSet<CoevolutionMCSMazeNavigatorResult>();
         }
     
         public int RunPhaseID { get; set; }
@@ -28,5 +31,11 @@ namespace ExperimentEntities
         public virtual ICollection<MCSExperimentEvaluationData> MCSExperimentEvaluationDatas { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<MCSExperimentOrganismStateData> MCSExperimentOrganismStateDatas { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<CoevolutionMCSNavigatorExperimentEvaluationData> CoevolutionMCSNavigatorExperimentEvaluationDatas { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<CoevolutionMCSNavigatorExperimentGenome> CoevolutionMCSNavigatorExperimentGenomes { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<CoevolutionMCSMazeNavigatorResult> CoevolutionMCSMazeNavigatorResults { get; set; }
     }
 }

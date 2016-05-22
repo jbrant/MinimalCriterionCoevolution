@@ -10,6 +10,7 @@ using SharpNeat.EvolutionAlgorithms.ComplexityRegulation;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Loggers;
 using SharpNeat.SpeciationStrategies;
+using SharpNeat.Utility;
 
 #endregion
 
@@ -107,17 +108,38 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </summary>
         protected override void Initialize()
         {
-            // Open the logger
+            // Open the loggers
             EvolutionLogger?.Open();
+            PopulationLogger?.Open();
 
-            // Update the run phase on the logger
+            // Update the run phase on the loggers
             EvolutionLogger?.UpdateRunPhase(RunPhase);
+            PopulationLogger?.UpdateRunPhase(RunPhase);
 
-            // Write out the header
+            // Write out the headers for both loggers
             EvolutionLogger?.LogHeader(GetLoggableElements(_logFieldEnabledMap),
                 Statistics.GetLoggableElements(_logFieldEnabledMap),
                 GenomeEvaluator.GetLoggableElements(_logFieldEnabledMap),
                 (GenomeList[0] as NeatGenome)?.GetLoggableElements(_logFieldEnabledMap));
+            PopulationLogger?.LogHeader(new List<LoggableElement>
+            {
+                _logFieldEnabledMap.ContainsKey(PopulationGenomesFieldElements.Generation) &&
+                _logFieldEnabledMap[PopulationGenomesFieldElements.Generation]
+                    ? new LoggableElement(PopulationGenomesFieldElements.Generation, null)
+                    : null,
+                _logFieldEnabledMap.ContainsKey(PopulationGenomesFieldElements.RunPhase) &&
+                _logFieldEnabledMap[PopulationGenomesFieldElements.RunPhase]
+                    ? new LoggableElement(PopulationGenomesFieldElements.RunPhase, null)
+                    : null,
+                _logFieldEnabledMap.ContainsKey(PopulationGenomesFieldElements.GenomeId) &&
+                _logFieldEnabledMap[PopulationGenomesFieldElements.GenomeId]
+                    ? new LoggableElement(PopulationGenomesFieldElements.GenomeId, null)
+                    : null,
+                _logFieldEnabledMap.ContainsKey(PopulationGenomesFieldElements.GenomeXml) &&
+                _logFieldEnabledMap[PopulationGenomesFieldElements.GenomeXml]
+                    ? new LoggableElement(PopulationGenomesFieldElements.GenomeXml, null)
+                    : null
+            });
 
             // Initialize the genome evalutor
             GenomeEvaluator.Initialize();
@@ -216,6 +238,35 @@ namespace SharpNeat.EvolutionAlgorithms
                 GenomeEvaluator.GetLoggableElements(_logFieldEnabledMap),
                 Statistics.GetLoggableElements(_logFieldEnabledMap),
                 (CurrentChampGenome as NeatGenome)?.GetLoggableElements(_logFieldEnabledMap));
+
+            // Also, if we're at the appropriate batch interval, dump the population
+            if (PopulationLoggingInterval != null &&
+                (CurrentGeneration == 1 || CurrentGeneration%PopulationLoggingInterval == 0))
+            {
+                foreach (TGenome genome in GenomeList)
+                {
+                    PopulationLogger?.LogRow(new List<LoggableElement>
+                    {
+                        _logFieldEnabledMap.ContainsKey(PopulationGenomesFieldElements.Generation) &&
+                        _logFieldEnabledMap[PopulationGenomesFieldElements.Generation]
+                            ? new LoggableElement(PopulationGenomesFieldElements.Generation, CurrentGeneration)
+                            : null,
+                        _logFieldEnabledMap.ContainsKey(PopulationGenomesFieldElements.RunPhase) &&
+                        _logFieldEnabledMap[PopulationGenomesFieldElements.RunPhase]
+                            ? new LoggableElement(PopulationGenomesFieldElements.RunPhase, RunPhase)
+                            : null,
+                        _logFieldEnabledMap.ContainsKey(PopulationGenomesFieldElements.GenomeId) &&
+                        _logFieldEnabledMap[PopulationGenomesFieldElements.GenomeId]
+                            ? new LoggableElement(PopulationGenomesFieldElements.GenomeId, genome.Id)
+                            : null,
+                        _logFieldEnabledMap.ContainsKey(PopulationGenomesFieldElements.GenomeXml) &&
+                        _logFieldEnabledMap[PopulationGenomesFieldElements.GenomeXml]
+                            ? new LoggableElement(PopulationGenomesFieldElements.GenomeXml,
+                                XmlIoUtils.GetGenomeXml(genome))
+                            : null
+                    });
+                }
+            }
         }
 
         #endregion
@@ -251,7 +302,7 @@ namespace SharpNeat.EvolutionAlgorithms
             _batchSize = 10;
             _mcUpdateInterval = mcUpdateInterval;
         }
-        
+
         /// <summary>
         ///     Constructs steady state evolution algorithm with the given NEAT parameters and complexity regulation strategy.
         /// </summary>
@@ -266,8 +317,10 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     Flag that indicates whether the minimal criteria is automatically/dynamically
         ///     determined.
         /// </param>
-        /// <param name="logger">The data logger (optional).</param>
+        /// <param name="logger">The evolution data logger (optional).</param>
         /// <param name="logFieldEnabledMap">Dictionary of logging fields that can be dynamically enabled or disabled.</param>
+        /// <param name="populationLogger">The population data logger.</param>
+        /// <param name="populationLoggingInterval">The interval at which the population is logged.</param>
         /// <param name="mcUpdateInterval">
         ///     The number of batches/generations that are permitted to elapse between updates to the
         ///     minimal criteria.
@@ -279,6 +332,8 @@ namespace SharpNeat.EvolutionAlgorithms
             bool isBridgingEnabled = false,
             bool isDynamicMinimalCriteria = false,
             IDataLogger logger = null, IDictionary<FieldElement, bool> logFieldEnabledMap = null,
+            IDataLogger populationLogger = null,
+            int? populationLoggingInterval = null,
             int mcUpdateInterval = 0)
         {
             ComplexityRegulationStrategy = complexityRegulationStrategy;
@@ -288,6 +343,8 @@ namespace SharpNeat.EvolutionAlgorithms
             _isBridgingEnabled = isBridgingEnabled;
             _isDynamicMinimalCriteria = isDynamicMinimalCriteria;
             _logFieldEnabledMap = logFieldEnabledMap;
+            PopulationLogger = populationLogger;
+            PopulationLoggingInterval = populationLoggingInterval;
             _mcUpdateInterval = mcUpdateInterval;
         }
 
@@ -306,8 +363,10 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     Flag that indicates whether the minimal criteria is automatically/dynamically
         ///     determined.
         /// </param>
-        /// <param name="logger">The data logger (optional).</param>
+        /// <param name="logger">The evolution data logger (optional).</param>
         /// <param name="logFieldEnabledMap">Dictionary of logging fields that can be dynamically enabled or disabled.</param>
+        /// <param name="populationLogger">The population data logger.</param>
+        /// <param name="populationLoggingInterval">The interval at which the population is logged.</param>
         /// <param name="mcUpdateInterval">
         ///     The number of batches/generations that are permitted to elapse between updates to the
         ///     minimal criteria.
@@ -319,11 +378,15 @@ namespace SharpNeat.EvolutionAlgorithms
             bool isBridgingEnabled = false,
             bool isDynamicMinimalCriteria = false,
             IDataLogger logger = null, IDictionary<FieldElement, bool> logFieldEnabledMap = null,
+            IDataLogger populationLogger = null,
+            int? populationLoggingInterval = null,
             int mcUpdateInterval = 0) : base(eaParams)
         {
             ComplexityRegulationStrategy = complexityRegulationStrategy;
             _batchSize = batchSize;
             EvolutionLogger = logger;
+            PopulationLogger = populationLogger;
+            PopulationLoggingInterval = populationLoggingInterval;
             RunPhase = runPhase;
             _isBridgingEnabled = isBridgingEnabled;
             _isDynamicMinimalCriteria = isDynamicMinimalCriteria;
