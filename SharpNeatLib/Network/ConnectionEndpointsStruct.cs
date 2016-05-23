@@ -78,7 +78,7 @@ namespace SharpNeat.Network
         /// </summary>
         public int GetHashCode(ConnectionEndpointsStruct obj)
         {
-            // Drawing.MazeStructurePoint uses x^y for a hash, but this is actually an extremely poor hash function
+            // Drawing.Point uses x^y for a hash, but this is actually an extremely poor hash function
             // for a pair of coordinates. Here we swap the low and high 16 bits of one of the 
             // Id's to generate a much better hash for our (and most other likely) circumstances.
             return (int)(_srcNodeId ^ ((_tgtNodeId>>16) + (_tgtNodeId<<16)));   

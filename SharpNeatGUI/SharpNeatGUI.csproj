@@ -89,6 +89,10 @@
       <HintPath>..\..\ThirdPartyAssemblies\log4net.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Redzen, Version=1.0.5.0, Culture=neutral, PublicKeyToken=182843a4be0a74f7, processorArchitecture=MSIL">
+      <HintPath>..\packages\Redzen.1.0.5.0\lib\net40\Redzen.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Data" />
@@ -96,9 +100,10 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
-    <Reference Include="ZedGraph, Version=5.1.5.28844, Culture=neutral, PublicKeyToken=02a83cbd123fcd60, processorArchitecture=MSIL">
+    <Reference Include="ZedGraph, Version=5.1.7.430, Culture=neutral, PublicKeyToken=02a83cbd123fcd60, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\ThirdPartyAssemblies\zedgraph_dll_v5.1.5\ZedGraph.dll</HintPath>
+      <HintPath>..\packages\ZedGraph.5.1.7\lib\net35-Client\ZedGraph.dll</HintPath>
+      <Private>True</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -217,6 +222,8 @@
   <ItemGroup>
     <None Include="Resources\About.txt" />
     <None Include="Resources\Licensing.txt" />
+    <Content Include="License-LGPL.txt" />
+    <Content Include="LICENSE.txt" />
     <Content Include="Resources\sharpneat.ico" />
     <EmbeddedResource Include="Resources\sharpneat_logo_small.png" />
   </ItemGroup>
