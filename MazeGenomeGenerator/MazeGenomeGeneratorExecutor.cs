@@ -18,14 +18,60 @@ namespace MazeGenomeGenerator
         private static readonly Dictionary<ExecutionParameter, String> _executionConfiguration =
             new Dictionary<ExecutionParameter, string>();
 
+        private static bool _generateMazes;
+
         private static void Main(string[] args)
         {
-            StringWriter genomeStringWriter = new StringWriter();
-            Random rand = new Random();
-
             // Extract the execution parameters and check for any errors (exit application if any found)
             if (ParseAndValidateConfiguration(args) == false)
                 Environment.Exit(0);
+
+            // Mazes genomes along with their graphical rendering is produced by default
+            if (_generateMazes)
+            {
+                HandleMazeGeneration();
+            }
+            // Alternatively, an existing genome file can be read in and the graphical depiction of that genome produced
+            else
+            {
+                HandleMazeImageReproduction();
+            }
+        }
+
+        /// <summary>
+        ///     Handles the process of rendering a bitmap file of an existing maze genome.
+        /// </summary>
+        private static void HandleMazeImageReproduction()
+        {
+            MazeGenome mazeGenome = null;
+
+            // Get the maze genome file path and image output path
+            string mazeGenomeFile = _executionConfiguration[ExecutionParameter.MazeGenomeFile];
+            string imageOutputPath = _executionConfiguration[ExecutionParameter.BitmapOutputBaseDirectory];
+
+            // Create a new (mostly dummy) maze genome factory
+            MazeGenomeFactory mazeGenomeFactory = new MazeGenomeFactory();
+
+            // Read in the genome
+            using (XmlReader xr = XmlReader.Create(mazeGenomeFile))
+            {
+                mazeGenome = MazeGenomeXmlIO.ReadSingleGenomeFromRoot(xr, mazeGenomeFactory);
+            }
+
+            // Get the maze genome ID
+            uint mazeGenomeId = mazeGenome.Id;
+
+            // Render the maze phenotype (i.e. the graphical structure0 and print to a bitmap file
+            PrintMazeToFile(mazeGenome,
+                Path.Combine(imageOutputPath, string.Format("EvolvedMaze_ID_{0}.bmp", mazeGenomeId)));
+        }
+
+        /// <summary>
+        ///     Handles the process of generating maze genomes and rendering bitmap files of their structure.
+        /// </summary>
+        private static void HandleMazeGeneration()
+        {
+            Random rand = new Random();
 
             // Get the number of interior walls and maze genome output directory
             int numInteriorWalls = Int32.Parse(_executionConfiguration[ExecutionParameter.NumWalls]);
@@ -133,6 +179,7 @@ namespace MazeGenomeGenerator
         /// <returns>Boolean status indicating whether parsing the configuration suceeded.</returns>
         private static bool ParseAndValidateConfiguration(string[] executionArguments)
         {
+            _generateMazes = true;
             bool isConfigurationValid = executionArguments != null;
 
             // Only continue if there are execution arguments
@@ -185,6 +232,7 @@ namespace MazeGenomeGenerator
 
                         // Ensure that valid boolean values were given
                         case ExecutionParameter.OutputMazeBitmap:
+                        case ExecutionParameter.GenerateMazes:
                             bool testBool;
                             if (Boolean.TryParse(parameterValuePair[1], out testBool) == false)
                             {
@@ -205,22 +253,39 @@ namespace MazeGenomeGenerator
                 isConfigurationValid = false;
             }
 
+            // If the generate mazes option was specified, then set it - otherwise defualt to true
+            if (_executionConfiguration.ContainsKey(ExecutionParameter.GenerateMazes))
+            {
+                _generateMazes = Boolean.Parse(_executionConfiguration[ExecutionParameter.GenerateMazes]);
+            }
+
+
             // If the per-parameter configuration is valid but not a full list of parameters were specified, makes sure the necessary ones are present
             if (isConfigurationValid && (_executionConfiguration.Count ==
                                          Enum.GetNames(typeof (ExecutionParameter)).Length) == false)
             {
                 // Check for existence of desired number of interior walls to generate
-                if (_executionConfiguration.ContainsKey(ExecutionParameter.NumWalls) == false)
+                if (_generateMazes && _executionConfiguration.ContainsKey(ExecutionParameter.NumWalls) == false)
                 {
                     Console.Error.WriteLine("Parameter [{0}] must be specified.", ExecutionParameter.NumWalls);
                     isConfigurationValid = false;
                 }
 
                 // Check for existence of the maze genome XML output directory
-                if (_executionConfiguration.ContainsKey(ExecutionParameter.MazeGenomeOutputBaseDirectory) == false)
+                if (_generateMazes &&
+                    _executionConfiguration.ContainsKey(ExecutionParameter.MazeGenomeOutputBaseDirectory) == false)
                 {
                     Console.Error.WriteLine("Parameter [{0}] must be specified.",
                         ExecutionParameter.MazeGenomeOutputBaseDirectory);
+                    isConfigurationValid = false;
+                }
+
+                // Check for the existence of the existing maze genome file if we're just rendering an image of the maze from that genome
+                if (_generateMazes == false &&
+                    _executionConfiguration.ContainsKey(ExecutionParameter.MazeGenomeFile) == false)
+                {
+                    Console.Error.WriteLine("Parameter [{0}] must be specified.",
+                        ExecutionParameter.MazeGenomeFile);
                     isConfigurationValid = false;
                 }
 
@@ -244,12 +309,13 @@ namespace MazeGenomeGenerator
             // Log the boiler plate instructions when an invalid configuration is encountered
             Console.Error.WriteLine("The experiment executor invocation must take the following form:");
             Console.Error.WriteLine(
-                "MazeGenomeGenerator.exe {0}=[{8}] {1}=[{11}] (Optional: {2}=[{10}]) (Optional: {3}=[{9}] {4}=[{10}] {5}=[{10}] {6}=[{10}] {7}=[{11}])",
-                ExecutionParameter.NumWalls, ExecutionParameter.MazeGenomeOutputBaseDirectory,
+                "MazeGenomeGenerator.exe {0}=[{11}] {1}=[{10}] {2}=[{13}] (Optional: {3}=[{12}]) (Optional: {4}=[{11}] {5}=[{12}] {6}=[{12}] {7}=[{12}] {8}=[{13}] {9}=[{13}])",
+                ExecutionParameter.GenerateMazes, ExecutionParameter.NumWalls,
+                ExecutionParameter.MazeGenomeOutputBaseDirectory,
                 ExecutionParameter.NumMazes, ExecutionParameter.OutputMazeBitmap, ExecutionParameter.MazeHeight,
                 ExecutionParameter.MazeWidth, ExecutionParameter.MazeScaleFactor,
-                ExecutionParameter.BitmapOutputBaseDirectory, "# of interior walls", "true|false", "integer value",
-                "directory");
+                ExecutionParameter.BitmapOutputBaseDirectory, ExecutionParameter.MazeGenomeFile, "# of interior walls",
+                "true|false", "integer value", "directory");
 
             return false;
         }

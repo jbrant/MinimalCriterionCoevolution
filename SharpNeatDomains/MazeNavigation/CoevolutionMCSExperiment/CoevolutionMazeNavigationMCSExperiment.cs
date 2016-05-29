@@ -130,7 +130,7 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             // (note that a new maze structure is created here for the sole purpose of extracting the maze dimensions and calculating max distance to target)
             _mazeNavigationInitializer.SetEnvironmentParameters(_maxTimesteps, _minSuccessDistance,
                 new MazeDecoder(_mazeHeight, _mazeWidth, _mazeScaleMultiplier).Decode(
-                    new MazeGenomeFactory(MazeGenomeParameters).CreateGenome(0)));
+                    new MazeGenomeFactory(MazeGenomeParameters, null, null).CreateGenome(0)));
         }
 
         /// <summary>
@@ -157,7 +157,7 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
                 NeatGenomeParameters);
 
             // Create a genome factory for the maze genomes
-            IGenomeFactory<MazeGenome> mazeGenomeFactory = new MazeGenomeFactory(MazeGenomeParameters);
+            IGenomeFactory<MazeGenome> mazeGenomeFactory = new MazeGenomeFactory(MazeGenomeParameters, _mazeHeight, _mazeWidth);
 
             // Create an initial population of maze navigators
             List<NeatGenome> neatGenomeList = neatGenomeFactory.CreateGenomeList(populationSize1, 0);
@@ -184,6 +184,9 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             IGenomeFactory<MazeGenome> genomeFactory2, List<NeatGenome> genomeList1, List<MazeGenome> genomeList2)
         {
             ulong initializationEvaluations;
+            
+            // Compute the maze max complexity
+            ((MazeGenomeFactory) genomeFactory2).MaxComplexity = _mazeHeight*_mazeWidth;
 
             // Go ahead and log static initialization maze genome
             _mazeNavigationInitializer.LogStartingMazeGenome(genomeList2[0], _mazePopulationGenomesDataLogger);

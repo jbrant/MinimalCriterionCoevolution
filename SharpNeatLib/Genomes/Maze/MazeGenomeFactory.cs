@@ -19,7 +19,8 @@ namespace SharpNeat.Genomes.Maze
         /// <summary>
         ///     Maze Genome Factory default constructor.
         /// </summary>
-        public MazeGenomeFactory() : this(new MazeGenomeParameters())
+        public MazeGenomeFactory()
+            : this(new MazeGenomeParameters(), null, null)
         {
         }
 
@@ -27,10 +28,15 @@ namespace SharpNeat.Genomes.Maze
         ///     Maze Genome Factory constructor which takes custom maze genome parameters.
         /// </summary>
         /// <param name="mazeGenomeParameters">The maze genome parameters.</param>
-        public MazeGenomeFactory(MazeGenomeParameters mazeGenomeParameters)
+        /// <param name="mazeHeight">The height of the maze.</param>
+        /// <param name="mazeWidth">The width of the maze.</param>
+        public MazeGenomeFactory(MazeGenomeParameters mazeGenomeParameters, int? mazeHeight, int? mazeWidth)
         {
             MazeGenomeParameters = mazeGenomeParameters;
             GenomeIdGenerator = new UInt32IdGenerator();
+
+            // Calculate maze max complexity as the area
+            MaxComplexity = mazeHeight*mazeWidth;
         }
 
         #endregion
@@ -92,6 +98,12 @@ namespace SharpNeat.Genomes.Maze
         ///     Parameters which control maze genome evolution.
         /// </summary>
         public MazeGenomeParameters MazeGenomeParameters { get; }
+
+        /// <summary>
+        ///     The maximum number of walls that can be added to the maze via the add wall mutation.  This is a limit that will be
+        ///     imposed by the maze PCG (procedural content generator).
+        /// </summary>
+        public int? MaxComplexity { get; set; }
 
         #endregion
 
