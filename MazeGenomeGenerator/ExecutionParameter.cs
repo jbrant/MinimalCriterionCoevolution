@@ -6,6 +6,12 @@
     public enum ExecutionParameter
     {
         /// <summary>
+        ///     Indicates whether the mazes are to be generated (then subsuquently rendered as an image) or just read in from an
+        ///     existing genome specification and rendered.
+        /// </summary>
+        GenerateMazes,
+
+        /// <summary>
         ///     The number of interior walls to be encoded in the maz.
         /// </summary>
         NumWalls,
@@ -43,6 +49,12 @@
         /// <summary>
         ///     The base directory into which to write the bitmap image trajectories.
         /// </summary>
-        BitmapOutputBaseDirectory
+        BitmapOutputBaseDirectory,
+
+        /// <summary>
+        ///     The path to the maze genome to render (only applicable when we're just rendering an existing maze genome instead of
+        ///     generating the genome).
+        /// </summary>
+        MazeGenomeFile
     }
 }

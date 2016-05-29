@@ -177,6 +177,8 @@ namespace SharpNeat.Genomes.Maze
         /// </summary>
         private void Mutate()
         {
+            int outcome;
+
             // If there are not yet any walls to mutate, the mutation will be to add a wall
             // (otherwise, the resulting maze will be exactly the same structure)
             if (GeneList.Count <= 0)
@@ -185,9 +187,13 @@ namespace SharpNeat.Genomes.Maze
                 return;
             }
 
-            // Get random mutation to perform
-            int outcome = RouletteWheel.SingleThrow(GenomeFactory.MazeGenomeParameters.RouletteWheelLayout,
-                GenomeFactory.Rng);
+            do
+            {
+                // Get random mutation to perform
+                outcome = RouletteWheel.SingleThrow(GenomeFactory.MazeGenomeParameters.RouletteWheelLayout,
+                    GenomeFactory.Rng);
+            } while (GenomeFactory.MaxComplexity != null && GeneList.Count > GenomeFactory.MaxComplexity && outcome >= 2);
+
 
             switch (outcome)
             {

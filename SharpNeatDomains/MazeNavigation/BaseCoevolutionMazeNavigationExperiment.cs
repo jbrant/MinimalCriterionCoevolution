@@ -129,7 +129,7 @@ namespace SharpNeat.Domains.MazeNavigation
         /// <returns>The constructed maze genome factory.</returns>
         public IGenomeFactory<MazeGenome> CreateMazeGenomeFactory()
         {
-            return new MazeGenomeFactory(MazeGenomeParameters);
+            return new MazeGenomeFactory(MazeGenomeParameters, null, null);
         }
 
         /// <summary>

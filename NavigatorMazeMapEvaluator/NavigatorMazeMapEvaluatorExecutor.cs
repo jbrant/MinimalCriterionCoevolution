@@ -374,7 +374,7 @@ namespace NavigatorMazeMapEvaluator
             _executionLogger.Error("The experiment executor invocation must take the following form:");
             _executionLogger.Error(
                 string.Format(
-                    "NavigatorMazeMapEvaluator.exe {0}=[{6}] {1}=[{7}] (Optional: {2}=[{8}]) (Optional: {3}=[{10}]) (Optional: {4}=[{9}] {5}=[{10}]) {6}=[{11}]",
+                    "NavigatorMazeMapEvaluator.exe {0}=[{7}] {1}=[{8}] (Optional: {2}=[{9}]) (Optional: {3}=[{10}]) (Optional: {4}=[{9}] {5}=[{10}]) {6}=[{11}]",
                     ExecutionParameter.AgentNeuronInputCount, ExecutionParameter.AgentNeuronOutputCount,
                     ExecutionParameter.WriteResultsToDatabase, ExecutionParameter.DataFileOutputDirectory,
                     ExecutionParameter.GenerateAgentTrajectoryBitmaps,
