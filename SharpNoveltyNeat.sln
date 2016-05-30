@@ -42,6 +42,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MazeGenomeGenerator", "Maze
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MazeSimulator", "MazeSimulator\MazeSimulator.csproj", "{6233C323-C77D-4F98-9815-BEBEFD0CA6CD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MazeSimulatorSupport", "MazeSimulatorSupport\MazeSimulatorSupport.csproj", "{4CA5EA7D-771D-4330-8C06-200FDA1B279E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -324,6 +326,26 @@ Global
 		{6233C323-C77D-4F98-9815-BEBEFD0CA6CD}.Release|x64.Build.0 = Release|Any CPU
 		{6233C323-C77D-4F98-9815-BEBEFD0CA6CD}.Release|x86.ActiveCfg = Release|Any CPU
 		{6233C323-C77D-4F98-9815-BEBEFD0CA6CD}.Release|x86.Build.0 = Release|Any CPU
+		{4CA5EA7D-771D-4330-8C06-200FDA1B279E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4CA5EA7D-771D-4330-8C06-200FDA1B279E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4CA5EA7D-771D-4330-8C06-200FDA1B279E}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{4CA5EA7D-771D-4330-8C06-200FDA1B279E}.Debug|ARM.Build.0 = Debug|Any CPU
+		{4CA5EA7D-771D-4330-8C06-200FDA1B279E}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{4CA5EA7D-771D-4330-8C06-200FDA1B279E}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{4CA5EA7D-771D-4330-8C06-200FDA1B279E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{4CA5EA7D-771D-4330-8C06-200FDA1B279E}.Debug|x64.Build.0 = Debug|Any CPU
+		{4CA5EA7D-771D-4330-8C06-200FDA1B279E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4CA5EA7D-771D-4330-8C06-200FDA1B279E}.Debug|x86.Build.0 = Debug|Any CPU
+		{4CA5EA7D-771D-4330-8C06-200FDA1B279E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4CA5EA7D-771D-4330-8C06-200FDA1B279E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4CA5EA7D-771D-4330-8C06-200FDA1B279E}.Release|ARM.ActiveCfg = Release|Any CPU
+		{4CA5EA7D-771D-4330-8C06-200FDA1B279E}.Release|ARM.Build.0 = Release|Any CPU
+		{4CA5EA7D-771D-4330-8C06-200FDA1B279E}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{4CA5EA7D-771D-4330-8C06-200FDA1B279E}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{4CA5EA7D-771D-4330-8C06-200FDA1B279E}.Release|x64.ActiveCfg = Release|Any CPU
+		{4CA5EA7D-771D-4330-8C06-200FDA1B279E}.Release|x64.Build.0 = Release|Any CPU
+		{4CA5EA7D-771D-4330-8C06-200FDA1B279E}.Release|x86.ActiveCfg = Release|Any CPU
+		{4CA5EA7D-771D-4330-8C06-200FDA1B279E}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
