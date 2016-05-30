@@ -6,20 +6,28 @@
         xmlns:local="clr-namespace:MazeSimulator"
         mc:Ignorable="d"
         Title="MainWindow" Height="780" Width="740">
-    <DockPanel>
-        <Menu DockPanel.Dock="Top">
-            <MenuItem Header="File">
-                <MenuItem Header="Open" Name="OpenMenuItem" Click="OpenMenuItem_OnClick" />
-                <MenuItem Header="Close" Name="CloseMenuItem" Click="CloseMenuItem_OnClick"/>
-            </MenuItem>
-            <MenuItem Header="Action">
-                <MenuItem Header="Start" Name="StartMenuItem" Click="StartMenuItem_OnClick" />
-                <MenuItem Header="Stop" Name="StopMenuItem" Click="StopMenuItem_OnClick" />
-                <MenuItem Header="Pause" Name="PauseMenuItem" Click="PauseMenuItem_OnClick"/>
-            </MenuItem>
-        </Menu>
-        <Grid Margin="0,0,0,0" Height="720" Width="720">
-            <Canvas x:Name="SimulationCanvas" HorizontalAlignment="Left" Height="700" Margin="10,10,10,10" VerticalAlignment="Top" Width="700"/>
-        </Grid>
-    </DockPanel>
+	<DockPanel>
+		<Menu DockPanel.Dock="Top">
+			<MenuItem Header="File">
+				<MenuItem Header="Load From File" Name="LoadFromFileMenuItem">
+					<MenuItem Header="Load Experiment Configuration" Name="LoadExperimentConfigurationMenuItem"
+					          Click="LoadExperimentConfigurationMenuItem_OnClick" />
+                    <MenuItem Header="Load Navigator Genome" Name="LoadNavigatorGenomeMenuItem" IsEnabled="False"
+					          Click="LoadNavigatorGenomeMenuItem_OnClick" />
+                    <MenuItem Header="Load Maze Genome" Name="LoadMazeGenomeMenuItem" IsEnabled="False" Click="LoadMazeGenomeMenuItem_OnClick" />
+				</MenuItem>
+				<MenuItem Header="Open From Database" Name="OpenDatabaseMenuItem" Click="OpenDatabaseMenuItem_OnClick" />
+				<MenuItem Header="Close" Name="CloseMenuItem" Click="CloseMenuItem_OnClick" />
+			</MenuItem>
+			<MenuItem Header="Action">
+				<MenuItem Header="Start" Name="StartMenuItem" Click="StartMenuItem_OnClick" />
+				<MenuItem Header="Stop" Name="StopMenuItem" Click="StopMenuItem_OnClick" />
+				<MenuItem Header="Pause" Name="PauseMenuItem" Click="PauseMenuItem_OnClick" />
+			</MenuItem>
+		</Menu>
+		<Grid Margin="0,0,0,0" Height="720" Width="720">
+			<Canvas x:Name="SimulationCanvas" HorizontalAlignment="Left" Height="700" Margin="10,10,10,10"
+			        VerticalAlignment="Top" Width="700" />
+		</Grid>
+	</DockPanel>
 </Window>
