@@ -26,18 +26,11 @@ namespace MazeSimulatorSupport
             _wallThickness = lineThickness;
         }
 
-        public List<Line> GetMazeWalls(List<MazeStructureWall> mazeStructureWalls, int evolvedMazeHeight,
-            int evolvedMazeWidth)
+        public List<Line> GetMazeWalls(List<MazeStructureWall> mazeStructureWalls, int mazeHeight, int mazeWidth)
         {
-            // Maze boundaries aren't serialized, so generate them based on dimensions
-            /*mazeWalls.Add(CreateMazeLine(0, 0, true));
-            mazeWalls.Add(CreateMazeLine(0, 0, false));
-            mazeWalls.Add(CreateMazeLine(0, _mazeCanvasHeight, true));
-            mazeWalls.Add(CreateMazeLine(_mazeCanvasWidth, 0, false));*/
-
             // Determine scale coefficient for fitting to canvas
-            double canvasHeightFitCoefficient = (double) _mazeCanvasHeight/evolvedMazeHeight;
-            double canvasWidthFitCoefficient = (double) _mazeCanvasWidth/evolvedMazeWidth;
+            double canvasHeightFitCoefficient = (double) _mazeCanvasHeight/mazeHeight;
+            double canvasWidthFitCoefficient = (double) _mazeCanvasWidth/mazeWidth;
 
             // Add the interior walls and return the list
             return

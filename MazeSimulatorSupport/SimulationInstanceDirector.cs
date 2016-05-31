@@ -1,6 +1,8 @@
 ﻿#region
 
+using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using SharpNeat.Phenomes;
@@ -55,8 +57,28 @@ namespace MazeSimulatorSupport
         }
 
         public List<Line> ConstructMazeWalls()
-        {            
-            return _mazeSimulationGraphicsController.GetMazeWalls(_mazeStructure.Walls, _simulatorExperimentConfiguration.MazeHeight, _simulatorExperimentConfiguration.MazeWidth);
+        {
+            return _mazeSimulationGraphicsController.GetMazeWalls(_mazeStructure.Walls,
+                _simulatorExperimentConfiguration.MazeHeight, _simulatorExperimentConfiguration.MazeWidth);
+        }
+
+        public bool IsConnectionStringValid(string connectionString)
+        {
+            try
+            {
+                using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+                {
+                    // Attempt to open connection (exception is raised if this fails)
+                    sqlConnection.Open();
+                }
+
+                return true;
+            }
+            catch (SqlException)
+            {
+                // If exception was thrown it means there was a problem connecting or the connection string is invalid
+                return false;
+            }
         }
 
         #endregion

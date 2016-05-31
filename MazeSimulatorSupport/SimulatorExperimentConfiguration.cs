@@ -29,9 +29,8 @@ namespace MazeSimulatorSupport
             int minSuccessDistance)
         {
             ExperimentName = experimentName;
-            MazeHeight = mazeHeight;
-            MazeWidth = mazeWidth;
-            MazeScaleMultiplier = mazeScaleMultiplier;
+            MazeHeight = mazeHeight*mazeScaleMultiplier;
+            MazeWidth = mazeWidth*mazeScaleMultiplier;
             NavigatorAnnActivationScheme = navigatorActivationScheme;
             MaxTimesteps = maxTimesteps;
             MinSuccessDistance = minSuccessDistance;
@@ -43,21 +42,16 @@ namespace MazeSimulatorSupport
         public string ExperimentName { get; }
 
         /// <summary>
-        ///     The height of the maze (this is the height at which evolution was performed, not the height on which the navigator
-        ///     was evaluated or the maze displayed).
+        ///     The height of the maze (this is the height at which navigator evolution was performed, not the height at which the
+        ///     maze is displayed).
         /// </summary>
         public int MazeHeight { get; }
 
         /// <summary>
-        ///     The width of the maze (this is the width at which evolution was performed, not the width on which the navigator was
-        ///     evaluated or the maze displayed).
+        ///     The width of the maze (this is the width at which navigator evolution was performed, not the width at which the
+        ///     maze is displayed).
         /// </summary>
         public int MazeWidth { get; }
-
-        /// <summary>
-        ///     The scale factor for bringing the maze up to evaluation/display size.
-        /// </summary>
-        public int MazeScaleMultiplier { get; }
 
         /// <summary>
         ///     The navigator ANN controller activation scheme (e.g. acyclic or cyclic).
