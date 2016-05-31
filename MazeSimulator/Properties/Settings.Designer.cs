@@ -22,5 +22,17 @@ namespace MazeSimulator.Properties {
                 return defaultInstance;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string ExperimentDbConnectionString {
+            get {
+                return ((string)(this["ExperimentDbConnectionString"]));
+            }
+            set {
+                this["ExperimentDbConnectionString"] = value;
+            }
+        }
     }
 }

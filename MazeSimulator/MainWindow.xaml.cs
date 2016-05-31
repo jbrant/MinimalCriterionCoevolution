@@ -5,8 +5,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using System.Windows.Threading;
 using MazeSimulatorSupport;
+using Microsoft.Data.ConnectionUI;
 using Microsoft.Win32;
 
 #endregion
@@ -83,9 +83,31 @@ namespace MazeSimulator
             throw new NotImplementedException();
         }
 
-        private void OpenDatabaseMenuItem_OnClick(object sender, RoutedEventArgs e)
+        private void OpenFromDatabaseMenuItem_OnClick(object sender, RoutedEventArgs e)
         {
-            throw new NotImplementedException();
+            // Build the data source, hard-coded to SQL Server
+            DataSource sqlDataSource = new DataSource("MicrosoftSqlServer", "Microsoft SQL Server");
+            sqlDataSource.Providers.Add(DataProvider.SqlDataProvider);
+
+            // Construct the data connection dialog, add the SQL Server data source, and set to default
+            DataConnectionDialog dbConnectionDialog = new DataConnectionDialog();
+            dbConnectionDialog.DataSources.Add(sqlDataSource);
+            dbConnectionDialog.SelectedDataProvider = DataProvider.SqlDataProvider;
+            dbConnectionDialog.SelectedDataSource = sqlDataSource;
+
+            // When user clicks OK, grab the connection string and parse through it
+            if (DataConnectionDialog.Show(dbConnectionDialog) == System.Windows.Forms.DialogResult.OK)
+            {
+                if (_simInstanceDirector.IsConnectionStringValid(dbConnectionDialog.ConnectionString))
+                {
+                    Properties.Settings.Default.ExperimentDbConnectionString = dbConnectionDialog.ConnectionString;
+                }
+                else
+                {
+                    MessageBox.Show("Couldn't connect to the database using the provided connection information.",
+                        "Error Connecting to Data Source", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                }
+            }
         }
 
         private void LoadNavigatorGenomeMenuItem_OnClick(object sender, RoutedEventArgs e)

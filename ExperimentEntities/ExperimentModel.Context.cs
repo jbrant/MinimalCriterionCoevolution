@@ -19,6 +19,10 @@ namespace ExperimentEntities
             : base("name=ExperimentDataEntities")
         {
         }
+
+        public ExperimentDataEntities(string connectionString) : base(connectionString)
+        {
+        }
     
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

@@ -9,20 +9,21 @@
 	<DockPanel>
 		<Menu DockPanel.Dock="Top">
 			<MenuItem Header="File">
-				<MenuItem Header="Load From File" Name="LoadFromFileMenuItem">
+                <MenuItem Header="Open From File" Name="OpenFromFileMenuItem">
 					<MenuItem Header="Load Experiment Configuration" Name="LoadExperimentConfigurationMenuItem"
 					          Click="LoadExperimentConfigurationMenuItem_OnClick" />
-                    <MenuItem Header="Load Navigator Genome" Name="LoadNavigatorGenomeMenuItem" IsEnabled="False"
+					<MenuItem Header="Load Navigator Genome" Name="LoadNavigatorGenomeMenuItem" IsEnabled="False"
 					          Click="LoadNavigatorGenomeMenuItem_OnClick" />
-                    <MenuItem Header="Load Maze Genome" Name="LoadMazeGenomeMenuItem" IsEnabled="False" Click="LoadMazeGenomeMenuItem_OnClick" />
+					<MenuItem Header="Load Maze Genome" Name="LoadMazeGenomeMenuItem" IsEnabled="False"
+					          Click="LoadMazeGenomeMenuItem_OnClick" />
 				</MenuItem>
-				<MenuItem Header="Open From Database" Name="OpenDatabaseMenuItem" Click="OpenDatabaseMenuItem_OnClick" />
+				<MenuItem Header="Open From Database" Name="OpenFromDatabaseMenuItem" Click="OpenFromDatabaseMenuItem_OnClick" />
 				<MenuItem Header="Close" Name="CloseMenuItem" Click="CloseMenuItem_OnClick" />
 			</MenuItem>
 			<MenuItem Header="Action">
-				<MenuItem Header="Start" Name="StartMenuItem" Click="StartMenuItem_OnClick" />
-				<MenuItem Header="Stop" Name="StopMenuItem" Click="StopMenuItem_OnClick" />
-				<MenuItem Header="Pause" Name="PauseMenuItem" Click="PauseMenuItem_OnClick" />
+				<MenuItem Header="Start" Name="StartMenuItem" IsEnabled="False" Click="StartMenuItem_OnClick" />
+				<MenuItem Header="Stop" Name="StopMenuItem" IsEnabled="False" Click="StopMenuItem_OnClick" />
+				<MenuItem Header="Pause" Name="PauseMenuItem" IsEnabled="False" Click="PauseMenuItem_OnClick" />
 			</MenuItem>
 		</Menu>
 		<Grid Margin="0,0,0,0" Height="720" Width="720">
