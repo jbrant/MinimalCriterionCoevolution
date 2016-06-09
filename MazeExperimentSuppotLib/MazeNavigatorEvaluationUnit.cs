@@ -5,7 +5,7 @@ using SharpNeat.Phenomes.Mazes;
 
 #endregion
 
-namespace NavigatorMazeMapEvaluator
+namespace MazeExperimentSuppotLib
 {
     public class MazeNavigatorEvaluationUnit
     {

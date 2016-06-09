@@ -1,6 +1,5 @@
 ﻿#region
 
-using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Windows.Media;
@@ -79,6 +78,16 @@ namespace MazeSimulatorSupport
                 // If exception was thrown it means there was a problem connecting or the connection string is invalid
                 return false;
             }
+        }
+
+        public string GetEntityFormatConnectionString(string connectionString)
+        {
+            return _mazeSimulationIoController.BuildEntityConnectionString(connectionString);
+        }
+
+        public List<string> RetrieveExperimentConfigurationNames(string connectionString)
+        {
+            return _mazeSimulationIoController.GetDatabaseExperimentNames(connectionString);
         }
 
         #endregion

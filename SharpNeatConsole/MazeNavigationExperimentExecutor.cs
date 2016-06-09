@@ -743,11 +743,12 @@ namespace SharpNeatConsole
                     mazeGenomeList);
                 _coevolutionEaContainer.UpdateEvent += coevolutionContainer_UpdateEvent;
             }
-            catch (Exception)
+            catch (Exception exception)
             {
                 _executionLogger.Error(string.Format("Experiment {0}, Run {1} of {2} failed to initialize",
                     experimentName,
                     runIdx, numRuns));
+                _executionLogger.Error(exception.Message);
                 Environment.Exit(0);
             }
 

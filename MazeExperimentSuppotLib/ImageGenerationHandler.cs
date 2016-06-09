@@ -10,7 +10,7 @@ using SharpNeat.Phenomes.Mazes;
 
 #endregion
 
-namespace NavigatorMazeMapEvaluator
+namespace MazeExperimentSuppotLib
 {
     /// <summary>
     ///     Handles generation of bitmap images of agent trajectories through the given maze structures.

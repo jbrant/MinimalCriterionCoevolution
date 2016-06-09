@@ -8,7 +8,7 @@ using RunPhase = SharpNeat.Core.RunPhase;
 
 #endregion
 
-namespace NavigatorMazeMapEvaluator
+namespace MazeExperimentSuppotLib
 {
     /// <summary>
     ///     Provides methods for interfacing with and writing reuslts to the experiment database or flat file.
@@ -104,6 +104,18 @@ namespace NavigatorMazeMapEvaluator
         }
 
         /// <summary>
+        ///     Retrieves the maze genome XML for a particular batch of a given run/experiment.
+        /// </summary>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <param name="batch">The batch number of the given run.</param>
+        /// <returns>The maze genome XML.</returns>
+        public static IList<string> GetMazeGenomeXml(int experimentId, int run, int batch)
+        {
+            return GetMazeGenomeData(experimentId, run, batch).Select(mazeGenome => mazeGenome.GenomeXml).ToList();
+        }
+
+        /// <summary>
         ///     Retrieves the maze genome data (i.e. evaluation statistics and XML) for a particular batch of a given
         ///     run/experiemnt.
         /// </summary>
@@ -150,7 +162,8 @@ namespace NavigatorMazeMapEvaluator
                     context.CoevolutionMCSNavigatorExperimentGenomes.Where(
                         expData =>
                             expData.ExperimentDictionaryID == experimentId && expData.Run == run &&
-                            expData.Generation == batch && expData.RunPhase.RunPhaseName == runPhase.ToString()).ToList();
+                            expData.Generation == batch && expData.RunPhase.RunPhaseName == runPhase.ToString())
+                        .ToList();
             }
 
             return navigatorGenomes;
