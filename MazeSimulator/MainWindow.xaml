@@ -9,17 +9,23 @@
 	<DockPanel>
 		<Menu DockPanel.Dock="Top">
 			<MenuItem Header="File">
-                <MenuItem Header="Open From File" Name="OpenFromFileMenuItem">
-					<MenuItem Header="Load Experiment Configuration" Name="LoadExperimentConfigurationMenuItem"
-					          Click="LoadExperimentConfigurationMenuItem_OnClick" />
+				<MenuItem Header="Open From File" Name="OpenFromFileMenuItem">
+					<MenuItem Header="Load Experiment Configuration" Name="LoadFileExperimentConfigurationMenuItem"
+					          Click="LoadFileExperimentConfigurationMenuItem_OnClick" />
 					<MenuItem Header="Load Navigator Genome" Name="LoadNavigatorGenomeMenuItem" IsEnabled="False"
 					          Click="LoadNavigatorGenomeMenuItem_OnClick" />
 					<MenuItem Header="Load Maze Genome" Name="LoadMazeGenomeMenuItem" IsEnabled="False"
 					          Click="LoadMazeGenomeMenuItem_OnClick" />
 				</MenuItem>
-				<MenuItem Header="Open From Database" Name="OpenFromDatabaseMenuItem" Click="OpenFromDatabaseMenuItem_OnClick" />
+				<MenuItem Header="Open From Database" Name="OpenFromDatabaseMenuItem">
+					<MenuItem Header="Define Database Connection" Name="DefineDatabaseConnectionMenuItem"
+					          Click="DefineDatabaseConnectionMenuItem_OnClick" />
+					<MenuItem Header="Load Experiment Configuration" Name="LoadDatabaseExperimentConfigurationMenuItem"
+					          IsEnabled="False" Click="LoadDatabaseExperimentConfigurationMenuItem_OnClick" />
+				</MenuItem>
 				<MenuItem Header="Close" Name="CloseMenuItem" Click="CloseMenuItem_OnClick" />
 			</MenuItem>
+			<MenuItem Header="View" Name="ViewMenuItem" />
 			<MenuItem Header="Action">
 				<MenuItem Header="Start" Name="StartMenuItem" IsEnabled="False" Click="StartMenuItem_OnClick" />
 				<MenuItem Header="Stop" Name="StopMenuItem" IsEnabled="False" Click="StopMenuItem_OnClick" />

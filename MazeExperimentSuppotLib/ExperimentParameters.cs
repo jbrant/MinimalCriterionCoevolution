@@ -4,7 +4,7 @@ using System;
 
 #endregion
 
-namespace NavigatorMazeMapEvaluator
+namespace MazeExperimentSuppotLib
 {
     public struct ExperimentParameters
     {

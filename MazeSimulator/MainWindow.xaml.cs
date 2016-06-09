@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using MazeSimulator.Properties;
 using MazeSimulatorSupport;
 using Microsoft.Data.ConnectionUI;
 using Microsoft.Win32;
@@ -32,12 +33,15 @@ namespace MazeSimulator
             _simInstanceDirector.SetupNewExecution((int) SimulationCanvas.Height, (int) SimulationCanvas.Width,
                 Brushes.LightSteelBlue, 2);
 
+            // Restore relevant state of any previous sessions
+            RestorePreviousSessionState();
+
             // TODO: Technically, this stuff should only be called when maze genome file is referenced
             // Get maze boundaries/walls
             /*foreach (Line mazeWall in _mazeSimulationGraphicsController.GetMazeWalls())
             {
                 SimulationCanvas.Children.Add(mazeWall);
-            }*/
+            }
 
             testRect = new Rectangle();
             testRect.Width = 20;
@@ -47,7 +51,7 @@ namespace MazeSimulator
 
             Canvas.SetLeft(testRect, 100);
 
-            Canvas.GetLeft(testRect);
+            Canvas.GetLeft(testRect);*/
 
             // TODO: This is the reference code for setting up the timer for simulation steps
             /*
@@ -58,6 +62,15 @@ namespace MazeSimulator
             */
         }
 
+        private void RestorePreviousSessionState()
+        {
+            // Enable database experiment selection if there's a pre-existing connection setup
+            if (Settings.Default.ExperimentDbConnectionString != null)
+            {
+                LoadDatabaseExperimentConfigurationMenuItem.IsEnabled = true;
+            }
+        }
+
         private void dispatchTimer_Tick(object sender, EventArgs e)
         {
             Canvas.SetLeft(testRect, Canvas.GetLeft(testRect) + 1);
@@ -65,7 +78,8 @@ namespace MazeSimulator
 
         private void CloseMenuItem_OnClick(object sender, RoutedEventArgs e)
         {
-            throw new NotImplementedException();
+            // Close the application
+            Close();
         }
 
         private void StartMenuItem_OnClick(object sender, RoutedEventArgs e)
@@ -81,33 +95,6 @@ namespace MazeSimulator
         private void PauseMenuItem_OnClick(object sender, RoutedEventArgs e)
         {
             throw new NotImplementedException();
-        }
-
-        private void OpenFromDatabaseMenuItem_OnClick(object sender, RoutedEventArgs e)
-        {
-            // Build the data source, hard-coded to SQL Server
-            DataSource sqlDataSource = new DataSource("MicrosoftSqlServer", "Microsoft SQL Server");
-            sqlDataSource.Providers.Add(DataProvider.SqlDataProvider);
-
-            // Construct the data connection dialog, add the SQL Server data source, and set to default
-            DataConnectionDialog dbConnectionDialog = new DataConnectionDialog();
-            dbConnectionDialog.DataSources.Add(sqlDataSource);
-            dbConnectionDialog.SelectedDataProvider = DataProvider.SqlDataProvider;
-            dbConnectionDialog.SelectedDataSource = sqlDataSource;
-
-            // When user clicks OK, grab the connection string and parse through it
-            if (DataConnectionDialog.Show(dbConnectionDialog) == System.Windows.Forms.DialogResult.OK)
-            {
-                if (_simInstanceDirector.IsConnectionStringValid(dbConnectionDialog.ConnectionString))
-                {
-                    Properties.Settings.Default.ExperimentDbConnectionString = dbConnectionDialog.ConnectionString;
-                }
-                else
-                {
-                    MessageBox.Show("Couldn't connect to the database using the provided connection information.",
-                        "Error Connecting to Data Source", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                }
-            }
         }
 
         private void LoadNavigatorGenomeMenuItem_OnClick(object sender, RoutedEventArgs e)
@@ -158,7 +145,7 @@ namespace MazeSimulator
             }
         }
 
-        private void LoadExperimentConfigurationMenuItem_OnClick(object sender, RoutedEventArgs e)
+        private void LoadFileExperimentConfigurationMenuItem_OnClick(object sender, RoutedEventArgs e)
         {
             // Create open file dialog and filter to XML files
             OpenFileDialog openExperimentConfigFileDialog = new OpenFileDialog {Filter = "XML files (*.xml) | *.xml"};
@@ -186,6 +173,55 @@ namespace MazeSimulator
                     LoadMazeGenomeMenuItem.IsEnabled = false;
                 }
             }
+        }
+
+        private void DefineDatabaseConnectionMenuItem_OnClick(object sender, RoutedEventArgs e)
+        {
+            // Build the data source, hard-coded to SQL Server
+            DataSource sqlDataSource = new DataSource("MicrosoftSqlServer", "Microsoft SQL Server");
+            sqlDataSource.Providers.Add(DataProvider.SqlDataProvider);
+
+            // Construct the data connection dialog, add the SQL Server data source, and set to default
+            DataConnectionDialog dbConnectionDialog = new DataConnectionDialog();
+            dbConnectionDialog.DataSources.Add(sqlDataSource);
+            dbConnectionDialog.SelectedDataProvider = DataProvider.SqlDataProvider;
+            dbConnectionDialog.SelectedDataSource = sqlDataSource;
+
+            // When user clicks OK, grab the connection string and parse through it
+            if (DataConnectionDialog.Show(dbConnectionDialog) == System.Windows.Forms.DialogResult.OK)
+            {
+                if (_simInstanceDirector.IsConnectionStringValid(dbConnectionDialog.ConnectionString))
+                {
+                    // Save off the validated connection string for future use on restart
+                    Settings.Default.ExperimentDbConnectionString =
+                        _simInstanceDirector.GetEntityFormatConnectionString(dbConnectionDialog.ConnectionString);
+                    Settings.Default.Save();
+
+                    // Enable the database experiment selection option
+                    LoadDatabaseExperimentConfigurationMenuItem.IsEnabled = true;
+                }
+                else
+                {
+                    MessageBox.Show("Couldn't connect to the database using the provided connection information.",
+                        "Error Connecting to Data Source", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+
+                    // Reset the database experiment selection option
+                    LoadDatabaseExperimentConfigurationMenuItem.IsEnabled = false;
+                }
+            }
+        }
+
+        private void LoadDatabaseExperimentConfigurationMenuItem_OnClick(object sender, RoutedEventArgs e)
+        {
+            // Instantiate new experiment selection window
+            ExperimentSelectionWindow experimentSelectionWindow = new ExperimentSelectionWindow(_simInstanceDirector)
+            {
+                ShowInTaskbar = false,
+                Owner = Application.Current.MainWindow
+            };
+
+            // Display the window
+            experimentSelectionWindow.Show();
         }
     }
 }

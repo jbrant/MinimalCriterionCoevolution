@@ -8,6 +8,7 @@ using System.Reflection;
 using ExperimentEntities;
 using log4net;
 using log4net.Config;
+using MazeExperimentSuppotLib;
 using RunPhase = SharpNeat.Core.RunPhase;
 
 #endregion

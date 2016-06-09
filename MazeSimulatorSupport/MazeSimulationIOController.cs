@@ -1,7 +1,12 @@
 ﻿#region
 
+using System.Collections.Generic;
+using System.Data.Entity.Core.EntityClient;
+using System.Data.SqlClient;
 using System.IO;
+using System.Linq;
 using System.Xml;
+using ExperimentEntities;
 using SharpNeat.Decoders;
 using SharpNeat.Decoders.Maze;
 using SharpNeat.Decoders.Neat;
@@ -89,6 +94,39 @@ namespace MazeSimulatorSupport
             MazeStructure mazeStructure = _mazeGenomeDecoder.Decode(mazeGenome);
 
             return mazeStructure;
+        }
+
+        public string BuildEntityConnectionString(string sqlConnectionString)
+        {
+            EntityConnectionStringBuilder entityConnectionStringBuilder = new EntityConnectionStringBuilder();
+
+            // Hard-code the provider name (since we only have a SQL Server source)
+            entityConnectionStringBuilder.Provider = "System.Data.SqlClient";
+
+            // Set the provider-specific connection string
+            entityConnectionStringBuilder.ProviderConnectionString =
+                new SqlConnectionStringBuilder(sqlConnectionString).ToString();
+
+            // Set the resource metadata location
+            entityConnectionStringBuilder.Metadata =
+                "res://*/ExperimentModel.csdl|res://*/ExperimentModel.ssdl|res://*/ExperimentModel.msl";
+
+            return entityConnectionStringBuilder.ToString();
+        }
+
+        public List<string> GetDatabaseExperimentNames(string efConnectionString)
+        {
+            List<string> experimentNames;
+
+            // Open database context and get all experiment names
+            using (ExperimentDataEntities expDataContext = new ExperimentDataEntities(efConnectionString))
+            {
+                // Get list of experiment names (note that these are sorted via ordered index on the field)
+                experimentNames =
+                    expDataContext.ExperimentDictionaries.Select(expConf => expConf.ExperimentName).ToList();
+            }
+
+            return experimentNames;
         }
     }
 }
