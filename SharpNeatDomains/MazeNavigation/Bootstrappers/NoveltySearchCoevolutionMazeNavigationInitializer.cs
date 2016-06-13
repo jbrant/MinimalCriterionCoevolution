@@ -135,7 +135,7 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
             {
                 // Start the algorithm
                 InitializationEa.StartContinue();
-
+                
                 // Ping for status every few hundred milliseconds
                 while (RunState.Terminated != InitializationEa.RunState &&
                        RunState.Paused != InitializationEa.RunState)

@@ -124,6 +124,7 @@
     <Compile Include="MazeNavigation\CoevolutionMCSExperiment\MazeNavigatorMCSEvaluator.cs" />
     <Compile Include="MazeNavigation\CoevolutionMCSExperiment\MazeNavigatorFitnessInitializationEvaluator.cs" />
     <Compile Include="MazeNavigation\CoevolutionMCSExperiment\MazeNavigatorNoveltySearchInitializationEvaluator.cs" />
+    <Compile Include="MazeNavigation\CoevolutionMCSExperiment\NoveltySearchComparisonExperiment.cs" />
     <Compile Include="MazeNavigation\Components\MazeNavigator.cs" />
     <Compile Include="MazeNavigation\Components\MazeVariant.cs" />
     <Compile Include="MazeNavigation\Components\PieSliceSensorArray.cs" />

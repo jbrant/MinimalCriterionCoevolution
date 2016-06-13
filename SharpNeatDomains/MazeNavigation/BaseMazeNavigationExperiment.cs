@@ -92,6 +92,7 @@ namespace SharpNeat.Domains.MazeNavigation
             NeatEvolutionAlgorithmParameters = ExperimentUtils.ReadNeatEvolutionAlgorithmParameters(
                 experimentDictionary, true);
             NeatGenomeParameters = ExperimentUtils.ReadNeatGenomeParameters(experimentDictionary, true);
+            NeatGenomeParameters.FeedforwardOnly = _activationScheme.AcyclicNetwork;
 
             // Set experiment-specific parameters
             MaxTimesteps = experimentDictionary.MaxTimesteps;
