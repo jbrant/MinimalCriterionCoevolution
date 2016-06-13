@@ -10,9 +10,10 @@ using ExperimentEntities;
 using log4net;
 using log4net.Config;
 using MazeExperimentSuppotLib;
+using SharpNeat.Core;
 using SharpNeat.Decoders.Maze;
-using SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment;
 using SharpNeat.Genomes.Maze;
+using SharpNeat.Genomes.Neat;
 using SharpNeat.Phenomes.Mazes;
 using RunPhase = SharpNeat.Core.RunPhase;
 
@@ -20,11 +21,21 @@ using RunPhase = SharpNeat.Core.RunPhase;
 
 namespace CoevolutionAlgorithmComparator
 {
+    /// <summary>
+    ///     Handles execution of comparison between coevolution and reference algorithm for one or more coevolution experiment
+    ///     configurations.
+    /// </summary>
     internal class CoevolutionAlgorithmComparatorExecutor
     {
+        /// <summary>
+        ///     Map of execution parameters.
+        /// </summary>
         private static readonly Dictionary<ExecutionParameter, String> ExecutionConfiguration =
             new Dictionary<ExecutionParameter, string>();
 
+        /// <summary>
+        ///     Execution file logger.
+        /// </summary>
         private static ILog _executionLogger;
 
         private static void Main(string[] args)
@@ -133,8 +144,9 @@ namespace CoevolutionAlgorithmComparator
 
                     // Begin comparative analysis
                     RunPerBatchComparativeAnalysis(batchesWithGenomeData,
-                        curCoEvoExperimentConfiguration.ExperimentDictionaryID, inputNeuronCount, outputNeuronCount,
-                        curRun, numRuns, mazeDecoder);
+                        curCoEvoExperimentConfiguration.ExperimentDictionaryID,
+                        curCoEvoExperimentConfiguration.ExperimentName, curRun, numRuns, mazeDecoder,
+                        referenceExperimentConfiguration);
 
                     // Close the file writer after the comparative analysis for the current run is complete
                     ExperimentDataHandler.CloseFileWriter();
@@ -142,12 +154,26 @@ namespace CoevolutionAlgorithmComparator
             }
         }
 
+        /// <summary>
+        ///     Handles per-batch comparison of coevolution-generated mazes on a reference algorithm (e.g. novelty search).
+        /// </summary>
+        /// <param name="batchesWithGenomeData">List of the batches that contain maze genome data.</param>
+        /// <param name="curCoevoExperimentId">Identifier of the coevolution experiment.</param>
+        /// <param name="curCoevoExperimentName">Name of the coevolution experiment.</param>
+        /// <param name="curRun">The current run.</param>
+        /// <param name="numRuns">The total number of runs in the experiment.</param>
+        /// <param name="mazeDecoder">Reference to the maze genome decoder.</param>
+        /// <param name="noveltySearchExperimentConfig">The experiment configuration for the reference (novelty search) experiment.</param>
         private static void RunPerBatchComparativeAnalysis(IList<int> batchesWithGenomeData,
-            int curCoevoExperimentId, int inputNeuronCount, int outputNeuronCount, int curRun,
-            int numRuns, MazeDecoder mazeDecoder)
+            int curCoevoExperimentId, string curCoevoExperimentName, int curRun, int numRuns, MazeDecoder mazeDecoder,
+            ExperimentDictionary noveltySearchExperimentConfig)
         {
             // Declare list to hold maze IDs that have already been evaluated using the comparison algorithm
             List<int> evaluatedMazeGenomeIds = new List<int>();
+
+            // Get the total number of initialization evaluations for the current run
+            int coEvoInitEvaluations = ExperimentDataHandler.GetInitializationEvaluationsForRun(curCoevoExperimentId,
+                curRun);
 
             // Iterate through each batch and run comparative algorithm on each maze
             foreach (int curBatch in batchesWithGenomeData)
@@ -162,20 +188,59 @@ namespace CoevolutionAlgorithmComparator
                 foreach (string genomeXml in mazeGenomeXml)
                 {
                     MazeStructure curMazeStructure = null;
+                    MazeGenome curMazeGenome = null;
 
                     // Create a new (mostly dummy) maze genome factory
                     MazeGenomeFactory curMazeGenomeFactory = new MazeGenomeFactory();
 
-                    // Convert each genome string to an equivalent genome object and decode to maze structure
+                    // Convert each genome string to an equivalent genome object
                     using (XmlReader xr = XmlReader.Create(new StringReader(genomeXml)))
                     {
-                        curMazeStructure = mazeDecoder.Decode(MazeGenomeXmlIO.ReadSingleGenomeFromRoot(xr, curMazeGenomeFactory));
+                        curMazeGenome = MazeGenomeXmlIO.ReadSingleGenomeFromRoot(xr, curMazeGenomeFactory);
                     }
 
-                    // TODO: We basically need to setup a new NS experiment configuration for every maze in every batch (NoveltySearchRunner)
-                    
+                    // If the maze has already been processed, continue on to the next one
+                    // (also exclude the initialization maze as a special case)
+                    if (evaluatedMazeGenomeIds.Contains((int) curMazeGenome.BirthGeneration) ||
+                        curMazeGenome.BirthGeneration == 0)
+                    {
+                        continue;
+                    }
+
+                    // Get the total number of evaluations required to solve this maze
+                    // (this amounts to the total number of evaluations from both queues at the time of maze birth)
+                    int coEvoTotalEvaluations = coEvoInitEvaluations +
+                                                ExperimentDataHandler.GetTotalPrimaryEvaluationsAtBatch(
+                                                    curCoevoExperimentId, curRun, (int) curMazeGenome.BirthGeneration);
+
+                    // Decode the maze structure
+                    curMazeStructure =
+                        mazeDecoder.Decode(curMazeGenome);
+
+                    // Instantiate new novelty search experiment for the current experiment/batch/maze
+                    NoveltySearchRunner nsRunner = new NoveltySearchRunner(noveltySearchExperimentConfig,
+                        curCoevoExperimentName, curMazeStructure, curRun, numRuns, _executionLogger);
+
+                    _executionLogger.Info(string.Format(
+                        "Executing novelty search on maze [{0}] with birth batch [{1}]", curMazeGenome.Id,
+                        curMazeGenome.BirthGeneration));
+
+                    // Run novelty search on that maze until the maze is solved or the max evals have been reached
+                    INeatEvolutionAlgorithm<NeatGenome> eaFinalState = nsRunner.RunNoveltySearch();
+
+                    // Write comparison results to output file
+                    ExperimentDataHandler.WriteNoveltySearchComparisonResults(curCoevoExperimentId,
+                        noveltySearchExperimentConfig.ExperimentDictionaryID, curRun, curBatch,
+                        (int) curMazeGenome.Id, (int) curMazeGenome.BirthGeneration,
+                        (int) eaFinalState.Statistics._minComplexity,
+                        (int) eaFinalState.Statistics._maxComplexity, eaFinalState.Statistics._meanComplexity,
+                        coEvoTotalEvaluations, (int) eaFinalState.CurrentEvaluations,
+                        !((int) eaFinalState.CurrentEvaluations >= noveltySearchExperimentConfig.MaxEvaluations), false);
+
+                    // Add maze genome ID to the list of processed mazes to its not considered for evaluation again
+                    evaluatedMazeGenomeIds.Add((int) curMazeGenome.Id);
                 }
-            }            
+            }
         }
 
         /// <summary>
