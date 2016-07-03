@@ -5,6 +5,7 @@ using System.Xml;
 using SharpNeat.Core;
 using SharpNeat.Decoders.Maze;
 using SharpNeat.Decoders.Neat;
+using SharpNeat.DistanceMetrics;
 using SharpNeat.Domains.MazeNavigation.Bootstrappers;
 using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.Genomes.Maze;
@@ -12,6 +13,7 @@ using SharpNeat.Genomes.Neat;
 using SharpNeat.Loggers;
 using SharpNeat.Phenomes;
 using SharpNeat.Phenomes.Mazes;
+using SharpNeat.SpeciationStrategies;
 
 #endregion
 
@@ -157,7 +159,8 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
                 NeatGenomeParameters);
 
             // Create a genome factory for the maze genomes
-            IGenomeFactory<MazeGenome> mazeGenomeFactory = new MazeGenomeFactory(MazeGenomeParameters, _mazeHeight, _mazeWidth);
+            IGenomeFactory<MazeGenome> mazeGenomeFactory = new MazeGenomeFactory(MazeGenomeParameters, _mazeHeight,
+                _mazeWidth);
 
             // Create an initial population of maze navigators
             List<NeatGenome> neatGenomeList = neatGenomeFactory.CreateGenomeList(populationSize1, 0);
@@ -184,7 +187,7 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             IGenomeFactory<MazeGenome> genomeFactory2, List<NeatGenome> genomeList1, List<MazeGenome> genomeList2)
         {
             ulong initializationEvaluations;
-            
+
             // Compute the maze max complexity
             ((MazeGenomeFactory) genomeFactory2).MaxComplexity = _mazeHeight*_mazeWidth;
 
@@ -208,13 +211,17 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
 
             // Create the NEAT (i.e. navigator) queueing evolution algorithm
             AbstractEvolutionAlgorithm<NeatGenome> neatEvolutionAlgorithm =
-                new QueueingNeatEvolutionAlgorithm<NeatGenome>(new NeatEvolutionAlgorithmParameters(), null,
+                new QueueingNeatEvolutionAlgorithm<NeatGenome>(new NeatEvolutionAlgorithmParameters(),
+                    new ParallelKMeansClusteringStrategy<NeatGenome>(new ManhattanDistanceMetric(1.0, 0.0, 10.0),
+                        ParallelOptions), null,
                     NavigatorBatchSize, RunPhase.Primary, false, false, _navigatorEvolutionDataLogger,
                     _navigatorLogFieldEnableMap, _navigatorPopulationGenomesDataLogger, _populationLoggingBatchInterval);
 
             // Create the maze queueing evolution algorithm
             AbstractEvolutionAlgorithm<MazeGenome> mazeEvolutionAlgorithm =
-                new QueueingNeatEvolutionAlgorithm<MazeGenome>(new NeatEvolutionAlgorithmParameters(), null,
+                new QueueingNeatEvolutionAlgorithm<MazeGenome>(new NeatEvolutionAlgorithmParameters(),
+                    new ParallelKMeansClusteringStrategy<MazeGenome>(new ManhattanDistanceMetric(1.0, 0.0, 10.0),
+                        ParallelOptions), null,
                     MazeBatchSize, RunPhase.Primary, false, false, _mazeEvolutionDataLogger, _mazeLogFieldEnableMap,
                     _mazePopulationGenomesDataLogger, _populationLoggingBatchInterval);
 

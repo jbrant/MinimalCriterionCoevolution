@@ -106,7 +106,7 @@ namespace SharpNeat.Domains.MazeEnvironmentTest
             IComplexityRegulationStrategy complexityRegulationStrategy = ExperimentUtils.CreateComplexityRegulationStrategy(ComplexityRegulationStrategy, Complexitythreshold);
 
             AbstractNeatEvolutionAlgorithm<NeatGenome> ea =
-                new QueueingNeatEvolutionAlgorithm<NeatGenome>(NeatEvolutionAlgorithmParameters,
+                new QueueingNeatEvolutionAlgorithm<NeatGenome>(NeatEvolutionAlgorithmParameters, null,
                     complexityRegulationStrategy, _batchSize);
 
             // TODO: Create the network evaluator

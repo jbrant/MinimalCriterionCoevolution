@@ -144,8 +144,15 @@ namespace SharpNeat.EvolutionAlgorithms
             // Initialize the genome evalutor
             GenomeEvaluator.Initialize();
 
+            // Speciate based on the total population size (note that this doesn't speciate the genomes
+            // yet because we're just starting with a seed that likely doesn't satisfy the requirements
+            // of establishing the target number of species)
+            SpecieList = SpeciationStrategy.InitializeSpeciation(PopulationSize, EaParams.SpecieCount);
+
             // If the population has not yet undergone intialization evaluations, 
             // run them through a cycle of evaluations now and update the best genome
+            // (again, speciation is not taken into account here because there's not yet
+            // endough individuals in the population)
             if (GenomeList.Any(genome => genome.EvaluationInfo.EvaluationCount <= 0))
             {
                 GenomeEvaluator.Evaluate(GenomeList, CurrentGeneration);
@@ -227,9 +234,25 @@ namespace SharpNeat.EvolutionAlgorithms
             // Update the total offspring count based on the number of *viable* offspring produced
             Statistics._totalOffspringCount = (ulong) childGenomes.Count;
 
-            // Update stats and store reference to best genome.
-            UpdateBestGenomeWithoutSpeciation(false, useAuxFitness);
-            UpdateStats(false, useAuxFitness);
+            // Don't speciate until the queue size is greater than the desired number of species
+            if (GenomeList.Count > SpecieList.Count)
+            {
+                // Clear all the species and respeciate
+                ClearAllSpecies();
+                SpeciationStrategy.SpeciateGenomes(GenomeList, SpecieList);
+
+                // Update the best genome within each species and the population
+                // statistics (include specie statistics)
+                UpdateBestGenome(false, useAuxFitness);
+                UpdateStats(true, useAuxFitness);
+            }
+            else
+            {
+                // Update the global best genome (since population is not yet speciated)
+                // and the population statistics (without specie statistics)
+                UpdateBestGenomeWithoutSpeciation(false, useAuxFitness);
+                UpdateStats(false, useAuxFitness);
+            }
 
             Debug.Assert(GenomeList.Count <= PopulationSize);
 
@@ -294,6 +317,7 @@ namespace SharpNeat.EvolutionAlgorithms
         public QueueingNeatEvolutionAlgorithm(IDataLogger logger = null, RunPhase runPhase = RunPhase.Primary,
             bool isBridgingEnabled = false, bool isDynamicMinimalCriteria = false, int mcUpdateInterval = 0)
             : this(
+                new KMeansClusteringStrategy<TGenome>(new ManhattanDistanceMetric()),
                 new NullComplexityRegulationStrategy(), 10, runPhase, isBridgingEnabled, isDynamicMinimalCriteria,
                 logger)
         {
@@ -306,6 +330,7 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <summary>
         ///     Constructs steady state evolution algorithm with the given NEAT parameters and complexity regulation strategy.
         /// </summary>
+        /// <param name="speciationStrategy">The speciation strategy.</param>
         /// <param name="complexityRegulationStrategy">The complexity regulation strategy.</param>
         /// <param name="batchSize">The batch size of offspring to produce, evaluate, and remove.</param>
         /// <param name="runPhase">
@@ -326,6 +351,7 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     minimal criteria.
         /// </param>
         public QueueingNeatEvolutionAlgorithm(
+            ISpeciationStrategy<TGenome> speciationStrategy,
             IComplexityRegulationStrategy complexityRegulationStrategy,
             int batchSize,
             RunPhase runPhase = RunPhase.Primary,
@@ -336,6 +362,7 @@ namespace SharpNeat.EvolutionAlgorithms
             int? populationLoggingInterval = null,
             int mcUpdateInterval = 0)
         {
+            SpeciationStrategy = speciationStrategy;
             ComplexityRegulationStrategy = complexityRegulationStrategy;
             _batchSize = batchSize;
             EvolutionLogger = logger;
@@ -352,6 +379,7 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     Constructs steady state evolution algorithm with the given NEAT parameters and complexity regulation strategy.
         /// </summary>
         /// <param name="eaParams">The NEAT algorithm parameters.</param>
+        /// <param name="speciationStrategy">The speciation strategy.</param>
         /// <param name="complexityRegulationStrategy">The complexity regulation strategy.</param>
         /// <param name="batchSize">The batch size of offspring to produce, evaluate, and remove.</param>
         /// <param name="runPhase">
@@ -372,6 +400,7 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     minimal criteria.
         /// </param>
         public QueueingNeatEvolutionAlgorithm(NeatEvolutionAlgorithmParameters eaParams,
+            ISpeciationStrategy<TGenome> speciationStrategy,
             IComplexityRegulationStrategy complexityRegulationStrategy,
             int batchSize,
             RunPhase runPhase = RunPhase.Primary,
@@ -382,6 +411,7 @@ namespace SharpNeat.EvolutionAlgorithms
             int? populationLoggingInterval = null,
             int mcUpdateInterval = 0) : base(eaParams)
         {
+            SpeciationStrategy = speciationStrategy;
             ComplexityRegulationStrategy = complexityRegulationStrategy;
             _batchSize = batchSize;
             EvolutionLogger = logger;

@@ -16,11 +16,16 @@
  * You should have received a copy of the GNU General Public License
  * along with SharpNEAT.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+#region
+
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Redzen.Sorting;
 using SharpNeat.Core;
+
+#endregion
 
 namespace SharpNeat.SpeciationStrategies
 {
@@ -30,24 +35,24 @@ namespace SharpNeat.SpeciationStrategies
     // ENHANCEMENT: Using the Triangle Inequality to Accelerate k-Means (http://cseweb.ucsd.edu/~elkan/kmeansicml03.pdf)
 
     /// <summary>
-    /// An ISpeciationStrategy that speciates genomes using the k-means clustering method.
-    /// k-means requires a distance metric and as such this class requires am IDistanceMetric to be provided at 
-    /// construction time. Different distance metrics can be used including NeatDistanceMetric which is 
-    /// equivalent to the metric used in the standard NEAT method albeit with a different clustering/speciation
-    /// algorithm (Standard NEAT does not use k-means).
+    ///     An ISpeciationStrategy that speciates genomes using the k-means clustering method.
+    ///     k-means requires a distance metric and as such this class requires am IDistanceMetric to be provided at
+    ///     construction time. Different distance metrics can be used including NeatDistanceMetric which is
+    ///     equivalent to the metric used in the standard NEAT method albeit with a different clustering/speciation
+    ///     algorithm (Standard NEAT does not use k-means).
     /// </summary>
     /// <typeparam name="TGenome">The genome type to apply clustering to.</typeparam>
     public class ParallelKMeansClusteringStrategy<TGenome> : ISpeciationStrategy<TGenome>
         where TGenome : class, IGenome<TGenome>
     {
-        const int __MAX_KMEANS_LOOPS = 5;
-        readonly IDistanceMetric _distanceMetric;
-        readonly ParallelOptions _parallelOptions;
+        private const int __MAX_KMEANS_LOOPS = 5;
+        private readonly IDistanceMetric _distanceMetric;
+        private readonly ParallelOptions _parallelOptions;
 
         #region Constructor
 
         /// <summary>
-        /// Constructor that accepts an IDistanceMetric to be used for the k-means method.
+        ///     Constructor that accepts an IDistanceMetric to be used for the k-means method.
         /// </summary>
         public ParallelKMeansClusteringStrategy(IDistanceMetric distanceMetric)
         {
@@ -56,7 +61,7 @@ namespace SharpNeat.SpeciationStrategies
         }
 
         /// <summary>
-        /// Constructor that accepts an IDistanceMetric to be used for the k-means method and ParallelOptions. 
+        ///     Constructor that accepts an IDistanceMetric to be used for the k-means method and ParallelOptions.
         /// </summary>
         public ParallelKMeansClusteringStrategy(IDistanceMetric distanceMetric, ParallelOptions options)
         {
@@ -69,18 +74,19 @@ namespace SharpNeat.SpeciationStrategies
         #region ISpeciationStrategy<TGenome> Members
 
         /// <summary>
-        /// Speciates the genomes in genomeList into the number of species specified by specieCount
-        /// and returns a newly constructed list of Specie objects containing the speciated genomes.
+        ///     Speciates the genomes in genomeList into the number of species specified by specieCount
+        ///     and returns a newly constructed list of Specie objects containing the speciated genomes.
         /// </summary>
         public IList<Specie<TGenome>> InitializeSpeciation(IList<TGenome> genomeList, int specieCount)
         {
             // Create empty specieList.
             // Use an initial specieList capacity that will limit the need for memory reallocation but that isn't
             // too wasteful of memory.
-            int initSpeciesCapacity = (genomeList.Count * 2) / specieCount;
+            int initSpeciesCapacity = (genomeList.Count*2)/specieCount;
             List<Specie<TGenome>> specieList = new List<Specie<TGenome>>(specieCount);
-            for(int i=0; i<specieCount; i++) {
-                specieList.Add(new Specie<TGenome>((uint)i, i, initSpeciesCapacity));
+            for (int i = 0; i < specieCount; i++)
+            {
+                specieList.Add(new Specie<TGenome>((uint) i, i, initSpeciesCapacity));
             }
 
             // Speciate genomes into the empty species.
@@ -89,15 +95,37 @@ namespace SharpNeat.SpeciationStrategies
         }
 
         /// <summary>
-        /// Speciates the genomes in genomeList into the provided specieList. It is assumed that
-        /// the genomeList represents all of the required genomes and that the species are currently empty.
-        /// 
-        /// This method can be used for initialization or completely respeciating an existing genome population.
+        ///     Creates a specie list with each species initial carrying capacity.  Note that this doesn't
+        ///     actually speciate the genomes into species yet.
+        /// </summary>
+        public IList<Specie<TGenome>> InitializeSpeciation(int genomeCount, int specieCount)
+        {
+            // Create empty specieList.
+            // Use an initial specieList capacity that will limit the need for memory reallocation but that isn't
+            // too wasteful of memory.
+            int initSpeciesCapacity = (genomeCount*2)/specieCount;
+            List<Specie<TGenome>> specieList = new List<Specie<TGenome>>(specieCount);
+            for (int i = 0; i < specieCount; i++)
+            {
+                specieList.Add(new Specie<TGenome>((uint) i, i, initSpeciesCapacity));
+            }
+
+            return specieList;
+        }
+
+        /// <summary>
+        ///     Speciates the genomes in genomeList into the provided specieList. It is assumed that
+        ///     the genomeList represents all of the required genomes and that the species are currently empty.
+        ///     This method can be used for initialization or completely respeciating an existing genome population.
         /// </summary>
         public void SpeciateGenomes(IList<TGenome> genomeList, IList<Specie<TGenome>> specieList)
         {
-            Debug.Assert(SpeciationUtils<TGenome>.TestEmptySpecies(specieList), "SpeciateGenomes(IList<TGenome>,IList<Species<TGenome>>) called with non-empty species");
-            Debug.Assert(genomeList.Count >= specieList.Count, string.Format("SpeciateGenomes(IList<TGenome>,IList<Species<TGenome>>). Species count [{0}] is greater than genome count [{1}].", specieList.Count, genomeList.Count));
+            Debug.Assert(SpeciationUtils<TGenome>.TestEmptySpecies(specieList),
+                "SpeciateGenomes(IList<TGenome>,IList<Species<TGenome>>) called with non-empty species");
+            Debug.Assert(genomeList.Count >= specieList.Count,
+                string.Format(
+                    "SpeciateGenomes(IList<TGenome>,IList<Species<TGenome>>). Species count [{0}] is greater than genome count [{1}].",
+                    specieList.Count, genomeList.Count));
 
             // Randomly allocate the first k genomes to their own specie. Because there is only one genome in these
             // species each genome effectively represents a specie centroid. This is necessary to ensure we get k specieList.
@@ -106,7 +134,7 @@ namespace SharpNeat.SpeciationStrategies
             // This approach ensures that each species will have at least one genome - because that genome is the specie 
             // centroid and therefore has distance of zero from the centroid (itself).
             int specieCount = specieList.Count;
-            for(int i=0; i<specieCount; i++)
+            for (int i = 0; i < specieCount; i++)
             {
                 Specie<TGenome> specie = specieList[i];
                 genomeList[i].SpecieIdx = specie.Idx;
@@ -124,15 +152,15 @@ namespace SharpNeat.SpeciationStrategies
                 Specie<TGenome> closestSpecie = FindClosestSpecie(genome, specieList);
                 genome.SpecieIdx = closestSpecie.Idx;
 
-                lock(closestSpecie.GenomeList) {
+                lock (closestSpecie.GenomeList)
+                {
                     closestSpecie.GenomeList.Add(genome);
                 }
             });
 
             // Recalculate each specie's centroid.
-            Parallel.ForEach(specieList, _parallelOptions, delegate(Specie<TGenome> specie) {
-                specie.Centroid = CalculateSpecieCentroid(specie);
-            });
+            Parallel.ForEach(specieList, _parallelOptions,
+                delegate(Specie<TGenome> specie) { specie.Centroid = CalculateSpecieCentroid(specie); });
 
             // Perform the main k-means loop until convergence.
             SpeciateUntilConvergence(genomeList, specieList);
@@ -141,29 +169,30 @@ namespace SharpNeat.SpeciationStrategies
         }
 
         /// <summary>
-        /// Speciates the offspring genomes in offspringList into the provided specieList. In contrast to
-        /// SpeciateGenomes() offspringList is taken to be a list of new genomes (offspring) that should be 
-        /// added to existing species. That is, the species contain genomes that are not in offspringList
-        /// that we wish to keep; typically these would be elite genomes that are the parents of the
-        /// offspring.
+        ///     Speciates the offspring genomes in offspringList into the provided specieList. In contrast to
+        ///     SpeciateGenomes() offspringList is taken to be a list of new genomes (offspring) that should be
+        ///     added to existing species. That is, the species contain genomes that are not in offspringList
+        ///     that we wish to keep; typically these would be elite genomes that are the parents of the
+        ///     offspring.
         /// </summary>
         public void SpeciateOffspring(IList<TGenome> offspringList, IList<Specie<TGenome>> specieList)
         {
             // Each specie should contain at least one genome. We need at least one existing genome per specie to act
             // as a specie centroid in order to define where the specie is within the encoding space.
-            Debug.Assert(SpeciationUtils<TGenome>.TestPopulatedSpecies(specieList), "SpeciateOffspring(IList<TGenome>,IList<Species<TGenome>>) called with an empty specie.");
+            Debug.Assert(SpeciationUtils<TGenome>.TestPopulatedSpecies(specieList),
+                "SpeciateOffspring(IList<TGenome>,IList<Species<TGenome>>) called with an empty specie.");
 
             // Update the centroid of each specie. If we're adding offspring this means that old genomes 
             // have been removed from the population and therefore the centroids are out-of-date.
-            Parallel.ForEach(specieList, _parallelOptions, delegate(Specie<TGenome> specie) {
-                specie.Centroid = CalculateSpecieCentroid(specie);
-            });
-            
+            Parallel.ForEach(specieList, _parallelOptions,
+                delegate(Specie<TGenome> specie) { specie.Centroid = CalculateSpecieCentroid(specie); });
+
             // Allocate each offspring genome to the specie it is closest to. 
             Parallel.ForEach(offspringList, _parallelOptions, delegate(TGenome genome)
             {
                 Specie<TGenome> closestSpecie = FindClosestSpecie(genome, specieList);
-                lock(closestSpecie.GenomeList) {
+                lock (closestSpecie.GenomeList)
+                {
                     // TODO: Consider using ConcurrentQueue here (and elsewhere in this class).
                     closestSpecie.GenomeList.Add(genome);
                 }
@@ -171,18 +200,19 @@ namespace SharpNeat.SpeciationStrategies
             });
 
             // Recalculate each specie's centroid now that we have additional genomes in the specieList.
-            Parallel.ForEach(specieList, _parallelOptions, delegate(Specie<TGenome> specie) {
-                specie.Centroid = CalculateSpecieCentroid(specie);
-            });
+            Parallel.ForEach(specieList, _parallelOptions,
+                delegate(Specie<TGenome> specie) { specie.Centroid = CalculateSpecieCentroid(specie); });
 
             // Accumulate *all* genomes into a flat genome list.
             int genomeCount = 0;
-            foreach(Specie<TGenome> specie in specieList) {
+            foreach (Specie<TGenome> specie in specieList)
+            {
                 genomeCount += specie.GenomeList.Count;
             }
 
             List<TGenome> genomeList = new List<TGenome>(genomeCount);
-            foreach(Specie<TGenome> specie in specieList) {
+            foreach (Specie<TGenome> specie in specieList)
+            {
                 genomeList.AddRange(specie.GenomeList);
             }
 
@@ -197,10 +227,10 @@ namespace SharpNeat.SpeciationStrategies
         #region Private Methods [k-means]
 
         /// <summary>
-        /// Perform the main k-means loop until no genome reallocations occur or some maximum number of loops
-        /// has been performed. Theoretically a small number of reallocations may occur for a great many loops 
-        /// therefore we require the additional max loops threshold exit strategy - the clusters should be pretty
-        /// stable and well defined after a few loops even if the the algorithm hasn't converged completely.
+        ///     Perform the main k-means loop until no genome reallocations occur or some maximum number of loops
+        ///     has been performed. Theoretically a small number of reallocations may occur for a great many loops
+        ///     therefore we require the additional max loops threshold exit strategy - the clusters should be pretty
+        ///     stable and well defined after a few loops even if the the algorithm hasn't converged completely.
         /// </summary>
         private void SpeciateUntilConvergence(IList<TGenome> genomeList, IList<Specie<TGenome>> specieList)
         {
@@ -209,9 +239,9 @@ namespace SharpNeat.SpeciationStrategies
 
             // Array of flags that indicate if a specie was modified (had genomes allocated to and/or from it).
             bool[] specieModArr = new bool[specieCount];
-            
+
             // Main k-means loop.
-            for(int loops=0; loops<__MAX_KMEANS_LOOPS; loops++)
+            for (int loops = 0; loops < __MAX_KMEANS_LOOPS; loops++)
             {
                 // Track number of reallocations made on each loop.
                 int[] reallocations = {0};
@@ -221,16 +251,16 @@ namespace SharpNeat.SpeciationStrategies
                 Parallel.ForEach(genomeList, _parallelOptions, delegate(TGenome genome)
                 {
                     Specie<TGenome> closestSpecie = FindClosestSpecie(genome, specieList);
-                    if(genome.SpecieIdx != closestSpecie.Idx) 
+                    if (genome.SpecieIdx != closestSpecie.Idx)
                     {
-                        lock(specieModArr)
+                        lock (specieModArr)
                         {
                             // Track which species have been modified.
                             specieModArr[genome.SpecieIdx] = true;
                             specieModArr[closestSpecie.Idx] = true;
                             reallocations[0]++;
                         }
-                        lock(closestSpecie.GenomeList)
+                        lock (closestSpecie.GenomeList)
                         {
                             // Add the genome to its new specie and set its speciesIdx accordingly.
                             // For now we leave the genome in its original species; It's more efficient to determine
@@ -247,40 +277,39 @@ namespace SharpNeat.SpeciationStrategies
                 // Complete the reallocations.
                 Parallel.For(0, specieCount, _parallelOptions, delegate(int i)
                 {
-                    if(!specieModArr[i]) 
-                    {   // Specie not changed. Skip.
+                    if (!specieModArr[i])
+                    {
+                        // Specie not changed. Skip.
                         return;
                     }
 
                     // Reset flag.
                     specieModArr[i] = false;
-                    
+
                     // Remove the genomes that have been allocated to other other species. We fill the resulting 
                     // gaps by shuffling down the remaining genomes.
                     Specie<TGenome> specie = specieList[i];
-                    specie.GenomeList.RemoveAll(delegate(TGenome genome) 
-                    {
-                        return genome.SpecieIdx != specie.Idx;
-                    });
+                    specie.GenomeList.RemoveAll(delegate(TGenome genome) { return genome.SpecieIdx != specie.Idx; });
 
                     // Track empty species. We will allocate genomes to them after this loop.
                     // This is necessary as some distance metrics can result in empty species occuring.
-                    if(0 == specie.GenomeList.Count) 
+                    if (0 == specie.GenomeList.Count)
                     {
-                        lock(emptySpecieList)
+                        lock (emptySpecieList)
                         {
                             emptySpecieList.Add(specie);
                         }
                     }
-                    else 
-                    {   // Recalc the specie centroid now that it contains a different set of genomes.
+                    else
+                    {
+                        // Recalc the specie centroid now that it contains a different set of genomes.
                         specie.Centroid = CalculateSpecieCentroid(specie);
                     }
                 });
 
                 // Check for empty species. We need to reallocate some genomes into the empty specieList to maintain the 
                 // required number of species.
-                if(0 != emptySpecieList.Count)
+                if (0 != emptySpecieList.Count)
                 {
                     // We find the genomes in the population as a whole that are furthest from their containing specie's 
                     // centroid genome - we call these outlier genomes. We then move these genomes into the empty species to
@@ -290,7 +319,7 @@ namespace SharpNeat.SpeciationStrategies
                     // Reallocate each of the outlier genomes from their current specie to an empty specie.
                     int emptySpecieCount = emptySpecieList.Count;
                     int outlierIdx = 0;
-                    for(int i=0; i<emptySpecieCount; i++)
+                    for (int i = 0; i < emptySpecieCount; i++)
                     {
                         // Find the next outlier genome that can be re-allocated. Skip genomes that are the
                         // only member of a specie - moving them would just create another empty specie.
@@ -300,12 +329,13 @@ namespace SharpNeat.SpeciationStrategies
                         {
                             genome = genomeByDistanceArr[outlierIdx++];
                             sourceSpecie = specieList[genome.SpecieIdx];
-                        } 
-                        while(sourceSpecie.GenomeList.Count == 1 && outlierIdx < genomeByDistanceArr.Length);
+                        } while (sourceSpecie.GenomeList.Count == 1 && outlierIdx < genomeByDistanceArr.Length);
 
-                        if(outlierIdx == genomeByDistanceArr.Length)
-                        {   // Theoretically impossible. We do the test so that we get an easily traceable error message if it does happen.
-                            throw new SharpNeatException("Error finding outlier genome. No outliers could be found in any specie with more than 1 genome.");
+                        if (outlierIdx == genomeByDistanceArr.Length)
+                        {
+                            // Theoretically impossible. We do the test so that we get an easily traceable error message if it does happen.
+                            throw new SharpNeatException(
+                                "Error finding outlier genome. No outliers could be found in any specie with more than 1 genome.");
                         }
 
                         // Get ref to the empty specie and register both source and target specie with specieModArr.
@@ -328,8 +358,9 @@ namespace SharpNeat.SpeciationStrategies
                     // Recalculate centroid for all affected species.
                     Parallel.For(0, specieCount, _parallelOptions, delegate(int i)
                     {
-                        if(specieModArr[i]) 
-                        {   // Reset flag while we're here. Do this first to help maintain CPU cache coherency (we just tested it).
+                        if (specieModArr[i])
+                        {
+                            // Reset flag while we're here. Do this first to help maintain CPU cache coherency (we just tested it).
                             specieModArr[i] = false;
                             specieList[i].Centroid = CalculateSpecieCentroid(specieList[i]);
                         }
@@ -341,19 +372,21 @@ namespace SharpNeat.SpeciationStrategies
                 }
 
                 // Exit the loop if no genome reallocations have occured. The species are stable, speciation is completed.
-                if(0==reallocations[0]) {
+                if (0 == reallocations[0])
+                {
                     break;
                 }
             }
         }
 
         /// <summary>
-        /// Recalculate the specie centroid based on the genomes currently in the specie.
+        ///     Recalculate the specie centroid based on the genomes currently in the specie.
         /// </summary>
         private CoordinateVector CalculateSpecieCentroid(Specie<TGenome> specie)
         {
             // Special case - 1 genome in specie (its position *is* the specie centroid).
-            if(1 == specie.GenomeList.Count) {
+            if (1 == specie.GenomeList.Count)
+            {
                 return new CoordinateVector(specie.GenomeList[0].Position.CoordArray);
             }
 
@@ -361,7 +394,8 @@ namespace SharpNeat.SpeciationStrategies
             List<TGenome> genomeList = specie.GenomeList;
             int count = genomeList.Count;
             List<CoordinateVector> coordList = new List<CoordinateVector>(count);
-            for(int i=0; i<count; i++) {
+            for (int i = 0; i < count; i++)
+            {
                 coordList.Add(genomeList[i].Position);
             }
 
@@ -371,7 +405,7 @@ namespace SharpNeat.SpeciationStrategies
 
         // ENHANCEMENT: Optimization candidate.
         /// <summary>
-        /// Gets an array of all genomes ordered by their distance from their current specie.
+        ///     Gets an array of all genomes ordered by their distance from their current specie.
         /// </summary>
         private TGenome[] GetGenomesByDistanceFromSpecie(IList<TGenome> genomeList, IList<Specie<TGenome>> specieList)
         {
@@ -392,7 +426,8 @@ namespace SharpNeat.SpeciationStrategies
 
             // Put the sorted genomes in an array and return it.
             TGenome[] genomeArr = new TGenome[genomeCount];
-            for(int i=0; i<genomeCount; i++) {
+            for (int i = 0; i < genomeCount; i++)
+            {
                 genomeArr[i] = genomeDistanceArr[i]._genome;
             }
 
@@ -400,7 +435,7 @@ namespace SharpNeat.SpeciationStrategies
         }
 
         /// <summary>
-        /// Find the specie that a genome is closest to as determined by the distance metric.
+        ///     Find the specie that a genome is closest to as determined by the distance metric.
         /// </summary>
         private Specie<TGenome> FindClosestSpecie(TGenome genome, IList<Specie<TGenome>> specieList)
         {
@@ -410,10 +445,10 @@ namespace SharpNeat.SpeciationStrategies
 
             // Measure distance to all remaining species.
             int speciesCount = specieList.Count;
-            for(int i=1; i<speciesCount; i++)
+            for (int i = 1; i < speciesCount; i++)
             {
                 double distance = _distanceMetric.MeasureDistance(genome.Position, specieList[i].Centroid);
-                if(distance < closestDistance)
+                if (distance < closestDistance)
                 {
                     closestDistance = distance;
                     closestSpecie = specieList[i];
