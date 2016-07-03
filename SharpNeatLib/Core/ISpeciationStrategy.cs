@@ -42,6 +42,13 @@ namespace SharpNeat.Core
         IList<Specie<TGenome>> InitializeSpeciation(IList<TGenome> genomeList, int specieCount);
 
         /// <summary>
+        /// Speciates given the total population size into the number of species specified by specieCount
+        /// and returns a newly constructed list of Specie objects with the associated carrying capacities.
+        /// Note that this method does not actually speciate any genomes yet.
+        /// </summary>
+        IList<Specie<TGenome>> InitializeSpeciation(int genomeCount, int specieCount);
+
+        /// <summary>
         /// Speciates the genomes in genomeList into the provided species. It is assumed that
         /// the genomeList represents all of the required genomes and that the species are currently empty.
         /// 

@@ -76,6 +76,25 @@ namespace SharpNeat.SpeciationStrategies
         }
 
         /// <summary>
+        /// Creates a specie list with each species initial carrying capacity.  Note that this doesn't
+        /// actually speciate the genomes into species yet.
+        /// </summary>
+        public IList<Specie<TGenome>> InitializeSpeciation(int genomeCount, int specieCount)
+        {
+            // Create empty specieList.
+            // Use an initial specieList capacity that will limit the need for memory reallocation but that isn't
+            // too wasteful of memory.
+            int initSpeciesCapacity = (genomeCount * 2) / specieCount;
+            List<Specie<TGenome>> specieList = new List<Specie<TGenome>>(specieCount);
+            for (int i = 0; i < specieCount; i++)
+            {
+                specieList.Add(new Specie<TGenome>((uint)i, i, initSpeciesCapacity));
+            }
+
+            return specieList;
+        }
+
+        /// <summary>
         /// Speciates the genomes in genomeList into the provided specieList. It is assumed that
         /// the genomeList represents all of the required genomes and that the species are currently empty.
         /// 

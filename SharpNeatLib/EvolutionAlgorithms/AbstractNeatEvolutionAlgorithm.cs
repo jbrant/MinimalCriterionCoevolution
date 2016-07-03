@@ -117,7 +117,7 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     by not having to scan all genomes.
         ///     Note. We may have several genomes with equal best fitness, we just select one of them in that case.
         /// </summary>
-        protected void UpdateBestGenome()
+        protected void UpdateBestGenome(bool isMaximization = true, bool useAuxFitness = false)
         {
             // If all genomes have the same fitness (including zero) then we simply return the first genome.
             TGenome bestGenome = null;
@@ -130,11 +130,28 @@ namespace SharpNeat.EvolutionAlgorithms
                 // Get the specie's first genome. Genomes are sorted, therefore this is also the fittest 
                 // genome in the specie.
                 var genome = SpecieList[i].GenomeList[0];
-                if (genome.EvaluationInfo.Fitness > bestFitness)
+
+                double specieChampGenomeFitness = useAuxFitness
+                    ? genome.EvaluationInfo.AuxFitnessArr[0]._value
+                    : genome.EvaluationInfo.Fitness;
+
+                if (isMaximization)
                 {
-                    bestGenome = genome;
-                    bestFitness = genome.EvaluationInfo.Fitness;
-                    bestSpecieIdx = i;
+                    if (specieChampGenomeFitness > bestFitness)
+                    {
+                        bestGenome = genome;
+                        bestFitness = specieChampGenomeFitness;
+                        bestSpecieIdx = i;
+                    }
+                }
+                else
+                {
+                    if (bestFitness <= 0 || specieChampGenomeFitness < bestFitness)
+                    {
+                        bestGenome = genome;
+                        bestFitness = specieChampGenomeFitness;
+                        bestSpecieIdx = i;
+                    }
                 }
             }
 

@@ -4,11 +4,13 @@ using System.Collections.Generic;
 using System.Xml;
 using ExperimentEntities;
 using SharpNeat.Core;
+using SharpNeat.DistanceMetrics;
 using SharpNeat.Domains.MazeNavigation.Bootstrappers;
 using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Loggers;
 using SharpNeat.Phenomes;
+using SharpNeat.SpeciationStrategies;
 using RunPhase = SharpNeat.Core.RunPhase;
 
 #endregion
@@ -147,6 +149,8 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             // Create the evolution algorithm.
             AbstractNeatEvolutionAlgorithm<NeatGenome> ea =
                 new QueueingNeatEvolutionAlgorithm<NeatGenome>(NeatEvolutionAlgorithmParameters,
+                    new ParallelKMeansClusteringStrategy<NeatGenome>(new ManhattanDistanceMetric(1.0, 0.0, 10.0),
+                        ParallelOptions),
                     complexityRegulationStrategy, _batchSize, RunPhase.Primary, (_bridgingMagnitude > 0),
                     false, _evolutionDataLogger, _experimentLogFieldEnableMap);
 
