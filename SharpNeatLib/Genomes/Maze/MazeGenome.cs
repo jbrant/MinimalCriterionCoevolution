@@ -15,6 +15,12 @@ namespace SharpNeat.Genomes.Maze
     /// </summary>
     public class MazeGenome : IGenome<MazeGenome>
     {
+        #region Instance Variables
+
+        private CoordinateVector _position;
+
+        #endregion
+
         #region Maze Properties
 
         /// <summary>
@@ -121,11 +127,42 @@ namespace SharpNeat.Genomes.Maze
         }
 
         /// <summary>
-        ///     NOT USED (required by interface).
+        ///     Gets a coordinate that represents the genome's position in the search space (also known
+        ///     as the genetic encoding space). This allows speciation/clustering algorithms to operate on
+        ///     an abstract cordinate data type rather than being coded against specific IGenome types.
         /// </summary>
         public CoordinateVector Position
         {
-            get { throw new NotImplementedException(); }
+            get
+            {
+                if (null == _position)
+                {
+                    int interiorWallCount = GeneList.Count;
+
+                    // Create array of key/value pairs to hold innovation IDs and their corresponding 
+                    // "position" in the genetic encoding space                    
+                    KeyValuePair<ulong, double>[] coordElemArray = new KeyValuePair<ulong, double>[interiorWallCount];
+
+                    for (int i = 0; i < interiorWallCount; i++)
+                    {
+                        double wallLocation = GeneList[i].WallLocation;
+                        double passageLocation = GeneList[i].PassageLocation;
+
+                        // Calculate cantor pairing of relative wall and passage positions
+                        double compositeGeneCoordinate = ((wallLocation + passageLocation)*
+                                                          (wallLocation + passageLocation + 1))/2 + passageLocation;
+
+                        // Add gene coordinate to array
+                        coordElemArray[i] = new KeyValuePair<ulong, double>(GeneList[i].InnovationId,
+                            compositeGeneCoordinate);
+                    }
+
+                    // Construct the genome coordinate vector
+                    _position = new CoordinateVector(coordElemArray);
+                }
+
+                return _position;
+            }
         }
 
         /// <summary>
@@ -298,7 +335,8 @@ namespace SharpNeat.Genomes.Maze
             double newPassageStartLocation = GenomeFactory.Rng.NextDoubleNonZero();
 
             // Add new gene to the genome
-            GeneList.Add(new MazeGene(newWallStartLocation, newPassageStartLocation, GenomeFactory.Rng.NextBool()));
+            GeneList.Add(new MazeGene(GenomeFactory.InnovationIdGenerator.NextId, newWallStartLocation,
+                newPassageStartLocation, GenomeFactory.Rng.NextBool()));
         }
 
         /// <summary>

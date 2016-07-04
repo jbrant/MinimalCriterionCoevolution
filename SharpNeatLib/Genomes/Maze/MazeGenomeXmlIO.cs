@@ -95,6 +95,7 @@ namespace SharpNeat.Genomes.Maze
             foreach (MazeGene mazeGene in genome.GeneList)
             {
                 xw.WriteStartElement(__ElemWall);
+                xw.WriteAttributeString(__AttrId, mazeGene.InnovationId.ToString(NumberFormatInfo.InvariantInfo));
                 xw.WriteAttributeString(__AttrRelativeWallLocation,
                     mazeGene.WallLocation.ToString(NumberFormatInfo.InvariantInfo));
                 xw.WriteAttributeString(__AttrRelativePassageLocation,
@@ -180,8 +181,17 @@ namespace SharpNeat.Genomes.Maze
             uint maxGenomeId = genomeList.Aggregate<MazeGenome, uint>(0,
                 (current, genome) => Math.Max(current, genome.Id));
 
-            // Set the genome factory ID generator to the max
+            // Determine the max gene innovation ID
+            uint maxInnovationId = genomeList.Aggregate<MazeGenome, uint>(0,
+                (curMaxPopulationInnovationId, genome) =>
+                    genome.GeneList.Aggregate(curMaxPopulationInnovationId,
+                        (curMaxGenomeInnovationId, mazeGene) =>
+                            Math.Max(curMaxGenomeInnovationId, mazeGene.InnovationId)));
+
+            // Set the genome factory ID generator and innovation ID generator to one more than the max
             genomeFactory.GenomeIdGenerator.Reset(Math.Max(genomeFactory.GenomeIdGenerator.Peek, maxGenomeId + 1));
+            genomeFactory.InnovationIdGenerator.Reset(Math.Max(genomeFactory.InnovationIdGenerator.Peek,
+                maxInnovationId + 1));
 
             // Retrospecitively assign the genome factory to the genomes
             foreach (MazeGenome genome in genomeList)
@@ -245,6 +255,7 @@ namespace SharpNeat.Genomes.Maze
                     do
                     {
                         // Read the wall, passage, and orientation information for the gene
+                        uint geneId = XmlIoUtils.ReadAttributeAsUInt(xrSubtree, __AttrId);
                         double relativeWallLocation = XmlIoUtils.ReadAttributeAsDouble(xrSubtree,
                             __AttrRelativeWallLocation);
                         double relativePassageLocation = XmlIoUtils.ReadAttributeAsDouble(xrSubtree,
@@ -252,7 +263,7 @@ namespace SharpNeat.Genomes.Maze
                         bool orientationSeed = XmlIoUtils.ReadAttributeAsBool(xrSubtree, __AttrOrientationSeed);
 
                         // Create a new maze gene and add it to the list
-                        genes.Add(new MazeGene(relativeWallLocation, relativePassageLocation, orientationSeed));
+                        genes.Add(new MazeGene(geneId, relativeWallLocation, relativePassageLocation, orientationSeed));
                     } while (xrSubtree.ReadToNextSibling(__ElemWall));
                 }
             }

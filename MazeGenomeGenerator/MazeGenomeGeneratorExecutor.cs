@@ -93,6 +93,9 @@ namespace MazeGenomeGenerator
             {
                 string fileBaseName = string.Format("GeneratedMaze_{0}", curMazeCnt);
 
+                // Reset innovation IDs
+                mazeGenomeFactory.InnovationIdGenerator.Reset();
+
                 // Create a new genome and pass in the requisite factory
                 MazeGenome mazeGenome = new MazeGenome(mazeGenomeFactory, 0, 0);
 
@@ -100,7 +103,8 @@ namespace MazeGenomeGenerator
                 for (int cnt = 0; cnt < numInteriorWalls; cnt++)
                 {
                     // Create new maze gene and add to genome
-                    mazeGenome.GeneList.Add(new MazeGene(rand.NextDouble(), rand.NextDouble(), rand.NextDouble() < 0.5));
+                    mazeGenome.GeneList.Add(new MazeGene(mazeGenomeFactory.InnovationIdGenerator.NextId,
+                        rand.NextDouble(), rand.NextDouble(), rand.NextDouble() < 0.5));
                 }
 
                 // Serialize the genome to XML            

@@ -11,6 +11,10 @@
         ///     Constructor which accepts a wall location, passage location, and their preliminary orientation and creates a new
         ///     maze gene.
         /// </summary>
+        /// <param name="innovationId">
+        ///     The unique "innovation" identifier for this gene (analogous to the innovation IDs on NEAT
+        ///     connection genes).
+        /// </param>
         /// <param name="wallLocation">The unscaled location of the wall (real value between 0 and 1).</param>
         /// <param name="passageLocation">The unscaled location of the wall passage (real value between 0 and 1).</param>
         /// <param name="orientationSeed">
@@ -18,12 +22,18 @@
         ///     practice, this value is only considered when constructing the phenotype maze if the area which the wall is dividing
         ///     is square.
         /// </param>
-        public MazeGene(double wallLocation, double passageLocation, bool orientationSeed)
+        public MazeGene(uint innovationId, double wallLocation, double passageLocation, bool orientationSeed)
         {
+            InnovationId = innovationId;
             WallLocation = wallLocation;
             PassageLocation = passageLocation;
             OrientationSeed = orientationSeed;
         }
+
+        /// <summary>
+        ///     The unique "innovation" identifier for this gene.
+        /// </summary>
+        public uint InnovationId { get; }
 
         /// <summary>
         ///     The unscaled wall location.

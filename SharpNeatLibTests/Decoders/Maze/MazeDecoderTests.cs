@@ -21,15 +21,15 @@ namespace SharpNeat.Decoders.Maze.Tests
             MazeGenome mazeGenome = new MazeGenome((MazeGenomeFactory) null, 1, 1);
 
             // Add some genes
-            mazeGenome.GeneList.Add(new MazeGene(0.6, 0.3, false));
-            mazeGenome.GeneList.Add(new MazeGene(0.7, 0.4, false));
-            mazeGenome.GeneList.Add(new MazeGene(0.3, 0.8, true));
-            mazeGenome.GeneList.Add(new MazeGene(0.9, 0.2, false));
-            mazeGenome.GeneList.Add(new MazeGene(0.5, 0.3, false));
-            mazeGenome.GeneList.Add(new MazeGene(0.2, 0.5, false));
-            mazeGenome.GeneList.Add(new MazeGene(0.4, 0.1, true));
-            mazeGenome.GeneList.Add(new MazeGene(0.7, 0.8, true));
-            mazeGenome.GeneList.Add(new MazeGene(0.3, 0.2, false));
+            mazeGenome.GeneList.Add(new MazeGene(1, 0.6, 0.3, false));
+            mazeGenome.GeneList.Add(new MazeGene(2, 0.7, 0.4, false));
+            mazeGenome.GeneList.Add(new MazeGene(3, 0.3, 0.8, true));
+            mazeGenome.GeneList.Add(new MazeGene(4, 0.9, 0.2, false));
+            mazeGenome.GeneList.Add(new MazeGene(5, 0.5, 0.3, false));
+            mazeGenome.GeneList.Add(new MazeGene(6, 0.2, 0.5, false));
+            mazeGenome.GeneList.Add(new MazeGene(7, 0.4, 0.1, true));
+            mazeGenome.GeneList.Add(new MazeGene(8, 0.7, 0.8, true));
+            mazeGenome.GeneList.Add(new MazeGene(9, 0.3, 0.2, false));
 
             // Create the maze decoder
             MazeDecoder mazeDecoder = new MazeDecoder(20, 20);

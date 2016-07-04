@@ -5,12 +5,12 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Xml;
 using ExperimentEntities;
-using MazeExperimentSuppotLib;
 using SharpNeat.Decoders;
 using SharpNeat.Decoders.Maze;
 using SharpNeat.Decoders.Neat;
 using SharpNeat.Genomes.Maze;
 using SharpNeat.Genomes.Neat;
+using MazeExperimentSuppotLib;
 
 #endregion
 
