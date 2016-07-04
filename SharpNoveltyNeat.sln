@@ -34,6 +34,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpNeatDomainsTests", "SharpNeatDomainsTests\SharpNeatDomainsTests.csproj", "{2D4DBF9E-8B65-483B-A57D-055401586892}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NavigatorMazeMapEvaluator", "NavigatorMazeMapEvaluator\NavigatorMazeMapEvaluator.csproj", "{2AA77AFA-77EB-46FF-862A-4EE18A0613FC}"
+	ProjectSection(ProjectDependencies) = postProject
+		{7C45C292-DE7A-4E1F-80AA-44D6950807F5} = {7C45C292-DE7A-4E1F-80AA-44D6950807F5}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MazeGenomeGenerator", "MazeGenomeGenerator\MazeGenomeGenerator.csproj", "{F04EB5CA-E63A-46C0-907C-C5685C454CA2}"
 	ProjectSection(ProjectDependencies) = postProject

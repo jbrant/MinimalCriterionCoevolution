@@ -34,6 +34,7 @@ namespace SharpNeat.Genomes.Maze
         {
             MazeGenomeParameters = mazeGenomeParameters;
             GenomeIdGenerator = new UInt32IdGenerator();
+            InnovationIdGenerator = new UInt32IdGenerator();
 
             // Calculate maze max complexity as the area
             MaxComplexity = mazeHeight*mazeWidth;
@@ -75,6 +76,11 @@ namespace SharpNeat.Genomes.Maze
         ///     Unique ID generator for maze genomes.
         /// </summary>
         public UInt32IdGenerator GenomeIdGenerator { get; }
+
+        /// <summary>
+        ///     Unique innovation ID generator for maze genes.
+        /// </summary>
+        public UInt32IdGenerator InnovationIdGenerator { get; }
 
         /// <summary>
         ///     NOT USED (but required by interface).
@@ -122,6 +128,7 @@ namespace SharpNeat.Genomes.Maze
 
             for (int i = 0; i < length; i++)
             {
+                InnovationIdGenerator.Reset();
                 genomeList.Add(CreateGenome(birthGeneration));
             }
 
