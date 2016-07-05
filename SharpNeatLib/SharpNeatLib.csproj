@@ -311,6 +311,7 @@
     <Compile Include="Utility\EvaluationUtils.cs" />
     <Compile Include="Utility\BoxMullerGaussianSampler.cs" />
     <Compile Include="Utility\CircularBuffer.cs" />
+    <Compile Include="Utility\MazeUtils.cs" />
     <Compile Include="Utility\NoveltyUtils.cs" />
     <Compile Include="Utility\FrequencyDistributionData.cs" />
     <Compile Include="Utility\DoubleCircularBufferWithStats.cs" />
