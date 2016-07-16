@@ -3,12 +3,14 @@
   <Mazes>
     <Maze id="0" birthGen="0">
       <Walls>
-        <Wall RelativeWallLocation="0.368571693714974" RelativePassageLocation="0.0598987248073792" OrientationSeed="True" />
-        <Wall RelativeWallLocation="0.440432869103007" RelativePassageLocation="0.375169356993944" OrientationSeed="True" />
-        <Wall RelativeWallLocation="0.838028935640132" RelativePassageLocation="0.0381600423893705" OrientationSeed="True" />
-        <Wall RelativeWallLocation="0.511854062560878" RelativePassageLocation="0.469604195314275" OrientationSeed="False" />
-        <Wall RelativeWallLocation="0.936148478154162" RelativePassageLocation="0.649287364282313" OrientationSeed="False" />
-        <Wall RelativeWallLocation="0.627020046872562" RelativePassageLocation="0.394174712893634" OrientationSeed="False" />
+        <Wall id="0" RelativeWallLocation="0.674504922551338" RelativePassageLocation="0.221471613376155" OrientationSeed="True" />
+        <Wall id="1" RelativeWallLocation="0.841837300379685" RelativePassageLocation="0.644576442262426" OrientationSeed="True" />
+        <Wall id="2" RelativeWallLocation="0.541684247339929" RelativePassageLocation="0.119586489684687" OrientationSeed="True" />
+        <Wall id="3" RelativeWallLocation="0.24871452257443" RelativePassageLocation="0.398169086034488" OrientationSeed="True" />
+        <Wall id="4" RelativeWallLocation="0.365038920363895" RelativePassageLocation="0.691246927106402" OrientationSeed="True" />
+        <Wall id="5" RelativeWallLocation="0.995580511165587" RelativePassageLocation="0.439328785724625" OrientationSeed="True" />
+        <Wall id="6" RelativeWallLocation="0.00953957066384124" RelativePassageLocation="0.986927429208033" OrientationSeed="True" />
+        <Wall id="7" RelativeWallLocation="0.243049142529745" RelativePassageLocation="0.706099351265514" OrientationSeed="False" />
       </Walls>
     </Maze>
   </Mazes>

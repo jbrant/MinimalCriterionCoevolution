@@ -14,6 +14,7 @@ using SharpNeat.Loggers;
 using SharpNeat.Phenomes;
 using SharpNeat.Phenomes.Mazes;
 using SharpNeat.SpeciationStrategies;
+using SharpNeat.Utility;
 
 #endregion
 
@@ -189,7 +190,8 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             ulong initializationEvaluations;
 
             // Compute the maze max complexity
-            ((MazeGenomeFactory) genomeFactory2).MaxComplexity = _mazeHeight*_mazeWidth;
+            ((MazeGenomeFactory) genomeFactory2).MaxComplexity = MazeUtils.DetermineMaxPartitions(_mazeHeight,
+                _mazeWidth, 200);
 
             // Go ahead and log static initialization maze genome
             _mazeNavigationInitializer.LogStartingMazeGenome(genomeList2[0], _mazePopulationGenomesDataLogger);
@@ -211,7 +213,8 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
 
             // Create the NEAT (i.e. navigator) queueing evolution algorithm
             AbstractEvolutionAlgorithm<NeatGenome> neatEvolutionAlgorithm =
-                new QueueingNeatEvolutionAlgorithm<NeatGenome>(new NeatEvolutionAlgorithmParameters(),
+                new QueueingNeatEvolutionAlgorithm<NeatGenome>(
+                    new NeatEvolutionAlgorithmParameters {SpecieCount = AgentNumSpecies},
                     new ParallelKMeansClusteringStrategy<NeatGenome>(new ManhattanDistanceMetric(1.0, 0.0, 10.0),
                         ParallelOptions), null,
                     NavigatorBatchSize, RunPhase.Primary, false, false, _navigatorEvolutionDataLogger,
@@ -219,7 +222,8 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
 
             // Create the maze queueing evolution algorithm
             AbstractEvolutionAlgorithm<MazeGenome> mazeEvolutionAlgorithm =
-                new QueueingNeatEvolutionAlgorithm<MazeGenome>(new NeatEvolutionAlgorithmParameters(),
+                new QueueingNeatEvolutionAlgorithm<MazeGenome>(
+                    new NeatEvolutionAlgorithmParameters {SpecieCount = MazeNumSpecies},
                     new ParallelKMeansClusteringStrategy<MazeGenome>(new ManhattanDistanceMetric(1.0, 0.0, 10.0),
                         ParallelOptions), null,
                     MazeBatchSize, RunPhase.Primary, false, false, _mazeEvolutionDataLogger, _mazeLogFieldEnableMap,

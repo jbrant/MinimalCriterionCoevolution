@@ -119,7 +119,8 @@ namespace MazeSimulatorSupport
             List<string> experimentNames;
 
             // Open database context and get all experiment names
-            using (ExperimentDataEntities expDataContext = new ExperimentDataEntities(efConnectionString))
+            // TODO: This constructor needs to accept the passed in connection string to work...
+            using (ExperimentDataEntities expDataContext = new ExperimentDataEntities())
             {
                 // Get list of experiment names (note that these are sorted via ordered index on the field)
                 experimentNames =

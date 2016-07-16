@@ -82,19 +82,64 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     Removes the specified number of oldest genomes from the population.
         /// </summary>
         /// <param name="numGenomesToRemove">The number of oldest genomes to remove from the population.</param>
-        private void RemoveOldestGenomes(int numGenomesToRemove)
+        private void RemoveOldestSpecieGenomes(int numGenomesToRemove)
         {
-            // Sort the population by age (oldest to youngest)
-            IEnumerable<TGenome> ageSortedPopulation =
-                ((List<TGenome>) GenomeList).OrderBy(g => g.BirthGeneration).AsParallel();
+            List<TGenome> genomesToRemove = new List<TGenome>();
+            List<Tuple<Specie<TGenome>, int>> specieRemovalCounts =
+                new List<Tuple<Specie<TGenome>, int>>(SpecieList.Count);
 
-            // Select the specified number of oldest genomes
-            IEnumerable<TGenome> oldestGenomes = ageSortedPopulation.Take(numGenomesToRemove);
+            // Sort the species by size
+            IEnumerable<Specie<TGenome>> sizeSortedSpecies =
+                SpecieList.OrderByDescending(x => x.GenomeList.Count).AsParallel();
 
-            // Remove the oldest genomes from the population
-            foreach (TGenome oldestGenome in oldestGenomes)
+            foreach (Specie<TGenome> specie in sizeSortedSpecies)
             {
-                ((List<TGenome>) GenomeList).Remove(oldestGenome);
+                // Calculate the number of genomes to remove from the current specie
+                int curNumToRemove =
+                    (int) Math.Round(((double) specie.GenomeList.Count/GenomeList.Count)*numGenomesToRemove, 0);
+
+                // Tag the species with the number to remove for that species
+                specieRemovalCounts.Add(new Tuple<Specie<TGenome>, int>(specie, curNumToRemove));
+            }
+
+            // Sum the total number of genomes identified for removal
+            int totalMarkedForRemoval = specieRemovalCounts.Sum(s => s.Item2);
+
+            // Get the discrepant amount of genomes remaining to be removed or retained
+            int removalDiff = Math.Abs(totalMarkedForRemoval - numGenomesToRemove);
+
+            while (removalDiff > 0)
+            {
+                // Get the index of the of the tuple with the species that can either absorb an additional loss
+                // or is the smallest non-empty species and can take an additional genome
+                int specieIdx = (totalMarkedForRemoval < numGenomesToRemove)
+                    ? specieRemovalCounts.FindIndex(s => s.Item1.GenomeList.Count >= 1)
+                    : specieRemovalCounts.FindLastIndex(s => s.Item1.GenomeList.Count >= 1);
+
+                // Mark another genome for removal or retention from the species at the identified index
+                specieRemovalCounts[specieIdx] =
+                    new Tuple<Specie<TGenome>, int>(specieRemovalCounts[specieIdx].Item1,
+                        (totalMarkedForRemoval < numGenomesToRemove)
+                            ? specieRemovalCounts[specieIdx].Item2 + 1
+                            : specieRemovalCounts[specieIdx].Item2 - 1);
+
+                removalDiff--;
+            }
+
+            foreach (Tuple<Specie<TGenome>, int> specieRemovalCount in specieRemovalCounts)
+            {
+                // Sort the specie members by age (oldest to youngest)
+                IEnumerable<TGenome> ageSortedSpeciePopulation =
+                    specieRemovalCount.Item1.GenomeList.OrderBy(g => g.BirthGeneration).AsParallel();
+
+                // Add the pre-calculated number of genomes to the removal list
+                genomesToRemove.AddRange(ageSortedSpeciePopulation.Take(specieRemovalCount.Item2));
+            }
+
+            // Remove the genomes marked for removal
+            foreach (TGenome genome in genomesToRemove)
+            {
+                ((List<TGenome>) GenomeList).Remove(genome);
             }
         }
 
@@ -225,7 +270,7 @@ namespace SharpNeat.EvolutionAlgorithms
                 int genomesToRemove = (GenomeList.Count + childGenomes.Count) - PopulationSize;
 
                 // Remove the above-computed number of oldest genomes from the population
-                RemoveOldestGenomes(genomesToRemove);
+                RemoveOldestSpecieGenomes(genomesToRemove);
             }
 
             // Add new children
