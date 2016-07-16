@@ -215,6 +215,7 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
             
             
             
+            
           </Key>
           <Property Name="ExperimentDictionaryID" Type="int" Nullable="false" StoreGeneratedPattern="Identity" />
           <Property Name="ExperimentName" Type="varchar" MaxLength="100" Nullable="false" />
@@ -256,6 +257,7 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <Property Name="Primary_ConnectionProportion" Type="float" Nullable="false" />
           <Property Name="Primary_ConnectionWeightRange" Type="int" Nullable="false" />
           <Property Name="Primary_Maze_PopulationSize" Type="int" Nullable="false" />
+          <Property Name="Primary_Maze_NumSpecies" Type="int" Nullable="false" />
           <Property Name="Primary_Maze_MutateWallLocationProbability" Type="float" />
           <Property Name="Primary_Maze_MutatePassageLocationProbability" Type="float" />
           <Property Name="Primary_Maze_MutateAddWallProbability" Type="float" />
@@ -263,6 +265,7 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <Property Name="Primary_Maze_MazeHeight" Type="int" />
           <Property Name="Primary_Maze_MazeWidth" Type="int" />
           <Property Name="Primary_Maze_MazeScaleMultiplier" Type="int" />
+          <Property Name="Primary_Maze_MinimumWalls" Type="smallint" />
           <Property Name="Initialization_OffspringBatchSize" Type="int" />
           <Property Name="Initialization_PopulationEvaluationFrequency" Type="int" />
           <Property Name="Initialization_NicheCapacity" Type="int" />
@@ -451,6 +454,7 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
     [ExperimentDictionary_vw].[Primary_ConnectionProportion] AS [Primary_ConnectionProportion], 
     [ExperimentDictionary_vw].[Primary_ConnectionWeightRange] AS [Primary_ConnectionWeightRange], 
     [ExperimentDictionary_vw].[Primary_Maze_PopulationSize] AS [Primary_Maze_PopulationSize], 
+    [ExperimentDictionary_vw].[Primary_Maze_NumSpecies] AS [Primary_Maze_NumSpecies], 
     [ExperimentDictionary_vw].[Primary_Maze_MutateWallLocationProbability] AS [Primary_Maze_MutateWallLocationProbability], 
     [ExperimentDictionary_vw].[Primary_Maze_MutatePassageLocationProbability] AS [Primary_Maze_MutatePassageLocationProbability], 
     [ExperimentDictionary_vw].[Primary_Maze_MutateAddWallProbability] AS [Primary_Maze_MutateAddWallProbability], 
@@ -458,6 +462,7 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
     [ExperimentDictionary_vw].[Primary_Maze_MazeHeight] AS [Primary_Maze_MazeHeight], 
     [ExperimentDictionary_vw].[Primary_Maze_MazeWidth] AS [Primary_Maze_MazeWidth], 
     [ExperimentDictionary_vw].[Primary_Maze_MazeScaleMultiplier] AS [Primary_Maze_MazeScaleMultiplier], 
+    [ExperimentDictionary_vw].[Primary_Maze_MinimumWalls] AS [Primary_Maze_MinimumWalls], 
     [ExperimentDictionary_vw].[Initialization_OffspringBatchSize] AS [Initialization_OffspringBatchSize], 
     [ExperimentDictionary_vw].[Initialization_PopulationEvaluationFrequency] AS [Initialization_PopulationEvaluationFrequency], 
     [ExperimentDictionary_vw].[Initialization_NicheCapacity] AS [Initialization_NicheCapacity], 
@@ -765,6 +770,8 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <NavigationProperty Name="CoevolutionMCSMazeExperimentGenomes" Relationship="ExperimentDataModel.ExperimentDictionaryCoevolutionMCSMazeExperimentGenome" FromRole="ExperimentDictionary" ToRole="CoevolutionMCSMazeExperimentGenome" />
           <NavigationProperty Name="CoevolutionMCSMazeExperimentEvaluationDatas" Relationship="ExperimentDataModel.CoevolutionMCSMazeExperimentEvaluationDataExperimentDictionary" FromRole="ExperimentDictionary" ToRole="CoevolutionMCSMazeExperimentEvaluationData" />
           <Property Name="MaxGenerations" Type="Int32" />
+          <Property Name="Primary_Maze_NumSpecies" Type="Int32" Nullable="false" />
+          <Property Name="Primary_Maze_MinimumWalls" Type="Int16" />
         </EntityType>
         <EntityType Name="NoveltyExperimentOrganismStateData">
           <Key>
@@ -1175,6 +1182,8 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <EntitySetMapping Name="ExperimentDictionaries">
             <EntityTypeMapping TypeName="ExperimentDataModel.ExperimentDictionary">
               <MappingFragment StoreEntitySet="ExperimentDictionary_vw">
+                <ScalarProperty Name="Primary_Maze_MinimumWalls" ColumnName="Primary_Maze_MinimumWalls" />
+                <ScalarProperty Name="Primary_Maze_NumSpecies" ColumnName="Primary_Maze_NumSpecies" />
                 <ScalarProperty Name="MaxGenerations" ColumnName="MaxGenerations" />
                 <ScalarProperty Name="Primary_Maze_MCS_BridgingApplications" ColumnName="Primary_Maze_MCS_BridgingApplications" />
                 <ScalarProperty Name="Primary_Maze_MCS_BridgingMagnitude" ColumnName="Primary_Maze_MCS_BridgingMagnitude" />

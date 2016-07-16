@@ -1366,9 +1366,6 @@
     <Content Include="SeedMazes\GeneratedMazeGenome_3_Walls.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="SeedMazes\GeneratedMazeGenome_8_Walls.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="SeedMazes\GeneratedMazeGenome_4_Walls.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -1382,6 +1379,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="SeedMazes\GeneratedMazeGenome_24_Walls.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SeedMazes\GeneratedMazeGenome_8_Walls.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run01.pop.xml">

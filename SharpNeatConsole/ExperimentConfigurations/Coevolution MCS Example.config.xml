@@ -4,9 +4,11 @@
   <SelectionAlgorithm>Queueing</SelectionAlgorithm>
   <!--<MaxDegreeOfParallelism>1</MaxDegreeOfParallelism>-->
   <AgentPopulationSize>1000</AgentPopulationSize>
-  <MazePopulationSize>100</MazePopulationSize>
+  <MazePopulationSize>10</MazePopulationSize>
   <AgentSeedGenomeCount>500</AgentSeedGenomeCount>
   <MazeSeedGenomeCount>1</MazeSeedGenomeCount>
+  <AgentNumSpecies>15</AgentNumSpecies>
+  <MazeNumSpecies>5</MazeNumSpecies>
   <Activation>
     <Scheme>Acyclic</Scheme>
   </Activation>

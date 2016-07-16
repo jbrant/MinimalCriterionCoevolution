@@ -148,6 +148,8 @@ namespace ExperimentEntities
         public Nullable<int> Primary_Maze_MCS_BridgingMagnitude { get; set; }
         public Nullable<int> Primary_Maze_MCS_BridgingApplications { get; set; }
         public Nullable<int> MaxGenerations { get; set; }
+        public int Primary_Maze_NumSpecies { get; set; }
+        public Nullable<short> Primary_Maze_MinimumWalls { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<NoveltyExperimentOrganismStateData> NoveltyExperimentOrganismStateDatas { get; set; }

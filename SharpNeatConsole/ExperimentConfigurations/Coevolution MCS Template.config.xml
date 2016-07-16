@@ -6,6 +6,8 @@
   <MazePopulationSize></MazePopulationSize>
   <AgentSeedGenomeCount></AgentSeedGenomeCount>
   <MazeSeedGenomeCount>1</MazeSeedGenomeCount>
+  <AgentNumSpecies></AgentNumSpecies>
+  <MazeNumSpecies></MazeNumSpecies>
   <Activation>
     <Scheme>Acyclic</Scheme>
   </Activation>

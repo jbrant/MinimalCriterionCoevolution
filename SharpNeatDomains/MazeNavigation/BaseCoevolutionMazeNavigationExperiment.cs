@@ -71,6 +71,16 @@ namespace SharpNeat.Domains.MazeNavigation
         protected const int AnnOutputCount = 2;
 
         /// <summary>
+        ///     The number of species in the agent queue.
+        /// </summary>
+        protected int AgentNumSpecies = 1;
+
+        /// <summary>
+        ///     The number of species in the maze queue.
+        /// </summary>
+        protected int MazeNumSpecies = 1;
+
+        /// <summary>
         ///     The activation scheme (i.e. cyclic or acyclic).
         /// </summary>
         protected NetworkActivationScheme ActivationScheme;
@@ -179,6 +189,8 @@ namespace SharpNeat.Domains.MazeNavigation
             MazeDefaultPopulationSize = XmlUtils.GetValueAsInt(xmlConfig, "MazePopulationSize");
             AgentSeedGenomeCount = XmlUtils.GetValueAsInt(xmlConfig, "AgentSeedGenomeCount");
             MazeSeedGenomeCount = XmlUtils.GetValueAsInt(xmlConfig, "MazeSeedGenomeCount");
+            AgentNumSpecies = XmlUtils.GetValueAsInt(xmlConfig, "AgentNumSpecies");
+            MazeNumSpecies = XmlUtils.GetValueAsInt(xmlConfig, "MazeNumSpecies");
             BehaviorCharacterizationFactory = ExperimentUtils.ReadBehaviorCharacterizationFactory(xmlConfig,
                 "BehaviorConfig");
             NavigatorBatchSize = XmlUtils.GetValueAsInt(xmlConfig, "NavigatorOffspringBatchSize");
