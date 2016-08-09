@@ -372,8 +372,16 @@ namespace SharpNeat.EvolutionAlgorithms
                     // Increment the current generation
                     CurrentGeneration++;
 
-                    // Execute the generation
-                    PerformOneGeneration();
+                    try
+                    {
+                        // Execute the generation
+                        PerformOneGeneration();
+                    }
+                    catch (Exception)
+                    {
+                        Console.Out.WriteLine("Exception occurred in call to PerformOneGeneration");
+                        throw;
+                    }
 
                     if (UpdateTest())
                     {
@@ -411,7 +419,14 @@ namespace SharpNeat.EvolutionAlgorithms
             }
             catch (ThreadAbortException)
             {
-                // Quietly exit thread.
+                // Quietly exit thread.                
+            }
+            catch (Exception e)
+            {
+                Console.Out.WriteLine("If we're here, who knows where this exception actually occurred...");
+                Console.Out.WriteLine(e.Message);
+
+                throw;
             }
         }
 

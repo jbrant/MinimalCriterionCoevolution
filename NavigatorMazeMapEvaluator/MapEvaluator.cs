@@ -1,16 +1,19 @@
 ﻿#region
 
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
 using ExperimentEntities;
+using MazeExperimentSuppotLib;
 using SharpNeat.Decoders;
 using SharpNeat.Decoders.Maze;
 using SharpNeat.Decoders.Neat;
 using SharpNeat.Genomes.Maze;
 using SharpNeat.Genomes.Neat;
-using MazeExperimentSuppotLib;
+using SharpNeat.Phenomes.Mazes;
 
 #endregion
 
@@ -147,10 +150,45 @@ namespace NavigatorMazeMapEvaluator
         }
 
         /// <summary>
+        ///     Preps for generating the maze structures by decoding the given list of maze genomes.  This is in support of
+        ///     post-hoc analyses that doesn't consider navigator trajectories.
+        /// </summary>
+        /// <param name="mazes">The mazes that were in the maze queue during the given batch.</param>
+        public void Initialize(IList<CoevolutionMCSMazeExperimentGenome> mazes)
+        {
+            foreach (CoevolutionMCSMazeExperimentGenome serializedMaze in mazes)
+            {
+                MazeGenome mazeGenome;
+
+                // Deserialize the maze XML into a maze genome
+                using (XmlReader xmlReader = XmlReader.Create(new StringReader(serializedMaze.GenomeXml)))
+                {
+                    mazeGenome = MazeGenomeXmlIO.ReadSingleGenomeFromRoot(xmlReader, _mazeGenomeFactory);
+                }
+
+                // Decode to maze phenome and add to the evaluation units list
+                EvaluationUnits.Add(new MazeNavigatorEvaluationUnit(_mazeDecoder.Decode(mazeGenome), null,
+                    serializedMaze.GenomeID, 0));
+            }
+        }
+        
+        /// <summary>
         ///     Executes a trial/simulation for all evaluation units (i.e. maze/navigator combinations).
         /// </summary>
         public void RunBatchEvaluation()
         {
+            // Check integrtiy of evaluation units
+            foreach (
+                MazeNavigatorEvaluationUnit evaluationUnit in
+                    EvaluationUnits.Where(
+                        evaluationUnit => evaluationUnit.AgentPhenome == null || evaluationUnit.MazePhenome == null))
+            {
+                throw new Exception(
+                    string.Format(
+                        "Malformed evaluation unit for agent {0} and maze {1} - each evaluation unit must contain a decoded maze and agent phenome.",
+                        evaluationUnit.AgentId, evaluationUnit.MazeId));
+            }
+
             // Execute all maze/navigator simulations in parallel
             Parallel.ForEach(EvaluationUnits,
                 delegate(MazeNavigatorEvaluationUnit evaluationUnit)

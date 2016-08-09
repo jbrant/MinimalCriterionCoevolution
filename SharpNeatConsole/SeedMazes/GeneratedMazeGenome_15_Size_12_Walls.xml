@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Root>
+  <Mazes>
+    <Maze id="0" birthGen="0">
+      <Walls>
+        <Wall id="0" RelativeWallLocation="0.944460566595411" RelativePassageLocation="0.207389699857398" OrientationSeed="True" />
+        <Wall id="1" RelativeWallLocation="0.695959067296218" RelativePassageLocation="0.565846408980827" OrientationSeed="False" />
+        <Wall id="2" RelativeWallLocation="0.337680043344237" RelativePassageLocation="0.855854566141895" OrientationSeed="True" />
+        <Wall id="3" RelativeWallLocation="0.831352761868086" RelativePassageLocation="0.976001814927907" OrientationSeed="True" />
+        <Wall id="4" RelativeWallLocation="0.358164388387541" RelativePassageLocation="0.997214643749043" OrientationSeed="False" />
+        <Wall id="5" RelativeWallLocation="0.0838820981252389" RelativePassageLocation="0.638442205096801" OrientationSeed="False" />
+        <Wall id="6" RelativeWallLocation="0.272106394764085" RelativePassageLocation="0.914388362744073" OrientationSeed="True" />
+        <Wall id="7" RelativeWallLocation="0.205625373965886" RelativePassageLocation="0.858315366719996" OrientationSeed="False" />
+        <Wall id="8" RelativeWallLocation="0.389636642946692" RelativePassageLocation="0.30572903123951" OrientationSeed="True" />
+        <Wall id="9" RelativeWallLocation="0.224711233388964" RelativePassageLocation="0.784833168976397" OrientationSeed="True" />
+        <Wall id="10" RelativeWallLocation="0.520607538298055" RelativePassageLocation="0.311234855703653" OrientationSeed="False" />
+        <Wall id="11" RelativeWallLocation="0.330438627549651" RelativePassageLocation="0.134205031736849" OrientationSeed="False" />
+      </Walls>
+    </Maze>
+  </Mazes>
+</Root>

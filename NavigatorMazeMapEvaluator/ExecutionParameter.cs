@@ -6,6 +6,12 @@
     public enum ExecutionParameter
     {
         /// <summary>
+        ///     Whether or not to evaluate mazes/navigator trajectories for the entirety of the run.  If false,
+        ///     only the last batch is analyzed.
+        /// </summary>
+        AnalyzeFullRun,
+
+        /// <summary>
         ///     The fixed number of input neurons in an agent neural network.
         /// </summary>
         AgentNeuronInputCount,
@@ -16,6 +22,12 @@
         AgentNeuronOutputCount,
 
         /// <summary>
+        ///     Whether or not to generate data/results about the simulation.  If enabled, either the WriteResultsToDatabase or
+        ///     DataFileOutputDirectory must be specified.
+        /// </summary>
+        GenerateSimulationResults,
+
+        /// <summary>
         ///     Whether or not to write the results of the maze/agent simulations to the experiment database.
         /// </summary>
         WriteResultsToDatabase,
@@ -24,6 +36,12 @@
         ///     The directory of the output data files (if we're not writing directly into the database).
         /// </summary>
         DataFileOutputDirectory,
+
+        /// <summary>
+        ///     Whether or not to generate bitmap images of the distinct mazes extant in the analyzed batches (no navigator
+        ///     trajectory included by default).
+        /// </summary>
+        GenerateMazeBitmaps,
 
         /// <summary>
         ///     Whether or not to generate bitmap images of the trajectory of each agent through each applicable maze.

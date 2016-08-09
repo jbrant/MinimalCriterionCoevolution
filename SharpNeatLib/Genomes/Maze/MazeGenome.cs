@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using SharpNeat.Core;
 using SharpNeat.Utility;
 
@@ -75,7 +76,7 @@ namespace SharpNeat.Genomes.Maze
 
             // Copy the other parameters off of the given genome
             GenomeFactory = copyFrom.GenomeFactory;
-            GeneList = new List<MazeGene>(copyFrom.GeneList);
+            GeneList = new List<MazeGene>(DeepCopyMazeGeneList(copyFrom.GeneList));
             EvaluationInfo = new EvaluationInfo(copyFrom.EvaluationInfo.FitnessHistoryLength);
         }
 
@@ -351,6 +352,21 @@ namespace SharpNeat.Genomes.Maze
             if (proposedLocation > 1)
                 return 1;
             return proposedLocation;
+        }
+
+        /// <summary>
+        ///     Performs a deep copy on the maze genes.
+        /// </summary>
+        /// <param name="copyFrom">The source maze gene list to duplicate.</param>
+        /// <returns>A newly constructed maze gene list.</returns>
+        private IList<MazeGene> DeepCopyMazeGeneList(IList<MazeGene> copyFrom)
+        {
+            List<MazeGene> copiedGeneList = new List<MazeGene>(copyFrom.Count);
+
+            // Duplicate all maze genes
+            copiedGeneList.AddRange(copyFrom.Select(mazeGene => mazeGene.CreateCopy()));
+
+            return copiedGeneList;
         }
 
         #endregion

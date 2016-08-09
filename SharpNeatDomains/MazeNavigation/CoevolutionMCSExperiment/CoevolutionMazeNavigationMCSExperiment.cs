@@ -214,7 +214,9 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             // Create the NEAT (i.e. navigator) queueing evolution algorithm
             AbstractEvolutionAlgorithm<NeatGenome> neatEvolutionAlgorithm =
                 new QueueingNeatEvolutionAlgorithm<NeatGenome>(
-                    new NeatEvolutionAlgorithmParameters {SpecieCount = AgentNumSpecies},
+                    // TODO: Add back in
+                    //new NeatEvolutionAlgorithmParameters {SpecieCount = AgentNumSpecies},
+                    new NeatEvolutionAlgorithmParameters(),
                     new ParallelKMeansClusteringStrategy<NeatGenome>(new ManhattanDistanceMetric(1.0, 0.0, 10.0),
                         ParallelOptions), null,
                     NavigatorBatchSize, RunPhase.Primary, false, false, _navigatorEvolutionDataLogger,
@@ -223,7 +225,9 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             // Create the maze queueing evolution algorithm
             AbstractEvolutionAlgorithm<MazeGenome> mazeEvolutionAlgorithm =
                 new QueueingNeatEvolutionAlgorithm<MazeGenome>(
-                    new NeatEvolutionAlgorithmParameters {SpecieCount = MazeNumSpecies},
+                    // TODO: Add back in
+                    //new NeatEvolutionAlgorithmParameters {SpecieCount = MazeNumSpecies},
+                    new NeatEvolutionAlgorithmParameters(),
                     new ParallelKMeansClusteringStrategy<MazeGenome>(new ManhattanDistanceMetric(1.0, 0.0, 10.0),
                         ParallelOptions), null,
                     MazeBatchSize, RunPhase.Primary, false, false, _mazeEvolutionDataLogger, _mazeLogFieldEnableMap,
