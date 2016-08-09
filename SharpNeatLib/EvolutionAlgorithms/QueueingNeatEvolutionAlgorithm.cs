@@ -82,6 +82,26 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     Removes the specified number of oldest genomes from the population.
         /// </summary>
         /// <param name="numGenomesToRemove">The number of oldest genomes to remove from the population.</param>
+        private void RemoveOldestGenomes(int numGenomesToRemove)
+        {
+            // Sort the population by age (oldest to youngest)
+            IEnumerable<TGenome> ageSortedPopulation =
+                ((List<TGenome>)GenomeList).OrderBy(g => g.BirthGeneration).AsParallel();
+
+            // Select the specified number of oldest genomes
+            IEnumerable<TGenome> oldestGenomes = ageSortedPopulation.Take(numGenomesToRemove);
+
+            // Remove the oldest genomes from the population
+            foreach (TGenome oldestGenome in oldestGenomes)
+            {
+                ((List<TGenome>)GenomeList).Remove(oldestGenome);
+            }
+        }
+
+        /// <summary>
+        ///     Removes the specified number of oldest genomes from the population.
+        /// </summary>
+        /// <param name="numGenomesToRemove">The number of oldest genomes to remove from the population.</param>
         private void RemoveOldestSpecieGenomes(int numGenomesToRemove)
         {
             List<TGenome> genomesToRemove = new List<TGenome>();
@@ -270,7 +290,9 @@ namespace SharpNeat.EvolutionAlgorithms
                 int genomesToRemove = (GenomeList.Count + childGenomes.Count) - PopulationSize;
 
                 // Remove the above-computed number of oldest genomes from the population
-                RemoveOldestSpecieGenomes(genomesToRemove);
+                // TODO: Add this back in
+                //RemoveOldestSpecieGenomes(genomesToRemove);
+                RemoveOldestGenomes(genomesToRemove);
             }
 
             // Add new children

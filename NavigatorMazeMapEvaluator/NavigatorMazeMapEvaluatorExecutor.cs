@@ -43,17 +43,33 @@ namespace NavigatorMazeMapEvaluator
 
             _executionLogger.Info("Invocation parameters validated - continuing with experiment execution.");
 
+            // Get boolean indicator dictating whether to analyze the whole run or just the last batch (default is true - full run)
+            bool analyzeFullRun = _executionConfiguration.ContainsKey(ExecutionParameter.AnalyzeFullRun) &&
+                                  Boolean.Parse(_executionConfiguration[ExecutionParameter.AnalyzeFullRun]);
+
             // Get input and output neurons counts for navigator agent
             int inputNeuronCount = Int32.Parse(_executionConfiguration[ExecutionParameter.AgentNeuronInputCount]);
             int outputNeuronCount = Int32.Parse(_executionConfiguration[ExecutionParameter.AgentNeuronOutputCount]);
 
-            // Get boolean indicators dictating whether to write simulation results to database and/or generate bitmaps of agent trajectories
-            bool writeResultsToDatabase =
-                !_executionConfiguration.ContainsKey(ExecutionParameter.WriteResultsToDatabase) ||
-                Boolean.Parse(_executionConfiguration[ExecutionParameter.WriteResultsToDatabase]);
+            // Get boolean indicator dictating whether to write out numeric results of the batch simulations (default is true)
+            bool generateSimulationResults =
+                _executionConfiguration.ContainsKey(ExecutionParameter.GenerateSimulationResults) == false ||
+                Boolean.Parse(_executionConfiguration[ExecutionParameter.GenerateSimulationResults]);
+
+            // Get boolean indicator dictating whether to generate bitmaps of mazes (default is true)
+            bool generateMazeBitmaps = _executionConfiguration.ContainsKey(ExecutionParameter.GenerateMazeBitmaps) ==
+                                       false ||
+                                       Boolean.Parse(_executionConfiguration[ExecutionParameter.GenerateMazeBitmaps]);
+
+            // Get boolean indicator dictating whether to generate bitmaps of agent trajectories (default is true)
             bool generateTrajectoryBitmaps =
-                !_executionConfiguration.ContainsKey(ExecutionParameter.GenerateAgentTrajectoryBitmaps) ||
+                _executionConfiguration.ContainsKey(ExecutionParameter.GenerateAgentTrajectoryBitmaps) == false ||
                 Boolean.Parse(_executionConfiguration[ExecutionParameter.GenerateAgentTrajectoryBitmaps]);
+
+            // Get boolean indicator dictating whether to write simulation results to database (default is false)
+            bool writeResultsToDatabase =
+                _executionConfiguration.ContainsKey(ExecutionParameter.WriteResultsToDatabase) &&
+                Boolean.Parse(_executionConfiguration[ExecutionParameter.WriteResultsToDatabase]);
 
             // If bitmap generation was enabled, grab the base output directory
             if (generateTrajectoryBitmaps)
@@ -102,63 +118,87 @@ namespace NavigatorMazeMapEvaluator
                     numRuns,
                     curExperimentConfiguration.ExperimentName));
 
-                // Get the number of batches (generations) in the experiment
+                // Process each experiment run
                 for (int curRun = startingRun; curRun <= numRuns; curRun++)
                 {
                     // If we're not writing to the database, open the file writer
-                    if (writeResultsToDatabase == false)
+                    if (generateSimulationResults && writeResultsToDatabase == false)
                     {
                         ExperimentDataHandler.OpenFileWriter(
                             Path.Combine(_executionConfiguration[ExecutionParameter.DataFileOutputDirectory],
                                 string.Format("{0} - Run{1}.csv", experimentName, curRun)));
                     }
 
-                    // Get the number of initialization batches in the current run
-                    IList<int> initializationBatchesWithGenomeData =
-                        ExperimentDataHandler.GetBatchesWithGenomeData(
-                            curExperimentConfiguration.ExperimentDictionaryID, curRun, RunPhase.Initialization);
-
-                    // If there was an initialization phase, analyze those results
-                    if (initializationBatchesWithGenomeData.Count > 0)
+                    // If we're analyzing the entire run, go ahead and process through the initialization phase
+                    // and all primary phase batch results
+                    if (analyzeFullRun)
                     {
+                        // Get the number of initialization batches in the current run
+                        IList<int> initializationBatchesWithGenomeData =
+                            ExperimentDataHandler.GetBatchesWithGenomeData(
+                                curExperimentConfiguration.ExperimentDictionaryID, curRun, RunPhase.Initialization);
+
+                        // If there was an initialization phase, analyze those results
+                        if (initializationBatchesWithGenomeData.Count > 0)
+                        {
+                            _executionLogger.Info(
+                                string.Format(
+                                    "Executing initialization phase analysis for run [{0}/{1}] with [{2}] batches",
+                                    curRun,
+                                    numRuns, initializationBatchesWithGenomeData.Count));
+
+                            // Begin initialization phase results processing
+                            ProcessAndLogPerBatchResults(initializationBatchesWithGenomeData, RunPhase.Initialization,
+                                experimentParameters, inputNeuronCount, outputNeuronCount, curRun, numRuns,
+                                curExperimentConfiguration, generateSimulationResults, writeResultsToDatabase,
+                                generateMazeBitmaps, generateTrajectoryBitmaps, baseImageOutputDirectory);
+                        }
+
+                        // Get the number of primary batches in the current run
+                        IList<int> batchesWithGenomeData =
+                            ExperimentDataHandler.GetBatchesWithGenomeData(
+                                curExperimentConfiguration.ExperimentDictionaryID, curRun, RunPhase.Primary);
+
+                        _executionLogger.Info(
+                            string.Format("Executing primary phase analysis for run [{0}/{1}] with [{2}] batches",
+                                curRun,
+                                numRuns, batchesWithGenomeData.Count));
+
+                        // Begin primary phase results processing
+                        ProcessAndLogPerBatchResults(batchesWithGenomeData, RunPhase.Primary, experimentParameters,
+                            inputNeuronCount, outputNeuronCount, curRun, numRuns, curExperimentConfiguration,
+                            generateSimulationResults, writeResultsToDatabase, generateMazeBitmaps,
+                            generateTrajectoryBitmaps, baseImageOutputDirectory);
+                    }
+                    // Otherwise, we're just analyzing the ending population
+                    else
+                    {
+                        // Get the last batch in the current run
+                        int finalBatch =
+                            ExperimentDataHandler.GetNumBatchesForRun(
+                                curExperimentConfiguration.ExperimentDictionaryID, curRun);
+
                         _executionLogger.Info(
                             string.Format(
-                                "Executing initialization phase analysis for run [{0}/{1}] with [{2}] batches",
-                                curRun,
-                                numRuns, initializationBatchesWithGenomeData.Count));
+                                "Executing analysis of end-stage mazes and navigator trajectories for run [{0}/{1}] batch [{2}]",
+                                curRun, numRuns, finalBatch));
 
-                        // Begin initialization phase results processing
-                        ProcessAndLogPerBatchResults(initializationBatchesWithGenomeData, RunPhase.Initialization,
-                            experimentParameters,
-                            inputNeuronCount, outputNeuronCount, curRun, numRuns, curExperimentConfiguration,
-                            writeResultsToDatabase, generateTrajectoryBitmaps, baseImageOutputDirectory);
+                        // Begin maze/navigator trajectory image generation
+                        ProcessAndLogPerBatchResults(new List<int>(1) {finalBatch}, RunPhase.Primary,
+                            experimentParameters, inputNeuronCount, outputNeuronCount, curRun, numRuns,
+                            curExperimentConfiguration, generateSimulationResults, writeResultsToDatabase,
+                            generateMazeBitmaps, generateTrajectoryBitmaps, baseImageOutputDirectory);
                     }
 
-                    // Get the number of primary batches in the current run
-                    IList<int> batchesWithGenomeData =
-                        ExperimentDataHandler.GetBatchesWithGenomeData(
-                            curExperimentConfiguration.ExperimentDictionaryID, curRun, RunPhase.Primary);
-
-                    _executionLogger.Info(
-                        string.Format("Executing primary phase analysis for run [{0}/{1}] with [{2}] batches",
-                            curRun,
-                            numRuns, batchesWithGenomeData.Count));
-
-                    // Begin primary phase results processing
-                    ProcessAndLogPerBatchResults(batchesWithGenomeData, RunPhase.Primary, experimentParameters,
-                        inputNeuronCount,
-                        outputNeuronCount, curRun, numRuns, curExperimentConfiguration, writeResultsToDatabase,
-                        generateTrajectoryBitmaps, baseImageOutputDirectory);
-
                     // If we're not writing to the database, close the file writer since the run is over
-                    if (writeResultsToDatabase == false)
+                    if (generateSimulationResults && writeResultsToDatabase == false)
                     {
                         ExperimentDataHandler.CloseFileWriter();
                     }
                 }
 
                 // Write a sentinel file to indicate analysis completion
-                if (writeResultsToDatabase == false)
+                if (generateSimulationResults && writeResultsToDatabase == false)
                     ExperimentDataHandler.WriteSentinelFile(
                         Path.Combine(_executionConfiguration[ExecutionParameter.DataFileOutputDirectory], experimentName));
             }
@@ -178,10 +218,12 @@ namespace NavigatorMazeMapEvaluator
         /// <param name="curRun">The run number.</param>
         /// <param name="numRuns">The total number of runs.</param>
         /// <param name="curExperimentConfiguration">The experiment configuration parameters.</param>
+        /// <param name="generateSimulationResults">Indicates whether to write out the results of the batch simulation.</param>
         /// <param name="writeResultsToDatabase">
         ///     Indicates whether to write results directly into a database (if not, results are
         ///     written to a flat file).
         /// </param>
+        /// <param name="generateMazeBitmaps">Indicates whether bitmap files of the distinct mazes should be written out.</param>
         /// <param name="generateTrajectoryBitmaps">
         ///     Indicates whether bitmap files depicting the navigator trajectory should be
         ///     written out.
@@ -189,8 +231,9 @@ namespace NavigatorMazeMapEvaluator
         /// <param name="baseImageOutputDirectory">The path to the output directory for the trajectory images.</param>
         private static void ProcessAndLogPerBatchResults(IList<int> batchesWithGenomeData, RunPhase runPhase,
             ExperimentParameters experimentParameters, int inputNeuronCount, int outputNeuronCount, int curRun,
-            int numRuns, ExperimentDictionary curExperimentConfiguration, bool writeResultsToDatabase,
-            bool generateTrajectoryBitmaps, string baseImageOutputDirectory)
+            int numRuns, ExperimentDictionary curExperimentConfiguration, bool generateSimulationResults,
+            bool writeResultsToDatabase,
+            bool generateMazeBitmaps, bool generateTrajectoryBitmaps, string baseImageOutputDirectory)
         {
             IList<CoevolutionMCSMazeExperimentGenome> staticInitializationMazes = null;
 
@@ -224,10 +267,21 @@ namespace NavigatorMazeMapEvaluator
                 // Evaluate all of the maze/navigator combinations in the batch
                 mapEvaluator.RunBatchEvaluation();
 
-                // Save the evaluation results
-                ExperimentDataHandler.WriteNavigatorMazeEvaluationData(
-                    curExperimentConfiguration.ExperimentDictionaryID, curRun, curBatch, runPhase,
-                    mapEvaluator.EvaluationUnits, CommitPageSize, writeResultsToDatabase);
+                if (generateSimulationResults)
+                {
+                    // Save the evaluation results
+                    ExperimentDataHandler.WriteNavigatorMazeEvaluationData(
+                        curExperimentConfiguration.ExperimentDictionaryID, curRun, curBatch, runPhase,
+                        mapEvaluator.EvaluationUnits, CommitPageSize, writeResultsToDatabase);
+                }
+
+                if (generateMazeBitmaps)
+                {
+                    // Generate bitmaps of distinct mazes extant at the current point in time
+                    ImageGenerationHandler.GenerateMazeBitmaps(baseImageOutputDirectory,
+                        curExperimentConfiguration.ExperimentName, curExperimentConfiguration.ExperimentDictionaryID,
+                        curRun, curBatch, mapEvaluator.EvaluationUnits);
+                }
 
                 if (generateTrajectoryBitmaps)
                 {
@@ -297,7 +351,10 @@ namespace NavigatorMazeMapEvaluator
                             break;
 
                         // Ensure that valid boolean values were given
+                        case ExecutionParameter.AnalyzeFullRun:
+                        case ExecutionParameter.GenerateSimulationResults:
                         case ExecutionParameter.WriteResultsToDatabase:
+                        case ExecutionParameter.GenerateMazeBitmaps:
                         case ExecutionParameter.GenerateAgentTrajectoryBitmaps:
                             bool testBool;
                             if (Boolean.TryParse(parameterValuePair[1], out testBool) == false)
@@ -347,17 +404,31 @@ namespace NavigatorMazeMapEvaluator
                     isConfigurationValid = false;
                 }
 
-                // If we're logging to a flat file instead of the database, the output directory must be set
-                if ((_executionConfiguration.ContainsKey(ExecutionParameter.WriteResultsToDatabase) &&
+                // If we're generating experiment result data (default is true) and logging to a flat file instead of the database 
+                // (default is true), the output directory must be set
+                if ((_executionConfiguration.ContainsKey(ExecutionParameter.GenerateSimulationResults) == false ||
+                     Convert.ToBoolean(_executionConfiguration[ExecutionParameter.GenerateSimulationResults])) &&
+                    (_executionConfiguration.ContainsKey(ExecutionParameter.WriteResultsToDatabase) == false ||
                      Convert.ToBoolean(_executionConfiguration[ExecutionParameter.WriteResultsToDatabase]) == false) &&
                     _executionConfiguration.ContainsKey(ExecutionParameter.DataFileOutputDirectory) == false)
                 {
                     _executionLogger.Error(
-                        "The data file output directory must be specified when writing results to a flat file instead of the database.");
+                        "The data file output directory must be specified when generating experiment result data and writing results to a flat file instead of the database.");
                     isConfigurationValid = false;
                 }
 
-                // If the executor is going to produce bitmap images, then the base output directory must be specified
+                // If the executor is going to produce maze bitmap images (default is true), then the base output directory must be specified
+                if ((_executionConfiguration.ContainsKey(ExecutionParameter.GenerateMazeBitmaps) == false ||
+                     Convert.ToBoolean(_executionConfiguration[ExecutionParameter.GenerateMazeBitmaps])) &&
+                    _executionConfiguration.ContainsKey(ExecutionParameter.BitmapOutputBaseDirectory) == false)
+                {
+                    _executionLogger.Error(
+                        "The bitmap image base directory must be specified when producing maze images.");
+                    isConfigurationValid = false;
+                }
+
+                // If the executor is going to produce navigator trajectory bitmap images (default is true), 
+                // then the base output directory must be specified
                 if ((_executionConfiguration.ContainsKey(ExecutionParameter.GenerateAgentTrajectoryBitmaps) == false ||
                      Convert.ToBoolean(_executionConfiguration[ExecutionParameter.GenerateAgentTrajectoryBitmaps])) &&
                     _executionConfiguration.ContainsKey(ExecutionParameter.BitmapOutputBaseDirectory) == false)
@@ -375,10 +446,11 @@ namespace NavigatorMazeMapEvaluator
             _executionLogger.Error("The experiment executor invocation must take the following form:");
             _executionLogger.Error(
                 string.Format(
-                    "NavigatorMazeMapEvaluator.exe {0}=[{7}] {1}=[{8}] (Optional: {2}=[{9}]) (Optional: {3}=[{10}]) (Optional: {4}=[{9}] {5}=[{10}]) {6}=[{11}]",
+                    "NavigatorMazeMapEvaluator.exe {0}=[{9}] {1}=[{10}] (Optional: {2}=[{12}]) (Optional: {3}=[{12}] {4}=[{12}] (Required: {5}=[{13}])) (Optional: {6}=[{12}] (Required: {8}=[{13}])) (Optional: {7}=[{12}] (Required: {8}=[{13}])) {9}=[{14}]",
                     ExecutionParameter.AgentNeuronInputCount, ExecutionParameter.AgentNeuronOutputCount,
+                    ExecutionParameter.AnalyzeFullRun, ExecutionParameter.GenerateSimulationResults,
                     ExecutionParameter.WriteResultsToDatabase, ExecutionParameter.DataFileOutputDirectory,
-                    ExecutionParameter.GenerateAgentTrajectoryBitmaps,
+                    ExecutionParameter.GenerateMazeBitmaps, ExecutionParameter.GenerateAgentTrajectoryBitmaps,
                     ExecutionParameter.BitmapOutputBaseDirectory, ExecutionParameter.ExperimentNames, "# Input Neurons",
                     "# Output Neurons", "true|false", "directory", "experiment,experiment,..."));
 

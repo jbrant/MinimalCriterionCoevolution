@@ -509,6 +509,30 @@
     <Content Include="ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 14.config.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 15-1.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 15-2.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 15-3.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 15-4.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 15-5.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 15-6.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 15-7.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 15-8.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 15.config.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -669,6 +693,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 9.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS Control 15-1.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS Control 15-2.config.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS with Maze Initialization 1.config.xml">
@@ -1353,6 +1383,21 @@
     </Content>
     <Content Include="ExperimentConfigurations\Queueing MCS Parameter Sweep Template.config.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SeedMazes\GeneratedMazeGenome_15_Size_0_Walls.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SeedMazes\GeneratedMazeGenome_15_Size_12_Walls.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SeedMazes\GeneratedMazeGenome_15_Size_16_Walls.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SeedMazes\GeneratedMazeGenome_15_Size_4_Walls.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SeedMazes\GeneratedMazeGenome_15_Size_8_Walls.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="SeedMazes\GeneratedMazeGenome_6_Walls.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

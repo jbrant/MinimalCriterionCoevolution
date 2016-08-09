@@ -31,6 +31,18 @@
         }
 
         /// <summary>
+        ///     Copy constructor for duplicating maze gene.
+        /// </summary>
+        /// <param name="copyFrom">The maze gene to deep copy.</param>
+        public MazeGene(MazeGene copyFrom)
+        {
+            InnovationId = copyFrom.InnovationId;
+            WallLocation = copyFrom.WallLocation;
+            PassageLocation = copyFrom.PassageLocation;
+            OrientationSeed = copyFrom.OrientationSeed;
+        }
+
+        /// <summary>
         ///     The unique "innovation" identifier for this gene.
         /// </summary>
         public uint InnovationId { get; }
@@ -49,5 +61,14 @@
         ///     The preliminary wall orientation (horizontal or vertical).
         /// </summary>
         public bool OrientationSeed { get; }
+
+        /// <summary>
+        ///     Creates a copy of the current gene.
+        /// </summary>
+        /// <returns></returns>
+        public MazeGene CreateCopy()
+        {
+            return new MazeGene(this);
+        }
     }
 }
