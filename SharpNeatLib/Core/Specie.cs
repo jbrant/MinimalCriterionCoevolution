@@ -17,6 +17,7 @@
  * along with SharpNEAT.  If not, see <http://www.gnu.org/licenses/>.
  */
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SharpNeat.Core
 {
@@ -121,7 +122,17 @@ namespace SharpNeat.Core
         public double CalcMeanFitness()
         {
             return CalcTotalFitness() / (double)_genomeList.Count;
-        }        
+        }
+
+        /// <summary>
+        ///     Calculates the mean age of the genomes within the specie.
+        /// </summary>
+        /// <param name="currentGeneration">The current generation used as a baseline against which to calculate age.</param>
+        /// <returns>The mean age for the specie.</returns>
+        public double CalcMeanAge(uint currentGeneration)
+        {
+            return (double) _genomeList.Sum(genome => (currentGeneration - genome.BirthGeneration))/_genomeList.Count;
+        }
 
         /// <summary>
         /// Calculates the total complexity of all genomes within the specie.

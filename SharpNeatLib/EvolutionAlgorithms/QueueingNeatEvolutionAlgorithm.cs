@@ -86,7 +86,7 @@ namespace SharpNeat.EvolutionAlgorithms
         {
             // Sort the population by age (oldest to youngest)
             IEnumerable<TGenome> ageSortedPopulation =
-                ((List<TGenome>)GenomeList).OrderBy(g => g.BirthGeneration).AsParallel();
+                ((List<TGenome>) GenomeList).OrderBy(g => g.BirthGeneration).AsParallel();
 
             // Select the specified number of oldest genomes
             IEnumerable<TGenome> oldestGenomes = ageSortedPopulation.Take(numGenomesToRemove);
@@ -94,72 +94,126 @@ namespace SharpNeat.EvolutionAlgorithms
             // Remove the oldest genomes from the population
             foreach (TGenome oldestGenome in oldestGenomes)
             {
-                ((List<TGenome>)GenomeList).Remove(oldestGenome);
+                ((List<TGenome>) GenomeList).Remove(oldestGenome);
             }
         }
 
         /// <summary>
-        ///     Removes the specified number of oldest genomes from the population.
+        ///     Removes the oldest from the species to which offspring have been assigned.  This is only invoked if the
+        ///     addition of said offspring push the population size above the queue capacity.
         /// </summary>
-        /// <param name="numGenomesToRemove">The number of oldest genomes to remove from the population.</param>
-        private void RemoveOldestSpecieGenomes(int numGenomesToRemove)
+        /// <param name="offspring">The offspring that have satisfied the criterion and been added to the queue.</param>
+        private void RemoveOldestFromAssignedSpecies(List<TGenome> offspring)
         {
-            List<TGenome> genomesToRemove = new List<TGenome>();
-            List<Tuple<Specie<TGenome>, int>> specieRemovalCounts =
-                new List<Tuple<Specie<TGenome>, int>>(SpecieList.Count);
+            // Get the number of offspring assigned to each affected specie
+            IDictionary<Specie<TGenome>, int> specieAssignmentCountMap =
+                SpeciationStrategy.FindClosestSpecieAssignments(offspring, SpecieList);
 
-            // Sort the species by size
-            IEnumerable<Specie<TGenome>> sizeSortedSpecies =
-                SpecieList.OrderByDescending(x => x.GenomeList.Count).AsParallel();
+            // Roulette wheel is used below in the event that offspring coming into a species
+            // exceed the current specie size (it probabalistically selects the largest species as an alternate)
+            RouletteWheelLayout rwl = null;
 
-            foreach (Specie<TGenome> specie in sizeSortedSpecies)
+            // Initialize removal map with the count of per-specie removals
+            IDictionary<int, int> specieRemovalCountMap =
+                specieAssignmentCountMap.ToDictionary(specieAssignmentCountPair => specieAssignmentCountPair.Key.Idx,
+                    specieAssignmentCountPair => specieAssignmentCountPair.Value);
+
+            // Validate that each species has the capacity to support removal of the specified
+            // number of genomes (based on the number of offspring coming into it)
+            foreach (int specieIdx in specieRemovalCountMap.Keys.ToList())
             {
-                // Calculate the number of genomes to remove from the current specie
-                int curNumToRemove =
-                    (int) Math.Round(((double) specie.GenomeList.Count/GenomeList.Count)*numGenomesToRemove, 0);
+                // Handle the case where there's more offspring coming into the species than there are
+                // current genomes in that species
+                if (SpecieList[specieIdx].GenomeList.Count < specieRemovalCountMap[specieIdx])
+                {
+                    // Setup the roulette wheel if this is the first time selecting alternate species
+                    if (rwl == null)
+                    {
+                        // Only those species who are not already maxed out in terms of genome removals are candidates for additional removal
+                        List<int> candidateSpecieIdxs = (from specie in SpecieList
+                            where
+                                specieRemovalCountMap.ContainsKey(specie.Idx) == false ||
+                                specie.GenomeList.Count > specieRemovalCountMap[specie.Idx]
+                            select specie.Idx).ToList();
 
-                // Tag the species with the number to remove for that species
-                specieRemovalCounts.Add(new Tuple<Specie<TGenome>, int>(specie, curNumToRemove));
+                        double[] probabilities = new double[SpecieList.Count];
+
+                        // Compute the sum of the mean specie ages in the original species
+                        // (this will be used as the denominator in determing the specie roulette wheel probability)
+                        double specieMeanAgeSum =
+                            candidateSpecieIdxs.Sum(specie => SpecieList[specie].CalcMeanAge(CurrentGeneration));
+
+                        // Compute the probability of specie selection based on mean age of genomes 
+                        // within species divided by the sum of the specie mean ages
+                        foreach (var specie in candidateSpecieIdxs)
+                        {
+                            probabilities[specie] = SpecieList[specie].CalcMeanAge(CurrentGeneration)/specieMeanAgeSum;
+                        }
+
+                        // Instiate the roulette wheel based on the age-based probabilities
+                        rwl = new RouletteWheelLayout(probabilities);
+                    }
+
+                    // Calculate the genome shortage to support removal operation for the current species
+                    int genomeShortage = specieRemovalCountMap[specieIdx] - SpecieList[specieIdx].GenomeList.Count;
+
+                    // Attempt to find specie that has the requisite capacity to support each 
+                    // of the remaining genome removals
+                    for (int genomeCnt = 0; genomeCnt < genomeShortage; genomeCnt++)
+                    {
+                        // This holds the index of the specie that will incur the extra removal
+                        int candidateSpecieIdx;
+
+                        do
+                        {
+                            // Get the candidate species for additional genome removal
+                            candidateSpecieIdx = RouletteWheel.SingleThrow(rwl, RandomNumGenerator);
+                        } while (specieRemovalCountMap.ContainsKey(candidateSpecieIdx) &&
+                                 specieRemovalCountMap[candidateSpecieIdx] >=
+                                 SpecieList[candidateSpecieIdx].GenomeList.Count);
+                        // Retry until we find a specie that can incur additional genome loss 
+                        // (i.e. that is either not in the removal map currently OR is in the removal map 
+                        // but does not have the full amount of its constituent genomes earmarked for removal)
+
+                        // Add to species removal map or increment existing removal count for species
+                        // for the selected species
+                        if (specieRemovalCountMap.ContainsKey(candidateSpecieIdx))
+                        {
+                            specieRemovalCountMap[candidateSpecieIdx]++;
+                        }
+                        else
+                        {
+                            specieRemovalCountMap.Add(candidateSpecieIdx, 1);
+                        }
+
+                        // If the species has now hit capacity in terms of removals, remove it as a candidate for future additional removals
+                        if (SpecieList[candidateSpecieIdx].GenomeList.Count <= specieRemovalCountMap[candidateSpecieIdx])
+                        {
+                            rwl = rwl.RemoveOutcome(candidateSpecieIdx);
+                        }
+                    }
+
+                    // Decrement the amount to remove from the current species via the computed genome shortage
+                    specieRemovalCountMap[specieIdx] -= genomeShortage;
+                }
             }
 
-            // Sum the total number of genomes identified for removal
-            int totalMarkedForRemoval = specieRemovalCounts.Sum(s => s.Item2);
-
-            // Get the discrepant amount of genomes remaining to be removed or retained
-            int removalDiff = Math.Abs(totalMarkedForRemoval - numGenomesToRemove);
-
-            while (removalDiff > 0)
+            // Iterate through all affected species, sort by oldest members, 
+            // and remove the determined amount
+            foreach (int specieIdx in specieRemovalCountMap.Keys)
             {
-                // Get the index of the of the tuple with the species that can either absorb an additional loss
-                // or is the smallest non-empty species and can take an additional genome
-                int specieIdx = (totalMarkedForRemoval < numGenomesToRemove)
-                    ? specieRemovalCounts.FindIndex(s => s.Item1.GenomeList.Count >= 1)
-                    : specieRemovalCounts.FindLastIndex(s => s.Item1.GenomeList.Count >= 1);
+                // Sort the population by age (oldest to youngest)
+                IEnumerable<TGenome> ageSortedPopulation =
+                    (SpecieList[specieIdx].GenomeList).OrderBy(g => g.BirthGeneration).AsParallel();
 
-                // Mark another genome for removal or retention from the species at the identified index
-                specieRemovalCounts[specieIdx] =
-                    new Tuple<Specie<TGenome>, int>(specieRemovalCounts[specieIdx].Item1,
-                        (totalMarkedForRemoval < numGenomesToRemove)
-                            ? specieRemovalCounts[specieIdx].Item2 + 1
-                            : specieRemovalCounts[specieIdx].Item2 - 1);
+                // Select the specified number of oldest genomes
+                IEnumerable<TGenome> oldestGenomes = ageSortedPopulation.Take(specieRemovalCountMap[specieIdx]);
 
-                removalDiff--;
-            }
-
-            foreach (Tuple<Specie<TGenome>, int> specieRemovalCount in specieRemovalCounts)
-            {
-                // Sort the specie members by age (oldest to youngest)
-                IEnumerable<TGenome> ageSortedSpeciePopulation =
-                    specieRemovalCount.Item1.GenomeList.OrderBy(g => g.BirthGeneration).AsParallel();
-
-                // Add the pre-calculated number of genomes to the removal list
-                genomesToRemove.AddRange(ageSortedSpeciePopulation.Take(specieRemovalCount.Item2));
-            }
-
-            // Remove the genomes marked for removal
-            foreach (TGenome genome in genomesToRemove)
-            {
-                ((List<TGenome>) GenomeList).Remove(genome);
+                // Remove the oldest genomes from the specie/population
+                foreach (TGenome oldestGenome in oldestGenomes)
+                {
+                    ((List<TGenome>) GenomeList).Remove(oldestGenome);
+                }
             }
         }
 
@@ -203,6 +257,9 @@ namespace SharpNeat.EvolutionAlgorithms
                 _logFieldEnabledMap.ContainsKey(PopulationGenomesFieldElements.GenomeXml) &&
                 _logFieldEnabledMap[PopulationGenomesFieldElements.GenomeXml]
                     ? new LoggableElement(PopulationGenomesFieldElements.GenomeXml, null)
+                    : null,
+                _logFieldEnabledMap[PopulationGenomesFieldElements.SpecieId]
+                    ? new LoggableElement(PopulationGenomesFieldElements.SpecieId, null)
                     : null
             });
 
@@ -283,20 +340,15 @@ namespace SharpNeat.EvolutionAlgorithms
             // Remove child genomes that are not viable
             childGenomes.RemoveAll(genome => genome.EvaluationInfo.IsViable == false);
 
-            // If the population cap has been exceeded, remove oldest genomes to keep population size constant
-            if ((GenomeList.Count + childGenomes.Count) > PopulationSize)
-            {
-                // Calculate number of genomes to remove
-                int genomesToRemove = (GenomeList.Count + childGenomes.Count) - PopulationSize;
-
-                // Remove the above-computed number of oldest genomes from the population
-                // TODO: Add this back in
-                //RemoveOldestSpecieGenomes(genomesToRemove);
-                RemoveOldestGenomes(genomesToRemove);
-            }
-
             // Add new children
             (GenomeList as List<TGenome>)?.AddRange(childGenomes);
+
+            // If the population cap has been exceeded, remove oldest genomes to keep population size constant
+            if (GenomeList.Count > PopulationSize)
+            {
+                // Remove the above-computed number of oldest genomes from the population
+                RemoveOldestFromAssignedSpecies(childGenomes);
+            }
 
             // Update the total offspring count based on the number of *viable* offspring produced
             Statistics._totalOffspringCount = (ulong) childGenomes.Count;
@@ -353,6 +405,10 @@ namespace SharpNeat.EvolutionAlgorithms
                         _logFieldEnabledMap[PopulationGenomesFieldElements.GenomeXml]
                             ? new LoggableElement(PopulationGenomesFieldElements.GenomeXml,
                                 XmlIoUtils.GetGenomeXml(genome))
+                            : null,
+                        _logFieldEnabledMap[PopulationGenomesFieldElements.SpecieId]
+                            ? new LoggableElement(PopulationGenomesFieldElements.SpecieId,
+                                genome.SpecieIdx)
                             : null
                     });
                 }

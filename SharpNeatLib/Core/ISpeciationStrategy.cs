@@ -64,5 +64,15 @@ namespace SharpNeat.Core
         /// offspring.
         /// </summary>
         void SpeciateOffspring(IList<TGenome> genomeList, IList<Specie<TGenome>> specieList);
+
+        /// <summary>
+        /// Determines the closest species to each offspring genome and returns a dictionary indicating
+        /// the affected species along with a count of genomes assigned to that species.  Importantly, this
+        /// does not physically speciate the genomes themselves.
+        /// </summary>
+        /// <param name="offspringList">The list of genomes for which to determine closest species.</param>
+        /// <param name="specieList">The list of species against which to compare genome distance.</param>
+        /// <returns>The number of genomes assigned to each species.</returns>
+        IDictionary<Specie<TGenome>, int> FindClosestSpecieAssignments(IList<TGenome> offspringList, IList<Specie<TGenome>> specieList);
     }
 }

@@ -212,5 +212,41 @@ namespace SharpNeat.SpeciationStrategies
 
             Debug.Assert(SpeciationUtils<TGenome>.PerformIntegrityCheck(specieList));
         }
+
+        /// <summary>
+        ///     Randomly determines the closest species to each offspring genome and returns a dictionary indicating
+        ///     the affected species along with a count of genomes assigned to that species.  Importantly, this
+        ///     does not physically speciate the genomes themselves.
+        /// </summary>
+        /// <param name="offspringList">The list of genomes for which to determine closest species.</param>
+        /// <param name="specieList">The list of species against which to compare genome distance.</param>
+        /// <returns>The number of genomes assigned to each species.</returns>
+        public IDictionary<Specie<TGenome>, int> FindClosestSpecieAssignments(IList<TGenome> offspringList,
+            IList<Specie<TGenome>> specieList)
+        {
+            IDictionary<Specie<TGenome>, int> closestSpecieAssignmentCount =
+                new Dictionary<Specie<TGenome>, int>(specieList.Count);
+
+            // Iterate through each genome, randomly determine its closest specie, and either add that specie 
+            // to the specie assignment count or increment its respective count
+            foreach (TGenome genome in offspringList)
+            {
+                // Randomly select a species
+                Specie<TGenome> closestSpecie = specieList[_rng.Next(0, specieList.Count - 1)];
+
+                // Increment the count for the affected specie if there's already genomes assigned, 
+                // otherwise add the specie with a count of 1
+                if (closestSpecieAssignmentCount.ContainsKey(closestSpecie))
+                {
+                    closestSpecieAssignmentCount[closestSpecie]++;
+                }
+                else
+                {
+                    closestSpecieAssignmentCount.Add(closestSpecie, 1);
+                }
+            }
+
+            return closestSpecieAssignmentCount;
+        }
     }
 }
