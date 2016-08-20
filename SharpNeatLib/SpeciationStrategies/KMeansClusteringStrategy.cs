@@ -17,8 +17,10 @@
  * along with SharpNEAT.  If not, see <http://www.gnu.org/licenses/>.
  */
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using SharpNeat.Core;
 
 namespace SharpNeat.SpeciationStrategies
@@ -189,6 +191,38 @@ namespace SharpNeat.SpeciationStrategies
             SpeciateUntilConvergence(genomeList, specieList);
 
             Debug.Assert(SpeciationUtils<TGenome>.PerformIntegrityCheck(specieList));
+        }
+
+        /// <summary>
+        ///     Determines the closest species to each offspring genome and returns a dictionary indicating
+        ///     the affected species along with a count of genomes assigned to that species.  Importantly, this
+        ///     does not physically speciate the genomes themselves.
+        /// </summary>
+        /// <param name="offspringList">The list of genomes for which to determine closest species.</param>
+        /// <param name="specieList">The list of species against which to compare genome distance.</param>
+        /// <returns>The number of genomes assigned to each species.</returns>
+        public IDictionary<Specie<TGenome>, int> FindClosestSpecieAssignments(IList<TGenome> offspringList,
+            IList<Specie<TGenome>> specieList)
+        {
+            IDictionary<Specie<TGenome>, int> closestSpecieAssignmentCount =
+                new Dictionary<Specie<TGenome>, int>(specieList.Count);
+
+            // Iterate through each genome, determine its closest specie, and either add that specie 
+            // to the specie assignment count or increment its respective count
+            foreach (
+                Specie<TGenome> closestSpecie in offspringList.Select(genome => FindClosestSpecie(genome, specieList)))
+            {
+                if (closestSpecieAssignmentCount.ContainsKey(closestSpecie))
+                {
+                    closestSpecieAssignmentCount[closestSpecie]++;
+                }
+                else
+                {
+                    closestSpecieAssignmentCount.Add(closestSpecie, 1);
+                }
+            }
+
+            return closestSpecieAssignmentCount;
         }
 
         #endregion

@@ -17,10 +17,15 @@
  * along with SharpNEAT.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#region
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using SharpNeat.Core;
+
+#endregion
 
 namespace SharpNeat.SpeciationStrategies
 {
@@ -90,7 +95,7 @@ namespace SharpNeat.SpeciationStrategies
             }
             return true;
         }
-        
+
         /// <summary>
         ///     Prints debugging information regarding the count of genomes per species and that species target size.
         /// </summary>
@@ -104,6 +109,47 @@ namespace SharpNeat.SpeciationStrategies
                 Debug.Write("[" + specieList[i].GenomeList.Count + "," + specieStatsArr[i].TargetSizeInt + "] ");
             }
             Debug.WriteLine(String.Empty);
+        }
+
+        /// <summary>
+        ///     Returns the number of genomes assigned to each species (indexed by the species index).
+        /// </summary>
+        /// <param name="specieList">The species list to count.</param>
+        /// <returns>The per-species size.</returns>
+        public static IDictionary<int, int> SumSpecieSizes(IList<Specie<TGenome>> specieList)
+        {
+            IDictionary<int, int> specieIdxSize = new Dictionary<int, int>(specieList.Count);
+
+            // Iterate through each specie and add its index and respective number of assigned
+            // genomes to the map
+            foreach (var specie in specieList)
+            {
+                specieIdxSize.Add(specie.Idx, specie.GenomeList.Count);
+            }
+
+            return specieIdxSize;
+        }
+
+        /// <summary>
+        ///     Computes the average age of the genomes within each specie.
+        /// </summary>
+        /// <param name="specieList">The specie list under consideration.</param>
+        /// <param name="currentGeneration">The current generation (used for computing the age of each genome).</param>
+        /// <returns>The per-specie average age.</returns>
+        public static IDictionary<int, double> AverageSpecieAge(IList<Specie<TGenome>> specieList, uint currentGeneration)
+        {
+            IDictionary<int, double> specieIdxAge = new Dictionary<int, double>(specieList.Count);
+
+            // Iterate through each specie and add its index and the average age 
+            // of its constituent genomes to the map
+            foreach (var specie in specieList)
+            {
+                specieIdxAge.Add(specie.Idx,
+                    (double) specie.GenomeList.Sum(genome => (currentGeneration - genome.BirthGeneration))/
+                    specie.GenomeList.Count);
+            }
+
+            return specieIdxAge;
         }
 
         /// <summary>

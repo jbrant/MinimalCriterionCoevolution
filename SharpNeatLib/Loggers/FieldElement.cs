@@ -330,6 +330,11 @@ namespace SharpNeat.Loggers
         public static readonly FieldElement GenomeXml = new FieldElement(3, "Genome XML");
 
         /// <summary>
+        ///     The unique identifier for the species of which the genome is a member.
+        /// </summary>
+        public static readonly FieldElement SpecieId = new FieldElement(4, "Specie ID");
+
+        /// <summary>
         ///     Pre-constructs an evaluation log field enable map with all of the fields enabled by default.
         /// </summary>
         /// <returns>Evaluation log field enable map with all fields enabled.</returns>
@@ -340,7 +345,8 @@ namespace SharpNeat.Loggers
                 {Generation, true},
                 {RunPhase, true},
                 {GenomeId, true},
-                {GenomeXml, true}
+                {GenomeXml, true},
+                {SpecieId, true}
             };
         }
     }

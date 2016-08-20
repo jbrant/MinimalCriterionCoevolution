@@ -25,6 +25,7 @@ namespace ExperimentEntities
         public int Generation { get; set; }
         public int GenomeID { get; set; }
         public string GenomeXml { get; set; }
+        public Nullable<int> SpecieID { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<CoevolutionMCSMazeNavigatorResult> CoevolutionMCSMazeNavigatorResults { get; set; }

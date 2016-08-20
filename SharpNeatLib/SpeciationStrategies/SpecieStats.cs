@@ -17,6 +17,11 @@
         #region Integer statistics
 
         /// <summary>
+        ///     The total number of genomes in the species.
+        /// </summary>
+        public int Size { get; set; }
+
+        /// <summary>
         ///     The garget number of genomes in the species (rounded).
         /// </summary>
         public int TargetSizeInt { get; set; }
@@ -54,6 +59,11 @@
         ///     The target number of genomes in the species.
         /// </summary>
         public double TargetSizeReal { get; set; }
+
+        /// <summary>
+        ///     The average age of the genomes in the species.
+        /// </summary>
+        public double MeanGenomeAge { get; set; }
 
         #endregion
     }
