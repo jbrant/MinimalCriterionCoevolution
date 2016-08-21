@@ -491,7 +491,8 @@ namespace SharpNeat.EvolutionAlgorithms
                 new LoggableElement(PopulationGenomesFieldElements.Generation, null),
                 new LoggableElement(PopulationGenomesFieldElements.RunPhase, null),
                 new LoggableElement(PopulationGenomesFieldElements.GenomeId, null),
-                new LoggableElement(PopulationGenomesFieldElements.GenomeXml, null)
+                new LoggableElement(PopulationGenomesFieldElements.GenomeXml, null),
+                new LoggableElement(PopulationGenomesFieldElements.SpecieId, null)
             });
 
             // Initialize the genome evalutor

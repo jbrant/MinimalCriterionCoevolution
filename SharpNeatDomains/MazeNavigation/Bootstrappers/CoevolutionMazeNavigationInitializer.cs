@@ -122,7 +122,8 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
             {
                 new LoggableElement(PopulationGenomesFieldElements.Generation, null),
                 new LoggableElement(PopulationGenomesFieldElements.GenomeId, null),
-                new LoggableElement(PopulationGenomesFieldElements.GenomeXml, null)
+                new LoggableElement(PopulationGenomesFieldElements.GenomeXml, null),
+                new LoggableElement(PopulationGenomesFieldElements.SpecieId, null)
             });
 
             // Write the genome XML
@@ -131,7 +132,8 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
                 new LoggableElement(PopulationGenomesFieldElements.Generation, initializationMazeGenome.BirthGeneration),
                 new LoggableElement(PopulationGenomesFieldElements.GenomeId, initializationMazeGenome.Id),
                 new LoggableElement(PopulationGenomesFieldElements.GenomeXml,
-                    XmlIoUtils.GetGenomeXml(initializationMazeGenome))
+                    XmlIoUtils.GetGenomeXml(initializationMazeGenome)),
+                new LoggableElement(PopulationGenomesFieldElements.SpecieId, initializationMazeGenome.SpecieIdx)
             });
         }
 
