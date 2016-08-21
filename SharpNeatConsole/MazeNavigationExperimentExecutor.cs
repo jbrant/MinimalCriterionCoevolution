@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -74,6 +73,13 @@ namespace SharpNeatConsole
         LogOrganismStateData,
 
         /// <summary>
+        ///     Flag indicating whether different runs will be distributed on separate cluster nodes.  If this is true, the
+        ///     "StartFromRun" parameter must be set as this will indicate the run that's being executed on a particular node.
+        ///     Additionally, each node will execute one run only.
+        /// </summary>
+        IsDistributedExecution,
+
+        /// <summary>
         ///     Flag indicating whether the experiment is coevolution-based.
         /// </summary>
         IsCoevolution,
@@ -115,14 +121,21 @@ namespace SharpNeatConsole
             if (ParseAndValidateConfiguration(args) == false)
                 Environment.Exit(0);
 
+            // Determine whether this is a distributed execution
+            bool isDistributedExecution =
+                _executionConfiguration.ContainsKey(ExecutionParameter.IsDistributedExecution) &&
+                Boolean.Parse(_executionConfiguration[ExecutionParameter.IsDistributedExecution]);
+
             // Set the execution source (file or database)
             string executionSource = _executionConfiguration[ExecutionParameter.ExperimentSource].ToLowerInvariant();
 
-            // Read number of runs and number of run to start from (if applicable)
-            int numRuns = Int32.Parse(_executionConfiguration[ExecutionParameter.NumRuns]);
+            // Read number of runs and run to start from.  Note that if this is a distributed execution, each node
+            // will only execute a single run, so the number of runs will be equivalent to the run to start from
+            // (this ensures that the ensuing loop that executes all of the runs executes exactly once)
             int startFromRun = _executionConfiguration.ContainsKey(ExecutionParameter.StartFromRun)
                 ? Int32.Parse(_executionConfiguration[ExecutionParameter.StartFromRun])
                 : 1;
+            int numRuns = isDistributedExecution ? startFromRun : Int32.Parse(_executionConfiguration[ExecutionParameter.NumRuns]);            
 
             // Determine whether to log organism state data
             bool logOrganismStateData = _executionConfiguration.ContainsKey(ExecutionParameter.LogOrganismStateData) &&
@@ -194,8 +207,19 @@ namespace SharpNeatConsole
                     }
                 }
 
-                // Write a sentinel file to indicate analysis completion
-                if ("file".Equals(executionSource))
+                // If this is a distributed execution, write out a sentinel file for every run (since each node is only
+                // executing one run)
+                if (isDistributedExecution)
+                {
+                    using (
+                        File.Create(string.Format("{0} - Run {1} - COMPLETE",
+                            Path.Combine(_executionConfiguration[ExecutionParameter.OutputFileDirectory],
+                                curExperimentName), startFromRun)))
+                    {
+                    }
+                }
+                // Otherwise, Write a sentinel file to indicate analysis completion
+                else if ("file".Equals(executionSource))
                 {
                     // Write sentinel file to the given output directory
                     using (
@@ -279,6 +303,7 @@ namespace SharpNeatConsole
                         case ExecutionParameter.GeneratePopulation:
                         case ExecutionParameter.LogOrganismStateData:
                         case ExecutionParameter.IsCoevolution:
+                        case ExecutionParameter.IsDistributedExecution:
                             bool testBool;
                             if (Boolean.TryParse(parameterValuePair[1], out testBool) == false)
                             {
@@ -331,8 +356,10 @@ namespace SharpNeatConsole
                     isConfigurationValid = false;
                 }
 
-                // Check for existence of number of runs
-                if (_executionConfiguration.ContainsKey(ExecutionParameter.NumRuns) == false)
+                // Check for existence of number of runs (only required if non-distributed execution)
+                if ((_executionConfiguration.ContainsKey(ExecutionParameter.IsDistributedExecution) == false ||
+                     Convert.ToBoolean(_executionConfiguration[ExecutionParameter.IsDistributedExecution]) == false) &&
+                    _executionConfiguration.ContainsKey(ExecutionParameter.NumRuns) == false)
                 {
                     _executionLogger.Error(string.Format("Parameter [{0}] must be specified.",
                         ExecutionParameter.NumRuns));
@@ -375,6 +402,17 @@ namespace SharpNeatConsole
                         "If a coevolution experiment is being executed, the full path and filename of the seed maze must be specified.");
                     isConfigurationValid = false;
                 }
+
+                // If this is distributed execution, the StartFromRun parameter must be specified as this
+                // is used to control which node is executing which run of the experiment
+                if (_executionConfiguration.ContainsKey(ExecutionParameter.IsDistributedExecution) &&
+                    Convert.ToBoolean(_executionConfiguration[ExecutionParameter.IsDistributedExecution]) &&
+                    _executionConfiguration.ContainsKey(ExecutionParameter.StartFromRun) == false)
+                {
+                    _executionLogger.Error(
+                        "If this is a distributed execution, the StartFromRun parameter must be specified via the invoking job.");
+                    isConfigurationValid = false;
+                }
             }
 
             // If there's still no problem with the configuration, go ahead and return valid
@@ -384,12 +422,13 @@ namespace SharpNeatConsole
             _executionLogger.Error("The experiment executor invocation must take the following form:");
             _executionLogger.Error(
                 string.Format(
-                    "SharpNeatConsole.exe {0}=[{11}] {1}=[{13}] {2}=[{14}] {3}=[{12}] {4}=[{15}] {5}=[{15}] {6}=[{15}] {7}=[{12}] {8}=[{12}] {9}=[{16}] {10}=[{17}]",
+                    "SharpNeatConsole.exe {0}=[{12}] {1}=[{14}] {2}=[{15}] {3}=[{13}] {4}=[{16}] {5}=[{16}] {6}=[{16}] {7}=[{13}] {8}=[{12}] {9}=[{17}] {10}=[{13}] {11}=[{18}]",
                     ExecutionParameter.ExperimentSource, ExecutionParameter.NumRuns, ExecutionParameter.StartFromRun,
                     ExecutionParameter.GeneratePopulation, ExecutionParameter.SeedPopulationDirectory,
                     ExecutionParameter.ExperimentConfigDirectory, ExecutionParameter.OutputFileDirectory,
                     ExecutionParameter.LogOrganismStateData, ExecutionParameter.IsCoevolution,
-                    ExecutionParameter.SeedMazeFile, ExecutionParameter.ExperimentNames, "file|database",
+                    ExecutionParameter.SeedMazeFile, ExecutionParameter.IsDistributedExecution,
+                    ExecutionParameter.ExperimentNames, "file|database",
                     "true|false", "# runs", "starting run #", "directory", "maze genome file",
                     "experiment,experiment,..."));
 
@@ -652,13 +691,16 @@ namespace SharpNeatConsole
                 IGenomeFactory<MazeGenome> mazeGenomeFactory = experiment.CreateMazeGenomeFactory();
 
                 // Generate the initial agent population
-                List<NeatGenome> agentGenomeList = agentGenomeFactory.CreateGenomeList(experiment.AgentSeedGenomeCount, 0);
+                List<NeatGenome> agentGenomeList = agentGenomeFactory.CreateGenomeList(experiment.AgentSeedGenomeCount,
+                    0);
 
                 // Read in the seed population
-                List<MazeGenome> mazeGenomeList = ExperimentUtils.ReadSeedMazeGenomes(seedMazePath, (MazeGenomeFactory) mazeGenomeFactory);
+                List<MazeGenome> mazeGenomeList = ExperimentUtils.ReadSeedMazeGenomes(seedMazePath,
+                    (MazeGenomeFactory) mazeGenomeFactory);
 
-                _executionLogger.Info(string.Format("Loaded [{0}] navigator genomes and [{1}] seed maze genomes as initial populations.",
-                    agentGenomeList.Count, mazeGenomeList.Count));
+                _executionLogger.Info(
+                    string.Format("Loaded [{0}] navigator genomes and [{1}] seed maze genomes as initial populations.",
+                        agentGenomeList.Count, mazeGenomeList.Count));
 
                 _executionLogger.Info("Kicking off Experiment initialization/execution");
 
