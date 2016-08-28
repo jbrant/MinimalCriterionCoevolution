@@ -115,6 +115,9 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             // Read in the number of batches between population logging
             _populationLoggingBatchInterval = XmlUtils.TryGetValueAsInt(xmlConfig, "PopulationLoggingBatchInterval");
 
+            // Read in whether the individual specie sizes are being capped (defaults to false)
+            _isSpecieFixedSize = XmlUtils.TryGetValueAsBool(xmlConfig, "SpecieSizeFixed") ?? default(bool);
+
             // Initialize the initialization algorithm
             _mazeNavigationInitializer =
                 ExperimentUtils.DetermineCoevolutionInitializer(
@@ -214,20 +217,29 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             // Create the NEAT (i.e. navigator) queueing evolution algorithm
             AbstractEvolutionAlgorithm<NeatGenome> neatEvolutionAlgorithm =
                 new QueueingNeatEvolutionAlgorithm<NeatGenome>(
-                    new NeatEvolutionAlgorithmParameters {SpecieCount = AgentNumSpecies},
+                    new NeatEvolutionAlgorithmParameters
+                    {
+                        SpecieCount = AgentNumSpecies,
+                        MaxSpecieSize = AgentDefaultPopulationSize/AgentNumSpecies
+                    },
                     new ParallelKMeansClusteringStrategy<NeatGenome>(new ManhattanDistanceMetric(1.0, 0.0, 10.0),
                         ParallelOptions), null,
                     NavigatorBatchSize, RunPhase.Primary, false, false, _navigatorEvolutionDataLogger,
-                    _navigatorLogFieldEnableMap, _navigatorPopulationGenomesDataLogger, _populationLoggingBatchInterval);
+                    _navigatorLogFieldEnableMap, _navigatorPopulationGenomesDataLogger, _populationLoggingBatchInterval,
+                    _isSpecieFixedSize);
 
             // Create the maze queueing evolution algorithm
             AbstractEvolutionAlgorithm<MazeGenome> mazeEvolutionAlgorithm =
                 new QueueingNeatEvolutionAlgorithm<MazeGenome>(
-                    new NeatEvolutionAlgorithmParameters {SpecieCount = MazeNumSpecies},
+                    new NeatEvolutionAlgorithmParameters
+                    {
+                        SpecieCount = MazeNumSpecies,
+                        MaxSpecieSize = MazeDefaultPopulationSize/MazeNumSpecies
+                    },
                     new ParallelKMeansClusteringStrategy<MazeGenome>(new ManhattanDistanceMetric(1.0, 0.0, 10.0),
                         ParallelOptions), null,
                     MazeBatchSize, RunPhase.Primary, false, false, _mazeEvolutionDataLogger, _mazeLogFieldEnableMap,
-                    _mazePopulationGenomesDataLogger, _populationLoggingBatchInterval);
+                    _mazePopulationGenomesDataLogger, _populationLoggingBatchInterval, _isSpecieFixedSize);
 
             // Create the maze phenome evaluator
             IPhenomeEvaluator<MazeStructure, BehaviorInfo> mazeEvaluator = new MazeEnvironmentMCSEvaluator(
@@ -352,6 +364,11 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
         ///     Controls the number of batches between population definitions (i.e. genome XML) being logged.
         /// </summary>
         private int? _populationLoggingBatchInterval;
+
+        /// <summary>
+        ///     Indicates whether each species should be capped at a maximum size.
+        /// </summary>
+        private bool _isSpecieFixedSize;
 
         #endregion
     }

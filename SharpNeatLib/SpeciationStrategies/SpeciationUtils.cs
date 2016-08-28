@@ -66,6 +66,26 @@ namespace SharpNeat.SpeciationStrategies
         }
 
         /// <summary>
+        ///     Returns true if the number of genomes assigned to any one species exceeds the specified specie size limit
+        ///     (otherwise, returns false).
+        /// </summary>
+        public static bool CheckSpecieSizeLimitExceeded(IList<Specie<TGenome>> specieList, int sizeLimit)
+        {
+            return specieList.Any(specie => specie.GenomeList.Count > sizeLimit);
+        }
+
+        /// <summary>
+        ///     Returns true if the number of genomes assigned to any one species plus the number of offspring being added to that
+        ///     species exceeds the specified specie size limit (otherwise, returns false).
+        /// </summary>
+        public static bool CheckSpecieSizeLimitExceeded(
+            IDictionary<Specie<TGenome>, int> offspringSpecieAssignmentCount, IList<Specie<TGenome>> specieList,
+            int sizeLimit)
+        {
+            return specieList.Any(specie => specie.GenomeList.Count + offspringSpecieAssignmentCount[specie] > sizeLimit);
+        }
+        
+        /// <summary>
         ///     Perform an integrity check on the provided species.
         ///     Returns true if everything is OK.
         /// </summary>
@@ -136,7 +156,8 @@ namespace SharpNeat.SpeciationStrategies
         /// <param name="specieList">The specie list under consideration.</param>
         /// <param name="currentGeneration">The current generation (used for computing the age of each genome).</param>
         /// <returns>The per-specie average age.</returns>
-        public static IDictionary<int, double> AverageSpecieAge(IList<Specie<TGenome>> specieList, uint currentGeneration)
+        public static IDictionary<int, double> AverageSpecieAge(IList<Specie<TGenome>> specieList,
+            uint currentGeneration)
         {
             IDictionary<int, double> specieIdxAge = new Dictionary<int, double>(specieList.Count);
 

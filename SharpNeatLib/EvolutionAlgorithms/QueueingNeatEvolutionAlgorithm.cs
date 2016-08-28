@@ -48,6 +48,12 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </summary>
         private readonly int _mcUpdateInterval;
 
+        /// <summary>
+        ///     Flag that indicates whether the species sizes should be capped (using the maximum specie size set in the EA
+        ///     parameters).
+        /// </summary>
+        private readonly bool _isFixedSpecieSize;
+
         #endregion
 
         #region Private Methods
@@ -95,6 +101,30 @@ namespace SharpNeat.EvolutionAlgorithms
             foreach (TGenome oldestGenome in oldestGenomes)
             {
                 ((List<TGenome>) GenomeList).Remove(oldestGenome);
+            }
+        }
+
+        private void RemoveOldestFromOverfullSpecies(List<TGenome> offspring,
+            IDictionary<Specie<TGenome>, int> closestSpecieAssignmentCount)
+        {
+            // Find and process each specie with excessive population
+            foreach (var specieAssignmentCount in closestSpecieAssignmentCount)
+            {
+                // Handle species that have exceeded their cap
+                if (specieAssignmentCount.Key.GenomeList.Count + specieAssignmentCount.Value > EaParams.MaxSpecieSize)
+                {
+                    // Compute the magnitude of cap exceedance
+                    int sizeDiff = specieAssignmentCount.Key.GenomeList.Count + specieAssignmentCount.Value -
+                                   EaParams.MaxSpecieSize;
+
+
+                    // Handle the case where there's more offspring assigned into species than are currently in the species,
+                    // and remove those genomes from the offspring list first
+                    if (sizeDiff > specieAssignmentCount.Key.GenomeList.Count)
+                    {
+                        // TODO: Need to get the exact assignments of the affected offspring
+                    }
+                }
             }
         }
 
@@ -343,8 +373,23 @@ namespace SharpNeat.EvolutionAlgorithms
             // Add new children
             (GenomeList as List<TGenome>)?.AddRange(childGenomes);
 
+            // If we're using fixed specie sizes and the cap on one of the species has been exceeded, we need
+            // to remove the oldest from the affected species to bring that species back to the cap
+            if (_isFixedSpecieSize)
+            {
+                // Find the offspring specie assignments
+                IDictionary<Specie<TGenome>, int> closestSpecieAssignments =
+                    SpeciationStrategy.FindClosestSpecieAssignments(childGenomes, SpecieList);
+
+                // Adjust size of affected specie
+                if (SpeciationUtils<TGenome>.CheckSpecieSizeLimitExceeded(closestSpecieAssignments, SpecieList,
+                    EaParams.MaxSpecieSize))
+                {
+                    RemoveOldestFromOverfullSpecies(childGenomes, closestSpecieAssignments);
+                }
+            }
             // If the population cap has been exceeded, remove oldest genomes to keep population size constant
-            if (GenomeList.Count > PopulationSize)
+            else if (GenomeList.Count > PopulationSize)
             {
                 // Remove the above-computed number of oldest genomes from the population
                 RemoveOldestFromAssignedSpecies(childGenomes);
@@ -433,12 +478,14 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     Flag that indicates whether the minimal criteria is automatically/dynamically
         ///     determined.
         /// </param>
+        /// <param name="isFixedSpecieSize">Flag that indicates whether the species sizes should be capped.</param>
         /// <param name="mcUpdateInterval">
         ///     The number of batches/generations that are permitted to elapse between updates to the
         ///     minimal criteria.
         /// </param>
         public QueueingNeatEvolutionAlgorithm(IDataLogger logger = null, RunPhase runPhase = RunPhase.Primary,
-            bool isBridgingEnabled = false, bool isDynamicMinimalCriteria = false, int mcUpdateInterval = 0)
+            bool isBridgingEnabled = false, bool isDynamicMinimalCriteria = false, bool isFixedSpecieSize = false,
+            int mcUpdateInterval = 0)
             : this(
                 new KMeansClusteringStrategy<TGenome>(new ManhattanDistanceMetric()),
                 new NullComplexityRegulationStrategy(), 10, runPhase, isBridgingEnabled, isDynamicMinimalCriteria,
@@ -448,6 +495,7 @@ namespace SharpNeat.EvolutionAlgorithms
             ComplexityRegulationStrategy = new NullComplexityRegulationStrategy();
             _batchSize = 10;
             _mcUpdateInterval = mcUpdateInterval;
+            _isFixedSpecieSize = isFixedSpecieSize;
         }
 
         /// <summary>
@@ -469,6 +517,7 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <param name="logFieldEnabledMap">Dictionary of logging fields that can be dynamically enabled or disabled.</param>
         /// <param name="populationLogger">The population data logger.</param>
         /// <param name="populationLoggingInterval">The interval at which the population is logged.</param>
+        /// <param name="isFixedSpecieSize">Flag that indicates whether the species sizes should be capped.</param>
         /// <param name="mcUpdateInterval">
         ///     The number of batches/generations that are permitted to elapse between updates to the
         ///     minimal criteria.
@@ -483,6 +532,7 @@ namespace SharpNeat.EvolutionAlgorithms
             IDataLogger logger = null, IDictionary<FieldElement, bool> logFieldEnabledMap = null,
             IDataLogger populationLogger = null,
             int? populationLoggingInterval = null,
+            bool isFixedSpecieSize = false,
             int mcUpdateInterval = 0)
         {
             SpeciationStrategy = speciationStrategy;
@@ -496,6 +546,7 @@ namespace SharpNeat.EvolutionAlgorithms
             PopulationLogger = populationLogger;
             PopulationLoggingInterval = populationLoggingInterval;
             _mcUpdateInterval = mcUpdateInterval;
+            _isFixedSpecieSize = isFixedSpecieSize;
         }
 
         /// <summary>
@@ -518,6 +569,7 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <param name="logFieldEnabledMap">Dictionary of logging fields that can be dynamically enabled or disabled.</param>
         /// <param name="populationLogger">The population data logger.</param>
         /// <param name="populationLoggingInterval">The interval at which the population is logged.</param>
+        /// <param name="isFixedSpecieSize">Flag that indicates whether the species sizes should be capped.</param>
         /// <param name="mcUpdateInterval">
         ///     The number of batches/generations that are permitted to elapse between updates to the
         ///     minimal criteria.
@@ -532,6 +584,7 @@ namespace SharpNeat.EvolutionAlgorithms
             IDataLogger logger = null, IDictionary<FieldElement, bool> logFieldEnabledMap = null,
             IDataLogger populationLogger = null,
             int? populationLoggingInterval = null,
+            bool isFixedSpecieSize = false,
             int mcUpdateInterval = 0) : base(eaParams)
         {
             SpeciationStrategy = speciationStrategy;
@@ -545,6 +598,7 @@ namespace SharpNeat.EvolutionAlgorithms
             _isDynamicMinimalCriteria = isDynamicMinimalCriteria;
             _logFieldEnabledMap = logFieldEnabledMap;
             _mcUpdateInterval = mcUpdateInterval;
+            _isFixedSpecieSize = isFixedSpecieSize;
         }
 
         #endregion
