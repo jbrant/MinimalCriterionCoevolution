@@ -9,6 +9,7 @@
   <MazeSeedGenomeCount>1</MazeSeedGenomeCount>
   <AgentNumSpecies>15</AgentNumSpecies>
   <MazeNumSpecies>10</MazeNumSpecies>
+  <SpecieSizeFixed>true</SpecieSizeFixed>
   <Activation>
     <Scheme>Acyclic</Scheme>
   </Activation>

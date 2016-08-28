@@ -126,6 +126,11 @@ namespace SharpNeat.EvolutionAlgorithms
         public int SpecieCount { get; set; }
 
         /// <summary>
+        ///     The maximum number of genomes in a species (only used with fixed size species).
+        /// </summary>
+        public int MaxSpecieSize { get; set; }
+
+        /// <summary>
         ///     Gets or sets the elitism proportion.
         ///     We sort specie genomes by fitness and keep the top N%, the other genomes are
         ///     removed to make way for the offspring.
