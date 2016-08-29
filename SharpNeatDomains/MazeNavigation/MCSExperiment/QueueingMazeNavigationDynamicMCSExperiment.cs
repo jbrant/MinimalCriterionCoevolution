@@ -121,7 +121,8 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                     new ParallelKMeansClusteringStrategy<NeatGenome>(new ManhattanDistanceMetric(1.0, 0.0, 10.0),
                         ParallelOptions),
                     complexityRegulationStrategy, _batchSize, RunPhase.Primary, (_bridgingMagnitude > 0),
-                    true, _evolutionDataLogger, _experimentLogFieldEnableMap, null, null, _minimalCriteriaUpdateInterval);
+                    true, _evolutionDataLogger, _experimentLogFieldEnableMap, null, null, false,
+                    _minimalCriteriaUpdateInterval);
 
             // Create IBlackBox evaluator.
             IPhenomeEvaluator<IBlackBox, BehaviorInfo> mazeNavigationEvaluator =
