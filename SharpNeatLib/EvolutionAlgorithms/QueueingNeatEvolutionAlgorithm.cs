@@ -88,7 +88,7 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     Removes the specified number of oldest genomes from the population.
         /// </summary>
         /// <param name="numGenomesToRemove">The number of oldest genomes to remove from the population.</param>
-        private void RemoveOldestGenomes(int numGenomesToRemove)
+        private void RemoveGlobalOldestGenomes(int numGenomesToRemove)
         {
             // Sort the population by age (oldest to youngest)
             IEnumerable<TGenome> ageSortedPopulation =
@@ -104,30 +104,36 @@ namespace SharpNeat.EvolutionAlgorithms
             }
         }
 
-        private void RemoveOldestFromOverfullSpecies(List<TGenome> offspring,
-            IDictionary<Specie<TGenome>, int> closestSpecieAssignmentCount)
+        /// <summary>
+        /// Removes the oldest genomes from species that have exceeded their size cap.
+        /// </summary>
+        private void RemoveOldestFromOverfullSpecies()
         {
-            // Find and process each specie with excessive population
-            foreach (var specieAssignmentCount in closestSpecieAssignmentCount)
+            // Iterate over each species and remove the oldest genomes from any that have exceeded their cap
+            foreach (var specie in SpecieList.ToList())
             {
-                // Handle species that have exceeded their cap
-                if (specieAssignmentCount.Key.GenomeList.Count + specieAssignmentCount.Value > EaParams.MaxSpecieSize)
-                {
-                    // Compute the magnitude of cap exceedance
-                    int sizeDiff = specieAssignmentCount.Key.GenomeList.Count + specieAssignmentCount.Value -
-                                   EaParams.MaxSpecieSize;
+                if (specie.GenomeList.Count > EaParams.MaxSpecieSize)
+                {                    
+                    // Sort the specie population by age (oldest to youngest)
+                    IEnumerable<TGenome> ageSortedPopulation =
+                        specie.GenomeList.OrderBy(g => g.BirthGeneration).AsParallel();
 
+                    // Select the specified number of oldest genomes
+                    IEnumerable<TGenome> oldestGenomes = ageSortedPopulation.Take(specie.GenomeList.Count - EaParams.MaxSpecieSize);
 
-                    // Handle the case where there's more offspring assigned into species than are currently in the species,
-                    // and remove those genomes from the offspring list first
-                    if (sizeDiff > specieAssignmentCount.Key.GenomeList.Count)
+                    // Remove the oldest genomes from the specie/population
+                    foreach (TGenome oldestGenome in oldestGenomes)
                     {
-                        // TODO: Need to get the exact assignments of the affected offspring
+                        // Remove from the population
+                        ((List<TGenome>)GenomeList).Remove(oldestGenome);
+
+                        // Remove the genome reference from the specie
+                        SpecieList[specie.Idx].GenomeList.Remove(oldestGenome);
                     }
                 }
-            }
+            }            
         }
-
+        
         /// <summary>
         ///     Removes the oldest from the species to which offspring have been assigned.  This is only invoked if the
         ///     addition of said offspring push the population size above the queue capacity.
@@ -373,23 +379,11 @@ namespace SharpNeat.EvolutionAlgorithms
             // Add new children
             (GenomeList as List<TGenome>)?.AddRange(childGenomes);
 
-            // If we're using fixed specie sizes and the cap on one of the species has been exceeded, we need
-            // to remove the oldest from the affected species to bring that species back to the cap
-            if (_isFixedSpecieSize)
-            {
-                // Find the offspring specie assignments
-                IDictionary<Specie<TGenome>, int> closestSpecieAssignments =
-                    SpeciationStrategy.FindClosestSpecieAssignments(childGenomes, SpecieList);
 
-                // Adjust size of affected specie
-                if (SpeciationUtils<TGenome>.CheckSpecieSizeLimitExceeded(closestSpecieAssignments, SpecieList,
-                    EaParams.MaxSpecieSize))
-                {
-                    RemoveOldestFromOverfullSpecies(childGenomes, closestSpecieAssignments);
-                }
-            }
-            // If the population cap has been exceeded, remove oldest genomes to keep population size constant
-            else if (GenomeList.Count > PopulationSize)
+            // If the population cap has been exceeded and we aren't using fixed/capped specie sizes 
+            // (these will be handled via recalibrating specie sizes after speciation), remove oldest 
+            // genomes to keep population size constant
+            if (_isFixedSpecieSize == false && GenomeList.Count > PopulationSize)
             {
                 // Remove the above-computed number of oldest genomes from the population
                 RemoveOldestFromAssignedSpecies(childGenomes);
@@ -404,6 +398,13 @@ namespace SharpNeat.EvolutionAlgorithms
                 // Clear all the species and respeciate
                 ClearAllSpecies();
                 SpeciationStrategy.SpeciateGenomes(GenomeList, SpecieList);
+
+                // If we're using fixed specie sizes and (after speciating) the cap on one of the species has been 
+                // exceeded, we need to remove the oldest from the affected species to bring that species back to the cap
+                if (_isFixedSpecieSize)
+                {
+                    RemoveOldestFromOverfullSpecies();
+                }
 
                 // Update the best genome within each species and the population
                 // statistics (include specie statistics)
