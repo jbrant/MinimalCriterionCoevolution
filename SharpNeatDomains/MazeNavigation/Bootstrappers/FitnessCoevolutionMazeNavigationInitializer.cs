@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml;
 using SharpNeat.Core;
 using SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment;
 using SharpNeat.EvolutionAlgorithms;
@@ -38,7 +37,8 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
         ///     (this is used in the case where we're restarting a run because it failed to find a solution in the allotted time).
         /// </param>
         public override void InitializeAlgorithm(ParallelOptions parallelOptions, List<NeatGenome> genomeList,
-            MazeStructure mazeEnvironment, IGenomeDecoder<NeatGenome, IBlackBox> genomeDecoder, ulong startingEvaluations)
+            MazeStructure mazeEnvironment, IGenomeDecoder<NeatGenome, IBlackBox> genomeDecoder,
+            ulong startingEvaluations)
         {
             // Set the boiler plate algorithm parameters
             base.InitializeAlgorithm(parallelOptions, genomeList, genomeDecoder, startingEvaluations);
@@ -71,14 +71,25 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
         ///     them.
         /// </summary>
         /// <param name="totalEvaluations">The resulting number of evaluations to find the viable seed genomes.</param>
+        /// <param name="maxEvaluations">
+        ///     The maximum number of evaluations that can be executed before the initialization process
+        ///     is restarted.  This prevents getting stuck for a long time and/or ending up with unecessarily complex networks.
+        /// </param>
+        /// <param name="restartCount">
+        ///     The number of times the initialization process has been restarted (this is only used for
+        ///     status logging purposes).
+        /// </param>
         /// <returns>The list of seed genomes that meet the minimal criteria.</returns>
-        public override List<NeatGenome> EvolveViableGenomes(out ulong totalEvaluations)
+        public override List<NeatGenome> EvolveViableGenomes(out ulong totalEvaluations, uint? maxEvaluations,
+            uint restartCount)
         {
             // The minimum fitness for an agent who has solved the maze
             int solvedFitness = MaxDistanceToTarget - MinSuccessDistance;
 
             // Create list of viable genomes
             List<NeatGenome> viableGenomes = new List<NeatGenome>(MinSuccessfulAgentCount + MinUnsuccessfulAgentCount);
+
+            Console.Out.WriteLine("Starting up the algorithm on restart #{0}", restartCount);
 
             do
             {
@@ -92,6 +103,24 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
                     Console.WriteLine(@"Current Evaluations: {0}  Mean Complexity: {1}  Closest Genome Distance: {2}",
                         InitializationEa.CurrentEvaluations, InitializationEa.Statistics._meanComplexity,
                         MaxDistanceToTarget - InitializationEa.Statistics._maxFitness);
+
+                    if (InitializationEa.CurrentEvaluations >= maxEvaluations)
+                    {
+                        // Record the total number of evaluations
+                        totalEvaluations = InitializationEa.CurrentEvaluations;
+
+                        // Halt the EA worker thread
+                        InitializationEa.RequestPauseAndWait();
+
+                        // Null out the factory/EA and delete the thread
+                        // (it's necessary to null out these resources so that the thread will be completely garbage collected)
+                        GenomeFactory = null;
+                        InitializationEa.Reset();
+                        InitializationEa = null;
+
+                        // Note that the calling experiment must be able to handle this null return value (not great practice)
+                        return null;
+                    }
 
                     Thread.Sleep(200);
                 }

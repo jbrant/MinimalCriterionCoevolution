@@ -104,8 +104,17 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
         ///     them.
         /// </summary>
         /// <param name="totalEvaluations">The resulting number of evaluations to find the viable seed genomes.</param>
+        /// <param name="maxEvaluations">
+        ///     The maximum number of evaluations that can be executed before the initialization process
+        ///     is restarted.  This prevents getting stuck for a long time and/or ending up with unecessarily complex networks.
+        /// </param>
+        /// <param name="restartCount">
+        ///     The number of times the initialization process has been restarted (this is only used for
+        ///     status logging purposes).
+        /// </param>
         /// <returns>The list of seed genomes that meet the minimal criteria.</returns>
-        public abstract List<NeatGenome> EvolveViableGenomes(out ulong totalEvaluations);
+        public abstract List<NeatGenome> EvolveViableGenomes(out ulong totalEvaluations, uint? maxEvaluations,
+            uint restartCount);
 
         /// <summary>
         ///     Logs the static maze genome on which all initialization evaluations will be conducted.

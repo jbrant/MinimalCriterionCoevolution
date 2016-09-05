@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -80,21 +81,28 @@ namespace SharpNeat.Loggers
         /// <param name="loggableElements">The LoggableElements which include the header text.</param>
         public void LogHeader(params List<LoggableElement>[] loggableElements)
         {
-            // Do nothing if the header has already been written to the output file
-            if (_isHeaderWritten)
-                return;
+            try
+            {
+                // Do nothing if the header has already been written to the output file
+                if (_isHeaderWritten)
+                    return;
 
-            // Combine and sort the loggable elements
-            List<LoggableElement> combinedElements = extractSortedCombinedList(loggableElements);
+                // Combine and sort the loggable elements
+                List<LoggableElement> combinedElements = extractSortedCombinedList(loggableElements);
 
-            // Write the header
-            _writer.WriteLine(string.Join(_rowElementDelimiter, extractHeaderNames(combinedElements)));
+                // Write the header
+                _writer.WriteLine(string.Join(_rowElementDelimiter, extractHeaderNames(combinedElements)));
 
-            // Update the header written state
-            _isHeaderWritten = true;
+                // Update the header written state
+                _isHeaderWritten = true;
 
-            // Immediatley flush to the log file
-            _writer.Flush();
+                // Immediatley flush to the log file
+                _writer.Flush();
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine("WTF???");
+            }
         }
 
         /// <summary>
@@ -115,6 +123,25 @@ namespace SharpNeat.Loggers
 
             // Immediatley flush to the log file
             _writer.Flush();
+        }
+
+        /// <summary>
+        ///     Wipes out any existing log entries in preparation for a complete restart.
+        /// </summary>
+        public void ResetLog()
+        {
+            // Close any handles on the log file
+            if (_writer != null)
+            {
+                Close();
+            }
+
+            // Delete the file
+            File.Delete(LogFileName);
+
+            // Reset header written status and null out writer
+            _isHeaderWritten = false;
+            _writer = null;
         }
 
         /// <summary>
@@ -151,7 +178,7 @@ namespace SharpNeat.Loggers
 
             // Sort the elements so that everything logged is kept in the same order
             combinedElements.Sort();
-            
+
             return combinedElements;
         }
 
