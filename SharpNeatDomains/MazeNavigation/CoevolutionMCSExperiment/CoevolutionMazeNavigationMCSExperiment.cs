@@ -1,6 +1,7 @@
 ﻿#region
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml;
 using SharpNeat.Core;
 using SharpNeat.Decoders.Maze;
@@ -68,6 +69,9 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             _mazePopulationGenomesDataLogger = mazeGenomeLogger ??
                                                ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.PopulationGenomes,
                                                    "MazeLoggingConfig");
+
+            // Read in the maximum number of initialization evaluations
+            _maxInitializationEvaluations = XmlUtils.GetValueAsUInt(xmlConfig, "MaxInitializationEvaluations");
 
             // Create new evolution field elements map with all fields enabled
             _navigatorLogFieldEnableMap = EvolutionFieldElements.PopulateEvolutionFieldElementsEnableMap();
@@ -187,10 +191,12 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
         /// <param name="genomeList2">The maze genome list.</param>
         /// <returns>The instantiated coevolution algorithm container.</returns>
         public override ICoevolutionAlgorithmContainer<NeatGenome, MazeGenome> CreateCoevolutionAlgorithmContainer(
-            IGenomeFactory<NeatGenome> genomeFactory1,
-            IGenomeFactory<MazeGenome> genomeFactory2, List<NeatGenome> genomeList1, List<MazeGenome> genomeList2)
+            IGenomeFactory<NeatGenome> genomeFactory1, IGenomeFactory<MazeGenome> genomeFactory2,
+            List<NeatGenome> genomeList1, List<MazeGenome> genomeList2)
         {
             ulong initializationEvaluations;
+            uint restartCount = 0;
+            List<NeatGenome> seedAgentPopulation;
 
             // Compute the maze max complexity
             ((MazeGenomeFactory) genomeFactory2).MaxComplexity = MazeUtils.DetermineMaxPartitions(_mazeHeight,
@@ -199,14 +205,26 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             // Go ahead and log static initialization maze genome
             _mazeNavigationInitializer.LogStartingMazeGenome(genomeList2[0], _mazePopulationGenomesDataLogger);
 
-            // Instantiate the internal initialization algorithm
-            _mazeNavigationInitializer.InitializeAlgorithm(ParallelOptions, genomeList1,
-                new MazeDecoder(_mazeHeight, _mazeWidth, _mazeScaleMultiplier).Decode(genomeList2[0]),
-                new NeatGenomeDecoder(ActivationScheme), 0);
+            do
+            {
+                // Delete/recreate navigator log files
+                _navigatorEvolutionDataLogger.ResetLog();
+                _navigatorPopulationGenomesDataLogger.ResetLog();
 
-            // Run the initialization algorithm until the requested number of viable seed genomes are found
-            List<NeatGenome> seedAgentPopulation =
-                _mazeNavigationInitializer.EvolveViableGenomes(out initializationEvaluations);
+                // Instantiate the internal initialization algorithm
+                _mazeNavigationInitializer.InitializeAlgorithm(ParallelOptions, genomeList1.ToList(),
+                    new MazeDecoder(_mazeHeight, _mazeWidth, _mazeScaleMultiplier).Decode(genomeList2[0]),
+                    new NeatGenomeDecoder(ActivationScheme), 0);
+
+                // Run the initialization algorithm until the requested number of viable seed genomes are found
+                seedAgentPopulation = _mazeNavigationInitializer.EvolveViableGenomes(out initializationEvaluations,
+                    _maxInitializationEvaluations, restartCount);
+
+                restartCount++;
+
+                // Repeat if maximum allotted evaluations is exceeded
+            } while (_maxInitializationEvaluations != null && seedAgentPopulation == null &&
+                     initializationEvaluations > _maxInitializationEvaluations);
 
             // Set dummy fitness so that seed maze(s) will be marked as evaluated
             foreach (MazeGenome mazeGenome in genomeList2)
@@ -369,6 +387,11 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
         ///     Indicates whether each species should be capped at a maximum size.
         /// </summary>
         private bool _isSpecieFixedSize;
+
+        /// <summary>
+        ///     The maximum number of evaluations allowed during the initialization phase before it is restarted.
+        /// </summary>
+        private uint? _maxInitializationEvaluations;
 
         #endregion
     }

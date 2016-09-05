@@ -33,6 +33,11 @@ namespace SharpNeat.Core
         void LogRow(params List<LoggableElement>[] loggableElements);
 
         /// <summary>
+        ///     Wipes out any existing log entries.
+        /// </summary>
+        void ResetLog();
+
+        /// <summary>
         ///     Closes the log file.
         /// </summary>
         void Close();

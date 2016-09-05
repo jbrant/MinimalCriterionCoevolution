@@ -713,6 +713,18 @@
     <Content Include="ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS Speciation Dynamic Size 4.config.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS Speciation Static Size 1.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS Speciation Static Size 2.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS Speciation Static Size 3.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS Speciation Static Size 4.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS with Maze Initialization 1.config.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

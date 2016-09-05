@@ -131,6 +131,15 @@ namespace SharpNeat.Loggers
         public abstract void LogRow(params List<LoggableElement>[] loggableElements);
 
         /// <summary>
+        ///     Wipes out any existing log entries.
+        /// </summary>
+        public void ResetLog()
+        {
+            // TODO: Needs to be handled for entity/database logging
+            throw new SharpNeatException("Reset log not implemented for entity logging.");
+        }
+
+        /// <summary>
         ///     Closes the database connection (not needed since we're creating/disposing the context on every transaction).
         /// </summary>
         public void Close()

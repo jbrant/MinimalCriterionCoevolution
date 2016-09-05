@@ -125,42 +125,58 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
         ///     them.
         /// </summary>
         /// <param name="totalEvaluations">The resulting number of evaluations to find the viable seed genomes.</param>
+        /// <param name="maxEvaluations">
+        ///     The maximum number of evaluations that can be executed before the initialization process
+        ///     is restarted.  This prevents getting stuck for a long time and/or ending up with unecessarily complex networks.
+        /// </param>
+        /// <param name="restartCount">
+        ///     The number of times the initialization process has been restarted (this is only used for
+        ///     status logging purposes).
+        /// </param>
         /// <returns>The list of seed genomes that meet the minimal criteria.</returns>
-        public override List<NeatGenome> EvolveViableGenomes(out ulong totalEvaluations)
+        public override List<NeatGenome> EvolveViableGenomes(out ulong totalEvaluations, uint? maxEvaluations,
+            uint restartCount)
         {
             // Create list of viable genomes
             List<NeatGenome> viableGenomes = new List<NeatGenome>(MinSuccessfulAgentCount + MinUnsuccessfulAgentCount);
 
             do
             {
-                Console.Out.WriteLine("Starting up the algorithm");
+                Console.Out.WriteLine("Starting up the algorithm on restart #{0}", restartCount);
 
                 // Start the algorithm
                 InitializationEa.StartContinue();
-                
+
                 Console.Out.WriteLine("Going into algorithm wait loop...");
 
                 // Ping for status every few hundred milliseconds
                 while (RunState.Terminated != InitializationEa.RunState &&
                        RunState.Paused != InitializationEa.RunState)
                 {
-                    try
+                    Console.WriteLine(@"Current Evaluations: {0}  Mean Complexity: {1}  Closest Genome Distance: {2}",
+                        InitializationEa.CurrentEvaluations, InitializationEa.Statistics._meanComplexity,
+                        InitializationEa.GenomeList.ToList().Min(genome => genome.EvaluationInfo.ObjectiveDistance));
+
+                    if (InitializationEa.CurrentEvaluations >= maxEvaluations)
                     {
-                        //TODO: GOT IT - the issue is that the GenomeList is being accessed/iterated while simultaneously being modified by the evolution thread
-                        Console.WriteLine(@"Current Evaluations: {0}  Mean Complexity: {1}  Closest Genome Distance: {2}",
-                                                InitializationEa.CurrentEvaluations, InitializationEa.Statistics._meanComplexity,
-                                                InitializationEa.GenomeList.ToList().Min(genome => genome.EvaluationInfo.ObjectiveDistance));
+                        // Record the total number of evaluations
+                        totalEvaluations = InitializationEa.CurrentEvaluations;
+
+                        // Halt the EA worker thread
+                        InitializationEa.RequestPauseAndWait();
+
+                        // Null out the factory/EA and delete the thread
+                        // (it's necessary to null out these resources so that the thread will be completely garbage collected)
+                        GenomeFactory = null;
+                        InitializationEa.Reset();
+                        InitializationEa = null;
+
+                        // Note that the calling experiment must be able to handle this null return value (not great practice)
+                        return null;
                     }
-                    catch (Exception)
-                    {
-                        Console.Out.WriteLine("How is the console output causing the exception???");
-                        throw;
-                    }                    
 
                     Thread.Sleep(200);
                 }
-
-                Console.Out.WriteLine("BROKE OUT OF WAIT LOOP");
 
                 Console.Out.WriteLine("Attempting to extract viable genome from list...");
 
@@ -176,7 +192,6 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
                         "MinSuccessfulAgentCount is [{0}] while we only have [{1}] viable genomes - re-executing initialization...",
                         MinSuccessfulAgentCount, viableGenomes.Count);
                 }
-
             } while (viableGenomes.Count < MinSuccessfulAgentCount);
 
             // Add the remainder of genomes who have not solved the maze

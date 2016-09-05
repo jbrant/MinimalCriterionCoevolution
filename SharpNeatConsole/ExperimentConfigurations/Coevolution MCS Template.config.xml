@@ -2,12 +2,15 @@
 <Config>
   <SearchAlgorithm></SearchAlgorithm>
   <SelectionAlgorithm></SelectionAlgorithm>
+  <MaxInitializationEvaluations>100000</MaxInitializationEvaluations>
   <AgentPopulationSize></AgentPopulationSize>
   <MazePopulationSize></MazePopulationSize>
   <AgentSeedGenomeCount></AgentSeedGenomeCount>
   <MazeSeedGenomeCount>1</MazeSeedGenomeCount>
   <AgentNumSpecies></AgentNumSpecies>
   <MazeNumSpecies></MazeNumSpecies>
+  <AgentSpecieSizeFixed></AgentSpecieSizeFixed>
+  <MazeSpecieSizeFixed></MazeSpecieSizeFixed>
   <Activation>
     <Scheme>Acyclic</Scheme>
   </Activation>
