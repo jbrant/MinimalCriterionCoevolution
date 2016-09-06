@@ -71,6 +71,11 @@ namespace NavigatorMazeMapEvaluator
                 _executionConfiguration.ContainsKey(ExecutionParameter.WriteResultsToDatabase) &&
                 Boolean.Parse(_executionConfiguration[ExecutionParameter.WriteResultsToDatabase]);
 
+            // Determine whether this is a distributed execution
+            bool isDistributedExecution =
+                _executionConfiguration.ContainsKey(ExecutionParameter.IsDistributedExecution) &&
+                Boolean.Parse(_executionConfiguration[ExecutionParameter.IsDistributedExecution]);
+
             // If bitmap generation was enabled, grab the base output directory
             if (generateTrajectoryBitmaps)
             {
@@ -111,8 +116,12 @@ namespace NavigatorMazeMapEvaluator
                         curExperimentConfiguration.Primary_Maze_MazeWidth,
                         curExperimentConfiguration.Primary_Maze_MazeScaleMultiplier);
 
-                // Get the number of runs in the experiment
-                int numRuns = ExperimentDataHandler.GetNumRuns(curExperimentConfiguration.ExperimentDictionaryID);
+                // Get the number of runs in the experiment. Note that if this is a distributed execution, each node
+                // will only execute a single run analysis, so the number of runs will be equivalent to the run 
+                // to start from (this ensures that the ensuing loop that executes all of the runs executes exactly once)
+                int numRuns = isDistributedExecution
+                    ? startingRun
+                    : ExperimentDataHandler.GetNumRuns(curExperimentConfiguration.ExperimentDictionaryID);
 
                 _executionLogger.Info(string.Format("Preparing to execute analysis for [{0}] runs of experiment [{1}]",
                     numRuns,
@@ -199,8 +208,23 @@ namespace NavigatorMazeMapEvaluator
 
                 // Write a sentinel file to indicate analysis completion
                 if (generateSimulationResults && writeResultsToDatabase == false)
-                    ExperimentDataHandler.WriteSentinelFile(
-                        Path.Combine(_executionConfiguration[ExecutionParameter.DataFileOutputDirectory], experimentName));
+                {
+                    // If this is a distributed execution, write out a sentinel file for every run (since each node is only
+                    // executing one run)
+                    if (isDistributedExecution)
+                    {
+                        ExperimentDataHandler.WriteSentinelFile(
+                            Path.Combine(_executionConfiguration[ExecutionParameter.DataFileOutputDirectory],
+                                experimentName), startingRun);
+                    }
+                    // Otherwise, Write a sentinel file to indicate analysis completion
+                    else
+                    {
+                        ExperimentDataHandler.WriteSentinelFile(
+                            Path.Combine(_executionConfiguration[ExecutionParameter.DataFileOutputDirectory],
+                                experimentName));
+                    }
+                }
             }
         }
 
@@ -356,6 +380,7 @@ namespace NavigatorMazeMapEvaluator
                         case ExecutionParameter.WriteResultsToDatabase:
                         case ExecutionParameter.GenerateMazeBitmaps:
                         case ExecutionParameter.GenerateAgentTrajectoryBitmaps:
+                        case ExecutionParameter.IsDistributedExecution:
                             bool testBool;
                             if (Boolean.TryParse(parameterValuePair[1], out testBool) == false)
                             {
@@ -437,6 +462,17 @@ namespace NavigatorMazeMapEvaluator
                         "The bitmap image base directory must be specified when producing navigator trajectory images.");
                     isConfigurationValid = false;
                 }
+
+                // If this is distributed execution, the StartFromRun parameter must be specified as this
+                // is used to control which node is executing which experiment analysis run
+                if (_executionConfiguration.ContainsKey(ExecutionParameter.IsDistributedExecution) &&
+                    Convert.ToBoolean(_executionConfiguration[ExecutionParameter.IsDistributedExecution]) &&
+                    _executionConfiguration.ContainsKey(ExecutionParameter.StartFromRun) == false)
+                {
+                    _executionLogger.Error(
+                        "If this is a distributed execution, the StartFromRun parameter must be specified via the invoking job.");
+                    isConfigurationValid = false;
+                }
             }
 
             // If there's still no problem with the configuration, go ahead and return valid
@@ -446,13 +482,14 @@ namespace NavigatorMazeMapEvaluator
             _executionLogger.Error("The experiment executor invocation must take the following form:");
             _executionLogger.Error(
                 string.Format(
-                    "NavigatorMazeMapEvaluator.exe {0}=[{9}] {1}=[{10}] (Optional: {2}=[{12}]) (Optional: {3}=[{12}] {4}=[{12}] (Required: {5}=[{13}])) (Optional: {6}=[{12}] (Required: {8}=[{13}])) (Optional: {7}=[{12}] (Required: {8}=[{13}])) {9}=[{14}]",
+                    "NavigatorMazeMapEvaluator.exe {0}=[{12}] {1}=[{13}] (Optional: {2}=[{14}]) (Optional: {3}=[{14}] {4}=[{14}] (Required: {5}=[{15}])) (Optional: {6}=[{14}] (Required: {8}=[{15}])) (Optional: {7}=[{14}] (Required: {8}=[{15}])) (Optional: {10}=[{17}]) (Optional: {11}=[{14}] {9}=[{16}]",
                     ExecutionParameter.AgentNeuronInputCount, ExecutionParameter.AgentNeuronOutputCount,
                     ExecutionParameter.AnalyzeFullRun, ExecutionParameter.GenerateSimulationResults,
                     ExecutionParameter.WriteResultsToDatabase, ExecutionParameter.DataFileOutputDirectory,
                     ExecutionParameter.GenerateMazeBitmaps, ExecutionParameter.GenerateAgentTrajectoryBitmaps,
-                    ExecutionParameter.BitmapOutputBaseDirectory, ExecutionParameter.ExperimentNames, "# Input Neurons",
-                    "# Output Neurons", "true|false", "directory", "experiment,experiment,..."));
+                    ExecutionParameter.BitmapOutputBaseDirectory, ExecutionParameter.ExperimentNames,
+                    ExecutionParameter.StartFromRun, ExecutionParameter.IsDistributedExecution, "# Input Neurons",
+                    "# Output Neurons", "true|false", "directory", "experiment,experiment,...", "starting run #"));
 
             return false;
         }

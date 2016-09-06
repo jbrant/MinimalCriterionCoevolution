@@ -59,6 +59,13 @@
         StartFromRun,
 
         /// <summary>
+        ///     Flag indicating whether different runs will be distributed on separate cluster nodes.  If this is true, the
+        ///     "StartFromRun" parameter must be set as this will indicate the run that's being executed on a particular node.
+        ///     Additionally, each node will execute an analysis of one run only.
+        /// </summary>
+        IsDistributedExecution,
+
+        /// <summary>
         ///     The names of the applicable experiment configurations.
         /// </summary>
         ExperimentNames
