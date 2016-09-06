@@ -345,6 +345,20 @@ namespace MazeExperimentSuppotLib
             }
         }
 
+        /// <summary>
+        ///     Writes empty "sentinel" file so that data transfer agent on cluster can easily identify that a given experiment run
+        ///     is complete.
+        /// </summary>
+        /// <param name="experimentFilename">The base path and filename of the experiment under execution.</param>
+        /// <param name="run">The completed run.</param>
+        public static void WriteSentinelFile(string experimentFilename, int run)
+        {
+            // Write sentinel file to the given output directory
+            using (File.Create(string.Format("{0} - Run {1} - COMPLETE", experimentFilename, run)))
+            {
+            }
+        }
+
         #endregion
 
         #region Private static methods
