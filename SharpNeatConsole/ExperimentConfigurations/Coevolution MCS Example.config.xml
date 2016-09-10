@@ -3,15 +3,15 @@
   <SearchAlgorithm>Minimal Criteria Search</SearchAlgorithm>
   <SelectionAlgorithm>Queueing</SelectionAlgorithm>
   <!--<MaxDegreeOfParallelism>1</MaxDegreeOfParallelism>-->
-  <MaxInitializationEvaluations>100000</MaxInitializationEvaluations>
-  <AgentPopulationSize>1000</AgentPopulationSize>
+  <MaxInitializationEvaluations>1000</MaxInitializationEvaluations>
+  <AgentPopulationSize>500</AgentPopulationSize>
   <MazePopulationSize>50</MazePopulationSize>
   <AgentSeedGenomeCount>500</AgentSeedGenomeCount>
   <MazeSeedGenomeCount>1</MazeSeedGenomeCount>
   <AgentNumSpecies>15</AgentNumSpecies>
   <MazeNumSpecies>10</MazeNumSpecies>
-  <AgentSpecieSizeFixed>true</AgentSpecieSizeFixed>
-  <MazeSpecieSizeFixed>true</MazeSpecieSizeFixed>
+  <AgentSpecieSizeFixed>True</AgentSpecieSizeFixed>
+  <MazeSpecieSizeFixed>True</MazeSpecieSizeFixed>
   <Activation>
     <Scheme>Acyclic</Scheme>
   </Activation>
