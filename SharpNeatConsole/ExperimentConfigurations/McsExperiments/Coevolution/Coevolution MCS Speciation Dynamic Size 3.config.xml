@@ -2,12 +2,15 @@
 <Config>
   <SearchAlgorithm>Minimal Criteria Search</SearchAlgorithm>
   <SelectionAlgorithm>Queueing</SelectionAlgorithm>
+  <MaxInitializationEvaluations>100000</MaxInitializationEvaluations>
   <AgentPopulationSize>250</AgentPopulationSize>
   <MazePopulationSize>100</MazePopulationSize>
   <AgentSeedGenomeCount>500</AgentSeedGenomeCount>
   <MazeSeedGenomeCount>1</MazeSeedGenomeCount>
   <AgentNumSpecies>10</AgentNumSpecies>
   <MazeNumSpecies>10</MazeNumSpecies>
+  <AgentSpecieSizeFixed>False</AgentSpecieSizeFixed>
+  <MazeSpecieSizeFixed>False</MazeSpecieSizeFixed>
   <Activation>
     <Scheme>Acyclic</Scheme>
   </Activation>
