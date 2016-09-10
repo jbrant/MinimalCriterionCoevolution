@@ -2,6 +2,7 @@
 <Config>
   <SearchAlgorithm>Minimal Criteria Search</SearchAlgorithm>
   <SelectionAlgorithm>Queueing</SelectionAlgorithm>
+  <MaxInitializationEvaluations>100000</MaxInitializationEvaluations>
   <AgentPopulationSize>500</AgentPopulationSize>
   <MazePopulationSize>100</MazePopulationSize>
   <AgentSeedGenomeCount>500</AgentSeedGenomeCount>
