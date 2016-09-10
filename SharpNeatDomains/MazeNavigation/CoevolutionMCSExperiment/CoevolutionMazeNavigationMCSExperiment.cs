@@ -119,8 +119,9 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             // Read in the number of batches between population logging
             _populationLoggingBatchInterval = XmlUtils.TryGetValueAsInt(xmlConfig, "PopulationLoggingBatchInterval");
 
-            // Read in whether the individual specie sizes are being capped (defaults to false)
-            _isSpecieFixedSize = XmlUtils.TryGetValueAsBool(xmlConfig, "SpecieSizeFixed") ?? default(bool);
+            // Read in whether the individual navigator and maze specie sizes are being capped (defaults to false)
+            _isNavigatorSpecieFixedSize = XmlUtils.TryGetValueAsBool(xmlConfig, "AgentSpecieSizeFixed") ?? default(bool);
+            _isMazeSpecieFixedSize = XmlUtils.TryGetValueAsBool(xmlConfig, "MazeSpecieSizeFixed") ?? default(bool);
 
             // Initialize the initialization algorithm
             _mazeNavigationInitializer =
@@ -244,7 +245,7 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
                         ParallelOptions), null,
                     NavigatorBatchSize, RunPhase.Primary, false, false, _navigatorEvolutionDataLogger,
                     _navigatorLogFieldEnableMap, _navigatorPopulationGenomesDataLogger, _populationLoggingBatchInterval,
-                    _isSpecieFixedSize);
+                    _isNavigatorSpecieFixedSize);
 
             // Create the maze queueing evolution algorithm
             AbstractEvolutionAlgorithm<MazeGenome> mazeEvolutionAlgorithm =
@@ -257,7 +258,7 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
                     new ParallelKMeansClusteringStrategy<MazeGenome>(new ManhattanDistanceMetric(1.0, 0.0, 10.0),
                         ParallelOptions), null,
                     MazeBatchSize, RunPhase.Primary, false, false, _mazeEvolutionDataLogger, _mazeLogFieldEnableMap,
-                    _mazePopulationGenomesDataLogger, _populationLoggingBatchInterval, _isSpecieFixedSize);
+                    _mazePopulationGenomesDataLogger, _populationLoggingBatchInterval, _isMazeSpecieFixedSize);
 
             // Create the maze phenome evaluator
             IPhenomeEvaluator<MazeStructure, BehaviorInfo> mazeEvaluator = new MazeEnvironmentMCSEvaluator(
@@ -384,9 +385,14 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
         private int? _populationLoggingBatchInterval;
 
         /// <summary>
-        ///     Indicates whether each species should be capped at a maximum size.
+        ///     Indicates whether each navigator population species should be capped at a maximum size.
         /// </summary>
-        private bool _isSpecieFixedSize;
+        private bool _isNavigatorSpecieFixedSize;
+
+        /// <summary>
+        ///     Indicates whether each maze population species should be capped at a maximum size.
+        /// </summary>
+        private bool _isMazeSpecieFixedSize;
 
         /// <summary>
         ///     The maximum number of evaluations allowed during the initialization phase before it is restarted.
