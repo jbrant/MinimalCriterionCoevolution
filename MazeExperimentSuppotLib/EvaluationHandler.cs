@@ -1,5 +1,6 @@
 ﻿#region
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using SharpNeat.Behaviors;
@@ -15,6 +16,8 @@ namespace MazeExperimentSuppotLib
 {
     public class EvaluationHandler
     {
+        #region Public methods
+
         /// <summary>
         ///     Runs the navigator through its corresponding maze and records data about said evaluation (e.g. solved status, time
         ///     steps, and trajectory).
@@ -54,6 +57,108 @@ namespace MazeExperimentSuppotLib
             evaluationUnit.AgentTrajectory = trialInfo.Behaviors;
         }
 
+        public static void CalculateTrajectoryDiversity(IList<MazeNavigatorEvaluationUnit> evaluationUnits)
+        {
+            // TODO: This method should return a list of domain objects, each encapsulating trajectory diversity for same maze, other mazes, and globally
+
+            foreach (MazeNavigatorEvaluationUnit evaluationUnit in evaluationUnits.Where(x => x.IsMazeSolved))
+            {
+                double sameMazeTotalTrajectoryDifference = 0;
+                double differentMazeTotalTrajectoryDifference = 0;
+
+                // Iterates through every other agent trajectory and computes the trajectory difference
+                foreach (MazeNavigatorEvaluationUnit otherEvaluationUnit in evaluationUnits.Where(x => x.IsMazeSolved))
+                {
+                    // Don't evaluate current agent trajectory against itself
+                    if (otherEvaluationUnit.Equals(evaluationUnit))
+                        continue;
+
+                    // Caculate trajectory difference for same maze
+                    if (otherEvaluationUnit.MazeId.Equals(evaluationUnit.MazeId))
+                    {
+                        sameMazeTotalTrajectoryDifference +=
+                            ComputeEuclideanTrajectoryDifference(evaluationUnit.AgentTrajectory,
+                                otherEvaluationUnit.AgentTrajectory);
+                    }
+                    // Calculate trajectory difference for other maze
+                    else
+                    {
+                        differentMazeTotalTrajectoryDifference +=
+                            ComputeEuclideanTrajectoryDifference(evaluationUnit.AgentTrajectory,
+                                otherEvaluationUnit.AgentTrajectory);
+                    }
+                }
+
+                // TODO: This is where the diversity scores for same/other maze and global should be stored and added to list
+            }
+        }
+
+        #endregion
+
+        #region Private methods
+
+        /// <summary>
+        ///     Computes the euclidean distance between two trajectories by summing the euclidean distance between each point in
+        ///     their simulation and dividing by the number of simulation timesteps.
+        /// </summary>
+        /// <param name="trajectory1">The first trajectory.</param>
+        /// <param name="trajectory2">The second trajectory.</param>
+        /// <returns>The euclidean distance between the two trajectories.</returns>
+        private static double ComputeEuclideanTrajectoryDifference(double[] trajectory1, double[] trajectory2)
+        {
+            double trajectoryDistance = 0;
+
+            // Number of timesteps is equivalent to the longest simulation
+            int timesteps = Math.Max(trajectory1.Length/2, trajectory2.Length/2);
+
+            // Compute the euclidean distance between the two trajectories at each point 
+            // during the simulation
+            for (int idx = 0;
+                idx < timesteps;
+                idx = idx + 2)
+            {
+                // Handle the case where the first trajectory has ended
+                if (idx >= trajectory1.Length)
+                {
+                    trajectoryDistance +=
+                        Math.Sqrt(
+                            Math.Pow(
+                                (trajectory2[idx] - trajectory1[trajectory1.Length - 2]),
+                                2) +
+                            Math.Pow(
+                                (trajectory2[idx + 1] -
+                                 trajectory1[trajectory1.Length - 1]), 2));
+                }
+                // Handle the case where the second trajectory has ended
+                else if (idx >= trajectory2.Length)
+                {
+                    trajectoryDistance +=
+                        Math.Sqrt(
+                            Math.Pow(
+                                (trajectory2[trajectory2.Length - 2] - trajectory1[idx]),
+                                2) +
+                            Math.Pow(
+                                (trajectory2[trajectory2.Length - 1] -
+                                 trajectory1[idx + 1]), 2));
+                }
+                // Otherwise, we're still in the simulation time frame for both trajectories
+                else
+                {
+                    trajectoryDistance +=
+                        Math.Sqrt(
+                            Math.Pow(
+                                (trajectory2[idx] - trajectory1[idx]),
+                                2) +
+                            Math.Pow(
+                                (trajectory2[idx + 1] -
+                                 trajectory1[idx + 1]), 2));
+                }
+            }
+
+            // Return the euclidean distance between the two trajectories
+            return trajectoryDistance/timesteps;
+        }
+
         /// <summary>
         ///     Converts the evolved walls into experiment domain walls so that experiment-specific calculations can be applied on
         ///     them.
@@ -86,5 +191,7 @@ namespace MazeExperimentSuppotLib
         {
             return new DoublePoint(point.X, point.Y);
         }
+
+        #endregion
     }
 }
