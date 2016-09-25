@@ -49,6 +49,11 @@
         GenerateAgentTrajectoryBitmaps,
 
         /// <summary>
+        ///     Whether or not to compute agent trajectory diversity scores.
+        /// </summary>
+        GenerateDiversityScores,
+
+        /// <summary>
         ///     The base directory into which to write the bitmap image trajectories.
         /// </summary>
         BitmapOutputBaseDirectory,

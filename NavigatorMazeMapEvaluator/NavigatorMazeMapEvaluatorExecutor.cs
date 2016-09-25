@@ -76,6 +76,11 @@ namespace NavigatorMazeMapEvaluator
                 _executionConfiguration.ContainsKey(ExecutionParameter.IsDistributedExecution) &&
                 Boolean.Parse(_executionConfiguration[ExecutionParameter.IsDistributedExecution]);
 
+            // Get boolean indicator dictating whether to write out trajectory diversity scores (default is true)
+            bool generateTrajectoryDiversityScores =
+                _executionConfiguration.ContainsKey(ExecutionParameter.GenerateDiversityScores) == false ||
+                Boolean.Parse(_executionConfiguration[ExecutionParameter.GenerateDiversityScores]);
+
             // If bitmap generation was enabled, grab the base output directory
             if (generateTrajectoryBitmaps)
             {
@@ -131,7 +136,8 @@ namespace NavigatorMazeMapEvaluator
                 for (int curRun = startingRun; curRun <= numRuns; curRun++)
                 {
                     // If we're not writing to the database, open the file writer
-                    if (generateSimulationResults && writeResultsToDatabase == false)
+                    if ((generateSimulationResults && writeResultsToDatabase == false) ||
+                        generateTrajectoryDiversityScores)
                     {
                         ExperimentDataHandler.OpenFileWriter(
                             Path.Combine(_executionConfiguration[ExecutionParameter.DataFileOutputDirectory],
@@ -159,8 +165,8 @@ namespace NavigatorMazeMapEvaluator
                             // Begin initialization phase results processing
                             ProcessAndLogPerBatchResults(initializationBatchesWithGenomeData, RunPhase.Initialization,
                                 experimentParameters, inputNeuronCount, outputNeuronCount, curRun, numRuns,
-                                curExperimentConfiguration, generateSimulationResults, writeResultsToDatabase,
-                                generateMazeBitmaps, generateTrajectoryBitmaps, baseImageOutputDirectory);
+                                curExperimentConfiguration, generateSimulationResults, generateTrajectoryDiversityScores,
+                                writeResultsToDatabase, generateMazeBitmaps, generateTrajectoryBitmaps, baseImageOutputDirectory);
                         }
 
                         // Get the number of primary batches in the current run
@@ -176,8 +182,8 @@ namespace NavigatorMazeMapEvaluator
                         // Begin primary phase results processing
                         ProcessAndLogPerBatchResults(batchesWithGenomeData, RunPhase.Primary, experimentParameters,
                             inputNeuronCount, outputNeuronCount, curRun, numRuns, curExperimentConfiguration,
-                            generateSimulationResults, writeResultsToDatabase, generateMazeBitmaps,
-                            generateTrajectoryBitmaps, baseImageOutputDirectory);
+                            generateSimulationResults, generateTrajectoryDiversityScores, writeResultsToDatabase,
+                            generateMazeBitmaps, generateTrajectoryBitmaps, baseImageOutputDirectory);
                     }
                     // Otherwise, we're just analyzing the ending population
                     else
@@ -195,8 +201,8 @@ namespace NavigatorMazeMapEvaluator
                         // Begin maze/navigator trajectory image generation
                         ProcessAndLogPerBatchResults(new List<int>(1) {finalBatch}, RunPhase.Primary,
                             experimentParameters, inputNeuronCount, outputNeuronCount, curRun, numRuns,
-                            curExperimentConfiguration, generateSimulationResults, writeResultsToDatabase,
-                            generateMazeBitmaps, generateTrajectoryBitmaps, baseImageOutputDirectory);
+                            curExperimentConfiguration, generateSimulationResults, generateTrajectoryDiversityScores,
+                            writeResultsToDatabase, generateMazeBitmaps, generateTrajectoryBitmaps, baseImageOutputDirectory);
                     }
 
                     // If we're not writing to the database, close the file writer since the run is over
@@ -252,12 +258,17 @@ namespace NavigatorMazeMapEvaluator
         ///     Indicates whether bitmap files depicting the navigator trajectory should be
         ///     written out.
         /// </param>
+        /// <param name="generateTrajectoryDiversityScore">
+        ///     Indicates whether quantification of navigator trajectory diversity
+        ///     should be written out.
+        /// </param>
         /// <param name="baseImageOutputDirectory">The path to the output directory for the trajectory images.</param>
         private static void ProcessAndLogPerBatchResults(IList<int> batchesWithGenomeData, RunPhase runPhase,
             ExperimentParameters experimentParameters, int inputNeuronCount, int outputNeuronCount, int curRun,
             int numRuns, ExperimentDictionary curExperimentConfiguration, bool generateSimulationResults,
-            bool writeResultsToDatabase,
-            bool generateMazeBitmaps, bool generateTrajectoryBitmaps, string baseImageOutputDirectory)
+            bool generateTrajectoryDiversityScore,
+            bool writeResultsToDatabase, bool generateMazeBitmaps, bool generateTrajectoryBitmaps,
+            string baseImageOutputDirectory)
         {
             IList<CoevolutionMCSMazeExperimentGenome> staticInitializationMazes = null;
 
@@ -314,6 +325,15 @@ namespace NavigatorMazeMapEvaluator
                         baseImageOutputDirectory, curExperimentConfiguration.ExperimentName,
                         curExperimentConfiguration.ExperimentDictionaryID,
                         curRun, curBatch, mapEvaluator.EvaluationUnits, runPhase);
+                }
+
+                // TODO: Compare trajectories of agents through maze to get quantitative sense of solution diversity
+                // TODO: Mean euclidean distance will be calculated for selected trajectory against:
+                // TODO: 1. Other agent trajectories in the current maze only
+                // TODO: 2. Other agent trajectories on *another* maze only
+                // TODO: 3. All other agent trajectories (regardless of maze)
+                if (generateTrajectoryDiversityScore)
+                {
                 }
             }
         }
@@ -380,6 +400,7 @@ namespace NavigatorMazeMapEvaluator
                         case ExecutionParameter.WriteResultsToDatabase:
                         case ExecutionParameter.GenerateMazeBitmaps:
                         case ExecutionParameter.GenerateAgentTrajectoryBitmaps:
+                        case ExecutionParameter.GenerateDiversityScores:
                         case ExecutionParameter.IsDistributedExecution:
                             bool testBool;
                             if (Boolean.TryParse(parameterValuePair[1], out testBool) == false)
@@ -482,12 +503,13 @@ namespace NavigatorMazeMapEvaluator
             _executionLogger.Error("The experiment executor invocation must take the following form:");
             _executionLogger.Error(
                 string.Format(
-                    "NavigatorMazeMapEvaluator.exe {0}=[{12}] {1}=[{13}] (Optional: {2}=[{14}]) (Optional: {3}=[{14}] {4}=[{14}] (Required: {5}=[{15}])) (Optional: {6}=[{14}] (Required: {8}=[{15}])) (Optional: {7}=[{14}] (Required: {8}=[{15}])) (Optional: {10}=[{17}]) (Optional: {11}=[{14}] {9}=[{16}]",
+                    "NavigatorMazeMapEvaluator.exe {0}=[{13}] {1}=[{14}] (Optional: {2}=[{15}]) (Optional: {3}=[{15}] {4}=[{15}] (Required: {5}=[{16}])) (Optional: {6}=[{15}] (Required: {8}=[{16}])) (Optional: {7}=[{15}] (Required: {8}=[{16}])) (Optional: {10}=[{15}] (Required: {5}=[{16}])) (Optional: {11}=[{18}]) (Optional: {12}=[{15}] {9}=[{17}]",
                     ExecutionParameter.AgentNeuronInputCount, ExecutionParameter.AgentNeuronOutputCount,
                     ExecutionParameter.AnalyzeFullRun, ExecutionParameter.GenerateSimulationResults,
                     ExecutionParameter.WriteResultsToDatabase, ExecutionParameter.DataFileOutputDirectory,
                     ExecutionParameter.GenerateMazeBitmaps, ExecutionParameter.GenerateAgentTrajectoryBitmaps,
                     ExecutionParameter.BitmapOutputBaseDirectory, ExecutionParameter.ExperimentNames,
+                    ExecutionParameter.GenerateDiversityScores,
                     ExecutionParameter.StartFromRun, ExecutionParameter.IsDistributedExecution, "# Input Neurons",
                     "# Output Neurons", "true|false", "directory", "experiment,experiment,...", "starting run #"));
 
