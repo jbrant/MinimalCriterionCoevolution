@@ -334,6 +334,7 @@ namespace NavigatorMazeMapEvaluator
                 // TODO: 3. All other agent trajectories (regardless of maze)
                 if (generateTrajectoryDiversityScore)
                 {
+                    EvaluationHandler.CalculateTrajectoryDiversity(mapEvaluator.EvaluationUnits);
                 }
             }
         }
