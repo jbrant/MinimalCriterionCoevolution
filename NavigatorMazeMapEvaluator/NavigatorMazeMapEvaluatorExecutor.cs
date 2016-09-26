@@ -135,13 +135,24 @@ namespace NavigatorMazeMapEvaluator
                 // Process each experiment run
                 for (int curRun = startingRun; curRun <= numRuns; curRun++)
                 {
-                    // If we're not writing to the database, open the file writer
-                    if ((generateSimulationResults && writeResultsToDatabase == false) ||
-                        generateTrajectoryDiversityScores)
+                    // If simulation result generation is enabled and we're not writing to 
+                    // the database, open the simulation result file writer
+                    if (generateSimulationResults && writeResultsToDatabase == false)
                     {
                         ExperimentDataHandler.OpenFileWriter(
                             Path.Combine(_executionConfiguration[ExecutionParameter.DataFileOutputDirectory],
-                                string.Format("{0} - Run{1}.csv", experimentName, curRun)));
+                                string.Format("{0} - Run{1}.csv", experimentName, curRun)),
+                            OutputFileType.NavigatorMazeEvaluationData);
+                    }
+
+                    // If trajectory diversity score generation is enabled and we're not writing to 
+                    // the database, open the trajectory diversity score file writer
+                    if (generateTrajectoryDiversityScores && writeResultsToDatabase == false)
+                    {
+                        ExperimentDataHandler.OpenFileWriter(
+                            Path.Combine(_executionConfiguration[ExecutionParameter.DataFileOutputDirectory],
+                                string.Format("{0} - TrajectoryDiversity - Run{1}.csv", experimentName, curRun)),
+                            OutputFileType.TrajectoryDiversityData);
                     }
 
                     // If we're analyzing the entire run, go ahead and process through the initialization phase
@@ -166,7 +177,8 @@ namespace NavigatorMazeMapEvaluator
                             ProcessAndLogPerBatchResults(initializationBatchesWithGenomeData, RunPhase.Initialization,
                                 experimentParameters, inputNeuronCount, outputNeuronCount, curRun, numRuns,
                                 curExperimentConfiguration, generateSimulationResults, generateTrajectoryDiversityScores,
-                                writeResultsToDatabase, generateMazeBitmaps, generateTrajectoryBitmaps, baseImageOutputDirectory);
+                                writeResultsToDatabase, generateMazeBitmaps, generateTrajectoryBitmaps,
+                                baseImageOutputDirectory);
                         }
 
                         // Get the number of primary batches in the current run
@@ -202,13 +214,21 @@ namespace NavigatorMazeMapEvaluator
                         ProcessAndLogPerBatchResults(new List<int>(1) {finalBatch}, RunPhase.Primary,
                             experimentParameters, inputNeuronCount, outputNeuronCount, curRun, numRuns,
                             curExperimentConfiguration, generateSimulationResults, generateTrajectoryDiversityScores,
-                            writeResultsToDatabase, generateMazeBitmaps, generateTrajectoryBitmaps, baseImageOutputDirectory);
+                            writeResultsToDatabase, generateMazeBitmaps, generateTrajectoryBitmaps,
+                            baseImageOutputDirectory);
                     }
 
-                    // If we're not writing to the database, close the file writer since the run is over
+                    // If we're not writing to the database, close the simulation result file writer since the run is over
                     if (generateSimulationResults && writeResultsToDatabase == false)
                     {
-                        ExperimentDataHandler.CloseFileWriter();
+                        ExperimentDataHandler.CloseFileWriter(OutputFileType.NavigatorMazeEvaluationData);
+                    }
+
+                    // If we're not writing to the database, close the trajectory diversity 
+                    // score file writer since the run is over
+                    if (generateTrajectoryDiversityScores && writeResultsToDatabase == false)
+                    {
+                        ExperimentDataHandler.CloseFileWriter(OutputFileType.TrajectoryDiversityData);
                     }
                 }
 
@@ -332,9 +352,12 @@ namespace NavigatorMazeMapEvaluator
                 // TODO: 1. Other agent trajectories in the current maze only
                 // TODO: 2. Other agent trajectories on *another* maze only
                 // TODO: 3. All other agent trajectories (regardless of maze)
-                if (generateTrajectoryDiversityScore)
+                if (generateTrajectoryDiversityScore && runPhase != RunPhase.Initialization)
                 {
-                    EvaluationHandler.CalculateTrajectoryDiversity(mapEvaluator.EvaluationUnits);
+                    ExperimentDataHandler.WriteTrajectoryDiversityData(
+                        curExperimentConfiguration.ExperimentDictionaryID, curRun, curBatch,
+                        EvaluationHandler.CalculateTrajectoryDiversity(mapEvaluator.EvaluationUnits),
+                        writeResultsToDatabase);
                 }
             }
         }
