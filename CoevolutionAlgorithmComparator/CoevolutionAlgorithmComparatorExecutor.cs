@@ -130,7 +130,8 @@ namespace CoevolutionAlgorithmComparator
                     // Open the file writer
                     ExperimentDataHandler.OpenFileWriter(
                         Path.Combine(ExecutionConfiguration[ExecutionParameter.DataFileOutputDirectory],
-                            string.Format("{0} - Run{1}.csv", coEvoExperimentName, curRun)));
+                            string.Format("{0} - Run{1}.csv", coEvoExperimentName, curRun)),
+                        OutputFileType.NoveltySearchComparisonData);
 
                     // Get the number of primary batches in the current run
                     IList<int> batchesWithGenomeData =
@@ -149,7 +150,7 @@ namespace CoevolutionAlgorithmComparator
                         referenceExperimentConfiguration);
 
                     // Close the file writer after the comparative analysis for the current run is complete
-                    ExperimentDataHandler.CloseFileWriter();
+                    ExperimentDataHandler.CloseFileWriter(OutputFileType.NoveltySearchComparisonData);
                 }
             }
         }
