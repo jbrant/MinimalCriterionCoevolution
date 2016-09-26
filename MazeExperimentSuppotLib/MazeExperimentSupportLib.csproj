@@ -52,7 +52,9 @@
     <Compile Include="ExperimentParameters.cs" />
     <Compile Include="ImageGenerationHandler.cs" />
     <Compile Include="MazeNavigatorEvaluationUnit.cs" />
+    <Compile Include="OutputFileType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TrajectoryDiversityUnit.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ExperimentEntities\ExperimentEntities.csproj">

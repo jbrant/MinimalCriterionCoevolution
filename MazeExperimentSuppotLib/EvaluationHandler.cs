@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using SharpNeat.Behaviors;
 using SharpNeat.Core;
 using SharpNeat.Domains;
@@ -57,40 +58,74 @@ namespace MazeExperimentSuppotLib
             evaluationUnit.AgentTrajectory = trialInfo.Behaviors;
         }
 
-        public static void CalculateTrajectoryDiversity(IList<MazeNavigatorEvaluationUnit> evaluationUnits)
+        /// <summary>
+        ///     Computes the diversity of trajectories for the given list of evaluations.
+        /// </summary>
+        /// <param name="evaluationUnits">The agent/maze evaluations for which to compute trajectory diversity.</param>
+        /// <returns>The resulting trajectory diversity scores.</returns>
+        public static IList<TrajectoryDiversityUnit> CalculateTrajectoryDiversity(
+            IList<MazeNavigatorEvaluationUnit> evaluationUnits)
         {
-            // TODO: This method should return a list of domain objects, each encapsulating trajectory diversity for same maze, other mazes, and globally
+            IList<TrajectoryDiversityUnit> trajectoryDiversityUnits = new List<TrajectoryDiversityUnit>();
 
-            foreach (MazeNavigatorEvaluationUnit evaluationUnit in evaluationUnits.Where(x => x.IsMazeSolved))
+            foreach (MazeNavigatorEvaluationUnit evaluationUnit in evaluationUnits.Where(u => u.IsMazeSolved))
             {
-                double sameMazeTotalTrajectoryDifference = 0;
-                double differentMazeTotalTrajectoryDifference = 0;
+                double intraMazeTotalTrajectoryDifference = 0;
+                double interMazeTotalTrajectoryDifference = 0;
 
-                // Iterates through every other agent trajectory and computes the trajectory difference
-                foreach (MazeNavigatorEvaluationUnit otherEvaluationUnit in evaluationUnits.Where(x => x.IsMazeSolved))
+                // Copy current evaluation unit for use in closure below
+                var evaluationUnitCopy = evaluationUnit;
+
+                // Iterates through every other agent trajectory and computes the trajectory difference                
+                Parallel.ForEach(evaluationUnits.Where(u => u.IsMazeSolved), otherEvaluationUnit =>
                 {
                     // Don't evaluate current agent trajectory against itself
-                    if (otherEvaluationUnit.Equals(evaluationUnit))
-                        continue;
+                    if (otherEvaluationUnit.Equals(evaluationUnitCopy))
+                        return;
 
                     // Caculate trajectory difference for same maze
-                    if (otherEvaluationUnit.MazeId.Equals(evaluationUnit.MazeId))
+                    if (otherEvaluationUnit.MazeId.Equals(evaluationUnitCopy.MazeId))
                     {
-                        sameMazeTotalTrajectoryDifference +=
-                            ComputeEuclideanTrajectoryDifference(evaluationUnit.AgentTrajectory,
+                        intraMazeTotalTrajectoryDifference +=
+                            ComputeEuclideanTrajectoryDifference(evaluationUnitCopy.AgentTrajectory,
                                 otherEvaluationUnit.AgentTrajectory);
                     }
                     // Calculate trajectory difference for other maze
                     else
                     {
-                        differentMazeTotalTrajectoryDifference +=
-                            ComputeEuclideanTrajectoryDifference(evaluationUnit.AgentTrajectory,
+                        interMazeTotalTrajectoryDifference +=
+                            ComputeEuclideanTrajectoryDifference(evaluationUnitCopy.AgentTrajectory,
                                 otherEvaluationUnit.AgentTrajectory);
                     }
-                }
+                });
 
-                // TODO: This is where the diversity scores for same/other maze and global should be stored and added to list
+                // Get the count of intramaze, intermaze, and globla trajectories
+                int intraMazeTrajectoryCount = evaluationUnits.Count(unit =>
+                    unit.IsMazeSolved && unit.Equals(evaluationUnit) == false &&
+                    unit.MazeId == evaluationUnit.MazeId);
+                int interMazeTrajectoryCount = evaluationUnits.Count(
+                    unit =>
+                        unit.IsMazeSolved && unit.MazeId != evaluationUnit.MazeId);
+                int globalMazeTrajectoryCount = evaluationUnits.Count(unit => unit.IsMazeSolved);
+
+                // Calculate intra-maze, inter-maze, and global trajectory diversity scores 
+                // and instantiate trajectory diversity unit
+                TrajectoryDiversityUnit trajectoryDiversityUnit = new TrajectoryDiversityUnit(evaluationUnit.AgentId,
+                    evaluationUnit.MazeId, intraMazeTrajectoryCount == 0
+                        ? 0
+                        : intraMazeTotalTrajectoryDifference/intraMazeTrajectoryCount, interMazeTrajectoryCount == 0
+                            ? 0
+                            : interMazeTotalTrajectoryDifference/interMazeTrajectoryCount,
+                    globalMazeTrajectoryCount == 0
+                        ? 0
+                        : (intraMazeTotalTrajectoryDifference + interMazeTotalTrajectoryDifference)/
+                          globalMazeTrajectoryCount);
+
+                // Add trajectory diversity unit to list
+                trajectoryDiversityUnits.Add(trajectoryDiversityUnit);
             }
+
+            return trajectoryDiversityUnits;
         }
 
         #endregion

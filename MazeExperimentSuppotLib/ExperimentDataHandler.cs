@@ -17,8 +17,16 @@ namespace MazeExperimentSuppotLib
     /// </summary>
     public static class ExperimentDataHandler
     {
+        /// <summary>
+        ///     Field delimiter used in output files.
+        /// </summary>
         private const string FileDelimiter = ",";
-        private static StreamWriter _fileWriter;
+
+        /// <summary>
+        ///     Map of output file stream writers.
+        /// </summary>
+        private static readonly Dictionary<OutputFileType, StreamWriter> FileWriters =
+            new Dictionary<OutputFileType, StreamWriter>();
 
         #region Public generic writer methods
 
@@ -51,6 +59,30 @@ namespace MazeExperimentSuppotLib
             {
                 WriteNavigatorMazeEvaluationDataToFile(experimentId, run, batch, runPhase, evaluationUnits);
             }
+        }
+
+        /// <summary>
+        ///     Writes the given trajectory diversity results to the experiment database or to a flat file.
+        /// </summary>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <param name="batch">The batch number of the given run.</param>
+        /// <param name="trajectoryDiversityUnits">The trajectory diversity results.</param>
+        /// <param name="writeToDatabase">
+        ///     Indicates whether evaluation results should be written directly to the database or to a
+        ///     flat file.
+        /// </param>
+        public static void WriteTrajectoryDiversityData(int experimentId, int run, int batch,
+            IList<TrajectoryDiversityUnit> trajectoryDiversityUnits, bool writeToDatabase)
+        {
+            // Write results to the database if the option has been specified
+            if (writeToDatabase)
+            {
+                throw new NotImplementedException(
+                    "Direct write to database for trajectory diversity not yet implemented!");
+            }
+            // Otherwise, write to the flat file output
+            WriteTrajectoryDiversityDataToFile(experimentId, run, batch, trajectoryDiversityUnits);
         }
 
         /// <summary>
@@ -317,19 +349,34 @@ namespace MazeExperimentSuppotLib
         ///     Opens the file stream writer.
         /// </summary>
         /// <param name="fileName">The name of the flat file to write into.</param>
-        public static void OpenFileWriter(string fileName)
+        /// <param name="fileType">The type of data being written.</param>
+        public static void OpenFileWriter(string fileName, OutputFileType fileType)
         {
+            // Make sure a writer of the given type has not already been opened.
+            if (FileWriters.ContainsKey(fileType))
+            {
+                throw new Exception(string.Format("File writer for type {0} already opened.", fileType));
+            }
+
             // Open the stream writer
-            _fileWriter = new StreamWriter(fileName) {AutoFlush = true};
+            FileWriters.Add(fileType, new StreamWriter(fileName) {AutoFlush = true});
         }
 
         /// <summary>
         ///     Closes the file stream writer.
         /// </summary>
-        public static void CloseFileWriter()
+        public static void CloseFileWriter(OutputFileType fileType)
         {
-            _fileWriter.Close();
-            _fileWriter.Dispose();
+            // Make sure the file writer actually exists before attempting to close it
+            if (FileWriters.ContainsKey(fileType) == false)
+            {
+                throw new Exception(
+                    string.Format("Cannot close file writer as no file writer of type {0} has been created.", fileType));
+            }
+
+            // Close the file writer and dispose of the stream
+            FileWriters[fileType].Close();
+            FileWriters[fileType].Dispose();
         }
 
         /// <summary>
@@ -449,27 +496,74 @@ namespace MazeExperimentSuppotLib
         /// </param>
         /// <param name="evaluationUnits">The evaluation results to persist.</param>
         private static void WriteNavigatorMazeEvaluationDataToFile(int experimentId, int run, int batch,
-            RunPhase runPhase,
-            IList<MazeNavigatorEvaluationUnit> evaluationUnits)
+            RunPhase runPhase, IList<MazeNavigatorEvaluationUnit> evaluationUnits)
         {
+            // Make sure the file writer actually exists before attempting to write to it
+            if (FileWriters.ContainsKey(OutputFileType.NavigatorMazeEvaluationData) == false)
+            {
+                throw new Exception(
+                    string.Format("Cannot write to output stream as no file writer of type {0} has been created.",
+                        OutputFileType.NavigatorMazeEvaluationData));
+            }
+
             // Loop through the evaluation units and write each row
             foreach (MazeNavigatorEvaluationUnit evaluationUnit in evaluationUnits)
             {
-                _fileWriter.WriteLine(string.Join(FileDelimiter, new List<string>
-                {
-                    experimentId.ToString(),
-                    run.ToString(),
-                    batch.ToString(),
-                    runPhase.ToString(),
-                    evaluationUnit.MazeId.ToString(),
-                    evaluationUnit.AgentId.ToString(),
-                    evaluationUnit.IsMazeSolved.ToString(),
-                    evaluationUnit.NumTimesteps.ToString()
-                }));
+                FileWriters[OutputFileType.NavigatorMazeEvaluationData].WriteLine(string.Join(FileDelimiter,
+                    new List<string>
+                    {
+                        experimentId.ToString(),
+                        run.ToString(),
+                        batch.ToString(),
+                        runPhase.ToString(),
+                        evaluationUnit.MazeId.ToString(),
+                        evaluationUnit.AgentId.ToString(),
+                        evaluationUnit.IsMazeSolved.ToString(),
+                        evaluationUnit.NumTimesteps.ToString()
+                    }));
             }
 
-            // Immediately flush to the log file
-            _fileWriter.Flush();
+            // Immediately flush to the output file
+            FileWriters[OutputFileType.NavigatorMazeEvaluationData].Flush();
+        }
+
+        /// <summary>
+        ///     Writes the given trajectory diversity results to a flat file.
+        /// </summary>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <param name="batch">The batch number of the given run.</param>
+        /// <param name="trajectoryDiversityUnits">The trajectory diversity data to persist.</param>
+        private static void WriteTrajectoryDiversityDataToFile(int experimentId, int run, int batch,
+            IList<TrajectoryDiversityUnit> trajectoryDiversityUnits)
+        {
+            // Make sure the file writer actually exists before attempting to write to it
+            if (FileWriters.ContainsKey(OutputFileType.TrajectoryDiversityData) == false)
+            {
+                throw new Exception(
+                    string.Format("Cannot write to output stream as no file writer of type {0} has been created.",
+                        OutputFileType.TrajectoryDiversityData));
+            }
+
+            // Loop through the trajectory diversity units and write each row
+            foreach (TrajectoryDiversityUnit diversityUnit in trajectoryDiversityUnits)
+            {
+                FileWriters[OutputFileType.TrajectoryDiversityData].WriteLine(string.Join(FileDelimiter,
+                    new List<string>
+                    {
+                        experimentId.ToString(),
+                        run.ToString(),
+                        batch.ToString(),
+                        diversityUnit.MazeId.ToString(),
+                        diversityUnit.AgentId.ToString(),
+                        diversityUnit.IntraMazeDiversityScore.ToString(CultureInfo.InvariantCulture),
+                        diversityUnit.InterMazeDiversityScore.ToString(CultureInfo.InvariantCulture),
+                        diversityUnit.GlobalDiversityScore.ToString(CultureInfo.InvariantCulture)
+                    }));
+            }
+
+            // Immediately flush to the output file
+            FileWriters[OutputFileType.TrajectoryDiversityData].Flush();
         }
 
         /// <summary>
@@ -500,25 +594,34 @@ namespace MazeExperimentSuppotLib
             int batch, int mazeGenomeId, int mazeBirthBatch, int nsAgentMinComplexity, int nsAgentMaxComplexity,
             double nsAgentMeanComplexity, int coEvoEvaluations, int nsEvaluations, bool isSolved)
         {
-            // Write comparison results row to flat file with the specified delimiter
-            _fileWriter.WriteLine(string.Join(FileDelimiter, new List<string>
+            // Make sure the file writer actually exists before attempting to write to it
+            if (FileWriters.ContainsKey(OutputFileType.NoveltySearchComparisonData) == false)
             {
-                coEvoExperimentId.ToString(),
-                nsExperimentId.ToString(),
-                run.ToString(),
-                batch.ToString(),
-                mazeGenomeId.ToString(),
-                mazeBirthBatch.ToString(),
-                nsAgentMinComplexity.ToString(),
-                nsAgentMaxComplexity.ToString(),
-                nsAgentMeanComplexity.ToString(CultureInfo.InvariantCulture),
-                coEvoEvaluations.ToString(),
-                nsEvaluations.ToString(),
-                isSolved.ToString()
-            }));
+                throw new Exception(
+                    string.Format("Cannot write to output stream as no file writer of type {0} has been created.",
+                        OutputFileType.NoveltySearchComparisonData));
+            }
+
+            // Write comparison results row to flat file with the specified delimiter
+            FileWriters[OutputFileType.NoveltySearchComparisonData].WriteLine(string.Join(FileDelimiter,
+                new List<string>
+                {
+                    coEvoExperimentId.ToString(),
+                    nsExperimentId.ToString(),
+                    run.ToString(),
+                    batch.ToString(),
+                    mazeGenomeId.ToString(),
+                    mazeBirthBatch.ToString(),
+                    nsAgentMinComplexity.ToString(),
+                    nsAgentMaxComplexity.ToString(),
+                    nsAgentMeanComplexity.ToString(CultureInfo.InvariantCulture),
+                    coEvoEvaluations.ToString(),
+                    nsEvaluations.ToString(),
+                    isSolved.ToString()
+                }));
 
             // Immediately flush to the output file
-            _fileWriter.Flush();
+            FileWriters[OutputFileType.NoveltySearchComparisonData].Flush();
         }
 
         #endregion
