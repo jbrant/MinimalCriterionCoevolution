@@ -176,7 +176,7 @@ namespace SharpNeat.SpeciationStrategies
         ///     that we wish to keep; typically these would be elite genomes that are the parents of the
         ///     offspring.
         /// </summary>
-        public void SpeciateOffspring(IList<TGenome> offspringList, IList<Specie<TGenome>> specieList)
+        public void SpeciateOffspring(IList<TGenome> offspringList, IList<Specie<TGenome>> specieList, bool respeciate)
         {
             // Each specie should contain at least one genome. We need at least one existing genome per specie to act
             // as a specie centroid in order to define where the specie is within the encoding space.
@@ -200,25 +200,29 @@ namespace SharpNeat.SpeciationStrategies
                 genome.SpecieIdx = closestSpecie.Idx;
             });
 
-            // Recalculate each specie's centroid now that we have additional genomes in the specieList.
-            Parallel.ForEach(specieList, _parallelOptions,
-                delegate(Specie<TGenome> specie) { specie.Centroid = CalculateSpecieCentroid(specie); });
-
-            // Accumulate *all* genomes into a flat genome list.
-            int genomeCount = 0;
-            foreach (Specie<TGenome> specie in specieList)
+            // Only respeciate if specified
+            if (respeciate)
             {
-                genomeCount += specie.GenomeList.Count;
-            }
+                // Recalculate each specie's centroid now that we have additional genomes in the specieList.
+                Parallel.ForEach(specieList, _parallelOptions,
+                    delegate(Specie<TGenome> specie) { specie.Centroid = CalculateSpecieCentroid(specie); });
 
-            List<TGenome> genomeList = new List<TGenome>(genomeCount);
-            foreach (Specie<TGenome> specie in specieList)
-            {
-                genomeList.AddRange(specie.GenomeList);
-            }
+                // Accumulate *all* genomes into a flat genome list.
+                int genomeCount = 0;
+                foreach (Specie<TGenome> specie in specieList)
+                {
+                    genomeCount += specie.GenomeList.Count;
+                }
 
-            // Perform the main k-means loop until convergence.
-            SpeciateUntilConvergence(genomeList, specieList);
+                List<TGenome> genomeList = new List<TGenome>(genomeCount);
+                foreach (Specie<TGenome> specie in specieList)
+                {
+                    genomeList.AddRange(specie.GenomeList);
+                }
+
+                // Perform the main k-means loop until convergence.
+                SpeciateUntilConvergence(genomeList, specieList);
+            }
 
             Debug.Assert(SpeciationUtils<TGenome>.PerformIntegrityCheck(specieList));
         }

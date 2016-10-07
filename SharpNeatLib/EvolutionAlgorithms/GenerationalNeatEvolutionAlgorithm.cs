@@ -92,7 +92,7 @@ namespace SharpNeat.EvolutionAlgorithms
             else
             {
                 // Integrate offspring into the existing species. 
-                SpeciationStrategy.SpeciateOffspring(offspringList, SpecieList);
+                SpeciationStrategy.SpeciateOffspring(offspringList, SpecieList, true);
             }
             Debug.Assert(!SpeciationUtils<TGenome>.TestEmptySpecies(SpecieList),
                 "Speciation resulted in one or more empty species.");

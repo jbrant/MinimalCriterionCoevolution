@@ -64,7 +64,7 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
             // Initialize the evolution algorithm
             InitializationEa.Initialize(fitnessEvaluator, GenomeFactory, genomeList, null, null);
         }
-
+        
         /// <summary>
         ///     Runs the initialization algorithm until the specified number of viable genomes (i.e. genomes that meets the minimal
         ///     criteria) are found and returns those genomes along with the total number of evaluations that were executed to find

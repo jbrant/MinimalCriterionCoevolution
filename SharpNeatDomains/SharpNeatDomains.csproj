@@ -119,7 +119,8 @@
     <Compile Include="MazeEnvironmentTest\MazeEnvironmentTestEvaluator.cs" />
     <Compile Include="MazeEnvironmentTest\MazeEnvironmentTestExperiment.cs" />
     <Compile Include="MazeNavigation\Bootstrappers\NoveltySearchCoevolutionMazeNavigationInitializer.cs" />
-    <Compile Include="MazeNavigation\CoevolutionMCSExperiment\CoevolutionMazeNavigationMCSExperiment.cs" />
+    <Compile Include="MazeNavigation\CoevolutionMCSExperiment\CoevolutionMCSMultiQueueExperiment.cs" />
+    <Compile Include="MazeNavigation\CoevolutionMCSExperiment\CoevolutionMCSQueueExperiment.cs" />
     <Compile Include="MazeNavigation\CoevolutionMCSExperiment\MazeEnvironmentMCSEvaluator.cs" />
     <Compile Include="MazeNavigation\CoevolutionMCSExperiment\MazeNavigatorMCSEvaluator.cs" />
     <Compile Include="MazeNavigation\CoevolutionMCSExperiment\MazeNavigatorFitnessInitializationEvaluator.cs" />

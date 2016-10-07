@@ -97,7 +97,7 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
         public abstract void InitializeAlgorithm(ParallelOptions parallelOptions, List<NeatGenome> genomeList,
             MazeStructure mazeEnvironment, IGenomeDecoder<NeatGenome, IBlackBox> genomeDecoder,
             ulong startingEvaluations);
-
+        
         /// <summary>
         ///     Runs the initialization algorithm until the specified number of viable genomes (i.e. genomes that meets the minimal
         ///     criteria) are found and returns those genomes along with the total number of evaluations that were executed to find
@@ -117,11 +117,11 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
             uint restartCount);
 
         /// <summary>
-        ///     Logs the static maze genome on which all initialization evaluations will be conducted.
+        ///     Logs the static maze genomes on which all initialization evaluations will be conducted.
         /// </summary>
-        /// <param name="initializationMazeGenome">The initialization maze genome to log.</param>
+        /// <param name="initializationMazeGenomes">The initialization maze genomes to log.</param>
         /// <param name="mazeGenomeDataLogger">The maze data logger.</param>
-        public void LogStartingMazeGenome(MazeGenome initializationMazeGenome, IDataLogger mazeGenomeDataLogger)
+        public void LogStartingMazeGenomes(List<MazeGenome> initializationMazeGenomes, IDataLogger mazeGenomeDataLogger)
         {
             // Open the logger
             mazeGenomeDataLogger?.Open();
@@ -135,15 +135,19 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
                 new LoggableElement(PopulationGenomesFieldElements.SpecieId, null)
             });
 
-            // Write the genome XML
-            mazeGenomeDataLogger?.LogRow(new List<LoggableElement>
+            // Write the genome XML for all initialization genomes
+            foreach (MazeGenome mazeGenome in initializationMazeGenomes)
             {
-                new LoggableElement(PopulationGenomesFieldElements.Generation, initializationMazeGenome.BirthGeneration),
-                new LoggableElement(PopulationGenomesFieldElements.GenomeId, initializationMazeGenome.Id),
-                new LoggableElement(PopulationGenomesFieldElements.GenomeXml,
-                    XmlIoUtils.GetGenomeXml(initializationMazeGenome)),
-                new LoggableElement(PopulationGenomesFieldElements.SpecieId, initializationMazeGenome.SpecieIdx)
-            });
+                // Write the genome XML
+                mazeGenomeDataLogger?.LogRow(new List<LoggableElement>
+                {
+                    new LoggableElement(PopulationGenomesFieldElements.Generation, mazeGenome.BirthGeneration),
+                    new LoggableElement(PopulationGenomesFieldElements.GenomeId, mazeGenome.Id),
+                    new LoggableElement(PopulationGenomesFieldElements.GenomeXml,
+                        XmlIoUtils.GetGenomeXml(mazeGenome)),
+                    new LoggableElement(PopulationGenomesFieldElements.SpecieId, mazeGenome.SpecieIdx)
+                });
+            }
         }
 
         #endregion
