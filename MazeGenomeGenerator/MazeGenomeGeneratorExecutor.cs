@@ -86,12 +86,20 @@ namespace MazeGenomeGenerator
             bool generateMazeImages = _executionConfiguration.ContainsKey(ExecutionParameter.OutputMazeBitmap) &&
                                       Boolean.Parse(_executionConfiguration[ExecutionParameter.OutputMazeBitmap]);
 
+            // Get whether maze genomes are being serialized to the same file (defaults to false)
+            bool isSingleOutputFile = _executionConfiguration.ContainsKey(ExecutionParameter.SingleGenomeOutputFile) &&
+                                      Boolean.Parse(_executionConfiguration[ExecutionParameter.SingleGenomeOutputFile]);
+
             // Create a new maze genome factory
             MazeGenomeFactory mazeGenomeFactory = new MazeGenomeFactory();
 
+            // Instantiate list to hold generated maze genomes 
+            // (only really used when we're writing everything out to one file)
+            List<MazeGenome> mazeGenomeList = new List<MazeGenome>(numMazes);
+
             for (int curMazeCnt = 0; curMazeCnt < numMazes; curMazeCnt++)
             {
-                string fileBaseName = string.Format("GeneratedMaze_{0}", curMazeCnt);
+                string fileBaseName = string.Format("GeneratedMazeGenome_{0}_Walls_{1}", numInteriorWalls, curMazeCnt);
 
                 // Reset innovation IDs
                 mazeGenomeFactory.InnovationIdGenerator.Reset();
@@ -107,21 +115,43 @@ namespace MazeGenomeGenerator
                         rand.NextDouble(), rand.NextDouble(), rand.NextDouble() < 0.5));
                 }
 
-                // Serialize the genome to XML            
-                using (
-                    XmlWriter xmlWriter =
-                        XmlWriter.Create(
-                            Path.Combine(mazeGenomeOutputDirectory, string.Format("{0}_Genome.xml", fileBaseName)),
-                            new XmlWriterSettings {Indent = true}))
+                // Only serialize genomes to separate files if single output file option is turned off
+                if (isSingleOutputFile == false)
                 {
-                    // Get genome XML
-                    MazeGenomeXmlIO.WriteComplete(xmlWriter, mazeGenome);
+                    // Serialize the genome to XML            
+                    using (
+                        XmlWriter xmlWriter =
+                            XmlWriter.Create(
+                                Path.Combine(mazeGenomeOutputDirectory, string.Format("{0}.xml", fileBaseName)),
+                                new XmlWriterSettings {Indent = true}))
+                    {
+                        // Get genome XML
+                        MazeGenomeXmlIO.WriteComplete(xmlWriter, mazeGenome);
+                    }
+                }
+                // Otherwise, just add genome to list to be serialized to single file in bulk
+                else
+                {
+                    mazeGenomeList.Add(mazeGenome);
                 }
 
                 // Print the maze to a bitmap file if that option has been specified
                 if (generateMazeImages)
                 {
                     PrintMazeToFile(mazeGenome, string.Format("{0}_Structure.bmp", fileBaseName));
+                }
+            }
+
+            // If serialize to single output file is turned off, go ahead and write everything out to the file
+            if (isSingleOutputFile)
+            {
+                // Serialize all genomes to XML
+                using (
+                    XmlWriter xmlWriter =
+                        XmlWriter.Create(Path.Combine(mazeGenomeOutputDirectory,
+                            string.Format("GeneratedMazeGenomes_{0}_Walls.xml", numInteriorWalls))))
+                {
+                    MazeGenomeXmlIO.WriteComplete(xmlWriter, mazeGenomeList);
                 }
             }
         }
@@ -237,6 +267,7 @@ namespace MazeGenomeGenerator
                         // Ensure that valid boolean values were given
                         case ExecutionParameter.OutputMazeBitmap:
                         case ExecutionParameter.GenerateMazes:
+                        case ExecutionParameter.SingleGenomeOutputFile:
                             bool testBool;
                             if (Boolean.TryParse(parameterValuePair[1], out testBool) == false)
                             {
