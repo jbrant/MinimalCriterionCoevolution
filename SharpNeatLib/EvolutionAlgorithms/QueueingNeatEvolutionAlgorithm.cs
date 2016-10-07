@@ -17,9 +17,7 @@ using SharpNeat.Utility;
 namespace SharpNeat.EvolutionAlgorithms
 {
     /// <summary>
-    ///     Implementation of a queue-based NEAT evolution algorithm.  Note that this omits the speciation aspects of NEAT
-    ///     (because the algorithm inherently imposes no preference other than age-based removal) and reproduction is asexual
-    ///     only.
+    ///     Implementation of a queue-based NEAT evolution algorithm.  Note that reproduction is asexual only.
     /// </summary>
     /// <typeparam name="TGenome">The genome type that the algorithm will operate on.</typeparam>
     public class QueueingNeatEvolutionAlgorithm<TGenome> : AbstractNeatEvolutionAlgorithm<TGenome>
@@ -105,7 +103,7 @@ namespace SharpNeat.EvolutionAlgorithms
         }
 
         /// <summary>
-        /// Removes the oldest genomes from species that have exceeded their size cap.
+        ///     Removes the oldest genomes from species that have exceeded their size cap.
         /// </summary>
         private void RemoveOldestFromOverfullSpecies()
         {
@@ -113,27 +111,28 @@ namespace SharpNeat.EvolutionAlgorithms
             foreach (var specie in SpecieList.ToList())
             {
                 if (specie.GenomeList.Count > EaParams.MaxSpecieSize)
-                {                    
+                {
                     // Sort the specie population by age (oldest to youngest)
                     IEnumerable<TGenome> ageSortedPopulation =
                         specie.GenomeList.OrderBy(g => g.BirthGeneration).AsParallel();
 
                     // Select the specified number of oldest genomes
-                    IEnumerable<TGenome> oldestGenomes = ageSortedPopulation.Take(specie.GenomeList.Count - EaParams.MaxSpecieSize);
+                    IEnumerable<TGenome> oldestGenomes =
+                        ageSortedPopulation.Take(specie.GenomeList.Count - EaParams.MaxSpecieSize);
 
                     // Remove the oldest genomes from the specie/population
                     foreach (TGenome oldestGenome in oldestGenomes)
                     {
                         // Remove from the population
-                        ((List<TGenome>)GenomeList).Remove(oldestGenome);
+                        ((List<TGenome>) GenomeList).Remove(oldestGenome);
 
                         // Remove the genome reference from the specie
                         SpecieList[specie.Idx].GenomeList.Remove(oldestGenome);
                     }
                 }
-            }            
+            }
         }
-        
+
         /// <summary>
         ///     Removes the oldest from the species to which offspring have been assigned.  This is only invoked if the
         ///     addition of said offspring push the population size above the queue capacity.

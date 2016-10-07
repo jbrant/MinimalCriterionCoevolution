@@ -202,7 +202,7 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <summary>
         ///     Updates the NeatAlgorithmStats object.
         /// </summary>
-        protected void UpdateStats(bool updateSpeciesStats, bool useAuxFitness)
+        protected void UpdateStats(bool updateSpeciesStats, bool useAuxFitness = false)
         {
             Statistics._generation = CurrentGeneration;
             Statistics._totalEvaluationCount = GenomeEvaluator.EvaluationCount;

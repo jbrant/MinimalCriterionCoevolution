@@ -115,6 +115,7 @@
     <Compile Include="Core\RunPhase.cs" />
     <Compile Include="Decoders\Maze\MazeDecoder.cs" />
     <Compile Include="EvolutionAlgorithms\CoevolutionAlgorithmContainer.cs" />
+    <Compile Include="EvolutionAlgorithms\MultiQueueNeatEvolutionAlgorithm.cs" />
     <Compile Include="EvolutionAlgorithms\QueueingNichedNeatEvolutionAlgorithm.cs" />
     <Compile Include="EvolutionAlgorithms\QueueingNeatEvolutionAlgorithm.cs" />
     <Compile Include="Genomes\Maze\MazeGene.cs" />

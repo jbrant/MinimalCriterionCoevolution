@@ -718,6 +718,41 @@ namespace SharpNeat.Domains
         }
 
         /// <summary>
+        ///     Generates the specified number of maze genomes with the specified complexity (i.e. number of interior partitions).
+        /// </summary>
+        /// <param name="numMazeGenomes">The number of maze genomes to generate.</param>
+        /// <param name="numPartitions">The number of initial partitions (the starting complexity of the genome).</param>
+        /// <param name="mazeGenomeFactory">Reference to the maze genome factory.</param>
+        /// <returns></returns>
+        public static List<MazeGenome> GenerateMazeGenomes(int numMazeGenomes, int numPartitions,
+            MazeGenomeFactory mazeGenomeFactory)
+        {
+            List<MazeGenome> mazeGenomes = new List<MazeGenome>(numMazeGenomes);
+            Random rand = new Random();
+
+            for (int curMazeCnt = 0; curMazeCnt < numMazeGenomes; curMazeCnt++)
+            {
+                // Reset innovation IDs
+                mazeGenomeFactory.InnovationIdGenerator.Reset();
+
+                // Create a new genome and pass in the requisite factory
+                MazeGenome mazeGenome = new MazeGenome(mazeGenomeFactory, 0, 0);
+
+                // Create the specified number of interior partitions (i.e. maze genes)
+                for (int cnt = 0; cnt < numPartitions; cnt++)
+                {
+                    // Create new maze gene and add to genome
+                    mazeGenome.GeneList.Add(new MazeGene(mazeGenomeFactory.InnovationIdGenerator.NextId,
+                        rand.NextDouble(), rand.NextDouble(), rand.NextDouble() < 0.5));
+                }
+
+                mazeGenomes.Add(mazeGenome);
+            }
+
+            return mazeGenomes;
+        }
+
+        /// <summary>
         ///     Determines which coevolution initializer to instantiate and return based on the initialization algorithm search
         ///     type.
         /// </summary>

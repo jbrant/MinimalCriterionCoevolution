@@ -980,7 +980,7 @@ namespace SharpNeatConsole
 
             // Match up with the correct experiment
             // TODO: Right now, there's only one type of coevolution experiment, but the multi-tiered queue concept would be another
-            return new CoevolutionMazeNavigationMCSExperiment();
+            return new CoevolutionMCSQueueExperiment();
         }
     }
 }
