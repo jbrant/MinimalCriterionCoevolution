@@ -55,6 +55,11 @@
         ///     The path to the maze genome to render (only applicable when we're just rendering an existing maze genome instead of
         ///     generating the genome).
         /// </summary>
-        MazeGenomeFile
+        MazeGenomeFile,
+
+        /// <summary>
+        ///     Indicates whether the maze genomes should be serialized to the same file or not.
+        /// </summary>
+        SingleGenomeOutputFile
     }
 }
