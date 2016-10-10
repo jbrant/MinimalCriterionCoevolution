@@ -10,6 +10,7 @@ using System.Xml;
 using ExperimentEntities;
 using log4net;
 using log4net.Config;
+using SharpNeat;
 using SharpNeat.Core;
 using SharpNeat.Domains;
 using SharpNeat.Domains.MazeNavigation;
@@ -135,7 +136,9 @@ namespace SharpNeatConsole
             int startFromRun = _executionConfiguration.ContainsKey(ExecutionParameter.StartFromRun)
                 ? Int32.Parse(_executionConfiguration[ExecutionParameter.StartFromRun])
                 : 1;
-            int numRuns = isDistributedExecution ? startFromRun : Int32.Parse(_executionConfiguration[ExecutionParameter.NumRuns]);            
+            int numRuns = isDistributedExecution
+                ? startFromRun
+                : Int32.Parse(_executionConfiguration[ExecutionParameter.NumRuns]);
 
             // Determine whether to log organism state data
             bool logOrganismStateData = _executionConfiguration.ContainsKey(ExecutionParameter.LogOrganismStateData) &&
@@ -696,7 +699,16 @@ namespace SharpNeatConsole
 
                 // Read in the seed population
                 List<MazeGenome> mazeGenomeList = ExperimentUtils.ReadSeedMazeGenomes(seedMazePath,
-                    (MazeGenomeFactory) mazeGenomeFactory);
+                    (MazeGenomeFactory) mazeGenomeFactory).Take(experiment.MazeDefaultPopulationSize).ToList();
+
+                // Check for insufficient number of genomes in the seed maze file
+                if (mazeGenomeList.Count < experiment.MazeDefaultPopulationSize)
+                {
+                    throw new SharpNeatException(
+                        string.Format(
+                            "The maze genome input file contains only {0} genomes while the experiment configuration requires {1} genomes.",
+                            mazeGenomeList.Count, experiment.MazeDefaultPopulationSize));
+                }
 
                 _executionLogger.Info(
                     string.Format("Loaded [{0}] navigator genomes and [{1}] seed maze genomes as initial populations.",
@@ -978,8 +990,15 @@ namespace SharpNeatConsole
             SearchType searchType = AlgorithmTypeUtil.ConvertStringToSearchType(searchAlgorithmName);
             SelectionType selectionType = AlgorithmTypeUtil.ConvertStringToSelectionType(selectionAlgorithmName);
 
-            // Match up with the correct experiment
-            // TODO: Right now, there's only one type of coevolution experiment, but the multi-tiered queue concept would be another
+            // TODO: Currently, the coevoultion experiments are implemented with only one search algorithm: MCS
+
+            // Queueing coevolution experiment with separate (currently per-species) queues
+            if (SelectionType.MultipleQueueing.Equals(selectionType))
+            {
+                return new CoevolutionMCSMultiQueueExperiment();
+            }
+
+            // Otherwise, go with the single maze, single queue MCS coevolution experiment
             return new CoevolutionMCSQueueExperiment();
         }
     }

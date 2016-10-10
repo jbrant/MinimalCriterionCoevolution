@@ -698,19 +698,22 @@ namespace SharpNeat.Domains
                 mazeGenomeFiles[0] = seedMazePath;
             }
 
-            // Read in each maze genome and add it to the list
+            // Read in all maze genomes and add them to the list
             foreach (string mazeGenomeFile in mazeGenomeFiles)
             {
                 using (XmlReader xr = XmlReader.Create(mazeGenomeFile))
                 {
-                    // Read in the maze genome
-                    MazeGenome curMazeGenome = MazeGenomeXmlIO.ReadSingleGenomeFromRoot(xr, mazeGenomeFactory);
+                    // Read in the maze genomes
+                    List<MazeGenome> curMazeGenomes = MazeGenomeXmlIO.ReadCompleteGenomeList(xr, mazeGenomeFactory);
 
                     // Assign the genome factory
-                    curMazeGenome.GenomeFactory = mazeGenomeFactory;
+                    foreach (MazeGenome curMazeGenome in curMazeGenomes)
+                    {
+                        curMazeGenome.GenomeFactory = mazeGenomeFactory;
+                    }
 
-                    // Add the genome to the list
-                    mazeGenomes.Add(curMazeGenome);
+                    // Add the genomes to the overall genome list
+                    mazeGenomes.AddRange(curMazeGenomes);
                 }
             }
 

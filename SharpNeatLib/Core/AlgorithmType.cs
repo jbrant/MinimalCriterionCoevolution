@@ -72,7 +72,15 @@ namespace SharpNeat.Core
         ///     offspring (subject to applicable viability constraints).  Removals are based on individual age (i.e. the oldest are
         ///     removed).
         /// </summary>
-        QueueingWithNiching
+        QueueingWithNiching,
+
+        /// <summary>
+        ///     Multiple queueing (or specie queueing) breaks the overall population out into multiple separate logical queues.  In
+        ///     the current implementation, there is a separate queue per species, but this could probably be extended such that
+        ///     the queues are segregated based on some other boundary.  Selection then occurs within individual queues only,
+        ///     isolated from the rest of the population.
+        /// </summary>
+        MultipleQueueing
     }
 
     /// <summary>
@@ -136,6 +144,12 @@ namespace SharpNeat.Core
                 "Queueing with Niching".Equals(strSelectionType, StringComparison.InvariantCultureIgnoreCase))
             {
                 return SelectionType.QueueingWithNiching;
+            }
+
+            if ("MultipleQueueing".Equals(strSelectionType, StringComparison.InvariantCultureIgnoreCase) ||
+                "Multiple Queueing".Equals(strSelectionType, StringComparison.InvariantCultureIgnoreCase))
+            {
+                return SelectionType.MultipleQueueing;
             }
 
             // If nothing matches, return generational selection

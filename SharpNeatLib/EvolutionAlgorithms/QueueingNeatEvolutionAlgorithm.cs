@@ -304,7 +304,10 @@ namespace SharpNeat.EvolutionAlgorithms
             // Speciate based on the total population size (note that this doesn't speciate the genomes
             // yet because we're just starting with a seed that likely doesn't satisfy the requirements
             // of establishing the target number of species)
-            SpecieList = SpeciationStrategy.InitializeSpeciation(PopulationSize, EaParams.SpecieCount);
+            if (EaParams.SpecieCount > 0)
+            {
+                SpecieList = SpeciationStrategy.InitializeSpeciation(PopulationSize, EaParams.SpecieCount);
+            }
 
             // If the population has not yet undergone intialization evaluations, 
             // run them through a cycle of evaluations now and update the best genome
@@ -382,17 +385,26 @@ namespace SharpNeat.EvolutionAlgorithms
             // If the population cap has been exceeded and we aren't using fixed/capped specie sizes 
             // (these will be handled via recalibrating specie sizes after speciation), remove oldest 
             // genomes to keep population size constant
-            if (_isFixedSpecieSize == false && GenomeList.Count > PopulationSize)
+            if (SpecieList != null && _isFixedSpecieSize == false && GenomeList.Count > PopulationSize)
             {
                 // Remove the above-computed number of oldest genomes from the population
                 RemoveOldestFromAssignedSpecies(childGenomes);
+            }
+            // If speciation is not enabled, remove the requisite number of global oldest individuals
+            else if (SpecieList == null && (GenomeList.Count + childGenomes.Count) > PopulationSize)
+            {
+                // Calculate number of genomes to remove
+                int genomesToRemove = (GenomeList.Count + childGenomes.Count) - PopulationSize;
+
+                // Remove the above-computed number of oldest genomes from the population
+                RemoveGlobalOldestGenomes(genomesToRemove);
             }
 
             // Update the total offspring count based on the number of *viable* offspring produced
             Statistics._totalOffspringCount = (ulong) childGenomes.Count;
 
             // Don't speciate until the queue size is greater than the desired number of species
-            if (GenomeList.Count > SpecieList.Count)
+            if (SpecieList != null && GenomeList.Count > SpecieList.Count)
             {
                 // Clear all the species and respeciate
                 ClearAllSpecies();

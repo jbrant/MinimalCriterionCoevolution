@@ -40,8 +40,8 @@ namespace SharpNeat.Genomes.Neat
 
         /// <summary>NeatGenomeParameters currently in effect.</summary>
         protected NeatGenomeParameters _neatGenomeParamsCurrent;
-        readonly NeatGenomeParameters _neatGenomeParamsComplexifying;
-        readonly NeatGenomeParameters _neatGenomeParamsSimplifying;
+        protected NeatGenomeParameters _neatGenomeParamsComplexifying;
+        protected NeatGenomeParameters _neatGenomeParamsSimplifying;
         readonly NeatGenomeStats _stats = new NeatGenomeStats();
         readonly int _inputNeuronCount;
         readonly int _outputNeuronCount;
@@ -596,6 +596,20 @@ namespace SharpNeat.Genomes.Neat
         {
             // NEAT uses the same activation function at each neuron; Hence we use an activationFnId of 0 here.
             return new NeuronGene(innovationId, neuronType, 0);
+        }
+
+        /// <summary>
+        ///     Reset the NEAT genome parameters for the existing genome factory (typically used when going from an initialization
+        ///     phase to a primary phase where we want to keep the state intact and just change the hyperparameters so that we
+        ///     don't affect any pre-evolved individuals).
+        /// </summary>
+        /// <param name="genomeParameters">The NEAT genome parameters.</param>
+        public virtual void ResetNeatGenomeParameters(NeatGenomeParameters genomeParameters)
+        {
+            _neatGenomeParamsCurrent = genomeParameters;
+            _neatGenomeParamsComplexifying = _neatGenomeParamsCurrent;
+            _neatGenomeParamsSimplifying =
+                NeatGenomeParameters.CreateSimplifyingParameters(_neatGenomeParamsComplexifying);
         }
 
         #endregion

@@ -213,7 +213,7 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
                 _navigatorPopulationGenomesDataLogger.ResetLog();
 
                 // Instantiate the internal initialization algorithm
-                _mazeNavigationInitializer.InitializeAlgorithm(ParallelOptions, genomeList1.ToList(),
+                _mazeNavigationInitializer.InitializeAlgorithm(ParallelOptions, genomeList1.ToList(), genomeFactory1,
                     new MazeDecoder(_mazeHeight, _mazeWidth, _mazeScaleMultiplier).Decode(genomeList2[0]),
                     new NeatGenomeDecoder(ActivationScheme), 0);
 
@@ -239,7 +239,7 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
                     new NeatEvolutionAlgorithmParameters
                     {
                         SpecieCount = AgentNumSpecies,
-                        MaxSpecieSize = AgentDefaultPopulationSize/AgentNumSpecies
+                        MaxSpecieSize = AgentNumSpecies > 0 ? AgentDefaultPopulationSize/AgentNumSpecies : AgentDefaultPopulationSize
                     },
                     new ParallelKMeansClusteringStrategy<NeatGenome>(new ManhattanDistanceMetric(1.0, 0.0, 10.0),
                         ParallelOptions), null,
@@ -253,7 +253,7 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
                     new NeatEvolutionAlgorithmParameters
                     {
                         SpecieCount = MazeNumSpecies,
-                        MaxSpecieSize = MazeDefaultPopulationSize/MazeNumSpecies
+                        MaxSpecieSize = MazeNumSpecies > 0 ? MazeDefaultPopulationSize/MazeNumSpecies : MazeDefaultPopulationSize
                     },
                     new ParallelKMeansClusteringStrategy<MazeGenome>(new ManhattanDistanceMetric(1.0, 0.0, 10.0),
                         ParallelOptions), null,

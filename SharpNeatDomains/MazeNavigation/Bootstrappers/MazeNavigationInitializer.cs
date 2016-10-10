@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Xml;
 using SharpNeat.Core;
+using SharpNeat.Decoders;
 using SharpNeat.DistanceMetrics;
 using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.EvolutionAlgorithms.ComplexityRegulation;
@@ -33,7 +34,7 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
         #endregion
 
         #region Public methods
-        
+
         /// <summary>
         ///     Constructs and initializes the initialization algorithm.
         /// </summary>
@@ -44,21 +45,20 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
         public virtual void SetAlgorithmParameters(XmlElement xmlConfig, int inputCount, int outputCount)
         {
             // Read NEAT genome parameters
-            NeatGenomeParameters neatGenomeParameters = ExperimentUtils.ReadNeatGenomeParameters(xmlConfig);
+            // Save off genome parameters specifically for the initialization algorithm 
+            // (this is primarily because the initialization algorithm will quite likely have different NEAT parameters)
+            NeatGenomeParameters = ExperimentUtils.ReadNeatGenomeParameters(xmlConfig);
+            NeatGenomeParameters.FeedforwardOnly = NetworkActivationScheme.CreateAcyclicScheme().AcyclicNetwork;
 
             // Read NEAT evolution parameters
             NeatEvolutionAlgorithmParameters = ExperimentUtils.ReadNeatEvolutionAlgorithmParameters(xmlConfig);
-
-            // Create genome factory specifically for the initialization algorithm 
-            // (this is primarily because the initialization algorithm will quite likely have different NEAT parameters)
-            GenomeFactory = new NeatGenomeFactory(inputCount, outputCount, neatGenomeParameters);
 
             // Get complexity constraint parameters
             ComplexityRegulationStrategyDefinition = XmlUtils.TryGetValueAsString(xmlConfig,
                 "ComplexityRegulationStrategy");
             ComplexityThreshold = XmlUtils.TryGetValueAsInt(xmlConfig, "ComplexityThreshold");
         }
-        
+
         /// <summary>
         ///     Sets configuration variables specific to the maze navigation simulation.
         /// </summary>
@@ -110,10 +110,13 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
         protected AbstractNeatEvolutionAlgorithm<NeatGenome> InitializationEa;
 
         /// <summary>
-        ///     The genome factory specifically for the initialization algorithm (this is because the initialization algorithm will
-        ///     likely have different algorithm parameters than the primary algorithm).
+        ///     The genome parameters specifically for the initialization algorithm (this is because the initialization algorithm
+        ///     will likely have different algorithm parameters than the primary algorithm).  Note that only the parameters are
+        ///     stored because they temporarily replace the parameters on an *existing* genome factory.  This allows transition
+        ///     into the primary phase of the experiment by simply replacing the parameters, but keeping the rest of the factory
+        ///     state (e.g. innovation IDs, gene IDs, etc.) intact.
         /// </summary>
-        protected IGenomeFactory<NeatGenome> GenomeFactory;
+        protected NeatGenomeParameters NeatGenomeParameters;
 
         /// <summary>
         ///     The genome decoder for the agents.
@@ -176,7 +179,7 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
         protected IComplexityRegulationStrategy ComplexityRegulationStrategy;
 
         #endregion
-       
+
         #region Private methods
 
         #endregion
