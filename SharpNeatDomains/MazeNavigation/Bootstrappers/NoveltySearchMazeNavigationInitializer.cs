@@ -121,11 +121,7 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
             // Read NEAT evolution parameters
             NeatEvolutionAlgorithmParameters =
                 ExperimentUtils.ReadNeatEvolutionAlgorithmParameters(experimentDictionary, false);
-
-            // Create genome factory specifically for the initialization algorithm 
-            // (this is primarily because the initialization algorithm will quite likely have different NEAT parameters)
-            GenomeFactory = new NeatGenomeFactory(inputCount, outputCount, neatGenomeParameters);
-
+            
             // Get complexity constraint parameters
             ComplexityRegulationStrategyDefinition =
                 experimentDictionary.Initialization_ComplexityRegulationStrategy;
@@ -180,13 +176,14 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
         /// </summary>
         /// <param name="parallelOptions">Synchronous/Asynchronous execution settings.</param>
         /// <param name="genomeList">The initial population of genomes.</param>
+        /// <param name="genomeFactory">The genome factory initialized by the main evolution thread.</param>
         /// <param name="genomeDecoder">The decoder to translate genomes into phenotypes.</param>
         /// <param name="startingEvaluations">
         ///     The number of evaluations that preceeded this from which this process will pick up
         ///     (this is used in the case where we're restarting a run because it failed to find a solution in the allotted time).
         /// </param>
         public void InitializeAlgorithm(ParallelOptions parallelOptions, List<NeatGenome> genomeList,
-            IGenomeDecoder<NeatGenome, IBlackBox> genomeDecoder, ulong startingEvaluations)
+            IGenomeFactory<NeatGenome> genomeFactory, IGenomeDecoder<NeatGenome, IBlackBox> genomeDecoder, ulong startingEvaluations)
         {
             // Set the boiler plate algorithm parameters
             base.InitializeAlgorithm(parallelOptions, genomeList, genomeDecoder, startingEvaluations);
@@ -223,8 +220,11 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
             // population size, which could have been larger)
             genomeList = genomeList.Take(PopulationSize).ToList();
 
+            // Replace genome factory primary NEAT parameters with initialization parameters
+            ((NeatGenomeFactory)genomeFactory).ResetNeatGenomeParameters(NeatGenomeParameters);
+
             // Initialize the evolution algorithm.
-            InitializationEa.Initialize(fitnessEvaluator, GenomeFactory, genomeList, PopulationSize, null,
+            InitializationEa.Initialize(fitnessEvaluator, genomeFactory, genomeList, PopulationSize, null,
                 _maxEvaluations + startingEvaluations,
                 archive);
         }

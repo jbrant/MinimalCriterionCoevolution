@@ -75,6 +75,7 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
         /// </summary>
         /// <param name="parallelOptions">Synchronous/Asynchronous execution settings.</param>
         /// <param name="genomeList">The initial population of genomes.</param>
+        /// <param name="genomeFactory">The genome factory initialized by the main evolution thread.</param>
         /// <param name="mazeEnvironment">The maze on which to evaluate the navigators.</param>
         /// <param name="genomeDecoder">The decoder to translate genomes into phenotypes.</param>
         /// <param name="startingEvaluations">
@@ -82,7 +83,7 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
         ///     (this is used in the case where we're restarting a run because it failed to find a solution in the allotted time).
         /// </param>
         public override void InitializeAlgorithm(ParallelOptions parallelOptions, List<NeatGenome> genomeList,
-            MazeStructure mazeEnvironment,
+            IGenomeFactory<NeatGenome> genomeFactory, MazeStructure mazeEnvironment,
             IGenomeDecoder<NeatGenome, IBlackBox> genomeDecoder, ulong startingEvaluations)
         {
             // Set the boiler plate algorithm parameters
@@ -115,8 +116,11 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
             // population size, which is quite likely larger)
             genomeList = genomeList.Take(PopulationSize).ToList();
 
+            // Replace genome factory primary NEAT parameters with initialization parameters
+            ((NeatGenomeFactory) genomeFactory).ResetNeatGenomeParameters(NeatGenomeParameters);
+
             // Initialize the evolution algorithm
-            InitializationEa.Initialize(fitnessEvaluator, GenomeFactory, genomeList, null, null, archive);
+            InitializationEa.Initialize(fitnessEvaluator, genomeFactory, genomeList, null, null, archive);
         }
 
         /// <summary>
@@ -153,10 +157,6 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
                 while (RunState.Terminated != InitializationEa.RunState &&
                        RunState.Paused != InitializationEa.RunState)
                 {
-                    Console.WriteLine(@"Current Evaluations: {0}  Mean Complexity: {1}  Closest Genome Distance: {2}",
-                        InitializationEa.CurrentEvaluations, InitializationEa.Statistics._meanComplexity,
-                        InitializationEa.GenomeList.ToList().Min(genome => genome.EvaluationInfo.ObjectiveDistance));
-
                     if (InitializationEa.CurrentEvaluations >= maxEvaluations)
                     {
                         // Record the total number of evaluations
@@ -165,9 +165,8 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
                         // Halt the EA worker thread
                         InitializationEa.RequestPauseAndWait();
 
-                        // Null out the factory/EA and delete the thread
+                        // Null out the EA and delete the thread
                         // (it's necessary to null out these resources so that the thread will be completely garbage collected)
-                        GenomeFactory = null;
                         InitializationEa.Reset();
                         InitializationEa = null;
 

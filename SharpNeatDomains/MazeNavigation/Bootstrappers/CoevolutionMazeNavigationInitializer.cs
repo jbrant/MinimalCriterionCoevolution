@@ -88,6 +88,7 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
         /// </summary>
         /// <param name="parallelOptions">Synchronous/Asynchronous execution settings.</param>
         /// <param name="genomeList">The initial population of genomes.</param>
+        /// <param name="genomeFactory">The genome factory initialized by the main evolution thread.</param>
         /// <param name="mazeEnvironment">The maze on which to evaluate the navigators.</param>
         /// <param name="genomeDecoder">The decoder to translate genomes into phenotypes.</param>
         /// <param name="startingEvaluations">
@@ -95,9 +96,9 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
         ///     (this is used in the case where we're restarting a run because it failed to find a solution in the allotted time).
         /// </param>
         public abstract void InitializeAlgorithm(ParallelOptions parallelOptions, List<NeatGenome> genomeList,
-            MazeStructure mazeEnvironment, IGenomeDecoder<NeatGenome, IBlackBox> genomeDecoder,
-            ulong startingEvaluations);
-        
+            IGenomeFactory<NeatGenome> genomeFactory, MazeStructure mazeEnvironment,
+            IGenomeDecoder<NeatGenome, IBlackBox> genomeDecoder, ulong startingEvaluations);
+
         /// <summary>
         ///     Runs the initialization algorithm until the specified number of viable genomes (i.e. genomes that meets the minimal
         ///     criteria) are found and returns those genomes along with the total number of evaluations that were executed to find

@@ -99,19 +99,33 @@ namespace MazeGenomeGenerator
 
             for (int curMazeCnt = 0; curMazeCnt < numMazes; curMazeCnt++)
             {
+                MazeGenome mazeGenome = null;
+
+                // Lay out the base file name
                 string fileBaseName = string.Format("GeneratedMazeGenome_{0}_Walls_{1}", numInteriorWalls, curMazeCnt);
 
-                // Reset innovation IDs
-                mazeGenomeFactory.InnovationIdGenerator.Reset();
+                // With a single output file, the genomes are likely being used for separate experiments, so we
+                // reset the innovation IDs and assign the maze a constant identifier
+                if (isSingleOutputFile == false)
+                {
+                    // Reset innovation IDs
+                    mazeGenomeFactory.InnovationIdGenerator.Reset();
 
-                // Create a new genome and pass in the requisite factory
-                MazeGenome mazeGenome = new MazeGenome(mazeGenomeFactory, 0, 0);
+                    // Create a new genome and pass in the requisite factory
+                    mazeGenome = new MazeGenome(mazeGenomeFactory, 0, 0);
+                }
+                // Otherwise, we leave the innovation ID generator along and create a new maze genome with
+                // an identifier that's incremented by one
+                else
+                {
+                    mazeGenome = new MazeGenome(mazeGenomeFactory, (uint) curMazeCnt, 0);
+                }
 
                 // Create the specified number of interior walls (i.e. maze genes)
                 for (int cnt = 0; cnt < numInteriorWalls; cnt++)
                 {
                     // Create new maze gene and add to genome
-                    mazeGenome.GeneList.Add(new MazeGene(mazeGenomeFactory.InnovationIdGenerator.NextId,
+                    mazeGenome?.GeneList.Add(new MazeGene(mazeGenomeFactory.InnovationIdGenerator.NextId,
                         rand.NextDouble(), rand.NextDouble(), rand.NextDouble() < 0.5));
                 }
 
@@ -149,7 +163,7 @@ namespace MazeGenomeGenerator
                 using (
                     XmlWriter xmlWriter =
                         XmlWriter.Create(Path.Combine(mazeGenomeOutputDirectory,
-                            string.Format("GeneratedMazeGenomes_{0}_Walls.xml", numInteriorWalls))))
+                            string.Format("GeneratedMaze_{0}_Genomes_{1}_Walls.xml", numMazes, numInteriorWalls))))
                 {
                     MazeGenomeXmlIO.WriteComplete(xmlWriter, mazeGenomeList);
                 }
