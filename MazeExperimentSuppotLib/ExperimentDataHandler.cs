@@ -62,6 +62,31 @@ namespace MazeExperimentSuppotLib
         }
 
         /// <summary>
+        ///     Writes the given evaluation results containing the full trajectory characterization to the experiment database or
+        ///     to a flat file.
+        /// </summary>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <param name="batch">The batch number of the given run.</param>
+        /// <param name="evaluationUnits">The evaluation results to persist.</param>
+        /// <param name="commitPageSize">The number of records that are committed within a single batch/context.</param>
+        /// <param name="writeToDatabase">
+        ///     Indicates whether evaluation results should be written directly to the database or to a
+        ///     flat file.
+        /// </param>
+        public static void WriteTrajectoryData(int experimentId, int run, int batch,
+            IList<MazeNavigatorEvaluationUnit> evaluationUnits, int commitPageSize, bool writeToDatabase)
+        {
+            // Write results to the database if the option has been specified
+            if (writeToDatabase)
+            {
+                throw new NotImplementedException("Direct write to database for trajectory data not yet implemented!");
+            }
+            // Otherwise, write to the flat file output
+            WriteTrajectoryDataToFile(experimentId, run, batch, evaluationUnits);
+        }
+
+        /// <summary>
         ///     Writes the given trajectory diversity results to the experiment database or to a flat file.
         /// </summary>
         /// <param name="experimentId">The experiment that was executed.</param>
@@ -525,6 +550,45 @@ namespace MazeExperimentSuppotLib
 
             // Immediately flush to the output file
             FileWriters[OutputFileType.NavigatorMazeEvaluationData].Flush();
+        }
+
+        /// <summary>
+        ///     Writes each position within each trajectory to a flat file.
+        /// </summary>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <param name="batch">The batch number of the given run.</param>
+        /// <param name="evaluationUnits">The evaluation results to persist.</param>
+        private static void WriteTrajectoryDataToFile(int experimentId, int run, int batch,
+            IList<MazeNavigatorEvaluationUnit> evaluationUnits)
+        {
+            // Make sure the file writer actually exists before attempting to write to it
+            if (FileWriters.ContainsKey(OutputFileType.TrajectoryData) == false)
+            {
+                throw new Exception(
+                    string.Format("Cannot write to output stream as no file writer of type {0} has been created.",
+                        OutputFileType.TrajectoryData));
+            }
+
+            // Loop through evaluation units and through each trajectory unit and write each point on the trajectory
+            foreach (MazeNavigatorEvaluationUnit evaluationUnit in evaluationUnits.Where(eu => eu.IsMazeSolved))
+            {
+                for (int idx = 0; idx < evaluationUnit.AgentTrajectory.Count(); idx += 2)
+                {
+                    FileWriters[OutputFileType.TrajectoryData].WriteLine(string.Join(FileDelimiter,
+                        new List<string>
+                        {
+                            experimentId.ToString(),
+                            run.ToString(),
+                            batch.ToString(),
+                            ((idx/2) + 1).ToString(), // this is the timestep
+                            evaluationUnit.MazeId.ToString(),
+                            evaluationUnit.AgentId.ToString(),
+                            evaluationUnit.AgentTrajectory[idx].ToString(CultureInfo.InvariantCulture),
+                            evaluationUnit.AgentTrajectory[idx + 1].ToString(CultureInfo.InvariantCulture)
+                        }));
+                }
+            }
         }
 
         /// <summary>

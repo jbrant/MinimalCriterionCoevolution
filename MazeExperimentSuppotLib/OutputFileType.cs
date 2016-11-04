@@ -11,6 +11,11 @@
         NavigatorMazeEvaluationData,
 
         /// <summary>
+        ///     All points visited in agent trajectory.
+        /// </summary>
+        TrajectoryData,
+
+        /// <summary>
         ///     Trajectory diversity score data.
         /// </summary>
         TrajectoryDiversityData,
