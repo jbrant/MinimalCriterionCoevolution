@@ -36,5 +36,7 @@ namespace ExperimentEntities
         public virtual DbSet<CoevolutionMCSMazeNavigatorResult> CoevolutionMCSMazeNavigatorResults { get; set; }
         public virtual DbSet<CoevolutionMCSNavigatorExperimentEvaluationData> CoevolutionMCSNavigatorExperimentEvaluationDatas { get; set; }
         public virtual DbSet<CoevolutionMCSNavigatorExperimentGenome> CoevolutionMCSNavigatorExperimentGenomes { get; set; }
+        public virtual DbSet<CoevolutionMCSFullTrajectory> CoevolutionMCSFullTrajectories { get; set; }
+        public virtual DbSet<CoevolutionMCSTrajectoryDiversity> CoevolutionMCSTrajectoryDiversities { get; set; }
     }
 }

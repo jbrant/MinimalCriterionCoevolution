@@ -56,6 +56,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Class1.cs" />
+    <Compile Include="CoevolutionMCSFullTrajectory.cs">
+      <DependentUpon>ExperimentModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="CoevolutionMCSMazeExperimentEvaluationData.cs">
       <DependentUpon>ExperimentModel.tt</DependentUpon>
     </Compile>
@@ -69,6 +72,9 @@
       <DependentUpon>ExperimentModel.tt</DependentUpon>
     </Compile>
     <Compile Include="CoevolutionMCSNavigatorExperimentGenome.cs">
+      <DependentUpon>ExperimentModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="CoevolutionMCSTrajectoryDiversity.cs">
       <DependentUpon>ExperimentModel.tt</DependentUpon>
     </Compile>
     <Compile Include="ExperimentDbConfiguration.cs" />
