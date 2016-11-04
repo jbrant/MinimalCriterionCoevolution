@@ -22,6 +22,12 @@
         AgentNeuronOutputCount,
 
         /// <summary>
+        ///     Whether or not to run simulations and output full trajectory data for every point visited during each trajectory
+        ///     simulation.
+        /// </summary>
+        GenerateTrajectoryData,
+
+        /// <summary>
         ///     Whether or not to generate data/results about the simulation.  If enabled, either the WriteResultsToDatabase or
         ///     DataFileOutputDirectory must be specified.
         /// </summary>
