@@ -235,7 +235,7 @@ namespace MazeExperimentSuppotLib
                         expData.ExperimentDictionaryID == experimentId && expData.Run == run &&
                         expData.RunPhase.RunPhaseName == runPhase.ToString())
                     .Select(row => row.Generation)
-                    .Distinct().ToList();
+                    .Distinct().OrderBy(row => row).ToList();
             }
 
             return batchesWithGenomeData;
