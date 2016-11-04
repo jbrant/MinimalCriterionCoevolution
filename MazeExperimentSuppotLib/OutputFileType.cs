@@ -21,6 +21,11 @@
         TrajectoryDiversityData,
 
         /// <summary>
+        ///     Natural clustering of population.
+        /// </summary>
+        NaturalClusterData,
+
+        /// <summary>
         ///     Novelty search comparison data.
         /// </summary>
         NoveltySearchComparisonData

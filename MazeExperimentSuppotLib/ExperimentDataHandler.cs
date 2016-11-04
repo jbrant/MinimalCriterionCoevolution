@@ -592,6 +592,57 @@ namespace MazeExperimentSuppotLib
         }
 
         /// <summary>
+        ///     Writes the given trajectory diversity results to the experiment database.
+        /// </summary>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <param name="batch">The batch number of the given run.</param>
+        /// <param name="evaluationUnits">The evaluation results to persist.</param>
+        /// <param name="commitPageSize">The number of records that are committed within a single batch/context.</param>
+        private static void WriteTrajectoryDataToDatabase(int experimentId, int run, int batch,
+            IList<MazeNavigatorEvaluationUnit> evaluationUnits, int commitPageSize)
+        {
+            // Page through the result set, committing each in the specified batch size
+            for (int curPage = 0; curPage <= evaluationUnits.Count/commitPageSize; curPage++)
+            {
+                IList<CoevolutionMCSFullTrajectory> serializedResults =
+                    new List<CoevolutionMCSFullTrajectory>(commitPageSize);
+
+                // Build a list of serialized results
+                foreach (
+                    MazeNavigatorEvaluationUnit evaluationUnit in
+                        evaluationUnits.Skip(curPage*commitPageSize).Take(commitPageSize))
+                {
+                    for (int idx = 0; idx < evaluationUnit.AgentTrajectory.Count(); idx += 2)
+                    {
+                        serializedResults.Add(new CoevolutionMCSFullTrajectory
+                        {
+                            ExperimentDictionaryID = experimentId,
+                            Run = run,
+                            Generation = batch,
+                            Timestep = ((idx/2) + 1), // this is the timestep
+                            MazeGenomeID = evaluationUnit.MazeId,
+                            NavigatorGenomeID = evaluationUnit.AgentId,
+                            XPosition = Convert.ToDecimal(evaluationUnit.AgentTrajectory[idx]),
+                            YPosition = Convert.ToDecimal(evaluationUnit.AgentTrajectory[idx + 1])
+                        });
+                    }
+                }
+
+                // Create a new context and persist the batch
+                using (ExperimentDataEntities context = new ExperimentDataEntities())
+                {
+                    // Auto-detect changes and save validation are switched off to speed things up
+                    context.Configuration.AutoDetectChangesEnabled = false;
+                    context.Configuration.ValidateOnSaveEnabled = false;
+
+                    context.CoevolutionMCSFullTrajectories.AddRange(serializedResults);
+                    context.SaveChanges();
+                }
+            }
+        }
+
+        /// <summary>
         ///     Writes the given trajectory diversity results to a flat file.
         /// </summary>
         /// <param name="experimentId">The experiment that was executed.</param>

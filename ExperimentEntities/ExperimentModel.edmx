@@ -5,6 +5,24 @@
     <!-- SSDL content -->
     <edmx:StorageModels>
     <Schema Namespace="ExperimentDataModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="CoevolutionMCSFullTrajectories">
+          <Key>
+            <PropertyRef Name="ExperimentDictionaryID" />
+            <PropertyRef Name="Run" />
+            <PropertyRef Name="Generation" />
+            <PropertyRef Name="Timestep" />
+            <PropertyRef Name="MazeGenomeID" />
+            <PropertyRef Name="NavigatorGenomeID" />
+          </Key>
+          <Property Name="ExperimentDictionaryID" Type="int" Nullable="false" />
+          <Property Name="Run" Type="int" Nullable="false" />
+          <Property Name="Generation" Type="int" Nullable="false" />
+          <Property Name="Timestep" Type="int" Nullable="false" />
+          <Property Name="MazeGenomeID" Type="int" Nullable="false" />
+          <Property Name="NavigatorGenomeID" Type="int" Nullable="false" />
+          <Property Name="XPosition" Type="numeric" Precision="10" Scale="6" Nullable="false" />
+          <Property Name="YPosition" Type="numeric" Precision="10" Scale="6" Nullable="false" />
+        </EntityType>
         <EntityType Name="CoevolutionMCSMazeExperimentEvaluationData">
           <Key>
             <PropertyRef Name="ExperimentDictionaryID" />
@@ -88,6 +106,23 @@
           <Property Name="GenomeXml" Type="xml" Nullable="false" />
           <Property Name="RunPhase_FK" Type="int" Nullable="false" />
           <Property Name="SpecieID" Type="int" />
+        </EntityType>
+        <EntityType Name="CoevolutionMCSTrajectoryDiversity">
+          <Key>
+            <PropertyRef Name="ExperimentDictionaryID" />
+            <PropertyRef Name="Run" />
+            <PropertyRef Name="Generation" />
+            <PropertyRef Name="MazeGenomeID" />
+            <PropertyRef Name="NavigatorGenomeID" />
+          </Key>
+          <Property Name="ExperimentDictionaryID" Type="int" Nullable="false" />
+          <Property Name="Run" Type="int" Nullable="false" />
+          <Property Name="Generation" Type="int" Nullable="false" />
+          <Property Name="MazeGenomeID" Type="int" Nullable="false" />
+          <Property Name="NavigatorGenomeID" Type="int" Nullable="false" />
+          <Property Name="IntraMazeDiversityScore" Type="float" Nullable="false" />
+          <Property Name="InterMazeDiversityScore" Type="float" Nullable="false" />
+          <Property Name="GlobalDiversityScore" Type="float" Nullable="false" />
         </EntityType>
         <EntityType Name="MCSExperimentEvaluationData">
           <Key>
@@ -198,26 +233,6 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
             <PropertyRef Name="ExperimentDictionaryID" />
             
             
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
           </Key>
           <Property Name="ExperimentDictionaryID" Type="int" Nullable="false" StoreGeneratedPattern="Identity" />
           <Property Name="ExperimentName" Type="varchar" MaxLength="100" Nullable="false" />
@@ -258,6 +273,7 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <Property Name="Primary_MutateDeleteConnectionProbability" Type="float" Nullable="false" />
           <Property Name="Primary_ConnectionProportion" Type="float" Nullable="false" />
           <Property Name="Primary_ConnectionWeightRange" Type="int" Nullable="false" />
+          <Property Name="Primary_SpecieSizeFixed" Type="bit" Nullable="false" />
           <Property Name="Primary_Maze_PopulationSize" Type="int" Nullable="false" />
           <Property Name="Primary_Maze_NumSpecies" Type="int" Nullable="false" />
           <Property Name="Primary_Maze_MutateWallLocationProbability" Type="float" />
@@ -268,6 +284,7 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <Property Name="Primary_Maze_MazeWidth" Type="int" />
           <Property Name="Primary_Maze_MazeScaleMultiplier" Type="int" />
           <Property Name="Primary_Maze_MinimumWalls" Type="smallint" />
+          <Property Name="Primary_Maze_SpecieSizeFixed" Type="bit" />
           <Property Name="Initialization_OffspringBatchSize" Type="int" />
           <Property Name="Initialization_PopulationEvaluationFrequency" Type="int" />
           <Property Name="Initialization_NicheCapacity" Type="int" />
@@ -404,11 +421,13 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           </ReferentialConstraint>
         </Association>
         <EntityContainer Name="ExperimentDataModelStoreContainer">
+          <EntitySet Name="CoevolutionMCSFullTrajectories" EntityType="Self.CoevolutionMCSFullTrajectories" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="CoevolutionMCSMazeExperimentEvaluationData" EntityType="Self.CoevolutionMCSMazeExperimentEvaluationData" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="CoevolutionMCSMazeExperimentGenomes" EntityType="Self.CoevolutionMCSMazeExperimentGenomes" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="CoevolutionMCSMazeNavigatorResults" EntityType="Self.CoevolutionMCSMazeNavigatorResults" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="CoevolutionMCSNavigatorExperimentEvaluationData" EntityType="Self.CoevolutionMCSNavigatorExperimentEvaluationData" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="CoevolutionMCSNavigatorExperimentGenomes" EntityType="Self.CoevolutionMCSNavigatorExperimentGenomes" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="CoevolutionMCSTrajectoryDiversity" EntityType="Self.CoevolutionMCSTrajectoryDiversity" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="MCSExperimentEvaluationData" EntityType="Self.MCSExperimentEvaluationData" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="MCSExperimentOrganismStateData" EntityType="Self.MCSExperimentOrganismStateData" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="NoveltyExperimentEvaluationData" EntityType="Self.NoveltyExperimentEvaluationData" Schema="dbo" store:Type="Tables" />
@@ -455,6 +474,7 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
     [ExperimentDictionary_vw].[Primary_MutateDeleteConnectionProbability] AS [Primary_MutateDeleteConnectionProbability], 
     [ExperimentDictionary_vw].[Primary_ConnectionProportion] AS [Primary_ConnectionProportion], 
     [ExperimentDictionary_vw].[Primary_ConnectionWeightRange] AS [Primary_ConnectionWeightRange], 
+    [ExperimentDictionary_vw].[Primary_SpecieSizeFixed] AS [Primary_SpecieSizeFixed], 
     [ExperimentDictionary_vw].[Primary_Maze_PopulationSize] AS [Primary_Maze_PopulationSize], 
     [ExperimentDictionary_vw].[Primary_Maze_NumSpecies] AS [Primary_Maze_NumSpecies], 
     [ExperimentDictionary_vw].[Primary_Maze_MutateWallLocationProbability] AS [Primary_Maze_MutateWallLocationProbability], 
@@ -465,6 +485,7 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
     [ExperimentDictionary_vw].[Primary_Maze_MazeWidth] AS [Primary_Maze_MazeWidth], 
     [ExperimentDictionary_vw].[Primary_Maze_MazeScaleMultiplier] AS [Primary_Maze_MazeScaleMultiplier], 
     [ExperimentDictionary_vw].[Primary_Maze_MinimumWalls] AS [Primary_Maze_MinimumWalls], 
+    [ExperimentDictionary_vw].[Primary_Maze_SpecieSizeFixed] AS [Primary_Maze_SpecieSizeFixed], 
     [ExperimentDictionary_vw].[Initialization_OffspringBatchSize] AS [Initialization_OffspringBatchSize], 
     [ExperimentDictionary_vw].[Initialization_PopulationEvaluationFrequency] AS [Initialization_PopulationEvaluationFrequency], 
     [ExperimentDictionary_vw].[Initialization_NicheCapacity] AS [Initialization_NicheCapacity], 
@@ -638,6 +659,8 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
             <End Role="RunPhase" EntitySet="RunPhases" />
             <End Role="CoevolutionMCSMazeNavigatorResult" EntitySet="CoevolutionMCSMazeNavigatorResults" />
           </AssociationSet>
+          <EntitySet Name="CoevolutionMCSFullTrajectories" EntityType="ExperimentDataModel.CoevolutionMCSFullTrajectory" />
+          <EntitySet Name="CoevolutionMCSTrajectoryDiversities" EntityType="ExperimentDataModel.CoevolutionMCSTrajectoryDiversity" />
         </EntityContainer>
         <EntityType Name="ExperimentDictionary">
           <Key>
@@ -774,6 +797,8 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <Property Name="MaxGenerations" Type="Int32" />
           <Property Name="Primary_Maze_NumSpecies" Type="Int32" Nullable="false" />
           <Property Name="Primary_Maze_MinimumWalls" Type="Int16" />
+          <Property Name="Primary_SpecieSizeFixed" Type="Boolean" Nullable="false" />
+          <Property Name="Primary_Maze_SpecieSizeFixed" Type="Boolean" />
         </EntityType>
         <EntityType Name="NoveltyExperimentOrganismStateData">
           <Key>
@@ -1177,6 +1202,41 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <EntityType Name="CoevolutionMCSFullTrajectory">
+          <Key>
+            <PropertyRef Name="ExperimentDictionaryID" />
+            <PropertyRef Name="Run" />
+            <PropertyRef Name="Generation" />
+            <PropertyRef Name="Timestep" />
+            <PropertyRef Name="MazeGenomeID" />
+            <PropertyRef Name="NavigatorGenomeID" />
+          </Key>
+          <Property Name="ExperimentDictionaryID" Type="Int32" Nullable="false" />
+          <Property Name="Run" Type="Int32" Nullable="false" />
+          <Property Name="Generation" Type="Int32" Nullable="false" />
+          <Property Name="Timestep" Type="Int32" Nullable="false" />
+          <Property Name="MazeGenomeID" Type="Int32" Nullable="false" />
+          <Property Name="NavigatorGenomeID" Type="Int32" Nullable="false" />
+          <Property Name="XPosition" Type="Decimal" Nullable="false" Precision="10" Scale="6" />
+          <Property Name="YPosition" Type="Decimal" Nullable="false" Precision="10" Scale="6" />
+        </EntityType>
+        <EntityType Name="CoevolutionMCSTrajectoryDiversity">
+          <Key>
+            <PropertyRef Name="ExperimentDictionaryID" />
+            <PropertyRef Name="Run" />
+            <PropertyRef Name="Generation" />
+            <PropertyRef Name="MazeGenomeID" />
+            <PropertyRef Name="NavigatorGenomeID" />
+          </Key>
+          <Property Name="ExperimentDictionaryID" Type="Int32" Nullable="false" />
+          <Property Name="Run" Type="Int32" Nullable="false" />
+          <Property Name="Generation" Type="Int32" Nullable="false" />
+          <Property Name="MazeGenomeID" Type="Int32" Nullable="false" />
+          <Property Name="NavigatorGenomeID" Type="Int32" Nullable="false" />
+          <Property Name="IntraMazeDiversityScore" Type="Double" Nullable="false" />
+          <Property Name="InterMazeDiversityScore" Type="Double" Nullable="false" />
+          <Property Name="GlobalDiversityScore" Type="Double" Nullable="false" />
+        </EntityType>
         </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -1186,6 +1246,8 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <EntitySetMapping Name="ExperimentDictionaries">
             <EntityTypeMapping TypeName="ExperimentDataModel.ExperimentDictionary">
               <MappingFragment StoreEntitySet="ExperimentDictionary_vw">
+                <ScalarProperty Name="Primary_Maze_SpecieSizeFixed" ColumnName="Primary_Maze_SpecieSizeFixed" />
+                <ScalarProperty Name="Primary_SpecieSizeFixed" ColumnName="Primary_SpecieSizeFixed" />
                 <ScalarProperty Name="Primary_Maze_MinimumWalls" ColumnName="Primary_Maze_MinimumWalls" />
                 <ScalarProperty Name="Primary_Maze_NumSpecies" ColumnName="Primary_Maze_NumSpecies" />
                 <ScalarProperty Name="MaxGenerations" ColumnName="MaxGenerations" />
@@ -1473,6 +1535,34 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
                 <ScalarProperty Name="RunPhase_FK" ColumnName="RunPhase_FK" />
                 <ScalarProperty Name="GenomeXml" ColumnName="GenomeXml" />
                 <ScalarProperty Name="GenomeID" ColumnName="GenomeID" />
+                <ScalarProperty Name="Generation" ColumnName="Generation" />
+                <ScalarProperty Name="Run" ColumnName="Run" />
+                <ScalarProperty Name="ExperimentDictionaryID" ColumnName="ExperimentDictionaryID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="CoevolutionMCSFullTrajectories">
+            <EntityTypeMapping TypeName="ExperimentDataModel.CoevolutionMCSFullTrajectory">
+              <MappingFragment StoreEntitySet="CoevolutionMCSFullTrajectories">
+                <ScalarProperty Name="YPosition" ColumnName="YPosition" />
+                <ScalarProperty Name="XPosition" ColumnName="XPosition" />
+                <ScalarProperty Name="NavigatorGenomeID" ColumnName="NavigatorGenomeID" />
+                <ScalarProperty Name="MazeGenomeID" ColumnName="MazeGenomeID" />
+                <ScalarProperty Name="Timestep" ColumnName="Timestep" />
+                <ScalarProperty Name="Generation" ColumnName="Generation" />
+                <ScalarProperty Name="Run" ColumnName="Run" />
+                <ScalarProperty Name="ExperimentDictionaryID" ColumnName="ExperimentDictionaryID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="CoevolutionMCSTrajectoryDiversities">
+            <EntityTypeMapping TypeName="ExperimentDataModel.CoevolutionMCSTrajectoryDiversity">
+              <MappingFragment StoreEntitySet="CoevolutionMCSTrajectoryDiversity">
+                <ScalarProperty Name="GlobalDiversityScore" ColumnName="GlobalDiversityScore" />
+                <ScalarProperty Name="InterMazeDiversityScore" ColumnName="InterMazeDiversityScore" />
+                <ScalarProperty Name="IntraMazeDiversityScore" ColumnName="IntraMazeDiversityScore" />
+                <ScalarProperty Name="NavigatorGenomeID" ColumnName="NavigatorGenomeID" />
+                <ScalarProperty Name="MazeGenomeID" ColumnName="MazeGenomeID" />
                 <ScalarProperty Name="Generation" ColumnName="Generation" />
                 <ScalarProperty Name="Run" ColumnName="Run" />
                 <ScalarProperty Name="ExperimentDictionaryID" ColumnName="ExperimentDictionaryID" />

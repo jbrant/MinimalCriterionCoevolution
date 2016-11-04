@@ -150,6 +150,8 @@ namespace ExperimentEntities
         public Nullable<int> MaxGenerations { get; set; }
         public int Primary_Maze_NumSpecies { get; set; }
         public Nullable<short> Primary_Maze_MinimumWalls { get; set; }
+        public bool Primary_SpecieSizeFixed { get; set; }
+        public Nullable<bool> Primary_Maze_SpecieSizeFixed { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<NoveltyExperimentOrganismStateData> NoveltyExperimentOrganismStateDatas { get; set; }

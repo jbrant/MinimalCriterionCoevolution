@@ -60,6 +60,11 @@
         GenerateDiversityScores,
 
         /// <summary>
+        ///     Whether or not to analyze natural clustering of population.
+        /// </summary>
+        GenerateNaturalClusters,
+
+        /// <summary>
         ///     The base directory into which to write the bitmap image trajectories.
         /// </summary>
         BitmapOutputBaseDirectory,
