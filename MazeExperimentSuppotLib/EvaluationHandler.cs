@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Accord.MachineLearning;
 using SharpNeat.Behaviors;
 using SharpNeat.Core;
 using SharpNeat.Domains;
@@ -126,6 +127,83 @@ namespace MazeExperimentSuppotLib
             }
 
             return trajectoryDiversityUnits;
+        }
+
+        /// <summary>
+        ///     Computes the natural clustering of the resulting trajectories (behaviors) along with the behavioral entropy
+        ///     (diversity).
+        /// </summary>
+        /// <param name="evaluationUnits">The agent/maze evaluations to cluster and compute entropy.</param>
+        /// <param name="errorThreshold">
+        ///     The maximum error (intracluster variance) threshold.  Additional clusters are added and
+        ///     the population reclustered until the resulting error is below the threshold.
+        /// </param>
+        /// <returns></returns>
+        public static ClusterDiversityUnit CalculateNaturalClustering(
+            IList<MazeNavigatorEvaluationUnit> evaluationUnits, int errorThreshold)
+        {
+            KMeans kmeans = null;
+
+            // Only consider successful trials
+            IList<MazeNavigatorEvaluationUnit> successfulEvaluations =
+                evaluationUnits.Where(eu => eu.IsMazeSolved).ToList();
+
+            // Define the trajectory matrix in which to store all trajectory points for each trajectory
+            // (this becomes a collection of observation vectors that's fed into k-means)
+            double[][] trajectoryMatrix = new double[successfulEvaluations.Count][];
+
+            // Get the maximum observation vector length (max simulation runtime)
+            // (multiplied by 2 to account for each timestep containing a 2-dimensional position)
+            int maxObservationLength = successfulEvaluations.Max(x => x.NumTimesteps)*2;
+
+            for (int idx = 0; idx < successfulEvaluations.Count; idx++)
+            {
+                // If there are few observations than the total elements in the observation vector,
+                // fill out the vector with the existing observations and set the rest equal to the last
+                // position in the simulation
+                if (successfulEvaluations[idx].AgentTrajectory.Length < maxObservationLength)
+                {
+                    trajectoryMatrix[idx] =
+                        successfulEvaluations[idx].AgentTrajectory.Concat(
+                            Enumerable.Repeat(
+                                successfulEvaluations[idx].AgentTrajectory[
+                                    successfulEvaluations[idx].AgentTrajectory.Length - 1],
+                                maxObservationLength - successfulEvaluations[idx].AgentTrajectory.Length)).ToArray();
+                }
+                // If they are equal, just set the trajectory points
+                else
+                {
+                    trajectoryMatrix[idx] = successfulEvaluations[idx].AgentTrajectory;
+                }
+            }
+
+            // Always start with the standard 3-cluster arrangement
+            int clusterCount = 3;
+
+            // Increment the number of clusters until the error (intracluster variance) is below some threshold
+            do
+            {
+                // Create a new k-means instance with the specified number of clusters
+                kmeans = new KMeans(clusterCount++);
+
+                // Compute the cluster assignments
+                kmeans.Learn(trajectoryMatrix);
+            } while (kmeans.Error > errorThreshold);
+            // Continue while error (intracluster variance) remains above threshold
+
+            double sumLogProportion = 0.0;
+
+            // Compute the shannon entropy of the population
+            for (int idx = 0; idx < kmeans.Clusters.Count; idx++)
+            {
+                sumLogProportion += kmeans.Clusters[idx].Proportion*Math.Log(kmeans.Clusters[idx].Proportion, 2);
+            }
+
+            // Multiply by negative one to get the Shannon entropy
+            double shannonEntropy = sumLogProportion*-1;
+
+            // Return the resulting cluster diversity info
+            return new ClusterDiversityUnit(kmeans.Clusters.Count, shannonEntropy);
         }
 
         #endregion

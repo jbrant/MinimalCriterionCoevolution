@@ -3,12 +3,12 @@
   <SearchAlgorithm>Minimal Criteria Search</SearchAlgorithm>
   <SelectionAlgorithm>Multiple Queueing</SelectionAlgorithm>
   <MaxInitializationEvaluations>100000</MaxInitializationEvaluations>
-  <AgentPopulationSize>500</AgentPopulationSize>
-  <MazePopulationSize>100</MazePopulationSize>
-  <AgentSeedGenomeCount>20</AgentSeedGenomeCount>
-  <MazeSeedGenomeCount>10</MazeSeedGenomeCount>
-  <AgentNumSpecies>20</AgentNumSpecies>
-  <MazeNumSpecies>10</MazeNumSpecies>
+  <AgentPopulationSize>250</AgentPopulationSize>
+  <MazePopulationSize>50</MazePopulationSize>
+  <AgentSeedGenomeCount>10</AgentSeedGenomeCount>
+  <MazeSeedGenomeCount>5</MazeSeedGenomeCount>
+  <AgentNumSpecies>10</AgentNumSpecies>
+  <MazeNumSpecies>5</MazeNumSpecies>
   <AgentSpecieSizeFixed>True</AgentSpecieSizeFixed>
   <MazeSpecieSizeFixed>True</MazeSpecieSizeFixed>
   <Activation>
@@ -17,8 +17,8 @@
   <GenomeConfig>
     <InitialConnectionProportion>1</InitialConnectionProportion>
     <WeightMutationProbability>0.7</WeightMutationProbability>
-    <AddConnnectionProbability>0.1</AddConnnectionProbability>
-    <AddNodeProbability>0.01</AddNodeProbability>
+    <AddConnnectionProbability>0.01</AddConnnectionProbability>
+    <AddNodeProbability>0.005</AddNodeProbability>
     <DeleteConnectionProbability>0.001</DeleteConnectionProbability>
     <ConnectionWeightRange>5</ConnectionWeightRange>
   </GenomeConfig>

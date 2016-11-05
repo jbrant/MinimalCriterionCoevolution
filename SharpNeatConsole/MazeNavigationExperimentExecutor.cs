@@ -694,15 +694,15 @@ namespace SharpNeatConsole
                 IGenomeFactory<MazeGenome> mazeGenomeFactory = experiment.CreateMazeGenomeFactory();
 
                 // Generate the initial agent population
-                List<NeatGenome> agentGenomeList = agentGenomeFactory.CreateGenomeList(experiment.AgentSeedGenomeCount,
+                List<NeatGenome> agentGenomeList = agentGenomeFactory.CreateGenomeList(experiment.AgentInitializationGenomeCount,
                     0);
 
                 // Read in the seed population
                 List<MazeGenome> mazeGenomeList = ExperimentUtils.ReadSeedMazeGenomes(seedMazePath,
-                    (MazeGenomeFactory) mazeGenomeFactory).Take(experiment.MazeDefaultPopulationSize).ToList();
+                    (MazeGenomeFactory) mazeGenomeFactory).Take(experiment.MazeSeedGenomeCount).ToList();
 
                 // Check for insufficient number of genomes in the seed maze file
-                if (mazeGenomeList.Count < experiment.MazeDefaultPopulationSize)
+                if (mazeGenomeList.Count < experiment.MazeSeedGenomeCount)
                 {
                     throw new SharpNeatException(
                         string.Format(

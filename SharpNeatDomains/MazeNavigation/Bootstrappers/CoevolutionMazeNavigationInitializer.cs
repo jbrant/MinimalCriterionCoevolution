@@ -158,7 +158,7 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
         /// <summary>
         ///     The population size for the initialization algorithm.
         /// </summary>
-        protected int PopulationSize;
+        public int PopulationSize;
 
         /// <summary>
         ///     The minimum number of successful maze navigators.

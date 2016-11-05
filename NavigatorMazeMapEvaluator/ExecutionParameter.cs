@@ -65,6 +65,12 @@
         GenerateNaturalClusters,
 
         /// <summary>
+        ///     Threshold above which clusters will continue to be added to reduce error (only used when natural clustering is
+        ///     enabled).
+        /// </summary>
+        ClusterDistortionThreshold,
+
+        /// <summary>
         ///     The base directory into which to write the bitmap image trajectories.
         /// </summary>
         BitmapOutputBaseDirectory,

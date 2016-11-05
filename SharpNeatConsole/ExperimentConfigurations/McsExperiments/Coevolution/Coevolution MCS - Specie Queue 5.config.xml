@@ -17,8 +17,8 @@
   <GenomeConfig>
     <InitialConnectionProportion>1</InitialConnectionProportion>
     <WeightMutationProbability>0.7</WeightMutationProbability>
-    <AddConnnectionProbability>0.1</AddConnnectionProbability>
-    <AddNodeProbability>0.01</AddNodeProbability>
+    <AddConnnectionProbability>0.01</AddConnnectionProbability>
+    <AddNodeProbability>0.005</AddNodeProbability>
     <DeleteConnectionProbability>0.001</DeleteConnectionProbability>
     <ConnectionWeightRange>5</ConnectionWeightRange>
   </GenomeConfig>

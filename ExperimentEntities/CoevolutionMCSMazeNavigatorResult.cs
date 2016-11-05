@@ -23,8 +23,7 @@ namespace ExperimentEntities
         public int NumTimesteps { get; set; }
         public int RunPhase_FK { get; set; }
     
-        public virtual CoevolutionMCSMazeExperimentGenome CoevolutionMCSMazeExperimentGenome { get; set; }
-        public virtual CoevolutionMCSNavigatorExperimentGenome CoevolutionMCSNavigatorExperimentGenome { get; set; }
         public virtual RunPhase RunPhase { get; set; }
+        public virtual ExperimentDictionary ExperimentDictionary { get; set; }
     }
 }

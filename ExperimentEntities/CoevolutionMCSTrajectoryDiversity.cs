@@ -22,5 +22,7 @@ namespace ExperimentEntities
         public double IntraMazeDiversityScore { get; set; }
         public double InterMazeDiversityScore { get; set; }
         public double GlobalDiversityScore { get; set; }
+    
+        public virtual ExperimentDictionary ExperimentDictionary { get; set; }
     }
 }
