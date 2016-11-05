@@ -14,12 +14,6 @@ namespace ExperimentEntities
     
     public partial class CoevolutionMCSMazeExperimentGenome
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public CoevolutionMCSMazeExperimentGenome()
-        {
-            this.CoevolutionMCSMazeNavigatorResults = new HashSet<CoevolutionMCSMazeNavigatorResult>();
-        }
-    
         public int ExperimentDictionaryID { get; set; }
         public int Run { get; set; }
         public int Generation { get; set; }
@@ -27,8 +21,6 @@ namespace ExperimentEntities
         public string GenomeXml { get; set; }
         public Nullable<int> SpecieID { get; set; }
     
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<CoevolutionMCSMazeNavigatorResult> CoevolutionMCSMazeNavigatorResults { get; set; }
         public virtual ExperimentDictionary ExperimentDictionary { get; set; }
     }
 }

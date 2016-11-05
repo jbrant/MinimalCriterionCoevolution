@@ -254,6 +254,10 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             _mazeNavigationInitializer.SetEnvironmentParameters(_maxTimesteps, _minSuccessDistance,
                 new MazeDecoder(_mazeHeight, _mazeWidth, _mazeScaleMultiplier).Decode(
                     new MazeGenomeFactory(MazeGenomeParameters, null, null).CreateGenome(0)));
+
+            // Propagate the initialization seed genome size up to the base experiment level
+            // so that we know how to generate the bootstrap population
+            AgentInitializationGenomeCount = _mazeNavigationInitializer.PopulationSize;
         }
 
         /// <summary>
@@ -382,7 +386,7 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             }
 
             // Reset primary NEAT genome parameters on agent genome factory
-            ((NeatGenomeFactory)genomeFactory1).ResetNeatGenomeParameters(NeatGenomeParameters);
+            ((NeatGenomeFactory) genomeFactory1).ResetNeatGenomeParameters(NeatGenomeParameters);
 
             // Create the NEAT (i.e. navigator) queueing evolution algorithm
             AbstractEvolutionAlgorithm<NeatGenome> neatEvolutionAlgorithm =
@@ -442,7 +446,6 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
                 AgentDefaultPopulationSize, mazeFitnessEvaluator, genomeFactory2, genomeList2, MazeDefaultPopulationSize,
                 MaxGenerations, MaxEvaluations);
 
-            // TODO: Need to complete out the rest of this method
             return coevolutionAlgorithmContainer;
         }
 

@@ -92,7 +92,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             _nicheCapacity = experimentDictionary.Primary_NicheCapacity ?? default(int);
 
             // Read in the number of seed genomes to generate to bootstrap the primary algorithm
-            SeedGenomeCount = experimentDictionary.NumSeedGenomes;
+            SeedGenomeCount = experimentDictionary.NumSeedAgentGenomes;
 
             // Read in log file path/name
             _evolutionDataLogger = new McsExperimentEvaluationEntityDataLogger(experimentDictionary.ExperimentName);

@@ -6,7 +6,7 @@
   <AgentPopulationSize></AgentPopulationSize>
   <MazePopulationSize></MazePopulationSize>
   <AgentSeedGenomeCount></AgentSeedGenomeCount>
-  <MazeSeedGenomeCount>1</MazeSeedGenomeCount>
+  <MazeSeedGenomeCount></MazeSeedGenomeCount>
   <AgentNumSpecies></AgentNumSpecies>
   <MazeNumSpecies></MazeNumSpecies>
   <AgentSpecieSizeFixed></AgentSpecieSizeFixed>

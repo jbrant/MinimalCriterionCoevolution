@@ -80,7 +80,7 @@ namespace MazeExperimentSuppotLib
             // Write results to the database if the option has been specified
             if (writeToDatabase)
             {
-                throw new NotImplementedException("Direct write to database for trajectory data not yet implemented!");
+                WriteTrajectoryDataToDatabase(experimentId, run, batch, evaluationUnits, commitPageSize);
             }
             // Otherwise, write to the flat file output
             WriteTrajectoryDataToFile(experimentId, run, batch, evaluationUnits);
@@ -108,6 +108,19 @@ namespace MazeExperimentSuppotLib
             }
             // Otherwise, write to the flat file output
             WriteTrajectoryDiversityDataToFile(experimentId, run, batch, trajectoryDiversityUnits);
+        }
+
+        public static void WriteClusteringDiversityData(int experimentId, int run, int batch,
+            ClusterDiversityUnit clusterDiversityUnit, bool writeToDatabase)
+        {
+            // Write results to the database if the option has been specified
+            if (writeToDatabase)
+            {
+                throw new NotImplementedException(
+                    "Direct write to database for clustering diversity not yet implemented!");
+            }
+            // Otherwise, write to the flat file output
+            WriteClusteringDiversityDataToFile(experimentId, run, batch, clusterDiversityUnit);
         }
 
         /// <summary>
@@ -679,6 +692,35 @@ namespace MazeExperimentSuppotLib
 
             // Immediately flush to the output file
             FileWriters[OutputFileType.TrajectoryDiversityData].Flush();
+        }
+
+        /// <summary>
+        ///     Writes the given cluster diversity unit to a flat file.
+        /// </summary>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <param name="batch">The batch number of the given run.</param>
+        /// <param name="clusterDiversityUnit">The clustering and population entropy data to persist.</param>
+        private static void WriteClusteringDiversityDataToFile(int experimentId, int run, int batch,
+            ClusterDiversityUnit clusterDiversityUnit)
+        {
+            // Make sure the file writer actually exists before attempting to write to it
+            if (FileWriters.ContainsKey(OutputFileType.NaturalClusterData) == false)
+            {
+                throw new Exception(
+                    string.Format("Cannot write to output stream as no file writer of type {0} has been created.",
+                        OutputFileType.NaturalClusterData));
+            }
+
+            FileWriters[OutputFileType.NaturalClusterData].WriteLine(string.Join(FileDelimiter,
+                new List<string>
+                {
+                    experimentId.ToString(),
+                    run.ToString(),
+                    batch.ToString(),
+                    clusterDiversityUnit.NumClusters.ToString(),
+                    clusterDiversityUnit.PopulationEntropy.ToString(CultureInfo.InvariantCulture)
+                }));
         }
 
         /// <summary>

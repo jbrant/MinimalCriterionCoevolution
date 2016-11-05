@@ -37,6 +37,11 @@ namespace SharpNeat.Domains.MazeNavigation
         public int MazeDefaultPopulationSize { get; protected set; }
 
         /// <summary>
+        ///     The number of agent genomes needed for the initialization algorithm.
+        /// </summary>
+        public int AgentInitializationGenomeCount { get; protected set; }
+
+        /// <summary>
         ///     The number of agent genomes in the agent seed population.
         /// </summary>
         public int AgentSeedGenomeCount { get; protected set; }

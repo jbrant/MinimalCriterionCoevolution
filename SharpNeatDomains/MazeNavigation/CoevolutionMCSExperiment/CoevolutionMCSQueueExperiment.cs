@@ -1,5 +1,6 @@
 ﻿#region
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
@@ -23,6 +24,43 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
 {
     public class CoevolutionMCSQueueExperiment : BaseCoevolutionMazeNavigationExperiment
     {
+        #region Private methods
+
+        /// <summary>
+        ///     Evolves the requisite number of agents who satisfy the MC of the given maze.
+        /// </summary>
+        /// <param name="genomeFactory">The agent genome factory.</param>
+        /// <param name="seedAgentList">The seed population of agents.</param>
+        /// <param name="mazeStructure">The maze structure on which agents are to be evaluated.</param>
+        /// <returns></returns>
+        private List<NeatGenome> EvolveViableAgents(IGenomeFactory<NeatGenome> genomeFactory,
+            List<NeatGenome> seedAgentList, MazeStructure mazeStructure)
+        {
+            List<NeatGenome> viableMazeAgents;
+            uint restartCount = 0;
+            ulong initializationEvaluations;
+
+            do
+            {
+                // Instantiate the internal initialization algorithm
+                _mazeNavigationInitializer.InitializeAlgorithm(ParallelOptions, seedAgentList.ToList(), genomeFactory,
+                    mazeStructure, new NeatGenomeDecoder(ActivationScheme), 0);
+
+                // Run the initialization algorithm until the requested number of viable seed genomes are found
+                viableMazeAgents = _mazeNavigationInitializer.EvolveViableGenomes(out initializationEvaluations,
+                    _maxInitializationEvaluations, restartCount);
+
+                restartCount++;
+
+                // Repeat if maximum allotted evaluations is exceeded
+            } while (_maxInitializationEvaluations != null && viableMazeAgents == null &&
+                     initializationEvaluations > _maxInitializationEvaluations);
+
+            return viableMazeAgents;
+        }
+
+        #endregion
+
         #region Public Methods
 
         /// <summary>
@@ -142,6 +180,10 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             _mazeNavigationInitializer.SetEnvironmentParameters(_maxTimesteps, _minSuccessDistance,
                 new MazeDecoder(_mazeHeight, _mazeWidth, _mazeScaleMultiplier).Decode(
                     new MazeGenomeFactory(MazeGenomeParameters, null, null).CreateGenome(0)));
+
+            // Propagate the initialization seed genome size up to the base experiment level
+            // so that we know how to generate the bootstrap population
+            AgentInitializationGenomeCount = _mazeNavigationInitializer.PopulationSize;
         }
 
         /// <summary>
@@ -195,37 +237,73 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             IGenomeFactory<NeatGenome> genomeFactory1, IGenomeFactory<MazeGenome> genomeFactory2,
             List<NeatGenome> genomeList1, List<MazeGenome> genomeList2)
         {
-            ulong initializationEvaluations;
-            uint restartCount = 0;
-            List<NeatGenome> seedAgentPopulation;
+            List<NeatGenome> seedAgentPopulation = new List<NeatGenome>();
 
             // Compute the maze max complexity
             ((MazeGenomeFactory) genomeFactory2).MaxComplexity = MazeUtils.DetermineMaxPartitions(_mazeHeight,
                 _mazeWidth, 200);
 
-            // Go ahead and log static initialization maze genome
-            _mazeNavigationInitializer.LogStartingMazeGenomes(genomeList2, _mazePopulationGenomesDataLogger);
+            // Create maze decoder to decode initialization mazes
+            MazeDecoder mazeDecoder = new MazeDecoder(_mazeHeight, _mazeWidth, _mazeScaleMultiplier);
 
-            do
+            // Loop through every maze and evolve the requisite number of viable genomes that solve it
+            for (int idx = 0; idx < genomeList2.Count; idx++)
             {
-                // Delete/recreate navigator log files
-                _navigatorEvolutionDataLogger.ResetLog();
-                _navigatorPopulationGenomesDataLogger.ResetLog();
+                Console.WriteLine(@"Evolving viable agents for maze population index {0} and maze ID {1}", idx,
+                    genomeList2[idx].Id);
 
-                // Instantiate the internal initialization algorithm
-                _mazeNavigationInitializer.InitializeAlgorithm(ParallelOptions, genomeList1.ToList(), genomeFactory1,
-                    new MazeDecoder(_mazeHeight, _mazeWidth, _mazeScaleMultiplier).Decode(genomeList2[0]),
-                    new NeatGenomeDecoder(ActivationScheme), 0);
+                // Evolve the number of agents required to meet the success MC for the current maze                
+                List<NeatGenome> viableMazeAgents = EvolveViableAgents(genomeFactory1, genomeList1.ToList(),
+                    mazeDecoder.Decode(genomeList2[idx]));
 
-                // Run the initialization algorithm until the requested number of viable seed genomes are found
-                seedAgentPopulation = _mazeNavigationInitializer.EvolveViableGenomes(out initializationEvaluations,
-                    _maxInitializationEvaluations, restartCount);
+                // Add the viable agent genomes who solve the current maze (but avoid adding duplicates, as identified by the genome ID)
+                // Note that it's fine to have multiple mazes solved by the same agent, so in this case, we'll leave the agent
+                // in the pool of seed agent genomes
+                foreach (
+                    NeatGenome viableMazeAgent in
+                        viableMazeAgents.Where(
+                            viableMazeAgent =>
+                                seedAgentPopulation.Select(sap => sap.Id).Contains(viableMazeAgent.Id) == false))
+                {
+                    seedAgentPopulation.Add(viableMazeAgent);
+                }
+            }
 
-                restartCount++;
+            // If we still lack the genomes to fill out the agent seed genome count while still satisfying the maze MC,
+            // iteratively pick a random maze and evolve agents on that maze until we reach the requisite number
+            while (seedAgentPopulation.ToList().Count < AgentSeedGenomeCount)
+            {
+                FastRandom rndMazePicker = new FastRandom();
 
-                // Repeat if maximum allotted evaluations is exceeded
-            } while (_maxInitializationEvaluations != null && seedAgentPopulation == null &&
-                     initializationEvaluations > _maxInitializationEvaluations);
+                // Pick a random maze on which to evolve agent(s)
+                MazeGenome mazeGenome = genomeList2[rndMazePicker.Next(genomeList2.Count - 1)];
+
+                Console.WriteLine(
+                    @"Continuing viable agent evolution on maze {0}, with {1} of {2} required agents in place",
+                    mazeGenome.Id, seedAgentPopulation.Count, AgentSeedGenomeCount);
+
+                // Evolve the number of agents required to meet the success MC for the maze
+                List<NeatGenome> viableMazeAgents = EvolveViableAgents(genomeFactory1, genomeList1.ToList(),
+                    mazeDecoder.Decode(mazeGenome));
+
+                // Iterate through each viable agent and remove them if they've already solved a maze or add them to the list
+                // of viable agents if they have not
+                foreach (NeatGenome viableMazeAgent in viableMazeAgents)
+                {
+                    // If they agent has already solved maze and is in the list of viable agents, remove that agent
+                    // from the pool of seed genomes (this is done because here, we're interested in getting unique
+                    // agents and want to avoid an endless loop wherein the same viable agents are returned)
+                    if (seedAgentPopulation.Select(sap => sap.Id).Contains(viableMazeAgent.Id))
+                    {
+                        genomeList1.Remove(viableMazeAgent);
+                    }
+                    // Otherwise, add that agent to the list of viable agents
+                    else
+                    {
+                        seedAgentPopulation.Add(viableMazeAgent);
+                    }
+                }
+            }
 
             // Set dummy fitness so that seed maze(s) will be marked as evaluated
             foreach (MazeGenome mazeGenome in genomeList2)
@@ -239,7 +317,10 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
                     new NeatEvolutionAlgorithmParameters
                     {
                         SpecieCount = AgentNumSpecies,
-                        MaxSpecieSize = AgentNumSpecies > 0 ? AgentDefaultPopulationSize/AgentNumSpecies : AgentDefaultPopulationSize
+                        MaxSpecieSize =
+                            AgentNumSpecies > 0
+                                ? AgentDefaultPopulationSize/AgentNumSpecies
+                                : AgentDefaultPopulationSize
                     },
                     new ParallelKMeansClusteringStrategy<NeatGenome>(new ManhattanDistanceMetric(1.0, 0.0, 10.0),
                         ParallelOptions), null,
@@ -253,7 +334,8 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
                     new NeatEvolutionAlgorithmParameters
                     {
                         SpecieCount = MazeNumSpecies,
-                        MaxSpecieSize = MazeNumSpecies > 0 ? MazeDefaultPopulationSize/MazeNumSpecies : MazeDefaultPopulationSize
+                        MaxSpecieSize =
+                            MazeNumSpecies > 0 ? MazeDefaultPopulationSize/MazeNumSpecies : MazeDefaultPopulationSize
                     },
                     new ParallelKMeansClusteringStrategy<MazeGenome>(new ManhattanDistanceMetric(1.0, 0.0, 10.0),
                         ParallelOptions), null,
