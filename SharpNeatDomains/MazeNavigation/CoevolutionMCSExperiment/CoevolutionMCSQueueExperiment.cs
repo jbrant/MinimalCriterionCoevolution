@@ -42,6 +42,10 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
 
             do
             {
+                // Delete/recreate navigator log files on restart
+                _navigatorEvolutionDataLogger.ResetLog();
+                _navigatorPopulationGenomesDataLogger.ResetLog();
+
                 // Instantiate the internal initialization algorithm
                 _mazeNavigationInitializer.InitializeAlgorithm(ParallelOptions, seedAgentList.ToList(), genomeFactory,
                     mazeStructure, new NeatGenomeDecoder(ActivationScheme), 0);
