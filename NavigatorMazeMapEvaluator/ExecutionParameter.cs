@@ -6,10 +6,9 @@
     public enum ExecutionParameter
     {
         /// <summary>
-        ///     Whether or not to evaluate mazes/navigator trajectories for the entirety of the run.  If false,
-        ///     only the last batch is analyzed.
+        ///     The scope of the analysis (every batch in the run, the aggregate results of the run, or the last batch).
         /// </summary>
-        AnalyzeFullRun,
+        AnalysisScope,
 
         /// <summary>
         ///     The fixed number of input neurons in an agent neural network.
@@ -65,10 +64,9 @@
         GenerateNaturalClusters,
 
         /// <summary>
-        ///     Threshold above which clusters will continue to be added to reduce error (only used when natural clustering is
-        ///     enabled).
+        ///     The number of cluster additions that are permitted without further improvement to the cluster quality heuristic.
         /// </summary>
-        ClusterDistortionThreshold,
+        ClusterImprovementThreshold,
 
         /// <summary>
         ///     The base directory into which to write the bitmap image trajectories.
