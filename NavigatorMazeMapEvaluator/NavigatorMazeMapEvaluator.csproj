@@ -61,6 +61,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AnalysisScope.cs" />
     <Compile Include="ExecutionParameter.cs" />
     <Compile Include="MapEvaluator.cs" />
     <Compile Include="NavigatorMazeMapEvaluatorExecutor.cs" />

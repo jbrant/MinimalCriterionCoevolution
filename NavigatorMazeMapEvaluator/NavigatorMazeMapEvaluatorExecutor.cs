@@ -44,8 +44,8 @@ namespace NavigatorMazeMapEvaluator
             _executionLogger.Info("Invocation parameters validated - continuing with experiment execution.");
 
             // Get boolean indicator dictating whether to analyze the whole run or just the last batch (default is true - full run)
-            bool analyzeFullRun = _executionConfiguration.ContainsKey(ExecutionParameter.AnalyzeFullRun) &&
-                                  Boolean.Parse(_executionConfiguration[ExecutionParameter.AnalyzeFullRun]);
+            AnalysisScope analysisScope =
+                AnalysisScopeUtil.ConvertStringToAnalysisScope(_executionConfiguration[ExecutionParameter.AnalysisScope]);
 
             // Get input and output neurons counts for navigator agent
             int inputNeuronCount = Int32.Parse(_executionConfiguration[ExecutionParameter.AgentNeuronInputCount]);
@@ -91,9 +91,9 @@ namespace NavigatorMazeMapEvaluator
                 _executionConfiguration.ContainsKey(ExecutionParameter.GenerateNaturalClusters) &&
                 Boolean.Parse(_executionConfiguration[ExecutionParameter.GenerateNaturalClusters]);
 
-            // If the generate natural clusters flag is set, get the error threshold
-            int clusterDistortionThreshold = generateNaturalClusters
-                ? Int32.Parse(_executionConfiguration[ExecutionParameter.ClusterDistortionThreshold])
+            // If the generate natural clusters flag is set, get the cluster improvement threshold
+            int clusterImprovementThreshold = generateNaturalClusters
+                ? Int32.Parse(_executionConfiguration[ExecutionParameter.ClusterImprovementThreshold])
                 : 0;
 
             // If bitmap generation was enabled, grab the base output directory
@@ -190,7 +190,7 @@ namespace NavigatorMazeMapEvaluator
 
                     // If we're analyzing the entire run, go ahead and process through the initialization phase
                     // and all primary phase batch results
-                    if (analyzeFullRun)
+                    if (AnalysisScope.Full == analysisScope)
                     {
                         // Get the number of initialization batches in the current run
                         IList<int> initializationBatchesWithGenomeData =
@@ -216,7 +216,7 @@ namespace NavigatorMazeMapEvaluator
                                     curExperimentConfiguration, generateSimulationResults, generateTrajectoryData,
                                     generateTrajectoryDiversityScores, generateNaturalClusters, writeResultsToDatabase,
                                     generateMazeBitmaps, generateTrajectoryBitmaps, baseImageOutputDirectory,
-                                    clusterDistortionThreshold);
+                                    clusterImprovementThreshold);
                             }
                         }
 
@@ -235,7 +235,12 @@ namespace NavigatorMazeMapEvaluator
                             inputNeuronCount, outputNeuronCount, curRun, numRuns, curExperimentConfiguration,
                             generateSimulationResults, generateTrajectoryData, generateTrajectoryDiversityScores,
                             generateNaturalClusters, writeResultsToDatabase, generateMazeBitmaps,
-                            generateTrajectoryBitmaps, baseImageOutputDirectory, clusterDistortionThreshold);
+                            generateTrajectoryBitmaps, baseImageOutputDirectory, clusterImprovementThreshold);
+                    }
+                    // If we want to analyze the entirety of the run as a whole
+                    else if (AnalysisScope.Aggregate == analysisScope)
+                    {
+                        // TODO: This is where the new metrics to compute full run diversity will go
                     }
                     // Otherwise, we're just analyzing the ending population
                     else
@@ -256,7 +261,7 @@ namespace NavigatorMazeMapEvaluator
                             curExperimentConfiguration, generateSimulationResults, generateTrajectoryData,
                             generateTrajectoryDiversityScores, generateNaturalClusters, writeResultsToDatabase,
                             generateMazeBitmaps, generateTrajectoryBitmaps, baseImageOutputDirectory,
-                            clusterDistortionThreshold);
+                            clusterImprovementThreshold);
                     }
 
                     // If we're not writing to the database, close the simulation result file writer since the run is over
@@ -327,16 +332,15 @@ namespace NavigatorMazeMapEvaluator
         ///     written out.
         /// </param>
         /// <param name="baseImageOutputDirectory">The path to the output directory for the trajectory images.</param>
-        /// <param name="clusterErrorThreshold">
-        ///     The threshold above which more clusters will be added to reduce error (intracluster
-        ///     variance).
+        /// <param name="clusterImprovementThreshold">
+        ///     The number of cluster additions that are permitted without further maximization of silhouette width.
         /// </param>
         private static void ProcessAndLogPerBatchResults(IList<int> batchesWithGenomeData, RunPhase runPhase,
             ExperimentParameters experimentParameters, int inputNeuronCount, int outputNeuronCount, int curRun,
             int numRuns, ExperimentDictionary curExperimentConfiguration, bool generateSimulationResults,
             bool generateTrajectoryData, bool generateTrajectoryDiversityScore, bool generateNaturalClustering,
             bool writeResultsToDatabase, bool generateMazeBitmaps, bool generateTrajectoryBitmaps,
-            string baseImageOutputDirectory, int clusterErrorThreshold)
+            string baseImageOutputDirectory, int clusterImprovementThreshold)
         {
             IList<CoevolutionMCSMazeExperimentGenome> staticInitializationMazes = null;
 
@@ -421,7 +425,8 @@ namespace NavigatorMazeMapEvaluator
                     // Calculate natural clustering of the population trajectories at each point in time and persist
                     ExperimentDataHandler.WriteClusteringDiversityData(
                         curExperimentConfiguration.ExperimentDictionaryID, curRun, curBatch,
-                        EvaluationHandler.CalculateNaturalClustering(mapEvaluator.EvaluationUnits, clusterErrorThreshold),
+                        EvaluationHandler.CalculateNaturalClustering(mapEvaluator.EvaluationUnits,
+                            clusterImprovementThreshold),
                         writeResultsToDatabase);
                 }
             }
@@ -473,7 +478,7 @@ namespace NavigatorMazeMapEvaluator
                         case ExecutionParameter.AgentNeuronInputCount:
                         case ExecutionParameter.AgentNeuronOutputCount:
                         case ExecutionParameter.StartFromRun:
-                        case ExecutionParameter.ClusterDistortionThreshold:
+                        case ExecutionParameter.ClusterImprovementThreshold:
                             int testInt;
                             if (Int32.TryParse(parameterValuePair[1], out testInt) == false)
                             {
@@ -485,7 +490,7 @@ namespace NavigatorMazeMapEvaluator
                             break;
 
                         // Ensure that valid boolean values were given
-                        case ExecutionParameter.AnalyzeFullRun:
+                        case ExecutionParameter.AnalysisScope:
                         case ExecutionParameter.GenerateTrajectoryData:
                         case ExecutionParameter.GenerateSimulationResults:
                         case ExecutionParameter.WriteResultsToDatabase:
@@ -557,7 +562,7 @@ namespace NavigatorMazeMapEvaluator
                 // If natural clustering is being generated, then the error threshold must be specified
                 if ((_executionConfiguration.ContainsKey(ExecutionParameter.GenerateNaturalClusters) &&
                      Convert.ToBoolean(_executionConfiguration[ExecutionParameter.GenerateNaturalClusters])) &&
-                    _executionConfiguration.ContainsKey(ExecutionParameter.ClusterDistortionThreshold) == false)
+                    _executionConfiguration.ContainsKey(ExecutionParameter.ClusterImprovementThreshold) == false)
                 {
                     _executionLogger.Error(
                         "The error threshold must be specified when generating natural clustering statistics.");
@@ -595,6 +600,20 @@ namespace NavigatorMazeMapEvaluator
                         "If this is a distributed execution, the StartFromRun parameter must be specified via the invoking job.");
                     isConfigurationValid = false;
                 }
+
+                // Ensure that the analysis scope was specified and that it matches one of the defined scopes
+                if (_executionConfiguration.ContainsKey(ExecutionParameter.AnalysisScope) == false ||
+                    (_executionConfiguration[ExecutionParameter.AnalysisScope].Equals(AnalysisScope.Full.ToString(),
+                        StringComparison.InvariantCultureIgnoreCase) &&
+                     _executionConfiguration[ExecutionParameter.AnalysisScope].Equals(
+                         AnalysisScope.Aggregate.ToString(), StringComparison.InvariantCultureIgnoreCase) &&
+                     _executionConfiguration[ExecutionParameter.AnalysisScope].Equals(AnalysisScope.Last.ToString(),
+                         StringComparison.InvariantCultureIgnoreCase)))
+                {
+                    _executionLogger.Error(
+                        "The AnalysisScope parameter must be well-specified and via the invoking job.");
+                    isConfigurationValid = false;
+                }
             }
 
             // If there's still no problem with the configuration, go ahead and return valid
@@ -604,17 +623,17 @@ namespace NavigatorMazeMapEvaluator
             _executionLogger.Error("The experiment executor invocation must take the following form:");
             _executionLogger.Error(
                 string.Format(
-                    "NavigatorMazeMapEvaluator.exe {0}=[{16}] {1}=[{17}] (Optional: {2}=[{18}]) (Optional: {3}=[{18}] {4}=[{18}] (Required: {5}=[{19}])) (Optional: {6}=[{18}] (Required: {9}=[{19}])) (Optional: {7}=[{18}] (Required: {9}=[{19}])) (Optional: {8}=[{18}] (Required: {5}=[{19}]) (Required: {15}=[{22}])) (Optional: {11}=[{18}] (Required: {5}=[{19}])) (Optional: {12}=[{18}] (Required: {5}=[{19}])) (Optional: {13}=[{21}]) (Optional: {14}=[{18}] {10}=[{20}]",
+                    "NavigatorMazeMapEvaluator.exe {0}=[{16}] {1}=[{17}] (Optional: {2}=[{23}]) (Optional: {3}=[{18}] {4}=[{18}] (Required: {5}=[{19}])) (Optional: {6}=[{18}] (Required: {9}=[{19}])) (Optional: {7}=[{18}] (Required: {9}=[{19}])) (Optional: {8}=[{18}] (Required: {5}=[{19}]) (Required: {15}=[{22}])) (Optional: {11}=[{18}] (Required: {5}=[{19}])) (Optional: {12}=[{18}] (Required: {5}=[{19}])) (Optional: {13}=[{21}]) (Optional: {14}=[{18}] {10}=[{20}]",
                     ExecutionParameter.AgentNeuronInputCount, ExecutionParameter.AgentNeuronOutputCount,
-                    ExecutionParameter.AnalyzeFullRun, ExecutionParameter.GenerateSimulationResults,
+                    ExecutionParameter.AnalysisScope, ExecutionParameter.GenerateSimulationResults,
                     ExecutionParameter.WriteResultsToDatabase, ExecutionParameter.DataFileOutputDirectory,
                     ExecutionParameter.GenerateMazeBitmaps, ExecutionParameter.GenerateAgentTrajectoryBitmaps,
                     ExecutionParameter.GenerateNaturalClusters, ExecutionParameter.BitmapOutputBaseDirectory,
                     ExecutionParameter.ExperimentNames, ExecutionParameter.GenerateDiversityScores,
                     ExecutionParameter.GenerateTrajectoryData, ExecutionParameter.StartFromRun,
-                    ExecutionParameter.IsDistributedExecution, ExecutionParameter.ClusterDistortionThreshold,
+                    ExecutionParameter.IsDistributedExecution, ExecutionParameter.ClusterImprovementThreshold,
                     "# Input Neurons", "# Output Neurons", "true|false",
-                    "directory", "experiment,experiment,...", "starting run #", "error"));
+                    "directory", "experiment,experiment,...", "starting run #", "error", "Full, Aggregate, Last"));
 
             return false;
         }
