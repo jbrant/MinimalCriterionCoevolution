@@ -69,6 +69,11 @@
         ClusterImprovementThreshold,
 
         /// <summary>
+        ///     The number of individuals to choose from each maze/agent species.
+        /// </summary>
+        ClusterSpecieSampleSize,
+
+        /// <summary>
         ///     The base directory into which to write the bitmap image trajectories.
         /// </summary>
         BitmapOutputBaseDirectory,
@@ -77,6 +82,11 @@
         ///     Allows starting from an arbitrary run number of the experiment under analysis.
         /// </summary>
         StartFromRun,
+
+        /// <summary>
+        ///     Flag indicating whether to run initialization trial analysis.
+        /// </summary>
+        ExecuteInitializationTrials,
 
         /// <summary>
         ///     Flag indicating whether different runs will be distributed on separate cluster nodes.  If this is true, the

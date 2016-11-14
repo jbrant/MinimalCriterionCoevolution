@@ -146,8 +146,8 @@ namespace MazeExperimentSuppotLib
             Dictionary<int, double> clusterSilhoutteMap = new Dictionary<int, double>();
             Tuple<int, double> clusterWithMaxSilhouetteWidth = null;
 
-            // Always start with three clusters
-            const int initClusterCnt = 3;
+            // Always start with zero clusters and increment on first iteration of loop
+            const int initClusterCnt = 0;
 
             // Only consider successful trials
             IList<MazeNavigatorEvaluationUnit> successfulEvaluations =
@@ -182,17 +182,38 @@ namespace MazeExperimentSuppotLib
                 }
             }
 
-            // Always start with the standard 3-cluster arrangement
+            // Set the initial cluster count
             int clusterCount = initClusterCnt;
 
-            // Increment the number of clusters until the error (intracluster variance) is below some threshold
-            do
+            // Continue loop until the maximum number of iterations without silhouette width improvement has elapsed
+            // (also don't allow number of clusters to match the number of observations)
+            while (clusterWithMaxSilhouetteWidth == null || (clusterSilhoutteMap.Count <= clusterImprovementThreshold ||
+                                                             clusterSilhoutteMap.Where(
+                                                                 csm =>
+                                                                     (csm.Key - initClusterCnt) >=
+                                                                     clusterSilhoutteMap.Count -
+                                                                     clusterImprovementThreshold)
+                                                                 .Any(
+                                                                     csm =>
+                                                                         csm.Value >=
+                                                                         clusterWithMaxSilhouetteWidth.Item2)) &&
+                   clusterCount < trajectoryMatrix.Length - 1)
             {
+                // Increment cluster count
+                clusterCount++;
+
                 // Create a new k-means instance with the specified number of clusters
                 var kmeans = new KMeans(clusterCount);
 
+                // TODO: The below logic is in support of a work-around to an Accord.NET bug wherein
+                // TODO: an internal random number generator sometimes generates out-of-bounds values
+                // TODO: (i.e. a probability that is not between 0 and 1)
+                // TODO: https://github.com/accord-net/framework/issues/259
+                // Use uniform initialization
+                kmeans.UseSeeding = Seeding.Uniform;
+
                 // Determine the resulting clusters
-                KMeansClusterCollection clusters = kmeans.Learn(trajectoryMatrix);
+                var clusters = kmeans.Learn(trajectoryMatrix);
 
                 // Compute the silhouette width for the current number of clusters
                 double silhouetteWidth = ComputeSilhouetteWidth(clusters, trajectoryMatrix);
@@ -204,21 +225,18 @@ namespace MazeExperimentSuppotLib
                 if (clusterWithMaxSilhouetteWidth == null || silhouetteWidth > clusterWithMaxSilhouetteWidth.Item2)
                 {
                     clusterWithMaxSilhouetteWidth = new Tuple<int, double>(clusterCount, silhouetteWidth);
-                }
-
-                // Increment cluster count
-                clusterCount++;
-
-                // Continue loop until the maximum number of iterations without silhouette width improvement has elapsed
-                // (also don't allow number of clusters to match the number of observations)
-            } while ((clusterSilhoutteMap.Count <= clusterImprovementThreshold ||
-                      clusterSilhoutteMap.Where(
-                          csm => (csm.Key - initClusterCnt) >= clusterSilhoutteMap.Count - clusterImprovementThreshold)
-                          .Any(csm => csm.Value >= clusterWithMaxSilhouetteWidth.Item2)) &&
-                     clusterCount < trajectoryMatrix.Length - 1);
+                }                
+            }
 
             // Rerun kmeans for the final cluster count
-            KMeans optimalClustering = new KMeans(clusterCount);
+            var optimalClustering = new KMeans(clusterCount);
+
+            // TODO: The below logic is in support of a work-around to an Accord.NET bug wherein
+            // TODO: an internal random number generator sometimes generates out-of-bounds values
+            // TODO: (i.e. a probability that is not between 0 and 1)
+            // TODO: https://github.com/accord-net/framework/issues/259
+            // Use uniform initialization
+            optimalClustering.UseSeeding = Seeding.Uniform;
 
             // Determine cluster assignments
             optimalClustering.Learn(trajectoryMatrix);
@@ -251,12 +269,13 @@ namespace MazeExperimentSuppotLib
         /// <returns>The silhouette width for the given set of clusters and observations.</returns>
         private static double ComputeSilhouetteWidth(KMeansClusterCollection clusters, double[][] observations)
         {
-            double totalSilhoutteWidth = 0;
+            Object lockObj = new object();
+            double totalSilhouetteWidth = 0;
 
             // Get cluster assignments for all of the observations
             int[] clusterAssignments = clusters.Decide(observations);
 
-            for (int observationIdx = 0; observationIdx < observations.Length; observationIdx++)
+            Parallel.For(0, observations.Length, observationIdx =>
             {
                 double obsIntraclusterDissimilarity = 0;
                 double obsInterClusterDissimilarity = 0;
@@ -291,18 +310,26 @@ namespace MazeExperimentSuppotLib
                     }
                 }
 
-                // Get the minimum intercluster dissimilarity
-                obsInterClusterDissimilarity = centroidDistances.Min();
+                // Get the minimum intercluster dissimilarity (0 if there are no centroid differences)
+                obsInterClusterDissimilarity = centroidDistances.Any() ? centroidDistances.Min() : 0;
 
                 // Add the silhoutte width for the current observation
-                totalSilhoutteWidth += (obsInterClusterDissimilarity -
-                                        obsIntraclusterDissimilarity)/
-                                       Math.Max(obsIntraclusterDissimilarity,
-                                           obsInterClusterDissimilarity);
-            }
+                var curSilhouetteWidth = (Math.Abs(obsIntraclusterDissimilarity) < 0.0000001 &&
+                                          Math.Abs(obsInterClusterDissimilarity) < 0.0000001)
+                    ? 0
+                    : (obsInterClusterDissimilarity -
+                       obsIntraclusterDissimilarity)/
+                      Math.Max(obsIntraclusterDissimilarity,
+                          obsInterClusterDissimilarity);
+
+                lock (lockObj)
+                {
+                    totalSilhouetteWidth += curSilhouetteWidth;
+                }
+            });
 
             // Return the silhoutte width
-            return totalSilhoutteWidth/observations.Length;
+            return totalSilhouetteWidth/observations.Length;
         }
 
         /// <summary>

@@ -61,6 +61,18 @@ namespace NavigatorMazeMapEvaluator
         /// </summary>
         private readonly NeatGenomeFactory _neatGenomeFactory;
 
+        /// <summary>
+        ///     List of distinct agent IDs that have been submitted for trajectory analysis (used during aggregate run analysis
+        ///     wherein we don't want to duplicate agents every batch).
+        /// </summary>
+        private readonly IList<int> _agentGenomeIds;
+
+        /// <summary>
+        ///     Map of maze IDs and their associated structural encoding.  This is a distinct set of mazes that's intended to
+        ///     persist throughout the analysis of a run.
+        /// </summary>
+        private readonly IDictionary<int, MazeStructure> _mazeIdStructureMap;
+
         #endregion
 
         #region Public methods
@@ -90,6 +102,41 @@ namespace NavigatorMazeMapEvaluator
 
             // Set experiment parameters
             _experimentParameters = experimentParameters;
+
+            // Create new agent ID list and maze ID/structure map
+            _agentGenomeIds = new List<int>();
+            _mazeIdStructureMap = new Dictionary<int, MazeStructure>();
+        }
+
+        /// <summary>
+        ///     Preps for running the maze navigation simulations by decoding the given maze/navigator combinations genomes.  These
+        ///     are presumably combinations that were determined to be successful in solving the respective maze.
+        /// </summary>
+        /// <param name="navigationCombos">The combinations of mazes and navigators.</param>
+        public void Initialize(
+            IList<Tuple<CoevolutionMCSMazeExperimentGenome, CoevolutionMCSNavigatorExperimentGenome>> navigationCombos)
+        {
+            foreach (var navigationCombo in navigationCombos)
+            {
+                MazeGenome mazeGenome;
+                NeatGenome navigatorGenome;
+
+                // Deserialize the maze XML into a maze genome
+                using (XmlReader xmlReader = XmlReader.Create(new StringReader(navigationCombo.Item1.GenomeXml)))
+                {
+                    mazeGenome = MazeGenomeXmlIO.ReadSingleGenomeFromRoot(xmlReader, _mazeGenomeFactory);
+                }
+                // Deserialize the navigator XML into a NEAT genome
+                using (XmlReader xmlReader = XmlReader.Create(new StringReader(navigationCombo.Item2.GenomeXml)))
+                {
+                    navigatorGenome = NeatGenomeXmlIO.ReadSingleGenomeFromRoot(xmlReader, false, _neatGenomeFactory);
+                }
+
+                // Decode to maze and navigator phenomes and add to the evaluation units list
+                EvaluationUnits.Add(new MazeNavigatorEvaluationUnit(_mazeDecoder.Decode(mazeGenome),
+                    _agentDecoder.Decode(navigatorGenome), navigationCombo.Item1.GenomeID,
+                    navigationCombo.Item2.GenomeID));
+            }
         }
 
         /// <summary>
@@ -166,16 +213,49 @@ namespace NavigatorMazeMapEvaluator
                     mazeGenome = MazeGenomeXmlIO.ReadSingleGenomeFromRoot(xmlReader, _mazeGenomeFactory);
                 }
 
-                // Decode to maze phenome and add to the evaluation units list
-                EvaluationUnits.Add(new MazeNavigatorEvaluationUnit(_mazeDecoder.Decode(mazeGenome), null,
-                    serializedMaze.GenomeID, 0));
+                // Decode to maze phenome and add to the maze/id map
+                _mazeIdStructureMap.Add(serializedMaze.GenomeID, _mazeDecoder.Decode(mazeGenome));
             }
         }
-        
+
+        /// <summary>
+        ///     Preps for evaluation via decoding agents to their phenome representation and creating a separate evaluation unit
+        ///     for each non-evaluated agent/maze combination.
+        /// </summary>
+        /// <param name="agents">The agents that are in the queue at the given time.</param>
+        public void Initialize(IList<CoevolutionMCSNavigatorExperimentGenome> agents)
+        {
+            // Build a separate evaluation unit for each agent/maze combination, but only consider those agents
+            // who have not already been evaluated
+            foreach (
+                var serializedAgent in
+                    agents.Where(agentGenome => _agentGenomeIds.Contains(agentGenome.GenomeID) == false))
+            {
+                NeatGenome agentGenome;
+
+                // Read in the current navigator agent genome
+                using (XmlReader xmlReader = XmlReader.Create(new StringReader(serializedAgent.GenomeXml)))
+                {
+                    agentGenome = NeatGenomeXmlIO.ReadSingleGenomeFromRoot(xmlReader, false, _neatGenomeFactory);
+                }
+
+                // Iterate through every maze and add an evaluation unit for that maze and the agent
+                foreach (var maze in _mazeIdStructureMap)
+                {
+                    // Only need to decode the agent genome as the mazes have already been decoded
+                    EvaluationUnits.Add(new MazeNavigatorEvaluationUnit(maze.Value, _agentDecoder.Decode(agentGenome),
+                        maze.Key, serializedAgent.GenomeID));
+                }
+
+                // Add the agent genome ID to the list of agents that have been evaluated
+                _agentGenomeIds.Add(serializedAgent.GenomeID);
+            }
+        }
+
         /// <summary>
         ///     Executes a trial/simulation for all evaluation units (i.e. maze/navigator combinations).
         /// </summary>
-        public void RunBatchEvaluation()
+        public void RunTrajectoryEvaluations()
         {
             // Check integrtiy of evaluation units
             foreach (
