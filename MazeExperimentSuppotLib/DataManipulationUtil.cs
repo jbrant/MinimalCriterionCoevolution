@@ -17,6 +17,28 @@ namespace MazeExperimentSuppotLib
         #region Public utility methods
 
         /// <summary>
+        ///     Extracts the specied number of evaluation unit samples from the population of evaluation units (trajectories).
+        /// </summary>
+        /// <param name="allEvaluationUnits">All evaluation during the given experiment/run/batch.</param>
+        /// <param name="sampleSize">The sample size to extract from the collection of evaluation units.</param>
+        /// <returns>The specified number of evaluation unit samples.</returns>
+        public static IList<MazeNavigatorEvaluationUnit> ExtractEvaluationUnitSamplesFromPopulation(
+            IList<MazeNavigatorEvaluationUnit> allEvaluationUnits, int sampleSize)
+        {
+            List<MazeNavigatorEvaluationUnit> evalUnitSamples = new List<MazeNavigatorEvaluationUnit>();
+            Random rnd = new Random();
+
+            // Gather sample of randomly selected evaluation units
+            for (int cnt = 0; cnt < Math.Min(allEvaluationUnits.Count, sampleSize); cnt++)
+            {
+                evalUnitSamples.Add(allEvaluationUnits[rnd.Next(allEvaluationUnits.Count-1)]);
+            }
+
+            // Return evaluation unit sample
+            return evalUnitSamples;
+        }
+
+        /// <summary>
         ///     Extracts the specified number of evaluation unit samples from each navigator/maze species for subsuquent clustering
         ///     analysis.
         /// </summary>
@@ -26,7 +48,8 @@ namespace MazeExperimentSuppotLib
         /// <param name="allEvaluationUnits">All evaluation during the given experiment/run/batch.</param>
         /// <param name="sampleSize">The sample size to extract from each navigator/maze species.</param>
         /// <returns>The specified number of evaluation unit samples from each navigator/maze species.</returns>
-        public static IList<MazeNavigatorEvaluationUnit> ExtractEvaluationUnitSamples(int experimentId, int run,
+        public static IList<MazeNavigatorEvaluationUnit> ExtractEvaluationUnitSamplesFromSpecies(int experimentId,
+            int run,
             int batch, IList<MazeNavigatorEvaluationUnit> allEvaluationUnits, int sampleSize)
         {
             List<MazeNavigatorEvaluationUnit> evalUnitSamples = new List<MazeNavigatorEvaluationUnit>();

@@ -69,9 +69,16 @@
         ClusterImprovementThreshold,
 
         /// <summary>
-        ///     The number of individuals to choose from each maze/agent species.
+        ///     The number of individuals to choose either from the population or from each maze/agent species (depending on the
+        ///     experiment configuration) to use in cluster analysis.
         /// </summary>
-        ClusterSpecieSampleSize,
+        ClusterSampleSize,
+
+        /// <summary>
+        ///     Whether or not to select samples evenly across species (not possible for non-speciated experiments) or from the
+        ///     entire population.
+        /// </summary>
+        SampleFromSpecies,
 
         /// <summary>
         ///     The base directory into which to write the bitmap image trajectories.
