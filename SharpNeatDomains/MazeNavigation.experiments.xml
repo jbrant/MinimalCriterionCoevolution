@@ -455,15 +455,15 @@
       <MinSuccessDistance>5</MinSuccessDistance>
       <MaxDistanceToTarget>300</MaxDistanceToTarget>
       <MazeVariant>HardMaze</MazeVariant>
-      <MinimalCriteriaUpdateInterval>50</MinimalCriteriaUpdateInterval>
+      <MinimalCriteriaUpdateInterval>10</MinimalCriteriaUpdateInterval>
       <BridgingMagnitude>0</BridgingMagnitude>
       <BridgingApplications></BridgingApplications>
-      <LoggingConfig>
+      <!--<LoggingConfig>
         <Type>Evolution</Type>
         <Destination>File</Destination>
         <LogFile>C:\\Users\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Minimal Criteria Search\ExperimentData\\EvolutionData.csv</LogFile>
       </LoggingConfig>
-      <!--<LoggingConfig>
+      <LoggingConfig>
         <Type>Evaluation</Type>
         <Destination>File</Destination>
         <LogFile>C:\\Users\\Jonathan\\Documents\\school\\Jonathan\\Graduate\\PhD\\Minimal Criteria Search\ExperimentData\\EvaluationData.csv</LogFile>
