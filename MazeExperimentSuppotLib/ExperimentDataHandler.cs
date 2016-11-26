@@ -188,6 +188,30 @@ namespace MazeExperimentSuppotLib
         }
 
         /// <summary>
+        ///     Writes the population entropy results to the experiment database or to a flat file.
+        /// </summary>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <param name="batch">The batch number of the given run.</param>
+        /// <param name="populationEntropyUnit">The population entropy results.</param>
+        /// <param name="writeToDatabase">
+        ///     Indicates whether evaluation results should be written directly to the database or to a
+        ///     flat file.
+        /// </param>
+        public static void WritePopulationEntropyData(int experimentId, int run, int batch,
+            PopulationEntropyUnit populationEntropyUnit, bool writeToDatabase)
+        {
+            // Write results to the database if the option has been specified
+            if (writeToDatabase)
+            {
+                throw new NotImplementedException(
+                    "Direct write to database for population entropy not yet implemented!");
+            }
+            // Otherwise, write to the flat file output
+            WritePopulationEntropyDataToFile(experimentId, run, batch, populationEntropyUnit);
+        }
+
+        /// <summary>
         ///     Writes the coevolution vs. novelty search comparison results to the experiment database or to a flat file.
         /// </summary>
         /// <param name="coEvoExperimentId">The coevolution experiment that was executed.</param>
@@ -1248,6 +1272,34 @@ namespace MazeExperimentSuppotLib
                     batch.ToString(),
                     clusterDiversityUnit.NumClusters.ToString(),
                     clusterDiversityUnit.PopulationEntropy.ToString(CultureInfo.InvariantCulture)
+                }));
+        }
+
+        /// <summary>
+        ///     Writes the given population entropy unit to a flat file.
+        /// </summary>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <param name="batch">The batch number of the given run.</param>
+        /// <param name="populationEntropyUnit">The population entropy data to persist.</param>
+        private static void WritePopulationEntropyDataToFile(int experimentId, int run, int batch,
+            PopulationEntropyUnit populationEntropyUnit)
+        {
+            // Make sure the file writer actually exists before attempting to write to it
+            if (FileWriters.ContainsKey(OutputFileType.PopulationEntropyData) == false)
+            {
+                throw new Exception(
+                    string.Format("Cannot write to output stream as no file writer of type {0} has been created.",
+                        OutputFileType.PopulationEntropyData));
+            }
+
+            FileWriters[OutputFileType.PopulationEntropyData].WriteLine(string.Join(FileDelimiter,
+                new List<string>
+                {
+                    experimentId.ToString(),
+                    run.ToString(),
+                    batch.ToString(),
+                    populationEntropyUnit.PopulationEntropy.ToString(CultureInfo.InvariantCulture)
                 }));
         }
 

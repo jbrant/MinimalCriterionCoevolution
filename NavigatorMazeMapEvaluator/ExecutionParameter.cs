@@ -64,6 +64,12 @@
         GenerateNaturalClusters,
 
         /// <summary>
+        ///     Whether or not to compute population entropy (using a fixed number of clusters that's based on the number of specie
+        ///     clusters).
+        /// </summary>
+        GeneratePopulationEntropy,
+
+        /// <summary>
         ///     The number of cluster additions that are permitted without further improvement to the cluster quality heuristic.
         /// </summary>
         ClusterImprovementThreshold,

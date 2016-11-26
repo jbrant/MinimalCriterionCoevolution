@@ -130,6 +130,78 @@ namespace MazeExperimentSuppotLib
         }
 
         /// <summary>
+        ///     Computes the population entropy (shannon entropy) based on the given list of trajectories and number of clusters in
+        ///     which to cluster those behaviors using the k-means algorithm.
+        /// </summary>
+        /// <param name="evaluationUnits">The agent/maze evaluations (trajectories) to cluster.</param>
+        /// <param name="numClusters">The number of clusters into which to segregate agent trajectories.</param>
+        /// <returns>The population entropy.</returns>
+        public static PopulationEntropyUnit CalculatePopulationEntropy(
+            IList<MazeNavigatorEvaluationUnit> evaluationUnits, int numClusters)
+        {
+            // Only consider successful trials
+            IList<MazeNavigatorEvaluationUnit> successfulEvaluations =
+                evaluationUnits.Where(eu => eu.IsMazeSolved).ToList();
+
+            // Define the trajectory matrix in which to store all trajectory points for each trajectory
+            // (this becomes a collection of observation vectors that's fed into k-means)
+            double[][] trajectoryMatrix = new double[successfulEvaluations.Count][];
+
+            // Get the maximum observation vector length (max simulation runtime)
+            // (multiplied by 2 to account for each timestep containing a 2-dimensional position)
+            int maxObservationLength = successfulEvaluations.Max(x => x.NumTimesteps)*2;
+
+            for (int idx = 0; idx < successfulEvaluations.Count; idx++)
+            {
+                // If there are few observations than the total elements in the observation vector,
+                // fill out the vector with the existing observations and set the rest equal to the last
+                // position in the simulation
+                if (successfulEvaluations[idx].AgentTrajectory.Length < maxObservationLength)
+                {
+                    trajectoryMatrix[idx] =
+                        successfulEvaluations[idx].AgentTrajectory.Concat(
+                            Enumerable.Repeat(
+                                successfulEvaluations[idx].AgentTrajectory[
+                                    successfulEvaluations[idx].AgentTrajectory.Length - 1],
+                                maxObservationLength - successfulEvaluations[idx].AgentTrajectory.Length)).ToArray();
+                }
+                // If they are equal, just set the trajectory points
+                else
+                {
+                    trajectoryMatrix[idx] = successfulEvaluations[idx].AgentTrajectory;
+                }
+            }
+
+            // Initialize k-Means algorithm with the given number of clusters
+            var kmeans = new KMeans(numClusters);
+
+            // TODO: The below logic is in support of a work-around to an Accord.NET bug wherein
+            // TODO: an internal random number generator sometimes generates out-of-bounds values
+            // TODO: (i.e. a probability that is not between 0 and 1)
+            // TODO: https://github.com/accord-net/framework/issues/259
+            // Use uniform initialization
+            kmeans.UseSeeding = Seeding.Uniform;
+
+            // Determine cluster assignments
+            kmeans.Learn(trajectoryMatrix);
+
+            double sumLogProportion = 0.0;
+
+            // Compute the shannon entropy of the population
+            for (int idx = 0; idx < kmeans.Clusters.Count; idx++)
+            {
+                sumLogProportion += kmeans.Clusters[idx].Proportion*
+                                    Math.Log(kmeans.Clusters[idx].Proportion, 2);
+            }
+
+            // Multiply by negative one to get the Shannon entropy
+            double shannonEntropy = sumLogProportion*-1;
+
+            // Return the resulting population entropy
+            return new PopulationEntropyUnit(shannonEntropy);
+        }
+
+        /// <summary>
         ///     Computes the natural clustering of the resulting trajectories (behaviors) along with the behavioral entropy
         ///     (diversity).
         /// </summary>
@@ -225,7 +297,7 @@ namespace MazeExperimentSuppotLib
                 if (clusterWithMaxSilhouetteWidth == null || silhouetteWidth > clusterWithMaxSilhouetteWidth.Item2)
                 {
                     clusterWithMaxSilhouetteWidth = new Tuple<int, double>(clusterCount, silhouetteWidth);
-                }                
+                }
             }
 
             // Rerun kmeans for the final cluster count
