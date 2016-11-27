@@ -187,11 +187,14 @@ namespace MazeExperimentSuppotLib
 
             double sumLogProportion = 0.0;
 
-            // Compute the shannon entropy of the population
+            // Compute the shannon entropy of the population - if proportion is zero, add zero instead
+            // of calculating log of the proportion (which would be -infinity) to avoid NaN result
             for (int idx = 0; idx < kmeans.Clusters.Count; idx++)
             {
-                sumLogProportion += kmeans.Clusters[idx].Proportion*
-                                    Math.Log(kmeans.Clusters[idx].Proportion, 2);
+                sumLogProportion += kmeans.Clusters[idx].Proportion <= 0
+                    ? 0
+                    : kmeans.Clusters[idx].Proportion*
+                      Math.Log(kmeans.Clusters[idx].Proportion, 2);
             }
 
             // Multiply by negative one to get the Shannon entropy

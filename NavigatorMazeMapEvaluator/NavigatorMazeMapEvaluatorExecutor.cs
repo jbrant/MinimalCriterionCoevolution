@@ -884,14 +884,15 @@ namespace NavigatorMazeMapEvaluator
             _executionLogger.Error("The experiment executor invocation must take the following form:");
             _executionLogger.Error(
                 string.Format(
-                    "NavigatorMazeMapEvaluator.exe {0}=[{19}] {1}=[{20}] (Optional: {2}=[{27}]) (Optional: {3}=[{21}] {4}=[{21}] (Required: {5}=[{22}])) (Optional: {6}=[{21}] (Required: {9}=[{22}])) (Optional: {7}=[{21}] (Required: {9}=[{22}])) (Optional: {8}=[{21}] (Required: {5}=[{22}]) (Required: {16}=[{25}] {17}=[{26}]) (Optional: {18}=[{21}])) (Optional: {11}=[{21}] (Required: {5}=[{22}])) (Optional: {12}=[{21}] (Required: {5}=[{22}])) (Optional: {13}=[{24}]) (Optional: {14}=[{21}]) (Optional: {15}=[{21}] {10}=[{23}]",
+                    "NavigatorMazeMapEvaluator.exe {0}=[{20}] {1}=[{21}] (Optional: {2}=[{28}]) (Optional: {3}=[{22}] {4}=[{22}] (Required: {5}=[{23}])) (Optional: {6}=[{22}] (Required: {9}=[{23}])) (Optional: {7}=[{22}] (Required: {9}=[{23}])) (Optional: {8}=[{22}] (Required: {5}=[{23}]) (Required: {17}=[{26}] {18}=[{27}]) (Optional: {19}=[{22}])) (Optional: {11}=[{22}] (Required: {5}=[{23}])) (Optional: {12}=[{22}] (Required: {5}=[{23}])) (Optional: {13}=[{22}] (Required: {5}=[{23}])) (Optional: {14}=[{25}]) (Optional: {15}=[{22}]) (Optional: {16}=[{22}] {10}=[{24}]",
                     ExecutionParameter.AgentNeuronInputCount, ExecutionParameter.AgentNeuronOutputCount,
                     ExecutionParameter.AnalysisScope, ExecutionParameter.GenerateSimulationResults,
                     ExecutionParameter.WriteResultsToDatabase, ExecutionParameter.DataFileOutputDirectory,
                     ExecutionParameter.GenerateMazeBitmaps, ExecutionParameter.GenerateAgentTrajectoryBitmaps,
                     ExecutionParameter.GenerateNaturalClusters, ExecutionParameter.BitmapOutputBaseDirectory,
                     ExecutionParameter.ExperimentNames, ExecutionParameter.GenerateDiversityScores,
-                    ExecutionParameter.GenerateTrajectoryData, ExecutionParameter.StartFromRun,
+                    ExecutionParameter.GenerateTrajectoryData, ExecutionParameter.GeneratePopulationEntropy,
+                    ExecutionParameter.StartFromRun,
                     ExecutionParameter.ExecuteInitializationTrials,
                     ExecutionParameter.IsDistributedExecution, ExecutionParameter.ClusterImprovementThreshold,
                     ExecutionParameter.ClusterSampleSize, ExecutionParameter.SampleFromSpecies,
