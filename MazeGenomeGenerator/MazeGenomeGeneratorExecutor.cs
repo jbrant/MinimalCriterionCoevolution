@@ -184,13 +184,11 @@ namespace MazeGenomeGenerator
         private static void PrintMazeToFile(MazeGenome mazeGenome, string mazeImageName)
         {
             // Read in the maze decode parameters
-            int mazeHeight = Int32.Parse(_executionConfiguration[ExecutionParameter.MazeHeight]);
-            int mazeWidth = Int32.Parse(_executionConfiguration[ExecutionParameter.MazeWidth]);
             int mazeScaleFactor = Int32.Parse(_executionConfiguration[ExecutionParameter.MazeScaleFactor]);
             string mazeBitmapOutputDirectory = _executionConfiguration[ExecutionParameter.BitmapOutputBaseDirectory];
 
             // Instantiate the maze genome decoder
-            MazeDecoder mazeDecoder = new MazeDecoder(mazeHeight, mazeWidth, mazeScaleFactor);
+            MazeDecoder mazeDecoder = new MazeDecoder(mazeScaleFactor);
 
             // Decode the maze to get a maze structure
             MazeStructure mazeStructure = mazeDecoder.Decode(mazeGenome);

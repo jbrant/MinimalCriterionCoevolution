@@ -111,9 +111,8 @@ namespace CoevolutionAlgorithmComparator
                     "Maze Scale Multiplier configuration parameter cannot be null.");
 
                 // Instantiate maze decoder
-                MazeDecoder mazeDecoder = new MazeDecoder((int) curCoEvoExperimentConfiguration.Primary_Maze_MazeHeight,
-                    (int) curCoEvoExperimentConfiguration.Primary_Maze_MazeWidth,
-                    (int) curCoEvoExperimentConfiguration.Primary_Maze_MazeScaleMultiplier);
+                MazeDecoder mazeDecoder =
+                    new MazeDecoder((int) curCoEvoExperimentConfiguration.Primary_Maze_MazeScaleMultiplier);
 
                 // Get the number of runs in the coevolution experiment
                 int numRuns = ExperimentDataHandler.GetNumRuns(curCoEvoExperimentConfiguration.ExperimentDictionaryID);

@@ -50,8 +50,8 @@ namespace MazeSimulatorSupport
             int mazeWidth = XmlUtils.GetValueAsInt(rootElement, "MazeWidth");
             int mazeScaleMultiplier = XmlUtils.GetValueAsInt(rootElement, "MazeScaleMultiplier");
 
-            // Create a new maze genome decoder based on the maze size
-            _mazeGenomeDecoder = new MazeDecoder(mazeHeight, mazeWidth, mazeScaleMultiplier);
+            // Create a new maze genome decoder with the appropriate scale multiplier
+            _mazeGenomeDecoder = new MazeDecoder(mazeScaleMultiplier);
 
             // Read experiment parameteres and return experiment configuration
             return new SimulatorExperimentConfiguration(experimentName, mazeHeight, mazeWidth, mazeScaleMultiplier,

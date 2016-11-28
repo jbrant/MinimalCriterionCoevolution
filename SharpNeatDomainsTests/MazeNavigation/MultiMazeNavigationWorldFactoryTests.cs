@@ -94,7 +94,7 @@ namespace SharpNeat.Domains.MazeNavigation.Tests
             NeatGenomeFactory agentGenomeFactory = new NeatGenomeFactory(10, 2);
 
             // Create new minimal maze (no barriers)
-            MazeStructure mazeStructure = new MazeDecoder(mazeHeight, mazeWidth, scaleMultiplier).Decode(
+            MazeStructure mazeStructure = new MazeDecoder(scaleMultiplier).Decode(
                 new MazeGenomeFactory(null, mazeHeight, mazeWidth).CreateGenome(0));
 
             // Create behavior characterization factory

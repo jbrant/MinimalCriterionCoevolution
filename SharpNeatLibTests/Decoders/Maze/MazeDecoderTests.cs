@@ -32,7 +32,7 @@ namespace SharpNeat.Decoders.Maze.Tests
             mazeGenome.GeneList.Add(new MazeGene(9, 0.3, 0.2, false));
 
             // Create the maze decoder
-            MazeDecoder mazeDecoder = new MazeDecoder(20, 20);
+            MazeDecoder mazeDecoder = new MazeDecoder(1);
 
             MazeStructure mazeGrid = mazeDecoder.Decode(mazeGenome);
 
@@ -47,7 +47,7 @@ namespace SharpNeat.Decoders.Maze.Tests
             // Mock up maze genome (just use null genome factory)
             MazeGenome mazeGenome = new MazeGenome(new MazeGenomeFactory(), 1, 1);
 
-            MazeDecoder mazeDecoder = new MazeDecoder(20, 20, scaleMultiplier);
+            MazeDecoder mazeDecoder = new MazeDecoder(scaleMultiplier);
 
             MazeStructure mazeGrid = mazeDecoder.Decode(mazeGenome);
 
@@ -71,7 +71,7 @@ namespace SharpNeat.Decoders.Maze.Tests
             } while (birthGeneration < 1000000);
 
             // Create the maze decoder
-            mazeDecoder = new MazeDecoder(20, 20, scaleMultiplier);
+            mazeDecoder = new MazeDecoder(scaleMultiplier);
 
             mazeGrid = mazeDecoder.Decode(mazeGenome);
 

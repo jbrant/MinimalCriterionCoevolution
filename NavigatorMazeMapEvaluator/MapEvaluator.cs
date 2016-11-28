@@ -90,8 +90,7 @@ namespace NavigatorMazeMapEvaluator
             _agentDecoder = new NeatGenomeDecoder(NetworkActivationScheme.CreateAcyclicScheme());
 
             // Create the maze decoder
-            _mazeDecoder = new MazeDecoder(experimentParameters.MazeHeight, experimentParameters.MazeWidth,
-                experimentParameters.MazeScaleMultiplier);
+            _mazeDecoder = new MazeDecoder(experimentParameters.MazeScaleMultiplier);
 
             // Initialize evaluation units
             EvaluationUnits = new List<MazeNavigatorEvaluationUnit>();

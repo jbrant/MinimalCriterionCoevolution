@@ -252,7 +252,7 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             // Pass in maze experiment specific parameters 
             // (note that a new maze structure is created here for the sole purpose of extracting the maze dimensions and calculating max distance to target)
             _mazeNavigationInitializer.SetEnvironmentParameters(_maxTimesteps, _minSuccessDistance,
-                new MazeDecoder(_mazeHeight, _mazeWidth, _mazeScaleMultiplier).Decode(
+                new MazeDecoder(_mazeScaleMultiplier).Decode(
                     new MazeGenomeFactory(MazeGenomeParameters, _mazeHeight, _mazeWidth).CreateGenome(0)));
 
             // Propagate the initialization seed genome size up to the base experiment level
@@ -312,9 +312,9 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             IGenomeFactory<MazeGenome> genomeFactory2, List<NeatGenome> genomeList1, List<MazeGenome> genomeList2)
         {
             List<NeatGenome> seedAgentPopulation = new List<NeatGenome>();
-            
+
             // Create maze decoder to decode initialization mazes
-            MazeDecoder mazeDecoder = new MazeDecoder(_mazeHeight, _mazeWidth, _mazeScaleMultiplier);
+            MazeDecoder mazeDecoder = new MazeDecoder(_mazeScaleMultiplier);
 
             // Loop through every maze and evolve the requisite number of viable genomes that solve it
             for (int idx = 0; idx < genomeList2.Count; idx++)
@@ -417,8 +417,7 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
                 _maxTimesteps, _minSuccessDistance, BehaviorCharacterizationFactory, _numMazeSuccessCriteria);
 
             // Create maze genome decoder
-            IGenomeDecoder<MazeGenome, MazeStructure> mazeGenomeDecoder = new MazeDecoder(_mazeHeight, _mazeWidth,
-                _mazeScaleMultiplier);
+            IGenomeDecoder<MazeGenome, MazeStructure> mazeGenomeDecoder = new MazeDecoder(_mazeScaleMultiplier);
 
             // Create navigator genome decoder
             IGenomeDecoder<NeatGenome, IBlackBox> navigatorGenomeDecoder = new NeatGenomeDecoder(ActivationScheme);
