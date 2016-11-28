@@ -253,7 +253,7 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             // (note that a new maze structure is created here for the sole purpose of extracting the maze dimensions and calculating max distance to target)
             _mazeNavigationInitializer.SetEnvironmentParameters(_maxTimesteps, _minSuccessDistance,
                 new MazeDecoder(_mazeHeight, _mazeWidth, _mazeScaleMultiplier).Decode(
-                    new MazeGenomeFactory(MazeGenomeParameters, null, null).CreateGenome(0)));
+                    new MazeGenomeFactory(MazeGenomeParameters, _mazeHeight, _mazeWidth).CreateGenome(0)));
 
             // Propagate the initialization seed genome size up to the base experiment level
             // so that we know how to generate the bootstrap population
@@ -312,11 +312,7 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             IGenomeFactory<MazeGenome> genomeFactory2, List<NeatGenome> genomeList1, List<MazeGenome> genomeList2)
         {
             List<NeatGenome> seedAgentPopulation = new List<NeatGenome>();
-
-            // Compute the maze max complexity
-            ((MazeGenomeFactory) genomeFactory2).MaxComplexity = MazeUtils.DetermineMaxPartitions(_mazeHeight,
-                _mazeWidth, 200);
-
+            
             // Create maze decoder to decode initialization mazes
             MazeDecoder mazeDecoder = new MazeDecoder(_mazeHeight, _mazeWidth, _mazeScaleMultiplier);
 

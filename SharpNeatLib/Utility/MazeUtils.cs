@@ -19,9 +19,12 @@ namespace SharpNeat.Utility
         /// </summary>
         /// <param name="mazeHeight">The height of the maze.</param>
         /// <param name="mazeWidth">The width of the maze.</param>
-        /// <param name="numSamples">The number of sample mazes to attempt partitioning out to get a representative average.</param>
+        /// <param name="numSamples">
+        ///     The number of sample mazes to attempt partitioning out to get a representative average
+        ///     (defaults to 2,000).
+        /// </param>
         /// <returns>The average number of partitions supportable within the given maze dimensions.</returns>
-        public static int DetermineMaxPartitions(int mazeHeight, int mazeWidth, int numSamples)
+        public static int DetermineMaxPartitions(int mazeHeight, int mazeWidth, int numSamples = 2000)
         {
             int[] maxMazeResolutions = new int[numSamples];
             FastRandom rng = new FastRandom();

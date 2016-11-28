@@ -27,6 +27,8 @@ namespace SharpNeat.Genomes.Maze
 
         private const string __AttrId = "id";
         private const string __AttrBirthGeneration = "birthGen";
+        private const string __AttrHeight = "height";
+        private const string __AttrWidth = "width";
         private const string __AttrRelativeWallLocation = "RelativeWallLocation";
         private const string __AttrRelativePassageLocation = "RelativePassageLocation";
         private const string __AttrOrientationSeed = "OrientationSeed";
@@ -89,6 +91,8 @@ namespace SharpNeat.Genomes.Maze
             xw.WriteAttributeString(__AttrId, genome.Id.ToString(NumberFormatInfo.InvariantInfo));
             xw.WriteAttributeString(__AttrBirthGeneration,
                 genome.BirthGeneration.ToString(NumberFormatInfo.InvariantInfo));
+            xw.WriteAttributeString(__AttrHeight, genome.MazeBoundaryHeight.ToString(NumberFormatInfo.InvariantInfo));
+            xw.WriteAttributeString(__AttrWidth, genome.MazeBoundaryWidth.ToString(NumberFormatInfo.InvariantInfo));
 
             // Emit walls
             xw.WriteStartElement(__ElemWalls);
@@ -225,6 +229,7 @@ namespace SharpNeat.Genomes.Maze
             XmlIoUtils.MoveToElement(xr, false, __ElemMaze);
             int initialDepth = xr.Depth;
 
+            // Read genome ID attribute
             string genomeIdStr = xr.GetAttribute(__AttrId);
             uint genomeId;
             uint.TryParse(genomeIdStr, out genomeId);
@@ -233,6 +238,16 @@ namespace SharpNeat.Genomes.Maze
             string birthGenStr = xr.GetAttribute(__AttrBirthGeneration);
             uint birthGen;
             uint.TryParse(birthGenStr, out birthGen);
+
+            // Read maze height attribute
+            string heightStr = xr.GetAttribute(__AttrHeight);
+            int height;
+            int.TryParse(heightStr, out height);
+
+            // Read maze width attribute
+            string widthStr = xr.GetAttribute(__AttrWidth);
+            int width;
+            int.TryParse(widthStr, out width);
 
             // Find <Walls>
             XmlIoUtils.MoveToElement(xr, true, __ElemWalls);
@@ -278,7 +293,7 @@ namespace SharpNeat.Genomes.Maze
             } while (xr.Read());
 
             // Construct and return loaded MazeGenome
-            return new MazeGenome(null, genomeId, birthGen, genes);
+            return new MazeGenome(null, genomeId, birthGen, height, width, genes);
         }
 
         #endregion

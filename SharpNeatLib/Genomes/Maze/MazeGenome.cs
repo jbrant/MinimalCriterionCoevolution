@@ -35,21 +35,29 @@ namespace SharpNeat.Genomes.Maze
         /// </summary>
         public IList<MazeGene> GeneList { get; }
 
+        /// <summary>
+        ///     Height of the evolved maze genome (before being scaled to phenotype).
+        /// </summary>
+        public int MazeBoundaryHeight { get; }
+
+        /// <summary>
+        ///     Width of evolved maze genome (before being scaled to phenotype).
+        /// </summary>
+        public int MazeBoundaryWidth { get; }
+
+        /// <summary>
+        ///     The maximum complexity of the maze (at the evolved resolution).  Note that this is set when the genome is birthed,
+        ///     but can also change as a result of a mutation; however, it's stored on the genome instead of being calculated via
+        ///     the "get" call because of the computational cost involved in calculating it.
+        /// </summary>
+        public int MaxComplexity { get; }
+
         #endregion
 
         #region Maze Genome Constructors
 
-        /// <summary>
-        ///     Constructor which constructs a new maze genome with the given unique identifier and birth generation.
-        /// </summary>
-        /// <param name="genomeFactory">Reference to the genome factory.</param>
-        /// <param name="id">The unique identifier of the new maze genome.</param>
-        /// <param name="birthGeneration">The birth generation.</param>
-        public MazeGenome(MazeGenomeFactory genomeFactory, uint id, uint birthGeneration)
+        protected MazeGenome(uint id, uint birthGeneration)
         {
-            // Set the genome factory
-            GenomeFactory = genomeFactory;
-
             // Set the unique genome ID and the birth generation
             Id = id;
             BirthGeneration = birthGeneration;
@@ -59,6 +67,54 @@ namespace SharpNeat.Genomes.Maze
 
             // Instantiate new gene list
             GeneList = new List<MazeGene>();
+        }
+
+        /// <summary>
+        ///     Constructor which constructs a new maze genome with the given unique identifier and birth generation.
+        /// </summary>
+        /// <param name="genomeFactory">Reference to the genome factory.</param>
+        /// <param name="id">The unique identifier of the new maze genome.</param>
+        /// <param name="birthGeneration">The birth generation.</param>
+        public MazeGenome(MazeGenomeFactory genomeFactory, uint id, uint birthGeneration) : this(id, birthGeneration)
+        {
+            // Ensure that genome factory is non-null
+            if (genomeFactory == null)
+            {
+                throw new SharpNeatException(
+                    string.Format(
+                        "Null genome factory passed in during construction of maze genome with id [{0}] and birth generation [{1}].  If the maze height/width are not explicitly specified, the genome factory is required for instantiating genome with boundary length defaults.",
+                        id, birthGeneration));
+            }
+
+            // Set the initial maze height and width
+            MazeBoundaryHeight = genomeFactory.BaseMazeHeight;
+            MazeBoundaryWidth = genomeFactory.BaseMazeWidth;
+
+            // Set the genome factory
+            GenomeFactory = genomeFactory;
+        }
+
+        /// <summary>
+        ///     Constructor which constructs a new maze genome with the given unique identifier, birth generation, and initial maze
+        ///     height/width.
+        /// </summary>
+        /// <param name="genomeFactory">Reference to the genome factory.</param>
+        /// <param name="id">The unique identifier of the new maze genome.</param>
+        /// <param name="birthGeneration">The birth generation.</param>
+        /// <param name="height">The base/initial height of the maze genome.</param>
+        /// <param name="width">The base/initial width of the maze genome.</param>
+        public MazeGenome(MazeGenomeFactory genomeFactory, uint id, uint birthGeneration, int height, int width)
+            : this(id, birthGeneration)
+        {
+            // Set the initial maze height and width
+            MazeBoundaryHeight = height;
+            MazeBoundaryWidth = width;
+
+            // Set the genome factory
+            GenomeFactory = genomeFactory;
+
+            // Compute max complexity based on maze dimensions
+            MaxComplexity = MazeUtils.DetermineMaxPartitions(height, width);
         }
 
         /// <summary>
@@ -76,8 +132,13 @@ namespace SharpNeat.Genomes.Maze
 
             // Copy the other parameters off of the given genome
             GenomeFactory = copyFrom.GenomeFactory;
+            MazeBoundaryHeight = copyFrom.MazeBoundaryHeight;
+            MazeBoundaryWidth = copyFrom.MazeBoundaryWidth;
             GeneList = new List<MazeGene>(DeepCopyMazeGeneList(copyFrom.GeneList));
             EvaluationInfo = new EvaluationInfo(copyFrom.EvaluationInfo.FitnessHistoryLength);
+
+            // Compute max complexity based on maze dimensions
+            MaxComplexity = MazeUtils.DetermineMaxPartitions(MazeBoundaryHeight, MazeBoundaryWidth);
         }
 
         /// <summary>
@@ -87,9 +148,12 @@ namespace SharpNeat.Genomes.Maze
         /// <param name="genomeFactory">Reference to the genome factory.</param>
         /// <param name="id">The unique identifier of the new maze genome.</param>
         /// <param name="birthGeneration">The birth generation.</param>
+        /// <param name="height">The base/initial height of the maze genome.</param>
+        /// <param name="width">The base/initial width of the maze genome.</param>
         /// <param name="geneList">The list of wall genes.</param>
-        public MazeGenome(MazeGenomeFactory genomeFactory, uint id, uint birthGeneration, IList<MazeGene> geneList)
-            : this(genomeFactory, id, birthGeneration)
+        public MazeGenome(MazeGenomeFactory genomeFactory, uint id, uint birthGeneration, int height, int width,
+            IList<MazeGene> geneList)
+            : this(genomeFactory, id, birthGeneration, height, width)
         {
             GeneList = geneList;
         }
@@ -230,7 +294,7 @@ namespace SharpNeat.Genomes.Maze
                 // Get random mutation to perform
                 outcome = RouletteWheel.SingleThrow(GenomeFactory.MazeGenomeParameters.RouletteWheelLayout,
                     GenomeFactory.Rng);
-            } while (GenomeFactory.MaxComplexity != null && GeneList.Count > GenomeFactory.MaxComplexity && outcome >= 2);
+            } while (GeneList.Count > MaxComplexity && outcome >= 2);
 
 
             switch (outcome)

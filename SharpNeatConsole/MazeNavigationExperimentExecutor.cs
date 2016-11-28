@@ -676,7 +676,7 @@ namespace SharpNeatConsole
                 // Initialize new experiment
                 experiment.Initialize(experimentName, xmlConfig.DocumentElement, navigatorDataLogger,
                     navigatorGenomesLogger, mazeDataLogger, mazeGenomesLogger);
-
+                
                 _executionLogger.Info(string.Format("Initialized experiment {0}.", experiment.GetType()));
 
                 // If there were seed population files specified, read them in

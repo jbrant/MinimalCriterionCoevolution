@@ -1513,6 +1513,8 @@
     <Content Include="SeedMazes\GeneratedMazeGenome_8_Walls.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="SeedMazes\GeneratedMaze_100_Genomes_10_Height_10_Width_2_Walls.xml" />
+    <Content Include="SeedMazes\GeneratedMaze_100_Genomes_10_Height_10_Width_8_Walls.xml" />
     <Content Include="SeedMazes\GeneratedMaze_100_Genomes_8_Walls.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

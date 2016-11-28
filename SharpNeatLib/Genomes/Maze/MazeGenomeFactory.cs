@@ -20,7 +20,7 @@ namespace SharpNeat.Genomes.Maze
         ///     Maze Genome Factory default constructor.
         /// </summary>
         public MazeGenomeFactory()
-            : this(new MazeGenomeParameters(), null, null)
+            : this(new MazeGenomeParameters())
         {
         }
 
@@ -28,16 +28,35 @@ namespace SharpNeat.Genomes.Maze
         ///     Maze Genome Factory constructor which takes custom maze genome parameters.
         /// </summary>
         /// <param name="mazeGenomeParameters">The maze genome parameters.</param>
+        public MazeGenomeFactory(MazeGenomeParameters mazeGenomeParameters) : this(mazeGenomeParameters, 0, 0)
+        {
+        }
+
+        /// <summary>
+        ///     Maze Genome Factory constructor which takes only maze boundary lengths.
+        /// </summary>
         /// <param name="mazeHeight">The height of the maze.</param>
         /// <param name="mazeWidth">The width of the maze.</param>
-        public MazeGenomeFactory(MazeGenomeParameters mazeGenomeParameters, int? mazeHeight, int? mazeWidth)
+        public MazeGenomeFactory(int mazeHeight, int mazeWidth)
+            : this(new MazeGenomeParameters(), mazeHeight, mazeWidth)
+        {
+        }
+
+        /// <summary>
+        ///     Maze Genome Factory constructor which takes custom maze genome parameters and initial maze height and width.
+        /// </summary>
+        /// <param name="mazeGenomeParameters">The maze genome parameters.</param>
+        /// <param name="mazeHeight">The height of the maze.</param>
+        /// <param name="mazeWidth">The width of the maze.</param>
+        public MazeGenomeFactory(MazeGenomeParameters mazeGenomeParameters, int mazeHeight, int mazeWidth)
         {
             MazeGenomeParameters = mazeGenomeParameters;
             GenomeIdGenerator = new UInt32IdGenerator();
             InnovationIdGenerator = new UInt32IdGenerator();
 
-            // Calculate maze max complexity as the area
-            MaxComplexity = mazeHeight*mazeWidth;
+            // Set the initial maze height and width
+            BaseMazeHeight = mazeHeight;
+            BaseMazeWidth = mazeWidth;
         }
 
         #endregion
@@ -106,10 +125,14 @@ namespace SharpNeat.Genomes.Maze
         public MazeGenomeParameters MazeGenomeParameters { get; }
 
         /// <summary>
-        ///     The maximum number of walls that can be added to the maze via the add wall mutation.  This is a limit that will be
-        ///     imposed by the maze PCG (procedural content generator).
+        ///     The height of the initial (base) maze genome (at the evolved resolution).
         /// </summary>
-        public int? MaxComplexity { get; set; }
+        public int BaseMazeHeight { get; set; }
+
+        /// <summary>
+        ///     The width of the initial (base) maze genome (at the evolved resolution).
+        /// </summary>
+        public int BaseMazeWidth { get; set; }
 
         #endregion
 

@@ -73,6 +73,10 @@ namespace MazeGenomeGenerator
         {
             Random rand = new Random();
 
+            // Get the evolved maze height and width
+            int mazeHeight = Int32.Parse(_executionConfiguration[ExecutionParameter.MazeHeight]);
+            int mazeWidth = Int32.Parse(_executionConfiguration[ExecutionParameter.MazeWidth]);
+
             // Get the number of interior walls and maze genome output directory
             int numInteriorWalls = Int32.Parse(_executionConfiguration[ExecutionParameter.NumWalls]);
             string mazeGenomeOutputDirectory = _executionConfiguration[ExecutionParameter.MazeGenomeOutputBaseDirectory];
@@ -91,7 +95,7 @@ namespace MazeGenomeGenerator
                                       Boolean.Parse(_executionConfiguration[ExecutionParameter.SingleGenomeOutputFile]);
 
             // Create a new maze genome factory
-            MazeGenomeFactory mazeGenomeFactory = new MazeGenomeFactory();
+            MazeGenomeFactory mazeGenomeFactory = new MazeGenomeFactory(mazeHeight, mazeWidth);
 
             // Instantiate list to hold generated maze genomes 
             // (only really used when we're writing everything out to one file)
@@ -102,7 +106,8 @@ namespace MazeGenomeGenerator
                 MazeGenome mazeGenome = null;
 
                 // Lay out the base file name
-                string fileBaseName = string.Format("GeneratedMazeGenome_{0}_Walls_{1}", numInteriorWalls, curMazeCnt);
+                string fileBaseName = string.Format("GeneratedMazeGenome_{0}_Height_{1}_Width_{2}_Walls_{3}", mazeHeight,
+                    mazeWidth, numInteriorWalls, curMazeCnt);
 
                 // With a single output file, the genomes are likely being used for separate experiments, so we
                 // reset the innovation IDs and assign the maze a constant identifier
@@ -163,7 +168,8 @@ namespace MazeGenomeGenerator
                 using (
                     XmlWriter xmlWriter =
                         XmlWriter.Create(Path.Combine(mazeGenomeOutputDirectory,
-                            string.Format("GeneratedMaze_{0}_Genomes_{1}_Walls.xml", numMazes, numInteriorWalls))))
+                            string.Format("GeneratedMaze_{0}_Genomes_{1}_Height_{2}_Width_{3}_Walls.xml", numMazes,
+                                mazeHeight, mazeWidth, numInteriorWalls))))
                 {
                     MazeGenomeXmlIO.WriteComplete(xmlWriter, mazeGenomeList);
                 }

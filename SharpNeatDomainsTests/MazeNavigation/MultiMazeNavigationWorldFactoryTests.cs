@@ -95,7 +95,7 @@ namespace SharpNeat.Domains.MazeNavigation.Tests
 
             // Create new minimal maze (no barriers)
             MazeStructure mazeStructure = new MazeDecoder(mazeHeight, mazeWidth, scaleMultiplier).Decode(
-                new MazeGenomeFactory(null, null, null).CreateGenome(0));
+                new MazeGenomeFactory(null, mazeHeight, mazeWidth).CreateGenome(0));
 
             // Create behavior characterization factory
             IBehaviorCharacterizationFactory behaviorCharacterizationFactory =
