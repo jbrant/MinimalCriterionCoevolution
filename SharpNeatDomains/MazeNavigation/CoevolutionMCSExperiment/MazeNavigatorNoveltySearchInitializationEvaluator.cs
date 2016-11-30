@@ -21,12 +21,11 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
         /// <summary>
         ///     Maze Navigator fitness initialization evaluator constructor.
         /// </summary>
-        /// <param name="maxTimesteps">The maximum number of time steps in a single simulation.</param>
         /// <param name="minSuccessDistance">The minimum distance from the target to be considered a successful run.</param>
         /// <param name="maxDistanceToTarget">The maximum distance from the target possible.</param>
         /// <param name="behaviorCharacterizationFactory">The initialized behavior characterization factory.</param>
         /// <param name="startingEvaluations">The number of evaluations from which the evaluator is starting (defaults to 0).</param>
-        public MazeNavigatorNoveltySearchInitializationEvaluator(int maxTimesteps, int minSuccessDistance,
+        public MazeNavigatorNoveltySearchInitializationEvaluator(int minSuccessDistance,
             int maxDistanceToTarget, IBehaviorCharacterizationFactory behaviorCharacterizationFactory,
             ulong startingEvaluations = 0)
         {
@@ -34,14 +33,13 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             _behaviorCharacterizationFactory = behaviorCharacterizationFactory;
 
             // Create factory for generating mazes
-            _multiMazeWorldFactory = new MultiMazeNavigationWorldFactory<BehaviorInfo>(maxTimesteps, minSuccessDistance,
+            _multiMazeWorldFactory = new MultiMazeNavigationWorldFactory<BehaviorInfo>(minSuccessDistance,
                 maxDistanceToTarget);
         }
 
         /// <summary>
         ///     Maze Navigator fitness initialization evaluator constructor.
         /// </summary>
-        /// <param name="maxTimesteps">The maximum number of time steps in a single simulation.</param>
         /// <param name="minSuccessDistance">The minimum distance from the target to be considered a successful run.</param>
         /// <param name="maxDistanceToTarget">The maximum distance from the target possible.</param>
         /// <param name="initialMazeStructure">
@@ -50,12 +48,11 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
         /// </param>
         /// <param name="behaviorCharacterizationFactory">The initialized behavior characterization factory.</param>
         /// <param name="startingEvaluations">The number of evaluations from which the evaluator is starting (defaults to 0).</param>
-        public MazeNavigatorNoveltySearchInitializationEvaluator(int maxTimesteps, int minSuccessDistance,
+        public MazeNavigatorNoveltySearchInitializationEvaluator(int minSuccessDistance,
             int maxDistanceToTarget, MazeStructure initialMazeStructure,
             IBehaviorCharacterizationFactory behaviorCharacterizationFactory, ulong startingEvaluations = 0)
             : this(
-                maxTimesteps, minSuccessDistance, maxDistanceToTarget, behaviorCharacterizationFactory,
-                startingEvaluations)
+                minSuccessDistance, maxDistanceToTarget, behaviorCharacterizationFactory, startingEvaluations)
         {
             // Add initial maze structure
             _multiMazeWorldFactory.SetMazeConfigurations(new List<MazeStructure>(1) {initialMazeStructure});
@@ -127,14 +124,15 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
                 _behaviorCharacterizationFactory.CreateBehaviorCharacterization();
 
             // Instantiate the maze world
-            MazeNavigationWorld<BehaviorInfo> world = _multiMazeWorldFactory.CreateMazeNavigationWorld(behaviorCharacterization);
+            MazeNavigationWorld<BehaviorInfo> world =
+                _multiMazeWorldFactory.CreateMazeNavigationWorld(behaviorCharacterization);
 
             // Run a single trial
             BehaviorInfo trialInfo = world.RunTrial(agent, SearchType.NoveltySearch, out goalReached);
 
             // Set the objective distance
             trialInfo.ObjectiveDistance = world.GetDistanceToTarget();
-            
+
             // Set the stop condition to the outcome
             if (goalReached)
                 StopConditionSatisfied = true;

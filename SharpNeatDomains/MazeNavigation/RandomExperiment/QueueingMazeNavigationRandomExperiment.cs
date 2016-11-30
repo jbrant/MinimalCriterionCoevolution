@@ -77,8 +77,7 @@ namespace SharpNeat.Domains.MazeNavigation.RandomExperiment
 
             // Create IBlackBox evaluator.
             IPhenomeEvaluator<IBlackBox, FitnessInfo> mazeNavigationEvaluator =
-                new MazeNavigationRandomEvaluator(MaxDistanceToTarget, MaxTimesteps,
-                    MazeVariant, MinSuccessDistance);
+                new MazeNavigationRandomEvaluator(MaxDistanceToTarget, MazeVariant, MinSuccessDistance);
 
             // Create genome decoder.
             IGenomeDecoder<NeatGenome, IBlackBox> genomeDecoder = CreateGenomeDecoder();

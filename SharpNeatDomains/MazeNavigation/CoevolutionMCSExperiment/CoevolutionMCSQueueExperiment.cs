@@ -181,7 +181,7 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
 
             // Pass in maze experiment specific parameters 
             // (note that a new maze structure is created here for the sole purpose of extracting the maze dimensions and calculating max distance to target)
-            _mazeNavigationInitializer.SetEnvironmentParameters(_maxTimesteps, _minSuccessDistance,
+            _mazeNavigationInitializer.SetEnvironmentParameters(_minSuccessDistance,
                 new MazeDecoder(_mazeScaleMultiplier).Decode(
                     new MazeGenomeFactory(MazeGenomeParameters, _mazeHeight, _mazeWidth).CreateGenome(0)));
 
@@ -343,13 +343,14 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
                     _mazePopulationGenomesDataLogger, _populationLoggingBatchInterval, _isMazeSpecieFixedSize);
 
             // Create the maze phenome evaluator
-            IPhenomeEvaluator<MazeStructure, BehaviorInfo> mazeEvaluator = new MazeEnvironmentMCSEvaluator(
-                _maxTimesteps,
-                _minSuccessDistance, BehaviorCharacterizationFactory, _numAgentSuccessCriteria, _numAgentFailedCriteria);
+            IPhenomeEvaluator<MazeStructure, BehaviorInfo> mazeEvaluator =
+                new MazeEnvironmentMCSEvaluator(_minSuccessDistance, BehaviorCharacterizationFactory,
+                    _numAgentSuccessCriteria, _numAgentFailedCriteria);
 
             // Create navigator phenome evaluator
-            IPhenomeEvaluator<IBlackBox, BehaviorInfo> navigatorEvaluator = new MazeNavigatorMCSEvaluator(
-                _maxTimesteps, _minSuccessDistance, BehaviorCharacterizationFactory, _numMazeSuccessCriteria);
+            IPhenomeEvaluator<IBlackBox, BehaviorInfo> navigatorEvaluator =
+                new MazeNavigatorMCSEvaluator(_minSuccessDistance, BehaviorCharacterizationFactory,
+                    _numMazeSuccessCriteria);
 
             // Create maze genome decoder
             IGenomeDecoder<MazeGenome, MazeStructure> mazeGenomeDecoder = new MazeDecoder(_mazeScaleMultiplier);

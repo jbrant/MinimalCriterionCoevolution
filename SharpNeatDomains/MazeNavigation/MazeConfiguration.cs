@@ -19,6 +19,11 @@ namespace SharpNeat.Domains.MazeNavigation
         public readonly DoublePoint GoalLocation;
 
         /// <summary>
+        ///     The maximum time allotted for the simulation on this maze.
+        /// </summary>
+        public readonly int MaxSimulationTimesteps;
+
+        /// <summary>
         ///     The starting location of the maze navigator.
         /// </summary>
         public readonly DoublePoint NavigatorLocation;
@@ -34,11 +39,14 @@ namespace SharpNeat.Domains.MazeNavigation
         /// <param name="walls">The list of walls in the maze.</param>
         /// <param name="navigatorLocation">The starting location of the maze navigator.</param>
         /// <param name="goalLocation">The location of the goal.</param>
-        public MazeConfiguration(List<Wall> walls, DoublePoint navigatorLocation, DoublePoint goalLocation)
+        /// <param name="maxSimulationTimesteps">The maximum time allotted for the simulation on this maze.</param>
+        public MazeConfiguration(List<Wall> walls, DoublePoint navigatorLocation, DoublePoint goalLocation,
+            int maxSimulationTimesteps)
         {
             Walls = walls;
             NavigatorLocation = navigatorLocation;
             GoalLocation = goalLocation;
+            MaxSimulationTimesteps = maxSimulationTimesteps;
         }
     }
 }

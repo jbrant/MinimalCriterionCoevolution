@@ -66,17 +66,16 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
         /// <summary>
         ///     Sets configuration variables specific to the maze navigation simulation.
         /// </summary>
-        /// <param name="maxTimesteps">The maximum number of time steps for which to run the simulation.</param>
         /// <param name="mazeStructure">The initial maze environment on which to evaluate agents.</param>
         /// <param name="minSuccessDistance">The minimum distance to the target location for the maze to be considered "solved".</param>
-        public void SetEnvironmentParameters(int maxTimesteps, int minSuccessDistance, MazeStructure mazeStructure)
+        public void SetEnvironmentParameters(int minSuccessDistance, MazeStructure mazeStructure)
         {
             // Set boiler plate environment parameters
             // (note that the max distance to the target is the diagonal of the maze environment)
             base.SetEnvironmentParameters(
                 (int)
                     Math.Sqrt(Math.Pow(mazeStructure.ScaledMazeHeight, 2) + Math.Pow(mazeStructure.ScaledMazeWidth, 2)),
-                maxTimesteps, minSuccessDistance);
+                minSuccessDistance);
         }
 
         #endregion

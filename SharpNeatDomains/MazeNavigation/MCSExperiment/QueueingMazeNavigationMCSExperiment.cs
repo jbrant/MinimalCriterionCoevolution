@@ -79,8 +79,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                 OutputCount);
 
             // Pass in maze experiment specific parameters
-            _mazeNavigationInitializer.SetEnvironmentParameters(MaxDistanceToTarget, MaxTimesteps, MazeVariant,
-                MinSuccessDistance);
+            _mazeNavigationInitializer.SetEnvironmentParameters(MaxDistanceToTarget, MazeVariant, MinSuccessDistance);
         }
 
         public override void Initialize(ExperimentDictionary experimentDictionary)
@@ -114,8 +113,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             _mazeNavigationInitializer.SetAlgorithmParameters(experimentDictionary, InputCount, OutputCount);
 
             // Pass in maze experiment specific parameters
-            _mazeNavigationInitializer.SetEnvironmentParameters(MaxDistanceToTarget, MaxTimesteps, MazeVariant,
-                MinSuccessDistance);
+            _mazeNavigationInitializer.SetEnvironmentParameters(MaxDistanceToTarget, MazeVariant, MinSuccessDistance);
         }
 
         /// <summary>
@@ -156,9 +154,9 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 
             // Create IBlackBox evaluator.
             IPhenomeEvaluator<IBlackBox, BehaviorInfo> mazeNavigationEvaluator =
-                new MazeNavigationMCSEvaluator(MaxDistanceToTarget, MaxTimesteps,
-                    MazeVariant, MinSuccessDistance, _behaviorCharacterizationFactory,
-                    _bridgingMagnitude, _bridgingApplications, initializationEvaluations);
+                new MazeNavigationMCSEvaluator(MaxDistanceToTarget, MazeVariant, MinSuccessDistance,
+                    _behaviorCharacterizationFactory, _bridgingMagnitude, _bridgingApplications,
+                    initializationEvaluations);
 
             // Create genome decoder.
             IGenomeDecoder<NeatGenome, IBlackBox> genomeDecoder = CreateGenomeDecoder();

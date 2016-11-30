@@ -102,8 +102,8 @@ namespace SharpNeat.Domains.MazeNavigation.Tests
                 new TrajectoryBehaviorCharacterizationFactory(null);
 
             // Create evaluator
-            MazeNavigatorMCSEvaluator mazeNavigatorEvaluator = new MazeNavigatorMCSEvaluator(maxTimesteps,
-                minSuccessDistance, behaviorCharacterizationFactory, 1);
+            MazeNavigatorMCSEvaluator mazeNavigatorEvaluator = new MazeNavigatorMCSEvaluator(minSuccessDistance,
+                behaviorCharacterizationFactory, 1);
 
             // Set maze within evaluator
             mazeNavigatorEvaluator.UpdateEvaluatorPhenotypes(new List<MazeStructure> {mazeStructure});

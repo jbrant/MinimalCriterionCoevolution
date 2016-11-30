@@ -97,7 +97,7 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
 
             // Create IBlackBox evaluator.
             MazeNavigatorNoveltySearchInitializationEvaluator mazeNavigatorEvaluator =
-                new MazeNavigatorNoveltySearchInitializationEvaluator(MaxTimesteps, MinSuccessDistance,
+                new MazeNavigatorNoveltySearchInitializationEvaluator(MinSuccessDistance,
                     MaxDistanceToTarget, mazeEnvironment, _behaviorCharacterizationFactory, startingEvaluations);
 
             // Create a novelty archive

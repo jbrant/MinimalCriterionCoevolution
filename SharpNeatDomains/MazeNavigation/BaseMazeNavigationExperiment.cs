@@ -61,7 +61,6 @@ namespace SharpNeat.Domains.MazeNavigation
             NeatGenomeParameters.FeedforwardOnly = _activationScheme.AcyclicNetwork;
 
             // Set experiment-specific parameters
-            MaxTimesteps = XmlUtils.GetValueAsInt(xmlConfig, "MaxTimesteps");
             MinSuccessDistance = XmlUtils.GetValueAsInt(xmlConfig, "MinSuccessDistance");
             MaxDistanceToTarget = XmlUtils.GetValueAsInt(xmlConfig, "MaxDistanceToTarget");
             MazeVariant =
@@ -95,7 +94,6 @@ namespace SharpNeat.Domains.MazeNavigation
             NeatGenomeParameters.FeedforwardOnly = _activationScheme.AcyclicNetwork;
 
             // Set experiment-specific parameters
-            MaxTimesteps = experimentDictionary.MaxTimesteps;
             MinSuccessDistance = experimentDictionary.MinSuccessDistance;
             MaxDistanceToTarget = experimentDictionary.MaxDistanceToTarget ?? default(int);
             MazeVariant = MazeVariantUtil.convertStringToMazeVariant(experimentDictionary.ExperimentDomainName);
@@ -291,12 +289,7 @@ namespace SharpNeat.Domains.MazeNavigation
         ///     The maximum number of generations allowed (optional).
         /// </summary>
         protected int? MaxGenerations;
-
-        /// <summary>
-        ///     The maximum number of timesteps allowed for a single simulation.
-        /// </summary>
-        protected int MaxTimesteps;
-
+        
         /// <summary>
         ///     The maze to use as the simulation environment.
         /// </summary>

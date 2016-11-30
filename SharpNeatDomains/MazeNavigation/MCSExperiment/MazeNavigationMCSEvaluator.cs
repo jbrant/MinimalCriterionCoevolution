@@ -22,12 +22,11 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         ///     MCS Evaluator constructor.
         /// </summary>
         /// <param name="maxDistanceToTarget">The maximum distance possible from the target location.</param>
-        /// <param name="maxTimesteps">The maximum number of time steps in a single simulation.</param>
         /// <param name="mazeVariant">The maze environment used for the simulation.</param>
         /// <param name="minSuccessDistance">The minimum distance from the target to be considered a successful run.</param>
         /// <param name="behaviorCharacterizationFactory">The initialized behavior characterization factory.</param>
         /// <param name="initializationEvaluations">The number of evaluations that were expended during intialization.</param>
-        internal MazeNavigationMCSEvaluator(int maxDistanceToTarget, int maxTimesteps, MazeVariant mazeVariant,
+        internal MazeNavigationMCSEvaluator(int maxDistanceToTarget, MazeVariant mazeVariant,
             int minSuccessDistance, IBehaviorCharacterizationFactory behaviorCharacterizationFactory,
             ulong initializationEvaluations = 0)
         {
@@ -36,21 +35,20 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 
             // Create the maze world factory
             _mazeWorldFactory = new MazeNavigationWorldFactory<BehaviorInfo>(mazeVariant, minSuccessDistance,
-                maxDistanceToTarget, maxTimesteps);
+                maxDistanceToTarget);
         }
 
         /// <summary>
         ///     MCS Evaluator constructor with bridging.
         /// </summary>
         /// <param name="maxDistanceToTarget">The maximum distance possible from the target location.</param>
-        /// <param name="maxTimesteps">The maximum number of time steps in a single simulation.</param>
         /// <param name="mazeVariant">The maze environment used for the simulation.</param>
         /// <param name="minSuccessDistance">The minimum distance from the target to be considered a successful run.</param>
         /// <param name="behaviorCharacterizationFactory">The initialized behavior characterization factory.</param>
         /// <param name="bridgingMagnitude">The degree heading adjustment imposed by bridging.</param>
         /// <param name="numBridgingApplications">The maximum number of times bridging heading adjustment can be applied.</param>
         /// <param name="initializationEvaluations">The number of evaluations that were expended during intialization.</param>
-        internal MazeNavigationMCSEvaluator(int maxDistanceToTarget, int maxTimesteps, MazeVariant mazeVariant,
+        internal MazeNavigationMCSEvaluator(int maxDistanceToTarget, MazeVariant mazeVariant,
             int minSuccessDistance, IBehaviorCharacterizationFactory behaviorCharacterizationFactory,
             int bridgingMagnitude, int numBridgingApplications,
             ulong initializationEvaluations = 0)
@@ -60,20 +58,19 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 
             // Create the maze world factory
             _mazeWorldFactory = new MazeNavigationWorldFactory<BehaviorInfo>(mazeVariant, minSuccessDistance,
-                maxDistanceToTarget, maxTimesteps, bridgingMagnitude, numBridgingApplications);
+                maxDistanceToTarget, bridgingMagnitude, numBridgingApplications);
         }
 
         /// <summary>
         ///     MCS Evaluator constructor with grid-based niching.
         /// </summary>
         /// <param name="maxDistanceToTarget">The maximum distance possible from the target location.</param>
-        /// <param name="maxTimesteps">The maximum number of time steps in a single simulation.</param>
         /// <param name="mazeVariant">The maze environment used for the simulation.</param>
         /// <param name="minSuccessDistance">The minimum distance from the target to be considered a successful run.</param>
         /// <param name="behaviorCharacterizationFactory">The initialized behavior characterization factory.</param>
         /// <param name="initializationEvaluations">The number of evaluations that were expended during intialization.</param>
         /// <param name="gridDensity">The density of the niche grid.</param>
-        internal MazeNavigationMCSEvaluator(int maxDistanceToTarget, int maxTimesteps, MazeVariant mazeVariant,
+        internal MazeNavigationMCSEvaluator(int maxDistanceToTarget, MazeVariant mazeVariant,
             int minSuccessDistance, IBehaviorCharacterizationFactory behaviorCharacterizationFactory, int gridDensity,
             ulong initializationEvaluations = 0)
         {
@@ -82,7 +79,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 
             // Create the maze world factory
             _mazeWorldFactory = new MazeNavigationWorldFactory<BehaviorInfo>(mazeVariant, minSuccessDistance,
-                maxDistanceToTarget, maxTimesteps, gridDensity);
+                maxDistanceToTarget, gridDensity);
         }
 
         #endregion

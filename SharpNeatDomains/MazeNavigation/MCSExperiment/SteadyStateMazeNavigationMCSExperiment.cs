@@ -115,9 +115,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 
             // Create IBlackBox evaluator.
             MazeNavigationMCSEvaluator mazeNavigationEvaluator = new MazeNavigationMCSEvaluator(MaxDistanceToTarget,
-                MaxTimesteps,
-                MazeVariant,
-                MinSuccessDistance, _behaviorCharacterizationFactory);
+                MazeVariant, MinSuccessDistance, _behaviorCharacterizationFactory);
 
             // Create genome decoder.
             var genomeDecoder = CreateGenomeDecoder();

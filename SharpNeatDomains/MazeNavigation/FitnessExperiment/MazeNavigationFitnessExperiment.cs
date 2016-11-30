@@ -43,8 +43,7 @@ namespace SharpNeat.Domains.MazeNavigation.FitnessExperiment
                 complexityRegulationStrategy);
 
             // Create IBlackBox evaluator.
-            var mazeNavigationEvaluator = new MazeNavigationFitnessEvaluator(MaxDistanceToTarget, MaxTimesteps,
-                MazeVariant,
+            var mazeNavigationEvaluator = new MazeNavigationFitnessEvaluator(MaxDistanceToTarget, MazeVariant,
                 MinSuccessDistance);
 
             // Create genome decoder.

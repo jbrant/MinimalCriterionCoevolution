@@ -64,11 +64,6 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
         #region Private members
 
         /// <summary>
-        ///     The maximum number of timesteps allowed for a single simulation.
-        /// </summary>
-        private int _maxTimesteps;
-
-        /// <summary>
         ///     The minimum distance to the target required in order to have "solved" the maze.
         /// </summary>
         private int _minSuccessDistance;
@@ -166,7 +161,6 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
                 mazeGenomeLogger);
 
             // Set experiment-specific parameters
-            _maxTimesteps = XmlUtils.GetValueAsInt(xmlConfig, "MaxTimesteps");
             _minSuccessDistance = XmlUtils.GetValueAsInt(xmlConfig, "MinSuccessDistance");
             _mazeHeight = XmlUtils.GetValueAsInt(xmlConfig, "MazeHeight");
             _mazeWidth = XmlUtils.GetValueAsInt(xmlConfig, "MazeWidth");
@@ -251,7 +245,7 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
 
             // Pass in maze experiment specific parameters 
             // (note that a new maze structure is created here for the sole purpose of extracting the maze dimensions and calculating max distance to target)
-            _mazeNavigationInitializer.SetEnvironmentParameters(_maxTimesteps, _minSuccessDistance,
+            _mazeNavigationInitializer.SetEnvironmentParameters(_minSuccessDistance,
                 new MazeDecoder(_mazeScaleMultiplier).Decode(
                     new MazeGenomeFactory(MazeGenomeParameters, _mazeHeight, _mazeWidth).CreateGenome(0)));
 
@@ -409,12 +403,14 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
                     _mazeLogFieldEnableMap, _mazePopulationGenomesDataLogger, _populationLoggingBatchInterval);
 
             // Create the maze phenome evaluator
-            IPhenomeEvaluator<MazeStructure, BehaviorInfo> mazeEvaluator = new MazeEnvironmentMCSEvaluator(
-                _maxTimesteps, _minSuccessDistance, BehaviorCharacterizationFactory, _numAgentSuccessCriteria, 0);
+            IPhenomeEvaluator<MazeStructure, BehaviorInfo> mazeEvaluator =
+                new MazeEnvironmentMCSEvaluator(_minSuccessDistance, BehaviorCharacterizationFactory,
+                    _numAgentSuccessCriteria, 0);
 
             // Create navigator phenome evaluator
-            IPhenomeEvaluator<IBlackBox, BehaviorInfo> navigatorEvaluator = new MazeNavigatorMCSEvaluator(
-                _maxTimesteps, _minSuccessDistance, BehaviorCharacterizationFactory, _numMazeSuccessCriteria);
+            IPhenomeEvaluator<IBlackBox, BehaviorInfo> navigatorEvaluator =
+                new MazeNavigatorMCSEvaluator(_minSuccessDistance, BehaviorCharacterizationFactory,
+                    _numMazeSuccessCriteria);
 
             // Create maze genome decoder
             IGenomeDecoder<MazeGenome, MazeStructure> mazeGenomeDecoder = new MazeDecoder(_mazeScaleMultiplier);

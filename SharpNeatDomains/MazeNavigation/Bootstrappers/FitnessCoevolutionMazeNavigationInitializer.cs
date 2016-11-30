@@ -51,8 +51,8 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
 
             // Create IBlackBox evaluator.
             MazeNavigatorFitnessInitializationEvaluator mazeNavigatorEvaluator =
-                new MazeNavigatorFitnessInitializationEvaluator(MaxTimesteps, MinSuccessDistance, MaxDistanceToTarget,
-                    mazeEnvironment, startingEvaluations);
+                new MazeNavigatorFitnessInitializationEvaluator(MinSuccessDistance, MaxDistanceToTarget, mazeEnvironment,
+                    startingEvaluations);
 
             // Create the genome evaluator
             IGenomeEvaluator<NeatGenome> fitnessEvaluator = new ParallelGenomeFitnessEvaluator<NeatGenome, IBlackBox>(

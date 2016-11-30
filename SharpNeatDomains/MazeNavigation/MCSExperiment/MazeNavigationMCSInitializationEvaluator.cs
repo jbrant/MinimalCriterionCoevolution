@@ -23,13 +23,12 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         ///     MCS Initialization Evaluator constructor.
         /// </summary>
         /// <param name="maxDistanceToTarget">The maximum distance possible from the target location.</param>
-        /// <param name="maxTimesteps">The maximum number of time steps in a single simulation.</param>
         /// <param name="mazeVariant">The maze environment used for the simulation.</param>
         /// <param name="minSuccessDistance">The minimum distance from the target to be considered a successful run.</param>
         /// <param name="behaviorCharacterizationFactory">The initialized behavior characterization factory.</param>
         /// <param name="startingEvaluations">Number of evaluations that have been executed prior to this run.</param>
-        internal MazeNavigationMCSInitializationEvaluator(int maxDistanceToTarget, int maxTimesteps,
-            MazeVariant mazeVariant, int minSuccessDistance,
+        internal MazeNavigationMCSInitializationEvaluator(int maxDistanceToTarget, MazeVariant mazeVariant,
+            int minSuccessDistance,
             IBehaviorCharacterizationFactory behaviorCharacterizationFactory, ulong startingEvaluations)
         {
             _behaviorCharacterizationFactory = behaviorCharacterizationFactory;
@@ -37,7 +36,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 
             // Create the maze world factory
             _mazeWorldFactory = new MazeNavigationWorldFactory<BehaviorInfo>(mazeVariant, minSuccessDistance,
-                maxDistanceToTarget, maxTimesteps);
+                maxDistanceToTarget);
         }
 
         #endregion
@@ -177,7 +176,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
         {
             throw new NotImplementedException();
         }
-        
+
         /// <summary>
         ///     Resets the internal state of the evaluation scheme.  This may not be needed for the maze navigation task.
         /// </summary>

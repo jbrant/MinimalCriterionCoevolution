@@ -90,7 +90,16 @@ namespace SharpNeat.Phenomes.Mazes
         /// </summary>
         public int ScaledMazeWidth { get; }
 
+        /// <summary>
+        ///     The unscaled maze cell matrix.
+        /// </summary>
         public int[,] MazeArray { get; private set; }
+
+        /// <summary>
+        ///     The maximum number of timesteps allotted to solve the maze (based on the sum of the scaled maze height/width minus
+        ///     the value of the scale multiplier from each).
+        /// </summary>
+        public int MaxTimesteps => (ScaledMazeHeight - _scaleMultiplier) + (ScaledMazeWidth - _scaleMultiplier);
 
         #endregion
 

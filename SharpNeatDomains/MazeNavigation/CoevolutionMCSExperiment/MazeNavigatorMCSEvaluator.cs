@@ -22,14 +22,13 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
         /// <summary>
         ///     Maze Navigator MCS evaluator constructor.
         /// </summary>
-        /// <param name="maxTimesteps">The maximum number of time steps in a single simulation.</param>
         /// <param name="minSuccessDistance">The minimum distance from the target to be considered a successful run.</param>
         /// <param name="behaviorCharacterizationFactory">The initialized behavior characterization factory.</param>
         /// <param name="agentNumSuccessesCriteria">
         ///     The number of mazes that must be solved successfully in order to satisfy the
         ///     minimal criterion.
         /// </param>
-        public MazeNavigatorMCSEvaluator(int maxTimesteps, int minSuccessDistance,
+        public MazeNavigatorMCSEvaluator(int minSuccessDistance,
             IBehaviorCharacterizationFactory behaviorCharacterizationFactory, int agentNumSuccessesCriteria)
         {
             _behaviorCharacterizationFactory = behaviorCharacterizationFactory;
@@ -37,7 +36,7 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             EvaluationCount = 0;
 
             // Create factory for generating multiple mazzes
-            _multiMazeWorldFactory = new MultiMazeNavigationWorldFactory<BehaviorInfo>(maxTimesteps, minSuccessDistance);
+            _multiMazeWorldFactory = new MultiMazeNavigationWorldFactory<BehaviorInfo>(minSuccessDistance);
         }
 
         #endregion

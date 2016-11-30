@@ -21,24 +21,22 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
         /// <summary>
         ///     Maze Navigator fitness initialization evaluator constructor.
         /// </summary>
-        /// <param name="maxTimesteps">The maximum number of time steps in a single simulation.</param>
         /// <param name="minSuccessDistance">The minimum distance from the target to be considered a successful run.</param>
         /// <param name="maxDistanceToTarget">The maximum distance from the target possible.</param>
         /// <param name="startingEvaluations">The number of evaluations from which the evaluator is starting (defaults to 0).</param>
-        public MazeNavigatorFitnessInitializationEvaluator(int maxTimesteps, int minSuccessDistance,
+        public MazeNavigatorFitnessInitializationEvaluator(int minSuccessDistance,
             int maxDistanceToTarget, ulong startingEvaluations = 0)
         {
             EvaluationCount = startingEvaluations;
 
             // Create factory for generating mazes
-            _multiMazeWorldFactory = new MultiMazeNavigationWorldFactory<FitnessInfo>(maxTimesteps, minSuccessDistance,
+            _multiMazeWorldFactory = new MultiMazeNavigationWorldFactory<FitnessInfo>(minSuccessDistance,
                 maxDistanceToTarget);
         }
 
         /// <summary>
         ///     Maze Navigator fitness initialization evaluator constructor.
         /// </summary>
-        /// <param name="maxTimesteps">The maximum number of time steps in a single simulation.</param>
         /// <param name="minSuccessDistance">The minimum distance from the target to be considered a successful run.</param>
         /// <param name="maxDistanceToTarget">The maximum distance from the target possible.</param>
         /// <param name="initialMazeStructure">
@@ -46,9 +44,9 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
         ///     factory.
         /// </param>
         /// <param name="startingEvaluations">The number of evaluations from which the evaluator is starting (defaults to 0).</param>
-        public MazeNavigatorFitnessInitializationEvaluator(int maxTimesteps, int minSuccessDistance,
+        public MazeNavigatorFitnessInitializationEvaluator(int minSuccessDistance,
             int maxDistanceToTarget, MazeStructure initialMazeStructure, ulong startingEvaluations = 0)
-            : this(maxTimesteps, minSuccessDistance, maxDistanceToTarget, startingEvaluations)
+            : this(minSuccessDistance, maxDistanceToTarget, startingEvaluations)
         {
             // Add initial maze structure
             _multiMazeWorldFactory.SetMazeConfigurations(new List<MazeStructure>(1) {initialMazeStructure});

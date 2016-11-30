@@ -35,7 +35,8 @@ namespace MazeExperimentSuppotLib
             MazeConfiguration mazeConfiguration =
                 new MazeConfiguration(ExtractMazeWalls(evaluationUnit.MazePhenome.Walls),
                     ExtractStartEndPoint(evaluationUnit.MazePhenome.StartLocation),
-                    ExtractStartEndPoint(evaluationUnit.MazePhenome.TargetLocation));
+                    ExtractStartEndPoint(evaluationUnit.MazePhenome.TargetLocation),
+                    evaluationUnit.MazePhenome.MaxTimesteps);
 
             // Create trajectory behavior characterization (in order to capture full trajectory of navigator)
             IBehaviorCharacterization behaviorCharacterization = new TrajectoryBehaviorCharacterization();
@@ -225,7 +226,7 @@ namespace MazeExperimentSuppotLib
                 if (clusterWithMaxSilhouetteWidth == null || silhouetteWidth > clusterWithMaxSilhouetteWidth.Item2)
                 {
                     clusterWithMaxSilhouetteWidth = new Tuple<int, double>(clusterCount, silhouetteWidth);
-                }                
+                }
             }
 
             // Rerun kmeans for the final cluster count

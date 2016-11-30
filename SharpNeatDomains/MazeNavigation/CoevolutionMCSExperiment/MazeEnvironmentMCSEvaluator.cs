@@ -18,7 +18,6 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
         /// <summary>
         ///     Maze Environment MCS evaluator constructor.
         /// </summary>
-        /// <param name="maxTimesteps">The maximum number of time steps in a single simulation.</param>
         /// <param name="minSuccessDistance">The minimum distance from the target to be considered a successful run.</param>
         /// <param name="behaviorCharacterizationFactory">The initialized behavior characterization factory.</param>
         /// <param name="numAgentsSolvedCriteria">
@@ -29,7 +28,7 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
         ///     The number of failed attempts at maze navigation in order to satisfy the minimal
         ///     criterion.
         /// </param>
-        public MazeEnvironmentMCSEvaluator(int maxTimesteps, int minSuccessDistance,
+        public MazeEnvironmentMCSEvaluator(int minSuccessDistance,
             IBehaviorCharacterizationFactory behaviorCharacterizationFactory, int numAgentsSolvedCriteria,
             int numAgentsFailedCriteria)
         {
@@ -38,7 +37,7 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
             _numAgentsFailedCriteria = numAgentsFailedCriteria;
 
             // Create factory for maze world generation
-            _multiMazeWorldFactory = new MultiMazeNavigationWorldFactory<BehaviorInfo>(maxTimesteps, minSuccessDistance);
+            _multiMazeWorldFactory = new MultiMazeNavigationWorldFactory<BehaviorInfo>(minSuccessDistance);
         }
 
         #endregion
@@ -137,7 +136,7 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
                 // Generate a new maze world
                 MazeNavigationWorld<BehaviorInfo> world = _multiMazeWorldFactory.CreateMazeNavigationWorld(
                     mazeStructure,
-                    behaviorCharacterization);                
+                    behaviorCharacterization);
 
                 // Run a single trial
                 trialInfo = world.RunTrial(_mazeNavigators[cnt], SearchType.MinimalCriteriaSearch, out goalReached);

@@ -70,8 +70,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
                 OutputCount);
 
             // Pass in maze experiment specific parameters
-            _mazeNavigationInitializer.SetEnvironmentParameters(MaxDistanceToTarget, MaxTimesteps, MazeVariant,
-                MinSuccessDistance);
+            _mazeNavigationInitializer.SetEnvironmentParameters(MaxDistanceToTarget, MazeVariant, MinSuccessDistance);
 
             // Make sure that the population size for the primary algorithm is at least the size required
             // by the initialization algorithm
@@ -108,8 +107,7 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
             _mazeNavigationInitializer.SetAlgorithmParameters(experimentDictionary, InputCount, OutputCount);
 
             // Pass in maze experiment specific parameters
-            _mazeNavigationInitializer.SetEnvironmentParameters(MaxDistanceToTarget, MaxTimesteps, MazeVariant,
-                MinSuccessDistance);
+            _mazeNavigationInitializer.SetEnvironmentParameters(MaxDistanceToTarget, MazeVariant, MinSuccessDistance);
 
             // Make sure that the population size for the primary algorithm is at least the size required
             // by the initialization algorithm
@@ -152,9 +150,8 @@ namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
 
             // Create IBlackBox evaluator.
             IPhenomeEvaluator<IBlackBox, BehaviorInfo> mazeNavigationEvaluator =
-                new MazeNavigationMCSEvaluator(MaxDistanceToTarget, MaxTimesteps,
-                    MazeVariant, MinSuccessDistance, _behaviorCharacterizationFactory, _gridDensity,
-                    initializationEvaluations);
+                new MazeNavigationMCSEvaluator(MaxDistanceToTarget, MazeVariant, MinSuccessDistance,
+                    _behaviorCharacterizationFactory, _gridDensity, initializationEvaluations);
 
             // Create genome decoder.
             IGenomeDecoder<NeatGenome, IBlackBox> genomeDecoder = CreateGenomeDecoder();

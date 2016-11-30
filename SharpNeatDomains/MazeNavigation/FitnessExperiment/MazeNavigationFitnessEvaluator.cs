@@ -31,15 +31,14 @@ namespace SharpNeat.Domains.MazeNavigation
         ///     Fitness Evaluator constructor.
         /// </summary>
         /// <param name="maxDistanceToTarget">The maximum distance possible from the target location.</param>
-        /// <param name="maxTimesteps">The maximum number of time steps in a single simulation.</param>
         /// <param name="mazeVariant">The maze environment used for the simulation.</param>
         /// <param name="minSuccessDistance">The minimum distance from the target to be considered a successful run.</param>
-        internal MazeNavigationFitnessEvaluator(int maxDistanceToTarget, int maxTimesteps, MazeVariant mazeVariant,
+        internal MazeNavigationFitnessEvaluator(int maxDistanceToTarget, MazeVariant mazeVariant,
             int minSuccessDistance)
         {
             // Create the maze world factory
             _mazeWorldFactory = new MazeNavigationWorldFactory<FitnessInfo>(mazeVariant, minSuccessDistance,
-                maxDistanceToTarget, maxTimesteps);
+                maxDistanceToTarget);
         }
 
         #endregion

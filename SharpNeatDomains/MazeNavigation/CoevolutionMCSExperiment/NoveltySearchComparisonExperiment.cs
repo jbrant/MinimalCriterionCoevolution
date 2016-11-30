@@ -85,8 +85,8 @@ namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
 
             // Create IBlackBox evaluator.
             MazeNavigatorNoveltySearchInitializationEvaluator mazeNavigatorEvaluator =
-                new MazeNavigatorNoveltySearchInitializationEvaluator(MaxTimesteps, MinSuccessDistance,
-                    MaxDistanceToTarget, _evaluationMaze, _behaviorCharacterizationFactory, startingEvaluations);
+                new MazeNavigatorNoveltySearchInitializationEvaluator(MinSuccessDistance, MaxDistanceToTarget,
+                    _evaluationMaze, _behaviorCharacterizationFactory, startingEvaluations);
 
             // Create a novelty archive
             AbstractNoveltyArchive<NeatGenome> archive =

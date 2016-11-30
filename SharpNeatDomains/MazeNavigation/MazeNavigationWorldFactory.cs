@@ -22,17 +22,14 @@ namespace SharpNeat.Domains.MazeNavigation
         /// <param name="mazeVariant">The maze environment used for the simulation.</param>
         /// <param name="minSuccessDistance">The minimum distance from the target to be considered a successful run.</param>
         /// <param name="maxDistanceToTarget">The maximum distance possible from the target location.</param>
-        /// <param name="maxTimeSteps">The maximum number of time steps in a single simulation.</param>
         /// <param name="bridgingMagnitude">The degree heading adjustment imposed by bridging.</param>
         /// <param name="numBridgingApplications">The maximum number of times bridging heading adjustment can be applied.</param>
         public MazeNavigationWorldFactory(MazeVariant mazeVariant, int minSuccessDistance,
-            int maxDistanceToTarget, int maxTimeSteps, int bridgingMagnitude = 0,
-            int numBridgingApplications = 0)
+            int maxDistanceToTarget, int bridgingMagnitude = 0, int numBridgingApplications = 0)
         {
             _mazeVariant = mazeVariant;
             _minSuccessDistance = minSuccessDistance;
             _maxDistanceToTarget = maxDistanceToTarget;
-            _maxTimesteps = maxTimeSteps;
             _numBridgingApplications = numBridgingApplications;
 
             switch (mazeVariant)
@@ -134,11 +131,10 @@ namespace SharpNeat.Domains.MazeNavigation
         /// <param name="mazeVariant">The maze environment used for the simulation.</param>
         /// <param name="minSuccessDistance">The minimum distance from the target to be considered a successful run.</param>
         /// <param name="maxDistanceToTarget">The maximum distance possible from the target location.</param>
-        /// <param name="maxTimeSteps">The maximum number of time steps in a single simulation.</param>
         /// <param name="gridDensity">The density of the niche grid.</param>
-        public MazeNavigationWorldFactory(MazeVariant mazeVariant, int minSuccessDistance,
-            int maxDistanceToTarget, int maxTimeSteps, int gridDensity)
-            : this(mazeVariant, minSuccessDistance, maxDistanceToTarget, maxTimeSteps, 0, 0)
+        public MazeNavigationWorldFactory(MazeVariant mazeVariant, int minSuccessDistance, int maxDistanceToTarget,
+            int gridDensity)
+            : this(mazeVariant, minSuccessDistance, maxDistanceToTarget, 0, 0)
         {
             // Instantiate the grid of behavioral niches
             _mazeNicheGrid = new MazeNicheGrid(gridDensity, _walls);

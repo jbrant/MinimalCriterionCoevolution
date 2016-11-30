@@ -13,13 +13,7 @@ namespace SharpNeat.Utility
     ///     Contains utility methods for maze genomes.
     /// </summary>
     public static class MazeUtils
-    {
-        public static uint CalculateOptimalPathTimesteps(MazeStructure maze, double maxVelocity)
-        {
-            // TODO: Need to implement method for finding 
-            return 0;
-        }
-
+    {        
         /// <summary>
         ///     Averages out the number of partitions possible given the evolved maze dimensions.
         /// </summary>

@@ -121,7 +121,7 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
             // Read NEAT evolution parameters
             NeatEvolutionAlgorithmParameters =
                 ExperimentUtils.ReadNeatEvolutionAlgorithmParameters(experimentDictionary, false);
-            
+
             // Get complexity constraint parameters
             ComplexityRegulationStrategyDefinition =
                 experimentDictionary.Initialization_ComplexityRegulationStrategy;
@@ -160,14 +160,12 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
         ///     Sets configuration variables specific to the maze navigation simulation.
         /// </summary>
         /// <param name="maxDistanceToTarget">The maximum distance possible from the target location.</param>
-        /// <param name="maxTimesteps">The maximum number of time steps for which to run the simulation.</param>
         /// <param name="mazeVariant">The maze variant to run (i.e. medium/hard maze).</param>
         /// <param name="minSuccessDistance">The minimum distance to the target location for the maze to be considered "solved".</param>
-        public void SetEnvironmentParameters(int maxDistanceToTarget, int maxTimesteps, MazeVariant mazeVariant,
-            int minSuccessDistance)
+        public void SetEnvironmentParameters(int maxDistanceToTarget, MazeVariant mazeVariant, int minSuccessDistance)
         {
             // Set boiler plate environment parameters
-            base.SetEnvironmentParameters(maxDistanceToTarget, maxTimesteps, minSuccessDistance);
+            base.SetEnvironmentParameters(maxDistanceToTarget, minSuccessDistance);
             _mazeVariant = mazeVariant;
         }
 
@@ -183,7 +181,8 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
         ///     (this is used in the case where we're restarting a run because it failed to find a solution in the allotted time).
         /// </param>
         public void InitializeAlgorithm(ParallelOptions parallelOptions, List<NeatGenome> genomeList,
-            IGenomeFactory<NeatGenome> genomeFactory, IGenomeDecoder<NeatGenome, IBlackBox> genomeDecoder, ulong startingEvaluations)
+            IGenomeFactory<NeatGenome> genomeFactory, IGenomeDecoder<NeatGenome, IBlackBox> genomeDecoder,
+            ulong startingEvaluations)
         {
             // Set the boiler plate algorithm parameters
             base.InitializeAlgorithm(parallelOptions, genomeList, genomeDecoder, startingEvaluations);
@@ -195,9 +194,8 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
 
             // Create IBlackBox evaluator.
             MazeNavigationMCSInitializationEvaluator mazeNavigationEvaluator =
-                new MazeNavigationMCSInitializationEvaluator(MaxDistanceToTarget, MaxTimesteps,
-                    _mazeVariant,
-                    MinSuccessDistance, _behaviorCharacterizationFactory, startingEvaluations);
+                new MazeNavigationMCSInitializationEvaluator(MaxDistanceToTarget, _mazeVariant, MinSuccessDistance,
+                    _behaviorCharacterizationFactory, startingEvaluations);
 
             // Create a novelty archive.
             AbstractNoveltyArchive<NeatGenome> archive =
@@ -221,7 +219,7 @@ namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
             genomeList = genomeList.Take(PopulationSize).ToList();
 
             // Replace genome factory primary NEAT parameters with initialization parameters
-            ((NeatGenomeFactory)genomeFactory).ResetNeatGenomeParameters(NeatGenomeParameters);
+            ((NeatGenomeFactory) genomeFactory).ResetNeatGenomeParameters(NeatGenomeParameters);
 
             // Initialize the evolution algorithm.
             InitializationEa.Initialize(fitnessEvaluator, genomeFactory, genomeList, PopulationSize, null,
