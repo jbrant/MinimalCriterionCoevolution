@@ -235,27 +235,31 @@ namespace SharpNeat.Domains
                     "MutatePassageStartLocationProbability");
                 double? addWallProbability = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
                     "MutateAddWallProbability");
+                double? expandMazeProbability = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
+                    "MutateExpandMazeProbability");
                 double? perturbanceMagnitude = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
                     "PerturbanceMagnitude");
 
                 // Set each if it's specified in the configuration (otherwise, accept the default)
                 if (wallStartMutationProbability != null)
                 {
-                    genomeParameters.MutateWallStartLocationProbability = wallStartMutationProbability ??
-                                                                          default(double);
+                    genomeParameters.MutateWallStartLocationProbability = (double) wallStartMutationProbability;
                 }
                 if (passageStartMutationProbability != null)
                 {
-                    genomeParameters.MutatePassageStartLocationProbability = passageStartMutationProbability ??
-                                                                             default(double);
+                    genomeParameters.MutatePassageStartLocationProbability = (double) passageStartMutationProbability;
                 }
                 if (addWallProbability != null)
                 {
-                    genomeParameters.MutateAddWallProbability = addWallProbability ?? default(double);
+                    genomeParameters.MutateAddWallProbability = (double) addWallProbability;
+                }
+                if (expandMazeProbability != null)
+                {
+                    genomeParameters.MutateExpandMazeProbability = (double) expandMazeProbability;
                 }
                 if (perturbanceMagnitude != null)
                 {
-                    genomeParameters.PerturbanceMagnitude = perturbanceMagnitude ?? default(double);
+                    genomeParameters.PerturbanceMagnitude = (double) perturbanceMagnitude;
                 }
             }
 

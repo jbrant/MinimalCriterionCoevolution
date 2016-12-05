@@ -27,7 +27,7 @@
     <MutateWallStartLocationProbability>0.05</MutateWallStartLocationProbability>
     <MutatePassageStartLocationProbability>0.05</MutatePassageStartLocationProbability>
     <MutateAddWallProbability>0.7</MutateAddWallProbability>
-    <MutateExpandMazeProbability>0.001</MutateExpandMazeProbability>
+    <MutateExpandMazeProbability>0.1</MutateExpandMazeProbability>
     <PerturbanceMagnitude>0.1</PerturbanceMagnitude>
   </MazeGenomeConfig>
   <BehaviorConfig>

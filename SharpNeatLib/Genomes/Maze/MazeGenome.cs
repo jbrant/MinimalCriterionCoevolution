@@ -38,19 +38,19 @@ namespace SharpNeat.Genomes.Maze
         /// <summary>
         ///     Height of the evolved maze genome (before being scaled to phenotype).
         /// </summary>
-        public int MazeBoundaryHeight { get; }
+        public int MazeBoundaryHeight { get; private set; }
 
         /// <summary>
         ///     Width of evolved maze genome (before being scaled to phenotype).
         /// </summary>
-        public int MazeBoundaryWidth { get; }
+        public int MazeBoundaryWidth { get; private set; }
 
         /// <summary>
         ///     The maximum complexity of the maze (at the evolved resolution).  Note that this is set when the genome is birthed,
         ///     but can also change as a result of a mutation; however, it's stored on the genome instead of being calculated via
         ///     the "get" call because of the computational cost involved in calculating it.
         /// </summary>
-        public int MaxComplexity { get; }
+        public int MaxComplexity { get; private set; }
 
         #endregion
 
@@ -308,6 +308,9 @@ namespace SharpNeat.Genomes.Maze
                 case 2:
                     MutateAddWall();
                     break;
+                case 3:
+                    MutateExpandMaze();
+                    break;
             }
         }
 
@@ -402,6 +405,20 @@ namespace SharpNeat.Genomes.Maze
             // Add new gene to the genome
             GeneList.Add(new MazeGene(GenomeFactory.InnovationIdGenerator.NextId, newWallStartLocation,
                 newPassageStartLocation, GenomeFactory.Rng.NextBool()));
+        }
+
+        /// <summary>
+        ///     Probabalistically expands the maze area by one unit.
+        /// </summary>
+        private void MutateExpandMaze()
+        {
+            // TODO: This could also support incrementing in only one dimension
+            // Increment maze height and width by 1
+            MazeBoundaryHeight += 1;
+            MazeBoundaryWidth += 1;
+
+            // Recalculate estimated max complexity
+            MaxComplexity = MazeUtils.DetermineMaxPartitions(MazeBoundaryHeight, MazeBoundaryWidth);
         }
 
         /// <summary>
