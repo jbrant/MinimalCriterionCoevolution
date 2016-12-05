@@ -111,7 +111,7 @@ namespace NavigatorMazeMapEvaluator
                 Boolean.Parse(_executionConfiguration[ExecutionParameter.ExecuteInitializationTrials]);
 
             // If bitmap generation was enabled, grab the base output directory
-            if (generateTrajectoryBitmaps)
+            if (generateTrajectoryBitmaps || generateMazeBitmaps)
             {
                 baseImageOutputDirectory = _executionConfiguration[ExecutionParameter.BitmapOutputBaseDirectory];
             }
