@@ -41,8 +41,13 @@ namespace MazeExperimentSuppotLib
                 Directory.CreateDirectory(outputDirectory);
             }
 
+            // Evaluate only one successful agent trial per distinct maze
+            // (otherwise, there would be millions of generated images)
+            var distinctMazeEvaluationUnits =
+                evaluationUnits.Where(eu => eu.IsMazeSolved).GroupBy(eu => eu.MazeId).Select(eu => eu.First()).ToList();
+
             // Generate bitmap images for each maze/navigator combination that resulted in a successful trial
-            Parallel.ForEach(evaluationUnits.Where(unit => unit.IsMazeSolved),
+            Parallel.ForEach(distinctMazeEvaluationUnits,
                 delegate(MazeNavigatorEvaluationUnit evaluationUnit)
                 {
                     GenerateSingleMazeTrajectoryImage(
