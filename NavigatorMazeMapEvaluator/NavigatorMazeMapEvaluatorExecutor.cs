@@ -546,10 +546,14 @@ namespace NavigatorMazeMapEvaluator
                             sampleSize);
 
                     // Calculate natural clustering of the population trajectories at each point in time and persist
+                    //                    ExperimentDataHandler.WriteClusteringDiversityData(
+                    //                        curExperimentConfiguration.ExperimentDictionaryID, curRun, curBatch,
+                    //                        EvaluationHandler.CalculateNaturalClustering(evaluationSamples, clusterImprovementThreshold),
+                    //                        writeResultsToDatabase);
                     ExperimentDataHandler.WriteClusteringDiversityData(
-                        curExperimentConfiguration.ExperimentDictionaryID, curRun, curBatch,
-                        EvaluationHandler.CalculateNaturalClustering(evaluationSamples, clusterImprovementThreshold),
-                        writeResultsToDatabase);
+                                            curExperimentConfiguration.ExperimentDictionaryID, curRun, curBatch,
+                                            EvaluationHandler.CalculateNaturalClustering(mapEvaluator.EvaluationUnits.Where(eu => eu.IsMazeSolved).ToList(), clusterImprovementThreshold),
+                                            writeResultsToDatabase);
                 }
 
                 if (generatePopulationEntropy && runPhase != RunPhase.Initialization)
