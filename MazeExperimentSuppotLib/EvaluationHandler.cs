@@ -209,20 +209,15 @@ namespace MazeExperimentSuppotLib
         ///     (diversity).
         /// </summary>
         /// <param name="evaluationUnits">The agent/maze evaluations to cluster and compute entropy.</param>
-        /// <param name="clusterImprovementThreshold">
-        ///     The number of cluster additions that are permitted without further
-        ///     maximization of silhouette width.  When this is exceeded, the incremental cluster additions will stop and the
-        ///     number of clusters resulting in the highest silhouette width will be considered optimal.
-        /// </param>
         /// <returns></returns>
-        public static ClusterDiversityUnit CalculateNaturalClustering(
-            IList<MazeNavigatorEvaluationUnit> evaluationUnits, int clusterImprovementThreshold)
+        public static ClusterDiversityUnit CalculateNaturalClustering(IList<MazeNavigatorEvaluationUnit> evaluationUnits)
         {
-            Dictionary<int, double> clusterSilhoutteMap = new Dictionary<int, double>();
-            Tuple<int, double> clusterWithMaxSilhouetteWidth = null;
+            const double sillhouetteWidthImprovementThreshold = 0.001;
+            double curSilhouetteWidth = 0;
+            double maxSilhouetteWidth = 0;
 
-            // Always start with zero clusters and increment on first iteration of loop
-            const int initClusterCnt = 0;
+            // Always start with one cluster and increment on first iteration of loop
+            const int initClusterCnt = 1;
 
             // Only consider successful trials
             IList<MazeNavigatorEvaluationUnit> successfulEvaluations =
@@ -260,20 +255,11 @@ namespace MazeExperimentSuppotLib
             // Set the initial cluster count
             int clusterCount = initClusterCnt;
 
-            // Continue loop until the maximum number of iterations without silhouette width improvement has elapsed
-            // (also don't allow number of clusters to match the number of observations)
-            while (clusterWithMaxSilhouetteWidth == null || (clusterSilhoutteMap.Count <= clusterImprovementThreshold ||
-                                                             clusterSilhoutteMap.Where(
-                                                                 csm =>
-                                                                     (csm.Key - initClusterCnt) >=
-                                                                     clusterSilhoutteMap.Count -
-                                                                     clusterImprovementThreshold)
-                                                                 .Any(
-                                                                     csm =>
-                                                                         csm.Value >=
-                                                                         clusterWithMaxSilhouetteWidth.Item2)) &&
-                   clusterCount < trajectoryMatrix.Length - 1)
+            do
             {
+                // Set max silhouette with the value on the previous loop iteration (since it was an improvement)
+                maxSilhouetteWidth = curSilhouetteWidth;
+
                 // Increment cluster count
                 clusterCount++;
 
@@ -291,17 +277,13 @@ namespace MazeExperimentSuppotLib
                 var clusters = kmeans.Learn(trajectoryMatrix);
 
                 // Compute the silhouette width for the current number of clusters
-                double silhouetteWidth = ComputeSilhouetteWidth(clusters, trajectoryMatrix);
+                curSilhouetteWidth = ComputeSilhouetteWidth(clusters, trajectoryMatrix);
 
-                // Compute silhouette width and add to map with the current cluster count
-                clusterSilhoutteMap.Add(clusterCount, silhouetteWidth);
-
-                // If greater than the max silhouette width, reset the cluster with the max
-                if (clusterWithMaxSilhouetteWidth == null || silhouetteWidth > clusterWithMaxSilhouetteWidth.Item2)
-                {
-                    clusterWithMaxSilhouetteWidth = new Tuple<int, double>(clusterCount, silhouetteWidth);
-                }
-            }
+                // Continue to increment number of clusters while there is a silhouette width improvement 
+                // greater than the improvement threshold and we have not yet reached a number of clusters 
+                // equivalent to the number of observations
+            } while ((curSilhouetteWidth - maxSilhouetteWidth) > sillhouetteWidthImprovementThreshold &&
+                     clusterCount < trajectoryMatrix.Length);
 
             // Rerun kmeans for the final cluster count
             var optimalClustering = new KMeans(clusterCount);
@@ -321,8 +303,10 @@ namespace MazeExperimentSuppotLib
             // Compute the shannon entropy of the population
             for (int idx = 0; idx < optimalClustering.Clusters.Count; idx++)
             {
-                sumLogProportion += optimalClustering.Clusters[idx].Proportion*
-                                    Math.Log(optimalClustering.Clusters[idx].Proportion, 2);
+                sumLogProportion += optimalClustering.Clusters[idx].Proportion > 0
+                    ? optimalClustering.Clusters[idx].Proportion*
+                      Math.Log(optimalClustering.Clusters[idx].Proportion, 2)
+                    : 0;
             }
 
             // Multiply by negative one to get the Shannon entropy
@@ -355,38 +339,61 @@ namespace MazeExperimentSuppotLib
                 double obsIntraclusterDissimilarity = 0;
                 double obsInterClusterDissimilarity = 0;
 
-                // Sum the distance between current observation and every other observation in the same cluster
-                for (int caIdx = 0; caIdx < clusterAssignments.Length; caIdx++)
+                // Get the cluster assignment of the current observation
+                int curObsClusterAssignment = clusterAssignments[observationIdx];
+
+                // Setup list to hold average distance from current observation to every other neighboring cluster
+                List<double> neighboringClusterDistances = new List<double>(clusters.Count);
+
+                for (int clusterIdx = 0; clusterIdx < clusters.Count; clusterIdx++)
                 {
-                    if (clusterAssignments[caIdx] == clusterAssignments[observationIdx])
+                    // Handle the case where the current cluster is the cluster of which the observation is a member
+                    if (clusterIdx == curObsClusterAssignment)
                     {
-                        obsIntraclusterDissimilarity +=
-                            ComputeEuclideanTrajectoryDifference(observations[observationIdx], observations[caIdx]);
+                        // Sum the distance between current observation and every other observation in the same cluster
+                        for (int caIdx = 0; caIdx < clusterAssignments.Length; caIdx++)
+                        {
+                            if (curObsClusterAssignment == clusterAssignments[caIdx])
+                            {
+                                obsIntraclusterDissimilarity +=
+                                    ComputeEuclideanTrajectoryDifference(observations[observationIdx],
+                                        observations[caIdx]);
+                            }
+                        }
+                    }
+                    // Otherwise, handle the case where we're on a neighboring cluster
+                    else
+                    {
+                        // Create new variable to hold sum of dissimilarities between observation and 
+                        // neighboring cluster observations
+                        double curObsNeighboringClusterDissimilarity = 0;
+
+                        // Sum the distance between current observation and cluster centroids to which 
+                        // the current observation is NOT assigned
+                        for (int caIdx = 0; caIdx < clusterAssignments.Length; caIdx++)
+                        {
+                            if (curObsClusterAssignment != clusterAssignments[caIdx])
+                            {
+                                curObsNeighboringClusterDissimilarity +=
+                                    ComputeEuclideanTrajectoryDifference(observations[observationIdx],
+                                        observations[caIdx]);
+                            }
+                        }
+
+                        // Compute the average intercluster dissimilarity for the current neighboring 
+                        // cluster and add to the list of average neighboring cluster distances
+                        neighboringClusterDistances.Add(curObsNeighboringClusterDissimilarity/
+                                                        clusterAssignments.Where(ca => ca == clusterIdx).Count());
                     }
                 }
 
                 // Compute the average intracluster dissimilarity (local variance)
                 obsIntraclusterDissimilarity = obsIntraclusterDissimilarity/
-                                               clusterAssignments.Where(ca => ca == clusterAssignments[observationIdx])
+                                               clusterAssignments.Where(ca => ca == curObsClusterAssignment)
                                                    .Count();
 
-                // Setup list to hold distance from current observation to every other cluster centroid
-                List<double> centroidDistances = new List<double>(clusters.Count);
-
-                // Sum the distance between current observation and cluster centroids to which the current
-                // observation is NOT assigned
-                for (int idx = 0; idx < clusters.Count; idx++)
-                {
-                    // Only compute distance when observation is not assigned to the current cluster
-                    if (idx != clusterAssignments[observationIdx])
-                    {
-                        centroidDistances.Add(ComputeEuclideanTrajectoryDifference(observations[observationIdx],
-                            clusters[idx].Centroid));
-                    }
-                }
-
                 // Get the minimum intercluster dissimilarity (0 if there are no centroid differences)
-                obsInterClusterDissimilarity = centroidDistances.Any() ? centroidDistances.Min() : 0;
+                obsInterClusterDissimilarity = neighboringClusterDistances.Any() ? neighboringClusterDistances.Min() : 0;
 
                 // Add the silhoutte width for the current observation
                 var curSilhouetteWidth = (Math.Abs(obsIntraclusterDissimilarity) < 0.0000001 &&

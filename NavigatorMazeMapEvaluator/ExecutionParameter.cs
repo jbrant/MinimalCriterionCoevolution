@@ -68,12 +68,7 @@
         ///     clusters).
         /// </summary>
         GeneratePopulationEntropy,
-
-        /// <summary>
-        ///     The number of cluster additions that are permitted without further improvement to the cluster quality heuristic.
-        /// </summary>
-        ClusterImprovementThreshold,
-
+        
         /// <summary>
         ///     The number of individuals to choose either from the population or from each maze/agent species (depending on the
         ///     experiment configuration) to use in cluster analysis.

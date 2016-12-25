@@ -391,10 +391,10 @@ namespace SharpNeat.EvolutionAlgorithms
                 RemoveOldestFromAssignedSpecies(childGenomes);
             }
             // If speciation is not enabled, remove the requisite number of global oldest individuals
-            else if (SpecieList == null && (GenomeList.Count + childGenomes.Count) > PopulationSize)
+            else if (SpecieList == null && GenomeList.Count > PopulationSize)
             {
                 // Calculate number of genomes to remove
-                int genomesToRemove = (GenomeList.Count + childGenomes.Count) - PopulationSize;
+                int genomesToRemove = GenomeList.Count - PopulationSize;
 
                 // Remove the above-computed number of oldest genomes from the population
                 RemoveGlobalOldestGenomes(genomesToRemove);
