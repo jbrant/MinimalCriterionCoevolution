@@ -170,12 +170,13 @@ namespace MazeExperimentSuppotLib
         /// <param name="run">The run number of the given experiment.</param>
         /// <param name="batch">The batch number of the given run.</param>
         /// <param name="clusterDiversityUnit">The cluster diversity results.</param>
+        /// <param name="clusteringOutputType">The type of clustering output (e.g. agent trajectory maze).</param>
         /// <param name="writeToDatabase">
         ///     Indicates whether evaluation results should be written directly to the database or to a
         ///     flat file.
         /// </param>
         public static void WriteClusteringDiversityData(int experimentId, int run, int batch,
-            ClusterDiversityUnit clusterDiversityUnit, bool writeToDatabase)
+            ClusterDiversityUnit clusterDiversityUnit, OutputFileType clusteringOutputType, bool writeToDatabase)
         {
             // Write results to the database if the option has been specified
             if (writeToDatabase)
@@ -184,7 +185,7 @@ namespace MazeExperimentSuppotLib
                     "Direct write to database for clustering diversity not yet implemented!");
             }
             // Otherwise, write to the flat file output
-            WriteClusteringDiversityDataToFile(experimentId, run, batch, clusterDiversityUnit);
+            WriteClusteringDiversityDataToFile(experimentId, run, batch, clusterDiversityUnit, clusteringOutputType);
         }
 
         /// <summary>
@@ -1253,18 +1254,19 @@ namespace MazeExperimentSuppotLib
         /// <param name="run">The run number of the given experiment.</param>
         /// <param name="batch">The batch number of the given run.</param>
         /// <param name="clusterDiversityUnit">The clustering and population entropy data to persist.</param>
+        /// <param name="clusteringOutputType">The type of clustering output (e.g. agent trajectory maze).</param>
         private static void WriteClusteringDiversityDataToFile(int experimentId, int run, int batch,
-            ClusterDiversityUnit clusterDiversityUnit)
+            ClusterDiversityUnit clusterDiversityUnit, OutputFileType clusteringOutputType)
         {
             // Make sure the file writer actually exists before attempting to write to it
-            if (FileWriters.ContainsKey(OutputFileType.NaturalClusterData) == false)
+            if (FileWriters.ContainsKey(clusteringOutputType) == false)
             {
                 throw new Exception(
                     string.Format("Cannot write to output stream as no file writer of type {0} has been created.",
-                        OutputFileType.NaturalClusterData));
+                        clusteringOutputType));
             }
 
-            FileWriters[OutputFileType.NaturalClusterData].WriteLine(string.Join(FileDelimiter,
+            FileWriters[clusteringOutputType].WriteLine(string.Join(FileDelimiter,
                 new List<string>
                 {
                     experimentId.ToString(),

@@ -26,6 +26,11 @@
         NaturalClusterData,
 
         /// <summary>
+        ///     Natural clustering of maze data.
+        /// </summary>
+        MazeClusterData,
+
+        /// <summary>
         ///     Entropy of population data.
         /// </summary>
         PopulationEntropyData,

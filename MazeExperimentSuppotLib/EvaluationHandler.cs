@@ -2,14 +2,17 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml;
 using Accord.MachineLearning;
 using SharpNeat.Behaviors;
 using SharpNeat.Core;
 using SharpNeat.Domains;
 using SharpNeat.Domains.MazeNavigation;
 using SharpNeat.Domains.MazeNavigation.Components;
+using SharpNeat.Genomes.Maze;
 using SharpNeat.Phenomes.Mazes;
 
 #endregion
@@ -185,23 +188,77 @@ namespace MazeExperimentSuppotLib
             // Determine cluster assignments
             kmeans.Learn(trajectoryMatrix);
 
-            double sumLogProportion = 0.0;
-
-            // Compute the shannon entropy of the population - if proportion is zero, add zero instead
-            // of calculating log of the proportion (which would be -infinity) to avoid NaN result
-            for (int idx = 0; idx < kmeans.Clusters.Count; idx++)
-            {
-                sumLogProportion += kmeans.Clusters[idx].Proportion <= 0
-                    ? 0
-                    : kmeans.Clusters[idx].Proportion*
-                      Math.Log(kmeans.Clusters[idx].Proportion, 2);
-            }
-
-            // Multiply by negative one to get the Shannon entropy
-            double shannonEntropy = sumLogProportion*-1;
+            // Compute shannon entropy given clustering
+            double shannonEntropy = ComputeShannonEntropy(kmeans);
 
             // Return the resulting population entropy
             return new PopulationEntropyUnit(shannonEntropy);
+        }
+
+        /// <summary>
+        ///     Computes the natural clustering of the maze genomes along with their respective entropy.
+        /// </summary>
+        /// <param name="mazeGenomeListXml">The list of serialized maze genome XML.</param>
+        /// <returns>The cluster diversity unit for maze genomes.</returns>
+        public static ClusterDiversityUnit CalculateMazeClustering(IList<string> mazeGenomeListXml)
+        {
+            // Always start with one cluster
+            const int initClusterCnt = 1;
+
+            // Initialize list of maze genome objects
+            var mazeGenomes = new List<MazeGenome>(mazeGenomeListXml.Count());
+
+            // Convert all maze genome XML strings to maze genome objects
+            foreach (var genomeXml in mazeGenomeListXml)
+            {
+                MazeGenome curMazeGenome;
+
+                // Create a new, dummy maze genome factory
+                MazeGenomeFactory tempMazeGenomeFactory = new MazeGenomeFactory();
+
+                // Convert genome XML to genome object
+                using (XmlReader xr = XmlReader.Create(new StringReader(genomeXml)))
+                {
+                    curMazeGenome = MazeGenomeXmlIO.ReadSingleGenomeFromRoot(xr, tempMazeGenomeFactory);
+                }
+
+                // Add to the genome object list
+                mazeGenomes.Add(curMazeGenome);
+            }
+
+            // Define observation matrix in which to store all gene coordinate vectors for each maze
+            double[][] observationMatrix = new double[mazeGenomes.Count()][];
+
+            // Get the maximum observation vector length (max number of maze genes)
+            var maxObservationLength = mazeGenomes.Max(g => g.GeneList.Count());
+
+            for (int idx = 0; idx < mazeGenomes.Count(); idx++)
+            {
+                // If there are more observations than the total elements in the observation vector, 
+                // zero out the rest of the vector
+                if (mazeGenomes[idx].GeneList.Count() < maxObservationLength)
+                {
+                    observationMatrix[idx] =
+                        mazeGenomes[idx].Position.CoordArray.Select(ca => ca.Value)
+                            .Concat(Enumerable.Repeat(0.0,
+                                maxObservationLength - mazeGenomes[idx].Position.CoordArray.Length))
+                            .ToArray();
+                }
+                // Otherwise, if the observation and vector length are the same, just set the elements
+                else
+                {
+                    observationMatrix[idx] = mazeGenomes[idx].Position.CoordArray.Select(ca => ca.Value).ToArray();
+                }
+            }
+
+            // Determine the optimal number of clusters to fit these data
+            var optimalClustering = DetermineOptimalClusters(observationMatrix, initClusterCnt);
+
+            // Compute shannon entropy given optimal clustering
+            double shannonEntropy = ComputeShannonEntropy(optimalClustering);
+
+            // Return the resulting maze genome cluster diversity info
+            return new ClusterDiversityUnit(optimalClustering.Clusters.Count, shannonEntropy);
         }
 
         /// <summary>
@@ -209,14 +266,10 @@ namespace MazeExperimentSuppotLib
         ///     (diversity).
         /// </summary>
         /// <param name="evaluationUnits">The agent/maze evaluations to cluster and compute entropy.</param>
-        /// <returns></returns>
+        /// <returns>The cluster diversity unit for agent trajectories.</returns>
         public static ClusterDiversityUnit CalculateNaturalClustering(IList<MazeNavigatorEvaluationUnit> evaluationUnits)
         {
-            const double sillhouetteWidthImprovementThreshold = 0.001;
-            double curSilhouetteWidth = 0;
-            double maxSilhouetteWidth = 0;
-
-            // Always start with one cluster and increment on first iteration of loop
+            // Always start with one cluster
             const int initClusterCnt = 1;
 
             // Only consider successful trials
@@ -238,11 +291,16 @@ namespace MazeExperimentSuppotLib
                 // position in the simulation
                 if (successfulEvaluations[idx].AgentTrajectory.Length < maxObservationLength)
                 {
-                    trajectoryMatrix[idx] =
+                    /*trajectoryMatrix[idx] =
                         successfulEvaluations[idx].AgentTrajectory.Concat(
                             Enumerable.Repeat(
                                 successfulEvaluations[idx].AgentTrajectory[
                                     successfulEvaluations[idx].AgentTrajectory.Length - 1],
+                                maxObservationLength - successfulEvaluations[idx].AgentTrajectory.Length)).ToArray();*/
+                    trajectoryMatrix[idx] =
+                        successfulEvaluations[idx].AgentTrajectory.Concat(
+                            Enumerable.Repeat(
+                                0.0,
                                 maxObservationLength - successfulEvaluations[idx].AgentTrajectory.Length)).ToArray();
                 }
                 // If they are equal, just set the trajectory points
@@ -252,8 +310,58 @@ namespace MazeExperimentSuppotLib
                 }
             }
 
+            // Determine the optimal number of clusters to fit these data
+            var optimalClustering = DetermineOptimalClusters(trajectoryMatrix, initClusterCnt);
+
+            // Compute shannon entropy given optimal clustering
+            double shannonEntropy = ComputeShannonEntropy(optimalClustering);
+
+            // Return the resulting agent trajectory cluster diversity info
+            return new ClusterDiversityUnit(optimalClustering.Clusters.Count, shannonEntropy);
+        }
+
+        #endregion
+
+        #region Private methods
+
+        /// <summary>
+        ///     Computes the shannon entropy for the given clusters and their respective assignment proportions.
+        /// </summary>
+        /// <param name="clusters">The clusters resulting from K-means clustering process.</param>
+        /// <returns>The shannon entropy (i.e. population diversity) based on cluster proportion assignments.</returns>
+        private static double ComputeShannonEntropy(KMeans clusters)
+        {
+            double sumLogProportion = 0.0;
+
+            // Compute the shannon entropy of the population
+            for (int idx = 0; idx < clusters.Clusters.Count; idx++)
+            {
+                sumLogProportion += clusters.Clusters[idx].Proportion > 0
+                    ? clusters.Clusters[idx].Proportion*
+                      Math.Log(clusters.Clusters[idx].Proportion, 2)
+                    : 0;
+            }
+
+            // Multiply by negative one to get the Shannon entropy
+            return sumLogProportion*-1;
+        }
+
+        /// <summary>
+        ///     Computes the optimal number of clusters for the given observations.
+        /// </summary>
+        /// <param name="observationMatrix">The matrix of observations.</param>
+        /// <param name="initialClusterCount">The initial number of clusters to start with.</param>
+        /// <returns>The cluster assignments and their proportions (as well as other K-Means stats).</returns>
+        private static KMeans DetermineOptimalClusters(double[][] observationMatrix, int initialClusterCount)
+        {
+            const double sillhouetteWidthImprovementThreshold = 0.001;
+            double maxSilhouetteWidth;
+
+            // Initialize current silhouette width
+            double curSilhouetteWidth = 0;
+
             // Set the initial cluster count
-            int clusterCount = initClusterCnt;
+            int clusterCount = initialClusterCount;
 
             do
             {
@@ -274,16 +382,16 @@ namespace MazeExperimentSuppotLib
                 kmeans.UseSeeding = Seeding.Uniform;
 
                 // Determine the resulting clusters
-                var clusters = kmeans.Learn(trajectoryMatrix);
+                var clusters = kmeans.Learn(observationMatrix);
 
                 // Compute the silhouette width for the current number of clusters
-                curSilhouetteWidth = ComputeSilhouetteWidth(clusters, trajectoryMatrix);
+                curSilhouetteWidth = ComputeSilhouetteWidth(clusters, observationMatrix);
 
                 // Continue to increment number of clusters while there is a silhouette width improvement 
                 // greater than the improvement threshold and we have not yet reached a number of clusters 
                 // equivalent to the number of observations
             } while ((curSilhouetteWidth - maxSilhouetteWidth) > sillhouetteWidthImprovementThreshold &&
-                     clusterCount < trajectoryMatrix.Length);
+                     clusterCount < observationMatrix.Length);
 
             // Rerun kmeans for the final cluster count
             var optimalClustering = new KMeans(clusterCount);
@@ -296,29 +404,10 @@ namespace MazeExperimentSuppotLib
             optimalClustering.UseSeeding = Seeding.Uniform;
 
             // Determine cluster assignments
-            optimalClustering.Learn(trajectoryMatrix);
+            optimalClustering.Learn(observationMatrix);
 
-            double sumLogProportion = 0.0;
-
-            // Compute the shannon entropy of the population
-            for (int idx = 0; idx < optimalClustering.Clusters.Count; idx++)
-            {
-                sumLogProportion += optimalClustering.Clusters[idx].Proportion > 0
-                    ? optimalClustering.Clusters[idx].Proportion*
-                      Math.Log(optimalClustering.Clusters[idx].Proportion, 2)
-                    : 0;
-            }
-
-            // Multiply by negative one to get the Shannon entropy
-            double shannonEntropy = sumLogProportion*-1;
-
-            // Return the resulting cluster diversity info
-            return new ClusterDiversityUnit(optimalClustering.Clusters.Count, shannonEntropy);
+            return optimalClustering;
         }
-
-        #endregion
-
-        #region Private methods
 
         /// <summary>
         ///     Computes the silhouette width for the given set of clusters and observations.
@@ -437,24 +526,30 @@ namespace MazeExperimentSuppotLib
                 // Handle the case where the first trajectory has ended
                 if (idx >= trajectory1.Length)
                 {
-                    trajectoryDistance +=
+                    /*trajectoryDistance +=
                         Math.Pow(
                             (trajectory2[idx] - trajectory1[trajectory1.Length - 2]),
                             2) +
                         Math.Pow(
                             (trajectory2[idx + 1] -
-                             trajectory1[trajectory1.Length - 1]), 2);
+                             trajectory1[trajectory1.Length - 1]), 2);*/
+                    trajectoryDistance +=
+                        Math.Pow(trajectory2[idx], 2) +
+                        Math.Pow(trajectory2[idx + 1], 2);
                 }
                 // Handle the case where the second trajectory has ended
                 else if (idx >= trajectory2.Length)
                 {
-                    trajectoryDistance +=
+                    /*trajectoryDistance +=
                         Math.Pow(
                             (trajectory2[trajectory2.Length - 2] - trajectory1[idx]),
                             2) +
                         Math.Pow(
                             (trajectory2[trajectory2.Length - 1] -
-                             trajectory1[idx + 1]), 2);
+                             trajectory1[idx + 1]), 2);*/
+                    trajectoryDistance +=
+                        Math.Pow(trajectory1[idx], 2) +
+                        Math.Pow(trajectory1[idx + 1], 2);
                 }
                 // Otherwise, we're still in the simulation time frame for both trajectories
                 else

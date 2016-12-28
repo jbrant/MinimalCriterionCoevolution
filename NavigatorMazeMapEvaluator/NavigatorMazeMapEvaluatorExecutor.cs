@@ -86,14 +86,19 @@ namespace NavigatorMazeMapEvaluator
                 _executionConfiguration.ContainsKey(ExecutionParameter.GenerateDiversityScores) &&
                 Boolean.Parse(_executionConfiguration[ExecutionParameter.GenerateDiversityScores]);
 
-            // Get boolean indicator dictating whether to write out natural population clusters (default is false)
+            // Get boolean indicator dictating whether to write out natural agent trajectory clusters (default is false)
             bool generateNaturalClusters =
                 _executionConfiguration.ContainsKey(ExecutionParameter.GenerateNaturalClusters) &&
                 Boolean.Parse(_executionConfiguration[ExecutionParameter.GenerateNaturalClusters]);
 
-            // If the generate natural clusters flag is set, get the specie sample size
-            int specieSampleSize = generateNaturalClusters
-                ? Int32.Parse(_executionConfiguration[ExecutionParameter.ClusterSampleSize])
+            // Get boolean indicator dictating whether to write out natural maze clusters (default is false)
+            bool generateMazeClusters =
+                _executionConfiguration.ContainsKey(ExecutionParameter.GenerateMazeClusters) &&
+                Boolean.Parse(_executionConfiguration[ExecutionParameter.GenerateMazeClusters]);
+
+            // If the generate natural clusters or trajectory diversity flag is set, get the sample size
+            int sampleSize = (generateNaturalClusters || generateTrajectoryDiversityScores)
+                ? Int32.Parse(_executionConfiguration[ExecutionParameter.SampleSize])
                 : 0;
 
             // Get boolean indicator dictating whether to sample the clustering data points from 
@@ -206,6 +211,15 @@ namespace NavigatorMazeMapEvaluator
                             OutputFileType.NaturalClusterData);
                     }
 
+                    if (generateMazeClusters && writeResultsToDatabase == false)
+                    {
+                        ExperimentDataHandler.OpenFileWriter(
+                            Path.Combine(_executionConfiguration[ExecutionParameter.DataFileOutputDirectory],
+                                string.Format("{0} - MazeClusters - {1} - Run{2}.csv", experimentName, analysisScope,
+                                    curRun)),
+                            OutputFileType.MazeClusterData);
+                    }
+
                     if (generatePopulationEntropy && writeResultsToDatabase == false)
                     {
                         ExperimentDataHandler.OpenFileWriter(
@@ -239,9 +253,10 @@ namespace NavigatorMazeMapEvaluator
                                 RunPhase.Initialization,
                                 experimentParameters, inputNeuronCount, outputNeuronCount, curRun, numRuns,
                                 curExperimentConfiguration, generateSimulationResults, generateTrajectoryData,
-                                generateTrajectoryDiversityScores, generateNaturalClusters, generatePopulationEntropy,
+                                generateTrajectoryDiversityScores, generateNaturalClusters, generateMazeClusters,
+                                generatePopulationEntropy,
                                 writeResultsToDatabase, generateMazeBitmaps, generateTrajectoryBitmaps,
-                                baseImageOutputDirectory, specieSampleSize,
+                                baseImageOutputDirectory, sampleSize,
                                 sampleClusterObservationsFromSpecies);
                         }
 
@@ -259,9 +274,10 @@ namespace NavigatorMazeMapEvaluator
                         ProcessAndLogPerBatchResults(batchesWithGenomeData, RunPhase.Primary, experimentParameters,
                             inputNeuronCount, outputNeuronCount, curRun, numRuns, curExperimentConfiguration,
                             generateSimulationResults, generateTrajectoryData, generateTrajectoryDiversityScores,
-                            generateNaturalClusters, generatePopulationEntropy, writeResultsToDatabase,
+                            generateNaturalClusters, generateMazeClusters, generatePopulationEntropy,
+                            writeResultsToDatabase,
                             generateMazeBitmaps,
-                            generateTrajectoryBitmaps, baseImageOutputDirectory, specieSampleSize,
+                            generateTrajectoryBitmaps, baseImageOutputDirectory, sampleSize,
                             sampleClusterObservationsFromSpecies);
                     }
                     // If we want to analyze the entirety of the run as a whole
@@ -280,8 +296,9 @@ namespace NavigatorMazeMapEvaluator
                             outputNeuronCount,
                             curRun, numRuns, curExperimentConfiguration, generateSimulationResults,
                             generateTrajectoryData, generateTrajectoryDiversityScores, generateNaturalClusters,
+                            generateMazeClusters,
                             writeResultsToDatabase, generateMazeBitmaps, generateTrajectoryBitmaps,
-                            baseImageOutputDirectory, specieSampleSize);
+                            baseImageOutputDirectory, sampleSize);
                     }
                     // Otherwise, we're just analyzing the ending population
                     else
@@ -300,9 +317,10 @@ namespace NavigatorMazeMapEvaluator
                         ProcessAndLogPerBatchResults(new List<int>(1) {finalBatch}, RunPhase.Primary,
                             experimentParameters, inputNeuronCount, outputNeuronCount, curRun, numRuns,
                             curExperimentConfiguration, generateSimulationResults, generateTrajectoryData,
-                            generateTrajectoryDiversityScores, generateNaturalClusters, generatePopulationEntropy,
+                            generateTrajectoryDiversityScores, generateNaturalClusters, generateMazeClusters,
+                            generatePopulationEntropy,
                             writeResultsToDatabase, generateMazeBitmaps, generateTrajectoryBitmaps,
-                            baseImageOutputDirectory, specieSampleSize, sampleClusterObservationsFromSpecies);
+                            baseImageOutputDirectory, sampleSize, sampleClusterObservationsFromSpecies);
                     }
 
                     // If we're not writing to the database, close the simulation result file writer
@@ -345,6 +363,16 @@ namespace NavigatorMazeMapEvaluator
                                 string.Format("{0} - NaturalClusters - {1}", experimentName, analysisScope)), curRun);
                     }
 
+                    // If we're not writing to the database, close the maze clustering file writer
+                    // and write the sentinel file for the run
+                    if (generateMazeClusters && writeResultsToDatabase == false)
+                    {
+                        ExperimentDataHandler.CloseFileWriter(OutputFileType.MazeClusterData);
+                        ExperimentDataHandler.WriteSentinelFile(
+                            Path.Combine(_executionConfiguration[ExecutionParameter.DataFileOutputDirectory],
+                                string.Format("{0} - MazeClusters - {1}", experimentName, analysisScope)), curRun);
+                    }
+
                     // If we're not writing to the database, close the population entropy file writer
                     // and write the sentinel file for the run
                     if (generatePopulationEntropy && writeResultsToDatabase == false)
@@ -383,6 +411,7 @@ namespace NavigatorMazeMapEvaluator
         ///     should be written out.
         /// </param>
         /// <param name="generateNaturalClustering">Indicates whether the natural population clusters should be analyzed.</param>
+        /// <param name="generateMazeClusters">Indicates whether the naturally occurring maze clusters should be analyzed.</param>
         /// <param name="generatePopulationEntropy">
         ///     Indicates whether the entropy of the resulting population clusters should be
         ///     analyzed.
@@ -393,7 +422,7 @@ namespace NavigatorMazeMapEvaluator
         ///     written out.
         /// </param>
         /// <param name="baseImageOutputDirectory">The path to the output directory for the trajectory images.</param>
-        /// <param name="sampleSize">The number of genomes sampled from the extant species for clustering analysis.</param>
+        /// <param name="sampleSize">The number of genomes sampled from the extant species for trajectory or clustering analysis.</param>
         /// <param name="sampleClusterObservationsFromSpecies">
         ///     Indicates whether to sample observations used in clustering analysis
         ///     from species or from the population as a whole.
@@ -402,8 +431,8 @@ namespace NavigatorMazeMapEvaluator
             ExperimentParameters experimentParameters, int inputNeuronCount, int outputNeuronCount, int curRun,
             int numRuns, ExperimentDictionary curExperimentConfiguration, bool generateSimulationResults,
             bool generateTrajectoryData, bool generateTrajectoryDiversityScore, bool generateNaturalClustering,
-            bool generatePopulationEntropy, bool writeResultsToDatabase, bool generateMazeBitmaps,
-            bool generateTrajectoryBitmaps, string baseImageOutputDirectory, int sampleSize,
+            bool generateMazeClusters, bool generatePopulationEntropy, bool writeResultsToDatabase,
+            bool generateMazeBitmaps, bool generateTrajectoryBitmaps, string baseImageOutputDirectory, int sampleSize,
             bool sampleClusterObservationsFromSpecies)
         {
             IList<CoevolutionMCSMazeExperimentGenome> staticInitializationMazes = null;
@@ -518,10 +547,26 @@ namespace NavigatorMazeMapEvaluator
                 // 3. All other agent trajectories (regardless of maze)
                 if (generateTrajectoryDiversityScore && runPhase != RunPhase.Initialization)
                 {
-                    ExperimentDataHandler.WriteTrajectoryDiversityData(
-                        curExperimentConfiguration.ExperimentDictionaryID, curRun, curBatch,
-                        EvaluationHandler.CalculateTrajectoryDiversity(mapEvaluator.EvaluationUnits),
-                        writeResultsToDatabase);
+                    // If sample size is specified, then trajectory diversity is based on a sample of the population 
+                    // instead of an exhaustive evaluation
+                    if (sampleSize > 0)
+                    {
+                        Random rnd = new Random();
+
+                        ExperimentDataHandler.WriteTrajectoryDiversityData(
+                            curExperimentConfiguration.ExperimentDictionaryID, curRun, curBatch,
+                            EvaluationHandler.CalculateTrajectoryDiversity(
+                                mapEvaluator.EvaluationUnits.OrderBy(eu => rnd.Next()).Take(sampleSize).ToList()),
+                            writeResultsToDatabase);
+                    }
+                    // Otherwise, trajectory diversity comparison is exhaustive
+                    else
+                    {
+                        ExperimentDataHandler.WriteTrajectoryDiversityData(
+                            curExperimentConfiguration.ExperimentDictionaryID, curRun, curBatch,
+                            EvaluationHandler.CalculateTrajectoryDiversity(mapEvaluator.EvaluationUnits),
+                            writeResultsToDatabase);
+                    }
                 }
 
                 // Only write clustering results for primary runs when the number of trajectories have surpassed 
@@ -545,7 +590,8 @@ namespace NavigatorMazeMapEvaluator
                         // Calculate natural clustering of the population trajectories at each point in time and persist
                         ExperimentDataHandler.WriteClusteringDiversityData(
                             curExperimentConfiguration.ExperimentDictionaryID, curRun, curBatch,
-                            EvaluationHandler.CalculateNaturalClustering(evaluationSamples), writeResultsToDatabase);
+                            EvaluationHandler.CalculateNaturalClustering(evaluationSamples),
+                            OutputFileType.NaturalClusterData, writeResultsToDatabase);
                     }
                     // Otherwise, evaluation is exhaustive (i.e. includes all trajectories in the population)
                     else
@@ -554,8 +600,19 @@ namespace NavigatorMazeMapEvaluator
                             curExperimentConfiguration.ExperimentDictionaryID, curRun, curBatch,
                             EvaluationHandler.CalculateNaturalClustering(
                                 mapEvaluator.EvaluationUnits.Where(eu => eu.IsMazeSolved).ToList()),
-                            writeResultsToDatabase);
+                            OutputFileType.NaturalClusterData, writeResultsToDatabase);
                     }
+                }
+
+                if (generateMazeClusters && runPhase != RunPhase.Initialization)
+                {
+                    // Calculate maze clustering and persist
+                    ExperimentDataHandler.WriteClusteringDiversityData(
+                        curExperimentConfiguration.ExperimentDictionaryID, curRun, curBatch,
+                        EvaluationHandler.CalculateMazeClustering(
+                            ExperimentDataHandler.GetMazeGenomeXml(curExperimentConfiguration.ExperimentDictionaryID,
+                                curRun,
+                                curBatch)), OutputFileType.MazeClusterData, writeResultsToDatabase);
                 }
 
                 if (generatePopulationEntropy && runPhase != RunPhase.Initialization)
@@ -591,6 +648,7 @@ namespace NavigatorMazeMapEvaluator
         ///     should be written out.
         /// </param>
         /// <param name="generateNaturalClustering">Indicates whether the natural population clusters should be analyzed.</param>
+        /// <param name="generateMazeClusters">Indicates whether the naturally occurring maze clusters should be analyzed.</param>
         /// <param name="generateMazeBitmaps">Indicates whether bitmap files of the distinct mazes should be written out.</param>
         /// <param name="generateTrajectoryBitmaps">
         ///     Indicates whether bitmap files depicting the navigator trajectory should be
@@ -603,6 +661,7 @@ namespace NavigatorMazeMapEvaluator
             int inputNeuronCount, int outputNeuronCount, int curRun,
             int numRuns, ExperimentDictionary curExperimentConfiguration, bool generateSimulationResults,
             bool generateTrajectoryData, bool generateTrajectoryDiversityScore, bool generateNaturalClustering,
+            bool generateMazeClusters,
             bool writeResultsToDatabase, bool generateMazeBitmaps, bool generateTrajectoryBitmaps,
             string baseImageOutputDirectory, int specieSampleSize)
         {
@@ -728,7 +787,7 @@ namespace NavigatorMazeMapEvaluator
                         case ExecutionParameter.AgentNeuronInputCount:
                         case ExecutionParameter.AgentNeuronOutputCount:
                         case ExecutionParameter.StartFromRun:
-                        case ExecutionParameter.ClusterSampleSize:
+                        case ExecutionParameter.SampleSize:
                             int testInt;
                             if (Int32.TryParse(parameterValuePair[1], out testInt) == false)
                             {
@@ -747,6 +806,7 @@ namespace NavigatorMazeMapEvaluator
                         case ExecutionParameter.GenerateAgentTrajectoryBitmaps:
                         case ExecutionParameter.GenerateDiversityScores:
                         case ExecutionParameter.GenerateNaturalClusters:
+                        case ExecutionParameter.GenerateMazeClusters:
                         case ExecutionParameter.GeneratePopulationEntropy:
                         case ExecutionParameter.IsDistributedExecution:
                         case ExecutionParameter.ExecuteInitializationTrials:
@@ -815,7 +875,7 @@ namespace NavigatorMazeMapEvaluator
                 // If natural clustering is being generated, then the specie sample size must be specified
                 if ((_executionConfiguration.ContainsKey(ExecutionParameter.GenerateNaturalClusters) &&
                      Convert.ToBoolean(_executionConfiguration[ExecutionParameter.GenerateNaturalClusters])) &&
-                    _executionConfiguration.ContainsKey(ExecutionParameter.ClusterSampleSize) == false)
+                    _executionConfiguration.ContainsKey(ExecutionParameter.SampleSize) == false)
                 {
                     _executionLogger.Error(
                         "The specie sample size must be specified when generating natural clustering statistics.");
@@ -877,19 +937,20 @@ namespace NavigatorMazeMapEvaluator
             _executionLogger.Error(
                 string.Format(
                     "NavigatorMazeMapEvaluator.exe \n\t" +
-                    "Required: {0}=[{19}] {1}=[{20}] \n\t" +
-                    "Optional: {2}=[{26}] \n\t" +
-                    "Optional: {3}=[{21}] {4}=[{21}] (Required: {5}=[{22}]) \n\t" +
-                    "Optional: {6}=[{21}] (Required: {9}=[{22}]) \n\t" +
-                    "Optional: {7}=[{21}] (Required: {9}=[{22}]) \n\t" +
-                    "Optional: {8}=[{21}] (Required: {17}=[{25}] {18}=[{21}] {5}=[{22}]) \n\t" +
-                    "Optional: {11}=[{21}] (Required: {5}=[{22}])) \n\t" +
-                    "Optional: {12}=[{21}] (Required: {5}=[{22}]) \n\t" +
-                    "Optional: {13}=[{21}] (Required: {5}=[{22}]) \n\t" +
-                    "Optional: {14}=[{24}] \n\t" +
-                    "Optional: {15}=[{21}] \n\t" +
-                    "Optional: {16}=[{21}] \n\t" +
-                    "Required: {10}=[{23}]",
+                    "Required: {0}=[{20}] {1}=[{21}] \n\t" +
+                    "Optional: {2}=[{27}] \n\t" +
+                    "Optional: {3}=[{22}] {4}=[{22}] (Required: {5}=[{23}]) \n\t" +
+                    "Optional: {6}=[{21}] (Required: {9}=[{23}]) \n\t" +
+                    "Optional: {7}=[{22}] (Required: {9}=[{23}]) \n\t" +
+                    "Optional: {8}=[{22}] (Required: {17}=[{26}] {18}=[{22}] {5}=[{23}]) \n\t" +
+                    "Optional: {19}=[{22}] \n\t" +
+                    "Optional: {11}=[{22}] (Required: {5}=[{23}] {5}=[{23}]) \n\t" +
+                    "Optional: {12}=[{22}] (Required: {17}=[{26}] {5}=[{23}]) \n\t" +
+                    "Optional: {13}=[{22}] (Required: {5}=[{23}]) \n\t" +
+                    "Optional: {14}=[{25}] \n\t" +
+                    "Optional: {15}=[{22}] \n\t" +
+                    "Optional: {16}=[{22}] \n\t" +
+                    "Required: {10}=[{24}]",
                     ExecutionParameter.AgentNeuronInputCount, ExecutionParameter.AgentNeuronOutputCount,
                     ExecutionParameter.AnalysisScope, ExecutionParameter.GenerateSimulationResults,
                     ExecutionParameter.WriteResultsToDatabase, ExecutionParameter.DataFileOutputDirectory,
@@ -898,8 +959,8 @@ namespace NavigatorMazeMapEvaluator
                     ExecutionParameter.ExperimentNames, ExecutionParameter.GenerateDiversityScores,
                     ExecutionParameter.GenerateTrajectoryData, ExecutionParameter.GeneratePopulationEntropy,
                     ExecutionParameter.StartFromRun, ExecutionParameter.ExecuteInitializationTrials,
-                    ExecutionParameter.IsDistributedExecution, ExecutionParameter.ClusterSampleSize,
-                    ExecutionParameter.SampleFromSpecies,
+                    ExecutionParameter.IsDistributedExecution, ExecutionParameter.SampleSize,
+                    ExecutionParameter.SampleFromSpecies, ExecutionParameter.GenerateMazeClusters,
                     "# Input Neurons", "# Output Neurons", "true|false", "directory", "experiment,experiment,...",
                     "starting run #", "sample #", "Full, Aggregate, Last"));
 

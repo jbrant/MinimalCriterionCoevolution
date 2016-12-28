@@ -59,21 +59,26 @@
         GenerateDiversityScores,
 
         /// <summary>
-        ///     Whether or not to analyze natural clustering of population.
+        ///     Whether or not to analyze natural clustering of agent trajectories.
         /// </summary>
         GenerateNaturalClusters,
+
+        /// <summary>
+        ///     Whether or not to analyze natural clustering of mazes.
+        /// </summary>
+        GenerateMazeClusters,
 
         /// <summary>
         ///     Whether or not to compute population entropy (using a fixed number of clusters that's based on the number of specie
         ///     clusters).
         /// </summary>
         GeneratePopulationEntropy,
-        
+
         /// <summary>
         ///     The number of individuals to choose either from the population or from each maze/agent species (depending on the
-        ///     experiment configuration) to use in cluster analysis.
+        ///     experiment configuration) to use in cluster or trajectory analysis.
         /// </summary>
-        ClusterSampleSize,
+        SampleSize,
 
         /// <summary>
         ///     Whether or not to select samples evenly across species (not possible for non-speciated experiments) or from the
