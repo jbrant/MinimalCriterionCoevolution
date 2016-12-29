@@ -61,7 +61,7 @@
         /// <summary>
         ///     Whether or not to analyze natural clustering of agent trajectories.
         /// </summary>
-        GenerateNaturalClusters,
+        GenerateAgentTrajectoryClusters,
 
         /// <summary>
         ///     Whether or not to analyze natural clustering of mazes.
@@ -73,6 +73,17 @@
         ///     clusters).
         /// </summary>
         GeneratePopulationEntropy,
+
+        /// <summary>
+        ///     Whether or not to use a greedy strategy when calculating silhouette width for optimal cluster determination.
+        /// </summary>
+        UseGreedySilhouetteCalculation,
+
+        /// <summary>
+        ///     Ceiling on range of cluster values to try when determining which cluster values maximizes the silhouette width
+        ///     (used as part of a non-greedy strategy).
+        /// </summary>
+        ClusterRange,
 
         /// <summary>
         ///     The number of individuals to choose either from the population or from each maze/agent species (depending on the

@@ -1273,6 +1273,7 @@ namespace MazeExperimentSuppotLib
                     run.ToString(),
                     batch.ToString(),
                     clusterDiversityUnit.NumClusters.ToString(),
+                    clusterDiversityUnit.SilhouetteWidth.ToString(CultureInfo.InvariantCulture),
                     clusterDiversityUnit.PopulationEntropy.ToString(CultureInfo.InvariantCulture)
                 }));
         }
