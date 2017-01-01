@@ -313,7 +313,8 @@ namespace MazeExperimentSuppotLib
                     trajectoryMatrix[idx] =
                         successfulEvaluations[idx].AgentTrajectory.Concat(
                             Enumerable.Repeat(
-                                0.0,
+                                successfulEvaluations[idx].AgentTrajectory[
+                                    successfulEvaluations[idx].AgentTrajectory.Length - 1],
                                 maxObservationLength - successfulEvaluations[idx].AgentTrajectory.Length)).ToArray();
                 }
                 // If they are equal, just set the trajectory points
@@ -586,22 +587,22 @@ namespace MazeExperimentSuppotLib
                 // Handle the case where there are no more observations in observation vector 1
                 if (idx >= observation1.Length)
                 {
-                    distance += Math.Abs(observation2[idx]);
+                    distance += Math.Pow(observation2[idx], 2);
                 }
                 // Handle the case where there are no more observations in observation vector 2
                 else if (idx >= observation2.Length)
                 {
-                    distance += Math.Abs(observation1[idx]);
+                    distance += Math.Pow(observation1[idx], 2);
                 }
                 // Otherwise, there's an observation in both vectors for the current index
                 else
                 {
-                    distance += Math.Abs(observation2[idx] - observation1[idx]);
+                    distance += Math.Pow(observation2[idx] - observation1[idx], 2);
                 }
             }
 
-            // Return the euclidean distance between the two observations
-            return distance/maxObservationLength;
+            // Return the euclidean distance between the two observation vectors
+            return Math.Sqrt(distance);
         }
 
         /// <summary>
@@ -628,15 +629,23 @@ namespace MazeExperimentSuppotLib
                 if (idx >= trajectory1.Length)
                 {
                     trajectoryDistance += Math.Sqrt(
-                        Math.Pow(trajectory2[idx], 2) +
-                        Math.Pow(trajectory2[idx + 1], 2));
+                        Math.Pow(
+                            (trajectory2[idx] - trajectory1[trajectory1.Length - 2]),
+                            2) +
+                        Math.Pow(
+                            (trajectory2[idx + 1] -
+                             trajectory1[trajectory1.Length - 1]), 2));
                 }
                 // Handle the case where the second trajectory has ended
                 else if (idx >= trajectory2.Length)
                 {
                     trajectoryDistance += Math.Sqrt(
-                        Math.Pow(trajectory1[idx], 2) +
-                        Math.Pow(trajectory1[idx + 1], 2));
+                        Math.Pow(
+                            (trajectory2[trajectory2.Length - 2] - trajectory1[idx]),
+                            2) +
+                        Math.Pow(
+                            (trajectory2[trajectory2.Length - 1] -
+                             trajectory1[idx + 1]), 2));
                 }
                 // Otherwise, we're still in the simulation time frame for both trajectories
                 else

@@ -280,6 +280,11 @@ namespace MazeExperimentSuppotLib
                             context.ExperimentDictionaries.Single(expName => expName.ExperimentName == experimentName);
                     }
 
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
+                    }
+
                     querySuccess = true;
                 }
                 catch (Exception e)
@@ -316,6 +321,11 @@ namespace MazeExperimentSuppotLib
                             .Count();
                     }
 
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
+                    }
+
                     querySuccess = true;
                 }
                 catch (Exception e)
@@ -350,6 +360,11 @@ namespace MazeExperimentSuppotLib
                             expData => expData.ExperimentDictionaryID == experimentId && expData.Run == run)
                             .Select(row => row.Generation)
                             .Max();
+                    }
+
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
                     }
 
                     querySuccess = true;
@@ -389,6 +404,11 @@ namespace MazeExperimentSuppotLib
                                 expData.RunPhase.RunPhaseName == runPhase.ToString())
                             .Select(row => row.Generation)
                             .Distinct().OrderBy(row => row).ToList();
+                    }
+
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
                     }
 
                     querySuccess = true;
@@ -441,6 +461,11 @@ namespace MazeExperimentSuppotLib
                             .ToList();
                     }
 
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
+                    }
+
                     querySuccess = true;
                 }
                 catch (Exception e)
@@ -491,6 +516,11 @@ namespace MazeExperimentSuppotLib
                         }
                     }
 
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
+                    }
+
                     querySuccess = true;
                 }
                 catch (Exception e)
@@ -533,6 +563,11 @@ namespace MazeExperimentSuppotLib
                             .GroupBy(expData => expData.GenomeID)
                             .Select(expDataGroup => expDataGroup.OrderBy(expData => expData.Generation).FirstOrDefault())
                             .ToList();
+                    }
+
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
                     }
 
                     querySuccess = true;
@@ -596,6 +631,11 @@ namespace MazeExperimentSuppotLib
                         }
                     }
 
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
+                    }
+
                     querySuccess = true;
                 }
                 catch (Exception e)
@@ -632,6 +672,11 @@ namespace MazeExperimentSuppotLib
                                     navigatorData.ExperimentDictionaryID == experimentId && navigatorData.Run == run &&
                                     navigatorData.RunPhase.RunPhaseName == RunPhase.Initialization.ToString())
                                 .Max(navigatorData => navigatorData.TotalEvaluations);
+                    }
+
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
                     }
 
                     querySuccess = true;
@@ -683,6 +728,11 @@ namespace MazeExperimentSuppotLib
                                 .Single();
                     }
 
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
+                    }
+
                     querySuccess = true;
                 }
                 catch (Exception e)
@@ -720,6 +770,11 @@ namespace MazeExperimentSuppotLib
                                 experimentId == nav.ExperimentDictionaryID && run == nav.Run && batch == nav.Generation &&
                                 RunPhase.Primary.ToString().Equals(nav.RunPhase.RunPhaseName) && nav.IsMazeSolved)
                             .ToList();
+                    }
+
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
                     }
 
                     querySuccess = true;
@@ -772,6 +827,11 @@ namespace MazeExperimentSuppotLib
                                         specieGenomesGroup.Select(gg => gg.GenomeID).ToList())));
                     }
 
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
+                    }
+
                     querySuccess = true;
                 }
                 catch (Exception e)
@@ -822,6 +882,11 @@ namespace MazeExperimentSuppotLib
                                 specieGenomesGroup =>
                                     new SpecieGenomesGroup((int) specieGenomesGroup.Key,
                                         specieGenomesGroup.Select(gg => gg.GenomeID).ToList())));
+                    }
+
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
                     }
 
                     querySuccess = true;
@@ -905,6 +970,17 @@ namespace MazeExperimentSuppotLib
         #region Private static methods
 
         /// <summary>
+        ///     Handles logging of query success state after one or more failed attempts.
+        /// </summary>
+        /// <param name="methodName">The name of the method executing the query.</param>
+        /// <param name="retryCnt">The number of times the query has been retried.</param>
+        private static void LogFailedQuerySuccess(string methodName, int retryCnt)
+        {
+            Console.Error.WriteLine("Successfully executed {0}.{1} query on batch retry {2}",
+                typeof (ExperimentDataHandler).FullName, methodName, retryCnt);
+        }
+
+        /// <summary>
         ///     Handles logging and retry boundary checking for exceptions that are thrown during query execution.
         /// </summary>
         /// <param name="methodName">The name of the method executing the query.</param>
@@ -943,6 +1019,11 @@ namespace MazeExperimentSuppotLib
                         runPhaseKey =
                             context.RunPhases.First(runPhaseData => runPhaseData.RunPhaseName == runPhase.ToString())
                                 .RunPhaseID;
+                    }
+
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
                     }
 
                     querySuccess = true;
