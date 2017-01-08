@@ -27,9 +27,10 @@ namespace MazeExperimentSuppotLib
         /// <param name="batch">The batch during which the trial took place.</param>
         /// <param name="evaluationUnits">The maze/agent combinations to trace.</param>
         /// <param name="runPhase">The run phase (initialization or primary) for the current set of trials.</param>
+        /// <param name="trajectoryPointSize">The size of a point on the agent's trajectory (optional).</param>
         public static void GenerateBitmapsForSuccessfulTrials(string baseDirectory, string experimentName,
-            int experimentId, int run,
-            int batch, IList<MazeNavigatorEvaluationUnit> evaluationUnits, RunPhase runPhase)
+            int experimentId, int run, int batch, IList<MazeNavigatorEvaluationUnit> evaluationUnits, RunPhase runPhase,
+            int trajectoryPointSize = 3)
         {
             // Construct the output directory path
             string outputDirectory = Path.Combine(baseDirectory, experimentName,
@@ -54,7 +55,7 @@ namespace MazeExperimentSuppotLib
                         Path.Combine(outputDirectory,
                             string.Format("{0}_ExperimentID_{1}_Run_{2}_Batch_{3}_MazeID_{4}_NavigatorID_{5}.bmp",
                                 experimentName, experimentId, run, batch, evaluationUnit.MazeId, evaluationUnit.AgentId)),
-                        evaluationUnit.MazePhenome, evaluationUnit.AgentTrajectory);
+                        evaluationUnit.MazePhenome, evaluationUnit.AgentTrajectory, trajectoryPointSize);
                 });
         }
 
@@ -100,8 +101,9 @@ namespace MazeExperimentSuppotLib
         /// <param name="imagePathName">Image path and filename.</param>
         /// <param name="mazeStructure">The structure of the maze on which the trial was run.</param>
         /// <param name="agentTrajectory">The trajectory of the agent through the maze.</param>
+        /// <param name="trajectoryPointSize">The size of a point on the agent's trajectory.</param>
         private static void GenerateSingleMazeTrajectoryImage(string imagePathName, MazeStructure mazeStructure,
-            double[] agentTrajectory)
+            double[] agentTrajectory, int trajectoryPointSize)
         {
             // Create pen and initialize bitmap canvas
             Pen blackPen = new Pen(Color.Black, 0.0001f);
@@ -133,8 +135,8 @@ namespace MazeExperimentSuppotLib
                 for (int i = 0; i < agentTrajectory.Length; i = i + 2)
                 {
                     // Draw trajectory point
-                    graphics.FillRectangle(Brushes.Gray, (float) agentTrajectory[i], (float) agentTrajectory[i + 1], 1,
-                        1);
+                    graphics.FillRectangle(Brushes.Gray, (float) agentTrajectory[i], (float) agentTrajectory[i + 1],
+                        trajectoryPointSize, trajectoryPointSize);
                 }
             }
 
