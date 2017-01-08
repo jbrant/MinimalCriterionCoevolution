@@ -27,10 +27,11 @@ namespace MazeExperimentSuppotLib
         /// <param name="batch">The batch during which the trial took place.</param>
         /// <param name="evaluationUnits">The maze/agent combinations to trace.</param>
         /// <param name="runPhase">The run phase (initialization or primary) for the current set of trials.</param>
+        /// <param name="startEndPointSize">The size of the start and end location points (optional).</param>
         /// <param name="trajectoryPointSize">The size of a point on the agent's trajectory (optional).</param>
         public static void GenerateBitmapsForSuccessfulTrials(string baseDirectory, string experimentName,
             int experimentId, int run, int batch, IList<MazeNavigatorEvaluationUnit> evaluationUnits, RunPhase runPhase,
-            int trajectoryPointSize = 3)
+            int startEndPointSize = 5, int trajectoryPointSize = 1)
         {
             // Construct the output directory path
             string outputDirectory = Path.Combine(baseDirectory, experimentName,
@@ -55,7 +56,8 @@ namespace MazeExperimentSuppotLib
                         Path.Combine(outputDirectory,
                             string.Format("{0}_ExperimentID_{1}_Run_{2}_Batch_{3}_MazeID_{4}_NavigatorID_{5}.bmp",
                                 experimentName, experimentId, run, batch, evaluationUnit.MazeId, evaluationUnit.AgentId)),
-                        evaluationUnit.MazePhenome, evaluationUnit.AgentTrajectory, trajectoryPointSize);
+                        evaluationUnit.MazePhenome, evaluationUnit.AgentTrajectory, startEndPointSize,
+                        trajectoryPointSize);
                 });
         }
 
@@ -101,9 +103,10 @@ namespace MazeExperimentSuppotLib
         /// <param name="imagePathName">Image path and filename.</param>
         /// <param name="mazeStructure">The structure of the maze on which the trial was run.</param>
         /// <param name="agentTrajectory">The trajectory of the agent through the maze.</param>
+        /// <param name="startEndPointSize">The size of the start and end location points.</param>
         /// <param name="trajectoryPointSize">The size of a point on the agent's trajectory.</param>
         private static void GenerateSingleMazeTrajectoryImage(string imagePathName, MazeStructure mazeStructure,
-            double[] agentTrajectory, int trajectoryPointSize)
+            double[] agentTrajectory, int startEndPointSize, int trajectoryPointSize)
         {
             // Create pen and initialize bitmap canvas
             Pen blackPen = new Pen(Color.Black, 0.0001f);
