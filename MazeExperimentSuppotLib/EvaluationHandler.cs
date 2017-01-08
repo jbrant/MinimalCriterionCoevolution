@@ -9,11 +9,8 @@ using System.Xml;
 using Accord.MachineLearning;
 using SharpNeat.Behaviors;
 using SharpNeat.Core;
-using SharpNeat.Domains;
 using SharpNeat.Domains.MazeNavigation;
-using SharpNeat.Domains.MazeNavigation.Components;
 using SharpNeat.Genomes.Maze;
-using SharpNeat.Phenomes.Mazes;
 
 #endregion
 
@@ -36,9 +33,9 @@ namespace MazeExperimentSuppotLib
 
             // Build maze configuration
             MazeConfiguration mazeConfiguration =
-                new MazeConfiguration(ExtractMazeWalls(evaluationUnit.MazePhenome.Walls),
-                    ExtractStartEndPoint(evaluationUnit.MazePhenome.StartLocation),
-                    ExtractStartEndPoint(evaluationUnit.MazePhenome.TargetLocation));
+                new MazeConfiguration(DataManipulationUtil.ExtractMazeWalls(evaluationUnit.MazePhenome.Walls),
+                    DataManipulationUtil.ExtractStartEndPoint(evaluationUnit.MazePhenome.StartLocation),
+                    DataManipulationUtil.ExtractStartEndPoint(evaluationUnit.MazePhenome.TargetLocation));
 
             // Create trajectory behavior characterization (in order to capture full trajectory of navigator)
             IBehaviorCharacterization behaviorCharacterization = new TrajectoryBehaviorCharacterization();
@@ -662,39 +659,6 @@ namespace MazeExperimentSuppotLib
 
             // Return the euclidean distance between the two trajectories
             return trajectoryDistance/timesteps;
-        }
-
-        /// <summary>
-        ///     Converts the evolved walls into experiment domain walls so that experiment-specific calculations can be applied on
-        ///     them.
-        /// </summary>
-        /// <param name="mazeStructureWalls">The evolved walls.</param>
-        /// <returns>List of the experiment-specific walls.</returns>
-        private static List<Wall> ExtractMazeWalls(List<MazeStructureWall> mazeStructureWalls)
-        {
-            List<Wall> mazeWalls = new List<Wall>(mazeStructureWalls.Count);
-
-            // Convert each of the maze structure walls to the experiment domain wall
-            // TODO: Can this also be parallelized?
-            mazeWalls.AddRange(
-                mazeStructureWalls.Select(
-                    mazeStructureWall =>
-                        new Wall(new DoubleLine(mazeStructureWall.StartMazeStructurePoint.X,
-                            mazeStructureWall.StartMazeStructurePoint.Y,
-                            mazeStructureWall.EndMazeStructurePoint.X, mazeStructureWall.EndMazeStructurePoint.Y))));
-
-            return mazeWalls;
-        }
-
-        /// <summary>
-        ///     Converts evolved point (start or finish) to experiment domain point for the navigator start location and the target
-        ///     (goal).
-        /// </summary>
-        /// <param name="point">The point to convert.</param>
-        /// <returns>The domain-specific point object.</returns>
-        private static DoublePoint ExtractStartEndPoint(MazeStructurePoint point)
-        {
-            return new DoublePoint(point.X, point.Y);
         }
 
         #endregion

@@ -80,6 +80,12 @@
         UseGreedySilhouetteCalculation,
 
         /// <summary>
+        ///     Whether to distribute the stated sample size evenly across extant mazes.  If this is set, the number of
+        ///     trajectories clustered will be (# mazes) x (# samples).
+        /// </summary>
+        UseEvenMazeTrajectoryDistribution,
+
+        /// <summary>
         ///     Ceiling on range of cluster values to try when determining which cluster values maximizes the silhouette width
         ///     (used as part of a non-greedy strategy).
         /// </summary>
