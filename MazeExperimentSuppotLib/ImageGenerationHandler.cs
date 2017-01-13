@@ -31,7 +31,7 @@ namespace MazeExperimentSuppotLib
         /// <param name="trajectoryPointSize">The size of a point on the agent's trajectory (optional).</param>
         public static void GenerateBitmapsForSuccessfulTrials(string baseDirectory, string experimentName,
             int experimentId, int run, int batch, IList<MazeNavigatorEvaluationUnit> evaluationUnits, RunPhase runPhase,
-            int startEndPointSize = 5, int trajectoryPointSize = 1)
+            int startEndPointSize = 10, int trajectoryPointSize = 3)
         {
             // Construct the output directory path
             string outputDirectory = Path.Combine(baseDirectory, experimentName,
@@ -120,8 +120,10 @@ namespace MazeExperimentSuppotLib
                 graphics.FillRectangle(Brushes.White, imageSize);
 
                 // Draw start and end points
-                graphics.FillEllipse(Brushes.Green, mazeStructure.StartLocation.X, mazeStructure.StartLocation.Y, 5, 5);
-                graphics.FillEllipse(Brushes.Red, mazeStructure.TargetLocation.X, mazeStructure.TargetLocation.Y, 5, 5);
+                graphics.FillEllipse(Brushes.Green, mazeStructure.StartLocation.X, mazeStructure.StartLocation.Y,
+                    startEndPointSize, startEndPointSize);
+                graphics.FillEllipse(Brushes.Red, mazeStructure.TargetLocation.X, mazeStructure.TargetLocation.Y,
+                    startEndPointSize, startEndPointSize);
 
                 // Draw all of the walls
                 foreach (MazeStructureWall wall in mazeStructure.Walls)
