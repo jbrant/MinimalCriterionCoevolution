@@ -520,7 +520,7 @@ namespace NavigatorMazeMapEvaluator
                                 new Tuple<CoevolutionMCSMazeExperimentGenome, CoevolutionMCSNavigatorExperimentGenome>(
                                     mazeGenomeData.First(gd => successfulNav.MazeGenomeID == gd.GenomeID),
                                     navigatorGenomeData.First(gd => successfulNav.NavigatorGenomeID == gd.GenomeID))));
-
+                    
                     // Initialize the maze/navigator map with combinations that are known to be successful
                     mapEvaluator.Initialize(successfulGenomeCombos);
                 }
@@ -535,7 +535,7 @@ namespace NavigatorMazeMapEvaluator
                                 curRun, curBatch), ExperimentDataHandler.GetNavigatorGenomeData(
                                     curExperimentConfiguration.ExperimentDictionaryID, curRun, curBatch, runPhase));
                 }
-
+                
                 // Evaluate all of the maze/navigator combinations in the batch (if analysis is based on trajectory data)
                 if (generateSimulationResults || generateMazeBitmaps || generateTrajectoryBitmaps ||
                     generateTrajectoryData || generateTrajectoryDiversityScore || generateAgentTrajectoryClustering ||

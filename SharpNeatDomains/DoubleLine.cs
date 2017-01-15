@@ -166,10 +166,15 @@ namespace SharpNeat.Domains
                                     (a.Start.Y - a.End.Y)*(b.Start.X*b.End.Y - b.Start.Y*b.End.X))/denominator;
 
                 // Ensure that the intersection point actually lies within both line segments
-                if (xDeterminant >= Math.Min(a.Start.X, a.End.X) && xDeterminant <= Math.Max(a.Start.X, a.End.X) &&
-                    xDeterminant >= Math.Min(b.Start.X, b.End.X) && xDeterminant <= Math.Max(b.Start.X, b.End.X) &&
-                    yDeterminant >= Math.Min(a.Start.Y, a.End.Y) && yDeterminant <= Math.Max(a.Start.Y, a.End.Y) &&
-                    yDeterminant >= Math.Min(b.Start.Y, b.End.Y) && yDeterminant <= Math.Max(b.Start.Y, b.End.Y))
+                if (MathUtils.AlmostGreaterThanOrEqual(xDeterminant, Math.Min(a.Start.X, a.End.X)) &&
+                    MathUtils.AlmostLessThanOrEqual(xDeterminant, Math.Max(a.Start.X, a.End.X)) &&
+                    MathUtils.AlmostGreaterThanOrEqual(xDeterminant, Math.Min(b.Start.X, b.End.X)) &&
+                    MathUtils.AlmostLessThanOrEqual(xDeterminant, Math.Max(b.Start.X, b.End.X)) &&
+                    MathUtils.AlmostGreaterThanOrEqual(yDeterminant, Math.Min(a.Start.Y, a.End.Y)) &&
+                    MathUtils.AlmostLessThanOrEqual(yDeterminant, Math.Max(a.Start.Y, a.End.Y)) &&
+                    MathUtils.AlmostGreaterThanOrEqual(yDeterminant, Math.Min(b.Start.Y, b.End.Y)) &&
+                    MathUtils.AlmostLessThanOrEqual(yDeterminant, Math.Max(b.Start.Y, b.End.Y))
+                    )
                 {
                     intersectionFound = true;
                     return new DoublePoint(xDeterminant, yDeterminant);

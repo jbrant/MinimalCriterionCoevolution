@@ -358,7 +358,17 @@ namespace MazeGenomeGenerator
             // Log the boiler plate instructions when an invalid configuration is encountered
             Console.Error.WriteLine("The experiment executor invocation must take the following form:");
             Console.Error.WriteLine(
-                "MazeGenomeGenerator.exe {0}=[{11}] {1}=[{10}] {2}=[{13}] (Optional: {3}=[{12}]) (Optional: {4}=[{11}] {5}=[{12}] {6}=[{12}] {7}=[{12}] {8}=[{13}] {9}=[{13}])",
+                "MazeGenomeGenerator.exe \n\t" +
+                "Required: {0}=[{11}] \n\t" +
+                "Required: {1}=[{10}] \n\t" +
+                "Required: {2}=[{13}] \n\t" +
+                "Optional: {3}=[{12}] \n\t" +
+                "Optional: {4}=[{11}] \n\t" +
+                "Optional: {5}=[{12}] \n\t" +
+                "Optional: {6}=[{12}] \n\t" +
+                "Optional: {7}=[{12}] \n\t" +
+                "Optional: {8}=[{13}] \n\t" +
+                "Optional: {9}=[{13}]",
                 ExecutionParameter.GenerateMazes, ExecutionParameter.NumWalls,
                 ExecutionParameter.MazeGenomeOutputBaseDirectory,
                 ExecutionParameter.NumMazes, ExecutionParameter.OutputMazeBitmap, ExecutionParameter.MazeHeight,
