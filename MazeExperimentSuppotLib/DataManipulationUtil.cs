@@ -4,6 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using SharpNeat.Core;
+using SharpNeat.Domains;
+using SharpNeat.Domains.MazeNavigation.Components;
+using SharpNeat.Phenomes.Mazes;
 
 #endregion
 
@@ -21,17 +24,39 @@ namespace MazeExperimentSuppotLib
         /// </summary>
         /// <param name="allEvaluationUnits">All evaluation during the given experiment/run/batch.</param>
         /// <param name="sampleSize">The sample size to extract from the collection of evaluation units.</param>
+        /// <param name="extractEvenlyAcrossMazes">Whether to extract the given number of samples from each distinct maze.</param>
         /// <returns>The specified number of evaluation unit samples.</returns>
         public static IList<MazeNavigatorEvaluationUnit> ExtractEvaluationUnitSamplesFromPopulation(
-            IList<MazeNavigatorEvaluationUnit> allEvaluationUnits, int sampleSize)
+            IList<MazeNavigatorEvaluationUnit> allEvaluationUnits, int sampleSize, bool extractEvenlyAcrossMazes)
         {
             List<MazeNavigatorEvaluationUnit> evalUnitSamples = new List<MazeNavigatorEvaluationUnit>();
             Random rnd = new Random();
 
-            // Gather sample of randomly selected evaluation units
-            for (int cnt = 0; cnt < Math.Min(allEvaluationUnits.Count, sampleSize); cnt++)
+            // If we're extract the sample size evenly across all extant/solvable mazes
+            if (extractEvenlyAcrossMazes)
             {
-                evalUnitSamples.Add(allEvaluationUnits[rnd.Next(allEvaluationUnits.Count-1)]);
+                // Group agent trajectories by their applicable maze
+                foreach (
+                    var mazeEvalGroup in allEvaluationUnits.GroupBy(eu => eu.MazeId).Select(eu => eu.ToList()).ToList())
+                {
+                    // Get the actual sample size based on the minimum of the sample size or trajectories through the current maze
+                    var groupSampleSize = Math.Min(sampleSize, mazeEvalGroup.Count());
+
+                    // Gather sample of randomly selected evaluation units for the current maze
+                    for (int cnt = 0; cnt < groupSampleSize; cnt++)
+                    {
+                        evalUnitSamples.Add(mazeEvalGroup[rnd.Next(groupSampleSize - 1)]);
+                    }
+                }
+            }
+            // Otherwise, just select randomly from the population
+            else
+            {
+                // Gather sample of randomly selected evaluation units
+                for (int cnt = 0; cnt < Math.Min(allEvaluationUnits.Count, sampleSize); cnt++)
+                {
+                    evalUnitSamples.Add(allEvaluationUnits[rnd.Next(allEvaluationUnits.Count - 1)]);
+                }
             }
 
             // Return evaluation unit sample
@@ -162,6 +187,39 @@ namespace MazeExperimentSuppotLib
             }
 
             return sampleGenomeIds;
+        }
+
+        /// <summary>
+        ///     Converts the evolved walls into experiment domain walls so that experiment-specific calculations can be applied on
+        ///     them.
+        /// </summary>
+        /// <param name="mazeStructureWalls">The evolved walls.</param>
+        /// <returns>List of the experiment-specific walls.</returns>
+        public static List<Wall> ExtractMazeWalls(List<MazeStructureWall> mazeStructureWalls)
+        {
+            List<Wall> mazeWalls = new List<Wall>(mazeStructureWalls.Count);
+
+            // Convert each of the maze structure walls to the experiment domain wall
+            // TODO: Can this also be parallelized?
+            mazeWalls.AddRange(
+                mazeStructureWalls.Select(
+                    mazeStructureWall =>
+                        new Wall(new DoubleLine(mazeStructureWall.StartMazeStructurePoint.X,
+                            mazeStructureWall.StartMazeStructurePoint.Y,
+                            mazeStructureWall.EndMazeStructurePoint.X, mazeStructureWall.EndMazeStructurePoint.Y))));
+
+            return mazeWalls;
+        }
+
+        /// <summary>
+        ///     Converts evolved point (start or finish) to experiment domain point for the navigator start location and the target
+        ///     (goal).
+        /// </summary>
+        /// <param name="point">The point to convert.</param>
+        /// <returns>The domain-specific point object.</returns>
+        public static DoublePoint ExtractStartEndPoint(MazeStructurePoint point)
+        {
+            return new DoublePoint(point.X, point.Y);
         }
 
         #endregion

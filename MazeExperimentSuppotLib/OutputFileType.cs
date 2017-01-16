@@ -21,9 +21,19 @@
         TrajectoryDiversityData,
 
         /// <summary>
-        ///     Natural clustering of population.
+        ///     Natural clustering of population data.
         /// </summary>
         NaturalClusterData,
+
+        /// <summary>
+        ///     Natural clustering of maze data.
+        /// </summary>
+        MazeClusterData,
+
+        /// <summary>
+        ///     Entropy of population data.
+        /// </summary>
+        PopulationEntropyData,
 
         /// <summary>
         ///     Novelty search comparison data.

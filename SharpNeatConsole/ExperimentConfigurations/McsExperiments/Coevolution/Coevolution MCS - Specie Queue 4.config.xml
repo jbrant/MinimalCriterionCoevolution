@@ -31,8 +31,8 @@
   <BehaviorConfig>
     <BehaviorCharacterization>End Point</BehaviorCharacterization>
   </BehaviorConfig>
-  <NavigatorOffspringBatchSize>50</NavigatorOffspringBatchSize>
-  <MazeOffspringBatchSize>5</MazeOffspringBatchSize>
+  <NavigatorOffspringBatchSize>4</NavigatorOffspringBatchSize>
+  <MazeOffspringBatchSize>2</MazeOffspringBatchSize>
   <MaxEvaluations>
   </MaxEvaluations>
   <MaxGenerations>2000</MaxGenerations>

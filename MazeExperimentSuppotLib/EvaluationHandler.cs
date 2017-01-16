@@ -2,15 +2,15 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml;
 using Accord.MachineLearning;
 using SharpNeat.Behaviors;
 using SharpNeat.Core;
-using SharpNeat.Domains;
 using SharpNeat.Domains.MazeNavigation;
-using SharpNeat.Domains.MazeNavigation.Components;
-using SharpNeat.Phenomes.Mazes;
+using SharpNeat.Genomes.Maze;
 
 #endregion
 
@@ -33,10 +33,9 @@ namespace MazeExperimentSuppotLib
 
             // Build maze configuration
             MazeConfiguration mazeConfiguration =
-                new MazeConfiguration(ExtractMazeWalls(evaluationUnit.MazePhenome.Walls),
-                    ExtractStartEndPoint(evaluationUnit.MazePhenome.StartLocation),
-                    ExtractStartEndPoint(evaluationUnit.MazePhenome.TargetLocation),
-                    evaluationUnit.MazePhenome.MaxTimesteps);
+                new MazeConfiguration(DataManipulationUtil.ExtractMazeWalls(evaluationUnit.MazePhenome.Walls),
+                    DataManipulationUtil.ExtractStartEndPoint(evaluationUnit.MazePhenome.StartLocation),
+                    DataManipulationUtil.ExtractStartEndPoint(evaluationUnit.MazePhenome.TargetLocation));
 
             // Create trajectory behavior characterization (in order to capture full trajectory of navigator)
             IBehaviorCharacterization behaviorCharacterization = new TrajectoryBehaviorCharacterization();
@@ -131,24 +130,163 @@ namespace MazeExperimentSuppotLib
         }
 
         /// <summary>
-        ///     Computes the natural clustering of the resulting trajectories (behaviors) along with the behavioral entropy
-        ///     (diversity).
+        ///     Computes the population entropy (shannon entropy) based on the given list of trajectories and number of clusters in
+        ///     which to cluster those behaviors using the k-means algorithm.
+        /// </summary>
+        /// <param name="evaluationUnits">The agent/maze evaluations (trajectories) to cluster.</param>
+        /// <param name="numClusters">The number of clusters into which to segregate agent trajectories.</param>
+        /// <returns>The population entropy.</returns>
+        public static PopulationEntropyUnit CalculatePopulationEntropy(
+            IList<MazeNavigatorEvaluationUnit> evaluationUnits, int numClusters)
+        {
+            // Only consider successful trials
+            IList<MazeNavigatorEvaluationUnit> successfulEvaluations =
+                evaluationUnits.Where(eu => eu.IsMazeSolved).ToList();
+
+            // Define the trajectory matrix in which to store all trajectory points for each trajectory
+            // (this becomes a collection of observation vectors that's fed into k-means)
+            double[][] trajectoryMatrix = new double[successfulEvaluations.Count][];
+
+            // Get the maximum observation vector length (max simulation runtime)
+            // (multiplied by 2 to account for each timestep containing a 2-dimensional position)
+            int maxObservationLength = successfulEvaluations.Max(x => x.NumTimesteps)*2;
+
+            for (int idx = 0; idx < successfulEvaluations.Count; idx++)
+            {
+                // If there are few observations than the total elements in the observation vector,
+                // fill out the vector with the existing observations and set the rest equal to the last
+                // position in the simulation
+                if (successfulEvaluations[idx].AgentTrajectory.Length < maxObservationLength)
+                {
+                    trajectoryMatrix[idx] =
+                        successfulEvaluations[idx].AgentTrajectory.Concat(
+                            Enumerable.Repeat(
+                                successfulEvaluations[idx].AgentTrajectory[
+                                    successfulEvaluations[idx].AgentTrajectory.Length - 1],
+                                maxObservationLength - successfulEvaluations[idx].AgentTrajectory.Length)).ToArray();
+                }
+                // If they are equal, just set the trajectory points
+                else
+                {
+                    trajectoryMatrix[idx] = successfulEvaluations[idx].AgentTrajectory;
+                }
+            }
+
+            // Initialize k-Means algorithm with the given number of clusters
+            var kmeans = new KMeans(numClusters);
+
+            // TODO: The below logic is in support of a work-around to an Accord.NET bug wherein
+            // TODO: an internal random number generator sometimes generates out-of-bounds values
+            // TODO: (i.e. a probability that is not between 0 and 1)
+            // TODO: https://github.com/accord-net/framework/issues/259
+            // Use uniform initialization
+            kmeans.UseSeeding = Seeding.Uniform;
+
+            // Determine cluster assignments
+            kmeans.Learn(trajectoryMatrix);
+
+            // Compute shannon entropy given clustering
+            double shannonEntropy = ComputeShannonEntropy(kmeans);
+
+            // Return the resulting population entropy
+            return new PopulationEntropyUnit(shannonEntropy);
+        }
+
+        /// <summary>
+        ///     Computes the natural clustering of the maze genomes along with their respective entropy.
+        /// </summary>
+        /// <param name="mazeGenomeListXml">The list of serialized maze genome XML.</param>
+        /// <param name="isGreedySilhouetteCalculation">
+        ///     Dictates whether optimal clustering is based on number of clusters that
+        ///     maximize silhouette score until the first decrease in score (true), or based on the silhouette score calculated for
+        ///     a range of clusters with the number of clusters resulting in the maximum score used as the optimal number of
+        ///     clusters (false).
+        /// </param>
+        /// <param name="clusterRange">The range of clusters values for which to compute the silhouette width (optional).</param>
+        /// <returns>The cluster diversity unit for maze genomes.</returns>
+        public static ClusterDiversityUnit CalculateMazeClustering(IList<string> mazeGenomeListXml,
+            bool isGreedySilhouetteCalculation, int clusterRange = 0)
+        {
+            // Always start with one cluster
+            const int initClusterCnt = 1;
+
+            // Initialize list of maze genome objects
+            var mazeGenomes = new List<MazeGenome>(mazeGenomeListXml.Count());
+
+            // Convert all maze genome XML strings to maze genome objects
+            foreach (var genomeXml in mazeGenomeListXml)
+            {
+                MazeGenome curMazeGenome;
+
+                // Create a new, dummy maze genome factory
+                MazeGenomeFactory tempMazeGenomeFactory = new MazeGenomeFactory();
+
+                // Convert genome XML to genome object
+                using (XmlReader xr = XmlReader.Create(new StringReader(genomeXml)))
+                {
+                    curMazeGenome = MazeGenomeXmlIO.ReadSingleGenomeFromRoot(xr, tempMazeGenomeFactory);
+                }
+
+                // Add to the genome object list
+                mazeGenomes.Add(curMazeGenome);
+            }
+
+            // Define observation matrix in which to store all gene coordinate vectors for each maze
+            double[][] observationMatrix = new double[mazeGenomes.Count()][];
+
+            // Get the maximum observation vector length (max number of maze genes)
+            var maxObservationLength = mazeGenomes.Max(g => g.GeneList.Count());
+
+            for (int idx = 0; idx < mazeGenomes.Count(); idx++)
+            {
+                // If there are more observations than the total elements in the observation vector, 
+                // zero out the rest of the vector
+                if (mazeGenomes[idx].GeneList.Count() < maxObservationLength)
+                {
+                    observationMatrix[idx] =
+                        mazeGenomes[idx].Position.CoordArray.Select(ca => ca.Value)
+                            .Concat(Enumerable.Repeat(0.0,
+                                maxObservationLength - mazeGenomes[idx].Position.CoordArray.Length))
+                            .ToArray();
+                }
+                // Otherwise, if the observation and vector length are the same, just set the elements
+                else
+                {
+                    observationMatrix[idx] = mazeGenomes[idx].Position.CoordArray.Select(ca => ca.Value).ToArray();
+                }
+            }
+
+            // Determine the optimal number of clusters to fit these data
+            var optimalClustering = DetermineOptimalClusters(observationMatrix, initClusterCnt, false,
+                isGreedySilhouetteCalculation, clusterRange);
+
+            // Compute shannon entropy given optimal clustering
+            double shannonEntropy = ComputeShannonEntropy(optimalClustering);
+
+            // Compute the silhouette width given optimal clustering
+            double silhouetteWidth = ComputeSilhouetteWidth(optimalClustering.Clusters, observationMatrix, false);
+
+            // Return the resulting maze genome cluster diversity info
+            return new ClusterDiversityUnit(optimalClustering.Clusters.Count, silhouetteWidth, shannonEntropy);
+        }
+
+        /// <summary>
+        ///     Clusters the agent trajectories (behaviors) along with computing the behavioral entropy (diversity).
         /// </summary>
         /// <param name="evaluationUnits">The agent/maze evaluations to cluster and compute entropy.</param>
-        /// <param name="clusterImprovementThreshold">
-        ///     The number of cluster additions that are permitted without further
-        ///     maximization of silhouette width.  When this is exceeded, the incremental cluster additions will stop and the
-        ///     number of clusters resulting in the highest silhouette width will be considered optimal.
+        /// <param name="isGreedySilhouetteCalculation">
+        ///     Dictates whether optimal clustering is based on number of clusters that
+        ///     maximize silhouette score until the first decrease in score (true), or based on the silhouette score calculated for
+        ///     a range of clusters with the number of clusters resulting in the maximum score used as the optimal number of
+        ///     clusters (false).
         /// </param>
-        /// <returns></returns>
-        public static ClusterDiversityUnit CalculateNaturalClustering(
-            IList<MazeNavigatorEvaluationUnit> evaluationUnits, int clusterImprovementThreshold)
+        /// <param name="clusterRange">The range of clusters values for which to compute the silhouette width (optional).</param>
+        /// <returns>The cluster diversity unit for agent trajectories.</returns>
+        public static ClusterDiversityUnit CalculateAgentTrajectoryClustering(
+            IList<MazeNavigatorEvaluationUnit> evaluationUnits, bool isGreedySilhouetteCalculation, int clusterRange = 0)
         {
-            Dictionary<int, double> clusterSilhoutteMap = new Dictionary<int, double>();
-            Tuple<int, double> clusterWithMaxSilhouetteWidth = null;
-
-            // Always start with zero clusters and increment on first iteration of loop
-            const int initClusterCnt = 0;
+            // Always start with one cluster
+            const int initClusterCnt = 1;
 
             // Only consider successful trials
             IList<MazeNavigatorEvaluationUnit> successfulEvaluations =
@@ -183,23 +321,80 @@ namespace MazeExperimentSuppotLib
                 }
             }
 
-            // Set the initial cluster count
-            int clusterCount = initClusterCnt;
+            // Determine the optimal number of clusters to fit these data
+            var optimalClustering = DetermineOptimalClusters(trajectoryMatrix, initClusterCnt, true,
+                isGreedySilhouetteCalculation, clusterRange);
 
-            // Continue loop until the maximum number of iterations without silhouette width improvement has elapsed
-            // (also don't allow number of clusters to match the number of observations)
-            while (clusterWithMaxSilhouetteWidth == null || (clusterSilhoutteMap.Count <= clusterImprovementThreshold ||
-                                                             clusterSilhoutteMap.Where(
-                                                                 csm =>
-                                                                     (csm.Key - initClusterCnt) >=
-                                                                     clusterSilhoutteMap.Count -
-                                                                     clusterImprovementThreshold)
-                                                                 .Any(
-                                                                     csm =>
-                                                                         csm.Value >=
-                                                                         clusterWithMaxSilhouetteWidth.Item2)) &&
-                   clusterCount < trajectoryMatrix.Length - 1)
+            // Compute shannon entropy given optimal clustering
+            double shannonEntropy = ComputeShannonEntropy(optimalClustering);
+
+            // Compute the silhouette width given optimal clustering
+            double silhouetteWidth = ComputeSilhouetteWidth(optimalClustering.Clusters, trajectoryMatrix, true);
+
+            // Return the resulting agent trajectory cluster diversity info
+            return new ClusterDiversityUnit(optimalClustering.Clusters.Count, silhouetteWidth, shannonEntropy);
+        }
+
+        #endregion
+
+        #region Private methods
+
+        /// <summary>
+        ///     Computes the shannon entropy for the given clusters and their respective assignment proportions.
+        /// </summary>
+        /// <param name="clusters">The clusters resulting from K-means clustering process.</param>
+        /// <returns>The shannon entropy (i.e. population diversity) based on cluster proportion assignments.</returns>
+        private static double ComputeShannonEntropy(KMeans clusters)
+        {
+            double sumLogProportion = 0.0;
+
+            // Compute the shannon entropy of the population
+            for (int idx = 0; idx < clusters.Clusters.Count; idx++)
             {
+                sumLogProportion += clusters.Clusters[idx].Proportion > 0
+                    ? clusters.Clusters[idx].Proportion*
+                      Math.Log(clusters.Clusters[idx].Proportion, 2)
+                    : 0;
+            }
+
+            // Multiply by negative one to get the Shannon entropy
+            return sumLogProportion*-1;
+        }
+
+        /// <summary>
+        ///     Computes the optimal number of clusters for the given observations.
+        /// </summary>
+        /// <param name="observationMatrix">The matrix of observations.</param>
+        /// <param name="initialClusterCount">The initial number of clusters to start with.</param>
+        /// <param name="isAgentTrajectoryClustering">
+        ///     Dictates whether the clustering that is being performed is specific to
+        ///     two-dimensional agent trajectories (otherwise, distance calculations assume one-dimensional observation vectors).
+        /// </param>
+        /// <param name="isGreedySilhouetteCalculation">
+        ///     Dictates whether optimal clustering is based on number of clusters that
+        ///     maximize silhouette score until the first decrease in score (true), or based on the silhouette score calculated for
+        ///     a range of clusters with the number of clusters resulting in the maximum score used as the optimal number of
+        ///     clusters (false).
+        /// </param>
+        /// <param name="clusterRange">The range of clusters values for which to compute the silhouette width (optional).</param>
+        /// <returns>The cluster assignments and their proportions (as well as other K-Means stats).</returns>
+        private static KMeans DetermineOptimalClusters(double[][] observationMatrix, int initialClusterCount,
+            bool isAgentTrajectoryClustering, bool isGreedySilhouetteCalculation, int clusterRange = 0)
+        {
+            Dictionary<int, double> clusterSilhouetteMap = new Dictionary<int, double>();
+            double maxSilhouetteWidth;
+
+            // Initialize current silhouette width
+            double curSilhouetteWidth = 0;
+
+            // Set the initial cluster count
+            int clusterCount = initialClusterCount;
+
+            do
+            {
+                // Set max silhouette with the value on the previous loop iteration (since it was an improvement)
+                maxSilhouetteWidth = curSilhouetteWidth;
+
                 // Increment cluster count
                 clusterCount++;
 
@@ -214,19 +409,32 @@ namespace MazeExperimentSuppotLib
                 kmeans.UseSeeding = Seeding.Uniform;
 
                 // Determine the resulting clusters
-                var clusters = kmeans.Learn(trajectoryMatrix);
+                var clusters = kmeans.Learn(observationMatrix);
 
                 // Compute the silhouette width for the current number of clusters
-                double silhouetteWidth = ComputeSilhouetteWidth(clusters, trajectoryMatrix);
+                curSilhouetteWidth = ComputeSilhouetteWidth(clusters, observationMatrix, isAgentTrajectoryClustering);
 
-                // Compute silhouette width and add to map with the current cluster count
-                clusterSilhoutteMap.Add(clusterCount, silhouetteWidth);
-
-                // If greater than the max silhouette width, reset the cluster with the max
-                if (clusterWithMaxSilhouetteWidth == null || silhouetteWidth > clusterWithMaxSilhouetteWidth.Item2)
+                // If this is non-greedy silhouette calculation, record the silhouette width associated with
+                // the current number of clusters
+                if (isGreedySilhouetteCalculation == false)
                 {
-                    clusterWithMaxSilhouetteWidth = new Tuple<int, double>(clusterCount, silhouetteWidth);
+                    clusterSilhouetteMap.Add(clusterCount, curSilhouetteWidth);
                 }
+
+                // Continue to increment number of clusters while there is a silhouette width improvement 
+                // (in the case of greedy silhouette calculation) or we have reached the max cluster range, 
+                // and we have not yet reached a number of clusters equivalent to the number of observations
+            } while ((isGreedySilhouetteCalculation
+                ? curSilhouetteWidth >= maxSilhouetteWidth
+                : clusterCount < clusterRange) &&
+                     clusterCount < observationMatrix.Length);
+
+            // If this is non-greedy silhouette calculation, set the cluster count to the number of clusters
+            // within the given range that results in the highest silhouette width (i.e. highest cluster validity)
+            if (isGreedySilhouetteCalculation == false)
+            {
+                clusterCount =
+                    clusterSilhouetteMap.FirstOrDefault(csm => csm.Value == clusterSilhouetteMap.Values.Max()).Key;
             }
 
             // Rerun kmeans for the final cluster count
@@ -240,35 +448,24 @@ namespace MazeExperimentSuppotLib
             optimalClustering.UseSeeding = Seeding.Uniform;
 
             // Determine cluster assignments
-            optimalClustering.Learn(trajectoryMatrix);
+            optimalClustering.Learn(observationMatrix);
 
-            double sumLogProportion = 0.0;
-
-            // Compute the shannon entropy of the population
-            for (int idx = 0; idx < optimalClustering.Clusters.Count; idx++)
-            {
-                sumLogProportion += optimalClustering.Clusters[idx].Proportion*
-                                    Math.Log(optimalClustering.Clusters[idx].Proportion, 2);
-            }
-
-            // Multiply by negative one to get the Shannon entropy
-            double shannonEntropy = sumLogProportion*-1;
-
-            // Return the resulting cluster diversity info
-            return new ClusterDiversityUnit(optimalClustering.Clusters.Count, shannonEntropy);
+            return optimalClustering;
         }
-
-        #endregion
-
-        #region Private methods
 
         /// <summary>
         ///     Computes the silhouette width for the given set of clusters and observations.
         /// </summary>
         /// <param name="clusters">The clusters in the dataset.</param>
         /// <param name="observations">The observation vectors.</param>
+        /// <param name="isTwoDimensionalObservations">
+        ///     Indicates whether or not the observation vector consists of flattened,
+        ///     two-dimensioal observations (which is how agent trajectories are stored), prompting special consideration for
+        ///     euclidean distasnce calculation.
+        /// </param>
         /// <returns>The silhouette width for the given set of clusters and observations.</returns>
-        private static double ComputeSilhouetteWidth(KMeansClusterCollection clusters, double[][] observations)
+        private static double ComputeSilhouetteWidth(KMeansClusterCollection clusters, double[][] observations,
+            bool isTwoDimensionalObservations)
         {
             Object lockObj = new object();
             double totalSilhouetteWidth = 0;
@@ -279,58 +476,130 @@ namespace MazeExperimentSuppotLib
             Parallel.For(0, observations.Length, observationIdx =>
             {
                 double obsIntraclusterDissimilarity = 0;
-                double obsInterClusterDissimilarity = 0;
 
-                // Sum the distance between current observation and every other observation in the same cluster
-                for (int caIdx = 0; caIdx < clusterAssignments.Length; caIdx++)
+                // Get the cluster assignment of the current observation
+                int curObsClusterAssignment = clusterAssignments[observationIdx];
+
+                // Only add observation silhouette width if it is NOT the sole member of its assigned cluster
+                if (clusterAssignments.Count(ca => ca == curObsClusterAssignment) > 1)
                 {
-                    if (clusterAssignments[caIdx] == clusterAssignments[observationIdx])
+                    // Setup list to hold average distance from current observation to every other neighboring cluster
+                    List<double> neighboringClusterDistances = new List<double>(clusters.Count);
+
+                    for (int clusterIdx = 0; clusterIdx < clusters.Count; clusterIdx++)
                     {
-                        obsIntraclusterDissimilarity +=
-                            ComputeEuclideanTrajectoryDifference(observations[observationIdx], observations[caIdx]);
+                        // Handle the case where the current cluster is the cluster of which the observation is a member
+                        if (clusterIdx == curObsClusterAssignment)
+                        {
+                            // Sum the distance between current observation and every other observation in the same cluster
+                            for (int caIdx = 0; caIdx < clusterAssignments.Length; caIdx++)
+                            {
+                                if (curObsClusterAssignment == clusterAssignments[caIdx])
+                                {
+                                    obsIntraclusterDissimilarity +=
+                                        isTwoDimensionalObservations
+                                            ? ComputeEuclideanTrajectoryDifference(observations[observationIdx],
+                                                observations[caIdx])
+                                            : ComputeEuclideanObservationDifference(observations[observationIdx],
+                                                observations[caIdx]);
+                                }
+                            }
+                        }
+                        // Otherwise, handle the case where we're on a neighboring cluster
+                        else
+                        {
+                            // Create new variable to hold sum of dissimilarities between observation and 
+                            // neighboring cluster observations
+                            double curObsNeighboringClusterDissimilarity = 0;
+
+                            // Sum the distance between current observation and cluster centroids to which 
+                            // the current observation is NOT assigned
+                            for (int caIdx = 0; caIdx < clusterAssignments.Length; caIdx++)
+                            {
+                                if (curObsClusterAssignment != clusterAssignments[caIdx])
+                                {
+                                    curObsNeighboringClusterDissimilarity +=
+                                        isTwoDimensionalObservations
+                                            ? ComputeEuclideanTrajectoryDifference(observations[observationIdx],
+                                                observations[caIdx])
+                                            : ComputeEuclideanObservationDifference(observations[observationIdx],
+                                                observations[caIdx]);
+                                }
+                            }
+
+                            // Compute the average intercluster dissimilarity for the current neighboring 
+                            // cluster and add to the list of average neighboring cluster distances
+                            neighboringClusterDistances.Add(curObsNeighboringClusterDissimilarity/
+                                                            clusterAssignments.Where(ca => ca == clusterIdx).Count());
+                        }
                     }
-                }
 
-                // Compute the average intracluster dissimilarity (local variance)
-                obsIntraclusterDissimilarity = obsIntraclusterDissimilarity/
-                                               clusterAssignments.Where(ca => ca == clusterAssignments[observationIdx])
-                                                   .Count();
+                    // Compute the average intracluster dissimilarity (local variance)
+                    obsIntraclusterDissimilarity = obsIntraclusterDissimilarity/
+                                                   clusterAssignments.Where(ca => ca == curObsClusterAssignment)
+                                                       .Count();
 
-                // Setup list to hold distance from current observation to every other cluster centroid
-                List<double> centroidDistances = new List<double>(clusters.Count);
+                    // Get the minimum intercluster dissimilarity (0 if there are no centroid differences)
+                    var obsInterClusterDissimilarity = neighboringClusterDistances.Any()
+                        ? neighboringClusterDistances.Min()
+                        : 0;
 
-                // Sum the distance between current observation and cluster centroids to which the current
-                // observation is NOT assigned
-                for (int idx = 0; idx < clusters.Count; idx++)
-                {
-                    // Only compute distance when observation is not assigned to the current cluster
-                    if (idx != clusterAssignments[observationIdx])
+                    // Compute the silhouette width for the current observation
+                    // If its the only point in the cluster, then the silhouette width is 0
+                    var curSilhouetteWidth = Math.Abs(obsIntraclusterDissimilarity) < 0.0000001
+                        ? 0
+                        : (obsInterClusterDissimilarity -
+                           obsIntraclusterDissimilarity)/
+                          Math.Max(obsIntraclusterDissimilarity,
+                              obsInterClusterDissimilarity);
+
+                    lock (lockObj)
                     {
-                        centroidDistances.Add(ComputeEuclideanTrajectoryDifference(observations[observationIdx],
-                            clusters[idx].Centroid));
+                        // Add the silhoutte width for the current observation
+                        totalSilhouetteWidth += curSilhouetteWidth;
                     }
-                }
-
-                // Get the minimum intercluster dissimilarity (0 if there are no centroid differences)
-                obsInterClusterDissimilarity = centroidDistances.Any() ? centroidDistances.Min() : 0;
-
-                // Add the silhoutte width for the current observation
-                var curSilhouetteWidth = (Math.Abs(obsIntraclusterDissimilarity) < 0.0000001 &&
-                                          Math.Abs(obsInterClusterDissimilarity) < 0.0000001)
-                    ? 0
-                    : (obsInterClusterDissimilarity -
-                       obsIntraclusterDissimilarity)/
-                      Math.Max(obsIntraclusterDissimilarity,
-                          obsInterClusterDissimilarity);
-
-                lock (lockObj)
-                {
-                    totalSilhouetteWidth += curSilhouetteWidth;
                 }
             });
 
             // Return the silhoutte width
             return totalSilhouetteWidth/observations.Length;
+        }
+
+        /// <summary>
+        ///     Generic euclidean distance calculation that computes the euclidean distance between two observation vectors.
+        /// </summary>
+        /// <param name="observation1">The first observation vector.</param>
+        /// <param name="observation2">The second observation vector.</param>
+        /// <returns></returns>
+        private static double ComputeEuclideanObservationDifference(double[] observation1, double[] observation2)
+        {
+            double distance = 0;
+
+            // The length of the longest observation vector
+            int maxObservationLength = Math.Max(observation1.Length, observation2.Length);
+
+            // Compute the euclidean distance between each element of the observation vectors
+            for (int idx = 0; idx < maxObservationLength; idx++)
+            {
+                // Handle the case where there are no more observations in observation vector 1
+                if (idx >= observation1.Length)
+                {
+                    distance += Math.Pow(observation2[idx], 2);
+                }
+                // Handle the case where there are no more observations in observation vector 2
+                else if (idx >= observation2.Length)
+                {
+                    distance += Math.Pow(observation1[idx], 2);
+                }
+                // Otherwise, there's an observation in both vectors for the current index
+                else
+                {
+                    distance += Math.Pow(observation2[idx] - observation1[idx], 2);
+                }
+            }
+
+            // Return the euclidean distance between the two observation vectors
+            return Math.Sqrt(distance);
         }
 
         /// <summary>
@@ -356,73 +625,40 @@ namespace MazeExperimentSuppotLib
                 // Handle the case where the first trajectory has ended
                 if (idx >= trajectory1.Length)
                 {
-                    trajectoryDistance +=
+                    trajectoryDistance += Math.Sqrt(
                         Math.Pow(
                             (trajectory2[idx] - trajectory1[trajectory1.Length - 2]),
                             2) +
                         Math.Pow(
                             (trajectory2[idx + 1] -
-                             trajectory1[trajectory1.Length - 1]), 2);
+                             trajectory1[trajectory1.Length - 1]), 2));
                 }
                 // Handle the case where the second trajectory has ended
                 else if (idx >= trajectory2.Length)
                 {
-                    trajectoryDistance +=
+                    trajectoryDistance += Math.Sqrt(
                         Math.Pow(
                             (trajectory2[trajectory2.Length - 2] - trajectory1[idx]),
                             2) +
                         Math.Pow(
                             (trajectory2[trajectory2.Length - 1] -
-                             trajectory1[idx + 1]), 2);
+                             trajectory1[idx + 1]), 2));
                 }
                 // Otherwise, we're still in the simulation time frame for both trajectories
                 else
                 {
-                    trajectoryDistance +=
+                    trajectoryDistance += Math.Sqrt(
                         Math.Pow(
                             (trajectory2[idx] - trajectory1[idx]),
                             2) +
                         Math.Pow(
                             (trajectory2[idx + 1] -
-                             trajectory1[idx + 1]), 2);
+                             trajectory1[idx + 1]), 2));
                 }
             }
 
             // Return the euclidean distance between the two trajectories
-            return Math.Sqrt(trajectoryDistance);
-        }
-
-        /// <summary>
-        ///     Converts the evolved walls into experiment domain walls so that experiment-specific calculations can be applied on
-        ///     them.
-        /// </summary>
-        /// <param name="mazeStructureWalls">The evolved walls.</param>
-        /// <returns>List of the experiment-specific walls.</returns>
-        private static List<Wall> ExtractMazeWalls(List<MazeStructureWall> mazeStructureWalls)
-        {
-            List<Wall> mazeWalls = new List<Wall>(mazeStructureWalls.Count);
-
-            // Convert each of the maze structure walls to the experiment domain wall
-            // TODO: Can this also be parallelized?
-            mazeWalls.AddRange(
-                mazeStructureWalls.Select(
-                    mazeStructureWall =>
-                        new Wall(new DoubleLine(mazeStructureWall.StartMazeStructurePoint.X,
-                            mazeStructureWall.StartMazeStructurePoint.Y,
-                            mazeStructureWall.EndMazeStructurePoint.X, mazeStructureWall.EndMazeStructurePoint.Y))));
-
-            return mazeWalls;
-        }
-
-        /// <summary>
-        ///     Converts evolved point (start or finish) to experiment domain point for the navigator start location and the target
-        ///     (goal).
-        /// </summary>
-        /// <param name="point">The point to convert.</param>
-        /// <returns>The domain-specific point object.</returns>
-        private static DoublePoint ExtractStartEndPoint(MazeStructurePoint point)
-        {
-            return new DoublePoint(point.X, point.Y);
+            return trajectoryDistance/timesteps;
         }
 
         #endregion

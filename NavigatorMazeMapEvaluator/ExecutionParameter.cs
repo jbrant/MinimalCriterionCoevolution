@@ -59,20 +59,43 @@
         GenerateDiversityScores,
 
         /// <summary>
-        ///     Whether or not to analyze natural clustering of population.
+        ///     Whether or not to analyze natural clustering of agent trajectories.
         /// </summary>
-        GenerateNaturalClusters,
+        GenerateAgentTrajectoryClusters,
 
         /// <summary>
-        ///     The number of cluster additions that are permitted without further improvement to the cluster quality heuristic.
+        ///     Whether or not to analyze natural clustering of mazes.
         /// </summary>
-        ClusterImprovementThreshold,
+        GenerateMazeClusters,
+
+        /// <summary>
+        ///     Whether or not to compute population entropy (using a fixed number of clusters that's based on the number of specie
+        ///     clusters).
+        /// </summary>
+        GeneratePopulationEntropy,
+
+        /// <summary>
+        ///     Whether or not to use a greedy strategy when calculating silhouette width for optimal cluster determination.
+        /// </summary>
+        UseGreedySilhouetteCalculation,
+
+        /// <summary>
+        ///     Whether to distribute the stated sample size evenly across extant mazes.  If this is set, the number of
+        ///     trajectories clustered will be (# mazes) x (# samples).
+        /// </summary>
+        UseEvenMazeTrajectoryDistribution,
+
+        /// <summary>
+        ///     Ceiling on range of cluster values to try when determining which cluster values maximizes the silhouette width
+        ///     (used as part of a non-greedy strategy).
+        /// </summary>
+        ClusterRange,
 
         /// <summary>
         ///     The number of individuals to choose either from the population or from each maze/agent species (depending on the
-        ///     experiment configuration) to use in cluster analysis.
+        ///     experiment configuration) to use in cluster or trajectory analysis.
         /// </summary>
-        ClusterSampleSize,
+        SampleSize,
 
         /// <summary>
         ///     Whether or not to select samples evenly across species (not possible for non-speciated experiments) or from the

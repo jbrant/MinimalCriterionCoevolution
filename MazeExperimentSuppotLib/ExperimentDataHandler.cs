@@ -170,12 +170,13 @@ namespace MazeExperimentSuppotLib
         /// <param name="run">The run number of the given experiment.</param>
         /// <param name="batch">The batch number of the given run.</param>
         /// <param name="clusterDiversityUnit">The cluster diversity results.</param>
+        /// <param name="clusteringOutputType">The type of clustering output (e.g. agent trajectory maze).</param>
         /// <param name="writeToDatabase">
         ///     Indicates whether evaluation results should be written directly to the database or to a
         ///     flat file.
         /// </param>
         public static void WriteClusteringDiversityData(int experimentId, int run, int batch,
-            ClusterDiversityUnit clusterDiversityUnit, bool writeToDatabase)
+            ClusterDiversityUnit clusterDiversityUnit, OutputFileType clusteringOutputType, bool writeToDatabase)
         {
             // Write results to the database if the option has been specified
             if (writeToDatabase)
@@ -184,7 +185,31 @@ namespace MazeExperimentSuppotLib
                     "Direct write to database for clustering diversity not yet implemented!");
             }
             // Otherwise, write to the flat file output
-            WriteClusteringDiversityDataToFile(experimentId, run, batch, clusterDiversityUnit);
+            WriteClusteringDiversityDataToFile(experimentId, run, batch, clusterDiversityUnit, clusteringOutputType);
+        }
+
+        /// <summary>
+        ///     Writes the population entropy results to the experiment database or to a flat file.
+        /// </summary>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <param name="batch">The batch number of the given run.</param>
+        /// <param name="populationEntropyUnit">The population entropy results.</param>
+        /// <param name="writeToDatabase">
+        ///     Indicates whether evaluation results should be written directly to the database or to a
+        ///     flat file.
+        /// </param>
+        public static void WritePopulationEntropyData(int experimentId, int run, int batch,
+            PopulationEntropyUnit populationEntropyUnit, bool writeToDatabase)
+        {
+            // Write results to the database if the option has been specified
+            if (writeToDatabase)
+            {
+                throw new NotImplementedException(
+                    "Direct write to database for population entropy not yet implemented!");
+            }
+            // Otherwise, write to the flat file output
+            WritePopulationEntropyDataToFile(experimentId, run, batch, populationEntropyUnit);
         }
 
         /// <summary>
@@ -255,6 +280,11 @@ namespace MazeExperimentSuppotLib
                             context.ExperimentDictionaries.Single(expName => expName.ExperimentName == experimentName);
                     }
 
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
+                    }
+
                     querySuccess = true;
                 }
                 catch (Exception e)
@@ -291,6 +321,11 @@ namespace MazeExperimentSuppotLib
                             .Count();
                     }
 
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
+                    }
+
                     querySuccess = true;
                 }
                 catch (Exception e)
@@ -325,6 +360,11 @@ namespace MazeExperimentSuppotLib
                             expData => expData.ExperimentDictionaryID == experimentId && expData.Run == run)
                             .Select(row => row.Generation)
                             .Max();
+                    }
+
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
                     }
 
                     querySuccess = true;
@@ -364,6 +404,11 @@ namespace MazeExperimentSuppotLib
                                 expData.RunPhase.RunPhaseName == runPhase.ToString())
                             .Select(row => row.Generation)
                             .Distinct().OrderBy(row => row).ToList();
+                    }
+
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
                     }
 
                     querySuccess = true;
@@ -416,6 +461,11 @@ namespace MazeExperimentSuppotLib
                             .ToList();
                     }
 
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
+                    }
+
                     querySuccess = true;
                 }
                 catch (Exception e)
@@ -466,6 +516,11 @@ namespace MazeExperimentSuppotLib
                         }
                     }
 
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
+                    }
+
                     querySuccess = true;
                 }
                 catch (Exception e)
@@ -508,6 +563,11 @@ namespace MazeExperimentSuppotLib
                             .GroupBy(expData => expData.GenomeID)
                             .Select(expDataGroup => expDataGroup.OrderBy(expData => expData.Generation).FirstOrDefault())
                             .ToList();
+                    }
+
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
                     }
 
                     querySuccess = true;
@@ -571,6 +631,11 @@ namespace MazeExperimentSuppotLib
                         }
                     }
 
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
+                    }
+
                     querySuccess = true;
                 }
                 catch (Exception e)
@@ -607,6 +672,11 @@ namespace MazeExperimentSuppotLib
                                     navigatorData.ExperimentDictionaryID == experimentId && navigatorData.Run == run &&
                                     navigatorData.RunPhase.RunPhaseName == RunPhase.Initialization.ToString())
                                 .Max(navigatorData => navigatorData.TotalEvaluations);
+                    }
+
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
                     }
 
                     querySuccess = true;
@@ -658,6 +728,11 @@ namespace MazeExperimentSuppotLib
                                 .Single();
                     }
 
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
+                    }
+
                     querySuccess = true;
                 }
                 catch (Exception e)
@@ -695,6 +770,11 @@ namespace MazeExperimentSuppotLib
                                 experimentId == nav.ExperimentDictionaryID && run == nav.Run && batch == nav.Generation &&
                                 RunPhase.Primary.ToString().Equals(nav.RunPhase.RunPhaseName) && nav.IsMazeSolved)
                             .ToList();
+                    }
+
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
                     }
 
                     querySuccess = true;
@@ -747,6 +827,11 @@ namespace MazeExperimentSuppotLib
                                         specieGenomesGroup.Select(gg => gg.GenomeID).ToList())));
                     }
 
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
+                    }
+
                     querySuccess = true;
                 }
                 catch (Exception e)
@@ -797,6 +882,11 @@ namespace MazeExperimentSuppotLib
                                 specieGenomesGroup =>
                                     new SpecieGenomesGroup((int) specieGenomesGroup.Key,
                                         specieGenomesGroup.Select(gg => gg.GenomeID).ToList())));
+                    }
+
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
                     }
 
                     querySuccess = true;
@@ -880,6 +970,17 @@ namespace MazeExperimentSuppotLib
         #region Private static methods
 
         /// <summary>
+        ///     Handles logging of query success state after one or more failed attempts.
+        /// </summary>
+        /// <param name="methodName">The name of the method executing the query.</param>
+        /// <param name="retryCnt">The number of times the query has been retried.</param>
+        private static void LogFailedQuerySuccess(string methodName, int retryCnt)
+        {
+            Console.Error.WriteLine("Successfully executed {0}.{1} query on batch retry {2}",
+                typeof (ExperimentDataHandler).FullName, methodName, retryCnt);
+        }
+
+        /// <summary>
         ///     Handles logging and retry boundary checking for exceptions that are thrown during query execution.
         /// </summary>
         /// <param name="methodName">The name of the method executing the query.</param>
@@ -918,6 +1019,11 @@ namespace MazeExperimentSuppotLib
                         runPhaseKey =
                             context.RunPhases.First(runPhaseData => runPhaseData.RunPhaseName == runPhase.ToString())
                                 .RunPhaseID;
+                    }
+
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
                     }
 
                     querySuccess = true;
@@ -1229,25 +1335,55 @@ namespace MazeExperimentSuppotLib
         /// <param name="run">The run number of the given experiment.</param>
         /// <param name="batch">The batch number of the given run.</param>
         /// <param name="clusterDiversityUnit">The clustering and population entropy data to persist.</param>
+        /// <param name="clusteringOutputType">The type of clustering output (e.g. agent trajectory maze).</param>
         private static void WriteClusteringDiversityDataToFile(int experimentId, int run, int batch,
-            ClusterDiversityUnit clusterDiversityUnit)
+            ClusterDiversityUnit clusterDiversityUnit, OutputFileType clusteringOutputType)
         {
             // Make sure the file writer actually exists before attempting to write to it
-            if (FileWriters.ContainsKey(OutputFileType.NaturalClusterData) == false)
+            if (FileWriters.ContainsKey(clusteringOutputType) == false)
             {
                 throw new Exception(
                     string.Format("Cannot write to output stream as no file writer of type {0} has been created.",
-                        OutputFileType.NaturalClusterData));
+                        clusteringOutputType));
             }
 
-            FileWriters[OutputFileType.NaturalClusterData].WriteLine(string.Join(FileDelimiter,
+            FileWriters[clusteringOutputType].WriteLine(string.Join(FileDelimiter,
                 new List<string>
                 {
                     experimentId.ToString(),
                     run.ToString(),
                     batch.ToString(),
                     clusterDiversityUnit.NumClusters.ToString(),
+                    clusterDiversityUnit.SilhouetteWidth.ToString(CultureInfo.InvariantCulture),
                     clusterDiversityUnit.PopulationEntropy.ToString(CultureInfo.InvariantCulture)
+                }));
+        }
+
+        /// <summary>
+        ///     Writes the given population entropy unit to a flat file.
+        /// </summary>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <param name="batch">The batch number of the given run.</param>
+        /// <param name="populationEntropyUnit">The population entropy data to persist.</param>
+        private static void WritePopulationEntropyDataToFile(int experimentId, int run, int batch,
+            PopulationEntropyUnit populationEntropyUnit)
+        {
+            // Make sure the file writer actually exists before attempting to write to it
+            if (FileWriters.ContainsKey(OutputFileType.PopulationEntropyData) == false)
+            {
+                throw new Exception(
+                    string.Format("Cannot write to output stream as no file writer of type {0} has been created.",
+                        OutputFileType.PopulationEntropyData));
+            }
+
+            FileWriters[OutputFileType.PopulationEntropyData].WriteLine(string.Join(FileDelimiter,
+                new List<string>
+                {
+                    experimentId.ToString(),
+                    run.ToString(),
+                    batch.ToString(),
+                    populationEntropyUnit.PopulationEntropy.ToString(CultureInfo.InvariantCulture)
                 }));
         }
 
