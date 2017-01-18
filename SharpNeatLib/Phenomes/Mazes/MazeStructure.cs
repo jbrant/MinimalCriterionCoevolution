@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 #endregion
 
@@ -59,6 +60,9 @@ namespace SharpNeat.Phenomes.Mazes
 
             // Extract all of the vertical walls
             ExtractVerticalWalls(mazeGridArray);
+
+            // Calculate the maximum number of allotted time steps based on the maze structure
+            CalculateMaxTimesteps();
         }
 
         #endregion
@@ -96,10 +100,9 @@ namespace SharpNeat.Phenomes.Mazes
         public int[,] MazeArray { get; private set; }
 
         /// <summary>
-        ///     The maximum number of timesteps allotted to solve the maze (based on the sum of the scaled maze height/width minus
-        ///     the value of the scale multiplier from each).
+        ///     The maximum number of timesteps allotted to solve the maze.
         /// </summary>
-        public int MaxTimesteps => (ScaledMazeHeight - _scaleMultiplier) + (ScaledMazeWidth - _scaleMultiplier);
+        public int MaxTimesteps { get; private set; }
 
         #endregion
 
@@ -135,6 +138,100 @@ namespace SharpNeat.Phenomes.Mazes
             // Set the target location to be in the bottom right corner of the maze
             TargetLocation = new MazeStructurePoint(ScaledMazeWidth - (_scaleMultiplier/2),
                 ScaledMazeHeight - (_scaleMultiplier/2));
+        }
+
+        /// <summary>
+        ///     Calculates the maximum number of time steps allotted to solve the maze based on the manhattan distance from the
+        ///     starting location to the target location, respecting all obstructions.
+        /// </summary>
+        private void CalculateMaxTimesteps()
+        {
+            // Setup grid to store maze structure points
+            var pointGrid = new MazeStructurePoint[_mazeHeight, _mazeWidth];
+
+            // Convert to grid of maze structure points
+            for (int x = 0; x < _mazeHeight; x++)
+            {
+                for (int y = 0; y < _mazeWidth; y++)
+                {
+                    pointGrid[x, y] = new MazeStructurePoint(x, y);
+                }
+            }
+
+            // Define queue in which to store cells as they're discovered and visited
+            Queue<MazeStructurePoint> cellQueue = new Queue<MazeStructurePoint>(pointGrid.Length);
+
+            // Define a dictionary to store the distances between each visited cell and the starting location
+            Dictionary<MazeStructurePoint, int> visitedCellDistances = new Dictionary<MazeStructurePoint, int>();
+
+            // Enqueue the starting location
+            cellQueue.Enqueue(pointGrid[0, 0]);
+
+            // Add starting location to visited cells with 0 distance
+            visitedCellDistances.Add(pointGrid[0, 0], 0);
+
+            // Iterate through maze cells, dequeueing each and determining the distance to their reachable neighbors
+            // until the target location is reached and we have the shortest distance to it
+            while (cellQueue.Count > 0)
+            {
+                // Get the next element in the queue
+                var curPoint = cellQueue.Dequeue();
+
+                // Exit if target reached
+                if (curPoint.X == _mazeHeight - 1 && curPoint.Y == _mazeWidth - 1)
+                {
+                    break;
+                }
+                // Every adjacent vertex is a distance of 1 away
+                int curDistance = visitedCellDistances[curPoint] + 1;
+
+                // Handle cells in each cardinal direction
+
+                // North
+                if (0 != curPoint.X && (int) WallOrientation.Horizontal != MazeArray[curPoint.X - 1, curPoint.Y] &&
+                    (int) WallOrientation.Both != MazeArray[curPoint.X - 1, curPoint.Y] &&
+                    visitedCellDistances.ContainsKey(pointGrid[curPoint.X - 1, curPoint.Y]) == false)
+                {
+                    cellQueue.Enqueue(pointGrid[curPoint.X - 1, curPoint.Y]);
+                    visitedCellDistances.Add(pointGrid[curPoint.X - 1, curPoint.Y], curDistance);
+                }
+
+                // East
+                if (_mazeWidth > curPoint.Y + 1 && (int) WallOrientation.Vertical != MazeArray[curPoint.X, curPoint.Y] &&
+                    (int) WallOrientation.Both != MazeArray[curPoint.X, curPoint.Y] &&
+                    visitedCellDistances.ContainsKey(pointGrid[curPoint.X, curPoint.Y + 1]) == false)
+                {
+                    cellQueue.Enqueue(pointGrid[curPoint.X, curPoint.Y + 1]);
+                    visitedCellDistances.Add(pointGrid[curPoint.X, curPoint.Y + 1], curDistance);
+                }
+
+                // South
+                if (_mazeHeight > curPoint.X + 1 &&
+                    (int) WallOrientation.Horizontal != MazeArray[curPoint.X, curPoint.Y] &&
+                    (int) WallOrientation.Both != MazeArray[curPoint.X, curPoint.Y] &&
+                    visitedCellDistances.ContainsKey(pointGrid[curPoint.X + 1, curPoint.Y]) == false)
+                {
+                    cellQueue.Enqueue(pointGrid[curPoint.X + 1, curPoint.Y]);
+                    visitedCellDistances.Add(pointGrid[curPoint.X + 1, curPoint.Y], curDistance);
+                }
+
+                // West
+                if (0 != curPoint.Y && (int) WallOrientation.Vertical != MazeArray[curPoint.X, curPoint.Y - 1] &&
+                    (int) WallOrientation.Both != MazeArray[curPoint.X, curPoint.Y - 1] &&
+                    visitedCellDistances.ContainsKey(pointGrid[curPoint.X, curPoint.Y - 1]) == false)
+                {
+                    cellQueue.Enqueue(pointGrid[curPoint.X, curPoint.Y - 1]);
+                    visitedCellDistances.Add(pointGrid[curPoint.X, curPoint.Y - 1], curDistance);
+                }
+            }
+
+            // Get the unscaled distance to the target location
+            int unscaledDistance =
+                visitedCellDistances.Single(cd => (_mazeHeight - 1) == cd.Key.X && (_mazeWidth - 1) == cd.Key.Y).Value;
+
+            // Compute the maximum time steps by distributing the unscalled distance evenly across both dimensions 
+            // (i.e. halving it) and multiplying by the scale multiplier for both dimensions
+            MaxTimesteps = 2*(_scaleMultiplier*(unscaledDistance/2));
         }
 
         /// <summary>

@@ -35,7 +35,8 @@ namespace MazeExperimentSuppotLib
             MazeConfiguration mazeConfiguration =
                 new MazeConfiguration(DataManipulationUtil.ExtractMazeWalls(evaluationUnit.MazePhenome.Walls),
                     DataManipulationUtil.ExtractStartEndPoint(evaluationUnit.MazePhenome.StartLocation),
-                    DataManipulationUtil.ExtractStartEndPoint(evaluationUnit.MazePhenome.TargetLocation));
+                    DataManipulationUtil.ExtractStartEndPoint(evaluationUnit.MazePhenome.TargetLocation),
+                    evaluationUnit.MazePhenome.MaxTimesteps);
 
             // Create trajectory behavior characterization (in order to capture full trajectory of navigator)
             IBehaviorCharacterization behaviorCharacterization = new TrajectoryBehaviorCharacterization();
