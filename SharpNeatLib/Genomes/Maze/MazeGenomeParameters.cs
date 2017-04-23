@@ -25,6 +25,7 @@ namespace SharpNeat.Genomes.Maze
                 MutateWallStartLocationProbability,
                 MutatePassageStartLocationProbability,
                 MutateAddWallProbability,
+                MutateDeleteWallProbability,
                 MutateExpandMazeProbability
             };
             return new RouletteWheelLayout(probabilities);
@@ -55,6 +56,11 @@ namespace SharpNeat.Genomes.Maze
         private double _mutateAddWallProbability;
 
         /// <summary>
+        ///     Backing field for delete wall mutation probability.
+        /// </summary>
+        private double _mutateDeleteWallProbability;
+
+        /// <summary>
         ///     Backing field for expand maze mutation probability.
         /// </summary>
         private double _mutateExpandMazeProbability;
@@ -71,6 +77,7 @@ namespace SharpNeat.Genomes.Maze
             MutateWallStartLocationProbability = DefaultMutateWallStartLocationProbability;
             MutatePassageStartLocationProbability = DefaultMutatePassageStartLocationProbability;
             MutateAddWallProbability = DefaultMutateAddWallProbability;
+            MutateDeleteWallProbability = DefaultMutateDeleteWallProbability;
             MutateExpandMazeProbability = DefaultMutateExpandMazeProbability;
             PerturbanceMagnitude = DefaultPerturbanceMagnitude;
 
@@ -87,6 +94,7 @@ namespace SharpNeat.Genomes.Maze
             MutateWallStartLocationProbability = copyFrom.MutateWallStartLocationProbability;
             MutatePassageStartLocationProbability = copyFrom.MutatePassageStartLocationProbability;
             MutateAddWallProbability = copyFrom.MutateAddWallProbability;
+            MutateDeleteWallProbability = copyFrom.MutateDeleteWallProbability;
             MutateExpandMazeProbability = copyFrom.MutateExpandMazeProbability;
             PerturbanceMagnitude = copyFrom.PerturbanceMagnitude;
 
@@ -101,6 +109,7 @@ namespace SharpNeat.Genomes.Maze
         private const double DefaultMutateWallStartLocationProbability = 0.1;
         private const double DefaultMutatePassageStartLocationProbability = 0.1;
         private const double DefaultMutateAddWallProbability = 0.01;
+        private const double DefaultMutateDeleteWallProbability = 0.001;
         private const double DefaultMutateExpandMazeProbability = 0.0005;
 
         // Default perturbance magnitude
@@ -146,6 +155,19 @@ namespace SharpNeat.Genomes.Maze
             set
             {
                 _mutateAddWallProbability = value;
+                RouletteWheelLayout = CreateRouletteWheelLayout();
+            }
+        }
+
+        /// <summary>
+        ///     The probability of deleting a random wall from the maze.
+        /// </summary>
+        public double MutateDeleteWallProbability
+        {
+            get { return _mutateDeleteWallProbability; }
+            set
+            {
+                _mutateDeleteWallProbability = value;
                 RouletteWheelLayout = CreateRouletteWheelLayout();
             }
         }

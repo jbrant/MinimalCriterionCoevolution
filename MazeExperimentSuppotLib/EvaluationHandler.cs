@@ -44,7 +44,7 @@ namespace MazeExperimentSuppotLib
             // Create the maze navigation world
             MazeNavigationWorld<BehaviorInfo> world = new MazeNavigationWorld<BehaviorInfo>(mazeConfiguration.Walls,
                 mazeConfiguration.NavigatorLocation, mazeConfiguration.GoalLocation,
-                experimentParameters.MinSuccessDistance, experimentParameters.MaxTimesteps, behaviorCharacterization);
+                experimentParameters.MinSuccessDistance, mazeConfiguration.MaxSimulationTimesteps, behaviorCharacterization);
 
             // Run a single trial
             BehaviorInfo trialInfo = world.RunTrial(evaluationUnit.AgentPhenome, SearchType.MinimalCriteriaSearch,

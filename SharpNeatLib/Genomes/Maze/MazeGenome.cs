@@ -56,6 +56,11 @@ namespace SharpNeat.Genomes.Maze
 
         #region Maze Genome Constructors
 
+        /// <summary>
+        ///     Constructor which constructs a new maze genome with the given unique identifier and birth generation.
+        /// </summary>
+        /// <param name="id">The unique identifier of the new maze genome.</param>
+        /// <param name="birthGeneration">The birth generation.</param>
         protected MazeGenome(uint id, uint birthGeneration)
         {
             // Set the unique genome ID and the birth generation
@@ -70,7 +75,8 @@ namespace SharpNeat.Genomes.Maze
         }
 
         /// <summary>
-        ///     Constructor which constructs a new maze genome with the given unique identifier and birth generation.
+        ///     Constructor which constructs a new maze genome with the given genome factory, unique identifier and birth
+        ///     generation.
         /// </summary>
         /// <param name="genomeFactory">Reference to the genome factory.</param>
         /// <param name="id">The unique identifier of the new maze genome.</param>
@@ -309,6 +315,9 @@ namespace SharpNeat.Genomes.Maze
                     MutateAddWall();
                     break;
                 case 3:
+                    MutateDeleteWall();
+                    break;
+                case 4:
                     MutateExpandMaze();
                     break;
             }
@@ -405,6 +414,24 @@ namespace SharpNeat.Genomes.Maze
             // Add new gene to the genome
             GeneList.Add(new MazeGene(GenomeFactory.InnovationIdGenerator.NextId, newWallStartLocation,
                 newPassageStartLocation, GenomeFactory.Rng.NextBool()));
+        }
+
+        /// <summary>
+        ///     Probabalistically deletes a random wall.  This is equivalent to deleting a gene from the genome.
+        /// </summary>
+        private void MutateDeleteWall()
+        {
+            // Don't attempt to delete a wall if only one exists
+            if (GeneList.Count < 2)
+            {
+                return;
+            }
+
+            // Select a random wall to be deleted
+            int wallIdx = GenomeFactory.Rng.Next(GeneList.Count);
+
+            // Delete the wall
+            GeneList.RemoveAt(wallIdx);
         }
 
         /// <summary>

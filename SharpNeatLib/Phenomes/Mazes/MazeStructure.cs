@@ -231,6 +231,7 @@ namespace SharpNeat.Phenomes.Mazes
 
             // Compute the maximum time steps by distributing the unscalled distance evenly across both dimensions 
             // (i.e. halving it) and multiplying by the scale multiplier for both dimensions
+            // TODO: Need to experiment with polynomial timestep increase here
             MaxTimesteps = 2*(_scaleMultiplier*(unscaledDistance/2));
         }
 
