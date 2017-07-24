@@ -19,7 +19,7 @@ namespace SharpNeat.Domains.MazeNavigation
     /// <summary>
     ///     The base class for all maze navigation experiments.
     /// </summary>
-    public abstract class BaseMazeNavigationExperiment : IGuiNeatExperiment
+    public abstract class BaseMazeNavigationExperiment
     {
         #region Private members
 
@@ -164,25 +164,6 @@ namespace SharpNeat.Domains.MazeNavigation
 
             // Create evolution algorithm.
             return CreateEvolutionAlgorithm(genomeFactory, genomeList);
-        }
-
-        /// <summary>
-        ///     Create a System.Windows.Forms derived object for displaying genomes.
-        /// </summary>
-        /// <returns></returns>
-        public AbstractGenomeView CreateGenomeView()
-        {
-            return new NeatGenomeView();
-        }
-
-        /// <summary>
-        ///     Create a System.Windows.Forms derived object for displaying output for a domain (e.g. show best genome's
-        ///     output/performance/behaviour in the domain).
-        /// </summary>
-        /// <returns></returns>
-        public AbstractDomainView CreateDomainView()
-        {
-            return null;
         }
 
         /// <summary>

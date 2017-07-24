@@ -1,0 +1,1608 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{57314EFA-48AB-4C81-B509-F36EA1000088}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SharpNeatConsole</RootNamespace>
+    <AssemblyName>SharpNeatConsole</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>SharpNeatConsole.MazeNavigationExperimentExecutor</StartupObject>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="log4net">
+      <HintPath>..\..\ThirdPartyAssemblies\log4net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="MazeNavigation\MazeNavigationExperimentExecutor.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ExperimentEntities\ExperimentEntities.csproj">
+      <Project>{E8688333-DD40-4905-9522-85971AE41B97}</Project>
+      <Name>ExperimentEntities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SharpNeatDomains\MCC_Domains.csproj">
+      <Project>{73AB8C8C-6315-4DC7-A3DE-3C747F86AC78}</Project>
+      <Name>MCC_Domains</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SharpNeatLib\SharpNeatLib.csproj">
+      <Project>{ABC5C77A-DEBA-420C-926C-BD3E6F37AE15}</Project>
+      <Name>SharpNeatLib</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="log4net.properties">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="MazeNavigation\ExperimentConfigurations\AutomaticExperiment.config.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\Coevolution MCS Example.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\Coevolution MCS Template.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS - no MC 1.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS - no MC 2.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 1a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 1b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 1c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 1d.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 1e.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 1f.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 1g.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 2a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 2b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 2c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 2d.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 2e.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 2f.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging - no MC 2g.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 10a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 10b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 10c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 10d.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 10e.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 10f.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 10g.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 11a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 11b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 11c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 11d.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 11e.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 11f.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 11g.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 12a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 12b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 12c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 12d.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 12e.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 12f.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 12g.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 13a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 13b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 13c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 13d.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 13e.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 13f.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 13g.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 14a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 14b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 14c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 14d.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 14e.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 14f.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 14g.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 1a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 1b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 1c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 1d.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 1e.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 1f.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 1g.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 2a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 2b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 2c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 2d.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 2e.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 2f.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 2g.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 3a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 3b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 3c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 3d.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 3e.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 3f.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 3g.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 4a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 4b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 4c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 4d.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 4e.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 4f.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 4g.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 5a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 5b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 5c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 5d.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 5e.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 5f.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 5g.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 6a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 6b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 6c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 6d.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 6e.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 6f.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 6g.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 7a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 7b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 7c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 7d.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 7e.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 7f.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 7g.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 8a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 8b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 8c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 8d.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 8e.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 8f.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 8g.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 9a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 9b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 9c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 9d.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 9e.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 9f.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS with Bridging 9g.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Dynamic Speciation - Single MC 1.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Dynamic Speciation - Single MC 2.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Dynamic Speciation - Single MC 3.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Dynamic Speciation - Single MC 4.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Speciation Control - Single MC 1.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Speciation Control - Single MC 2.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Speciation Control - Single MC 3.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Speciation Control - Single MC 4.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Specie Queue 1.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Specie Queue 2.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Specie Queue 3.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Specie Queue 4.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Specie Queue 5.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Specie Queue 6.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Specie Queue 7.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Specie Queue 8.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Static Speciation - Single MC 1.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Static Speciation - Single MC 2.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Static Speciation - Single MC 3.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Static Speciation - Single MC 4.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 1.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 10.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 11.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 12.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 13.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 14.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 15-1.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 15-2.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 15-3.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 15-4.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 15-5.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 15-6.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 15-7.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 15-8.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 15.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 16.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 17.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 18.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 19.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 2.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 20.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 21.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 22.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 23.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 24.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 25.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 26.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 27.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 28.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 29.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 3.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 30.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 31.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 31a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 31b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 31c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 31d.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 31e.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 31f.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 31g.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 31h.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 31i.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 31j.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 31k.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 31l.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 31m.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 31n.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 31o.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 31p.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 31q.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 31r.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 32.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 33.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 34.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 35.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 36.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 37.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 38.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 39.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 4.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 40.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 41.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 42.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 5.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 6.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 7.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 8.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS 9.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS Control 15-1.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS Control 15-2.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS Speciation Dynamic Size 1.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS Speciation Dynamic Size 2.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS Speciation Dynamic Size 3.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS Speciation Dynamic Size 4.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS Speciation Static Size 1.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS Speciation Static Size 2.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS Speciation Static Size 3.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS Speciation Static Size 4.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS with Maze Initialization 1.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS with Maze Initialization 10.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS with Maze Initialization 11.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS with Maze Initialization 12.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS with Maze Initialization 13.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS with Maze Initialization 14.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS with Maze Initialization 15.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS with Maze Initialization 16.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS with Maze Initialization 2.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS with Maze Initialization 3.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS with Maze Initialization 4.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS with Maze Initialization 5.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS with Maze Initialization 6.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS with Maze Initialization 7.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS with Maze Initialization 8.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS with Maze Initialization 9.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 10a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 10b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 10c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 11a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 11b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 11c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 12a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 12b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 12c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 13a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 13b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 13c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 14a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 14b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 14c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 15a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 15b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 15c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 16a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 16b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 16c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 17a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 17b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 17c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 18a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 18b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 18c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 1a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 1b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 1c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 2a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 2b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 2c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 3a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 3b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 3c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 4a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 4b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 4c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 5a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 5b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 5c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 6a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 6b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 6c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 7a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 7b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 7c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 8a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 8b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 8c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 9a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 9b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS 9c.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 10a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 10b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 11a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 11b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 1a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 1b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 2a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 2b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 3a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 3b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 4a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 4b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 5a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 5b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 6a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 6b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 7a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 7b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 8a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 8b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 9a.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Dynamic\Dynamic Queueing MCS with Population Centroid 9b.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Niching\Queueing MCS with Niching - No MC 1.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Niching\Queueing MCS with Niching - No MC 2.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Niching\Queueing MCS with Niching - No MC 3.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Niching\Queueing MCS with Niching - No MC 4.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Niching\Queueing MCS with Niching 1.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Niching\Queueing MCS with Niching 10.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Niching\Queueing MCS with Niching 11.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Niching\Queueing MCS with Niching 12.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Niching\Queueing MCS with Niching 13.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Niching\Queueing MCS with Niching 14.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Niching\Queueing MCS with Niching 15.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Niching\Queueing MCS with Niching 16.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Niching\Queueing MCS with Niching 17.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Niching\Queueing MCS with Niching 18.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Niching\Queueing MCS with Niching 19.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Niching\Queueing MCS with Niching 2.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Niching\Queueing MCS with Niching 20.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Niching\Queueing MCS with Niching 21.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Niching\Queueing MCS with Niching 22.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Niching\Queueing MCS with Niching 23.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Niching\Queueing MCS with Niching 24.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Niching\Queueing MCS with Niching 3.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Niching\Queueing MCS with Niching 4.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Niching\Queueing MCS with Niching 5.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Niching\Queueing MCS with Niching 6.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Niching\Queueing MCS with Niching 7.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Niching\Queueing MCS with Niching 8.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Niching\Queueing MCS with Niching 9.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\NoBridging\Queueing MCS 1.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\NoBridging\Queueing MCS 10.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\NoBridging\Queueing MCS 11.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\NoBridging\Queueing MCS 12.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\NoBridging\Queueing MCS 13.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\NoBridging\Queueing MCS 14.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\NoBridging\Queueing MCS 2.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\NoBridging\Queueing MCS 3.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\NoBridging\Queueing MCS 4.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\NoBridging\Queueing MCS 5.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\NoBridging\Queueing MCS 6.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\NoBridging\Queueing MCS 7.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\NoBridging\Queueing MCS 8.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\NoBridging\Queueing MCS 9.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 1.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 10.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 100.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 11.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 12.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 13.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 14.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 15.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 16.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 17.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 18.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 19.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 2.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 20.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 21.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 22.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 23.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 24.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 25.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 26.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 27.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 28.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 29.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 3.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 30.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 31.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 32.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 33.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 34.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 35.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 36.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 37.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 38.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 39.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 4.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 40.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 41.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 42.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 43.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 44.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 45.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 46.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 47.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 48.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 49.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 5.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 50.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 51.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 52.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 53.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 54.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 55.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 56.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 57.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 58.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 59.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 6.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 60.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 61.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 62.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 63.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 64.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 65.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 66.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 67.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 68.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 69.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 7.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 70.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 71.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 72.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 73.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 74.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 75.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 76.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 77.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 78.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 79.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 8.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 80.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 81.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 82.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 83.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 84.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 85.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 86.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 87.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 88.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 89.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 9.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 90.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 91.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 92.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 93.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 94.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 95.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 96.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 97.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 98.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 99.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\Queueing MCS Niching Template.config.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\Dynamic Queueing MCS Template.config.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\Queueing MCS Parameter Sweep Template.config.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\SeedMazes\GeneratedMazeGenome_15_Size_0_Walls.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\SeedMazes\GeneratedMazeGenome_15_Size_12_Walls.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\SeedMazes\GeneratedMazeGenome_15_Size_16_Walls.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\SeedMazes\GeneratedMazeGenome_15_Size_4_Walls.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\SeedMazes\GeneratedMazeGenome_15_Size_8_Walls.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\SeedMazes\GeneratedMazeGenome_6_Walls.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\SeedMazes\GeneratedMazeGenome_0_Walls.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\SeedMazes\GeneratedMazeGenome_2_Walls.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\SeedMazes\GeneratedMazeGenome_3_Walls.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\SeedMazes\GeneratedMazeGenome_4_Walls.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\SeedMazes\GeneratedMazeGenome_12_Walls.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\SeedMazes\GeneratedMazeGenome_16_Walls.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\SeedMazes\GeneratedMazeGenome_20_Walls.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\SeedMazes\GeneratedMazeGenome_24_Walls.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\SeedMazes\GeneratedMazeGenome_8_Walls.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\SeedMazes\GeneratedMaze_100_Genomes_10_Height_10_Width_2_Walls.xml" />
+    <Content Include="MazeNavigation\SeedMazes\GeneratedMaze_100_Genomes_10_Height_10_Width_8_Walls.xml" />
+    <Content Include="MazeNavigation\SeedMazes\GeneratedMaze_100_Genomes_8_Walls.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\SeedMazes\GeneratedMaze_50_Genomes_8_Walls.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run01.pop.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run02.pop.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run03.pop.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run04.pop.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run05.pop.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run06.pop.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run07.pop.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run08.pop.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run09.pop.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run10.pop.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run11.pop.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run12.pop.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run13.pop.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run14.pop.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run15.pop.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run16.pop.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run17.pop.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run18.pop.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run19.pop.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run20.pop.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.5.2 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
