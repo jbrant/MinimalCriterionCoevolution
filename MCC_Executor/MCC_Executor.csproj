@@ -8,8 +8,8 @@
     <ProjectGuid>{57314EFA-48AB-4C81-B509-F36EA1000088}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SharpNeatConsole</RootNamespace>
-    <AssemblyName>SharpNeatConsole</AssemblyName>
+    <RootNamespace>MCC_Executor</RootNamespace>
+    <AssemblyName>MCC_Executor</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
@@ -52,7 +52,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>SharpNeatConsole.MazeNavigationExperimentExecutor</StartupObject>
+    <StartupObject>MCC_Executor.ExperimentExecutor</StartupObject>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
@@ -118,6 +118,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ExperimentExecutor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MazeNavigation\MazeNavigationExperimentExecutor.cs" />
   </ItemGroup>
@@ -126,7 +127,7 @@
       <Project>{E8688333-DD40-4905-9522-85971AE41B97}</Project>
       <Name>ExperimentEntities</Name>
     </ProjectReference>
-    <ProjectReference Include="..\SharpNeatDomains\MCC_Domains.csproj">
+    <ProjectReference Include="..\MCC_Domains\MCC_Domains.csproj">
       <Project>{73AB8C8C-6315-4DC7-A3DE-3C747F86AC78}</Project>
       <Name>MCC_Domains</Name>
     </ProjectReference>

@@ -7,18 +7,18 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpNeatLib", "SharpNeatLi
 		{E8688333-DD40-4905-9522-85971AE41B97} = {E8688333-DD40-4905-9522-85971AE41B97}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCC_Domains", "SharpNeatDomains\MCC_Domains.csproj", "{73AB8C8C-6315-4DC7-A3DE-3C747F86AC78}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCC_Domains", "MCC_Domains\MCC_Domains.csproj", "{73AB8C8C-6315-4DC7-A3DE-3C747F86AC78}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpNeatViewLib", "SharpNeatViewLib\SharpNeatViewLib.csproj", "{4EA80D7B-B680-4AB8-BC4A-B51AF33A3FDE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCC_Executor", "SharpNeatConsole\MCC_Executor.csproj", "{57314EFA-48AB-4C81-B509-F36EA1000088}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCC_Executor", "MCC_Executor\MCC_Executor.csproj", "{57314EFA-48AB-4C81-B509-F36EA1000088}"
 	ProjectSection(ProjectDependencies) = postProject
 		{E8688333-DD40-4905-9522-85971AE41B97} = {E8688333-DD40-4905-9522-85971AE41B97}
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExperimentEntities", "ExperimentEntities\ExperimentEntities.csproj", "{E8688333-DD40-4905-9522-85971AE41B97}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MazeNavigationEvaluator", "NavigatorMazeMapEvaluator\MazeNavigationEvaluator.csproj", "{2AA77AFA-77EB-46FF-862A-4EE18A0613FC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MazeNavigationEvaluator", "MazeNavigationEvaluator\MazeNavigationEvaluator.csproj", "{2AA77AFA-77EB-46FF-862A-4EE18A0613FC}"
 	ProjectSection(ProjectDependencies) = postProject
 		{7C45C292-DE7A-4E1F-80AA-44D6950807F5} = {7C45C292-DE7A-4E1F-80AA-44D6950807F5}
 	EndProjectSection

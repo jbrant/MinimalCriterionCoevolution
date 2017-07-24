@@ -110,7 +110,7 @@ namespace SharpNeatConsole
         private static readonly Dictionary<ExecutionParameter, String> _executionConfiguration =
             new Dictionary<ExecutionParameter, string>();
 
-        private static void Main(string[] args)
+        public static void execute(string[] args)
         {
             // Initialise log4net (log to console and file).
             XmlConfigurator.Configure(new FileInfo("log4net.properties"));
