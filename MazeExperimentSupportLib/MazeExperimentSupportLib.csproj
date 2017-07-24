@@ -7,8 +7,8 @@
     <ProjectGuid>{7C45C292-DE7A-4E1F-80AA-44D6950807F5}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MazeExperimentSuppotLib</RootNamespace>
-    <AssemblyName>MazeExperimentSuppotLib</AssemblyName>
+    <RootNamespace>MazeExperimentSupportLib</RootNamespace>
+    <AssemblyName>MazeExperimentSupportLib</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>

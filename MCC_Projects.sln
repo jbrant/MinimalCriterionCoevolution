@@ -32,7 +32,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MazeSimulator", "MazeSimula
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MazeSimulatorSupport", "MazeSimulatorSupport\MazeSimulatorSupport.csproj", "{4CA5EA7D-771D-4330-8C06-200FDA1B279E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MazeExperimentSupportLib", "MazeExperimentSuppotLib\MazeExperimentSupportLib.csproj", "{7C45C292-DE7A-4E1F-80AA-44D6950807F5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MazeExperimentSupportLib", "MazeExperimentSupportLib\MazeExperimentSupportLib.csproj", "{7C45C292-DE7A-4E1F-80AA-44D6950807F5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoevolutionAlgorithmComparator", "CoevolutionAlgorithmComparator\CoevolutionAlgorithmComparator.csproj", "{5EF0563C-0594-4258-9DDA-B7B5B9149043}"
 EndProject
