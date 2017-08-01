@@ -85,10 +85,6 @@
       <Project>{e8688333-dd40-4905-9522-85971ae41b97}</Project>
       <Name>ExperimentEntities</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MazeExperimentSuppotLib\MazeExperimentSupportLib.csproj">
-      <Project>{7c45c292-de7a-4e1f-80aa-44d6950807f5}</Project>
-      <Name>MazeExperimentSupportLib</Name>
-    </ProjectReference>
     <ProjectReference Include="..\SharpNeatLib\SharpNeatLib.csproj">
       <Project>{ABC5C77A-DEBA-420C-926C-BD3E6F37AE15}</Project>
       <Name>SharpNeatLib</Name>
