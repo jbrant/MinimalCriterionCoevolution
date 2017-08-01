@@ -15,7 +15,7 @@ using RunPhase = SharpNeat.Core.RunPhase;
 
 namespace NavigatorMazeMapEvaluator
 {
-    internal class NavigatorMazeMapEvaluatorExecutor
+    internal class MazeNavigationEvaluatorExecutor
     {
         /// <summary>
         ///     This is the number of records that are written to the database in one pass.

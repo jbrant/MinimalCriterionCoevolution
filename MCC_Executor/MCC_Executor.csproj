@@ -8,8 +8,8 @@
     <ProjectGuid>{57314EFA-48AB-4C81-B509-F36EA1000088}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SharpNeatConsole</RootNamespace>
-    <AssemblyName>SharpNeatConsole</AssemblyName>
+    <RootNamespace>MCC_Executor</RootNamespace>
+    <AssemblyName>MCC_Executor</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
@@ -127,9 +127,9 @@
       <Project>{E8688333-DD40-4905-9522-85971AE41B97}</Project>
       <Name>ExperimentEntities</Name>
     </ProjectReference>
-    <ProjectReference Include="..\SharpNeatDomains\SharpNeatDomains.csproj">
+    <ProjectReference Include="..\MCC_Domains\MCC_Domains.csproj">
       <Project>{73AB8C8C-6315-4DC7-A3DE-3C747F86AC78}</Project>
-      <Name>SharpNeatDomains</Name>
+      <Name>MCC_Domains</Name>
     </ProjectReference>
     <ProjectReference Include="..\SharpNeatLib\SharpNeatLib.csproj">
       <Project>{ABC5C77A-DEBA-420C-926C-BD3E6F37AE15}</Project>

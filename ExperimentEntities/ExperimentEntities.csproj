@@ -55,7 +55,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
     <Compile Include="CoevolutionMCSMazeExperimentEvaluationData.cs">
       <DependentUpon>ExperimentModel.tt</DependentUpon>
     </Compile>
