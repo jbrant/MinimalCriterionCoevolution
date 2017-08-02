@@ -77,9 +77,9 @@
       <Project>{7c45c292-de7a-4e1f-80aa-44d6950807f5}</Project>
       <Name>MazeExperimentSupportLib</Name>
     </ProjectReference>
-    <ProjectReference Include="..\SharpNeatDomains\SharpNeatDomains.csproj">
+    <ProjectReference Include="..\SharpNeatDomains\MCC_Domains.csproj">
       <Project>{73ab8c8c-6315-4dc7-a3de-3c747f86ac78}</Project>
-      <Name>SharpNeatDomains</Name>
+      <Name>MCC_Domains</Name>
     </ProjectReference>
     <ProjectReference Include="..\SharpNeatLib\SharpNeatLib.csproj">
       <Project>{abc5c77a-deba-420c-926c-bd3e6f37ae15}</Project>
