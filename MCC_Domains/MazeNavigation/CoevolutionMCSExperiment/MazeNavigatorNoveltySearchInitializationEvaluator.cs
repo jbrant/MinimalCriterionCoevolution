@@ -9,7 +9,7 @@ using SharpNeat.Phenomes.Mazes;
 
 #endregion
 
-namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
+namespace MCC_Domains.MazeNavigation.CoevolutionMCSExperiment
 {
     /// <summary>
     ///     Defines evaluation rules and process for an initialization evaluation of the novelty search algorithm.

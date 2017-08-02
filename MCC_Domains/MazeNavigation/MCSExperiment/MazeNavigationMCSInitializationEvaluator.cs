@@ -2,14 +2,14 @@
 
 using System;
 using System.Collections.Generic;
+using MCC_Domains.MazeNavigation.Components;
 using SharpNeat.Core;
-using SharpNeat.Domains.MazeNavigation.Components;
 using SharpNeat.Loggers;
 using SharpNeat.Phenomes;
 
 #endregion
 
-namespace SharpNeat.Domains.MazeNavigation.MCSExperiment
+namespace MCC_Domains.MazeNavigation.MCSExperiment
 {
     /// <summary>
     ///     Defines evaluation rules and process for an initialization evaluation of the minimal criteria search (MCS)

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Xml;
+using MCC_Domains.Utils;
 using SharpNeat.Core;
 using SharpNeat.Genomes.Maze;
 using SharpNeat.Genomes.Neat;
@@ -14,7 +15,7 @@ using SharpNeat.Utility;
 
 #endregion
 
-namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
+namespace MCC_Domains.MazeNavigation.Bootstrappers
 {
     /// <summary>
     ///     Base class for coevolution experiment initializers.

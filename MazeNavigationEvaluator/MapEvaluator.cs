@@ -7,7 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
 using ExperimentEntities;
-using MazeExperimentSuppotLib;
+using MazeExperimentSupportLib;
 using SharpNeat.Decoders;
 using SharpNeat.Decoders.Maze;
 using SharpNeat.Decoders.Neat;
@@ -17,7 +17,7 @@ using SharpNeat.Phenomes.Mazes;
 
 #endregion
 
-namespace NavigatorMazeMapEvaluator
+namespace MazeNavigationEvaluator
 {
     /// <summary>
     ///     Sets up and evaluates the combination all of the given mazes and maze navigators, running a separate trial for each

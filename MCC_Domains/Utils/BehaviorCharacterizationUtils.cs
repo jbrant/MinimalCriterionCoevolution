@@ -6,7 +6,7 @@ using SharpNeat.Core;
 
 #endregion
 
-namespace SharpNeat.Domains
+namespace MCC_Domains.Utils
 {
     /// <summary>
     ///     Defines the behavior characterization type to use (end point, trajectory, etc.) for a given experiment.

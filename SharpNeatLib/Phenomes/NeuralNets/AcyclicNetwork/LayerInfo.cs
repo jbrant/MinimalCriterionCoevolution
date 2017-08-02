@@ -17,7 +17,7 @@
  * along with SharpNEAT.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace SharpNeat.Phenomes.NeuralNets
+namespace SharpNeat.Phenomes.NeuralNets.AcyclicNetwork
 {
     /// <summary>
     /// Stores a node and connection index that represent a layer within the network 

@@ -8,7 +8,7 @@ using SharpNeat.Genomes.Neat;
 
 #endregion
 
-namespace SharpNeat.Domains
+namespace MCC_Domains
 {
     /// <summary>
     ///     Interface for classes implementing coevolution experiments; specifically, those coevolving mazes with NEAT-based

@@ -6,9 +6,10 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
+using MCC_Domains.MazeNavigation.CoevolutionMCSExperiment;
+using MCC_Domains.Utils;
+using SharpNeat;
 using SharpNeat.Core;
-using SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment;
-using SharpNeat.EliteArchives;
 using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.NoveltyArchives;
@@ -17,7 +18,7 @@ using SharpNeat.Phenomes.Mazes;
 
 #endregion
 
-namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
+namespace MCC_Domains.MazeNavigation.Bootstrappers
 {
     public class NoveltySearchCoevolutionMazeNavigationInitializer : CoevolutionMazeNavigationInitializer
     {

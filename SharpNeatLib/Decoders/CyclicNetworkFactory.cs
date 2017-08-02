@@ -19,6 +19,7 @@
 using System.Collections.Generic;
 using SharpNeat.Network;
 using SharpNeat.Phenomes.NeuralNets;
+using SharpNeat.Phenomes.NeuralNets.CyclicNetwork;
 
 namespace SharpNeat.Decoders
 {

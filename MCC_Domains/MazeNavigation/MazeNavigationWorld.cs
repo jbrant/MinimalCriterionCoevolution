@@ -1,14 +1,15 @@
 ﻿#region
 
 using System.Collections.Generic;
+using MCC_Domains.Common;
+using MCC_Domains.MazeNavigation.Components;
 using SharpNeat.Core;
-using SharpNeat.Domains.MazeNavigation.Components;
 using SharpNeat.Loggers;
 using SharpNeat.Phenomes;
 
 #endregion
 
-namespace SharpNeat.Domains.MazeNavigation
+namespace MCC_Domains.MazeNavigation
 {
     /// <summary>
     ///     Sets up and runs the maze navigation simulation.

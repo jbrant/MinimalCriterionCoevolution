@@ -3,13 +3,14 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using MCC_Domains.Common;
+using MCC_Domains.MazeNavigation.Components;
 using SharpNeat.Core;
-using SharpNeat.Domains.MazeNavigation.Components;
 using SharpNeat.Phenomes.Mazes;
 
 #endregion
 
-namespace SharpNeat.Domains.MazeNavigation
+namespace MCC_Domains.MazeNavigation
 {
     /// <summary>
     ///     The multi maze navigation world factory facilitates generating maze navigation worlds based on evolved maze

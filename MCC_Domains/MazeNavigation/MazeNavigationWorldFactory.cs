@@ -1,12 +1,13 @@
 ﻿#region
 
 using System.Collections.Generic;
+using MCC_Domains.Common;
+using MCC_Domains.MazeNavigation.Components;
 using SharpNeat.Core;
-using SharpNeat.Domains.MazeNavigation.Components;
 
 #endregion
 
-namespace SharpNeat.Domains.MazeNavigation
+namespace MCC_Domains.MazeNavigation
 {
     /// <summary>
     ///     The purpose of this class is to capture properties of the maze domain that are common throughout evolution and

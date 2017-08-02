@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Xml;
+using MCC_Domains.Utils;
 using SharpNeat.Core;
 using SharpNeat.Decoders;
 using SharpNeat.Genomes.Maze;
@@ -10,7 +11,7 @@ using SharpNeat.Genomes.Neat;
 
 #endregion
 
-namespace SharpNeat.Domains.MazeNavigation
+namespace MCC_Domains.MazeNavigation
 {
     public abstract class BaseCoevolutionMazeNavigationExperiment : ICoevolutionExperiment
     {

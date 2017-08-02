@@ -1,11 +1,10 @@
 ﻿#region
 
 using SharpNeat.Core;
-using SharpNeat.NoveltyArchives;
 
 #endregion
 
-namespace SharpNeat.EliteArchives
+namespace SharpNeat.NoveltyArchives
 {
     /// <summary>
     ///     Encapsulates the state of the archive of behaviorally novel organisms.

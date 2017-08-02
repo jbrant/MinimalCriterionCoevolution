@@ -7,8 +7,8 @@
     <ProjectGuid>{7C45C292-DE7A-4E1F-80AA-44D6950807F5}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MazeExperimentSuppotLib</RootNamespace>
-    <AssemblyName>MazeExperimentSuppotLib</AssemblyName>
+    <RootNamespace>MazeExperimentSupportLib</RootNamespace>
+    <AssemblyName>MazeExperimentSupportLib</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>
@@ -87,7 +87,7 @@
       <Project>{e8688333-dd40-4905-9522-85971ae41b97}</Project>
       <Name>ExperimentEntities</Name>
     </ProjectReference>
-    <ProjectReference Include="..\SharpNeatDomains\MCC_Domains.csproj">
+    <ProjectReference Include="..\MCC_Domains\MCC_Domains.csproj">
       <Project>{73ab8c8c-6315-4dc7-a3de-3c747f86ac78}</Project>
       <Name>MCC_Domains</Name>
     </ProjectReference>

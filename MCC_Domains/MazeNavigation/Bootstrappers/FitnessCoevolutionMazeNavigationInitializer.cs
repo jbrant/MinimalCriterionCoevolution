@@ -5,8 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using MCC_Domains.MazeNavigation.CoevolutionMCSExperiment;
+using SharpNeat;
 using SharpNeat.Core;
-using SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment;
 using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Phenomes;
@@ -14,7 +15,7 @@ using SharpNeat.Phenomes.Mazes;
 
 #endregion
 
-namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
+namespace MCC_Domains.MazeNavigation.Bootstrappers
 {
     /// <summary>
     ///     Initializes a specified number of "viable" genomes (i.e. genomes that satisfy the minimal criteria) in order to

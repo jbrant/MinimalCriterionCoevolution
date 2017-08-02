@@ -10,23 +10,24 @@ using System.Xml;
 using ExperimentEntities;
 using log4net;
 using log4net.Config;
+using MCC_Domains;
+using MCC_Domains.MazeNavigation;
+using MCC_Domains.MazeNavigation.CoevolutionMCSExperiment;
+using MCC_Domains.MazeNavigation.FitnessExperiment;
+using MCC_Domains.MazeNavigation.MCNSExperiment;
+using MCC_Domains.MazeNavigation.MCSExperiment;
+using MCC_Domains.MazeNavigation.NoveltyExperiment;
+using MCC_Domains.MazeNavigation.RandomExperiment;
+using MCC_Domains.Utils;
 using SharpNeat;
 using SharpNeat.Core;
-using SharpNeat.Domains;
-using SharpNeat.Domains.MazeNavigation;
-using SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment;
-using SharpNeat.Domains.MazeNavigation.FitnessExperiment;
-using SharpNeat.Domains.MazeNavigation.MCNSExperiment;
-using SharpNeat.Domains.MazeNavigation.MCSExperiment;
-using SharpNeat.Domains.MazeNavigation.NoveltyExperiment;
-using SharpNeat.Domains.MazeNavigation.RandomExperiment;
 using SharpNeat.Genomes.Maze;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Loggers;
 
 #endregion
 
-namespace SharpNeatConsole
+namespace MCC_Executor
 {
     /// <summary>
     ///     Encapsulates and standardizes experiment execution parameters.

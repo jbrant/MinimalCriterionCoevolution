@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SharpNeat.Domains
+namespace MCC_Domains.Common
 {
     /// <summary>
     ///     Defines a 2D line segment with 2D integer start and end points.

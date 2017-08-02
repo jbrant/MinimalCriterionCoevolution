@@ -4,7 +4,7 @@ using System;
 
 #endregion
 
-namespace SharpNeat.Domains.MazeNavigation.Components
+namespace MCC_Domains.MazeNavigation.Components
 {
     /// <summary>
     ///     Defines the variant of maze environments to use (hard, medium, etc.) for a given maze navigation experiment.  Each

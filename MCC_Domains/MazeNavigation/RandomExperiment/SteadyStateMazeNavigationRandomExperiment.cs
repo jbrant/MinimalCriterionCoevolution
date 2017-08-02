@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Xml;
+using MCC_Domains.Utils;
 using SharpNeat.Core;
 using SharpNeat.DistanceMetrics;
 using SharpNeat.EvolutionAlgorithms;
@@ -12,7 +13,7 @@ using SharpNeat.SpeciationStrategies;
 
 #endregion
 
-namespace SharpNeat.Domains.MazeNavigation.RandomExperiment
+namespace MCC_Domains.MazeNavigation.RandomExperiment
 {
     public class SteadyStateMazeNavigationRandomExperiment : BaseMazeNavigationExperiment
     {

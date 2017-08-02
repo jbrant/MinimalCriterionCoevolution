@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-namespace SharpNeat.Domains
+namespace MCC_Domains.Common
 {
     /// <summary>
     /// Defines a 2D point in the polar coordinate space.

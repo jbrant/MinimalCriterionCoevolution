@@ -20,7 +20,7 @@
 // Disable missing comment warnings.
 #pragma warning disable 1591
 
-namespace SharpNeat.Phenomes.NeuralNets
+namespace SharpNeat.Phenomes.NeuralNets.FastCyclicNetwork
 {
     /// <summary>
     /// Working data struct for use in FastCyclicNetwork and sub-classes.

@@ -5,7 +5,7 @@ using SharpNeat.Phenomes.Mazes;
 
 #endregion
 
-namespace MazeExperimentSuppotLib
+namespace MazeExperimentSupportLib
 {
     /// <summary>
     ///     Encapsulates one unit of evaluation - a single agent through a single maze.

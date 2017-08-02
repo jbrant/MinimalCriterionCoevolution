@@ -1,11 +1,12 @@
 ﻿#region
 
 using System.Collections.Generic;
-using SharpNeat.Domains.MazeNavigation.Components;
+using MCC_Domains.Common;
+using MCC_Domains.MazeNavigation.Components;
 
 #endregion
 
-namespace SharpNeat.Domains.MazeNavigation
+namespace MCC_Domains.MazeNavigation
 {
     /// <summary>
     ///     Defines minimum/maximum boundaries on the provided maze walls as well as helper methods to map ending locations to

@@ -73,11 +73,11 @@
       <Project>{e8688333-dd40-4905-9522-85971ae41b97}</Project>
       <Name>ExperimentEntities</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MazeExperimentSuppotLib\MazeExperimentSupportLib.csproj">
+    <ProjectReference Include="..\MazeExperimentSupportLib\MazeExperimentSupportLib.csproj">
       <Project>{7c45c292-de7a-4e1f-80aa-44d6950807f5}</Project>
       <Name>MazeExperimentSupportLib</Name>
     </ProjectReference>
-    <ProjectReference Include="..\SharpNeatDomains\MCC_Domains.csproj">
+    <ProjectReference Include="..\MCC_Domains\MCC_Domains.csproj">
       <Project>{73ab8c8c-6315-4dc7-a3de-3c747f86ac78}</Project>
       <Name>MCC_Domains</Name>
     </ProjectReference>

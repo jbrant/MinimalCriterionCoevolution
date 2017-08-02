@@ -2,9 +2,9 @@
 
 using System.Collections.Generic;
 using ExperimentEntities;
+using MCC_Domains.Utils;
 using SharpNeat.Core;
 using SharpNeat.DistanceMetrics;
-using SharpNeat.EliteArchives;
 using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.NoveltyArchives;
@@ -14,7 +14,7 @@ using SharpNeat.SpeciationStrategies;
 
 #endregion
 
-namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
+namespace MCC_Domains.MazeNavigation.CoevolutionMCSExperiment
 {
     public class NoveltySearchComparisonExperiment : BaseMazeNavigationExperiment
     {

@@ -3,14 +3,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MCC_Domains.Common;
+using MCC_Domains.MazeNavigation.Components;
 using SharpNeat.Core;
-using SharpNeat.Domains;
-using SharpNeat.Domains.MazeNavigation.Components;
 using SharpNeat.Phenomes.Mazes;
 
 #endregion
 
-namespace MazeExperimentSuppotLib
+namespace MazeExperimentSupportLib
 {
     /// <summary>
     ///     Contains utility methods for performaing miscellaneous data transformation and processing tasks.

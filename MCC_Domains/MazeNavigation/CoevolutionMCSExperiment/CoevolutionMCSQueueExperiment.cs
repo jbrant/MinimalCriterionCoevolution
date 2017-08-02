@@ -4,11 +4,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
+using MCC_Domains.MazeNavigation.Bootstrappers;
+using MCC_Domains.Utils;
 using SharpNeat.Core;
 using SharpNeat.Decoders.Maze;
 using SharpNeat.Decoders.Neat;
 using SharpNeat.DistanceMetrics;
-using SharpNeat.Domains.MazeNavigation.Bootstrappers;
 using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.Genomes.Maze;
 using SharpNeat.Genomes.Neat;
@@ -20,7 +21,7 @@ using SharpNeat.Utility;
 
 #endregion
 
-namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
+namespace MCC_Domains.MazeNavigation.CoevolutionMCSExperiment
 {
     public class CoevolutionMCSQueueExperiment : BaseCoevolutionMazeNavigationExperiment
     {

@@ -26,9 +26,9 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Xml;
 using ExperimentEntities;
+using MCC_Domains.MazeNavigation.Bootstrappers;
 using SharpNeat.Core;
 using SharpNeat.Decoders;
-using SharpNeat.Domains.MazeNavigation.Bootstrappers;
 using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.EvolutionAlgorithms.ComplexityRegulation;
 using SharpNeat.Genomes.Maze;
@@ -38,7 +38,7 @@ using SharpNeat.MinimalCriterias;
 
 #endregion
 
-namespace SharpNeat.Domains
+namespace MCC_Domains.Utils
 {
     /// <summary>
     ///     Static helper methods for experiment initialization.

@@ -2,10 +2,12 @@
 
 using System;
 using System.Collections.Generic;
+using MCC_Domains.Common;
+using MCC_Domains.Utils;
 
 #endregion
 
-namespace SharpNeat.Domains.MazeNavigation.Components
+namespace MCC_Domains.MazeNavigation.Components
 {
     public class MazeNavigator
     {

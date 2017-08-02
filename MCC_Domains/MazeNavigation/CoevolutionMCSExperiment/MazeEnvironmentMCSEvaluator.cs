@@ -9,7 +9,7 @@ using SharpNeat.Phenomes.Mazes;
 
 #endregion
 
-namespace SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment
+namespace MCC_Domains.MazeNavigation.CoevolutionMCSExperiment
 {
     public class MazeEnvironmentMCSEvaluator : IPhenomeEvaluator<MazeStructure, BehaviorInfo>
     {

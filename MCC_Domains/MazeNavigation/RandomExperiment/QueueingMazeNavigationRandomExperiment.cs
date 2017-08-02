@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Xml;
 using ExperimentEntities;
+using MCC_Domains.Utils;
 using SharpNeat.Core;
 using SharpNeat.DistanceMetrics;
 using SharpNeat.EvolutionAlgorithms;
@@ -14,7 +15,7 @@ using RunPhase = SharpNeat.Core.RunPhase;
 
 #endregion
 
-namespace SharpNeat.Domains.MazeNavigation.RandomExperiment
+namespace MCC_Domains.MazeNavigation.RandomExperiment
 {
     public class QueueingMazeNavigationRandomExperiment : BaseMazeNavigationExperiment
     {

@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with SharpNEAT.  If not, see <http://www.gnu.org/licenses/>.
  */
-namespace SharpNeat.Phenomes.NeuralNets
+namespace SharpNeat.Phenomes.NeuralNets.CyclicNetwork
 {
     /// <summary>
     /// Represents a single connection between two neurons in a CyclicNetwork.

@@ -4,7 +4,7 @@ using System;
 
 #endregion
 
-namespace SharpNeat.Domains
+namespace MCC_Domains.Utils
 {
     /// <summary>
     ///     Common utility methods used in experiment calculations.

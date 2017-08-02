@@ -6,10 +6,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using ExperimentEntities;
+using MCC_Domains.MazeNavigation.Components;
+using MCC_Domains.MazeNavigation.MCSExperiment;
+using MCC_Domains.Utils;
+using SharpNeat;
 using SharpNeat.Core;
-using SharpNeat.Domains.MazeNavigation.Components;
-using SharpNeat.Domains.MazeNavigation.MCSExperiment;
-using SharpNeat.EliteArchives;
 using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Loggers;
@@ -19,7 +20,7 @@ using RunPhase = SharpNeat.Core.RunPhase;
 
 #endregion
 
-namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
+namespace MCC_Domains.MazeNavigation.Bootstrappers
 {
     /// <summary>
     ///     Initializes a specified number of "viable" genomes (i.e. genomes that satisfy the minimal criteria) in order to

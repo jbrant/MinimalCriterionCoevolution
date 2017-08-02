@@ -1,29 +1,40 @@
-﻿#region
+﻿/* ***************************************************************************
+ * This file is part of SharpNEAT - Evolution of Neural Networks.
+ * 
+ * Copyright 2004-2006, 2009-2010 Colin Green (sharpneat@gmail.com)
+ *
+ * SharpNEAT is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * SharpNEAT is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with SharpNEAT.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 using System;
 
-#endregion
-
-// ReSharper disable NonReadonlyMemberInGetHashCode
-
-// ReSharper disable CompareOfFloatsByEqualityOperator
-
-namespace SharpNeat.Domains
+namespace MCC_Domains.Common
 {
     /// <summary>
-    ///     Defines a 2D point with double-precision cartesian coordinates.
+    ///     Defines a 2D point with integer cartesian coordinates.
     /// </summary>
-    public struct DoublePoint
+    public struct IntPoint
     {
         /// <summary>
         ///     X-axis coordinate.
         /// </summary>
-        public double X;
+        public int X;
 
         /// <summary>
         ///     Y-axis coordinate.
         /// </summary>
-        public double Y;
+        public int Y;
 
         #region Constructor
 
@@ -32,7 +43,7 @@ namespace SharpNeat.Domains
         ///     <param name="x">The x-coordinate in two-dimensiona space.</param>
         ///     <param name="y">The y-coordinate in two-dimensiona space.</param>
         /// </summary>
-        public DoublePoint(double x, double y)
+        public IntPoint(int x, int y)
         {
             X = x;
             Y = y;
@@ -47,21 +58,14 @@ namespace SharpNeat.Domains
         /// </summary>
         /// <param name="angle">The angle from the origin.</param>
         /// <param name="point">The point about which to rotate.</param>
-        public void RotatePoint(double angle, DoublePoint point)
+        public void RotatePoint(double angle, IntPoint point)
         {
-            // Convert angle to radians
-            double radianAngle = MathUtils.toRadians(angle);
-
             // Decrement this point by the given point about which to rotate
             this -= point;
 
-            // Copy off the X/Y position values
-            double tempX = X;
-            double tempY = Y;
-
             // Perform the actual rotation
-            X = Math.Cos(radianAngle)* tempX - Math.Sin(radianAngle)* tempY;
-            Y = Math.Sin(radianAngle)* tempX + Math.Cos(radianAngle)* tempY;
+            X = (int) Math.Cos(angle)*X - (int) Math.Sin(angle)*Y;
+            Y = (int) Math.Sin(angle)*X + (int) Math.Cos(angle)*Y;
 
             // Add the coordinates that had been offset back in
             this += point;
@@ -69,7 +73,7 @@ namespace SharpNeat.Domains
 
         #endregion
 
-        // disable comment warnings for trivial public members.
+// disable comment warnings for trivial public members.
 #pragma warning disable 1591
 
         #region Overrides
@@ -81,9 +85,9 @@ namespace SharpNeat.Domains
         /// <returns>Whether or not the point and the given object are equivalent.</returns>
         public override bool Equals(object obj)
         {
-            if (obj is DoublePoint)
+            if (obj is IntPoint)
             {
-                var p = (DoublePoint) obj;
+                var p = (IntPoint) obj;
                 return (X == p.X) && (Y == p.Y);
             }
             return false;
@@ -95,7 +99,7 @@ namespace SharpNeat.Domains
         /// <returns>The point hash code.</returns>
         public override int GetHashCode()
         {
-            return (int) (X + (17*Y));
+            return X + (17*Y);
         }
 
         #endregion
@@ -108,7 +112,7 @@ namespace SharpNeat.Domains
         /// <param name="a">The first point.</param>
         /// <param name="b">The second point.</param>
         /// <returns>Whether or not the points are equivalent.</returns>
-        public static bool operator ==(DoublePoint a, DoublePoint b)
+        public static bool operator ==(IntPoint a, IntPoint b)
         {
             return (a.X == b.X) && (a.Y == b.Y);
         }
@@ -119,7 +123,7 @@ namespace SharpNeat.Domains
         /// <param name="a">The first point.</param>
         /// <param name="b">The second point.</param>
         /// <returns>Whether or not the points are *not* equivalent.</returns>
-        public static bool operator !=(DoublePoint a, DoublePoint b)
+        public static bool operator !=(IntPoint a, IntPoint b)
         {
             return (a.X != b.X) || (a.Y != b.Y);
         }
@@ -131,9 +135,9 @@ namespace SharpNeat.Domains
         /// <param name="a">The minuend point.</param>
         /// <param name="b">The subtrahend point.</param>
         /// <returns>The point resulting from the arithmetic difference between the two given points.</returns>
-        public static DoublePoint operator -(DoublePoint a, DoublePoint b)
+        public static IntPoint operator -(IntPoint a, IntPoint b)
         {
-            return new DoublePoint(a.X - b.X, a.Y - b.Y);
+            return new IntPoint(a.X - b.X, a.Y - b.Y);
         }
 
         /// <summary>
@@ -142,9 +146,9 @@ namespace SharpNeat.Domains
         /// <param name="a">The augend point.</param>
         /// <param name="b">The addend point.</param>
         /// <returns>The point resulting from the arithmetic sum of the two given points.</returns>
-        public static DoublePoint operator +(DoublePoint a, DoublePoint b)
+        public static IntPoint operator +(IntPoint a, IntPoint b)
         {
-            return new DoublePoint(a.X + b.X, a.Y + b.Y);
+            return new IntPoint(a.X + b.X, a.Y + b.Y);
         }
 
         #endregion
@@ -157,33 +161,33 @@ namespace SharpNeat.Domains
         ///     Calculates the angle that the given point makes with the origin in radians.
         /// </summary>
         /// <param name="a">The point whose position to compare with the origin.</param>
-        /// <returns>The angle (in degrees) that the given point makes with the origin.</returns>
-        public static double CalculateAngleFromOrigin(DoublePoint a)
+        /// <returns>The angle (in radians) that the given point makes with the origin.</returns>
+        public static double CalculateAngleFromOrigin(IntPoint a)
         {
             // If we're both X and Y are zero, the point is at the origin, but consider 
-            // this to be 90 degrees
+            // this to be 90 degrees (pi/2 radians)
             if (a.X == 0)
             {
                 if (a.Y == 0)
                 {
-                    return 90;
+                    return Math.PI/2;
                 }
 
                 // If only X is 0 but Y isn't, we still can't calculate the slope so 
-                // consider this to be 270 degrees
-                return 270;
+                // consider this to be 270 degrees (3pi/2 radians)
+                return (Math.PI*3)/2;
             }
 
             // Calculate the slope (this would just be Y/X since it's compared to the 
             // origin) and take the arc tangent (which yields the angle in radians)
-            var angle = MathUtils.toDegrees(Math.Atan(a.Y/a.X));
+            var angle = Math.Atan(a.Y/a.X);
 
             // If the X coordinate is positive, just return the calculated angle
             if (a.X > 0)
                 return angle;
 
-            // Otherwise, return the angle plus 180 degrees
-            return angle + 180;
+            // Otherwise, return the angle plus 180 degrees (pi radians)
+            return angle + Math.PI;
         }
 
         /// <summary>
@@ -192,7 +196,7 @@ namespace SharpNeat.Domains
         /// <param name="a">The first point in two-dimensional space.</param>
         /// <param name="b">The second point in two-dimensional space.</param>
         /// <returns>The squared distance.</returns>
-        public static double CalculateSquaredDistance(DoublePoint a, DoublePoint b)
+        public static int CalculateSquaredDistance(IntPoint a, IntPoint b)
         {
             var xDelta = a.X - b.X;
             var yDelta = a.Y - b.Y;
@@ -205,10 +209,10 @@ namespace SharpNeat.Domains
         /// <param name="a">The first point in two-dimensional space.</param>
         /// <param name="b">The second point in two-dimensional space.</param>
         /// <returns>The Euclidean distance.</returns>
-        public static double CalculateEuclideanDistance(DoublePoint a, DoublePoint b)
+        public static double CalculateEuclideanDistance(IntPoint a, IntPoint b)
         {
-            var xDelta = (a.X - b.X);
-            var yDelta = (a.Y - b.Y);
+            double xDelta = (a.X - b.X);
+            double yDelta = (a.Y - b.Y);
             return Math.Sqrt(xDelta*xDelta + yDelta*yDelta);
         }
 
@@ -219,10 +223,10 @@ namespace SharpNeat.Domains
         ///     <param name="y">The y-coordinate in two-dimensiona space.</param>
         ///     <returns>The Euclidean distance.</returns>
         /// </summary>
-        public static double CalculateEuclideanDistance(DoublePoint a, int x, int y)
+        public static double CalculateEuclideanDistance(IntPoint a, int x, int y)
         {
-            var xDelta = (a.X - x);
-            var yDelta = (a.Y - y);
+            double xDelta = (a.X - x);
+            double yDelta = (a.Y - y);
             return Math.Sqrt(xDelta*xDelta + yDelta*yDelta);
         }
 
@@ -232,10 +236,10 @@ namespace SharpNeat.Domains
         /// <param name="a">The first point in two-dimensional space.</param>
         /// <param name="b">The second point in two-dimensional space.</param>
         /// <returns>The manhattan distance.</returns>
-        public static double CalculateManhattanDistance(DoublePoint a, DoublePoint b)
+        public static double CalculateManhattanDistance(IntPoint a, IntPoint b)
         {
-            var xDelta = Math.Abs(a.X - b.X);
-            var yDelta = Math.Abs(a.Y - b.Y);
+            double xDelta = Math.Abs(a.X - b.X);
+            double yDelta = Math.Abs(a.Y - b.Y);
             return xDelta + yDelta;
         }
 
@@ -246,10 +250,10 @@ namespace SharpNeat.Domains
         /// <param name="x">The x-coordinate in two-dimensiona space.</param>
         /// <param name="y">The y-coordinate in two-dimensiona space.</param>
         /// <returns>The manhattan distance.</returns>
-        public static double CalculateManhattanDistance(DoublePoint a, int x, int y)
+        public static double CalculateManhattanDistance(IntPoint a, int x, int y)
         {
-            var xDelta = Math.Abs(a.X - x);
-            var yDelta = Math.Abs(a.Y - y);
+            double xDelta = Math.Abs(a.X - x);
+            double yDelta = Math.Abs(a.Y - y);
             return xDelta + yDelta;
         }
 

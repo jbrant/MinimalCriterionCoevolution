@@ -19,9 +19,8 @@
 
 using System;
 using Redzen.Numerics;
-using SharpNeat.Utility;
 
-namespace SharpNeat.Network
+namespace SharpNeat.Network.ActivationFunctions.Bipolar
 {
     /// <summary>
     /// Bipolar gaussian activation function. Output range is -1 to 1, that is, the tails of the gaussian

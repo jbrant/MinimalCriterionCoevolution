@@ -4,22 +4,23 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Xml;
 using ExperimentEntities;
+using MCC_Domains.MazeNavigation.Components;
+using MCC_Domains.Utils;
 using SharpNeat.Core;
 using SharpNeat.Decoders;
 using SharpNeat.Decoders.Neat;
-using SharpNeat.Domains.MazeNavigation.Components;
 using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Phenomes;
 
 #endregion
 
-namespace SharpNeat.Domains.MazeNavigation
+namespace MCC_Domains.MazeNavigation
 {
     /// <summary>
     ///     The base class for all maze navigation experiments.
     /// </summary>
-    public abstract class BaseMazeNavigationExperiment : IGuiNeatExperiment
+    public abstract class BaseMazeNavigationExperiment
     {
         #region Private members
 
@@ -167,26 +168,7 @@ namespace SharpNeat.Domains.MazeNavigation
             // Create evolution algorithm.
             return CreateEvolutionAlgorithm(genomeFactory, genomeList);
         }
-
-        /// <summary>
-        ///     Create a System.Windows.Forms derived object for displaying genomes.
-        /// </summary>
-        /// <returns></returns>
-        public AbstractGenomeView CreateGenomeView()
-        {
-            return new NeatGenomeView();
-        }
-
-        /// <summary>
-        ///     Create a System.Windows.Forms derived object for displaying output for a domain (e.g. show best genome's
-        ///     output/performance/behaviour in the domain).
-        /// </summary>
-        /// <returns></returns>
-        public AbstractDomainView CreateDomainView()
-        {
-            return null;
-        }
-
+        
         /// <summary>
         ///     Create and return a GenerationalNeatEvolutionAlgorithm object ready for running the NEAT algorithm/search based on
         ///     the given genome factory and genome list.  Various sub-parts of the algorithm are also constructed and connected

@@ -7,14 +7,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
 using Accord.MachineLearning;
+using MCC_Domains.MazeNavigation;
 using SharpNeat.Behaviors;
 using SharpNeat.Core;
-using SharpNeat.Domains.MazeNavigation;
 using SharpNeat.Genomes.Maze;
 
 #endregion
 
-namespace MazeExperimentSuppotLib
+namespace MazeExperimentSupportLib
 {
     public class EvaluationHandler
     {

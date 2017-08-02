@@ -23,16 +23,15 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Threading;
 using System.Xml;
 using log4net.Config;
+using MCC_Domains.MazeNavigation.NoveltyExperiment;
 using SharpNeat.Core;
-using SharpNeat.Domains.MazeNavigation.NoveltyExperiment;
 using SharpNeat.Genomes.Neat;
 
 #endregion
 
-namespace SharpNeatConsole
+namespace MCC_Executor
 {
     /// <summary>
     ///     Minimal console application that hardwaires the setting up on a evolution algorithm and start it running.

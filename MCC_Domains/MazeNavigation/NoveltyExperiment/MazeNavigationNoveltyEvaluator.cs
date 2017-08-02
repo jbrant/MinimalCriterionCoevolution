@@ -2,14 +2,14 @@
 
 using System;
 using System.Collections.Generic;
+using MCC_Domains.MazeNavigation.Components;
 using SharpNeat.Core;
-using SharpNeat.Domains.MazeNavigation.Components;
 using SharpNeat.Loggers;
 using SharpNeat.Phenomes;
 
 #endregion
 
-namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
+namespace MCC_Domains.MazeNavigation.NoveltyExperiment
 {
     /// <summary>
     ///     Defines evaluation rules and process for an evaluation of the novelty search algorithm.

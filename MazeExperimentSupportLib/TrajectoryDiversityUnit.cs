@@ -1,4 +1,4 @@
-﻿namespace MazeExperimentSuppotLib
+﻿namespace MazeExperimentSupportLib
 {
     /// <summary>
     ///     Encapsulates a single measure of trajectory diversity.

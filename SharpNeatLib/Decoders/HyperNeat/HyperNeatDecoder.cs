@@ -21,6 +21,9 @@ using SharpNeat.Genomes.Neat;
 using SharpNeat.Network;
 using SharpNeat.Phenomes;
 using SharpNeat.Phenomes.NeuralNets;
+using SharpNeat.Phenomes.NeuralNets.AcyclicNetwork;
+using SharpNeat.Phenomes.NeuralNets.CyclicNetwork;
+using SharpNeat.Phenomes.NeuralNets.FastCyclicNetwork;
 
 namespace SharpNeat.Decoders.HyperNeat
 {
