@@ -27,6 +27,7 @@ using System.IO;
 using System.Text;
 using System.Xml;
 using SharpNeat.Network;
+using SharpNeat.Network.ActivationFunctions;
 using SharpNeat.Utility;
 
 #endregion

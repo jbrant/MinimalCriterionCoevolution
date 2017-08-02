@@ -9,7 +9,7 @@ using System.Xml;
 using ExperimentEntities;
 using log4net;
 using log4net.Config;
-using MazeExperimentSuppotLib;
+using MazeExperimentSupportLib;
 using SharpNeat.Core;
 using SharpNeat.Decoders.Maze;
 using SharpNeat.Genomes.Maze;

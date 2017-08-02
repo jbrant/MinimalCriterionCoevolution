@@ -18,6 +18,7 @@
  */
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Network;
+using SharpNeat.Network.ActivationFunctions;
 using SharpNeat.Utility;
 
 namespace SharpNeat.Genomes.RbfNeat

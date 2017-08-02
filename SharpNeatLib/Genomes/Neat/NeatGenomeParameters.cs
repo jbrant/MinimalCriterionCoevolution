@@ -19,6 +19,7 @@
 
 using Redzen.Numerics;
 using SharpNeat.Network;
+using SharpNeat.Network.ActivationFunctions.Unipolar;
 
 namespace SharpNeat.Genomes.Neat
 {

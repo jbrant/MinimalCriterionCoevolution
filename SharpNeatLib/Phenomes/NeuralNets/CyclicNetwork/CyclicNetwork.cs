@@ -16,12 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with SharpNEAT.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 using System.Collections.Generic;
 
 // Disables missing comment warnings for non-private variables.
 #pragma warning disable 1591
 
-namespace SharpNeat.Phenomes.NeuralNets
+namespace SharpNeat.Phenomes.NeuralNets.CyclicNetwork
 {
     /// <summary>
     /// This class is provided for debugging and educational purposes. FastCyclicNetwork is functionally

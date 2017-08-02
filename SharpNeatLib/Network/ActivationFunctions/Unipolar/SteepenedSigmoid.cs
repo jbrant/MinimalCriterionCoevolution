@@ -19,9 +19,8 @@
 
 using System;
 using Redzen.Numerics;
-using SharpNeat.Utility;
 
-namespace SharpNeat.Network
+namespace SharpNeat.Network.ActivationFunctions.Unipolar
 {
     /// <summary>
     /// Sigmoid activation function with a steeper curve than the PlainSimple function.

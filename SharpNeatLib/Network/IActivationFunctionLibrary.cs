@@ -19,6 +19,7 @@
 
 using System.Collections.Generic;
 using Redzen.Numerics;
+using SharpNeat.Network.ActivationFunctions;
 using SharpNeat.Utility;
 
 namespace SharpNeat.Network

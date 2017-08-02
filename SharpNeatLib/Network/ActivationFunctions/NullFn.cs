@@ -18,9 +18,8 @@
  */
 
 using Redzen.Numerics;
-using SharpNeat.Utility;
 
-namespace SharpNeat.Network
+namespace SharpNeat.Network.ActivationFunctions
 {
     /// <summary>
     /// Null activation function. Returns zero regardless of input.
