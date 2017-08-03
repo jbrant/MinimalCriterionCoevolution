@@ -11,7 +11,7 @@ using RunPhase = SharpNeat.Core.RunPhase;
 
 #endregion
 
-namespace MazeExperimentSuppotLib
+namespace MazeExperimentSupportLib
 {
     /// <summary>
     ///     Provides methods for interfacing with and writing reuslts to the experiment database or flat file.

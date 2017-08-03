@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using SharpNeat.Network;
+using SharpNeat.Network.ActivationFunctions;
 
 namespace SharpNeat.View.Graph
 {

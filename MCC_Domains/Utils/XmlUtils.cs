@@ -24,7 +24,7 @@ using System.Xml;
 
 #endregion
 
-namespace SharpNeat.Domains
+namespace MCC_Domains.Utils
 {
     /// <summary>
     ///     Static helper methods for reading value from XML configuration data in DOM form.

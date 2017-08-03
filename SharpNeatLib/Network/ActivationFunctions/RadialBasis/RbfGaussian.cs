@@ -16,11 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with SharpNEAT.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 using System;
 using Redzen.Numerics;
-using SharpNeat.Utility;
 
-namespace SharpNeat.Network
+namespace SharpNeat.Network.ActivationFunctions.RadialBasis
 {
     /// <summary>
     /// Gaussian activation function. Output range is 0 to 1, that is, the tails of the gaussian

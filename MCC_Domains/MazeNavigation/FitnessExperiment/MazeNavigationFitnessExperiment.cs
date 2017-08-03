@@ -1,6 +1,7 @@
 ﻿#region
 
 using System.Collections.Generic;
+using MCC_Domains.Utils;
 using SharpNeat.Core;
 using SharpNeat.DistanceMetrics;
 using SharpNeat.EvolutionAlgorithms;
@@ -10,7 +11,7 @@ using SharpNeat.SpeciationStrategies;
 
 #endregion
 
-namespace SharpNeat.Domains.MazeNavigation.FitnessExperiment
+namespace MCC_Domains.MazeNavigation.FitnessExperiment
 {
     public class MazeNavigationFitnessExperiment : BaseMazeNavigationExperiment
     {

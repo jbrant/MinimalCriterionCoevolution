@@ -16,9 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with SharpNEAT.  If not, see <http://www.gnu.org/licenses/>.
  */
-using SharpNeat.Network;
 
-namespace SharpNeat.Phenomes.NeuralNets
+using SharpNeat.Network;
+using SharpNeat.Phenomes.NeuralNets.FastCyclicNetwork;
+
+namespace SharpNeat.Phenomes.NeuralNets.AcyclicNetwork
 {
     /// <summary>
     /// A neural network implementation for acyclic networks.

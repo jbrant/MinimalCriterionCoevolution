@@ -29,7 +29,7 @@ using SharpNeat.Phenomes;
 
 #endregion
 
-namespace SharpNeat.Domains
+namespace MCC_Domains
 {
     /// <summary>
     ///     Interface for classes that aggregate a number of experimental parameters and component creation routines.

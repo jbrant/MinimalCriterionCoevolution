@@ -1,4 +1,4 @@
-﻿namespace NavigatorMazeMapEvaluator
+﻿namespace MazeNavigationEvaluator
 {
     /// <summary>
     ///     Runtime parameters that can be set upon application invocation.

@@ -5,8 +5,8 @@ using System.Collections.Generic;
 using System.Threading;
 using ExperimentEntities;
 using log4net;
+using MCC_Domains.MazeNavigation.CoevolutionMCSExperiment;
 using SharpNeat.Core;
-using SharpNeat.Domains.MazeNavigation.CoevolutionMCSExperiment;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Phenomes.Mazes;
 

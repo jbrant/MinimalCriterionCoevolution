@@ -1,4 +1,4 @@
-﻿namespace MazeExperimentSuppotLib
+﻿namespace MazeExperimentSupportLib
 {
     /// <summary>
     ///     Output file types for various supported analyses.

@@ -19,9 +19,8 @@
 
 using System;
 using Redzen.Numerics;
-using SharpNeat.Utility;
 
-namespace SharpNeat.Network
+namespace SharpNeat.Network.ActivationFunctions.Unipolar
 {
     /// <summary>
     /// Absolute root activation function with clipping. The square root of the absolute (magnitude) of the

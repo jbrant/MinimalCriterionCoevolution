@@ -19,9 +19,8 @@
 
 using System;
 using Redzen.Numerics;
-using SharpNeat.Utility;
 
-namespace SharpNeat.Network
+namespace SharpNeat.Network.ActivationFunctions.Bipolar
 {
     /// <summary>
     /// Sine activation function with doubled period.

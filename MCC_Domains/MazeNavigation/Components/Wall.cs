@@ -1,4 +1,7 @@
-﻿namespace SharpNeat.Domains.MazeNavigation.Components
+﻿using MCC_Domains.Common;
+using SharpNeat.Domains;
+
+namespace MCC_Domains.MazeNavigation.Components
 {
     /// <summary>
     ///     Encapsulates a wall (2D line segment) abstraction along with supporting metadata regarding heading adjustments

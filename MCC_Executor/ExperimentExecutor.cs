@@ -2,7 +2,7 @@
 
 using System;
 using System.Linq;
-using SharpNeatConsole;
+using MCC_Executor.MazeNavigation;
 
 #endregion
 

@@ -1,10 +1,12 @@
 ﻿#region
 
 using System;
+using MCC_Domains.Utils;
+using SharpNeat.Domains;
 
 #endregion
 
-namespace SharpNeat.Domains
+namespace MCC_Domains.Common
 {
     /// <summary>
     ///     Defines a 2D line segment with 2D double-precision start and end points.

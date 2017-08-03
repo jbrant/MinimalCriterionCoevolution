@@ -17,7 +17,7 @@
  * along with SharpNEAT.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace SharpNeat.Network
+namespace SharpNeat.Network.ActivationFunctions
 {
     /// <summary>
     /// Represents a single item in an IActivationFunctionLibrary.

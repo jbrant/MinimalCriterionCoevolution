@@ -4,17 +4,18 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Xml;
 using ExperimentEntities;
+using MCC_Domains.MazeNavigation.Components;
+using MCC_Domains.Utils;
 using SharpNeat.Core;
 using SharpNeat.Decoders;
 using SharpNeat.Decoders.Neat;
-using SharpNeat.Domains.MazeNavigation.Components;
 using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Phenomes;
 
 #endregion
 
-namespace SharpNeat.Domains.MazeNavigation
+namespace MCC_Domains.MazeNavigation
 {
     /// <summary>
     ///     The base class for all maze navigation experiments.

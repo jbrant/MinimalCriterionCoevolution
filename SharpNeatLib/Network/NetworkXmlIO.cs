@@ -22,6 +22,10 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Xml;
+using SharpNeat.Network.ActivationFunctions;
+using SharpNeat.Network.ActivationFunctions.Bipolar;
+using SharpNeat.Network.ActivationFunctions.RadialBasis;
+using SharpNeat.Network.ActivationFunctions.Unipolar;
 using SharpNeat.Utility;
 
 namespace SharpNeat.Network

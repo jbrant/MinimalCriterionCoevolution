@@ -18,9 +18,8 @@
  */
 
 using Redzen.Numerics;
-using SharpNeat.Utility;
 
-namespace SharpNeat.Network
+namespace SharpNeat.Network.ActivationFunctions.Bipolar
 {
     /// <summary>
     /// Linear activation function with clipping. By 'clipping' we mean the output value is linear between

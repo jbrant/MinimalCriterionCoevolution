@@ -19,9 +19,8 @@
 
 using System;
 using Redzen.Numerics;
-using SharpNeat.Utility;
 
-namespace SharpNeat.Network
+namespace SharpNeat.Network.ActivationFunctions.Unipolar
 {
     /// <summary>
     /// A sigmoid curve produced from the simple and therefore fast arithmetic operations abs,

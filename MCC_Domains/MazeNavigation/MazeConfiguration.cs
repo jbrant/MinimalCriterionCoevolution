@@ -1,11 +1,12 @@
 ﻿#region
 
 using System.Collections.Generic;
-using SharpNeat.Domains.MazeNavigation.Components;
+using MCC_Domains.MazeNavigation.Components;
+using SharpNeat.Domains;
 
 #endregion
 
-namespace SharpNeat.Domains.MazeNavigation
+namespace MCC_Domains.MazeNavigation
 {
     /// <summary>
     ///     The maze configuration struct encapsulates domain/experiment native representation of maze walls and the

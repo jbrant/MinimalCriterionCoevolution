@@ -2,15 +2,15 @@
 
 using System;
 using System.Collections.Generic;
+using MCC_Domains.MazeNavigation.Components;
 using SharpNeat.Core;
-using SharpNeat.Domains.MazeNavigation.Components;
 using SharpNeat.Loggers;
 using SharpNeat.Phenomes;
 using SharpNeat.Utility;
 
 #endregion
 
-namespace SharpNeat.Domains.MazeNavigation.RandomExperiment
+namespace MCC_Domains.MazeNavigation.RandomExperiment
 {
     /// <summary>
     ///     Defines evaluation rules and process for an evaluation of the random fitness assignment algorithm.

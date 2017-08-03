@@ -1,4 +1,4 @@
-﻿namespace SharpNeat.Domains.MazeNavigation.Components
+﻿namespace MCC_Domains.MazeNavigation.Components
 {
     /// <summary>
     ///     Defines a single pie slice radar that fires when the goal point is within its field-of-view.

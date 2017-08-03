@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace SharpNeat.Domains.Properties {
+namespace MCC_Domains.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]

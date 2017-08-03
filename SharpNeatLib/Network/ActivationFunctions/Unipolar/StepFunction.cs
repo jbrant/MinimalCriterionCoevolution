@@ -18,8 +18,8 @@
  */
 
 using Redzen.Numerics;
-using SharpNeat.Utility;
-namespace SharpNeat.Network
+
+namespace SharpNeat.Network.ActivationFunctions.Unipolar
 {
     /// <summary>
     /// Step activation function.

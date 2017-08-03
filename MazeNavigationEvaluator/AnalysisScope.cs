@@ -4,7 +4,7 @@ using System;
 
 #endregion
 
-namespace NavigatorMazeMapEvaluator
+namespace MazeNavigationEvaluator
 {
     /// <summary>
     ///     Encapsulates the scope of the analysis being performed with regard to the amount of data and population members

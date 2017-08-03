@@ -3,9 +3,9 @@
 using System.Collections.Generic;
 using System.Xml;
 using ExperimentEntities;
+using MCC_Domains.Utils;
 using SharpNeat.Core;
 using SharpNeat.DistanceMetrics;
-using SharpNeat.EliteArchives;
 using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Loggers;
@@ -16,7 +16,7 @@ using RunPhase = SharpNeat.Core.RunPhase;
 
 #endregion
 
-namespace SharpNeat.Domains.MazeNavigation.NoveltyExperiment
+namespace MCC_Domains.MazeNavigation.NoveltyExperiment
 {
     public class SteadyStateMazeNavigationNoveltyExperiment : BaseMazeNavigationExperiment
     {

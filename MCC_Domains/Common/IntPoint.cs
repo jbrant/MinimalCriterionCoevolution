@@ -19,7 +19,7 @@
 
 using System;
 
-namespace SharpNeat.Domains
+namespace MCC_Domains.Common
 {
     /// <summary>
     ///     Defines a 2D point with integer cartesian coordinates.

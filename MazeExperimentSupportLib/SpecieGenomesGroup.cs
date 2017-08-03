@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 #endregion
 
-namespace MazeExperimentSuppotLib
+namespace MazeExperimentSupportLib
 {
     /// <summary>
     ///     Encapsulates the unique identifier for a single species and the unique identifiers of its constituent genomes.

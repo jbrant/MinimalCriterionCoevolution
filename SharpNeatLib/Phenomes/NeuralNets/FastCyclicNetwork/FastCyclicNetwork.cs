@@ -16,12 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with SharpNEAT.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 using SharpNeat.Network;
 
 // Disable missing comment warnings for non-private variables.
 #pragma warning disable 1591
 
-namespace SharpNeat.Phenomes.NeuralNets
+namespace SharpNeat.Phenomes.NeuralNets.FastCyclicNetwork
 {
     // TODO: Create a version of this class that uses single precision signals for extra performance. 
     // TODO: Reconsider algorithm. Even better/faster way?

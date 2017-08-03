@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Xml;
+using MCC_Domains.Utils;
 using SharpNeat.Core;
 using SharpNeat.Decoders;
 using SharpNeat.DistanceMetrics;
@@ -14,7 +15,7 @@ using SharpNeat.SpeciationStrategies;
 
 #endregion
 
-namespace SharpNeat.Domains.MazeNavigation.Bootstrappers
+namespace MCC_Domains.MazeNavigation.Bootstrappers
 {
     /// <summary>
     ///     Parent initializer class which only contains boiler plate intialization code for domain-specific (child)

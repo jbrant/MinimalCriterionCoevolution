@@ -1,10 +1,11 @@
 ﻿#region
 
 using System.Collections.Generic;
+using SharpNeat.Domains;
 
 #endregion
 
-namespace SharpNeat.Domains.MazeNavigation.Components
+namespace MCC_Domains.MazeNavigation.Components
 {
     /// <summary>
     ///     Encapsulates a collection of radars laid out as four parts of a circular configuration.  A radar only fires when

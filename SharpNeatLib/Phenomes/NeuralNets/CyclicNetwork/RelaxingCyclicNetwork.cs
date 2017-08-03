@@ -16,10 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with SharpNEAT.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 using System;
 using System.Collections.Generic;
 
-namespace SharpNeat.Phenomes.NeuralNets
+namespace SharpNeat.Phenomes.NeuralNets.CyclicNetwork
 {
     /// <summary>
     /// A version of CyclicNetwork that activates a network until it becomes 'relaxed' rather than for some
