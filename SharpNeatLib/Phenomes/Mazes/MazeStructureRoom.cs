@@ -54,11 +54,7 @@ namespace SharpNeat.Phenomes.Mazes
         /// <returns>The two subfields that were created as a result of the subfield division.</returns>
         public Tuple<MazeStructureRoom, MazeStructureRoom> DivideRoom(int[,] grid, double unscaledWallLocation,
             double unscaledPassageLocation, bool isHorizontalDefaultOrientation)
-        {
-            // Short circuit if we can't subdivide anymore
-            if (_width < MinimumWidth || _height < MinimumHeight)
-                return null;
-
+        {            
             // Determine orientation
             bool isHorizontal = DetermineWallOrientation(isHorizontalDefaultOrientation) == WallOrientation.Horizontal;
 
@@ -107,7 +103,9 @@ namespace SharpNeat.Phenomes.Mazes
             int newHeight = isHorizontal ? yWallLocation - _y + 1 : _height;
 
             // Recurse down top/left subfield
-            MazeStructureRoom newRoom1 = new MazeStructureRoom(_x, _y, newWidth, newHeight);
+            MazeStructureRoom newRoom1 = (newWidth >= MinimumWidth && newHeight >= MinimumHeight)
+                ? new MazeStructureRoom(_x, _y, newWidth, newHeight)
+                : null;
 
             // Assign new x/y coordinates for bottom/right part of maze
             int offsetX = isHorizontal ? _x : xWallLocation + 1;
@@ -118,7 +116,9 @@ namespace SharpNeat.Phenomes.Mazes
             newHeight = isHorizontal ? _y + _height - yWallLocation - 1 : _height;
 
             // Recurse down bottom/right subfield
-            MazeStructureRoom newRoom2 = new MazeStructureRoom(offsetX, offsetY, newWidth, newHeight);
+            MazeStructureRoom newRoom2 = (newWidth >= MinimumWidth && newHeight >= MinimumHeight)
+                ? new MazeStructureRoom(offsetX, offsetY, newWidth, newHeight)
+                : null;
 
             return new Tuple<MazeStructureRoom, MazeStructureRoom>(newRoom1, newRoom2);
         }

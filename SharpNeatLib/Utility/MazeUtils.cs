@@ -13,7 +13,7 @@ namespace SharpNeat.Utility
     ///     Contains utility methods for maze genomes.
     /// </summary>
     public static class MazeUtils
-    {        
+    {
         /// <summary>
         ///     Averages out the number of partitions possible given the evolved maze dimensions.
         /// </summary>
@@ -54,8 +54,8 @@ namespace SharpNeat.Utility
                         partitionCount++;
 
                         // Get the two resulting sub rooms and enqueue both of them
-                        mazeRoomQueue.Enqueue(subRooms.Item1);
-                        mazeRoomQueue.Enqueue(subRooms.Item2);
+                        if (subRooms.Item1 != null) mazeRoomQueue.Enqueue(subRooms.Item1);
+                        if (subRooms.Item2 != null) mazeRoomQueue.Enqueue(subRooms.Item2);
                     }
                 }
 

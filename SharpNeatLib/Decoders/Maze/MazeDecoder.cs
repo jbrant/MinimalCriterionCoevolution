@@ -70,8 +70,8 @@ namespace SharpNeat.Decoders.Maze
                     if (subRooms != null)
                     {
                         // Get the two resulting sub rooms and enqueue both of them
-                        mazeRoomQueue.Enqueue(subRooms.Item1);
-                        mazeRoomQueue.Enqueue(subRooms.Item2);
+                        if (subRooms.Item1 != null) mazeRoomQueue.Enqueue(subRooms.Item1);
+                        if (subRooms.Item2 != null) mazeRoomQueue.Enqueue(subRooms.Item2);
                     }
                 }
             }
