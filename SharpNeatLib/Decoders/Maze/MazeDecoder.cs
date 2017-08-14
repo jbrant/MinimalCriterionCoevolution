@@ -1,10 +1,9 @@
 ﻿#region
 
-using System;
-using System.Collections.Generic;
 using SharpNeat.Core;
 using SharpNeat.Genomes.Maze;
 using SharpNeat.Phenomes.Mazes;
+using SharpNeat.Utility;
 
 #endregion
 
@@ -46,38 +45,11 @@ namespace SharpNeat.Decoders.Maze
         /// <returns>The maze grid phenotype, which can be directly plotted or fed to an agent for navigation.</returns>
         public MazeStructure Decode(MazeGenome genome)
         {
-            Queue<MazeStructureRoom> mazeRoomQueue = new Queue<MazeStructureRoom>();
-            int[,] unscaledGrid = new int[genome.MazeBoundaryHeight, genome.MazeBoundaryWidth];
-
             // Initialize new maze (phenotype)
             MazeStructure maze = new MazeStructure(genome.MazeBoundaryWidth, genome.MazeBoundaryHeight, _scaleMultiplier);
 
-            // Queue up the first "room" (which will encompass the entirety of the maze grid)
-            mazeRoomQueue.Enqueue(new MazeStructureRoom(0, 0, genome.MazeBoundaryWidth, genome.MazeBoundaryHeight));
-
-            // Iterate through all of the genes, generating 
-            foreach (MazeGene mazeGene in genome.GeneList)
-            {
-                // Make sure there are rooms left in the queue before attempting to dequeue and bisect
-                if (mazeRoomQueue.Count > 0)
-                {
-                    // Dequeue a room and run division on it
-                    Tuple<MazeStructureRoom, MazeStructureRoom> subRooms = mazeRoomQueue.Dequeue()
-                        .DivideRoom(unscaledGrid, mazeGene.WallLocation,
-                            mazeGene.PassageLocation,
-                            mazeGene.OrientationSeed);
-
-                    if (subRooms != null)
-                    {
-                        // Get the two resulting sub rooms and enqueue both of them
-                        if (subRooms.Item1 != null) mazeRoomQueue.Enqueue(subRooms.Item1);
-                        if (subRooms.Item2 != null) mazeRoomQueue.Enqueue(subRooms.Item2);
-                    }
-                }
-            }
-
             // Convert to walls and scale to the desired lengths
-            maze.ConvertGridArrayToWalls(unscaledGrid);
+            maze.ConvertGridArrayToWalls(MazeUtils.ConvertMazeGenomeToUnscaledStructure(genome));
 
             return maze;
         }

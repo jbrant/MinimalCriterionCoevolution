@@ -10,8 +10,7 @@ namespace SharpNeat.Phenomes.Mazes
 {
     /// <summary>
     ///     The maze structure encapsulates the entire maze, including borders and all of the walls.  It can be scaled up from
-    ///     the
-    ///     original resolution used during evolution.
+    ///     the original resolution used during evolution.
     /// </summary>
     public class MazeStructure
     {
@@ -50,16 +49,16 @@ namespace SharpNeat.Phenomes.Mazes
         ///     Converts the maze space matrix (which indicates what type of wall is at each intersection in the 2D maze) to a list
         ///     of horizontal and vertical walls.
         /// </summary>
-        /// <param name="mazeGridArray"></param>
-        public void ConvertGridArrayToWalls(int[,] mazeGridArray)
+        /// <param name="mazeGrid"></param>
+        public void ConvertGridArrayToWalls(MazeStructureGrid mazeGrid)
         {
-            MazeArray = mazeGridArray;
+            MazeGrid = mazeGrid;
 
             // Extract all of the horizontal walls
-            ExtractHorizontalWalls(mazeGridArray);
+            ExtractHorizontalWalls(mazeGrid.Grid);
 
             // Extract all of the vertical walls
-            ExtractVerticalWalls(mazeGridArray);
+            ExtractVerticalWalls(mazeGrid.Grid);
 
             // Calculate the maximum number of allotted time steps based on the maze structure
             CalculateMaxTimesteps();
@@ -97,12 +96,18 @@ namespace SharpNeat.Phenomes.Mazes
         /// <summary>
         ///     The unscaled maze cell matrix.
         /// </summary>
-        public int[,] MazeArray { get; private set; }
+        public MazeStructureGrid MazeGrid { get; private set; }
 
         /// <summary>
         ///     The maximum number of timesteps allotted to solve the maze.
         /// </summary>
         public int MaxTimesteps { get; private set; }
+
+        /// <summary>
+        ///     The number of partitions bisecting maze sub-spaces. A partition could be either one or two walls (depending on
+        ///     whether the passage is adjacent to a maze bounding wall.
+        /// </summary>
+        public int NumPartitions { get; set; }
 
         #endregion
 
@@ -188,8 +193,8 @@ namespace SharpNeat.Phenomes.Mazes
                 // Handle cells in each cardinal direction
 
                 // North
-                if (0 != curPoint.X && (int) WallOrientation.Horizontal != MazeArray[curPoint.X - 1, curPoint.Y] &&
-                    (int) WallOrientation.Both != MazeArray[curPoint.X - 1, curPoint.Y] &&
+                if (0 != curPoint.X && (int) WallOrientation.Horizontal != MazeGrid.Grid[curPoint.X - 1, curPoint.Y] &&
+                    (int) WallOrientation.Both != MazeGrid.Grid[curPoint.X - 1, curPoint.Y] &&
                     visitedCellDistances.ContainsKey(pointGrid[curPoint.X - 1, curPoint.Y]) == false)
                 {
                     cellQueue.Enqueue(pointGrid[curPoint.X - 1, curPoint.Y]);
@@ -197,8 +202,9 @@ namespace SharpNeat.Phenomes.Mazes
                 }
 
                 // East
-                if (_mazeWidth > curPoint.Y + 1 && (int) WallOrientation.Vertical != MazeArray[curPoint.X, curPoint.Y] &&
-                    (int) WallOrientation.Both != MazeArray[curPoint.X, curPoint.Y] &&
+                if (_mazeWidth > curPoint.Y + 1 &&
+                    (int) WallOrientation.Vertical != MazeGrid.Grid[curPoint.X, curPoint.Y] &&
+                    (int) WallOrientation.Both != MazeGrid.Grid[curPoint.X, curPoint.Y] &&
                     visitedCellDistances.ContainsKey(pointGrid[curPoint.X, curPoint.Y + 1]) == false)
                 {
                     cellQueue.Enqueue(pointGrid[curPoint.X, curPoint.Y + 1]);
@@ -207,8 +213,8 @@ namespace SharpNeat.Phenomes.Mazes
 
                 // South
                 if (_mazeHeight > curPoint.X + 1 &&
-                    (int) WallOrientation.Horizontal != MazeArray[curPoint.X, curPoint.Y] &&
-                    (int) WallOrientation.Both != MazeArray[curPoint.X, curPoint.Y] &&
+                    (int) WallOrientation.Horizontal != MazeGrid.Grid[curPoint.X, curPoint.Y] &&
+                    (int) WallOrientation.Both != MazeGrid.Grid[curPoint.X, curPoint.Y] &&
                     visitedCellDistances.ContainsKey(pointGrid[curPoint.X + 1, curPoint.Y]) == false)
                 {
                     cellQueue.Enqueue(pointGrid[curPoint.X + 1, curPoint.Y]);
@@ -216,8 +222,8 @@ namespace SharpNeat.Phenomes.Mazes
                 }
 
                 // West
-                if (0 != curPoint.Y && (int) WallOrientation.Vertical != MazeArray[curPoint.X, curPoint.Y - 1] &&
-                    (int) WallOrientation.Both != MazeArray[curPoint.X, curPoint.Y - 1] &&
+                if (0 != curPoint.Y && (int) WallOrientation.Vertical != MazeGrid.Grid[curPoint.X, curPoint.Y - 1] &&
+                    (int) WallOrientation.Both != MazeGrid.Grid[curPoint.X, curPoint.Y - 1] &&
                     visitedCellDistances.ContainsKey(pointGrid[curPoint.X, curPoint.Y - 1]) == false)
                 {
                     cellQueue.Enqueue(pointGrid[curPoint.X, curPoint.Y - 1]);

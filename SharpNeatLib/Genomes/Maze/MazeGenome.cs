@@ -119,8 +119,8 @@ namespace SharpNeat.Genomes.Maze
             // Set the genome factory
             GenomeFactory = genomeFactory;
 
-            // Compute max complexity based on maze dimensions
-            MaxComplexity = MazeUtils.DetermineMaxPartitions(height, width);
+            // Compute max complexity based on existing genome complexity and maze dimensions
+            MaxComplexity = MazeUtils.DetermineMaxPartitions(this);
         }
 
         /// <summary>
@@ -143,8 +143,8 @@ namespace SharpNeat.Genomes.Maze
             GeneList = new List<MazeGene>(DeepCopyMazeGeneList(copyFrom.GeneList));
             EvaluationInfo = new EvaluationInfo(copyFrom.EvaluationInfo.FitnessHistoryLength);
 
-            // Compute max complexity based on maze dimensions
-            MaxComplexity = MazeUtils.DetermineMaxPartitions(MazeBoundaryHeight, MazeBoundaryWidth);
+            // Compute max complexity based on existing genome complexity and maze dimensions
+            MaxComplexity = MazeUtils.DetermineMaxPartitions(this);
         }
 
         /// <summary>
@@ -191,11 +191,7 @@ namespace SharpNeat.Genomes.Maze
         /// <summary>
         ///     Computes the complexity of the maze genome.
         /// </summary>
-        public double Complexity
-        {
-            // TODO: Need to figure out how to compute maze complexity
-            get { return GeneList.Count; }
-        }
+        public double Complexity => GeneList.Count;
 
         /// <summary>
         ///     Gets a coordinate that represents the genome's position in the search space (also known
@@ -302,7 +298,6 @@ namespace SharpNeat.Genomes.Maze
                     GenomeFactory.Rng);
             } while (GeneList.Count > MaxComplexity && outcome >= 2);
 
-
             switch (outcome)
             {
                 case 0:
@@ -321,6 +316,12 @@ namespace SharpNeat.Genomes.Maze
                     MutateExpandMaze();
                     break;
             }
+
+            // TODO: Check if maze meets deceptiveness/complexity requirements (repeat mutation if not):
+            // TODO: 1. At least three 90 degree or 270 degree turns
+            // TODO: 2. Path (main path and deceptive path) should fill the maze - i.e. maze coverage
+
+            // TODO: This should probably be a utility method called from each of
         }
 
         /// <summary>
@@ -367,6 +368,9 @@ namespace SharpNeat.Genomes.Maze
                                                                              ((int) (Math.Log(mazeGeneIdx + 1, 2)) + 1)/
                                                                           mazeTreeDepth)));
             }
+
+            // If the mutation caused a reduction in max complexity, remove non-coding genes
+            RemoveNonCodingGenes();
         }
 
         /// <summary>
@@ -415,6 +419,9 @@ namespace SharpNeat.Genomes.Maze
                                                                                  1)/
                                                                              mazeTreeDepth)));
             }
+
+            // If the mutation caused a reduction in max complexity, remove non-coding genes
+            RemoveNonCodingGenes();
         }
 
         /// <summary>
@@ -443,10 +450,14 @@ namespace SharpNeat.Genomes.Maze
             }
 
             // Select a random wall to be deleted
+            // TODO: Probably need to scale deletion mutation here based on effect size
             int wallIdx = GenomeFactory.Rng.Next(GeneList.Count);
 
             // Delete the wall
             GeneList.RemoveAt(wallIdx);
+
+            // If the mutation caused a reduction in max complexity, remove non-coding genes
+            RemoveNonCodingGenes();
         }
 
         /// <summary>
@@ -458,9 +469,6 @@ namespace SharpNeat.Genomes.Maze
             // Increment maze height and width by 1
             MazeBoundaryHeight += 1;
             MazeBoundaryWidth += 1;
-
-            // Recalculate estimated max complexity
-            MaxComplexity = MazeUtils.DetermineMaxPartitions(MazeBoundaryHeight, MazeBoundaryWidth);
         }
 
         /// <summary>
@@ -490,6 +498,23 @@ namespace SharpNeat.Genomes.Maze
             copiedGeneList.AddRange(copyFrom.Select(mazeGene => mazeGene.CreateCopy()));
 
             return copiedGeneList;
+        }
+
+        /// <summary>
+        ///     Recomputes the maximum complexity supported by the maze genome following a mutation and removes non-coding genes in
+        ///     the event that the mutation reduced the maximum complexity supported by the maze.
+        /// </summary>
+        private void RemoveNonCodingGenes()
+        {
+            // Recompute max complexity in the event that mutation changed wall/passage placement in a way that reduces the complexity cap
+            MaxComplexity = MazeUtils.DetermineMaxPartitions(this);
+
+            // If the max complexity is now lower, remove the non-coding genes
+            if (MaxComplexity < GeneList.Count)
+            {
+                ((List<MazeGene>) GeneList).RemoveRange(GeneList.Count - (MaxComplexity - GeneList.Count),
+                    MaxComplexity - GeneList.Count);
+            }
         }
 
         #endregion

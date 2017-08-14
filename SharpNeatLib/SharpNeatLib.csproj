@@ -264,6 +264,7 @@
     <Compile Include="Network\ActivationFunctions\Unipolar\SteepenedSigmoid.cs" />
     <Compile Include="Network\ActivationFunctions\Unipolar\SteepenedSigmoidApproximation.cs" />
     <Compile Include="Phenomes\MappingSignalArray.cs" />
+    <Compile Include="Phenomes\Mazes\MazeStructureGrid.cs" />
     <Compile Include="Phenomes\Mazes\MazeStructureWall.cs" />
     <Compile Include="Phenomes\Mazes\WallDirection.cs" />
     <Compile Include="Phenomes\Mazes\MazeStructure.cs" />
