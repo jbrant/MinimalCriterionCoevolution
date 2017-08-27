@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Config>
+  <SearchAlgorithm>Minimal Criteria Search</SearchAlgorithm>
+  <SelectionAlgorithm>Queueing</SelectionAlgorithm>
+  <PopulationSize>500</PopulationSize>
+  <InterspeciesMatingProbability>0</InterspeciesMatingProbability>
+  <Activation>
+    <Scheme>Acyclic</Scheme>
+  </Activation>
+  <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>
+  <ComplexityThreshold>30</ComplexityThreshold>
+  <OffspringBatchSize>50</OffspringBatchSize>
+  <MaxEvaluations>1000000</MaxEvaluations>
+  <MaxRestarts>0</MaxRestarts>
+  <DecodeGenomesToXml>False</DecodeGenomesToXml>
+  <SeedGenomeCount>200</SeedGenomeCount>
+  <GenomeConfig>
+    <InitialConnectionProportion>1</InitialConnectionProportion>
+    <WeightMutationProbability>0.9</WeightMutationProbability>
+    <AddConnnectionProbability>0.005</AddConnnectionProbability>
+    <AddNodeProbability>0.01</AddNodeProbability>
+    <DeleteConnectionProbability>0.001</DeleteConnectionProbability>
+    <ConnectionWeightRange>5</ConnectionWeightRange>
+  </GenomeConfig>
+  <BehaviorConfig>
+    <BehaviorCharacterization>Trajectory</BehaviorCharacterization>
+    <MinimalCriteriaConfig>
+      <MinimalCriteriaConstraint>Mileage</MinimalCriteriaConstraint>
+      <XStart>36</XStart>
+      <YStart>184</YStart>
+      <MinimumRequiredDistance>0</MinimumRequiredDistance>
+      <MinimumMileage>0</MinimumMileage>
+      <MaxUpdateCyclesWithoutChange>5</MaxUpdateCyclesWithoutChange>
+    </MinimalCriteriaConfig>
+  </BehaviorConfig>
+  <MaxTimesteps>400</MaxTimesteps>
+  <MinSuccessDistance>5</MinSuccessDistance>
+  <MaxDistanceToTarget>300</MaxDistanceToTarget>
+  <MazeVariant>Hard Maze</MazeVariant>
+  <MinimalCriteriaUpdateInterval>20</MinimalCriteriaUpdateInterval>
+  <BridgingMagnitude>0</BridgingMagnitude>
+  <BridgingApplications>
+  </BridgingApplications>
+  <Description>
+    This is the maze navigation experiment used in the original novelty search papers (citation needed).
+  </Description>
+</Config>
