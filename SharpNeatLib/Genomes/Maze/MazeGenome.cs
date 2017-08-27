@@ -296,7 +296,7 @@ namespace SharpNeat.Genomes.Maze
                 // Get random mutation to perform
                 outcome = RouletteWheel.SingleThrow(GenomeFactory.MazeGenomeParameters.RouletteWheelLayout,
                     GenomeFactory.Rng);
-            } while (GeneList.Count > MaxComplexity && outcome >= 2);
+            } while (GeneList.Count >= MaxComplexity && outcome >= 2);
 
             switch (outcome)
             {
@@ -317,11 +317,8 @@ namespace SharpNeat.Genomes.Maze
                     break;
             }
 
-            // TODO: Check if maze meets deceptiveness/complexity requirements (repeat mutation if not):
-            // TODO: 1. At least three 90 degree or 270 degree turns
-            // TODO: 2. Path (main path and deceptive path) should fill the maze - i.e. maze coverage
-
-            // TODO: This should probably be a utility method called from each of
+            // If the mutation caused a reduction in max complexity, remove non-coding genes
+            RemoveNonCodingGenes();
         }
 
         /// <summary>
@@ -368,9 +365,6 @@ namespace SharpNeat.Genomes.Maze
                                                                              ((int) (Math.Log(mazeGeneIdx + 1, 2)) + 1)/
                                                                           mazeTreeDepth)));
             }
-
-            // If the mutation caused a reduction in max complexity, remove non-coding genes
-            RemoveNonCodingGenes();
         }
 
         /// <summary>
@@ -419,9 +413,6 @@ namespace SharpNeat.Genomes.Maze
                                                                                  1)/
                                                                              mazeTreeDepth)));
             }
-
-            // If the mutation caused a reduction in max complexity, remove non-coding genes
-            RemoveNonCodingGenes();
         }
 
         /// <summary>
@@ -455,9 +446,6 @@ namespace SharpNeat.Genomes.Maze
 
             // Delete the wall
             GeneList.RemoveAt(wallIdx);
-
-            // If the mutation caused a reduction in max complexity, remove non-coding genes
-            RemoveNonCodingGenes();
         }
 
         /// <summary>

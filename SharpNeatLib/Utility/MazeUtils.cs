@@ -170,5 +170,123 @@ namespace SharpNeat.Utility
             // Construct and return the maze grid structure
             return new MazeStructureGrid(unscaledGrid, partitionCount, mazeRoomQueue.ToList());
         }
+
+        /// <summary>
+        ///     Flood fills from the starting location in the maze until the target location is reached. Each linked point has a
+        ///     reference back to the point preceding it, allowing the full path to be traced back from the target point.
+        /// </summary>
+        /// <param name="mazeGrid">The grid of maze points.</param>
+        /// <param name="mazeHeight">The height of the maze.</param>
+        /// <param name="mazeWidth">The width of the maze.</param>
+        /// <returns>The target point reached by the flood fill process, containing a pointer chain back to the starting location.</returns>
+        public static MazeStructureLinkedPoint FloodFillToTarget(MazeStructureGrid mazeGrid, int mazeHeight,
+            int mazeWidth)
+        {
+            MazeStructureLinkedPoint curPoint = null;
+
+            // Setup grid to store maze structure points
+            var pointGrid = new MazeStructureLinkedPoint[mazeHeight, mazeWidth];
+
+            // Convert to grid of maze structure points
+            for (int x = 0; x < mazeHeight; x++)
+            {
+                for (int y = 0; y < mazeWidth; y++)
+                {
+                    pointGrid[x, y] = new MazeStructureLinkedPoint(x, y);
+                }
+            }
+
+            // Define queue in which to store cells as they're discovered and visited
+            Queue<MazeStructureLinkedPoint> cellQueue = new Queue<MazeStructureLinkedPoint>(pointGrid.Length);
+
+            // Define a list to store visited cells in the order they were visited
+            List<MazeStructureLinkedPoint> visitedCells = new List<MazeStructureLinkedPoint>();
+
+            // Enqueue the starting location
+            cellQueue.Enqueue(new MazeStructureLinkedPoint(pointGrid[0, 0]));
+
+            // Iterate through maze cells, dequeueing each and determining the distance to their reachable neighbors
+            // until the target location is reached and we have the shortest distance to it
+            while (cellQueue.Count > 0)
+            {
+                // Get the next element in the queue
+                curPoint = cellQueue.Dequeue();
+
+                // Exit if target reached
+                if (curPoint.X == mazeHeight - 1 && curPoint.Y == mazeWidth - 1)
+                {
+                    break;
+                }
+
+                // Handle cells in each cardinal direction
+
+                // North
+                if (0 != curPoint.X && (int) WallOrientation.Horizontal != mazeGrid.Grid[curPoint.X - 1, curPoint.Y] &&
+                    (int) WallOrientation.Both != mazeGrid.Grid[curPoint.X - 1, curPoint.Y] &&
+                    visitedCells.Contains(pointGrid[curPoint.X - 1, curPoint.Y]) == false)
+                {
+                    cellQueue.Enqueue(new MazeStructureLinkedPoint(pointGrid[curPoint.X - 1, curPoint.Y], curPoint));
+                    visitedCells.Add(pointGrid[curPoint.X - 1, curPoint.Y]);
+                }
+
+                // East
+                if (mazeWidth > curPoint.Y + 1 &&
+                    (int) WallOrientation.Vertical != mazeGrid.Grid[curPoint.X, curPoint.Y] &&
+                    (int) WallOrientation.Both != mazeGrid.Grid[curPoint.X, curPoint.Y] &&
+                    visitedCells.Contains(pointGrid[curPoint.X, curPoint.Y + 1]) == false)
+                {
+                    cellQueue.Enqueue(new MazeStructureLinkedPoint(pointGrid[curPoint.X, curPoint.Y + 1], curPoint));
+                    visitedCells.Add(pointGrid[curPoint.X, curPoint.Y + 1]);
+                }
+
+                // South
+                if (mazeHeight > curPoint.X + 1 &&
+                    (int) WallOrientation.Horizontal != mazeGrid.Grid[curPoint.X, curPoint.Y] &&
+                    (int) WallOrientation.Both != mazeGrid.Grid[curPoint.X, curPoint.Y] &&
+                    visitedCells.Contains(pointGrid[curPoint.X + 1, curPoint.Y]) == false)
+                {
+                    cellQueue.Enqueue(new MazeStructureLinkedPoint(pointGrid[curPoint.X + 1, curPoint.Y], curPoint));
+                    visitedCells.Add(pointGrid[curPoint.X + 1, curPoint.Y]);
+                }
+
+                // West
+                if (0 != curPoint.Y && (int) WallOrientation.Vertical != mazeGrid.Grid[curPoint.X, curPoint.Y - 1] &&
+                    (int) WallOrientation.Both != mazeGrid.Grid[curPoint.X, curPoint.Y - 1] &&
+                    visitedCells.Contains(pointGrid[curPoint.X, curPoint.Y - 1]) == false)
+                {
+                    cellQueue.Enqueue(new MazeStructureLinkedPoint(pointGrid[curPoint.X, curPoint.Y - 1], curPoint));
+                    visitedCells.Add(pointGrid[curPoint.X, curPoint.Y - 1]);
+                }
+            }
+
+            return curPoint;
+        }
+
+        /// <summary>
+        ///     Computes the (unscaled) distance from the starting location in the maze grid to the target location.
+        /// </summary>
+        /// <param name="mazeGrid">The grid of maze points.</param>
+        /// <param name="mazeHeight">The height of the maze.</param>
+        /// <param name="mazeWidth">The width of the maze.</param>
+        /// <returns>Distance from starting location to the ending location.</returns>
+        public static int ComputeDistanceToTarget(MazeStructureGrid mazeGrid, int mazeHeight, int mazeWidth)
+        {
+            int distance = 0;
+
+            // Get target point with links back to origin
+            var targetLinkedPoint = FloodFillToTarget(mazeGrid, mazeHeight, mazeWidth);
+
+            // Walk the references back to the origin and compute the number of steps
+            while (targetLinkedPoint != null)
+            {
+                // Increment distance
+                distance++;
+
+                // Set the previous point
+                targetLinkedPoint = targetLinkedPoint.PrevPoint;
+            }
+
+            return distance;
+        }        
     }
 }
