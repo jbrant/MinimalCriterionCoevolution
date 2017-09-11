@@ -34,7 +34,7 @@ namespace SharpNeat.Utility
             for (int curSample = 0; curSample < numSamples; curSample++)
             {
                 Queue<MazeStructureRoom> mazeRoomQueue = new Queue<MazeStructureRoom>();
-                int[,] mazeSegments = new int[mazeHeight, mazeWidth];
+                MazeStructureGridCell[,] mazeSegments = new MazeStructureGridCell[mazeHeight, mazeWidth];
                 int partitionCount = 0;
 
                 // Queue up the first "room" (which will encompass the entirety of the maze grid)
@@ -98,7 +98,7 @@ namespace SharpNeat.Utility
 
                 // Initialize the partition count and grid to the current number of partitions and current maze grid respectively
                 int partitionCount = mazeGrid.NumPartitions;
-                int[,] mazeSegments = mazeGrid.Grid;
+                MazeStructureGridCell[,] mazeSegments = mazeGrid.Grid;
 
                 // Iterate until there are no more available sub fields in the queue
                 while (mazeRoomQueue.Count > 0)
@@ -137,14 +137,15 @@ namespace SharpNeat.Utility
         public static MazeStructureGrid ConvertMazeGenomeToUnscaledStructure(MazeGenome genome)
         {
             Queue<MazeStructureRoom> mazeRoomQueue = new Queue<MazeStructureRoom>();
-            int[,] unscaledGrid = new int[genome.MazeBoundaryHeight, genome.MazeBoundaryWidth];
+            MazeStructureGridCell[,] unscaledGrid = InitializeMazeGrid(genome.MazeBoundaryHeight,
+                genome.MazeBoundaryWidth);
             int partitionCount = 0;
 
             // Queue up the first "room" (which will encompass the entirety of the maze grid)
             mazeRoomQueue.Enqueue(new MazeStructureRoom(0, 0, genome.MazeBoundaryWidth, genome.MazeBoundaryHeight));
 
             // Iterate through all of the genes, generating 
-            foreach (MazeGene mazeGene in genome.GeneList)
+            foreach (WallGene mazeGene in genome.WallGeneList)
             {
                 // Make sure there are rooms left in the queue before attempting to dequeue and bisect
                 if (mazeRoomQueue.Count > 0)
@@ -221,8 +222,7 @@ namespace SharpNeat.Utility
                 // Handle cells in each cardinal direction
 
                 // North
-                if (0 != curPoint.X && (int) WallOrientation.Horizontal != mazeGrid.Grid[curPoint.X - 1, curPoint.Y] &&
-                    (int) WallOrientation.Both != mazeGrid.Grid[curPoint.X - 1, curPoint.Y] &&
+                if (0 != curPoint.X && mazeGrid.Grid[curPoint.X - 1, curPoint.Y].SouthWall == false &&
                     visitedCells.Contains(pointGrid[curPoint.X - 1, curPoint.Y]) == false)
                 {
                     cellQueue.Enqueue(new MazeStructureLinkedPoint(pointGrid[curPoint.X - 1, curPoint.Y], curPoint));
@@ -230,9 +230,7 @@ namespace SharpNeat.Utility
                 }
 
                 // East
-                if (mazeWidth > curPoint.Y + 1 &&
-                    (int) WallOrientation.Vertical != mazeGrid.Grid[curPoint.X, curPoint.Y] &&
-                    (int) WallOrientation.Both != mazeGrid.Grid[curPoint.X, curPoint.Y] &&
+                if (mazeWidth > curPoint.Y + 1 && mazeGrid.Grid[curPoint.X, curPoint.Y].EastWall == false &&
                     visitedCells.Contains(pointGrid[curPoint.X, curPoint.Y + 1]) == false)
                 {
                     cellQueue.Enqueue(new MazeStructureLinkedPoint(pointGrid[curPoint.X, curPoint.Y + 1], curPoint));
@@ -240,9 +238,7 @@ namespace SharpNeat.Utility
                 }
 
                 // South
-                if (mazeHeight > curPoint.X + 1 &&
-                    (int) WallOrientation.Horizontal != mazeGrid.Grid[curPoint.X, curPoint.Y] &&
-                    (int) WallOrientation.Both != mazeGrid.Grid[curPoint.X, curPoint.Y] &&
+                if (mazeHeight > curPoint.X + 1 && mazeGrid.Grid[curPoint.X, curPoint.Y].SouthWall == false &&
                     visitedCells.Contains(pointGrid[curPoint.X + 1, curPoint.Y]) == false)
                 {
                     cellQueue.Enqueue(new MazeStructureLinkedPoint(pointGrid[curPoint.X + 1, curPoint.Y], curPoint));
@@ -250,8 +246,7 @@ namespace SharpNeat.Utility
                 }
 
                 // West
-                if (0 != curPoint.Y && (int) WallOrientation.Vertical != mazeGrid.Grid[curPoint.X, curPoint.Y - 1] &&
-                    (int) WallOrientation.Both != mazeGrid.Grid[curPoint.X, curPoint.Y - 1] &&
+                if (0 != curPoint.Y && mazeGrid.Grid[curPoint.X, curPoint.Y - 1].EastWall == false &&
                     visitedCells.Contains(pointGrid[curPoint.X, curPoint.Y - 1]) == false)
                 {
                     cellQueue.Enqueue(new MazeStructureLinkedPoint(pointGrid[curPoint.X, curPoint.Y - 1], curPoint));
@@ -287,6 +282,49 @@ namespace SharpNeat.Utility
             }
 
             return distance;
-        }        
+        }
+
+        /// <summary>
+        ///     Creates a two-dimensional array (grid) of empty maze grid cells.
+        /// </summary>
+        /// <param name="height">Height of the grid.</param>
+        /// <param name="width">Width of the grid.</param>
+        /// <returns>Grid initialized with empty cells.</returns>
+        public static MazeStructureGridCell[,] InitializeMazeGrid(int height, int width)
+        {
+            // Create the two-dimensional grid
+            MazeStructureGridCell[,] grid =
+                new MazeStructureGridCell[height, width];
+
+            // Iterate through and create an empty cell for each position
+            for (int heightIdx = 0; heightIdx < height; heightIdx++)
+            {
+                for (int widthIdx = 0; widthIdx < width; widthIdx++)
+                {
+                    grid[heightIdx, widthIdx] = new MazeStructureGridCell(heightIdx, widthIdx);
+                }
+            }
+
+            return grid;
+        }
+
+        public static void BuildMazeSolutionPath(MazeGenome genome)
+        {
+            // Starting location will always be at the top left corner
+            Point2DInt startLocation = new Point2DInt(1, 1);
+
+            // Ending location will always be at the bottom right corner
+            Point2DInt targetLocation = new Point2DInt(genome.MazeBoundaryWidth - 1, genome.MazeBoundaryHeight - 1);
+
+            // Initialize the grid
+            MazeStructureGridCell[,] unscaledGrid = InitializeMazeGrid(genome.MazeBoundaryHeight,
+                genome.MazeBoundaryWidth);
+            
+            foreach (var pathGene in genome.PathGeneList)
+            {
+                // TODO: Call method to connect genes
+                
+            }
+        }
     }
 }

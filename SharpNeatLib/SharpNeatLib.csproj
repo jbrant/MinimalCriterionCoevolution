@@ -118,11 +118,13 @@
     <Compile Include="EvolutionAlgorithms\MultiQueueNeatEvolutionAlgorithm.cs" />
     <Compile Include="EvolutionAlgorithms\QueueingNichedNeatEvolutionAlgorithm.cs" />
     <Compile Include="EvolutionAlgorithms\QueueingNeatEvolutionAlgorithm.cs" />
-    <Compile Include="Genomes\Maze\MazeGene.cs" />
+    <Compile Include="Genomes\Maze\BaseMazeGene.cs" />
+    <Compile Include="Genomes\Maze\WallGene.cs" />
     <Compile Include="Genomes\Maze\MazeGenome.cs" />
     <Compile Include="Genomes\Maze\MazeGenomeFactory.cs" />
     <Compile Include="Genomes\Maze\MazeGenomeParameters.cs" />
     <Compile Include="Genomes\Maze\MazeGenomeXmlIO.cs" />
+    <Compile Include="Genomes\Maze\PathGene.cs" />
     <Compile Include="Loggers\AbstractEntityDataLogger.cs" />
     <Compile Include="Loggers\LoggingParameters.cs" />
     <Compile Include="Loggers\McsExperimentEvaluationEntityDataLogger.cs" />
@@ -265,6 +267,7 @@
     <Compile Include="Network\ActivationFunctions\Unipolar\SteepenedSigmoidApproximation.cs" />
     <Compile Include="Phenomes\MappingSignalArray.cs" />
     <Compile Include="Phenomes\Mazes\MazeStructureGrid.cs" />
+    <Compile Include="Phenomes\Mazes\MazeStructureGridCell.cs" />
     <Compile Include="Phenomes\Mazes\MazeStructureWall.cs" />
     <Compile Include="Phenomes\Mazes\WallDirection.cs" />
     <Compile Include="Phenomes\Mazes\MazeStructure.cs" />
@@ -319,6 +322,7 @@
     <Compile Include="Utility\FrequencyDistributionData.cs" />
     <Compile Include="Utility\DoubleCircularBufferWithStats.cs" />
     <Compile Include="Utility\FastRandom.cs" />
+    <Compile Include="Utility\Point2DInt.cs" />
     <Compile Include="Utility\XmlIoUtils.cs" />
     <Compile Include="Utility\KeyedCircularBuffer.cs" />
     <Compile Include="SharpNeatException.cs" />

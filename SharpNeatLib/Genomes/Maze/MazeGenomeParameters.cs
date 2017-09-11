@@ -26,7 +26,9 @@ namespace SharpNeat.Genomes.Maze
                 MutatePassageStartLocationProbability,
                 MutateAddWallProbability,
                 MutateDeleteWallProbability,
-                MutateExpandMazeProbability
+                MutateExpandMazeProbability,
+                MutatePathJunctureLocationProbability,
+                MutateAddPathJunctureProbability
             };
             return new RouletteWheelLayout(probabilities);
         }
@@ -65,6 +67,16 @@ namespace SharpNeat.Genomes.Maze
         /// </summary>
         private double _mutateExpandMazeProbability;
 
+        /// <summary>
+        ///     Backing field for juncture location mutation probability.
+        /// </summary>
+        private double _mutatePathJunctureLocationProbability;
+
+        /// <summary>
+        ///     Backing field for add path juncture mutation probability.
+        /// </summary>
+        private double _mutateAddPathJunctureProbability;
+
         #endregion
 
         #region Constructors
@@ -79,6 +91,8 @@ namespace SharpNeat.Genomes.Maze
             MutateAddWallProbability = DefaultMutateAddWallProbability;
             MutateDeleteWallProbability = DefaultMutateDeleteWallProbability;
             MutateExpandMazeProbability = DefaultMutateExpandMazeProbability;
+            MutatePathJunctureLocationProbability = DefaultMutatePathJunctureLocationProbability;
+            MutateAddPathJunctureProbability = DefaultMutateAddPathJunctureProbability;
             PerturbanceMagnitude = DefaultPerturbanceMagnitude;
 
             // Create a new roulette wheel layout with the default probabilities
@@ -96,6 +110,8 @@ namespace SharpNeat.Genomes.Maze
             MutateAddWallProbability = copyFrom.MutateAddWallProbability;
             MutateDeleteWallProbability = copyFrom.MutateDeleteWallProbability;
             MutateExpandMazeProbability = copyFrom.MutateExpandMazeProbability;
+            MutatePathJunctureLocationProbability = copyFrom.MutatePathJunctureLocationProbability;
+            MutateAddPathJunctureProbability = copyFrom.MutateAddPathJunctureProbability;
             PerturbanceMagnitude = copyFrom.PerturbanceMagnitude;
 
             RouletteWheelLayout = new RouletteWheelLayout(copyFrom.RouletteWheelLayout);
@@ -111,6 +127,8 @@ namespace SharpNeat.Genomes.Maze
         private const double DefaultMutateAddWallProbability = 0.01;
         private const double DefaultMutateDeleteWallProbability = 0.001;
         private const double DefaultMutateExpandMazeProbability = 0.0005;
+        private const double DefaultMutatePathJunctureLocationProbability = 0.05;
+        private const double DefaultMutateAddPathJunctureProbability = 0.01;
 
         // Default perturbance magnitude
         private const double DefaultPerturbanceMagnitude = 0.2;
@@ -181,6 +199,32 @@ namespace SharpNeat.Genomes.Maze
             set
             {
                 _mutateExpandMazeProbability = value;
+                RouletteWheelLayout = CreateRouletteWheelLayout();
+            }
+        }
+
+        /// <summary>
+        ///     The probability of mutating the location of a juncture within a path.
+        /// </summary>
+        public double MutatePathJunctureLocationProbability
+        {
+            get { return _mutatePathJunctureLocationProbability; }
+            set
+            {
+                _mutatePathJunctureLocationProbability = value;
+                RouletteWheelLayout = CreateRouletteWheelLayout();
+            }
+        }
+
+        /// <summary>
+        ///     The probability of adding a juncture to a path.
+        /// </summary>
+        public double MutateAddPathJunctureProbability
+        {
+            get { return _mutateAddPathJunctureProbability; }
+            set
+            {
+                _mutateAddPathJunctureProbability = value;
                 RouletteWheelLayout = CreateRouletteWheelLayout();
             }
         }

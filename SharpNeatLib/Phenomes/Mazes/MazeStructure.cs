@@ -164,7 +164,7 @@ namespace SharpNeat.Phenomes.Mazes
         ///     Parses the maze grid matrix in a row-wise manner, extracting the horizontal walls.
         /// </summary>
         /// <param name="mazeGridArray">The grid array which is being parsed.</param>
-        private void ExtractHorizontalWalls(int[,] mazeGridArray)
+        private void ExtractHorizontalWalls(MazeStructureGridCell[,] mazeGridArray)
         {
             // Get all of the horizontal lines
             for (int curRow = 0; curRow < _mazeHeight; curRow++)
@@ -175,8 +175,7 @@ namespace SharpNeat.Phenomes.Mazes
                 {
                     // Handle the start point of a line segment 
                     // (current cell is horizontal and a new horizontal line hasn't yet been established)
-                    if ((mazeGridArray[curRow, curCol] == (int) WallOrientation.Horizontal ||
-                         mazeGridArray[curRow, curCol] == (int) WallOrientation.Both) && curHorizontalLine == null)
+                    if (mazeGridArray[curRow, curCol].SouthWall && curHorizontalLine == null)
                     {
                         curHorizontalLine = new MazeStructureWall
                         {
@@ -186,8 +185,7 @@ namespace SharpNeat.Phenomes.Mazes
                     }
                     // Otherwise, if we've been tracking a horizontal line and the current position contains neither a horizontal line segment 
                     // nor a combination of a horizontal and vertical line, then record this as the maze ending point and null out the current line
-                    else if (mazeGridArray[curRow, curCol] != (int) WallOrientation.Horizontal &&
-                             mazeGridArray[curRow, curCol] != (int) WallOrientation.Both && curHorizontalLine != null)
+                    else if (mazeGridArray[curRow, curCol].SouthWall == false && curHorizontalLine != null)
                     {
                         curHorizontalLine.EndMazeStructurePoint = new MazeStructurePoint(curCol*_scaleMultiplier,
                             (curRow + 1)*_scaleMultiplier);
@@ -211,7 +209,7 @@ namespace SharpNeat.Phenomes.Mazes
         ///     Parses the maze grid matrix in a column-wise manner, extracting the vertical walls.
         /// </summary>
         /// <param name="mazeGridArray">The grid array which is being parsed.</param>
-        private void ExtractVerticalWalls(int[,] mazeGridArray)
+        private void ExtractVerticalWalls(MazeStructureGridCell[,] mazeGridArray)
         {
             // Get all of the vertical lines
             for (int curCol = 0; curCol < _mazeWidth; curCol++)
@@ -222,8 +220,7 @@ namespace SharpNeat.Phenomes.Mazes
                 {
                     // Handle the start point of a line segment 
                     // (current cell is vertical and a new vertical line hasn't yet been established)
-                    if ((mazeGridArray[curRow, curCol] == (int) WallOrientation.Vertical ||
-                         mazeGridArray[curRow, curCol] == (int) WallOrientation.Both) && curVerticalLine == null)
+                    if (mazeGridArray[curRow, curCol].EastWall && curVerticalLine == null)
                     {
                         curVerticalLine = new MazeStructureWall
                         {
@@ -233,8 +230,7 @@ namespace SharpNeat.Phenomes.Mazes
                     }
                     // Otherwise, if we've been tracking a vertical line and the current position contains neither a vertical line segment 
                     // nor a combination of a horizontal and vertical line, then record this as the maze ending point and null out the current line
-                    else if (mazeGridArray[curRow, curCol] != (int) WallOrientation.Vertical &&
-                             mazeGridArray[curRow, curCol] != (int) WallOrientation.Both && curVerticalLine != null)
+                    else if (mazeGridArray[curRow, curCol].EastWall == false && curVerticalLine != null)
                     {
                         curVerticalLine.EndMazeStructurePoint = new MazeStructurePoint((curCol + 1)*_scaleMultiplier,
                             Math.Max(1, curRow)*_scaleMultiplier);

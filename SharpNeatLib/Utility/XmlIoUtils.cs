@@ -180,6 +180,17 @@ namespace SharpNeat.Utility
         }
 
         /// <summary>
+        ///     Read the named attribute as a string (no parsing is involved here).
+        /// </summary>
+        /// <param name="xr">XML reader reference.</param>
+        /// <param name="attrName">Attribute name.</param>
+        /// <returns>String value of attribute.</returns>
+        public static string ReadAttributeAsString(XmlReader xr, string attrName)
+        {
+            return xr.GetAttribute(attrName);
+        }
+
+        /// <summary>
         ///     Writes a double array as a comma separated list of values.
         /// </summary>
         public static void WriteAttributeString(XmlWriter xw, string attrName, double[] arr)

@@ -130,7 +130,7 @@ namespace MazeGenomeGenerator
                 for (int cnt = 0; cnt < numInteriorWalls; cnt++)
                 {
                     // Create new maze gene and add to genome
-                    mazeGenome?.GeneList.Add(new MazeGene(mazeGenomeFactory.InnovationIdGenerator.NextId,
+                    mazeGenome?.WallGeneList.Add(new WallGene(mazeGenomeFactory.InnovationIdGenerator.NextId,
                         rand.NextDouble(), rand.NextDouble(), rand.NextDouble() < 0.5));
                 }
 

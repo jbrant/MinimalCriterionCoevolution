@@ -48,6 +48,8 @@ namespace SharpNeat.Decoders.Maze
             // Initialize new maze (phenotype)
             MazeStructure maze = new MazeStructure(genome.MazeBoundaryWidth, genome.MazeBoundaryHeight, _scaleMultiplier);
 
+            // TODO: Generate path
+
             // Convert to walls and scale to the desired lengths
             maze.ConvertGridArrayToWalls(MazeUtils.ConvertMazeGenomeToUnscaledStructure(genome));
 

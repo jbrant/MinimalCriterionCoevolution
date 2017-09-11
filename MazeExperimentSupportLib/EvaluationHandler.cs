@@ -236,13 +236,13 @@ namespace MazeExperimentSupportLib
             double[][] observationMatrix = new double[mazeGenomes.Count()][];
 
             // Get the maximum observation vector length (max number of maze genes)
-            var maxObservationLength = mazeGenomes.Max(g => g.GeneList.Count());
+            var maxObservationLength = mazeGenomes.Max(g => g.WallGeneList.Count());
 
             for (int idx = 0; idx < mazeGenomes.Count(); idx++)
             {
                 // If there are more observations than the total elements in the observation vector, 
                 // zero out the rest of the vector
-                if (mazeGenomes[idx].GeneList.Count() < maxObservationLength)
+                if (mazeGenomes[idx].WallGeneList.Count() < maxObservationLength)
                 {
                     observationMatrix[idx] =
                         mazeGenomes[idx].Position.CoordArray.Select(ca => ca.Value)

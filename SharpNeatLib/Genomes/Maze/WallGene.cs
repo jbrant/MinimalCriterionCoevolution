@@ -1,15 +1,15 @@
 ﻿namespace SharpNeat.Genomes.Maze
 {
     /// <summary>
-    ///     The maze gene class encapsulates evolvable details about a wall, including its location within the maze and the
+    ///     The wall gene class encapsulates evolvable details about a wall, including its location within the maze and the
     ///     position of its passage within the wall.  These are real-valued, relative positions as the maze generation
     ///     algorithm will determine their exact location in the phenotype maze.
     /// </summary>
-    public class MazeGene
+    public class WallGene
     {
         /// <summary>
         ///     Constructor which accepts a wall location, passage location, and their preliminary orientation and creates a new
-        ///     maze gene.
+        ///     wall gene.
         /// </summary>
         /// <param name="innovationId">
         ///     The unique "innovation" identifier for this gene (analogous to the innovation IDs on NEAT
@@ -22,7 +22,7 @@
         ///     practice, this value is only considered when constructing the phenotype maze if the area which the wall is dividing
         ///     is square.
         /// </param>
-        public MazeGene(uint innovationId, double wallLocation, double passageLocation, bool orientationSeed)
+        public WallGene(uint innovationId, double wallLocation, double passageLocation, bool orientationSeed)
         {
             InnovationId = innovationId;
             WallLocation = wallLocation;
@@ -31,10 +31,10 @@
         }
 
         /// <summary>
-        ///     Copy constructor for duplicating maze gene.
+        ///     Copy constructor for duplicating wall gene.
         /// </summary>
-        /// <param name="copyFrom">The maze gene to deep copy.</param>
-        public MazeGene(MazeGene copyFrom)
+        /// <param name="copyFrom">The wall gene to deep copy.</param>
+        public WallGene(WallGene copyFrom)
         {
             InnovationId = copyFrom.InnovationId;
             WallLocation = copyFrom.WallLocation;
@@ -66,9 +66,9 @@
         ///     Creates a copy of the current gene.
         /// </summary>
         /// <returns></returns>
-        public MazeGene CreateCopy()
+        public WallGene CreateCopy()
         {
-            return new MazeGene(this);
+            return new WallGene(this);
         }
     }
 }

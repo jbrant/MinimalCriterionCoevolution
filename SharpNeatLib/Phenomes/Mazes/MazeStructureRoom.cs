@@ -52,7 +52,7 @@ namespace SharpNeat.Phenomes.Mazes
         /// </param>
         /// <param name="isHorizontalDefaultOrientation">Indicator for whether the dividing line is horizontal or vertical.</param>
         /// <returns>The two subfields that were created as a result of the subfield division.</returns>
-        public Tuple<MazeStructureRoom, MazeStructureRoom> DivideRoom(int[,] grid, double unscaledWallLocation,
+        public Tuple<MazeStructureRoom, MazeStructureRoom> DivideRoom(MazeStructureGridCell[,] grid, double unscaledWallLocation,
             double unscaledPassageLocation, bool isHorizontalDefaultOrientation)
         {            
             // Determine orientation
@@ -89,8 +89,15 @@ namespace SharpNeat.Phenomes.Mazes
                 // If the current cell isn't in the defined passage, place a wall segment there
                 if (xWallLocation != xPassageLocation || yWallLocation != yPassageLocation)
                 {
-                    // Bitwise or with perpendicular direction to get appropriate wall
-                    grid[yWallLocation, xWallLocation] |= (int) perpendicularDirection;
+                    // Add wall segment to cell based on perpendicular direction
+                    if (perpendicularDirection == WallDirection.East)
+                    {
+                        grid[yWallLocation, xWallLocation].EastWall = true;
+                    }
+                    else
+                    {
+                        grid[yWallLocation, xWallLocation].SouthWall = true;
+                    }
                 }
 
                 // Increment the wall segment location by the appropriate directional components

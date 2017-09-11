@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root>
+	<Mazes>
+		<Maze id="0" birthGen="0" height="10" width="10">
+			<Paths>
+				<Path id="0" JunctureCoordinateX="4" JunctureCoordinateY="6" Orientation="HORIZONTAL" />
+				<Path id="1" JunctureCoordinateX="2" JunctureCoordinateY="5" Orientation="VERTICAL" />
+			</Paths>
+			<Walls/>
+		</Maze>		
+	</Mazes>
+</Root>
