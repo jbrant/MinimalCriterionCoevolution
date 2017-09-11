@@ -319,11 +319,34 @@ namespace SharpNeat.Utility
             // Initialize the grid
             MazeStructureGridCell[,] unscaledGrid = InitializeMazeGrid(genome.MazeBoundaryHeight,
                 genome.MazeBoundaryWidth);
-            
+
+            for (int idx = 0; idx < genome.PathGeneList.Count; idx++)
+            {
+                // Get the previous point
+                Point2DInt prevPoint = idx == 0 ? startLocation : genome.PathGeneList[idx - 1].JuncturePoint;
+                PathGene curPath = genome.PathGeneList[idx];
+
+                // Mark the cells in the horizontal component of the path
+                if (IntersectionOrientation.Horizontal == curPath.Orientation)
+                {
+                    for (int hIdx = prevPoint.X; hIdx <= curPath.JuncturePoint.X; hIdx++)
+                    {
+                        unscaledGrid[curPath.JuncturePoint.Y, hIdx].IsOnPath = true;
+                    }
+                }
+                // Mark the cells in the vertical component of the path
+                else
+                {
+                    for (int vIdx = prevPoint.X; vIdx <= curPath.JuncturePoint.X; vIdx++)
+                    {
+                        unscaledGrid[vIdx, curPath.JuncturePoint.X].IsOnPath = true;
+                    }
+                }
+            }
+
             foreach (var pathGene in genome.PathGeneList)
             {
                 // TODO: Call method to connect genes
-                
             }
         }
     }

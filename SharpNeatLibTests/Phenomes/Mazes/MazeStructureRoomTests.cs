@@ -17,8 +17,8 @@ namespace SharpNeat.Phenomes.Mazes.Tests
         [TestMethod()]
         public void DivideRoomTest()
         {
-            var seedMazePath = @"F:\User Data\Jonathan\Documents\school\Jonathan\Graduate\PhD\Development\MCC_Projects\MCC_Executor\MazeNavigation\SeedMazes\TestMaze_Genome_10_Height_10_Width_0_Walls.xml";
-            var outputPath = @"F:\User Data\Jonathan\Documents\school\Jonathan\Graduate\PhD\Minimal Criteria Search\ExperimentData\DebugOutput";
+            var seedMazePath = @"Z:\Jonathan\Documents\school\Jonathan\Graduate\PhD\Development\MCC_Projects\MCC_Executor\MazeNavigation\SeedMazes\TestMaze_Genome_10_Height_10_Width_0_Walls.xml";
+            var outputPath = @"Z:\Jonathan\Documents\school\Jonathan\Graduate\PhD\Minimal Criteria Search\ExperimentData\DebugOutput";
 
             var genomeParameters = new MazeGenomeParameters();
 
