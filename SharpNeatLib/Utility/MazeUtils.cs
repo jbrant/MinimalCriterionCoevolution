@@ -1,4 +1,6 @@
-﻿#region
+﻿// This is a test of setting the file header.
+
+#region
 
 using System;
 using System.Collections.Generic;
@@ -15,6 +17,135 @@ namespace SharpNeat.Utility
     /// </summary>
     public static class MazeUtils
     {
+        #region Internal helper methods
+
+        private static void MarkSolutionPath(MazeStructureGridCell[,] grid, Point2DInt startPoint, Point2DInt endPoint,
+            IntersectionOrientation orientation)
+        {
+            if (IntersectionOrientation.Horizontal == orientation)
+            {
+                // Mark solution along y-axis, leaving X-location at previous point
+                for (int yCoord = startPoint.Y;
+                    startPoint.Y < endPoint.Y
+                        ? yCoord <= endPoint.Y
+                        : yCoord >= endPoint.Y;
+                    yCoord += startPoint.Y < endPoint.Y ? 1 : -1)
+                {
+                    grid[yCoord, startPoint.X].PathOrientation = PathOrientation.Vertical;
+                }
+
+                // Mark solution along x-axis, with y-location at current point
+                for (int xCoord = startPoint.X;
+                    startPoint.X < endPoint.X
+                        ? xCoord <= endPoint.X
+                        : xCoord >= endPoint.X;
+                    xCoord += startPoint.X < endPoint.X ? 1 : -1)
+                {
+                    grid[endPoint.Y, xCoord].PathOrientation = PathOrientation.Horizontal;
+                }
+            }
+            // Mark path for vertical intersection
+            else
+            {
+                // Mark solution along x-axis, with y-location at previous point
+                for (int xCoord = startPoint.X;
+                    startPoint.X < endPoint.X
+                        ? xCoord <= endPoint.X
+                        : xCoord >= endPoint.X;
+                    xCoord += startPoint.X < endPoint.X ? 1 : -1)
+                {
+                    grid[startPoint.Y, xCoord].PathOrientation = PathOrientation.Horizontal;
+                }
+
+                // Mark solution along y-axis, leaving X-location at current point
+                for (int yCoord = startPoint.Y;
+                    startPoint.Y < endPoint.Y
+                        ? yCoord <= endPoint.Y
+                        : yCoord >= endPoint.Y;
+                    yCoord += startPoint.Y < endPoint.Y ? 1 : -1)
+                {
+                    grid[yCoord, endPoint.X].PathOrientation = PathOrientation.Vertical;
+                }
+            }
+        }
+
+        private static bool DoesPathOverlap(MazeStructureGridCell[,] grid, Point2DInt startPoint, Point2DInt endPoint,
+            IntersectionOrientation orientation)
+        {
+            if (IntersectionOrientation.Horizontal == orientation)
+            {
+                // Check for path overlaps when traversing y-direction
+                for (int yCoord = startPoint.Y;
+                    startPoint.Y < endPoint.Y
+                        ? yCoord <= endPoint.Y
+                        : yCoord >= endPoint.Y;
+                    yCoord += startPoint.Y < endPoint.Y ? 1 : -1)
+                {
+                    if ((PathOrientation.None != grid[yCoord, startPoint.X].PathOrientation ||
+                         grid[yCoord, startPoint.X].IsJuncture) &&
+                        false == grid[yCoord, startPoint.X].Equals(startPoint) &&
+                        false == grid[yCoord, startPoint.X].Equals(endPoint))
+                    {
+                        return true;
+                    }
+                }
+
+                // Check for path overlaps when traversing x-direction
+                for (int xCoord = startPoint.X;
+                    startPoint.X < endPoint.X
+                        ? xCoord <= endPoint.X
+                        : xCoord >= endPoint.X;
+                    xCoord += startPoint.X < endPoint.X ? 1 : -1)
+                {
+                    if ((PathOrientation.None != grid[endPoint.Y, xCoord].PathOrientation ||
+                         grid[endPoint.Y, xCoord].IsJuncture) && false == grid[endPoint.Y, xCoord].Equals(startPoint) &&
+                        false == grid[endPoint.Y, xCoord].Equals(endPoint))
+                    {
+                        return true;
+                    }
+                }
+            }
+            else if (IntersectionOrientation.Vertical == orientation)
+            {
+                // Check for path overlaps when traversing x-direction
+                for (int xCoord = startPoint.X;
+                    startPoint.X < endPoint.X
+                        ? xCoord <= endPoint.X
+                        : xCoord >= endPoint.X;
+                    xCoord += startPoint.X < endPoint.X ? 1 : -1)
+                {
+                    if ((PathOrientation.None != grid[startPoint.Y, xCoord].PathOrientation ||
+                         grid[startPoint.Y, xCoord].IsJuncture) &&
+                        false == grid[startPoint.Y, xCoord].Equals(startPoint) &&
+                        false == grid[startPoint.Y, xCoord].Equals(endPoint))
+                    {
+                        return true;
+                    }
+                }
+
+                // Check for path overlaps when traversing y-direction
+                for (int yCoord = startPoint.Y;
+                    startPoint.Y < endPoint.Y
+                        ? yCoord <= endPoint.Y
+                        : yCoord >= endPoint.Y;
+                    yCoord += startPoint.Y < endPoint.Y ? 1 : -1)
+                {
+                    if ((PathOrientation.None != grid[yCoord, endPoint.X].PathOrientation ||
+                         grid[yCoord, endPoint.X].IsJuncture) && false == grid[yCoord, endPoint.X].Equals(startPoint) &&
+                        false == grid[yCoord, endPoint.X].Equals(endPoint))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        #endregion
+
+        #region Helper methods
+
         /// <summary>
         ///     Averages out the number of partitions possible given the evolved maze dimensions.
         /// </summary>
@@ -27,15 +158,15 @@ namespace SharpNeat.Utility
         /// <returns>The average number of partitions supportable within the given maze dimensions.</returns>
         public static int DetermineMaxPartitions(int mazeHeight, int mazeWidth, int numSamples = 2000)
         {
-            int[] maxMazeResolutions = new int[numSamples];
-            FastRandom rng = new FastRandom();
+            var maxMazeResolutions = new int[numSamples];
+            var rng = new FastRandom();
 
             // Fully partition maze space for the specified number of samples
-            for (int curSample = 0; curSample < numSamples; curSample++)
+            for (var curSample = 0; curSample < numSamples; curSample++)
             {
-                Queue<MazeStructureRoom> mazeRoomQueue = new Queue<MazeStructureRoom>();
-                MazeStructureGridCell[,] mazeSegments = new MazeStructureGridCell[mazeHeight, mazeWidth];
-                int partitionCount = 0;
+                var mazeRoomQueue = new Queue<MazeStructureRoom>();
+                var mazeSegments = new MazeStructureGridCell[mazeHeight, mazeWidth];
+                var partitionCount = 0;
 
                 // Queue up the first "room" (which will encompass the entirety of the maze grid)
                 mazeRoomQueue.Enqueue(new MazeStructureRoom(0, 0, mazeWidth, mazeHeight));
@@ -44,7 +175,7 @@ namespace SharpNeat.Utility
                 while (mazeRoomQueue.Count > 0)
                 {
                     // Dequeue a room and run division on it
-                    Tuple<MazeStructureRoom, MazeStructureRoom> subRooms = mazeRoomQueue.Dequeue()
+                    var subRooms = mazeRoomQueue.Dequeue()
                         .DivideRoom(mazeSegments, rng.NextDoubleNonZero(),
                             rng.NextDoubleNonZero(),
                             rng.NextDoubleNonZero() > 0.5);
@@ -145,16 +276,16 @@ namespace SharpNeat.Utility
             mazeRoomQueue.Enqueue(new MazeStructureRoom(0, 0, genome.MazeBoundaryWidth, genome.MazeBoundaryHeight));
 
             // Iterate through all of the genes, generating 
-            foreach (WallGene mazeGene in genome.WallGeneList)
+            foreach (WallGene wallGene in genome.WallGeneList)
             {
                 // Make sure there are rooms left in the queue before attempting to dequeue and bisect
                 if (mazeRoomQueue.Count > 0)
                 {
                     // Dequeue a room and run division on it
                     Tuple<MazeStructureRoom, MazeStructureRoom> subRooms = mazeRoomQueue.Dequeue()
-                        .DivideRoom(unscaledGrid, mazeGene.WallLocation,
-                            mazeGene.PassageLocation,
-                            mazeGene.OrientationSeed);
+                        .DivideRoom(unscaledGrid, wallGene.WallLocation,
+                            wallGene.PassageLocation,
+                            wallGene.OrientationSeed);
 
                     if (subRooms != null)
                     {
@@ -301,17 +432,19 @@ namespace SharpNeat.Utility
             {
                 for (int widthIdx = 0; widthIdx < width; widthIdx++)
                 {
-                    grid[heightIdx, widthIdx] = new MazeStructureGridCell(heightIdx, widthIdx);
+                    grid[heightIdx, widthIdx] = new MazeStructureGridCell(widthIdx, heightIdx);
                 }
             }
 
             return grid;
         }
 
-        public static void BuildMazeSolutionPath(MazeGenome genome)
+        public static MazeStructureGridCell[,] BuildMazeSolutionPath(MazeGenome genome)
         {
+            var sortedPathGeneList = new List<PathGene>(genome.PathGeneList.Count);
+
             // Starting location will always be at the top left corner
-            Point2DInt startLocation = new Point2DInt(1, 1);
+            Point2DInt startLocation = new Point2DInt(0, 0);
 
             // Ending location will always be at the bottom right corner
             Point2DInt targetLocation = new Point2DInt(genome.MazeBoundaryWidth - 1, genome.MazeBoundaryHeight - 1);
@@ -320,34 +453,107 @@ namespace SharpNeat.Utility
             MazeStructureGridCell[,] unscaledGrid = InitializeMazeGrid(genome.MazeBoundaryHeight,
                 genome.MazeBoundaryWidth);
 
-            for (int idx = 0; idx < genome.PathGeneList.Count; idx++)
+            // Order points vertically and then horizontally (hoping for a winding trajectory with this ordering)
+            foreach (
+                var verticalGroup in
+                    genome.PathGeneList.OrderBy(g => g.JuncturePoint.Y)
+                        .GroupBy(
+                            g =>
+                                GetUnscaledCoordinates(g.JuncturePoint, genome.RelativeCellWidth,
+                                    genome.RelativeCellHeight).Y)
+                        .Distinct()
+                        .ToList())
             {
-                // Get the previous point
-                Point2DInt prevPoint = idx == 0 ? startLocation : genome.PathGeneList[idx - 1].JuncturePoint;
-                PathGene curPath = genome.PathGeneList[idx];
-
-                // Mark the cells in the horizontal component of the path
-                if (IntersectionOrientation.Horizontal == curPath.Orientation)
+                // Sort in horizontal ascending order if this is the first row
+                if (sortedPathGeneList.Count == 0)
                 {
-                    for (int hIdx = prevPoint.X; hIdx <= curPath.JuncturePoint.X; hIdx++)
-                    {
-                        unscaledGrid[curPath.JuncturePoint.Y, hIdx].IsOnPath = true;
-                    }
+                    sortedPathGeneList.AddRange(verticalGroup.OrderBy(g => g.JuncturePoint.X));
                 }
-                // Mark the cells in the vertical component of the path
                 else
                 {
-                    for (int vIdx = prevPoint.X; vIdx <= curPath.JuncturePoint.X; vIdx++)
-                    {
-                        unscaledGrid[vIdx, curPath.JuncturePoint.X].IsOnPath = true;
-                    }
+                    // Get vertical level of last sorted entry
+                    int prevY =
+                        GetUnscaledCoordinates(sortedPathGeneList.Last().JuncturePoint, genome.RelativeCellWidth,
+                            genome.RelativeCellHeight).Y;
+
+                    // If the max X-value for the previous row is greater than the max X-value for the current row,
+                    // sort this row in descending order on the horizontal axis
+                    sortedPathGeneList.AddRange(sortedPathGeneList.Where(
+                        g =>
+                            prevY ==
+                            GetUnscaledCoordinates(g.JuncturePoint, genome.RelativeCellWidth,
+                                genome.RelativeCellHeight).Y)
+                        .Max(
+                            h =>
+                                GetUnscaledCoordinates(h.JuncturePoint, genome.RelativeCellWidth,
+                                    genome.RelativeCellHeight).X) >
+                                                verticalGroup.ToList()
+                                                    .Max(
+                                                        h =>
+                                                            GetUnscaledCoordinates(h.JuncturePoint,
+                                                                genome.RelativeCellWidth,
+                                                                genome.RelativeCellHeight).X)
+                        ? verticalGroup.OrderByDescending(g => g.JuncturePoint.X)
+                        : verticalGroup.OrderBy(g => g.JuncturePoint.X));
                 }
             }
 
-            foreach (var pathGene in genome.PathGeneList)
+            for (int idx = 0; idx <= genome.PathGeneList.Count; idx++)
             {
-                // TODO: Call method to connect genes
+                // Get the previous point (if first iteration, previous point is the start location)
+                Point2DInt prevPoint = idx == 0
+                    ? startLocation
+                    : GetUnscaledCoordinates(sortedPathGeneList[idx - 1].JuncturePoint, genome.RelativeCellWidth,
+                        genome.RelativeCellHeight);
+
+                // Get the current point (if last iteration, current point is the target location)
+                Point2DInt curPoint = idx == genome.PathGeneList.Count
+                    ? targetLocation
+                    : GetUnscaledCoordinates(sortedPathGeneList[idx].JuncturePoint, genome.RelativeCellWidth,
+                        genome.RelativeCellHeight);
+
+                // Get the orientation
+                IntersectionOrientation curOrientation = idx == genome.PathGeneList.Count
+                    ? sortedPathGeneList[idx - 1].DefaultOrientation
+                    : sortedPathGeneList[idx].DefaultOrientation;
+
+                // Mark current juncture point
+                unscaledGrid[curPoint.Y, curPoint.X].IsJuncture = true;
+
+                // If there are no overlapping paths, use 
+                if (DoesPathOverlap(unscaledGrid, prevPoint, curPoint, curOrientation) == false)
+                {
+                    MarkSolutionPath(unscaledGrid, prevPoint, curPoint, curOrientation);
+                }
+                else if (DoesPathOverlap(unscaledGrid, prevPoint, curPoint,
+                    curOrientation == IntersectionOrientation.Horizontal
+                        ? IntersectionOrientation.Vertical
+                        : IntersectionOrientation.Horizontal) == false)
+                {
+                    MarkSolutionPath(unscaledGrid, prevPoint, curPoint,
+                        curOrientation == IntersectionOrientation.Horizontal
+                            ? IntersectionOrientation.Vertical
+                            : IntersectionOrientation.Horizontal);
+                }
             }
+
+            return unscaledGrid;
         }
+
+        /// <summary>
+        ///     Converts relative, decimal coordinates to unscaled integer coordinates.
+        /// </summary>
+        /// <param name="relativeCoordinates">The relative coordinate pair on the path gene.</param>
+        /// <param name="relativeCellWidth">The relative cell width.</param>
+        /// <param name="relativeCellHeight">The relative cell height.</param>
+        /// <returns>The integer coordinates on the unscaled grid.</returns>
+        public static Point2DInt GetUnscaledCoordinates(Point2DDouble relativeCoordinates, double relativeCellWidth,
+            double relativeCellHeight)
+        {
+            return new Point2DInt(Convert.ToInt32(Math.Floor(relativeCoordinates.X/relativeCellWidth)),
+                Convert.ToInt32(Math.Floor(relativeCoordinates.Y/relativeCellHeight)));
+        }
+
+        #endregion
     }
 }

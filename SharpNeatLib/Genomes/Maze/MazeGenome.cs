@@ -52,6 +52,16 @@ namespace SharpNeat.Genomes.Maze
         public int MazeBoundaryWidth { get; private set; }
 
         /// <summary>
+        ///     Relative height of each maze cell in the range 0 to 1.
+        /// </summary>
+        public double RelativeCellHeight { get; }
+
+        /// <summary>
+        ///     Relative width of each maze cell in the range 0 to 1.
+        /// </summary>
+        public double RelativeCellWidth { get; }
+
+        /// <summary>
         ///     The maximum complexity of the maze (at the evolved resolution).  Note that this is set when the genome is birthed,
         ///     but can also change as a result of a mutation; however, it's stored on the genome instead of being calculated via
         ///     the "get" call because of the computational cost involved in calculating it.
@@ -80,7 +90,7 @@ namespace SharpNeat.Genomes.Maze
             WallGeneList = new List<WallGene>();
 
             // Instantiate new path gene list
-            PathGeneList = new List<PathGene>();
+            PathGeneList = new List<PathGene>();            
         }
 
         /// <summary>
@@ -105,6 +115,10 @@ namespace SharpNeat.Genomes.Maze
             MazeBoundaryHeight = genomeFactory.BaseMazeHeight;
             MazeBoundaryWidth = genomeFactory.BaseMazeWidth;
 
+            // Set relative cell height and width
+            RelativeCellHeight = (double)1 / MazeBoundaryHeight;
+            RelativeCellWidth = (double)1 / MazeBoundaryWidth;
+
             // Set the genome factory
             GenomeFactory = genomeFactory;
         }
@@ -124,6 +138,10 @@ namespace SharpNeat.Genomes.Maze
             // Set the initial maze height and width
             MazeBoundaryHeight = height;
             MazeBoundaryWidth = width;
+
+            // Set relative cell height and width
+            RelativeCellHeight = (double)1 / MazeBoundaryHeight;
+            RelativeCellWidth = (double)1 / MazeBoundaryWidth;
 
             // Set the genome factory
             GenomeFactory = genomeFactory;
@@ -149,6 +167,8 @@ namespace SharpNeat.Genomes.Maze
             GenomeFactory = copyFrom.GenomeFactory;
             MazeBoundaryHeight = copyFrom.MazeBoundaryHeight;
             MazeBoundaryWidth = copyFrom.MazeBoundaryWidth;
+            RelativeCellHeight = copyFrom.RelativeCellHeight;
+            RelativeCellWidth = copyFrom.RelativeCellWidth;
             WallGeneList = new List<WallGene>(DeepCopyWallGeneList(copyFrom.WallGeneList));
             PathGeneList = new List<PathGene>(DeepCopyPathGeneList(copyFrom.PathGeneList));
             EvaluationInfo = new EvaluationInfo(copyFrom.EvaluationInfo.FitnessHistoryLength);
@@ -494,7 +514,7 @@ namespace SharpNeat.Genomes.Maze
         /// </summary>
         private void MutatePathJunctureLocation()
         {
-            Point2DInt mutatedPoint = new Point2DInt();
+            Point2DDouble mutatedPoint = new Point2DDouble();
             int geneIdx;
 
             // Don't try to mutate if the gene list is empty
@@ -513,25 +533,25 @@ namespace SharpNeat.Genomes.Maze
                 {
                     case PointShift.Down:
                     {
-                        mutatedPoint = new Point2DInt(PathGeneList[geneIdx].JuncturePoint.X,
-                            PathGeneList[geneIdx].JuncturePoint.Y + 1);
+                        mutatedPoint = new Point2DDouble(PathGeneList[geneIdx].JuncturePoint.X,
+                            PathGeneList[geneIdx].JuncturePoint.Y + RelativeCellHeight);
                         break;
                     }
                     case PointShift.Up:
                     {
-                        mutatedPoint = new Point2DInt(PathGeneList[geneIdx].JuncturePoint.X,
-                            PathGeneList[geneIdx].JuncturePoint.Y - 1);
+                        mutatedPoint = new Point2DDouble(PathGeneList[geneIdx].JuncturePoint.X,
+                            PathGeneList[geneIdx].JuncturePoint.Y - RelativeCellHeight);
                         break;
                     }
                     case PointShift.Left:
                     {
-                        mutatedPoint = new Point2DInt(PathGeneList[geneIdx].JuncturePoint.X - 1,
+                        mutatedPoint = new Point2DDouble(PathGeneList[geneIdx].JuncturePoint.X - RelativeCellWidth,
                             PathGeneList[geneIdx].JuncturePoint.Y);
                         break;
                     }
                     case PointShift.Right:
                     {
-                        mutatedPoint = new Point2DInt(PathGeneList[geneIdx].JuncturePoint.X + 1,
+                        mutatedPoint = new Point2DDouble(PathGeneList[geneIdx].JuncturePoint.X + RelativeCellWidth,
                             PathGeneList[geneIdx].JuncturePoint.Y);
                         break;
                     }
@@ -547,7 +567,7 @@ namespace SharpNeat.Genomes.Maze
         /// </summary>
         private void MutateAddPathJuncture()
         {
-            Point2DInt newPoint;
+            Point2DDouble newPoint;
 
             // Generate new points until we reach one that is valid 
             // (while seemingly inefficient, this is actually more memory efficient than 
@@ -555,8 +575,8 @@ namespace SharpNeat.Genomes.Maze
             // against that list - especially when the grid is large)
             do
             {
-                newPoint = new Point2DInt(GenomeFactory.Rng.Next(MazeBoundaryWidth - 1),
-                    GenomeFactory.Rng.Next(MazeBoundaryHeight - 1));
+                newPoint = new Point2DDouble(GenomeFactory.Rng.NextDoubleNonZero(),
+                    GenomeFactory.Rng.NextDoubleNonZero());
             } while (IsValidLocation(newPoint) == false);
 
             // Add the new path gene to the genome
@@ -589,13 +609,19 @@ namespace SharpNeat.Genomes.Maze
         /// </summary>
         /// <param name="junctureLocation">The proposed juncture point.</param>
         /// <returns>Boolean indicating whether the given point is valid per the maze boundary constraints.</returns>
-        private bool IsValidLocation(Point2DInt junctureLocation)
+        private bool IsValidLocation(Point2DDouble junctureLocation)
         {
             return junctureLocation.X >= 0 && junctureLocation.X < MazeBoundaryWidth && junctureLocation.Y >= 0 &&
                    junctureLocation.Y < MazeBoundaryHeight &&
-                   PathGeneList.Select(g => g.JuncturePoint).Contains(junctureLocation) == false &&
-                   junctureLocation.Equals(new Point2DInt(0, 0)) == false &&
-                   junctureLocation.Equals(new Point2DInt(MazeBoundaryWidth - 1, MazeBoundaryHeight - 1)) == false;
+                   PathGeneList.Any(
+                       g =>
+                           MazeUtils.GetUnscaledCoordinates(junctureLocation, RelativeCellWidth, RelativeCellHeight)
+                               .Equals(MazeUtils.GetUnscaledCoordinates(g.JuncturePoint, RelativeCellWidth,
+                                   RelativeCellHeight))) == false &&
+                   MazeUtils.GetUnscaledCoordinates(junctureLocation, RelativeCellWidth, RelativeCellHeight)
+                       .Equals(new Point2DInt(0, 0)) == false &&
+                   MazeUtils.GetUnscaledCoordinates(junctureLocation, RelativeCellWidth, RelativeCellHeight)
+                       .Equals(new Point2DInt(MazeBoundaryWidth - 1, MazeBoundaryHeight - 1)) == false;
         }
 
         /// <summary>

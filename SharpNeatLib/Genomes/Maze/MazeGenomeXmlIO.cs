@@ -49,7 +49,7 @@ namespace SharpNeat.Genomes.Maze
         private const string __AttrWidth = "width";
         private const string __AttrJunctureCoordinateX = "JunctureCoordinateX";
         private const string __AttrJunctureCoordinateY = "JunctureCoordinateY";
-        private const string __AttrOrientation = "Orientation";
+        private const string __AttrOrientation = "DefaultOrientation";
         private const string __AttrRelativeWallLocation = "RelativeWallLocation";
         private const string __AttrRelativePassageLocation = "RelativePassageLocation";
         private const string __AttrOrientationSeed = "OrientationSeed";
@@ -127,7 +127,7 @@ namespace SharpNeat.Genomes.Maze
                     pathGene.JuncturePoint.X.ToString(NumberFormatInfo.InvariantInfo));
                 xw.WriteAttributeString(__AttrJunctureCoordinateY,
                     pathGene.JuncturePoint.Y.ToString(NumberFormatInfo.InvariantInfo));
-                xw.WriteAttributeString(__AttrOrientation, pathGene.Orientation.ToString());
+                xw.WriteAttributeString(__AttrOrientation, pathGene.DefaultOrientation.ToString());
 
                 // </Path>
                 xw.WriteEndElement();
@@ -312,14 +312,14 @@ namespace SharpNeat.Genomes.Maze
                     {
                         // Read the path, juncture coordinates, and orientation information for the gene
                         uint geneId = XmlIoUtils.ReadAttributeAsUInt(xrSubtree, __AttrId);
-                        int junctureCoordinateX = XmlIoUtils.ReadAttributeAsInt(xrSubtree, __AttrJunctureCoordinateX);
-                        int junctureCoordinateY = XmlIoUtils.ReadAttributeAsInt(xrSubtree, __AttrJunctureCoordinateY);
+                        double junctureCoordinateX = XmlIoUtils.ReadAttributeAsDouble(xrSubtree, __AttrJunctureCoordinateX);
+                        double junctureCoordinateY = XmlIoUtils.ReadAttributeAsDouble(xrSubtree, __AttrJunctureCoordinateY);
                         IntersectionOrientation orientation =
                             ParseIntersectionOrientation(XmlIoUtils.ReadAttributeAsString(xrSubtree,
                                 __AttrOrientation));
 
                         // Create a new path gene and add it to the list
-                        pathGenes.Add(new PathGene(geneId, new Point2DInt(junctureCoordinateX, junctureCoordinateY),
+                        pathGenes.Add(new PathGene(geneId, new Point2DDouble(junctureCoordinateX, junctureCoordinateY),
                             orientation));
                     } while (xrSubtree.ReadToNextSibling(__ElemPath));
                 }

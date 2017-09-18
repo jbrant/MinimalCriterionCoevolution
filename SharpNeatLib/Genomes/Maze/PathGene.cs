@@ -77,13 +77,17 @@ namespace SharpNeat.Genomes.Maze
         ///     The unique "innovation" identifier for this gene (analogous to the innovation IDs on NEAT
         ///     connection genes).
         /// </param>
-        /// <param name="juncturePoint">The point at which two paths intersect.</param>
-        /// <param name="intersectionOrientation">The orientation (horizontal or vertical) of the incoming path segment.</param>
-        public PathGene(uint innovationId, Point2DInt juncturePoint, IntersectionOrientation intersectionOrientation)
+        /// <param name="juncturePoint">
+        ///     The point at which two paths intersect. This is a relative value between 0 and 1 and is
+        ///     scaled upon genome decode.
+        /// </param>
+        /// <param name="intersectionDefaultOrientation">The orientation (horizontal or vertical) of the incoming path segment.</param>
+        public PathGene(uint innovationId, Point2DDouble juncturePoint,
+            IntersectionOrientation intersectionDefaultOrientation)
         {
             InnovationId = innovationId;
             JuncturePoint = juncturePoint;
-            Orientation = intersectionOrientation;
+            DefaultOrientation = intersectionDefaultOrientation;
         }
 
         /// <summary>
@@ -94,7 +98,7 @@ namespace SharpNeat.Genomes.Maze
         {
             InnovationId = copyFrom.InnovationId;
             JuncturePoint = copyFrom.JuncturePoint;
-            Orientation = copyFrom.Orientation;
+            DefaultOrientation = copyFrom.DefaultOrientation;
         }
 
         #endregion Constructors
@@ -107,14 +111,15 @@ namespace SharpNeat.Genomes.Maze
         public uint InnovationId { get; }
 
         /// <summary>
-        ///     The point at which two path segments perpendicularly intersect.
+        ///     The point at which two path segments perpendicularly intersect. This is a relative value between 0 and 1 and is
+        ///     scaled upon genome decode.
         /// </summary>
-        public Point2DInt JuncturePoint { get; set; }
+        public Point2DDouble JuncturePoint { get; set; }
 
         /// <summary>
-        ///     Orientation for incoming path segment.
+        ///     DefaultOrientation for incoming path segment.
         /// </summary>
-        public IntersectionOrientation Orientation { get; }
+        public IntersectionOrientation DefaultOrientation { get; }
 
         #endregion Properties
     }

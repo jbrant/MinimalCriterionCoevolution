@@ -3,8 +3,11 @@
 	<Mazes>
 		<Maze id="0" birthGen="0" height="10" width="10">
 			<Paths>
-				<Path id="0" JunctureCoordinateX="4" JunctureCoordinateY="6" Orientation="HORIZONTAL" />
-				<Path id="1" JunctureCoordinateX="2" JunctureCoordinateY="5" Orientation="VERTICAL" />
+				<Path id="0" JunctureCoordinateX="0.23" JunctureCoordinateY="0.87" DefaultOrientation="HORIZONTAL" />
+				<Path id="1" JunctureCoordinateX="0.72" JunctureCoordinateY="0.56" DefaultOrientation="VERTICAL" />
+				<Path id="2" JunctureCoordinateX="0.52" JunctureCoordinateY="0.36" DefaultOrientation="VERTICAL" />
+				<Path id="3" JunctureCoordinateX="0.22" JunctureCoordinateY="0.36" DefaultOrientation="VERTICAL" />				
+				<Path id="4" JunctureCoordinateX="0.82" JunctureCoordinateY="0.13" DefaultOrientation="HORIZONTAL" />
 			</Paths>
 			<Walls/>
 		</Maze>		
