@@ -58,6 +58,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\MazeExperimentSupportLib\MazeExperimentSupportLib.csproj">
+      <Project>{7C45C292-DE7A-4E1F-80AA-44D6950807F5}</Project>
+      <Name>MazeExperimentSupportLib</Name>
+    </ProjectReference>
     <ProjectReference Include="..\MCC_Domains\MCC_Domains.csproj">
       <Project>{73ab8c8c-6315-4dc7-a3de-3c747f86ac78}</Project>
       <Name>MCC_Domains</Name>

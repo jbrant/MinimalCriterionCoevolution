@@ -45,6 +45,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Incomplete", "Incomplete", "{662D3B1F-09B8-4F08-AB1D-B7CC758D18C4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpNeatLibTests", "SharpNeatLibTests\SharpNeatLibTests.csproj", "{E1DEFE12-1A3B-4F15-99F9-7A6DF2645520}"
+	ProjectSection(ProjectDependencies) = postProject
+		{7C45C292-DE7A-4E1F-80AA-44D6950807F5} = {7C45C292-DE7A-4E1F-80AA-44D6950807F5}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

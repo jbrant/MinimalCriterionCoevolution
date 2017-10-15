@@ -7,23 +7,23 @@ using SharpNeat.Utility;
 namespace SharpNeat.Genomes.Maze
 {
     /// <summary>
-    ///     Specifies the orientation of the solution path when it intersects the juncture point.
+    ///     Specifies the orientation of the solution path when it intersects the waypoint.
     /// </summary>
     public enum IntersectionOrientation
     {
         /// <summary>
-        ///     Indicates a horizontal solution path inbound to the juncture point.
+        ///     Indicates a horizontal solution path inbound to the waypoint.
         /// </summary>
         Horizontal,
 
         /// <summary>
-        ///     Indicates a vertical solution path inbound to the juncture point.
+        ///     Indicates a vertical solution path inbound to the waypoint.
         /// </summary>
         Vertical
     }
 
     /// <summary>
-    ///     Specifies the cardinal directions in which a juncture point can be shifted during a mutation and its associated
+    ///     Specifies the cardinal directions in which a waypoint can be shifted during a mutation and its associated
     ///     ordinal.
     /// </summary>
     public enum PointShift
@@ -50,7 +50,7 @@ namespace SharpNeat.Genomes.Maze
     }
 
     /// <summary>
-    ///     The path gene encapsulates juncture points on a solution path and the orientation of the solution path inbound to
+    ///     The path gene encapsulates waypoints on a solution path and the orientation of the solution path inbound to
     ///     that point.
     /// </summary>
     public class PathGene
@@ -71,22 +71,22 @@ namespace SharpNeat.Genomes.Maze
         #region Constructors
 
         /// <summary>
-        ///     Constructor which accepts a juncture point and intersection orientation and creates a new path gene.
+        ///     Constructor which accepts a waypoint and intersection orientation and creates a new path gene.
         /// </summary>
         /// <param name="innovationId">
         ///     The unique "innovation" identifier for this gene (analogous to the innovation IDs on NEAT
         ///     connection genes).
         /// </param>
-        /// <param name="juncturePoint">
+        /// <param name="waypoint">
         ///     The point at which two paths intersect. This is a relative value between 0 and 1 and is
         ///     scaled upon genome decode.
         /// </param>
         /// <param name="intersectionDefaultOrientation">The orientation (horizontal or vertical) of the incoming path segment.</param>
-        public PathGene(uint innovationId, Point2DDouble juncturePoint,
+        public PathGene(uint innovationId, Point2DDouble waypoint,
             IntersectionOrientation intersectionDefaultOrientation)
         {
             InnovationId = innovationId;
-            JuncturePoint = juncturePoint;
+            Waypoint = waypoint;
             DefaultOrientation = intersectionDefaultOrientation;
         }
 
@@ -97,7 +97,7 @@ namespace SharpNeat.Genomes.Maze
         public PathGene(PathGene copyFrom)
         {
             InnovationId = copyFrom.InnovationId;
-            JuncturePoint = copyFrom.JuncturePoint;
+            Waypoint = copyFrom.Waypoint;
             DefaultOrientation = copyFrom.DefaultOrientation;
         }
 
@@ -111,15 +111,14 @@ namespace SharpNeat.Genomes.Maze
         public uint InnovationId { get; }
 
         /// <summary>
-        ///     The point at which two path segments perpendicularly intersect. This is a relative value between 0 and 1 and is
-        ///     scaled upon genome decode.
+        ///     The point at which two path segments intersect. This is a relative value between 0 and 1 and is scaled upon genome decode.
         /// </summary>
-        public Point2DDouble JuncturePoint { get; set; }
+        public Point2DDouble Waypoint { get; set; }
 
         /// <summary>
         ///     DefaultOrientation for incoming path segment.
         /// </summary>
-        public IntersectionOrientation DefaultOrientation { get; }
+        public IntersectionOrientation DefaultOrientation { get; set; }
 
         #endregion Properties
     }

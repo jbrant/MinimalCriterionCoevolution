@@ -32,7 +32,118 @@ namespace SharpNeat.Phenomes.Mazes
 
         #endregion
 
+        #region Private Methods
+
+        /// <summary>
+        ///     Determines whether the dividing wall should be horizontal or vertical based on the comparitive width and height of
+        ///     the subfield under consideration.
+        /// </summary>
+        /// <param name="isHorizontalDefaultOrientation">
+        ///     Each gene in the genome carries an indicator of preferred orientation.  If
+        ///     the dimensions are equal (i.e. the subfield is a square), this randomly selected orientation will be used.
+        /// </param>
+        /// <returns>The orientation of the dividing wall.</returns>
+        private WallOrientation DetermineWallOrientation(bool isHorizontalDefaultOrientation)
+        {
+            // Adopt random orientation seed set on genome
+            WallOrientation bisectionOrientation = isHorizontalDefaultOrientation
+                ? WallOrientation.Horizontal
+                : WallOrientation.Vertical;
+
+            // Determine the orientation of the separator wall within the room
+            if (_width < _height)
+            {
+                bisectionOrientation = WallOrientation.Horizontal;
+            }
+            else if (_height < _width)
+            {
+                bisectionOrientation = WallOrientation.Vertical;
+            }
+
+            return bisectionOrientation;
+        }
+
+        #endregion
+
         #region Public Methods
+
+        /// <summary>
+        ///     Marks outer boundaries of maze room.
+        /// </summary>
+        /// <param name="grid">The matrix of maze cells.</param>
+        public void MarkRoomBoundaries(MazeStructureGridCell[,] grid)
+        {
+            // Mark horizontal north and south boundaries
+            for (int x = _x; x < _x + _width; x++)
+            {
+                // Mark north horizontal boundary
+                if (_y > 0) grid[_y - 1, x].SouthWall = true;
+
+                // Mark south horizontal boundary
+                grid[_y + _height - 1, x].SouthWall = true;
+            }
+
+            // Mark vertical east and west boundaries
+            for (int y = _y; y < _y + _height; y++)
+            {
+                // Mark west vertical boundary
+                if (_x > 0) grid[y, _x - 1].EastWall = true;
+
+                // Mark east vertical boundary
+                grid[y, _x + _width - 1].EastWall = true;
+            }
+
+            // If the height is such that the maze can't support any internal walls, 
+            // open up the side that is not against the maze boundary
+            if (_height < MinimumHeight)
+            {
+                grid[_y, _x == 0 ? _x + _width - 1 : _x - 1].EastWall = false;
+            }
+            // Otherwise, if the width is such that the maze can't support any internal walls, 
+            // open up the side that is not against the maze boundary
+            else if (_width < MinimumWidth)
+            {
+                grid[_y == 0 ? _y + _height - 1 : _y, _x].SouthWall = false;
+            }
+        }
+
+        /// <summary>
+        ///     Marks outer boundaries of maze room and inserts passage perpendicular to first internal wall.
+        /// </summary>
+        /// <param name="grid">The matrix of maze cells.</param>
+        /// <param name="unscaledWallLocation">The relative location of the first internal dividing wall.</param>
+        /// <param name="isHorizontalDefaultOrientation">Indicator of whether the first internal wall is horizontal or vertical.</param>
+        public void MarkRoomBoundaries(MazeStructureGridCell[,] grid, double unscaledWallLocation,
+            bool isHorizontalDefaultOrientation)
+        {
+            // Mark the fully enclosed sub-maze boundaries
+            MarkRoomBoundaries(grid);
+
+            // Determine orientation of the first wall
+            bool isHorizontal = DetermineWallOrientation(isHorizontalDefaultOrientation) == WallOrientation.Horizontal;
+
+            // Determine starting location of wall
+            int xWallLocation = _x +
+                                (isHorizontal ? 0 : Math.Max(0, (int) ((_width - MinimumWidth+1)*unscaledWallLocation)));
+            int yWallLocation = _y +
+                                (isHorizontal ? Math.Max(0, (int) ((_height - MinimumHeight+1)*unscaledWallLocation)) : 0);
+
+            // Determine perpendicular direction
+            WallDirection perpendicularDirection = isHorizontal ? WallDirection.East : WallDirection.South;
+
+            // Insert horizontal gap either above or below the sub-maze
+            if (perpendicularDirection == WallDirection.South)
+            {
+                grid[yWallLocation == 0 ? _height + yWallLocation - 1 : yWallLocation - 1, xWallLocation].SouthWall =
+                    false;
+            }
+            // Insert vertical gap either to the left or right of the sub-maze
+            else
+            {
+                grid[yWallLocation, xWallLocation == 0 ? _width + xWallLocation - 1 : xWallLocation - 1].EastWall =
+                    false;
+            }
+        }
 
         /// <summary>
         ///     Divides the maze or subfield (room) into two component subfields based on the given wall location and passage
@@ -52,22 +163,21 @@ namespace SharpNeat.Phenomes.Mazes
         /// </param>
         /// <param name="isHorizontalDefaultOrientation">Indicator for whether the dividing line is horizontal or vertical.</param>
         /// <returns>The two subfields that were created as a result of the subfield division.</returns>
-        public Tuple<MazeStructureRoom, MazeStructureRoom> DivideRoom(MazeStructureGridCell[,] grid, double unscaledWallLocation,
+        public Tuple<MazeStructureRoom, MazeStructureRoom> DivideRoom(MazeStructureGridCell[,] grid,
+            double unscaledWallLocation,
             double unscaledPassageLocation, bool isHorizontalDefaultOrientation)
-        {            
+        {
             // Determine orientation
             bool isHorizontal = DetermineWallOrientation(isHorizontalDefaultOrientation) == WallOrientation.Horizontal;
 
             // Determine starting location of wall
-            // TODO: The wall location will be evolved
             int xWallLocation = _x +
-                                (isHorizontal ? 0 : Math.Max(0, (int) ((_width - MinimumWidth)*unscaledWallLocation)));
+                                (isHorizontal ? 0 : Math.Max(0, (int) ((_width - MinimumWidth+1)*unscaledWallLocation)));
             int yWallLocation = _y +
-                                (isHorizontal ? Math.Max(0, (int) ((_height - MinimumHeight)*unscaledWallLocation)) : 0);
+                                (isHorizontal ? Math.Max(0, (int) ((_height - MinimumHeight+1)*unscaledWallLocation)) : 0);
 
             // Determine the location of the passage 
             // (location can be no further out than width or height minus 1 to prevent passage starting at the wall end point)
-            // TODO: The passage location will be evolved
             int xPassageLocation = xWallLocation +
                                    (isHorizontal ? Math.Min((_width - 1), (int) (_width*unscaledPassageLocation)) : 0);
             int yPassageLocation = yWallLocation +
@@ -81,7 +191,7 @@ namespace SharpNeat.Phenomes.Mazes
             int wallLength = isHorizontal ? _width : _height;
 
             // Determine perpendicular direction
-            WallDirection perpendicularDirection = isHorizontal ? WallDirection.South : WallDirection.East;
+            WallDirection wallDirection = isHorizontal ? WallDirection.South : WallDirection.East;
 
             // Notate where all of the wall segments are in the current wall
             for (int curWallCell = 0; curWallCell < wallLength; curWallCell++)
@@ -90,7 +200,7 @@ namespace SharpNeat.Phenomes.Mazes
                 if (xWallLocation != xPassageLocation || yWallLocation != yPassageLocation)
                 {
                     // Add wall segment to cell based on perpendicular direction
-                    if (perpendicularDirection == WallDirection.East)
+                    if (wallDirection == WallDirection.East)
                     {
                         grid[yWallLocation, xWallLocation].EastWall = true;
                     }
@@ -130,44 +240,21 @@ namespace SharpNeat.Phenomes.Mazes
             return new Tuple<MazeStructureRoom, MazeStructureRoom>(newRoom1, newRoom2);
         }
 
-        #endregion
-
-        #region Private Methods
-
         /// <summary>
-        ///     Determines whether the dividing wall should be horizontal or vertical based on the comparitive width and height of
-        ///     the subfield under consideration.
+        ///     Reports whether maze is of a size sufficient for supporting internal walls. This means that both the height and
+        ///     width of the maze are greater than one unit.
         /// </summary>
-        /// <param name="isHorizontalDefaultOrientation">
-        ///     Each gene in the genome carries an indicator of preferred orientation.  If
-        ///     the dimensions are equal (i.e. the subfield is a square), this randomly selected orientation will be used.
-        /// </param>
-        /// <returns>The orientation of the dividing wall.</returns>
-        private WallOrientation DetermineWallOrientation(bool isHorizontalDefaultOrientation)
+        /// <returns>Boolean value indicating whether the maze is of sufficient size to support internal walls.</returns>
+        public bool AreInternalWallsSupported()
         {
-            // Adopt random orientation seed set on genome
-            WallOrientation bisectionOrientation = isHorizontalDefaultOrientation
-                ? WallOrientation.Horizontal
-                : WallOrientation.Vertical;
-
-            // Determine the orientation of the separator wall within the room
-            if (_width < _height)
-            {
-                bisectionOrientation = WallOrientation.Horizontal;
-            }
-            else if (_height < _width)
-            {
-                bisectionOrientation = WallOrientation.Vertical;
-            }
-
-            return bisectionOrientation;
+            return _height > 1 && _width > 1;
         }
 
         #endregion
 
         #region Constants
 
-        // The minimum width and height of the maze
+        // The minimum width and height of the maze (if supporting internal walls)
         private const int MinimumWidth = 2;
         private const int MinimumHeight = 2;
 

@@ -8,7 +8,11 @@
 				<Path id="2" WaypointCoordinateX="0.73" WaypointCoordinateY="0.37" DefaultOrientation="VERTICAL" />	
 				<Path id="3" WaypointCoordinateX="0.33" WaypointCoordinateY="0.27" DefaultOrientation="VERTICAL" />				
 				<Path id="4" WaypointCoordinateX="0.454572421964258" WaypointCoordinateY="0.151447448413819" DefaultOrientation="HORIZONTAL" />				
-				<Path id="5" WaypointCoordinateX="0.658177830744535" WaypointCoordinateY="0.735260270070285" DefaultOrientation="HORIZONTAL" />
+				<Path id="5" WaypointCoordinateX="0.658177830744535" WaypointCoordinateY="0.735260270070285" DefaultOrientation="HORIZONTAL" />				
+				<Path id="6" WaypointCoordinateX="0.0379727859981358" WaypointCoordinateY="0.356004902627319" DefaultOrientation="HORIZONTAL" />
+				<Path id="7" WaypointCoordinateX="0.426019341219217" WaypointCoordinateY="0.248352084774524" DefaultOrientation="HORIZONTAL" />
+				<Path id="8" WaypointCoordinateX="0.747906206641346" WaypointCoordinateY="0.929401853587478" DefaultOrientation="HORIZONTAL" />
+				<Path id="9" WaypointCoordinateX="0.519830087665468" WaypointCoordinateY="0.841920061502606" DefaultOrientation="HORIZONTAL" />
 			</Paths>
 			<Walls>	
 				<Wall id="0" RelativeWallLocation="0.411721636546646" RelativePassageLocation="0.0502953515622278" OrientationSeed="False" />				

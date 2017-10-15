@@ -47,8 +47,8 @@ namespace SharpNeat.Genomes.Maze
         private const string __AttrBirthGeneration = "birthGen";
         private const string __AttrHeight = "height";
         private const string __AttrWidth = "width";
-        private const string __AttrJunctureCoordinateX = "JunctureCoordinateX";
-        private const string __AttrJunctureCoordinateY = "JunctureCoordinateY";
+        private const string __AttrWaypointCoordinateX = "WaypointCoordinateX";
+        private const string __AttrWaypointCoordinateY = "WaypointCoordinateY";
         private const string __AttrOrientation = "DefaultOrientation";
         private const string __AttrRelativeWallLocation = "RelativeWallLocation";
         private const string __AttrRelativePassageLocation = "RelativePassageLocation";
@@ -123,15 +123,18 @@ namespace SharpNeat.Genomes.Maze
                 xw.WriteStartElement(__ElemPath);
 
                 xw.WriteAttributeString(__AttrId, pathGene.InnovationId.ToString(NumberFormatInfo.InvariantInfo));
-                xw.WriteAttributeString(__AttrJunctureCoordinateX,
-                    pathGene.JuncturePoint.X.ToString(NumberFormatInfo.InvariantInfo));
-                xw.WriteAttributeString(__AttrJunctureCoordinateY,
-                    pathGene.JuncturePoint.Y.ToString(NumberFormatInfo.InvariantInfo));
+                xw.WriteAttributeString(__AttrWaypointCoordinateX,
+                    pathGene.Waypoint.X.ToString(NumberFormatInfo.InvariantInfo));
+                xw.WriteAttributeString(__AttrWaypointCoordinateY,
+                    pathGene.Waypoint.Y.ToString(NumberFormatInfo.InvariantInfo));
                 xw.WriteAttributeString(__AttrOrientation, pathGene.DefaultOrientation.ToString());
 
                 // </Path>
                 xw.WriteEndElement();
             }
+
+            // </Paths>
+            xw.WriteEndElement();
 
             // Emit walls
             xw.WriteStartElement(__ElemWalls);
@@ -310,16 +313,16 @@ namespace SharpNeat.Genomes.Maze
 
                     do
                     {
-                        // Read the path, juncture coordinates, and orientation information for the gene
+                        // Read the path, waypoint coordinates, and orientation information for the gene
                         uint geneId = XmlIoUtils.ReadAttributeAsUInt(xrSubtree, __AttrId);
-                        double junctureCoordinateX = XmlIoUtils.ReadAttributeAsDouble(xrSubtree, __AttrJunctureCoordinateX);
-                        double junctureCoordinateY = XmlIoUtils.ReadAttributeAsDouble(xrSubtree, __AttrJunctureCoordinateY);
+                        double waypointCoordinateX = XmlIoUtils.ReadAttributeAsDouble(xrSubtree, __AttrWaypointCoordinateX);
+                        double waypointCoordinateY = XmlIoUtils.ReadAttributeAsDouble(xrSubtree, __AttrWaypointCoordinateY);
                         IntersectionOrientation orientation =
                             ParseIntersectionOrientation(XmlIoUtils.ReadAttributeAsString(xrSubtree,
                                 __AttrOrientation));
 
                         // Create a new path gene and add it to the list
-                        pathGenes.Add(new PathGene(geneId, new Point2DDouble(junctureCoordinateX, junctureCoordinateY),
+                        pathGenes.Add(new PathGene(geneId, new Point2DDouble(waypointCoordinateX, waypointCoordinateY),
                             orientation));
                     } while (xrSubtree.ReadToNextSibling(__ElemPath));
                 }

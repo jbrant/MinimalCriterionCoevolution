@@ -36,7 +36,7 @@ namespace SharpNeat.Genomes.Maze
         public IList<WallGene> WallGeneList { get; }
 
         /// <summary>
-        ///     The list of path genes composing the genome (each gene encodes a "juncture" in the path and the orientation of its
+        ///     The list of path genes composing the genome (each gene encodes a "waypoint" in the path and the orientation of its
         ///     intersection).
         /// </summary>
         public IList<PathGene> PathGeneList { get; }
@@ -90,7 +90,7 @@ namespace SharpNeat.Genomes.Maze
             WallGeneList = new List<WallGene>();
 
             // Instantiate new path gene list
-            PathGeneList = new List<PathGene>();            
+            PathGeneList = new List<PathGene>();
         }
 
         /// <summary>
@@ -116,8 +116,8 @@ namespace SharpNeat.Genomes.Maze
             MazeBoundaryWidth = genomeFactory.BaseMazeWidth;
 
             // Set relative cell height and width
-            RelativeCellHeight = (double)1 / MazeBoundaryHeight;
-            RelativeCellWidth = (double)1 / MazeBoundaryWidth;
+            RelativeCellHeight = (double) 1/MazeBoundaryHeight;
+            RelativeCellWidth = (double) 1/MazeBoundaryWidth;
 
             // Set the genome factory
             GenomeFactory = genomeFactory;
@@ -140,8 +140,8 @@ namespace SharpNeat.Genomes.Maze
             MazeBoundaryWidth = width;
 
             // Set relative cell height and width
-            RelativeCellHeight = (double)1 / MazeBoundaryHeight;
-            RelativeCellWidth = (double)1 / MazeBoundaryWidth;
+            RelativeCellHeight = (double) 1/MazeBoundaryHeight;
+            RelativeCellWidth = (double) 1/MazeBoundaryWidth;
 
             // Set the genome factory
             GenomeFactory = genomeFactory;
@@ -309,18 +309,18 @@ namespace SharpNeat.Genomes.Maze
 
         /// <summary>
         ///     Performs a mutation operation, which can be path-altering or non-path altering. Path altering mutations add
-        ///     junctures or otherwise shift the path/trajectory through the maze. Non-path altering mutations move/add walls.
+        ///     waypoints or otherwise shift the path/trajectory through the maze. Non-path altering mutations move/add walls.
         /// </summary>
         private void Mutate()
         {
             int outcome;
 
-            // If there are not yet any junctures defined, the mutation must be to add a juncture
-            // (this is really not feasible at all because without any junctures, the maze would not
+            // If there are not yet any waypoints defined, the mutation must be to add a waypoint
+            // (this is really not feasible at all because without any waypoints, the maze would not
             // be navigable)
             if (PathGeneList.Count <= 0)
             {
-                MutateAddPathJuncture();
+                MutateAddPathWaypoint();
                 return;
             }
 
@@ -357,10 +357,10 @@ namespace SharpNeat.Genomes.Maze
                     MutateExpandMaze();
                     break;
                 case 5:
-                    MutatePathJunctureLocation();
+                    MutatePathWaypointLocation();
                     break;
                 case 6:
-                    MutateAddPathJuncture();
+                    MutateAddPathWaypoint();
                     break;
             }
 
@@ -510,9 +510,9 @@ namespace SharpNeat.Genomes.Maze
         }
 
         /// <summary>
-        ///     Probabalistically shifts one of the juncture points by one unit in the horizontal or vertical direction.
+        ///     Probabalistically shifts one of the waypoints by one unit in the horizontal or vertical direction.
         /// </summary>
-        private void MutatePathJunctureLocation()
+        private void MutatePathWaypointLocation()
         {
             Point2DDouble mutatedPoint = new Point2DDouble();
             int geneIdx;
@@ -521,8 +521,8 @@ namespace SharpNeat.Genomes.Maze
             if (PathGeneList.Count <= 0)
                 return;
 
-            // Attempt to mutate a juncture on the path until we get a valid point
-            // (only one juncture point at a time is mutated to avoid drastically changing the path)
+            // Attempt to mutate a waypoint on the path until we get a valid point
+            // (only one waypoint point at a time is mutated to avoid drastically changing the path)
             do
             {
                 // Select a random gene to mutate
@@ -533,39 +533,39 @@ namespace SharpNeat.Genomes.Maze
                 {
                     case PointShift.Down:
                     {
-                        mutatedPoint = new Point2DDouble(PathGeneList[geneIdx].JuncturePoint.X,
-                            PathGeneList[geneIdx].JuncturePoint.Y + RelativeCellHeight);
+                        mutatedPoint = new Point2DDouble(PathGeneList[geneIdx].Waypoint.X,
+                            PathGeneList[geneIdx].Waypoint.Y + RelativeCellHeight);
                         break;
                     }
                     case PointShift.Up:
                     {
-                        mutatedPoint = new Point2DDouble(PathGeneList[geneIdx].JuncturePoint.X,
-                            PathGeneList[geneIdx].JuncturePoint.Y - RelativeCellHeight);
+                        mutatedPoint = new Point2DDouble(PathGeneList[geneIdx].Waypoint.X,
+                            PathGeneList[geneIdx].Waypoint.Y - RelativeCellHeight);
                         break;
                     }
                     case PointShift.Left:
                     {
-                        mutatedPoint = new Point2DDouble(PathGeneList[geneIdx].JuncturePoint.X - RelativeCellWidth,
-                            PathGeneList[geneIdx].JuncturePoint.Y);
+                        mutatedPoint = new Point2DDouble(PathGeneList[geneIdx].Waypoint.X - RelativeCellWidth,
+                            PathGeneList[geneIdx].Waypoint.Y);
                         break;
                     }
                     case PointShift.Right:
                     {
-                        mutatedPoint = new Point2DDouble(PathGeneList[geneIdx].JuncturePoint.X + RelativeCellWidth,
-                            PathGeneList[geneIdx].JuncturePoint.Y);
+                        mutatedPoint = new Point2DDouble(PathGeneList[geneIdx].Waypoint.X + RelativeCellWidth,
+                            PathGeneList[geneIdx].Waypoint.Y);
                         break;
                     }
                 }
             } while (IsValidLocation(mutatedPoint) == false);
 
-            // Set the new, validated juncture point
-            PathGeneList[geneIdx].JuncturePoint = mutatedPoint;
+            // Set the new, validated waypoint
+            PathGeneList[geneIdx].Waypoint = mutatedPoint;
         }
 
         /// <summary>
-        ///     Probabalistically adds a single new juncture in the maze solution path.
+        ///     Probabalistically adds a single new waypoint in the maze solution path.
         /// </summary>
-        private void MutateAddPathJuncture()
+        private void MutateAddPathWaypoint()
         {
             Point2DDouble newPoint;
 
@@ -603,24 +603,43 @@ namespace SharpNeat.Genomes.Maze
         }
 
         /// <summary>
-        ///     Ensures that the juncture location (resulting from a mutation) is within the maze boundaries and does not overlap
-        ///     with other junctures or with the start/end location (which are in the upper-left and lower right cells of the maze
-        ///     respectively).
+        ///     Ensures that the waypoint location (resulting from a mutation) is within the maze boundaries and does not overlap
+        ///     with other waypoints or with the start/end location (which are in the upper-left and lower right cells of the maze
+        ///     respectively). Specifically, the following validity checks are performed:
+        ///     1. Checks X and Y minimum and maximum points are in the horizontal and vertical boundaries of the maze
+        ///     respectively.
+        ///     2. Checks that proposed location does not overlap existing waypoints.
+        ///     3. Checks that either there are no waypoints in the last row or that waypoints in the next-to-last row are all
+        ///     to the left of waypoints in the last row and do not overlap by more than one position. This is to prevent
+        ///     trajectory overlaps.
+        ///     4. Checks that proposed location does not overlap start location or target location.
         /// </summary>
-        /// <param name="junctureLocation">The proposed juncture point.</param>
+        /// <param name="waypointLocation">The proposed waypoint.</param>
         /// <returns>Boolean indicating whether the given point is valid per the maze boundary constraints.</returns>
-        private bool IsValidLocation(Point2DDouble junctureLocation)
+        private bool IsValidLocation(Point2DDouble waypointLocation)
         {
-            return junctureLocation.X >= 0 && junctureLocation.X < MazeBoundaryWidth && junctureLocation.Y >= 0 &&
-                   junctureLocation.Y < MazeBoundaryHeight &&
+            return waypointLocation.X >= 0 && waypointLocation.X < MazeBoundaryWidth && waypointLocation.Y >= 0 &&
+                   waypointLocation.Y < MazeBoundaryHeight &&
                    PathGeneList.Any(
                        g =>
-                           MazeUtils.GetUnscaledCoordinates(junctureLocation, RelativeCellWidth, RelativeCellHeight)
-                               .Equals(MazeUtils.GetUnscaledCoordinates(g.JuncturePoint, RelativeCellWidth,
+                           MazeUtils.GetUnscaledCoordinates(waypointLocation, RelativeCellWidth, RelativeCellHeight)
+                               .Equals(MazeUtils.GetUnscaledCoordinates(g.Waypoint, RelativeCellWidth,
                                    RelativeCellHeight))) == false &&
-                   MazeUtils.GetUnscaledCoordinates(junctureLocation, RelativeCellWidth, RelativeCellHeight)
+                   (PathGeneList.Count(
+                       g =>
+                           MazeUtils.GetUnscaledCoordinates(g.Waypoint, RelativeCellWidth, RelativeCellHeight).Y ==
+                           MazeBoundaryHeight - 1) == 0 ||
+                    PathGeneList.Where(
+                        g =>
+                            MazeUtils.GetUnscaledCoordinates(g.Waypoint, RelativeCellWidth, RelativeCellHeight).Y ==
+                            MazeBoundaryHeight - 1).Min(g => g.Waypoint.X) >=
+                    PathGeneList.Where(
+                        g =>
+                            MazeUtils.GetUnscaledCoordinates(g.Waypoint, RelativeCellWidth, RelativeCellHeight).Y ==
+                            MazeBoundaryHeight - 2).Max(g => g.Waypoint.X)) &&
+                   MazeUtils.GetUnscaledCoordinates(waypointLocation, RelativeCellWidth, RelativeCellHeight)
                        .Equals(new Point2DInt(0, 0)) == false &&
-                   MazeUtils.GetUnscaledCoordinates(junctureLocation, RelativeCellWidth, RelativeCellHeight)
+                   MazeUtils.GetUnscaledCoordinates(waypointLocation, RelativeCellWidth, RelativeCellHeight)
                        .Equals(new Point2DInt(MazeBoundaryWidth - 1, MazeBoundaryHeight - 1)) == false;
         }
 

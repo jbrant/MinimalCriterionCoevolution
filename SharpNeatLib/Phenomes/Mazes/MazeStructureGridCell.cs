@@ -101,9 +101,14 @@ namespace SharpNeat.Phenomes.Mazes
         public PathOrientation PathOrientation { get; set; }
 
         /// <summary>
-        ///     Flag which indicates if cell is on a path juncture (i.e. intersection of two, perpendicular path segments).
+        ///     Flag which indicates if cell is on a path juncture (i.e. intersection of two perpendicular path components).
         /// </summary>
         public bool IsJuncture { get; set; }
+
+        /// <summary>
+        /// Flag which indicates if cell is a waypoint (i.e. genome-encoded point demarcating two path segments).
+        /// </summary>
+        public bool IsWayPoint { get; set; }
 
         #endregion
     }

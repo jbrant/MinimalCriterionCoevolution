@@ -31,5 +31,15 @@ namespace SharpNeat.Utility
             get { return _y; }
             set { _y = value; }
         }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is Point2DInt))
+                return false;
+
+            Point2DInt point2DInt = (Point2DInt) obj;
+
+            return point2DInt.X == X && point2DInt.Y == Y;
+        }
     }
 }
