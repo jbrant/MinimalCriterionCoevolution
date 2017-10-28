@@ -50,14 +50,14 @@ namespace MCC_Executor.MazeNavigation
         StartFromRun,
 
         /// <summary>
-        ///     Whether to generate the starting population or start with a predefined seed.
+        ///     Whether to generate the starting agent population or start with a predefined seed.
         /// </summary>
-        GeneratePopulation,
+        GenerateAgentPopulation,
 
         /// <summary>
-        ///     Directory containing the seed population of navigators.
+        ///     Directory containing the seed population of agents.
         /// </summary>
-        SeedPopulationDirectory,
+        SeedAgentPopulationDirectory,
 
         /// <summary>
         ///     Directory containing the experiment configurations.
@@ -134,14 +134,14 @@ namespace MCC_Executor.MazeNavigation
             // Array of initial genome population files
             string[] seedPopulationFiles = null;
 
-            if (Boolean.Parse(_executionConfiguration[ExecutionParameter.GeneratePopulation]) == false)
+            if (Boolean.Parse(_executionConfiguration[ExecutionParameter.GenerateAgentPopulation]) == false)
             {
                 // Read in the seed population files
                 // Note that two assumptions are made here
                 // 1. Files can be naturally sorted and match the naming convention "*Run01", "*Run02", etc.
                 // 2. The number of files in the directory matches the number of runs (this is checked for below)
                 seedPopulationFiles =
-                    Directory.GetFiles(_executionConfiguration[ExecutionParameter.SeedPopulationDirectory]);
+                    Directory.GetFiles(_executionConfiguration[ExecutionParameter.SeedAgentPopulationDirectory]);
 
                 // Make sure that the appropriate number of seed population have been specified
                 if (seedPopulationFiles.Count() < numRuns)
@@ -269,7 +269,7 @@ namespace MCC_Executor.MazeNavigation
                             break;
 
                         // Ensure that valid boolean values were given
-                        case ExecutionParameter.GeneratePopulation:
+                        case ExecutionParameter.GenerateAgentPopulation:
                         case ExecutionParameter.IsDistributedExecution:
                             bool testBool;
                             if (Boolean.TryParse(parameterValuePair[1], out testBool) == false)
@@ -281,7 +281,7 @@ namespace MCC_Executor.MazeNavigation
                             break;
 
                         // Ensure that the seed population directory actually exists
-                        case ExecutionParameter.SeedPopulationDirectory:
+                        case ExecutionParameter.SeedAgentPopulationDirectory:
                             if (Directory.Exists(parameterValuePair[1]) == false)
                             {
                                 _executionLogger.Error(
@@ -361,8 +361,8 @@ namespace MCC_Executor.MazeNavigation
                 }
 
                 // If the executor is told not to generate the population, then the seed population directory must be specified
-                if (Convert.ToBoolean(_executionConfiguration[ExecutionParameter.GeneratePopulation]) == false &&
-                    _executionConfiguration.ContainsKey(ExecutionParameter.SeedPopulationDirectory) == false)
+                if (Convert.ToBoolean(_executionConfiguration[ExecutionParameter.GenerateAgentPopulation]) == false &&
+                    _executionConfiguration.ContainsKey(ExecutionParameter.SeedAgentPopulationDirectory) == false)
                 {
                     _executionLogger.Error(
                         "If the executor is being run without generating a population, the directory containing the seed population must be specified.");
@@ -390,7 +390,7 @@ namespace MCC_Executor.MazeNavigation
                 string.Format(
                     "MCC_Executor.exe maze_navigation {0}=[{10}] {1}=[{12}] {2}=[{13}] {3}=[{11}] {4}=[{14}] {5}=[{14}] {6}=[{14}] {7}=[{15}] {8}=[{11}] {9}=[{16}]",
                     ExecutionParameter.ExperimentSource, ExecutionParameter.NumRuns, ExecutionParameter.StartFromRun,
-                    ExecutionParameter.GeneratePopulation, ExecutionParameter.SeedPopulationDirectory,
+                    ExecutionParameter.GenerateAgentPopulation, ExecutionParameter.SeedAgentPopulationDirectory,
                     ExecutionParameter.ExperimentConfigDirectory, ExecutionParameter.OutputFileDirectory,
                     ExecutionParameter.SeedMazeFile, ExecutionParameter.IsDistributedExecution,
                     ExecutionParameter.ExperimentNames, "file|database",
@@ -640,14 +640,7 @@ namespace MCC_Executor.MazeNavigation
                     navigatorGenomesLogger, mazeDataLogger, mazeGenomesLogger);
                 
                 _executionLogger.Info(string.Format("Initialized experiment {0}.", experiment.GetType()));
-
-                // If there were seed population files specified, read them in
-                if (Boolean.Parse(_executionConfiguration[ExecutionParameter.GeneratePopulation]) == false)
-                {
-                    // TODO: Need to implement ability to load maze seed genomes
-                    throw new NotImplementedException("Currently unable to read in serialized maze genomes.");
-                }
-
+                
                 // Otherwise, generate the starting population
                 // Create a new agent genome factory
                 IGenomeFactory<NeatGenome> agentGenomeFactory = experiment.CreateAgentGenomeFactory();
