@@ -15,6 +15,12 @@ namespace MCC_Executor
     {
         private static void Main(string[] args)
         {
+            if (args == null || args.Length < 1)
+            {
+                Console.WriteLine(@"Experiment name must be specified");
+                return;
+            }
+
             // Execute the appropriate experiment based on the first parameter
             switch (args[0])
             {
@@ -24,7 +30,7 @@ namespace MCC_Executor
                     MazeNavigationExperimentExecutor.execute(args.Skip(1).ToArray());
                     break;
                 default:
-                    Console.WriteLine(@"Invalid experiment specified");
+                    Console.WriteLine(@"Invalid experiment [{0}] specified", args[0]);
                     break;
             }
         }

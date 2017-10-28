@@ -68,24 +68,14 @@ namespace MCC_Executor.MazeNavigation
         ///     Directory into which to write experiment results.
         /// </summary>
         OutputFileDirectory,
-
-        /// <summary>
-        ///     Whether or not to log detailed information about individual navigator evaluations.
-        /// </summary>
-        LogOrganismStateData,
-
+        
         /// <summary>
         ///     Flag indicating whether different runs will be distributed on separate cluster nodes.  If this is true, the
         ///     "StartFromRun" parameter must be set as this will indicate the run that's being executed on a particular node.
         ///     Additionally, each node will execute one run only.
         /// </summary>
         IsDistributedExecution,
-
-        /// <summary>
-        ///     Flag indicating whether the experiment is coevolution-based.
-        /// </summary>
-        IsCoevolution,
-
+        
         /// <summary>
         ///     The path (directory and file name) of the seed maze.  This is only required/used in the case of coevolution
         ///     experiments, and is strictly required for said experiments.
@@ -140,11 +130,7 @@ namespace MCC_Executor.MazeNavigation
             int numRuns = isDistributedExecution
                 ? startFromRun
                 : Int32.Parse(_executionConfiguration[ExecutionParameter.NumRuns]);
-
-            // Determine whether to log organism state data
-            bool logOrganismStateData = _executionConfiguration.ContainsKey(ExecutionParameter.LogOrganismStateData) &&
-                                        Boolean.Parse(_executionConfiguration[ExecutionParameter.LogOrganismStateData]);
-
+            
             // Array of initial genome population files
             string[] seedPopulationFiles = null;
 
@@ -174,41 +160,20 @@ namespace MCC_Executor.MazeNavigation
             foreach (string curExperimentName in experimentNames)
             {
                 _executionLogger.Info(string.Format("Executing Experiment {0}", curExperimentName));
-
-                // If these are non-coevolution experiments, proceed as normal using the base maze navigator experiment configuration
-                if (Boolean.Parse(_executionConfiguration[ExecutionParameter.IsCoevolution]) == false)
+                
+                if ("file".Equals(executionSource))
                 {
-                    if ("file".Equals(executionSource))
-                    {
-                        // Execute file-based experiment
-                        ExecuteFileBasedExperiment(
-                            _executionConfiguration[ExecutionParameter.ExperimentConfigDirectory],
-                            _executionConfiguration[ExecutionParameter.OutputFileDirectory], curExperimentName,
-                            numRuns, seedPopulationFiles, logOrganismStateData);
-                    }
-                    else
-                    {
-                        // Execute database-based experiment
-                        ExecuteDatabaseBasedExperiment(curExperimentName, numRuns, seedPopulationFiles);
-                    }
+                    // Execute file-based coevolution experiment
+                    ExecuteFileBasedCoevolutionExperiment(
+                        _executionConfiguration[ExecutionParameter.ExperimentConfigDirectory],
+                        _executionConfiguration[ExecutionParameter.OutputFileDirectory],
+                        _executionConfiguration[ExecutionParameter.SeedMazeFile], curExperimentName, numRuns,
+                        startFromRun);
                 }
-                // Otherwise, use the coevolution container interface
                 else
                 {
-                    if ("file".Equals(executionSource))
-                    {
-                        // Execute file-based coevolution experiment
-                        ExecuteFileBasedCoevolutionExperiment(
-                            _executionConfiguration[ExecutionParameter.ExperimentConfigDirectory],
-                            _executionConfiguration[ExecutionParameter.OutputFileDirectory],
-                            _executionConfiguration[ExecutionParameter.SeedMazeFile], curExperimentName, numRuns,
-                            startFromRun);
-                    }
-                    else
-                    {
-                        throw new NotImplementedException(
-                            "Database-based coevolution executor has not been implemented!");
-                    }
+                    throw new NotImplementedException(
+                        "Database-based coevolution executor has not been implemented!");
                 }
 
                 // If this is a distributed execution, write out a sentinel file for every run (since each node is only
@@ -305,8 +270,6 @@ namespace MCC_Executor.MazeNavigation
 
                         // Ensure that valid boolean values were given
                         case ExecutionParameter.GeneratePopulation:
-                        case ExecutionParameter.LogOrganismStateData:
-                        case ExecutionParameter.IsCoevolution:
                         case ExecutionParameter.IsDistributedExecution:
                             bool testBool;
                             if (Boolean.TryParse(parameterValuePair[1], out testBool) == false)
@@ -317,8 +280,18 @@ namespace MCC_Executor.MazeNavigation
                             }
                             break;
 
-                        // Ensure that the seed population and experiments configuration directories actually exist
+                        // Ensure that the seed population directory actually exists
                         case ExecutionParameter.SeedPopulationDirectory:
+                            if (Directory.Exists(parameterValuePair[1]) == false)
+                            {
+                                _executionLogger.Error(
+                                    string.Format("The given seed population directory [{0}] does not exist",
+                                        parameterValuePair[1]));
+                                isConfigurationValid = false;
+                            }
+                            break;
+
+                        // Ensure that the experiments configuration directory actually exists
                         case ExecutionParameter.ExperimentConfigDirectory:
                             if (Directory.Exists(parameterValuePair[1]) == false)
                             {
@@ -395,18 +368,7 @@ namespace MCC_Executor.MazeNavigation
                         "If the executor is being run without generating a population, the directory containing the seed population must be specified.");
                     isConfigurationValid = false;
                 }
-
-                // If this is a coevolution experiment, the seed maze must be specified
-                if (_executionConfiguration.ContainsKey(ExecutionParameter.IsCoevolution) &&
-                    Convert.ToBoolean(_executionConfiguration[ExecutionParameter.IsCoevolution]) &&
-                    (_executionConfiguration.ContainsKey(ExecutionParameter.SeedMazeFile) == false ||
-                     _executionConfiguration[ExecutionParameter.SeedMazeFile] == null))
-                {
-                    _executionLogger.Error(
-                        "If a coevolution experiment is being executed, the full path and filename of the seed maze must be specified.");
-                    isConfigurationValid = false;
-                }
-
+                
                 // If this is distributed execution, the StartFromRun parameter must be specified as this
                 // is used to control which node is executing which run of the experiment
                 if (_executionConfiguration.ContainsKey(ExecutionParameter.IsDistributedExecution) &&
@@ -426,11 +388,10 @@ namespace MCC_Executor.MazeNavigation
             _executionLogger.Error("The experiment executor invocation must take the following form:");
             _executionLogger.Error(
                 string.Format(
-                    "SharpNeatConsole.exe {0}=[{12}] {1}=[{14}] {2}=[{15}] {3}=[{13}] {4}=[{16}] {5}=[{16}] {6}=[{16}] {7}=[{13}] {8}=[{12}] {9}=[{17}] {10}=[{13}] {11}=[{18}]",
+                    "MCC_Executor.exe maze_navigation {0}=[{10}] {1}=[{12}] {2}=[{13}] {3}=[{11}] {4}=[{14}] {5}=[{14}] {6}=[{14}] {7}=[{15}] {8}=[{11}] {9}=[{16}]",
                     ExecutionParameter.ExperimentSource, ExecutionParameter.NumRuns, ExecutionParameter.StartFromRun,
                     ExecutionParameter.GeneratePopulation, ExecutionParameter.SeedPopulationDirectory,
                     ExecutionParameter.ExperimentConfigDirectory, ExecutionParameter.OutputFileDirectory,
-                    ExecutionParameter.LogOrganismStateData, ExecutionParameter.IsCoevolution,
                     ExecutionParameter.SeedMazeFile, ExecutionParameter.IsDistributedExecution,
                     ExecutionParameter.ExperimentNames, "file|database",
                     "true|false", "# runs", "starting run #", "directory", "maze genome file",
@@ -863,11 +824,9 @@ namespace MCC_Executor.MazeNavigation
             {
                 _executionLogger.Info(
                     string.Format(
-                        "Generation={0:N0} Evaluations={1:N0} Population1BestFitness={2:N2} Population1MaxComplexity={3:N2} Population2BestFitness={4:N2}, Population2MaxComplexity={5:N2}",
+                        "Batch={0:N0} Evaluations={1:N0} Population1MaxComplexity={2:N2} Population2MaxComplexity={3:N2}",
                         _coevolutionEaContainer.CurrentGeneration, _coevolutionEaContainer.CurrentEvaluations,
-                        _coevolutionEaContainer.Population1CurrentChampGenome.EvaluationInfo.Fitness,
                         _coevolutionEaContainer.Population1Statistics._maxComplexity,
-                        _coevolutionEaContainer.Population2CurrentChampGenome.EvaluationInfo.Fitness,
                         _coevolutionEaContainer.Population2Statistics._maxComplexity));
             }
         }
