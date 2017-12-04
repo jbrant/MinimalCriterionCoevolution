@@ -339,7 +339,7 @@ namespace SharpNeat.Utility
 
             // A valid starting location has been found if the X location is between the
             // first and last column
-            return mazeStartPoint.X > 0 && mazeStartPoint.X < width - 1;
+            return mazeStartPoint.X > 0 && mazeStartPoint.X < width;
         }
 
         private static bool IsRightMazeEndRow(MazeStructureGridCell[,] grid, int row, int height, int width, int column,
@@ -631,7 +631,7 @@ namespace SharpNeat.Utility
             // Extract the "sub-mazes" that are induced by the solution trajectory
             List<MazeStructureRoom> subMazes = ExtractSubmazes(mazeGrid, genome.MazeBoundaryHeight,
                 genome.MazeBoundaryWidth);
-
+            
             // Build map of sub-mazes and their assigned internal walls
             Dictionary<MazeStructureRoom, List<WallGene>> subMazeWallsMap = ExtractMazeWallMap(subMazes,
                 genome.WallGeneList);
@@ -641,6 +641,49 @@ namespace SharpNeat.Utility
             {
                 Queue<MazeStructureRoom> mazeRoomQueue = new Queue<MazeStructureRoom>();
 
+                // Mark boundaries for current submaze, including perpendicular opening next to first 
+                // internal partition (if one exists)
+                if (subMaze.AreInternalWallsSupported() && genome.WallGeneList.Count > 0)
+                {
+                    subMaze.MarkRoomBoundaries(mazeGrid, genome.WallGeneList[0].WallLocation, genome.WallGeneList[0].OrientationSeed);
+                }
+                else
+                {
+                    subMaze.MarkRoomBoundaries(mazeGrid);
+                }
+
+                // TODO: This whole thing needs to be updated to iterate through wall gene list and loop back around as necessary
+                if (subMaze.AreInternalWallsSupported() && genome.WallGeneList.Count > 0)
+                {
+                    int loopIter = 0;
+
+                    // Queue up the first "room" (which will encompass the entirety of the submaze grid)
+                    mazeRoomQueue.Enqueue(subMaze);
+                    
+                    // Make sure there are rooms left in the queue before attempting to dequeue and bisect
+                    while (mazeRoomQueue.Count > 0)
+                    {
+                        // Dequeue a room and run division on it
+                        Tuple<MazeStructureRoom, MazeStructureRoom> subRooms = mazeRoomQueue.Dequeue()
+                            .DivideRoom(mazeGrid, genome.WallGeneList[loopIter % genome.WallGeneList.Count].WallLocation,
+                                genome.WallGeneList[loopIter % genome.WallGeneList.Count].PassageLocation,
+                                genome.WallGeneList[loopIter % genome.WallGeneList.Count].OrientationSeed);
+
+                        if (subRooms != null)
+                        {
+                            // Increment the count of partitions
+                            partitionCount++;
+
+                            // Get the two resulting sub rooms and enqueue both of them
+                            if (subRooms.Item1 != null) mazeRoomQueue.Enqueue(subRooms.Item1);
+                            if (subRooms.Item2 != null) mazeRoomQueue.Enqueue(subRooms.Item2);
+                        }
+
+                        loopIter++;
+                    }
+                }
+
+                /*                
                 // Mark boundaries for current submaze, including perpendicular opening next to first 
                 // internal partition (if one exists)
                 if (subMazeWallsMap.ContainsKey(subMaze) && subMazeWallsMap[subMaze].Count > 0)
@@ -688,6 +731,7 @@ namespace SharpNeat.Utility
                     // Dump the contents of the queue out to the overall maze room list
                     mazeRooms.AddRange(mazeRoomQueue.ToList());
                 }
+                */
             }
 
             return new MazeStructureGrid(mazeGrid, partitionCount, mazeRooms);
@@ -894,6 +938,15 @@ namespace SharpNeat.Utility
             // Initialize the grid
             MazeStructureGridCell[,] unscaledGrid = InitializeMazeGrid(genome.MazeBoundaryHeight,
                 genome.MazeBoundaryWidth);
+
+            // TODO: REMOVE THIS WHEN DEBUGGING COMPLETE
+            var orderGenomeList = genome.PathGeneList.OrderBy(g => g.Waypoint.Y)
+                .GroupBy(
+                    g =>
+                        GetUnscaledCoordinates(g.Waypoint, genome.RelativeCellWidth,
+                            genome.RelativeCellHeight).Y)
+                .Distinct()
+                .ToList();
 
             // Order points vertically and then horizontally (hoping for a winding trajectory with this ordering)
             foreach (

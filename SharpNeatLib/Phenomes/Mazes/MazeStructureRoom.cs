@@ -103,7 +103,7 @@ namespace SharpNeat.Phenomes.Mazes
             // open up the side that is not against the maze boundary
             else if (_width < MinimumWidth)
             {
-                grid[_y == 0 ? _y + _height - 1 : _y, _x].SouthWall = false;
+                grid[_y == 0 ? _y + _height - 1 : _y - 1, _x].SouthWall = false;
             }
         }
 
@@ -112,16 +112,13 @@ namespace SharpNeat.Phenomes.Mazes
         /// </summary>
         /// <param name="grid">The matrix of maze cells.</param>
         /// <param name="unscaledWallLocation">The relative location of the first internal dividing wall.</param>
-        /// <param name="isHorizontalDefaultOrientation">Indicator of whether the first internal wall is horizontal or vertical.</param>
+        /// <param name="isHorizontal">Indicator of whether the first internal wall is horizontal or vertical.</param>
         public void MarkRoomBoundaries(MazeStructureGridCell[,] grid, double unscaledWallLocation,
-            bool isHorizontalDefaultOrientation)
+            bool isHorizontal)
         {
             // Mark the fully enclosed sub-maze boundaries
             MarkRoomBoundaries(grid);
-
-            // Determine orientation of the first wall
-            bool isHorizontal = DetermineWallOrientation(isHorizontalDefaultOrientation) == WallOrientation.Horizontal;
-
+            
             // Determine starting location of wall
             int xWallLocation = _x +
                                 (isHorizontal ? 0 : Math.Max(0, (int) ((_width - MinimumWidth+1)*unscaledWallLocation)));
@@ -161,15 +158,12 @@ namespace SharpNeat.Phenomes.Mazes
         ///     The location of the new dividing wall passage.  This is a real number between 0
         ///     and 1 which must be normalized to the appropriate range for the containing subfield.
         /// </param>
-        /// <param name="isHorizontalDefaultOrientation">Indicator for whether the dividing line is horizontal or vertical.</param>
+        /// <param name="isHorizontal">Indicator for whether the dividing line is horizontal or vertical.</param>
         /// <returns>The two subfields that were created as a result of the subfield division.</returns>
         public Tuple<MazeStructureRoom, MazeStructureRoom> DivideRoom(MazeStructureGridCell[,] grid,
             double unscaledWallLocation,
-            double unscaledPassageLocation, bool isHorizontalDefaultOrientation)
-        {
-            // Determine orientation
-            bool isHorizontal = DetermineWallOrientation(isHorizontalDefaultOrientation) == WallOrientation.Horizontal;
-
+            double unscaledPassageLocation, bool isHorizontal)
+        {            
             // Determine starting location of wall
             int xWallLocation = _x +
                                 (isHorizontal ? 0 : Math.Max(0, (int) ((_width - MinimumWidth+1)*unscaledWallLocation)));

@@ -28,7 +28,7 @@ namespace SharpNeat.Phenomes.Mazes
             Walls = new List<MazeStructureWall>();
             _mazeWidth = mazeWidth;
             _mazeHeight = mazeHeight;
-            _scaleMultiplier = scaleMultiplier;
+            ScaleMultiplier = scaleMultiplier;
 
             // Set the scaled maze width and height
             ScaledMazeHeight = mazeHeight*scaleMultiplier;
@@ -82,6 +82,11 @@ namespace SharpNeat.Phenomes.Mazes
         ///     The target/goal of a maze navigator.
         /// </summary>
         public MazeStructurePoint TargetLocation { get; private set; }
+
+        /// <summary>
+        ///     The amount by which to scale up the size of the maze.
+        /// </summary>
+        public int ScaleMultiplier { get; }
 
         /// <summary>
         ///     The scaled height of the maze.
@@ -138,11 +143,11 @@ namespace SharpNeat.Phenomes.Mazes
         {
             // Set the starting location to be in the top left corner of the maze, half the scale multiplier
             // (this guarantees there will be no intersecting walls)
-            StartLocation = new MazeStructurePoint(_scaleMultiplier/2, _scaleMultiplier/2);
+            StartLocation = new MazeStructurePoint(ScaleMultiplier/2, ScaleMultiplier/2);
 
             // Set the target location to be in the bottom right corner of the maze
-            TargetLocation = new MazeStructurePoint(ScaledMazeWidth - (_scaleMultiplier/2),
-                ScaledMazeHeight - (_scaleMultiplier/2));
+            TargetLocation = new MazeStructurePoint(ScaledMazeWidth - (ScaleMultiplier/2),
+                ScaledMazeHeight - (ScaleMultiplier/2));
         }
 
         /// <summary>
@@ -157,7 +162,7 @@ namespace SharpNeat.Phenomes.Mazes
             // Compute the maximum time steps by distributing the unscalled distance evenly across both dimensions 
             // (i.e. halving it) and multiplying by the scale multiplier for both dimensions
             // TODO: Need to experiment with polynomial timestep increase here
-            MaxTimesteps = 2*(_scaleMultiplier*(unscaledDistance/2));
+            MaxTimesteps = 2*(ScaleMultiplier*(unscaledDistance/2));
         }
 
         /// <summary>
@@ -180,15 +185,15 @@ namespace SharpNeat.Phenomes.Mazes
                         curHorizontalLine = new MazeStructureWall
                         {
                             StartMazeStructurePoint =
-                                new MazeStructurePoint(curCol*_scaleMultiplier, (curRow + 1)*_scaleMultiplier)
+                                new MazeStructurePoint(curCol*ScaleMultiplier, (curRow + 1)*ScaleMultiplier)
                         };
                     }
                     // Otherwise, if we've been tracking a horizontal line and the current position contains neither a horizontal line segment 
                     // nor a combination of a horizontal and vertical line, then record this as the maze ending point and null out the current line
                     else if (mazeGridArray[curRow, curCol].SouthWall == false && curHorizontalLine != null)
                     {
-                        curHorizontalLine.EndMazeStructurePoint = new MazeStructurePoint(curCol*_scaleMultiplier,
-                            (curRow + 1)*_scaleMultiplier);
+                        curHorizontalLine.EndMazeStructurePoint = new MazeStructurePoint(curCol*ScaleMultiplier,
+                            (curRow + 1)*ScaleMultiplier);
                         Walls.Add(curHorizontalLine);
                         curHorizontalLine = null;
                     }
@@ -198,8 +203,8 @@ namespace SharpNeat.Phenomes.Mazes
                 // end point since it can't protrude outside of the maze walls
                 if (curHorizontalLine != null)
                 {
-                    curHorizontalLine.EndMazeStructurePoint = new MazeStructurePoint(_mazeWidth*_scaleMultiplier,
-                        (curRow + 1)*_scaleMultiplier);
+                    curHorizontalLine.EndMazeStructurePoint = new MazeStructurePoint(_mazeWidth*ScaleMultiplier,
+                        (curRow + 1)*ScaleMultiplier);
                     Walls.Add(curHorizontalLine);
                 }
             }
@@ -225,15 +230,15 @@ namespace SharpNeat.Phenomes.Mazes
                         curVerticalLine = new MazeStructureWall
                         {
                             StartMazeStructurePoint =
-                                new MazeStructurePoint((curCol + 1)*_scaleMultiplier, curRow*_scaleMultiplier)
+                                new MazeStructurePoint((curCol + 1)*ScaleMultiplier, curRow*ScaleMultiplier)
                         };
                     }
                     // Otherwise, if we've been tracking a vertical line and the current position contains neither a vertical line segment 
                     // nor a combination of a horizontal and vertical line, then record this as the maze ending point and null out the current line
                     else if (mazeGridArray[curRow, curCol].EastWall == false && curVerticalLine != null)
                     {
-                        curVerticalLine.EndMazeStructurePoint = new MazeStructurePoint((curCol + 1)*_scaleMultiplier,
-                            Math.Max(1, curRow)*_scaleMultiplier);
+                        curVerticalLine.EndMazeStructurePoint = new MazeStructurePoint((curCol + 1)*ScaleMultiplier,
+                            Math.Max(1, curRow)*ScaleMultiplier);
                         Walls.Add(curVerticalLine);
                         curVerticalLine = null;
                     }
@@ -243,8 +248,8 @@ namespace SharpNeat.Phenomes.Mazes
                 // end point since it can't protrude outside of the maze walls
                 if (curVerticalLine != null)
                 {
-                    curVerticalLine.EndMazeStructurePoint = new MazeStructurePoint((curCol + 1)*_scaleMultiplier,
-                        _mazeHeight*_scaleMultiplier);
+                    curVerticalLine.EndMazeStructurePoint = new MazeStructurePoint((curCol + 1)*ScaleMultiplier,
+                        _mazeHeight*ScaleMultiplier);
                     Walls.Add(curVerticalLine);
                 }
             }
@@ -257,9 +262,6 @@ namespace SharpNeat.Phenomes.Mazes
         // The maze dimensions
         private readonly int _mazeWidth;
         private readonly int _mazeHeight;
-
-        // The amount by which to scale up the size of the maze
-        private readonly int _scaleMultiplier;
 
         #endregion
     }

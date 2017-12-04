@@ -54,12 +54,12 @@ namespace SharpNeat.Genomes.Maze
         /// <summary>
         ///     Relative height of each maze cell in the range 0 to 1.
         /// </summary>
-        public double RelativeCellHeight { get; }
+        public double RelativeCellHeight { get; private set; }
 
         /// <summary>
         ///     Relative width of each maze cell in the range 0 to 1.
         /// </summary>
-        public double RelativeCellWidth { get; }
+        public double RelativeCellWidth { get; private set; }
 
         /// <summary>
         ///     The maximum complexity of the maze (at the evolved resolution).  Note that this is set when the genome is birthed,
@@ -507,6 +507,10 @@ namespace SharpNeat.Genomes.Maze
             // Increment maze height and width by 1
             MazeBoundaryHeight += 1;
             MazeBoundaryWidth += 1;
+
+            // Update relative cell width/height
+            RelativeCellHeight = (double) 1/MazeBoundaryHeight;
+            RelativeCellWidth = (double) 1/MazeBoundaryWidth;
         }
 
         /// <summary>

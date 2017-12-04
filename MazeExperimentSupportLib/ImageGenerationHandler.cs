@@ -93,7 +93,7 @@ namespace MazeExperimentSupportLib
                     Path.Combine(outputDirectory,
                         string.Format("{0}_ExperimentID_{1}_Run_{2}_Batch_{3}_MazeID_{4}.bmp", experimentName,
                             experimentId, run, batch, mazeId)),
-                    evaluationUnits.Where(unit => unit.MazeId == mazeId).Select(unit => unit.MazePhenome).First());
+                    evaluationUnits.Where(unit => unit.MazeId == mazeId).Select(unit => unit.MazePhenome).First(), false);
             });
         }
 
@@ -154,7 +154,9 @@ namespace MazeExperimentSupportLib
         /// </summary>
         /// <param name="imagePathName">Image path and filename.</param>
         /// <param name="mazeStructure">The structure of the maze.</param>
-        public static void GenerateMazeStructureImage(string imagePathName, MazeStructure mazeStructure)
+        /// <param name="drawSolutionPath">Flag which controls whether or not solution trajectory is rendered.</param>
+        public static void GenerateMazeStructureImage(string imagePathName, MazeStructure mazeStructure,
+            bool drawSolutionPath)
         {
             // Create pen and initialize bitmap canvas
             Pen blackPen = new Pen(Color.Black, 0.0001f);
@@ -180,6 +182,24 @@ namespace MazeExperimentSupportLib
 
                     // Draw wall
                     graphics.DrawLine(blackPen, startPoint, endPoint);
+                }
+
+                // Add solution path to image if enabled
+                if (drawSolutionPath)
+                {
+                    // Draw the solution trajectory/path
+                    for (int y = 0; y < mazeStructure.MazeGrid.Grid.GetLength(0); y++)
+                    {
+                        for (int x = 0; x < mazeStructure.MazeGrid.Grid.GetLength(1); x++)
+                        {
+                            if (PathOrientation.None != mazeStructure.MazeGrid.Grid[y, x].PathOrientation)
+                            {
+                                graphics.FillEllipse(Brushes.DarkViolet,
+                                    (x*mazeStructure.ScaleMultiplier) + (mazeStructure.ScaleMultiplier/2),
+                                    (y*mazeStructure.ScaleMultiplier) + (mazeStructure.ScaleMultiplier/2), 5, 5);
+                            }
+                        }
+                    }
                 }
             }
 

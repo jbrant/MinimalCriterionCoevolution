@@ -18,10 +18,13 @@ namespace SharpNeat.Phenomes.Mazes.Tests
         [TestMethod()]
         public void DivideRoomTest()
         {
-            int mazeHeight = 10;
-            int mazeWidth = 10;
+            var baseName = "6_MutationIter_3_Waypoints_2_Walls_12_Units";
+            int mazeHeight = 12;
+            int mazeWidth = 12;
             //var seedMazePath = @"F:\User Data\Jonathan\Documents\school\Jonathan\Graduate\PhD\Development\MCC_Projects\MCC_Executor\MazeNavigation\SeedMazes\PathEvo_Test9.xml";
-            var seedMazePath = @"F:\User Data\Jonathan\Documents\school\Jonathan\Graduate\PhD\Minimal Criteria Search\ExperimentData\DebugOutput\MazePathEvo_TestBattery\Maze_Genome_Iter_5.xml";
+            //var seedMazePath = @"F:\User Data\Jonathan\Documents\school\Jonathan\Graduate\PhD\Minimal Criteria Search\ExperimentData\DebugOutput\MazePathEvo_TestBattery\Maze_Genome_Iter_5.xml";
+            var seedMazePath = @"F:\User Data\Jonathan\Documents\school\Jonathan\Graduate\PhD\Minimal Criteria Search\Analysis\MCC Mazes - Pathway Complexification - reference\Genomes\" + baseName + ".xml";
+            //var outputPath = @"F:\User Data\Jonathan\Documents\school\Jonathan\Graduate\PhD\Minimal Criteria Search\Analysis\MCC Mazes - Pathway Complexification";
             var outputPath = @"F:\User Data\Jonathan\Documents\school\Jonathan\Graduate\PhD\Minimal Criteria Search\ExperimentData\DebugOutput";
 
             var genomeParameters = new MazeGenomeParameters();
@@ -45,9 +48,10 @@ namespace SharpNeat.Phenomes.Mazes.Tests
             var mazePhenotype = new MazeStructure(mazeWidth, mazeHeight, 32);
             mazePhenotype.ConvertGridArrayToWalls(structure);
 
-            ImageGenerationHandler.GenerateMazeStructureImage(outputPath + "\\Test_Maze_Structure.bmp", mazePhenotype);
+            ImageGenerationHandler.GenerateMazeStructureImage(string.Format("{0}\\{1}.bmp", outputPath, baseName), mazePhenotype, false);
 
-            
+
+            /*
             var childMaze = seedMazeGenome.CreateOffspring(1);
             
             grid = MazeUtils.BuildMazeSolutionPath(childMaze);
@@ -58,7 +62,7 @@ namespace SharpNeat.Phenomes.Mazes.Tests
             mazePhenotype.ConvertGridArrayToWalls(structure);
 
             ImageGenerationHandler.GenerateMazeStructureImage(outputPath + "\\Test_Maze_Child_Structure.bmp", mazePhenotype);
-            
+            */
         }
     }
 }
