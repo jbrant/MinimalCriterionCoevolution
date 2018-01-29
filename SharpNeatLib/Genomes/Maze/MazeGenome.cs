@@ -475,8 +475,11 @@ namespace SharpNeat.Genomes.Maze
             double newPassageStartLocation = GenomeFactory.Rng.NextDoubleNonZero();
 
             // Add new gene to the genome
+//            WallGeneList.Add(new WallGene(GenomeFactory.InnovationIdGenerator.NextId, newWallStartLocation,
+//                newPassageStartLocation, GenomeFactory.Rng.NextBool()));
+            // TODO: Evaluating effect of biasing toward vertical walls
             WallGeneList.Add(new WallGene(GenomeFactory.InnovationIdGenerator.NextId, newWallStartLocation,
-                newPassageStartLocation, GenomeFactory.Rng.NextBool()));
+                newPassageStartLocation, (GenomeFactory.Rng.NextDoubleNonZero() > 0.72)));
         }
 
         /// <summary>
@@ -518,7 +521,7 @@ namespace SharpNeat.Genomes.Maze
         /// </summary>
         private void MutatePathWaypointLocation()
         {
-            Point2DDouble mutatedPoint = new Point2DDouble();
+            Point2DInt mutatedPoint = new Point2DInt();
             int geneIdx;
 
             // Don't try to mutate if the gene list is empty
@@ -537,25 +540,25 @@ namespace SharpNeat.Genomes.Maze
                 {
                     case PointShift.Down:
                     {
-                        mutatedPoint = new Point2DDouble(PathGeneList[geneIdx].Waypoint.X,
-                            PathGeneList[geneIdx].Waypoint.Y + RelativeCellHeight);
+                        mutatedPoint = new Point2DInt(PathGeneList[geneIdx].Waypoint.X,
+                            PathGeneList[geneIdx].Waypoint.Y + 1);
                         break;
                     }
                     case PointShift.Up:
                     {
-                        mutatedPoint = new Point2DDouble(PathGeneList[geneIdx].Waypoint.X,
-                            PathGeneList[geneIdx].Waypoint.Y - RelativeCellHeight);
+                        mutatedPoint = new Point2DInt(PathGeneList[geneIdx].Waypoint.X,
+                            PathGeneList[geneIdx].Waypoint.Y - 1);
                         break;
                     }
                     case PointShift.Left:
                     {
-                        mutatedPoint = new Point2DDouble(PathGeneList[geneIdx].Waypoint.X - RelativeCellWidth,
+                        mutatedPoint = new Point2DInt(PathGeneList[geneIdx].Waypoint.X - 1,
                             PathGeneList[geneIdx].Waypoint.Y);
                         break;
                     }
                     case PointShift.Right:
                     {
-                        mutatedPoint = new Point2DDouble(PathGeneList[geneIdx].Waypoint.X + RelativeCellWidth,
+                        mutatedPoint = new Point2DInt(PathGeneList[geneIdx].Waypoint.X + 1,
                             PathGeneList[geneIdx].Waypoint.Y);
                         break;
                     }
@@ -571,17 +574,17 @@ namespace SharpNeat.Genomes.Maze
         /// </summary>
         private void MutateAddPathWaypoint()
         {
-            Point2DDouble newPoint;
+            Point2DInt newPoint;
 
-            // Generate new points until we reach one that is valid 
+            // Generate new points until we reach one that is valid and is in a sparse region of the maze
             // (while seemingly inefficient, this is actually more memory efficient than 
             // encoding all of the possible cells in the maze and doing a "contains" 
             // against that list - especially when the grid is large)
             do
             {
-                newPoint = new Point2DDouble(GenomeFactory.Rng.NextDoubleNonZero(),
-                    GenomeFactory.Rng.NextDoubleNonZero());
-            } while (IsValidLocation(newPoint) == false);
+                newPoint = new Point2DInt(GenomeFactory.Rng.Next(MazeBoundaryWidth),
+                    GenomeFactory.Rng.Next(MazeBoundaryHeight));
+            } while (IsValidLocation(newPoint) == false || MazeUtils.isSparseWaypointRegion(newPoint, PathGeneList, MazeBoundaryHeight, 0.2) == false);
 
             // Add the new path gene to the genome
             PathGeneList.Add(new PathGene(GenomeFactory.InnovationIdGenerator.NextId, newPoint,
@@ -613,38 +616,52 @@ namespace SharpNeat.Genomes.Maze
         ///     1. Checks X and Y minimum and maximum points are in the horizontal and vertical boundaries of the maze
         ///     respectively.
         ///     2. Checks that proposed location does not overlap existing waypoints.
-        ///     3. Checks that either there are no waypoints in the last row or that waypoints in the next-to-last row are all
-        ///     to the left of waypoints in the last row and do not overlap by more than one position. This is to prevent
-        ///     trajectory overlaps.
-        ///     4. Checks that proposed location does not overlap start location or target location.
+        ///     3. Checks that proposed location does not overlap start location or target location.
+        ///     4. Checks that proposed location is higher than the next to the last row, or that the proposed location is on the
+        ///     next to the last row but its x-position is less than or equal to existing points on the last row, or that the
+        ///     proposed location is on the last row but its x-position is greater than or equal to existing points on the next to
+        ///     the last row. This is to prevent trajectory overlaps.
         /// </summary>
         /// <param name="waypointLocation">The proposed waypoint.</param>
         /// <returns>Boolean indicating whether the given point is valid per the maze boundary constraints.</returns>
-        private bool IsValidLocation(Point2DDouble waypointLocation)
-        {
-            return waypointLocation.X >= 0 && waypointLocation.X < MazeBoundaryWidth && waypointLocation.Y >= 0 &&
-                   waypointLocation.Y < MazeBoundaryHeight &&
-                   PathGeneList.Any(
-                       g =>
-                           MazeUtils.GetUnscaledCoordinates(waypointLocation, RelativeCellWidth, RelativeCellHeight)
-                               .Equals(MazeUtils.GetUnscaledCoordinates(g.Waypoint, RelativeCellWidth,
-                                   RelativeCellHeight))) == false &&
-                   (PathGeneList.Count(
-                       g =>
-                           MazeUtils.GetUnscaledCoordinates(g.Waypoint, RelativeCellWidth, RelativeCellHeight).Y ==
-                           MazeBoundaryHeight - 1) == 0 ||
-                    PathGeneList.Where(
-                        g =>
-                            MazeUtils.GetUnscaledCoordinates(g.Waypoint, RelativeCellWidth, RelativeCellHeight).Y ==
-                            MazeBoundaryHeight - 1).Min(g => g.Waypoint.X) >=
-                    PathGeneList.Where(
-                        g =>
-                            MazeUtils.GetUnscaledCoordinates(g.Waypoint, RelativeCellWidth, RelativeCellHeight).Y ==
-                            MazeBoundaryHeight - 2).Max(g => g.Waypoint.X)) &&
-                   MazeUtils.GetUnscaledCoordinates(waypointLocation, RelativeCellWidth, RelativeCellHeight)
-                       .Equals(new Point2DInt(0, 0)) == false &&
-                   MazeUtils.GetUnscaledCoordinates(waypointLocation, RelativeCellWidth, RelativeCellHeight)
-                       .Equals(new Point2DInt(MazeBoundaryWidth - 1, MazeBoundaryHeight - 1)) == false;
+        private bool IsValidLocation(Point2DInt waypointLocation)
+        {            
+            return
+                // Check that x-coordinate is at-or-above minimum maze width
+                waypointLocation.X >= 0 &&
+
+                // Check that x-coordinate is within maze width boundary
+                waypointLocation.X < MazeBoundaryWidth &&
+
+                // Check that y-coordinate is at-or-above minimum maze height
+                waypointLocation.Y >= 0 &&
+
+                // Check that y-coordinate is within maze height boundary
+                waypointLocation.Y < MazeBoundaryHeight &&
+
+                // Check that no existing waypoint overlaps proposed waypoint
+                PathGeneList.Any(g => waypointLocation.Equals(g.Waypoint)) == false &&
+                
+                // Check that proposed waypoint does not overlap start position
+                waypointLocation.Equals(new Point2DInt(0, 0)) == false &&
+
+                // Check that proposed waypoint does not overlap target position
+                waypointLocation.Equals(new Point2DInt(MazeBoundaryWidth - 1, MazeBoundaryHeight - 1)) == false &&
+
+                // Check that proposed waypoint is higher than next-to-last row
+                (waypointLocation.Y < MazeBoundaryHeight - 2 ||
+
+                 // If proposed waypoint is on next-to-last row, check that it's further to the left than waypoints on last row 
+                 (waypointLocation.Y == MazeBoundaryHeight - 2 &&
+                  (PathGeneList.Count(g => g.Waypoint.Y == MazeBoundaryHeight - 1) == 0 ||
+                   PathGeneList.Where(g => g.Waypoint.Y == MazeBoundaryHeight - 1).Min(g => g.Waypoint.X) >=
+                   waypointLocation.X) ||
+
+                  // If proposed waypoint is on the last row, check that it's further to the right than waypoints on next-to-last row
+                  (waypointLocation.Y == MazeBoundaryHeight - 1 &&
+                   (PathGeneList.Count(g => g.Waypoint.Y == MazeBoundaryHeight - 2) == 0 ||
+                    PathGeneList.Where(g => g.Waypoint.Y == MazeBoundaryHeight - 2).Max(g => g.Waypoint.X) <=
+                    waypointLocation.X))));
         }
 
         /// <summary>

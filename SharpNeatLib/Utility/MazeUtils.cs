@@ -34,14 +34,15 @@ namespace SharpNeat.Utility
                 {
                     intersectionOrientation = IntersectionOrientation.Horizontal;
                 }
-                // If current waypoint is below and to the left of previous waypoint and previous waypoint
-                // has a trajectory cell to its left, vertical intersection would cause overlapping trajectories
-                else if (curWaypoint.Y > prevWaypoint.Y && curWaypoint.X < prevWaypoint.X &&
-                         grid[prevWaypoint.Y, prevWaypoint.X - 1].PathOrientation != PathOrientation.None)
+                // If current waypoint is directly below and to the left of previous waypoint and previous waypoint
+                // has a trajectory cell to its left, and next waypoint is on the next row, and current way point is
+                // not on the left border, vertical intersection would cause overlapping trajectories
+                else if (curWaypoint.Y == prevWaypoint.Y + 1 && curWaypoint.X < prevWaypoint.X &&
+                         grid[prevWaypoint.Y, prevWaypoint.X - 1].PathOrientation != PathOrientation.None && curWaypoint.X > 0)
                 {
                     intersectionOrientation = IntersectionOrientation.Horizontal;
                 }
-                // If current waypoint is below and tot he right of previous waypoint and previous waypoint
+                // If current waypoint is below and to the right of previous waypoint and previous waypoint
                 // has a trajectory cell to its right, vertical intersection would cause overlapping trajectories
                 else if (curWaypoint.Y > prevWaypoint.Y && curWaypoint.X > prevWaypoint.X &&
                          grid[prevWaypoint.Y, prevWaypoint.X + 1].PathOrientation != PathOrientation.None)
@@ -54,18 +55,37 @@ namespace SharpNeat.Utility
             {
                 // If current waypoint is below and to the left of previous waypoint and next waypoint is on
                 // the same row, horizontal intersection would cause overlapping trajectories
-                if (curWaypoint.Y > prevWaypoint.Y && curWaypoint.X < prevWaypoint.X && curWaypoint.Y == nextWaypoint.Y)
+                if (curWaypoint.Y > prevWaypoint.Y && curWaypoint.X < prevWaypoint.X && curWaypoint.Y == nextWaypoint.Y &&
+                    curWaypoint.X < nextWaypoint.X)
                 {
                     intersectionOrientation = IntersectionOrientation.Vertical;
                 }
-                else if (curWaypoint.Y > prevWaypoint.Y && curWaypoint.Y == nextWaypoint.Y &&
-                         curWaypoint.X >= prevWaypoint.X && nextWaypoint.X <= prevWaypoint.X &&
-                         curWaypoint.X == grid.GetLength(1) - 1)
+                // If current waypoint is below and to the right of the previous waypoint, and next waypoint
+                // is on the same row as the current waypoint but to the left of it, and the current waypoint 
+                // is not the end point, then intersection must be vertical because the maze boundary prevents 
+                // routing to the right of the current waypoint and intersecting horizontally
+                if (curWaypoint.Y > prevWaypoint.Y && curWaypoint.Y == nextWaypoint.Y &&
+                    curWaypoint.X >= prevWaypoint.X && curWaypoint.X > nextWaypoint.X && curWaypoint.Equals(nextWaypoint) == false)
                 {
                     intersectionOrientation = IntersectionOrientation.Vertical;
                 }
+                // If current waypoint is directly below or below and to the left of the previous waypoint, and
+                // next waypoint is on the same row and directyl below or to the right of the previous waypoint, 
+                // and current waypoint is against the left maze boundary, then intersection must be vertical
+                // because the maze boundary prevents routing to the left of the current waypoint and 
+                // intersecting horizontally
                 else if (curWaypoint.Y > prevWaypoint.Y && curWaypoint.Y == nextWaypoint.Y &&
                          curWaypoint.X <= prevWaypoint.X && nextWaypoint.X >= prevWaypoint.X && curWaypoint.X == 0)
+                {
+                    intersectionOrientation = IntersectionOrientation.Vertical;
+                }
+                // If current waypoint is below and to the right of the previous waypoint, and next waypoint is to
+                // the left of the current waypoint and is on the last row, and the current waypoint is on the next
+                // to the last row, then intersection must be vertical so that trajectory can back-track to intersect 
+                // next waypoint without overlapping
+                else if (curWaypoint.Y > prevWaypoint.Y && curWaypoint.X > prevWaypoint.X &&
+                         curWaypoint.X > nextWaypoint.X && nextWaypoint.Y == grid.GetLength(0) - 1 &&
+                         curWaypoint.Y == grid.GetLength(0) - 2)
                 {
                     intersectionOrientation = IntersectionOrientation.Vertical;
                 }
@@ -85,8 +105,13 @@ namespace SharpNeat.Utility
         ///     The orientation (i.e. horizontal or vertical) of the solution path segment coming into the
         ///     ending point.
         /// </param>
+        /// <param name="isStartPointEasterlyTrajectory">
+        ///     Flag indicating whether start point is on an easterly trajectory (used to
+        ///     determine non-standard trajectory modification for intersecting first point in last row).
+        /// </param>
         private static void MarkSolutionPathSegment(MazeStructureGridCell[,] grid, Point2DInt startPoint,
-            Point2DInt endPoint, Point2DInt nextPoint, IntersectionOrientation orientation)
+            Point2DInt endPoint, Point2DInt nextPoint, IntersectionOrientation orientation,
+            bool isStartPointEasterlyTrajectory)
         {
             if (IntersectionOrientation.Horizontal == orientation)
             {
@@ -146,6 +171,22 @@ namespace SharpNeat.Utility
             // Mark path for vertical intersection
             else
             {
+                // If start point is to the right of end point and it has trajectory points to the west of it,
+                // it must first descend one cell so that trajectory can intersect the end point vertically
+                // without overlapping
+                if (startPoint.X > endPoint.X && grid[startPoint.Y, startPoint.X - 1].PathOrientation != PathOrientation.None)
+                {
+                    // Set start point outgoing orientation to vertical
+                    grid[startPoint.Y, startPoint.X].PathOrientation = PathOrientation.Vertical;
+
+                    // Move one cell down
+                    startPoint.Y++;
+
+                    // Mark intersection of cell below as vertical and set it as juncture
+                    grid[startPoint.Y, startPoint.X].PathOrientation = PathOrientation.Vertical;
+                    grid[startPoint.Y, startPoint.X].IsJuncture = true;
+                }
+
                 // Mark solution along x-axis, with y-location at previous point
                 for (int xCoord = startPoint.X;
                     startPoint.X < endPoint.X
@@ -217,7 +258,18 @@ namespace SharpNeat.Utility
                 {
                     subMazeStartPoint = new Point2DInt(0, y);
                     leftSubmazeEndPos = DetermineLeftSubmazeEndPosition(grid, subMazeStartPoint.Y);
-                    inRoom = true;
+
+                    // If this is the last row, add the one unit height maze and leave in-room indicator false
+                    if (y == mazeHeight - 1)
+                    {
+                        subMazes.Add(new MazeStructureRoom(subMazeStartPoint.X, subMazeStartPoint.Y,
+                            leftSubmazeEndPos + 1, 1));
+                    }
+                    // Otherwise, set in room indicator
+                    else
+                    {
+                        inRoom = true;
+                    }
                 }
                 // Add current room if we've reached its endpoint
                 else if (inRoom && IsLeftMazeEndRow(grid, y, leftSubmazeEndPos, mazeHeight, out subMazeEndPoint))
@@ -260,12 +312,11 @@ namespace SharpNeat.Utility
 
             // Process walls enclosing vertically adjacent trajectory paths
             MazeStructureGridCell prevGridCell = grid[0, 0];
-            MazeStructureGridCell curGridCell = grid[1, 0].PathOrientation != PathOrientation.None
-                ? grid[1, 0]
-                : grid[0, 1];
+            MazeStructureGridCell curGridCell = grid[0, 0];
+
             do
             {
-                if (curGridCell.IsJuncture)
+                if (curGridCell.IsJuncture || curGridCell.IsStartCell)
                 {
                     prevGridCell = curGridCell;
 
@@ -385,7 +436,11 @@ namespace SharpNeat.Utility
             // If this is the last row of the maze, it's the end position by default
             if (row == height - 1)
             {
-                mazeEndPoint = new Point2DInt(subMazeEndPos, row);
+                // If last row is beneath L-intersection on trajectory, set end position one
+                // row above as there needs to be another room below the trajectory
+                mazeEndPoint = grid[row, subMazeEndPos + 1].PathOrientation == PathOrientation.None
+                    ? new Point2DInt(subMazeEndPos, row - 1)
+                    : new Point2DInt(subMazeEndPos, row);
                 isEndRow = true;
             }
             // Check for sub-maze to left of L-intersection (first) and inverted L-intersection (second)
@@ -631,7 +686,7 @@ namespace SharpNeat.Utility
             // Extract the "sub-mazes" that are induced by the solution trajectory
             List<MazeStructureRoom> subMazes = ExtractSubmazes(mazeGrid, genome.MazeBoundaryHeight,
                 genome.MazeBoundaryWidth);
-            
+
             // Build map of sub-mazes and their assigned internal walls
             Dictionary<MazeStructureRoom, List<WallGene>> subMazeWallsMap = ExtractMazeWallMap(subMazes,
                 genome.WallGeneList);
@@ -645,7 +700,8 @@ namespace SharpNeat.Utility
                 // internal partition (if one exists)
                 if (subMaze.AreInternalWallsSupported() && genome.WallGeneList.Count > 0)
                 {
-                    subMaze.MarkRoomBoundaries(mazeGrid, genome.WallGeneList[0].WallLocation, genome.WallGeneList[0].OrientationSeed);
+                    subMaze.MarkRoomBoundaries(mazeGrid, genome.WallGeneList[0].WallLocation,
+                        genome.WallGeneList[0].OrientationSeed);
                 }
                 else
                 {
@@ -659,15 +715,15 @@ namespace SharpNeat.Utility
 
                     // Queue up the first "room" (which will encompass the entirety of the submaze grid)
                     mazeRoomQueue.Enqueue(subMaze);
-                    
+
                     // Make sure there are rooms left in the queue before attempting to dequeue and bisect
                     while (mazeRoomQueue.Count > 0)
                     {
                         // Dequeue a room and run division on it
                         Tuple<MazeStructureRoom, MazeStructureRoom> subRooms = mazeRoomQueue.Dequeue()
-                            .DivideRoom(mazeGrid, genome.WallGeneList[loopIter % genome.WallGeneList.Count].WallLocation,
-                                genome.WallGeneList[loopIter % genome.WallGeneList.Count].PassageLocation,
-                                genome.WallGeneList[loopIter % genome.WallGeneList.Count].OrientationSeed);
+                            .DivideRoom(mazeGrid, genome.WallGeneList[loopIter%genome.WallGeneList.Count].WallLocation,
+                                genome.WallGeneList[loopIter%genome.WallGeneList.Count].PassageLocation,
+                                genome.WallGeneList[loopIter%genome.WallGeneList.Count].OrientationSeed);
 
                         if (subRooms != null)
                         {
@@ -910,7 +966,8 @@ namespace SharpNeat.Utility
             {
                 for (int widthIdx = 0; widthIdx < width; widthIdx++)
                 {
-                    grid[heightIdx, widthIdx] = new MazeStructureGridCell(widthIdx, heightIdx);
+                    grid[heightIdx, widthIdx] = new MazeStructureGridCell(widthIdx, heightIdx,
+                        heightIdx == 0 && widthIdx == 0, heightIdx == height - 1 && widthIdx == width - 1);
                 }
             }
 
@@ -941,23 +998,13 @@ namespace SharpNeat.Utility
 
             // TODO: REMOVE THIS WHEN DEBUGGING COMPLETE
             var orderGenomeList = genome.PathGeneList.OrderBy(g => g.Waypoint.Y)
-                .GroupBy(
-                    g =>
-                        GetUnscaledCoordinates(g.Waypoint, genome.RelativeCellWidth,
-                            genome.RelativeCellHeight).Y)
-                .Distinct()
-                .ToList();
+                .GroupBy(g => g.Waypoint.Y).Distinct().ToList();
 
             // Order points vertically and then horizontally (hoping for a winding trajectory with this ordering)
             foreach (
                 var verticalGroup in
                     genome.PathGeneList.OrderBy(g => g.Waypoint.Y)
-                        .GroupBy(
-                            g =>
-                                GetUnscaledCoordinates(g.Waypoint, genome.RelativeCellWidth,
-                                    genome.RelativeCellHeight).Y)
-                        .Distinct()
-                        .ToList())
+                        .GroupBy(g => g.Waypoint.Y).Distinct().ToList())
             {
                 // Sort in horizontal ascending order if this is the first row
                 if (sortedPathGeneList.Count == 0)
@@ -965,32 +1012,28 @@ namespace SharpNeat.Utility
                     sortedPathGeneList.AddRange(verticalGroup.OrderBy(g => g.Waypoint.X));
 
                     // Set easterly orientation for first row
-                    easterlyRowTrajectories[
-                        GetUnscaledCoordinates(sortedPathGeneList.First().Waypoint, genome.RelativeCellWidth,
-                            genome.RelativeCellHeight).Y] = true;
+                    easterlyRowTrajectories[sortedPathGeneList.First().Waypoint.Y] = true;
                 }
                 else
                 {
                     // Get last waypoint in previous row
-                    Point2DInt prevPoint = GetUnscaledCoordinates(sortedPathGeneList.Last().Waypoint,
-                        genome.RelativeCellWidth, genome.RelativeCellHeight);
+                    Point2DInt prevPoint = sortedPathGeneList.Last().Waypoint;
 
                     // Get left-most point in current row
-                    Point2DInt leftmostCurPoint =
-                        GetUnscaledCoordinates(verticalGroup.OrderBy(g => g.Waypoint.X).First().Waypoint,
-                            genome.RelativeCellWidth, genome.RelativeCellHeight);
+                    Point2DInt leftmostCurPoint = verticalGroup.OrderBy(g => g.Waypoint.X).First().Waypoint;
 
                     // Get right-most point in current row
-                    Point2DInt rightmostCurPoint =
-                        GetUnscaledCoordinates(verticalGroup.OrderByDescending(g => g.Waypoint.X).First().Waypoint,
-                            genome.RelativeCellWidth, genome.RelativeCellHeight);
+                    Point2DInt rightmostCurPoint = verticalGroup.OrderByDescending(g => g.Waypoint.X).First().Waypoint;
 
-                    // If the max X-value for the previous row is greater than or equal to the max X-value 
-                    // for the current row OR if the max X-value for the previous row is between the
-                    // min and max X-values on the current row AND there's only one row separating the two,
-                    // then sort the current row in descending order on the horizontal axis
-                    if (prevPoint.X >= rightmostCurPoint.X ||
-                        (prevPoint.X > leftmostCurPoint.X && prevPoint.X <= rightmostCurPoint.X && easterlyRowTrajectories[prevPoint.Y]))
+                    // If this is not the last row and either the max X-value for the previous row is greater 
+                    // than or equal to the max X-value for the current row OR if the max X-value for the 
+                    // previous row is between the min and max X-values on the current row AND there's only 
+                    // one row separating the two, then sort the current row in descending order on the horizontal 
+                    // axis
+                    if (verticalGroup.Key < genome.MazeBoundaryHeight - 1 &&
+                        (prevPoint.X >= rightmostCurPoint.X ||
+                         (prevPoint.X > leftmostCurPoint.X && prevPoint.X <= rightmostCurPoint.X &&
+                          easterlyRowTrajectories[prevPoint.Y])))
                     {
                         sortedPathGeneList.AddRange(verticalGroup.OrderByDescending(g => g.Waypoint.X));
                         easterlyRowTrajectories[leftmostCurPoint.Y] = false;
@@ -1009,20 +1052,17 @@ namespace SharpNeat.Utility
                 // Get the previous point (if first iteration, previous point is the start location)
                 Point2DInt prevPoint = idx == 0
                     ? startLocation
-                    : GetUnscaledCoordinates(sortedPathGeneList[idx - 1].Waypoint, genome.RelativeCellWidth,
-                        genome.RelativeCellHeight);
+                    : sortedPathGeneList[idx - 1].Waypoint;
 
                 // Get the current point (if last iteration, current point is the target location)
                 Point2DInt curPoint = idx == genome.PathGeneList.Count
                     ? targetLocation
-                    : GetUnscaledCoordinates(sortedPathGeneList[idx].Waypoint, genome.RelativeCellWidth,
-                        genome.RelativeCellHeight);
+                    : sortedPathGeneList[idx].Waypoint;
 
                 // Get the next point (if exists)
                 Point2DInt nextPoint = idx + 1 >= genome.PathGeneList.Count
                     ? targetLocation
-                    : GetUnscaledCoordinates(sortedPathGeneList[idx + 1].Waypoint, genome.RelativeCellWidth,
-                        genome.RelativeCellHeight);
+                    : sortedPathGeneList[idx + 1].Waypoint;
 
                 // TODO: This may be problematic if the waypoint is on the left side and has a horizontal orientation
                 // Get the orientation
@@ -1045,7 +1085,8 @@ namespace SharpNeat.Utility
                 unscaledGrid[curPoint.Y, curPoint.X].IsWayPoint = true;
 
                 // If there are no overlapping paths, use 
-                MarkSolutionPathSegment(unscaledGrid, prevPoint, curPoint, nextPoint, curOrientation);
+                MarkSolutionPathSegment(unscaledGrid, prevPoint, curPoint, nextPoint, curOrientation,
+                    easterlyRowTrajectories[prevPoint.Y]);
             }
 
             return unscaledGrid;
@@ -1063,6 +1104,23 @@ namespace SharpNeat.Utility
         {
             return new Point2DInt(Convert.ToInt32(Math.Floor(relativeCoordinates.X/relativeCellWidth)),
                 Convert.ToInt32(Math.Floor(relativeCoordinates.Y/relativeCellHeight)));
+        }
+
+        public static bool isSparseWaypointRegion(Point2DInt newWaypointLocation, IList<PathGene> waypoints, int mazeSideLength, double neighborhoodProportion)
+        {
+            // Get the "reach" of the candidate waypoint's neighborhood
+            int neighborhoodReach = Convert.ToInt32(mazeSideLength*neighborhoodProportion);
+
+            // Determine the number of waypoints with the candidate waypoint's neighborhood
+            int neighborhoodPopulation = waypoints.Count(
+                p =>
+                    (p.Waypoint.X >= Math.Max(newWaypointLocation.X - neighborhoodReach, 0) &&
+                     p.Waypoint.X <= Math.Min(newWaypointLocation.X + neighborhoodReach, mazeSideLength - 1)) &&
+                    (p.Waypoint.Y >= Math.Max(newWaypointLocation.Y - neighborhoodReach, 0) &&
+                     p.Waypoint.Y <= Math.Min(newWaypointLocation.Y + neighborhoodReach, mazeSideLength - 1)));
+            
+            // Return whether new waypoint neighborhood size is less than the average
+            return neighborhoodPopulation < ((double)waypoints.Count / (neighborhoodReach * 2 + 1));
         }
 
         #endregion

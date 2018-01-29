@@ -78,11 +78,10 @@ namespace SharpNeat.Genomes.Maze
         ///     connection genes).
         /// </param>
         /// <param name="waypoint">
-        ///     The point at which two paths intersect. This is a relative value between 0 and 1 and is
-        ///     scaled upon genome decode.
+        ///     The point at which two paths intersect. This represents an absolute position in the 2D maze grid.
         /// </param>
         /// <param name="intersectionDefaultOrientation">The orientation (horizontal or vertical) of the incoming path segment.</param>
-        public PathGene(uint innovationId, Point2DDouble waypoint,
+        public PathGene(uint innovationId, Point2DInt waypoint,
             IntersectionOrientation intersectionDefaultOrientation)
         {
             InnovationId = innovationId;
@@ -111,9 +110,9 @@ namespace SharpNeat.Genomes.Maze
         public uint InnovationId { get; }
 
         /// <summary>
-        ///     The point at which two path segments intersect. This is a relative value between 0 and 1 and is scaled upon genome decode.
+        ///     The point at which two path segments intersect. This represents an absolute position in the 2D maze grid.
         /// </summary>
-        public Point2DDouble Waypoint { get; set; }
+        public Point2DInt Waypoint { get; set; }
 
         /// <summary>
         ///     DefaultOrientation for incoming path segment.

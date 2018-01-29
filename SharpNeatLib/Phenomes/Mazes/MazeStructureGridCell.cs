@@ -33,6 +33,20 @@ namespace SharpNeat.Phenomes.Mazes
     /// </summary>
     public class MazeStructureGridCell
     {
+        #region Public methods
+
+        /// <summary>
+        ///     Compares current grid cell to point.
+        /// </summary>
+        /// <param name="point">The point of comparison.</param>
+        /// <returns>Where the grid cell and the point represent the same location.</returns>
+        public bool Equals(Point2DInt point)
+        {
+            return point.X == X && point.Y == Y;
+        }
+
+        #endregion
+
         #region Constructors
 
         /// <summary>
@@ -47,18 +61,18 @@ namespace SharpNeat.Phenomes.Mazes
             PathOrientation = PathOrientation.None;
         }
 
-        #endregion
-
-        #region Public methods
-
         /// <summary>
-        ///     Compares current grid cell to point.
+        ///     Constructor which accepts cartesian coordinates of grid cell along with two flags indicating whether it is the
+        ///     start cell or end cell respectively.
         /// </summary>
-        /// <param name="point">The point of comparison.</param>
-        /// <returns>Where the grid cell and the point represent the same location.</returns>
-        public bool Equals(Point2DInt point)
+        /// <param name="x">The x-coordinate of the cell.</param>
+        /// <param name="y">The y-coordinate of the cell.</param>
+        /// <param name="isStartCell">Flag indicating whether this cell is the start cell.</param>
+        /// <param name="isEndCell">Flag indicating whether this cell is the end cell.</param>
+        public MazeStructureGridCell(int x, int y, bool isStartCell, bool isEndCell) : this(x, y)
         {
-            return point.X == X && point.Y == Y;
+            IsStartCell = isStartCell;
+            IsEndCell = isEndCell;
         }
 
         #endregion
@@ -106,9 +120,19 @@ namespace SharpNeat.Phenomes.Mazes
         public bool IsJuncture { get; set; }
 
         /// <summary>
-        /// Flag which indicates if cell is a waypoint (i.e. genome-encoded point demarcating two path segments).
+        ///     Flag which indicates if cell is a waypoint (i.e. genome-encoded point demarcating two path segments).
         /// </summary>
         public bool IsWayPoint { get; set; }
+
+        /// <summary>
+        ///     Flag which indicates if this cell is the starting cell in the maze.
+        /// </summary>
+        public bool IsStartCell { get; }
+
+        /// <summary>
+        ///     Flag which indicates if this cell is the ending (target) cell in the maze.
+        /// </summary>
+        public bool IsEndCell { get; }
 
         #endregion
     }

@@ -3,7 +3,7 @@
 	<Mazes>
 		<Maze id="0" birthGen="0" height="10" width="10">
 			<Paths>
-				<Path id="0" WaypointCoordinateX="0.5" WaypointCoordinateY="0.5" DefaultOrientation="VERTICAL" />
+				<Path id="0" WaypointCoordinateX="5" WaypointCoordinateY="5" DefaultOrientation="VERTICAL" />
 			</Paths>
 			<Walls/>
 		</Maze>		

@@ -315,14 +315,14 @@ namespace SharpNeat.Genomes.Maze
                     {
                         // Read the path, waypoint coordinates, and orientation information for the gene
                         uint geneId = XmlIoUtils.ReadAttributeAsUInt(xrSubtree, __AttrId);
-                        double waypointCoordinateX = XmlIoUtils.ReadAttributeAsDouble(xrSubtree, __AttrWaypointCoordinateX);
-                        double waypointCoordinateY = XmlIoUtils.ReadAttributeAsDouble(xrSubtree, __AttrWaypointCoordinateY);
+                        int waypointCoordinateX = XmlIoUtils.ReadAttributeAsInt(xrSubtree, __AttrWaypointCoordinateX);
+                        int waypointCoordinateY = XmlIoUtils.ReadAttributeAsInt(xrSubtree, __AttrWaypointCoordinateY);
                         IntersectionOrientation orientation =
                             ParseIntersectionOrientation(XmlIoUtils.ReadAttributeAsString(xrSubtree,
                                 __AttrOrientation));
 
                         // Create a new path gene and add it to the list
-                        pathGenes.Add(new PathGene(geneId, new Point2DDouble(waypointCoordinateX, waypointCoordinateY),
+                        pathGenes.Add(new PathGene(geneId, new Point2DInt(waypointCoordinateX, waypointCoordinateY),
                             orientation));
                     } while (xrSubtree.ReadToNextSibling(__ElemPath));
                 }
