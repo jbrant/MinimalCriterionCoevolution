@@ -38,7 +38,8 @@ namespace SharpNeat.Utility
                 // has a trajectory cell to its left, and next waypoint is on the next row, and current way point is
                 // not on the left border, vertical intersection would cause overlapping trajectories
                 else if (curWaypoint.Y == prevWaypoint.Y + 1 && curWaypoint.X < prevWaypoint.X &&
-                         grid[prevWaypoint.Y, prevWaypoint.X - 1].PathOrientation != PathOrientation.None && curWaypoint.X > 0)
+                         grid[prevWaypoint.Y, prevWaypoint.X - 1].PathOrientation != PathOrientation.None &&
+                         curWaypoint.X > 0)
                 {
                     intersectionOrientation = IntersectionOrientation.Horizontal;
                 }
@@ -65,7 +66,8 @@ namespace SharpNeat.Utility
                 // is not the end point, then intersection must be vertical because the maze boundary prevents 
                 // routing to the right of the current waypoint and intersecting horizontally
                 if (curWaypoint.Y > prevWaypoint.Y && curWaypoint.Y == nextWaypoint.Y &&
-                    curWaypoint.X >= prevWaypoint.X && curWaypoint.X > nextWaypoint.X && curWaypoint.Equals(nextWaypoint) == false)
+                    curWaypoint.X >= prevWaypoint.X && curWaypoint.X > nextWaypoint.X &&
+                    curWaypoint.Equals(nextWaypoint) == false)
                 {
                     intersectionOrientation = IntersectionOrientation.Vertical;
                 }
@@ -174,7 +176,8 @@ namespace SharpNeat.Utility
                 // If start point is to the right of end point and it has trajectory points to the west of it,
                 // it must first descend one cell so that trajectory can intersect the end point vertically
                 // without overlapping
-                if (startPoint.X > endPoint.X && grid[startPoint.Y, startPoint.X - 1].PathOrientation != PathOrientation.None)
+                if (startPoint.X > endPoint.X &&
+                    grid[startPoint.Y, startPoint.X - 1].PathOrientation != PathOrientation.None)
                 {
                     // Set start point outgoing orientation to vertical
                     grid[startPoint.Y, startPoint.X].PathOrientation = PathOrientation.Vertical;
@@ -738,56 +741,6 @@ namespace SharpNeat.Utility
                         loopIter++;
                     }
                 }
-
-                /*                
-                // Mark boundaries for current submaze, including perpendicular opening next to first 
-                // internal partition (if one exists)
-                if (subMazeWallsMap.ContainsKey(subMaze) && subMazeWallsMap[subMaze].Count > 0)
-                {
-                    subMaze.MarkRoomBoundaries(mazeGrid, subMazeWallsMap[subMaze][0].WallLocation,
-                        subMazeWallsMap[subMaze][0].OrientationSeed);
-                }
-                // Otherwise, simply mark the fully enclosed submaze boundaries
-                else
-                {
-                    subMaze.MarkRoomBoundaries(mazeGrid);
-                }
-
-                // Only attempt to process internal walls for sub-mazes that are of sufficient size 
-                // to contain any
-                if (subMazeWallsMap.ContainsKey(subMaze))
-                {
-                    // Queue up the first "room" (which will encompass the entirety of the submaze grid)
-                    mazeRoomQueue.Enqueue(subMaze);
-
-                    // Iterate through all of the wall genes, generating further subdivided rooms
-                    foreach (WallGene wallGene in subMazeWallsMap[subMaze])
-                    {
-                        // Make sure there are rooms left in the queue before attempting to dequeue and bisect
-                        if (mazeRoomQueue.Count > 0)
-                        {
-                            // Dequeue a room and run division on it
-                            Tuple<MazeStructureRoom, MazeStructureRoom> subRooms = mazeRoomQueue.Dequeue()
-                                .DivideRoom(mazeGrid, wallGene.WallLocation,
-                                    wallGene.PassageLocation,
-                                    wallGene.OrientationSeed);
-
-                            if (subRooms != null)
-                            {
-                                // Increment the count of partitions
-                                partitionCount++;
-
-                                // Get the two resulting sub rooms and enqueue both of them
-                                if (subRooms.Item1 != null) mazeRoomQueue.Enqueue(subRooms.Item1);
-                                if (subRooms.Item2 != null) mazeRoomQueue.Enqueue(subRooms.Item2);
-                            }
-                        }
-                    }
-
-                    // Dump the contents of the queue out to the overall maze room list
-                    mazeRooms.AddRange(mazeRoomQueue.ToList());
-                }
-                */
             }
 
             return new MazeStructureGrid(mazeGrid, partitionCount, mazeRooms);
@@ -996,10 +949,6 @@ namespace SharpNeat.Utility
             MazeStructureGridCell[,] unscaledGrid = InitializeMazeGrid(genome.MazeBoundaryHeight,
                 genome.MazeBoundaryWidth);
 
-            // TODO: REMOVE THIS WHEN DEBUGGING COMPLETE
-            var orderGenomeList = genome.PathGeneList.OrderBy(g => g.Waypoint.Y)
-                .GroupBy(g => g.Waypoint.Y).Distinct().ToList();
-
             // Order points vertically and then horizontally (hoping for a winding trajectory with this ordering)
             foreach (
                 var verticalGroup in
@@ -1106,23 +1055,42 @@ namespace SharpNeat.Utility
                 Convert.ToInt32(Math.Floor(relativeCoordinates.Y/relativeCellHeight)));
         }
 
-        public static bool isSparseWaypointRegion(Point2DInt newWaypointLocation, IList<PathGene> waypoints, int mazeSideLength, double neighborhoodProportion)
+        /// <summary>
+        ///     Iterates through every cell of the maze grid and determines the number of waypoints that are within the
+        ///     "neighborhood" of that cell.
+        /// </summary>
+        /// <param name="waypoints">The list of waypoints (i.e. path genes).</param>
+        /// <param name="mazeHeight">The unscaled maze height.</param>
+        /// <param name="mazeWidth">The unscaled maze width.</param>
+        /// <param name="neighborhoodRadius">The radius of a maze cell neighborhood in which to search for nearby waypoints.</param>
+        /// <returns>Dictionary containing each non-waypoint cell and the number of waypoints within that cell's neighborhood.</returns>
+        public static Dictionary<Point2DInt, int> ComputeCellNeighborCounts(IList<PathGene> waypoints, int mazeHeight,
+            int mazeWidth, int neighborhoodRadius)
         {
-            // Get the "reach" of the candidate waypoint's neighborhood
-            int neighborhoodReach = Convert.ToInt32(mazeSideLength*neighborhoodProportion);
+            Dictionary<Point2DInt, int> cellNeighborCounts = new Dictionary<Point2DInt, int>(mazeHeight*mazeWidth);
 
-            // Determine the number of waypoints with the candidate waypoint's neighborhood
-            int neighborhoodPopulation = waypoints.Count(
-                p =>
-                    (p.Waypoint.X >= Math.Max(newWaypointLocation.X - neighborhoodReach, 0) &&
-                     p.Waypoint.X <= Math.Min(newWaypointLocation.X + neighborhoodReach, mazeSideLength - 1)) &&
-                    (p.Waypoint.Y >= Math.Max(newWaypointLocation.Y - neighborhoodReach, 0) &&
-                     p.Waypoint.Y <= Math.Min(newWaypointLocation.Y + neighborhoodReach, mazeSideLength - 1)));
-            
-            // Return whether new waypoint neighborhood size is less than the average
-            return neighborhoodPopulation < ((double)waypoints.Count / (neighborhoodReach * 2 + 1));
+            // Iterate through each grid cell and compute number of waypoints in neighborhood
+            // Note that cells which are themselves waypoints are discarded
+            for (int curHeight = 0; curHeight < mazeHeight; curHeight++)
+            {
+                for (int curWidth = 0; curWidth < mazeWidth; curWidth++)
+                {
+                    // Skip points that already contain a waypoint
+                    if (waypoints.Any(p => p.Waypoint.X == curWidth && p.Waypoint.Y == curHeight))
+                        continue;
+
+                    // Count waypoints in cell neighborhood
+                    cellNeighborCounts.Add(new Point2DInt(curWidth, curHeight),
+                        waypoints.Count(p => (p.Waypoint.X >= Math.Max(curWidth - neighborhoodRadius, 0) &&
+                                              p.Waypoint.X <= Math.Min(curWidth + neighborhoodRadius, mazeWidth - 1)) &&
+                                             (p.Waypoint.Y >= Math.Max(curHeight - neighborhoodRadius, 0) &&
+                                              p.Waypoint.Y <= Math.Min(curHeight + neighborhoodRadius, mazeHeight - 1))));
+                }
+            }
+
+            return cellNeighborCounts;
         }
-
+        
         #endregion
     }
 }

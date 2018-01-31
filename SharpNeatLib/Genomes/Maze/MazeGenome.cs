@@ -577,14 +577,10 @@ namespace SharpNeat.Genomes.Maze
             Point2DInt newPoint;
 
             // Generate new points until we reach one that is valid and is in a sparse region of the maze
-            // (while seemingly inefficient, this is actually more memory efficient than 
-            // encoding all of the possible cells in the maze and doing a "contains" 
-            // against that list - especially when the grid is large)
             do
             {
-                newPoint = new Point2DInt(GenomeFactory.Rng.Next(MazeBoundaryWidth),
-                    GenomeFactory.Rng.Next(MazeBoundaryHeight));
-            } while (IsValidLocation(newPoint) == false || MazeUtils.isSparseWaypointRegion(newPoint, PathGeneList, MazeBoundaryHeight, 0.2) == false);
+                newPoint = GetSparseGridCell();
+            } while (IsValidLocation(newPoint) == false);
 
             // Add the new path gene to the genome
             PathGeneList.Add(new PathGene(GenomeFactory.InnovationIdGenerator.NextId, newPoint,
@@ -625,7 +621,7 @@ namespace SharpNeat.Genomes.Maze
         /// <param name="waypointLocation">The proposed waypoint.</param>
         /// <returns>Boolean indicating whether the given point is valid per the maze boundary constraints.</returns>
         private bool IsValidLocation(Point2DInt waypointLocation)
-        {            
+        {
             return
                 // Check that x-coordinate is at-or-above minimum maze width
                 waypointLocation.X >= 0 &&
@@ -641,7 +637,7 @@ namespace SharpNeat.Genomes.Maze
 
                 // Check that no existing waypoint overlaps proposed waypoint
                 PathGeneList.Any(g => waypointLocation.Equals(g.Waypoint)) == false &&
-                
+
                 // Check that proposed waypoint does not overlap start position
                 waypointLocation.Equals(new Point2DInt(0, 0)) == false &&
 
@@ -662,6 +658,28 @@ namespace SharpNeat.Genomes.Maze
                    (PathGeneList.Count(g => g.Waypoint.Y == MazeBoundaryHeight - 2) == 0 ||
                     PathGeneList.Where(g => g.Waypoint.Y == MazeBoundaryHeight - 2).Max(g => g.Waypoint.X) <=
                     waypointLocation.X))));
+        }
+
+        /// <summary>
+        ///     Extracts a random most sparse cell from among the top N most sparse regions in the maze space.
+        /// </summary>
+        /// <returns>A randomly selected cell from a list of sparse regions within the maze space.</returns>
+        private Point2DInt GetSparseGridCell()
+        {
+            // TODO: Neighborhood radius needs to be a configurable parameter
+            var cellNeighborCounts = MazeUtils.ComputeCellNeighborCounts(PathGeneList, MazeBoundaryHeight,
+                MazeBoundaryWidth, 2);
+
+            // TODO: Relative sparsity proportion cutoff needs to be a configurable parameter
+            Dictionary<Point2DInt, double> cellSparsity = cellNeighborCounts.ToDictionary(cell => cell.Key,
+                cell => (double) cell.Value/PathGeneList.Count);
+
+            // TODO: Proportion of sparse cells considered (coefficient on cell sparsity count) should be tunable
+            // Extract the specified proportion of most sparse cells and return random cell in set
+            return cellSparsity.OrderBy(x => x.Value)
+                .Take((int) 0.2*cellSparsity.Count)
+                .OrderBy(x => GenomeFactory.Rng.Next())
+                .First().Key;
         }
 
         /// <summary>

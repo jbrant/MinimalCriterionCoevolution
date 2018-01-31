@@ -38,8 +38,8 @@ namespace SharpNeat.Decoders.Maze
         #region Interface Methods
 
         /// <summary>
-        ///     Decodes a given maze genome into its phenotypic maze grid, which specifies the lines (walls) in two dimensional
-        ///     space.
+        ///     Decodes a given maze genome into its component trajectory and phenotypic maze grid, which specifies 
+        ///     the lines (walls) in two dimensional space and the solution path through them.
         /// </summary>
         /// <param name="genome">The maze genome to decode.</param>
         /// <returns>The maze grid phenotype, which can be directly plotted or fed to an agent for navigation.</returns>
@@ -48,10 +48,11 @@ namespace SharpNeat.Decoders.Maze
             // Initialize new maze (phenotype)
             MazeStructure maze = new MazeStructure(genome.MazeBoundaryWidth, genome.MazeBoundaryHeight, _scaleMultiplier);
 
-            // TODO: Generate path
+            // Construct maze grid with solution path generated from connected waypoints
+            var grid = MazeUtils.BuildMazeSolutionPath(genome);
 
-            // Convert to walls and scale to the desired lengths
-            maze.ConvertGridArrayToWalls(MazeUtils.ConvertMazeGenomeToUnscaledStructure(genome));
+            // Build maze structure, convert to walls and scale to the desired lengths
+            maze.ConvertGridArrayToWalls(MazeUtils.BuildMazeStructureAroundPath(genome, grid));
 
             return maze;
         }
