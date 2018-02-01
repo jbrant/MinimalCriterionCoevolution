@@ -666,18 +666,17 @@ namespace SharpNeat.Genomes.Maze
         /// <returns>A randomly selected cell from a list of sparse regions within the maze space.</returns>
         private Point2DInt GetSparseGridCell()
         {
-            // TODO: Neighborhood radius needs to be a configurable parameter
+            // Get count of neighboring cells within neighborhood radius
             var cellNeighborCounts = MazeUtils.ComputeCellNeighborCounts(PathGeneList, MazeBoundaryHeight,
                 MazeBoundaryWidth, 2);
 
-            // TODO: Relative sparsity proportion cutoff needs to be a configurable parameter
-            Dictionary<Point2DInt, double> cellSparsity = cellNeighborCounts.ToDictionary(cell => cell.Key,
+            // Compute crowd factor scores for each cell by dividing neighbor count by total number of waypoints
+            Dictionary<Point2DInt, double> cellCrowdFactor = cellNeighborCounts.ToDictionary(cell => cell.Key,
                 cell => (double) cell.Value/PathGeneList.Count);
 
-            // TODO: Proportion of sparse cells considered (coefficient on cell sparsity count) should be tunable
             // Extract the specified proportion of most sparse cells and return random cell in set
-            return cellSparsity.OrderBy(x => x.Value)
-                .Take((int) 0.2*cellSparsity.Count)
+            return cellCrowdFactor.OrderBy(x => x.Value)
+                .Take((int) Math.Ceiling(0.2*cellCrowdFactor.Count))
                 .OrderBy(x => GenomeFactory.Rng.Next())
                 .First().Key;
         }
