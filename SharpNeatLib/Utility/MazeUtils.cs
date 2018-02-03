@@ -244,10 +244,7 @@ namespace SharpNeat.Utility
             List<MazeStructureRoom> subMazes = new List<MazeStructureRoom>();
             MazeStructureGridCell roomStartCell = null;
             bool inRoom = false;
-            bool isLeftSubmazeTaller = false;
-            //int y = 0;
-
-
+            
             // Handle left submazes
             Point2DInt subMazeStartPoint = new Point2DInt();
             Point2DInt subMazeEndPoint;
@@ -559,60 +556,7 @@ namespace SharpNeat.Utility
 
         #endregion
 
-        #region Helper methods
-
-        /// <summary>
-        ///     Averages out the number of partitions possible given the evolved maze dimensions.
-        /// </summary>
-        /// <param name="mazeHeight">The height of the maze.</param>
-        /// <param name="mazeWidth">The width of the maze.</param>
-        /// <param name="numSamples">
-        ///     The number of sample mazes to attempt partitioning out to get a representative average
-        ///     (defaults to 2,000).
-        /// </param>
-        /// <returns>The average number of partitions supportable within the given maze dimensions.</returns>
-        public static int DetermineMaxPartitions(int mazeHeight, int mazeWidth, int numSamples = 2000)
-        {
-            var maxMazeResolutions = new int[numSamples];
-            var rng = new FastRandom();
-
-            // Fully partition maze space for the specified number of samples
-            for (var curSample = 0; curSample < numSamples; curSample++)
-            {
-                var mazeRoomQueue = new Queue<MazeStructureRoom>();
-                var mazeSegments = new MazeStructureGridCell[mazeHeight, mazeWidth];
-                var partitionCount = 0;
-
-                // Queue up the first "room" (which will encompass the entirety of the maze grid)
-                mazeRoomQueue.Enqueue(new MazeStructureRoom(0, 0, mazeWidth, mazeHeight));
-
-                // Iterate until there are no more available sub fields in the queue
-                while (mazeRoomQueue.Count > 0)
-                {
-                    // Dequeue a room and run division on it
-                    var subRooms = mazeRoomQueue.Dequeue()
-                        .DivideRoom(mazeSegments, rng.NextDoubleNonZero(),
-                            rng.NextDoubleNonZero(),
-                            rng.NextDoubleNonZero() > 0.5);
-
-                    if (subRooms != null)
-                    {
-                        // Increment the count of partitions
-                        partitionCount++;
-
-                        // Get the two resulting sub rooms and enqueue both of them
-                        if (subRooms.Item1 != null) mazeRoomQueue.Enqueue(subRooms.Item1);
-                        if (subRooms.Item2 != null) mazeRoomQueue.Enqueue(subRooms.Item2);
-                    }
-                }
-
-                // Record the total number of maze partitions
-                maxMazeResolutions[curSample] = partitionCount;
-            }
-
-            // Return the average number of partitions associated with a fully partitioned maze
-            return (int) maxMazeResolutions.Average(partition => partition);
-        }
+        #region Helper methods        
 
         /// <summary>
         ///     Averages out the number of partitions possible given a partially partitioned maze genome as a starting point. The
@@ -631,47 +575,65 @@ namespace SharpNeat.Utility
         public static int DetermineMaxPartitions(MazeGenome mazeGenome, int numSamples = 2000)
         {
             int[] maxMazeResolutions = new int[numSamples];
-            FastRandom rng = new FastRandom();
+            int maxPartitions = 0;
 
             // First call maze grid conversion method to decode existing genome
             MazeStructureGrid mazeGrid = ConvertMazeGenomeToUnscaledStructure(mazeGenome);
 
-            // Fully partition the remainder maze space for the specified number of samples
-            for (int curSample = 0; curSample < numSamples; curSample++)
+            // Extract the "sub-mazes" that are induced by the solution trajectory
+            List<MazeStructureRoom> subMazes = ExtractSubmazes(mazeGrid.Grid, mazeGenome.MazeBoundaryHeight,
+                mazeGenome.MazeBoundaryWidth);
+
+            // Process all sub-mazes, iteratively bisecting the applicable maze room space
+            foreach (var subMaze in subMazes)
             {
-                // Seed the queue with existing maze sub-spaces
-                Queue<MazeStructureRoom> mazeRoomQueue = new Queue<MazeStructureRoom>(mazeGrid.MazeRooms);
+                Queue<MazeStructureRoom> mazeRoomQueue = new Queue<MazeStructureRoom>();
 
-                // Initialize the partition count and grid to the current number of partitions and current maze grid respectively
-                int partitionCount = mazeGrid.NumPartitions;
-                MazeStructureGridCell[,] mazeSegments = mazeGrid.Grid;
-
-                // Iterate until there are no more available sub fields in the queue
-                while (mazeRoomQueue.Count > 0)
+                // Mark boundaries for current submaze, including perpendicular opening next to first 
+                // internal partition (if one exists)
+                if (subMaze.AreInternalWallsSupported() && mazeGenome.WallGeneList.Count > 0)
                 {
-                    // Dequeue a room and run division on it
-                    Tuple<MazeStructureRoom, MazeStructureRoom> subRooms = mazeRoomQueue.Dequeue()
-                        .DivideRoom(mazeSegments, rng.NextDoubleNonZero(),
-                            rng.NextDoubleNonZero(),
-                            rng.NextDoubleNonZero() > 0.5);
-
-                    if (subRooms != null)
-                    {
-                        // Increment the count of partitions
-                        partitionCount++;
-
-                        // Get the two resulting sub rooms and enqueue both of them
-                        if (subRooms.Item1 != null) mazeRoomQueue.Enqueue(subRooms.Item1);
-                        if (subRooms.Item2 != null) mazeRoomQueue.Enqueue(subRooms.Item2);
-                    }
+                    subMaze.MarkRoomBoundaries(mazeGrid.Grid, mazeGenome.WallGeneList[0].WallLocation,
+                        mazeGenome.WallGeneList[0].OrientationSeed);
+                }
+                else
+                {
+                    subMaze.MarkRoomBoundaries(mazeGrid.Grid);
                 }
 
-                // Record the total number of maze partitions
-                maxMazeResolutions[curSample] = partitionCount;
-            }
+                if (subMaze.AreInternalWallsSupported() && mazeGenome.WallGeneList.Count > 0)
+                {
+                    int loopIter = 0;
 
-            // Return the average number of partitions associated with a fully partitioned maze
-            return (int) maxMazeResolutions.Average(partition => partition);
+                    // Queue up the first "room" (which will encompass the entirety of the submaze grid)
+                    mazeRoomQueue.Enqueue(subMaze);
+
+                    // Make sure there are rooms left in the queue before attempting to dequeue and bisect
+                    while (mazeRoomQueue.Count > 0)
+                    {
+                        // Dequeue a room and run division on it
+                        Tuple<MazeStructureRoom, MazeStructureRoom> subRooms = mazeRoomQueue.Dequeue()
+                            .DivideRoom(mazeGrid.Grid, mazeGenome.WallGeneList[loopIter % mazeGenome.WallGeneList.Count].WallLocation,
+                                mazeGenome.WallGeneList[loopIter % mazeGenome.WallGeneList.Count].PassageLocation,
+                                mazeGenome.WallGeneList[loopIter % mazeGenome.WallGeneList.Count].OrientationSeed);
+                        
+                        // Update max partitions to the max wall iteration depth in the submaze
+                        maxPartitions = Math.Max(loopIter%mazeGenome.WallGeneList.Count, maxPartitions);
+
+                        if (subRooms != null)
+                        {
+                            // Get the two resulting sub rooms and enqueue both of them
+                            if (subRooms.Item1 != null) mazeRoomQueue.Enqueue(subRooms.Item1);
+                            if (subRooms.Item2 != null) mazeRoomQueue.Enqueue(subRooms.Item2);
+                        }
+
+                        loopIter++;
+                    }
+                }
+            }
+            
+            // Return the maximum number of partitions applied in a submaze
+            return maxPartitions;
         }
 
         /// <summary>
@@ -689,11 +651,7 @@ namespace SharpNeat.Utility
             // Extract the "sub-mazes" that are induced by the solution trajectory
             List<MazeStructureRoom> subMazes = ExtractSubmazes(mazeGrid, genome.MazeBoundaryHeight,
                 genome.MazeBoundaryWidth);
-
-            // Build map of sub-mazes and their assigned internal walls
-            Dictionary<MazeStructureRoom, List<WallGene>> subMazeWallsMap = ExtractMazeWallMap(subMazes,
-                genome.WallGeneList);
-
+            
             // Process all sub-mazes, iteratively bisecting the applicable maze room space
             foreach (var subMaze in subMazes)
             {
@@ -711,7 +669,6 @@ namespace SharpNeat.Utility
                     subMaze.MarkRoomBoundaries(mazeGrid);
                 }
 
-                // TODO: This whole thing needs to be updated to iterate through wall gene list and loop back around as necessary
                 if (subMaze.AreInternalWallsSupported() && genome.WallGeneList.Count > 0)
                 {
                     int loopIter = 0;

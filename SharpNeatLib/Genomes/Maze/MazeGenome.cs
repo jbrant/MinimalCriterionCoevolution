@@ -132,7 +132,7 @@ namespace SharpNeat.Genomes.Maze
         /// <param name="birthGeneration">The birth generation.</param>
         /// <param name="height">The base/initial height of the maze genome.</param>
         /// <param name="width">The base/initial width of the maze genome.</param>
-        public MazeGenome(MazeGenomeFactory genomeFactory, uint id, uint birthGeneration, int height, int width)
+        protected MazeGenome(MazeGenomeFactory genomeFactory, uint id, uint birthGeneration, int height, int width)
             : this(id, birthGeneration)
         {
             // Set the initial maze height and width
@@ -145,9 +145,6 @@ namespace SharpNeat.Genomes.Maze
 
             // Set the genome factory
             GenomeFactory = genomeFactory;
-
-            // Compute max complexity based on existing genome complexity and maze dimensions
-            MaxComplexity = MazeUtils.DetermineMaxPartitions(this);
         }
 
         /// <summary>
@@ -194,6 +191,9 @@ namespace SharpNeat.Genomes.Maze
         {
             WallGeneList = wallGeneList;
             PathGeneList = pathGeneList;
+
+            // Compute max complexity based on existing genome complexity and maze dimensions
+            MaxComplexity = MazeUtils.DetermineMaxPartitions(this);
         }
 
         #endregion
@@ -365,7 +365,7 @@ namespace SharpNeat.Genomes.Maze
             }
 
             // If the mutation caused a reduction in max complexity, remove non-coding genes
-            RemoveNonCodingGenes();
+            RemoveNonCodingWallGenes();
         }
 
         /// <summary>
@@ -668,7 +668,7 @@ namespace SharpNeat.Genomes.Maze
         {
             // Get count of neighboring cells within neighborhood radius
             var cellNeighborCounts = MazeUtils.ComputeCellNeighborCounts(PathGeneList, MazeBoundaryHeight,
-                MazeBoundaryWidth, 2);
+                MazeBoundaryWidth, (int) Math.Sqrt(MazeBoundaryHeight*MazeBoundaryWidth)/5);
 
             // Compute crowd factor scores for each cell by dividing neighbor count by total number of waypoints
             Dictionary<Point2DInt, double> cellCrowdFactor = cellNeighborCounts.ToDictionary(cell => cell.Key,
@@ -715,7 +715,7 @@ namespace SharpNeat.Genomes.Maze
         ///     Recomputes the maximum complexity supported by the maze genome following a mutation and removes non-coding genes in
         ///     the event that the mutation reduced the maximum complexity supported by the maze.
         /// </summary>
-        private void RemoveNonCodingGenes()
+        private void RemoveNonCodingWallGenes()
         {
             // Recompute max complexity in the event that mutation changed wall/passage placement in a way that reduces the complexity cap
             MaxComplexity = MazeUtils.DetermineMaxPartitions(this);
