@@ -709,7 +709,7 @@ namespace MCC_Domains.Utils
         }
 
         /// <summary>
-        ///     Reads in seed maze genomes used to bootstrap coevolutionary experiments.
+        ///     Reads in seed maze genomes used to bootstrap MCC experiments.
         /// </summary>
         /// <param name="seedMazePath">
         ///     The path of the single maze genome or a directory containing multiple XML genome
@@ -796,30 +796,30 @@ namespace MCC_Domains.Utils
         }
 
         /// <summary>
-        ///     Determines which coevolution initializer to instantiate and return based on the initialization algorithm search
+        ///     Determines which MCC initializer to instantiate and return based on the initialization algorithm search
         ///     type.
         /// </summary>
         /// <param name="xmlConfig">XML initialization configuration.</param>
         /// <returns>The instantiated initializer.</returns>
-        public static CoevolutionMazeNavigationInitializer DetermineCoevolutionInitializer(XmlElement xmlConfig)
+        public static MCCMazeNavigationInitializer DetermineMCCInitializer(XmlElement xmlConfig)
         {
             // Make sure that the XML configuration exists
             if (xmlConfig == null)
             {
-                throw new ArgumentException("Missing or invalid coevolution initialization configuration.");
+                throw new ArgumentException("Missing or invalid MCC initialization configuration.");
             }
 
             // Extract the corresponding search and selection algorithm domain types
             SearchType searchType =
                 AlgorithmTypeUtil.ConvertStringToSearchType(XmlUtils.TryGetValueAsString(xmlConfig, "SearchAlgorithm"));
 
-            // There's currently just two coevolution initializers: fitness and novelty search
+            // There's currently just two MCC initializers: fitness and novelty search
             switch (searchType)
             {
                 case SearchType.Fitness:
-                    return new FitnessCoevolutionMazeNavigationInitializer();
+                    return new FitnessMCCMazeNavigationInitializer();
                 default:
-                    return new NoveltySearchCoevolutionMazeNavigationInitializer();
+                    return new NoveltySearchMCCMazeNavigationInitializer();
             }
         }
     }

@@ -7,17 +7,11 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Xml;
-using ExperimentEntities;
 using log4net;
 using log4net.Config;
 using MCC_Domains;
 using MCC_Domains.MazeNavigation;
-using MCC_Domains.MazeNavigation.CoevolutionMCSExperiment;
-using MCC_Domains.MazeNavigation.FitnessExperiment;
-using MCC_Domains.MazeNavigation.MCNSExperiment;
-using MCC_Domains.MazeNavigation.MCSExperiment;
-using MCC_Domains.MazeNavigation.NoveltyExperiment;
-using MCC_Domains.MazeNavigation.RandomExperiment;
+using MCC_Domains.MazeNavigation.MCCExperiment;
 using MCC_Domains.Utils;
 using SharpNeat;
 using SharpNeat.Core;
@@ -82,12 +76,7 @@ namespace MCC_Executor.MazeNavigation
         IsDistributedExecution,
 
         /// <summary>
-        ///     Flag indicating whether the experiment is coevolution-based.
-        /// </summary>
-        IsCoevolution,
-
-        /// <summary>
-        ///     The path (directory and file name) of the seed maze.  This is only required/used in the case of coevolution
+        ///     The path (directory and file name) of the seed maze.  This is only required/used in the case of MCC
         ///     experiments, and is strictly required for said experiments.
         /// </summary>
         SeedMazeFile,
@@ -105,7 +94,7 @@ namespace MCC_Executor.MazeNavigation
     public class MazeNavigationExperimentExecutor
     {
         private static INeatEvolutionAlgorithm<NeatGenome> _ea;
-        private static ICoevolutionAlgorithmContainer<NeatGenome, MazeGenome> _coevolutionEaContainer;
+        private static IMCCAlgorithmContainer<NeatGenome, MazeGenome> _imccEaContainer;
         private static ILog _executionLogger;
 
         private static readonly Dictionary<ExecutionParameter, String> _executionConfiguration =
@@ -175,40 +164,19 @@ namespace MCC_Executor.MazeNavigation
             {
                 _executionLogger.Info(string.Format("Executing Experiment {0}", curExperimentName));
 
-                // If these are non-coevolution experiments, proceed as normal using the base maze navigator experiment configuration
-                if (Boolean.Parse(_executionConfiguration[ExecutionParameter.IsCoevolution]) == false)
+                if ("file".Equals(executionSource))
                 {
-                    if ("file".Equals(executionSource))
-                    {
-                        // Execute file-based experiment
-                        ExecuteFileBasedExperiment(
-                            _executionConfiguration[ExecutionParameter.ExperimentConfigDirectory],
-                            _executionConfiguration[ExecutionParameter.OutputFileDirectory], curExperimentName,
-                            numRuns, seedPopulationFiles, logOrganismStateData);
-                    }
-                    else
-                    {
-                        // Execute database-based experiment
-                        ExecuteDatabaseBasedExperiment(curExperimentName, numRuns, seedPopulationFiles);
-                    }
+                    // Execute file-based MCC experiment
+                    ExecuteFileBasedMCCExperiment(
+                        _executionConfiguration[ExecutionParameter.ExperimentConfigDirectory],
+                        _executionConfiguration[ExecutionParameter.OutputFileDirectory],
+                        _executionConfiguration[ExecutionParameter.SeedMazeFile], curExperimentName, numRuns,
+                        startFromRun);
                 }
-                // Otherwise, use the coevolution container interface
                 else
                 {
-                    if ("file".Equals(executionSource))
-                    {
-                        // Execute file-based coevolution experiment
-                        ExecuteFileBasedCoevolutionExperiment(
-                            _executionConfiguration[ExecutionParameter.ExperimentConfigDirectory],
-                            _executionConfiguration[ExecutionParameter.OutputFileDirectory],
-                            _executionConfiguration[ExecutionParameter.SeedMazeFile], curExperimentName, numRuns,
-                            startFromRun);
-                    }
-                    else
-                    {
-                        throw new NotImplementedException(
-                            "Database-based coevolution executor has not been implemented!");
-                    }
+                    throw new NotImplementedException(
+                        "Database-based MCC executor has not been implemented!");
                 }
 
                 // If this is a distributed execution, write out a sentinel file for every run (since each node is only
@@ -306,7 +274,6 @@ namespace MCC_Executor.MazeNavigation
                         // Ensure that valid boolean values were given
                         case ExecutionParameter.GeneratePopulation:
                         case ExecutionParameter.LogOrganismStateData:
-                        case ExecutionParameter.IsCoevolution:
                         case ExecutionParameter.IsDistributedExecution:
                             bool testBool;
                             if (Boolean.TryParse(parameterValuePair[1], out testBool) == false)
@@ -396,14 +363,12 @@ namespace MCC_Executor.MazeNavigation
                     isConfigurationValid = false;
                 }
 
-                // If this is a coevolution experiment, the seed maze must be specified
-                if (_executionConfiguration.ContainsKey(ExecutionParameter.IsCoevolution) &&
-                    Convert.ToBoolean(_executionConfiguration[ExecutionParameter.IsCoevolution]) &&
-                    (_executionConfiguration.ContainsKey(ExecutionParameter.SeedMazeFile) == false ||
-                     _executionConfiguration[ExecutionParameter.SeedMazeFile] == null))
+                // If this is a MCC experiment, the seed maze must be specified
+                if (_executionConfiguration.ContainsKey(ExecutionParameter.SeedMazeFile) == false ||
+                    _executionConfiguration[ExecutionParameter.SeedMazeFile] == null)
                 {
                     _executionLogger.Error(
-                        "If a coevolution experiment is being executed, the full path and filename of the seed maze must be specified.");
+                        "If a MCC experiment is being executed, the full path and filename of the seed maze must be specified.");
                     isConfigurationValid = false;
                 }
 
@@ -426,11 +391,11 @@ namespace MCC_Executor.MazeNavigation
             _executionLogger.Error("The experiment executor invocation must take the following form:");
             _executionLogger.Error(
                 string.Format(
-                    "SharpNeatConsole.exe {0}=[{12}] {1}=[{14}] {2}=[{15}] {3}=[{13}] {4}=[{16}] {5}=[{16}] {6}=[{16}] {7}=[{13}] {8}=[{12}] {9}=[{17}] {10}=[{13}] {11}=[{18}]",
+                    "SharpNeatConsole.exe {0}=[{11}] {1}=[{13}] {2}=[{14}] {3}=[{12}] {4}=[{15}] {5}=[{15}] {6}=[{15}] {7}=[{12}] {8}=[{16}] {9}=[{12}] {10}=[{17}]]",
                     ExecutionParameter.ExperimentSource, ExecutionParameter.NumRuns, ExecutionParameter.StartFromRun,
                     ExecutionParameter.GeneratePopulation, ExecutionParameter.SeedPopulationDirectory,
                     ExecutionParameter.ExperimentConfigDirectory, ExecutionParameter.OutputFileDirectory,
-                    ExecutionParameter.LogOrganismStateData, ExecutionParameter.IsCoevolution,
+                    ExecutionParameter.LogOrganismStateData,
                     ExecutionParameter.SeedMazeFile, ExecutionParameter.IsDistributedExecution,
                     ExecutionParameter.ExperimentNames, "file|database",
                     "true|false", "# runs", "starting run #", "directory", "maze genome file",
@@ -441,182 +406,7 @@ namespace MCC_Executor.MazeNavigation
         }
 
         /// <summary>
-        ///     Executes all runs of a given experiment using a configuration file as the configuration source and generated flat
-        ///     files as the result destination.
-        /// </summary>
-        /// <param name="experimentConfigurationDirectory">The directory containing the XML experiment configuration file.</param>
-        /// <param name="logFileDirectory">The directory into which to write the evolution/evaluation log files.</param>
-        /// <param name="experimentName">The name of the experiment to execute.</param>
-        /// <param name="numRuns">The number of runs to execute for that experiment.</param>
-        /// <param name="seedPopulationFiles">The seed population XML file names.</param>
-        /// <param name="writeOrganismStateData">Flag indicating whether organism state data should be written to an output file.</param>
-        private static void ExecuteFileBasedExperiment(string experimentConfigurationDirectory, string logFileDirectory,
-            string experimentName,
-            int numRuns, string[] seedPopulationFiles, bool writeOrganismStateData)
-        {
-            // Read in the configuration files that match the given experiment name (should only be 1 file)
-            string[] experimentConfigurationFiles = Directory.GetFiles(experimentConfigurationDirectory,
-                string.Format("{0}.*", experimentName));
-
-            // Make sure there's only one configuration file that matches the experiment name
-            // (otherwise, we don't know for sure which configuration to use)
-            if (experimentConfigurationFiles.Count() != 1)
-            {
-                _executionLogger.Error(
-                    string.Format(
-                        "Experiment configuration ambiguous: expeted a single possible configuration, but found {0} possible configurations",
-                        experimentConfigurationFiles.Count()));
-                Environment.Exit(0);
-            }
-
-            // Instantiate XML reader for configuration file
-            XmlDocument xmlConfig = new XmlDocument();
-            xmlConfig.Load(experimentConfigurationFiles[0]);
-
-            // Determine which experiment to execute
-            BaseMazeNavigationExperiment experiment = DetermineMazeNavigationExperiment(xmlConfig.DocumentElement);
-
-            // Execute the experiment for the specified number of runs
-            for (int runIdx = 0; runIdx < numRuns; runIdx++)
-            {
-                // Initialize the data loggers for the given run
-                IDataLogger evolutionDataLogger =
-                    new FileDataLogger(string.Format("{0}\\{1} - Run{2} - Evolution.csv", logFileDirectory,
-                        experimentName,
-                        runIdx + 1));
-                IDataLogger evaluationDataLogger = writeOrganismStateData
-                    ? new FileDataLogger(string.Format("{0}\\{1} - Run{2} - Evaluation.csv", logFileDirectory,
-                        experimentName,
-                        runIdx + 1))
-                    : null;
-
-                // Initialize new experiment
-                experiment.Initialize(experimentName, xmlConfig.DocumentElement, evolutionDataLogger,
-                    evaluationDataLogger);
-
-                _executionLogger.Info(string.Format("Initialized experiment {0}.", experiment.GetType()));
-
-                // This will hold the number of evaluations executed for each "attempt" of the EA within the current run
-                ulong curEvaluations = 0;
-
-                // This will hold the number of restarts of the algorithm
-                int curRestarts = 0;
-
-                do
-                {
-                    IGenomeFactory<NeatGenome> genomeFactory;
-                    List<NeatGenome> genomeList;
-
-                    // If there were seed population files specified, read them in
-                    if (seedPopulationFiles != null)
-                    {
-                        // Open and load population XML file.
-                        using (XmlReader xr = XmlReader.Create(seedPopulationFiles[runIdx]))
-                        {
-                            genomeList = experiment.LoadPopulation(xr);
-                        }
-
-                        // Grab the specified genome factory on the first genome in the list
-                        genomeFactory = genomeList[0].GenomeFactory;
-                    }
-
-                    // Otherwise, generate the starting population
-                    else
-                    {
-                        // Create a new genome factory
-                        genomeFactory = experiment.CreateGenomeFactory();
-
-                        // Generate the initial population
-                        genomeList = genomeFactory.CreateGenomeList(experiment.SeedGenomeCount, 0);
-                    }
-
-                    _executionLogger.Info(string.Format("Loaded [{0}] genomes as initial population.", genomeList.Count));
-
-                    _executionLogger.Info("Kicking off Experiment initialization/execution");
-
-                    // Kick off the experiment run
-                    RunExperiment(genomeFactory, genomeList, experimentName, experiment, numRuns, runIdx, curEvaluations);
-
-                    // Increment the evaluations
-                    curEvaluations = _ea.CurrentEvaluations;
-
-                    // Increment the restart count
-                    curRestarts++;
-                } while (_ea.StopConditionSatisfied == false && experiment.MaxRestarts >= curRestarts);
-
-                // Close the data loggers
-                evolutionDataLogger.Close();
-                evaluationDataLogger?.Close();
-            }
-        }
-
-        /// <summary>
-        ///     Executes all runs of a given experiment using the database as both the configuration source and the results
-        ///     destination.
-        /// </summary>
-        /// <param name="experimentName">The name of the experiment to execute.</param>
-        /// <param name="numRuns">The number of runs to execute for that experiment.</param>
-        /// <param name="seedPopulationFiles">The seed population XML file names.</param>
-        private static void ExecuteDatabaseBasedExperiment(string experimentName, int numRuns,
-            string[] seedPopulationFiles)
-        {
-            // Create new database context and read in configuration for the given experiment
-            ExperimentDataEntities experimentContext = new ExperimentDataEntities();
-            var name = experimentName;
-            ExperimentDictionary experimentConfiguration =
-                experimentContext.ExperimentDictionaries.Single(
-                    expName => expName.ExperimentName == name);
-
-            // Determine which experiment to execute
-            BaseMazeNavigationExperiment experiment =
-                DetermineMazeNavigationExperiment(experimentConfiguration.Primary_SearchAlgorithmName,
-                    experimentConfiguration.Primary_SelectionAlgorithmName, false);
-
-            // Execute the experiment for the specified number of runs
-            for (int runIdx = 0; runIdx < numRuns; runIdx++)
-            {
-                // Initialize the experiment
-                experiment.Initialize(experimentConfiguration);
-
-                _executionLogger.Error(string.Format("Initialized experiment {0}.", experiment.GetType()));
-
-                // This will hold the number of evaluations executed for each "attempt" of the EA within the current run
-                ulong curEvaluations = 0;
-
-                // This will hold the number of restarts of the algorithm
-                int curRestarts = 0;
-
-                do
-                {
-                    List<NeatGenome> genomeList;
-
-                    // Open and load population XML file.
-                    using (XmlReader xr = XmlReader.Create(seedPopulationFiles[runIdx]))
-                    {
-                        genomeList = experiment.LoadPopulation(xr);
-                    }
-                    IGenomeFactory<NeatGenome> genomeFactory = genomeList[0].GenomeFactory;
-                    _executionLogger.Info(string.Format("Loaded [{0}] genomes as initial population.", genomeList.Count));
-
-                    _executionLogger.Info("Kicking off Experiment initialization/execution");
-
-                    // Kick off the experiment run
-                    RunExperiment(genomeFactory, genomeList, experimentName, experiment, numRuns, runIdx, curEvaluations);
-
-                    // Increment the evaluations
-                    curEvaluations = _ea.CurrentEvaluations;
-
-                    // Increment the restart count
-                    curRestarts++;
-                } while (_ea.StopConditionSatisfied == false && experiment.MaxRestarts >= curRestarts);
-            }
-
-            // Dispose of the database context
-            experimentContext.Dispose();
-        }
-
-        /// <summary>
-        ///     Executes all runs of a given coevolution experiment using a configuration file as the configuration source and
+        ///     Executes all runs of a given MCC experiment using a configuration file as the configuration source and
         ///     generated flat files as the result destination.
         /// </summary>
         /// <param name="experimentConfigurationDirectory">The directory containing the XML experiment configuration file.</param>
@@ -625,7 +415,7 @@ namespace MCC_Executor.MazeNavigation
         /// <param name="experimentName">The name of the experiment to execute.</param>
         /// <param name="numRuns">The number of runs to execute for that experiment.</param>
         /// <param name="startFromRun">The run to start from (1 by default).</param>
-        private static void ExecuteFileBasedCoevolutionExperiment(string experimentConfigurationDirectory,
+        private static void ExecuteFileBasedMCCExperiment(string experimentConfigurationDirectory,
             string logFileDirectory, string seedMazePath,
             string experimentName,
             int numRuns, int startFromRun)
@@ -650,8 +440,8 @@ namespace MCC_Executor.MazeNavigation
             xmlConfig.Load(experimentConfigurationFiles[0]);
 
             // Determine which experiment to execute
-            BaseCoevolutionMazeNavigationExperiment experiment =
-                DetermineCoevolutionMazeNavigationExperiment(xmlConfig.DocumentElement);
+            BaseMCCMazeNavigationExperiment experiment =
+                DetermineMCCMazeNavigationExperiment(xmlConfig.DocumentElement);
 
             // Execute the experiment for the specified number of runs
             for (int runIdx = startFromRun; runIdx <= numRuns; runIdx++)
@@ -742,74 +532,28 @@ namespace MCC_Executor.MazeNavigation
         }
 
         /// <summary>
-        ///     Executes a single run of the given experiment.
-        /// </summary>
-        /// <param name="genomeFactory">The factory for producing NEAT genomes.</param>
-        /// <param name="genomeList">The list of initial genomes (population).</param>
-        /// <param name="experimentName">The name of the experiment to execute.</param>
-        /// <param name="experiment">Reference to the initialized experiment.</param>
-        /// <param name="numRuns">Total number of runs being executed.</param>
-        /// <param name="runIdx">The current run being executed.</param>
-        /// <param name="startingEvaluation">
-        ///     The number of evaluations from which execution is starting (this is only applicable in
-        ///     the event of a restart).
-        /// </param>
-        private static void RunExperiment(IGenomeFactory<NeatGenome> genomeFactory, List<NeatGenome> genomeList,
-            string experimentName, BaseMazeNavigationExperiment experiment, int numRuns,
-            int runIdx, ulong startingEvaluation)
-        {
-            // Trap initialization exceptions (which, if applicable, could be due to initialization algorithm not
-            // finding a viable seed) and continue to the next run if an exception does occur
-            try
-            {
-                // Create evolution algorithm and attach update event.
-                _ea = experiment.CreateEvolutionAlgorithm(genomeFactory, genomeList, startingEvaluation);
-                _ea.UpdateEvent += ea_UpdateEvent;
-            }
-            catch (Exception)
-            {
-                _executionLogger.Error(string.Format("Experiment {0}, Run {1} of {2} failed to initialize",
-                    experimentName,
-                    runIdx + 1, numRuns));
-                Environment.Exit(0);
-            }
-
-            _executionLogger.Info(string.Format(
-                "Executing Experiment {0}, Run {1} of {2} from {3} starting evaluations", experimentName, runIdx + 1,
-                numRuns, startingEvaluation));
-
-            // Start algorithm (it will run on a background thread).
-            _ea.StartContinue();
-
-            while (RunState.Terminated != _ea.RunState && RunState.Paused != _ea.RunState)
-            {
-                Thread.Sleep(2000);
-            }
-        }
-
-        /// <summary>
-        ///     Executes a single run of the given coevolution experiment.
+        ///     Executes a single run of the given MCC experiment.
         /// </summary>
         /// <param name="agentGenomeFactory">The factory for producing NEAT genomes.</param>
         /// <param name="mazeGenomeFactory">The factory for producing maze genomes.</param>
         /// <param name="agentGenomeList">The list of initial agent genomes (navigator population).</param>
         /// <param name="mazeGenomeList">The list of initial maze genomes (maze population).</param>
-        /// <param name="experimentName">The name of the coevolution experiment to execute.</param>
+        /// <param name="experimentName">The name of the MCC experiment to execute.</param>
         /// <param name="experiment">Reference to the initialized experiment.</param>
         /// <param name="numRuns">Total number of runs being executed.</param>
         /// <param name="runIdx">The current run being executed.</param>
         private static void RunExperiment(IGenomeFactory<NeatGenome> agentGenomeFactory,
             IGenomeFactory<MazeGenome> mazeGenomeFactory, List<NeatGenome> agentGenomeList,
-            List<MazeGenome> mazeGenomeList, string experimentName, ICoevolutionExperiment experiment, int numRuns,
+            List<MazeGenome> mazeGenomeList, string experimentName, IMCCExperiment experiment, int numRuns,
             int runIdx)
         {
             try
             {
                 // Create evolution algorithm and attach update event.
-                _coevolutionEaContainer = experiment.CreateCoevolutionAlgorithmContainer(agentGenomeFactory,
+                _imccEaContainer = experiment.CreateMCCAlgorithmContainer(agentGenomeFactory,
                     mazeGenomeFactory, agentGenomeList,
                     mazeGenomeList);
-                _coevolutionEaContainer.UpdateEvent += coevolutionContainer_UpdateEvent;
+                _imccEaContainer.UpdateEvent += ImccContainerUpdateEvent;
             }
             catch (Exception exception)
             {
@@ -824,159 +568,43 @@ namespace MCC_Executor.MazeNavigation
                 numRuns));
 
             // Start algorithm (it will run on a background thread).
-            _coevolutionEaContainer.StartContinue();
+            _imccEaContainer.StartContinue();
 
-            while (RunState.Terminated != _coevolutionEaContainer.RunState &&
-                   RunState.Paused != _coevolutionEaContainer.RunState)
+            while (RunState.Terminated != _imccEaContainer.RunState &&
+                   RunState.Paused != _imccEaContainer.RunState)
             {
                 Thread.Sleep(2000);
             }
         }
 
         /// <summary>
-        ///     Evolutionary algorithm update delegate - logs current state of algorithm.
+        ///     Print update event specific to MCC algorithm.
         /// </summary>
         /// <param name="sender">Sender</param>
         /// <param name="e">Event arguments</param>
-        private static void ea_UpdateEvent(object sender, EventArgs e)
+        private static void ImccContainerUpdateEvent(object sender, EventArgs e)
         {
-            if (_ea.CurrentChampGenome != null)
-            {
-                double champGenomeAuxFitness = _ea.CurrentChampGenome.EvaluationInfo.AuxFitnessArr.Length > 0
-                    ? _ea.CurrentChampGenome.EvaluationInfo.AuxFitnessArr[0]._value
-                    : 0;
-
-                if (champGenomeAuxFitness > 0)
-                {
-                    _executionLogger.Info(
-                        string.Format("Generation={0:N0} Evaluations={1:N0} BestFitness={2:N6} BestAuxFitness={3:N6}",
-                            _ea.CurrentGeneration,
-                            _ea.CurrentEvaluations, _ea.CurrentChampGenome.EvaluationInfo.Fitness, champGenomeAuxFitness));
-                }
-                else
-                {
-                    _executionLogger.Info(string.Format("Generation={0:N0} Evaluations={1:N0} BestFitness={2:N6}",
-                        _ea.CurrentGeneration,
-                        _ea.CurrentEvaluations, _ea.CurrentChampGenome.EvaluationInfo.Fitness));
-                }
-            }
-            else
-            {
-                _executionLogger.Info(string.Format("Generation={0:N0} Evaluations={1:N0} BestFitness={2:N6}",
-                    _ea.CurrentGeneration,
-                    _ea.CurrentEvaluations, _ea.Statistics._maxFitness));
-            }
-        }
-
-        /// <summary>
-        ///     Print update event specific to coevolutionary algorithm.
-        /// </summary>
-        /// <param name="sender">Sender</param>
-        /// <param name="e">Event arguments</param>
-        private static void coevolutionContainer_UpdateEvent(object sender, EventArgs e)
-        {
-            if (_coevolutionEaContainer.Population1CurrentChampGenome != null &&
-                _coevolutionEaContainer.Population2CurrentChampGenome != null)
+            if (_imccEaContainer.Population1CurrentChampGenome != null &&
+                _imccEaContainer.Population2CurrentChampGenome != null)
             {
                 _executionLogger.Info(
                     string.Format(
                         "Generation={0:N0} Evaluations={1:N0} Population1BestFitness={2:N2} Population1MaxComplexity={3:N2} Population2BestFitness={4:N2}, Population2MaxComplexity={5:N2}",
-                        _coevolutionEaContainer.CurrentGeneration, _coevolutionEaContainer.CurrentEvaluations,
-                        _coevolutionEaContainer.Population1CurrentChampGenome.EvaluationInfo.Fitness,
-                        _coevolutionEaContainer.Population1Statistics._maxComplexity,
-                        _coevolutionEaContainer.Population2CurrentChampGenome.EvaluationInfo.Fitness,
-                        _coevolutionEaContainer.Population2Statistics._maxComplexity));
+                        _imccEaContainer.CurrentGeneration, _imccEaContainer.CurrentEvaluations,
+                        _imccEaContainer.Population1CurrentChampGenome.EvaluationInfo.Fitness,
+                        _imccEaContainer.Population1Statistics._maxComplexity,
+                        _imccEaContainer.Population2CurrentChampGenome.EvaluationInfo.Fitness,
+                        _imccEaContainer.Population2Statistics._maxComplexity));
             }
         }
 
         /// <summary>
-        ///     Determine the maze navigation experiment to run based on the search and selection algorithms specified in the
-        ///     configuration file.
-        /// </summary>
-        /// <param name="xmlConfig">The reference to the root node of the XML configuration file.</param>
-        /// <returns>The appropriate maze navigation experiment class.</returns>
-        private static BaseMazeNavigationExperiment DetermineMazeNavigationExperiment(XmlElement xmlConfig)
-        {
-            // Get the search and selection algorithm types
-            string searchAlgorithm = XmlUtils.TryGetValueAsString(xmlConfig, "SearchAlgorithm");
-            string selectionAlgorithm = XmlUtils.TryGetValueAsString(xmlConfig, "SelectionAlgorithm");
-            bool isDynamicMC = XmlUtils.TryGetValueAsInt(xmlConfig, "MinimalCriteriaUpdateInterval") != null;
-
-            // Make sure both the search algorithm and selection algorithm have been set in the configuration file
-            if (searchAlgorithm == null || selectionAlgorithm == null)
-            {
-                _executionLogger.Error(
-                    "Both the search algorithm and selection algorithm must be specified in the XML configuration file.");
-                Environment.Exit(0);
-            }
-
-            // Get the appropriate experiment class
-            return DetermineMazeNavigationExperiment(searchAlgorithm, selectionAlgorithm, isDynamicMC);
-        }
-
-        /// <summary>
-        ///     Determine the maze navigation experiment to run based on the given search and selection algorithms.
-        /// </summary>
-        /// <param name="searchAlgorithmName">The search algorithm to run.</param>
-        /// <param name="selectionAlgorithmName">The selection algorithm to run.</param>
-        /// <param name="isDynamicMC">Indicates whether or not the minimal criterion is dynamically changing.</param>
-        /// <returns>The applicable maze navigation experiment.</returns>
-        private static BaseMazeNavigationExperiment DetermineMazeNavigationExperiment(string searchAlgorithmName,
-            string selectionAlgorithmName, bool isDynamicMC)
-        {
-            // Extract the corresponding search and selection algorithm domain types
-            SearchType searchType = AlgorithmTypeUtil.ConvertStringToSearchType(searchAlgorithmName);
-            SelectionType selectionType = AlgorithmTypeUtil.ConvertStringToSelectionType(selectionAlgorithmName);
-
-            // Match up with the correct experiment
-            switch (searchType)
-            {
-                // Fitness experiment
-                case SearchType.Fitness:
-                    return new MazeNavigationFitnessExperiment();
-
-                // Novelty search experiment (generational or steady state)
-                case SearchType.NoveltySearch:
-                    if (SelectionType.Generational.Equals(selectionType))
-                    {
-                        return new GenerationalMazeNavigationNoveltyExperiment();
-                    }
-                    return new SteadyStateMazeNavigationNoveltyExperiment();
-
-                // Minimal criteria novelty search experiment (steady-state only)
-                case SearchType.MinimalCriteriaNoveltySearch:
-                    return new SteadyStateMazeNavigationMCNSExperiment();
-
-                // Minimal criteria search experiment (steady state or queueing)
-                case SearchType.MinimalCriteriaSearch:
-                    if (SelectionType.SteadyState.Equals(selectionType))
-                    {
-                        return new SteadyStateMazeNavigationMCSExperiment();
-                    }
-                    if (SelectionType.QueueingWithNiching.Equals(selectionType))
-                    {
-                        return new QueueingNichedMazeNavigationMCSExperiment();
-                    }
-                    if (SelectionType.Queueing.Equals(selectionType) && isDynamicMC)
-                    {
-                        return new QueueingMazeNavigationDynamicMCSExperiment();
-                    }
-                    return new QueueingMazeNavigationMCSExperiment();
-
-                // If none of the above were matched, return the steady state experiment with
-                // randomly assigned fitness
-                default:
-                    return new SteadyStateMazeNavigationRandomExperiment();
-            }
-        }
-
-        /// <summary>
-        ///     Determine the coevolution maze navigation experiment to run based on the search and selection algorithms specified
+        ///     Determine the MCC maze navigation experiment to run based on the search and selection algorithms specified
         ///     in the configuration file.
         /// </summary>
         /// <param name="xmlConfig">The reference to the root node of the XML configuration file.</param>
         /// <returns>The appropriate maze navigation experiment class.</returns>
-        private static BaseCoevolutionMazeNavigationExperiment DetermineCoevolutionMazeNavigationExperiment(
+        private static BaseMCCMazeNavigationExperiment DetermineMCCMazeNavigationExperiment(
             XmlElement xmlConfig)
         {
             // Get the search and selection algorithm types
@@ -992,16 +620,16 @@ namespace MCC_Executor.MazeNavigation
             }
 
             // Get the appropriate experiment class
-            return DetermineCoevolutionMazeNavigationExperiment(searchAlgorithm, selectionAlgorithm);
+            return DetermineMCCMazeNavigationExperiment(searchAlgorithm, selectionAlgorithm);
         }
 
         /// <summary>
-        ///     Determines the coevolution maze navigation experiment to run based on the given search and selection algorithm.
+        ///     Determines the MCC maze navigation experiment to run based on the given search and selection algorithm.
         /// </summary>
         /// <param name="searchAlgorithmName">The search algorithm to run.</param>
         /// <param name="selectionAlgorithmName">The selection algorithm to run.</param>
-        /// <returns>The applicable coevolution maze navigation experiment.</returns>
-        private static BaseCoevolutionMazeNavigationExperiment DetermineCoevolutionMazeNavigationExperiment(
+        /// <returns>The applicable MCC maze navigation experiment.</returns>
+        private static BaseMCCMazeNavigationExperiment DetermineMCCMazeNavigationExperiment(
             string searchAlgorithmName, string selectionAlgorithmName)
         {
             // Extract the corresponding search and selection algorithm domain types
@@ -1010,14 +638,14 @@ namespace MCC_Executor.MazeNavigation
 
             // TODO: Currently, the coevoultion experiments are implemented with only one search algorithm: MCS
 
-            // Queueing coevolution experiment with separate (currently per-species) queues
+            // Queueing MCC experiment with separate (currently per-species) queues
             if (SelectionType.MultipleQueueing.Equals(selectionType))
             {
-                return new CoevolutionMCSMultiQueueExperiment();
+                return new MCCMultiQueueExperiment();
             }
 
-            // Otherwise, go with the single maze, single queue MCS coevolution experiment
-            return new CoevolutionMCSQueueExperiment();
+            // Otherwise, go with the single maze, single queue MCC experiment
+            return new MCCQueueExperiment();
         }
     }
 }

@@ -63,7 +63,6 @@ namespace MCC_Domains.MazeNavigation
         ///     Creates the maze navigation world (environment) given the experiment parameters.
         /// </summary>
         /// <param name="walls">The walls in the maze environemnt.</param>
-        /// <param name="mazeNicheGrid">Metadata about the grid of niches overlaying the maze.</param>
         /// <param name="navigatorLocation">The starting location of the maze navigator.</param>
         /// <param name="goalLocation">The location of the goal (target).</param>
         /// <param name="minSuccessDistance">The minimum distance from the target for the trial to be considered a success.</param>
@@ -71,7 +70,7 @@ namespace MCC_Domains.MazeNavigation
         /// <param name="maxTimeSteps">The maximum number of time steps to run a given trial.</param>
         /// <param name="numBridgingApplications">The number of times to apply bridging during a given trial.</param>
         /// <param name="behaviorCharacterization">The behavior characterization for a navigator.</param>
-        public MazeNavigationWorld(List<Wall> walls, MazeNicheGrid mazeNicheGrid, DoublePoint navigatorLocation,
+        public MazeNavigationWorld(List<Wall> walls, DoublePoint navigatorLocation,
             DoublePoint goalLocation,
             int minSuccessDistance,
             int maxDistanceToTarget, int maxTimeSteps,
@@ -85,7 +84,6 @@ namespace MCC_Domains.MazeNavigation
             _maxTimesteps = maxTimeSteps;
             _behaviorCharacterization = behaviorCharacterization;
             _numBridgingApplications = numBridgingApplications;
-            _mazeNicheGrid = mazeNicheGrid;
 
             // Instantiate the navigator
             _navigator = new MazeNavigator(navigatorLocation);
@@ -105,7 +103,7 @@ namespace MCC_Domains.MazeNavigation
             int minSuccessDistance, int maxDistanceToTarget, int maxTimeSteps,
             IBehaviorCharacterization behaviorCharacterization)
             : this(
-                walls, new MazeNicheGrid(), navigatorLocation, goalLocation, minSuccessDistance, maxDistanceToTarget,
+                walls, navigatorLocation, goalLocation, minSuccessDistance, maxDistanceToTarget,
                 maxTimeSteps, 0, behaviorCharacterization)
         {
         }
@@ -123,7 +121,7 @@ namespace MCC_Domains.MazeNavigation
         public MazeNavigationWorld(List<Wall> walls, DoublePoint navigatorLocation, DoublePoint goalLocation,
             int minSuccessDistance, int maxTimeSteps, IBehaviorCharacterization behaviorCharacterization)
             : this(
-                walls, new MazeNicheGrid(), navigatorLocation, goalLocation, minSuccessDistance, 0, maxTimeSteps, 0,
+                walls, navigatorLocation, goalLocation, minSuccessDistance, 0, maxTimeSteps, 0,
                 behaviorCharacterization)
         {
         }
@@ -151,11 +149,6 @@ namespace MCC_Domains.MazeNavigation
         ///     Maximum timesteps for the trial to run.
         /// </summary>
         private readonly int? _maxTimesteps;
-
-        /// <summary>
-        ///     Encapsulates the maze boundaries and supporting methods for mapping ending locations into the niche grid.
-        /// </summary>
-        private readonly MazeNicheGrid _mazeNicheGrid;
 
         /// <summary>
         ///     Minimum distance from the target for the evaluation to be considered a success.
@@ -281,9 +274,6 @@ namespace MCC_Domains.MazeNavigation
                 // Extract the behavior info object
                 trialInfo = new BehaviorInfo(_behaviorCharacterization.GetBehaviorCharacterizationAsArray());
             }
-
-            // Determine the behavioral niche in which the navigator ended
-            trialInfo.NicheId = _mazeNicheGrid.DetermineNicheId(_navigator.Location);
 
             return (TTrialInfo) trialInfo;
         }

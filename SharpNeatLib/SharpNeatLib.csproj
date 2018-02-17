@@ -109,14 +109,13 @@
     <Compile Include="Core\BehaviorInfo.cs" />
     <Compile Include="Core\CoordinateVector.cs" />
     <Compile Include="Core\IBehaviorCharacterizationFactory.cs" />
-    <Compile Include="Core\ICoevolutionAlgorithmContainer.cs" />
+    <Compile Include="Core\IMCCAlgorithmContainer.cs" />
     <Compile Include="Core\IMinimalCriteria.cs" />
     <Compile Include="Core\INoveltyArchive.cs" />
     <Compile Include="Core\RunPhase.cs" />
     <Compile Include="Decoders\Maze\MazeDecoder.cs" />
-    <Compile Include="EvolutionAlgorithms\CoevolutionAlgorithmContainer.cs" />
+    <Compile Include="EvolutionAlgorithms\ImccAlgorithmContainer.cs" />
     <Compile Include="EvolutionAlgorithms\MultiQueueNeatEvolutionAlgorithm.cs" />
-    <Compile Include="EvolutionAlgorithms\QueueingNichedNeatEvolutionAlgorithm.cs" />
     <Compile Include="EvolutionAlgorithms\QueueingNeatEvolutionAlgorithm.cs" />
     <Compile Include="Genomes\Maze\BaseMazeGene.cs" />
     <Compile Include="Genomes\Maze\WallGene.cs" />

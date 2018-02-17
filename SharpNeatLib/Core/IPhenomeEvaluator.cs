@@ -63,7 +63,7 @@ namespace SharpNeat.Core
 
         /// <summary>
         ///     Updates the environment or other evaluation criteria against which the phenomes under evaluation are being
-        ///     compared.  This is typically used in a coevolutionary context.
+        ///     compared.  This is typically used in a MCC context.
         /// </summary>
         /// <param name="evaluatorPhenomes">The new phenomes to compare against.</param>
         void UpdateEvaluatorPhenotypes(IEnumerable<object> evaluatorPhenomes);
