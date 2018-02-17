@@ -12,7 +12,12 @@
         GenerateMazes,
 
         /// <summary>
-        ///     The number of interior walls to be encoded in the maz.
+        ///     The number of path waypoints to be encoded in the maze.
+        /// </summary>
+        NumWaypoints,
+
+        /// <summary>
+        ///     The number of interior walls to be encoded in the maze.
         /// </summary>
         NumWalls,
 

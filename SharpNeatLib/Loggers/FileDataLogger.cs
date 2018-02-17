@@ -199,7 +199,7 @@ namespace SharpNeat.Loggers
         /// <returns>The values (observations) from the given LoggableElements.</returns>
         private List<String> extractDataPoints(List<LoggableElement> loggableElements)
         {
-            return loggableElements.Select(LoggableElement => Convert.ToString(LoggableElement.Value)).ToList();
+            return loggableElements.Select(loggableElement => Convert.ToString(loggableElement.Value)).ToList();
         }
 
         #endregion

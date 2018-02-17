@@ -11,7 +11,6 @@ using SharpNeat.Genomes.Neat;
 using SharpNeat.Loggers;
 using SharpNeat.Phenomes;
 using SharpNeat.Phenomes.Mazes;
-using SharpNeat.Utility;
 
 #endregion
 
@@ -28,11 +27,13 @@ namespace MCC_Domains.MazeNavigation.Bootstrappers
         ///     Sets the data loggers for the initialization process.
         /// </summary>
         /// <param name="navigatorEvolutionDataLogger">The logger for evolution statistics.</param>
-        /// <param name="navigatorPopulationDataLogger">The logger for serializing navigator genomes.</param>
+        /// <param name="navigatorPopulationDataLogger">The logger for recording the extant genomes throughout evolution.</param>
+        /// ///
+        /// <param name="navigatorGenomeDataLogger">The logger for serializing navigator genomes.</param>
         /// <param name="navigatorEvolutionLogFieldEnableMap">Indicates the enabled/disabled status of the evolution logger fields.</param>
         /// <param name="populationLoggingInterval">The batch interval at which the current population is serialized to a file.</param>
         public void SetDataLoggers(IDataLogger navigatorEvolutionDataLogger,
-            IDataLogger navigatorPopulationDataLogger,
+            IDataLogger navigatorPopulationDataLogger, IDataLogger navigatorGenomeDataLogger,
             IDictionary<FieldElement, bool> navigatorEvolutionLogFieldEnableMap, int? populationLoggingInterval)
         {
             NavigatorEvolutionDataLogger = navigatorEvolutionDataLogger;
@@ -130,10 +131,9 @@ namespace MCC_Domains.MazeNavigation.Bootstrappers
             // Write the header
             mazeGenomeDataLogger?.LogHeader(new List<LoggableElement>
             {
-                new LoggableElement(PopulationGenomesFieldElements.Generation, null),
-                new LoggableElement(PopulationGenomesFieldElements.GenomeId, null),
-                new LoggableElement(PopulationGenomesFieldElements.GenomeXml, null),
-                new LoggableElement(PopulationGenomesFieldElements.SpecieId, null)
+                new LoggableElement(PopulationFieldElements.Generation, null),
+                new LoggableElement(PopulationFieldElements.GenomeId, null),
+                new LoggableElement(PopulationFieldElements.SpecieId, null)
             });
 
             // Write the genome XML for all initialization genomes
@@ -142,11 +142,9 @@ namespace MCC_Domains.MazeNavigation.Bootstrappers
                 // Write the genome XML
                 mazeGenomeDataLogger?.LogRow(new List<LoggableElement>
                 {
-                    new LoggableElement(PopulationGenomesFieldElements.Generation, mazeGenome.BirthGeneration),
-                    new LoggableElement(PopulationGenomesFieldElements.GenomeId, mazeGenome.Id),
-                    new LoggableElement(PopulationGenomesFieldElements.GenomeXml,
-                        XmlIoUtils.GetGenomeXml(mazeGenome)),
-                    new LoggableElement(PopulationGenomesFieldElements.SpecieId, mazeGenome.SpecieIdx)
+                    new LoggableElement(PopulationFieldElements.Generation, mazeGenome.BirthGeneration),
+                    new LoggableElement(PopulationFieldElements.GenomeId, mazeGenome.Id),
+                    new LoggableElement(PopulationFieldElements.SpecieId, mazeGenome.SpecieIdx)
                 });
             }
         }

@@ -85,12 +85,6 @@ namespace SharpNeat.Genomes.Maze
 
             // Create new evaluation info with no fitness history
             EvaluationInfo = new EvaluationInfo(0);
-
-            // Instantiate new wall gene list
-            WallGeneList = new List<WallGene>();
-
-            // Instantiate new path gene list
-            PathGeneList = new List<PathGene>();
         }
 
         /// <summary>
@@ -121,6 +115,17 @@ namespace SharpNeat.Genomes.Maze
 
             // Set the genome factory
             GenomeFactory = genomeFactory;
+
+            // Instantiate new wall gene list
+            WallGeneList = new List<WallGene>();
+
+            // Instantiate new path gene list (at least one waypoint is required to form an initial trajectory - placed in the middle by default)
+            PathGeneList = new List<PathGene>
+            {
+                new PathGene(GenomeFactory.InnovationIdGenerator.NextId,
+                    new Point2DInt(MazeBoundaryWidth/2, MazeBoundaryHeight/2),
+                    GenomeFactory.Rng.NextBool() ? IntersectionOrientation.Horizontal : IntersectionOrientation.Vertical)
+            };
         }
 
         /// <summary>
@@ -132,7 +137,7 @@ namespace SharpNeat.Genomes.Maze
         /// <param name="birthGeneration">The birth generation.</param>
         /// <param name="height">The base/initial height of the maze genome.</param>
         /// <param name="width">The base/initial width of the maze genome.</param>
-        protected MazeGenome(MazeGenomeFactory genomeFactory, uint id, uint birthGeneration, int height, int width)
+        protected MazeGenome(uint id, uint birthGeneration, int height, int width)
             : this(id, birthGeneration)
         {
             // Set the initial maze height and width
@@ -143,8 +148,11 @@ namespace SharpNeat.Genomes.Maze
             RelativeCellHeight = (double) 1/MazeBoundaryHeight;
             RelativeCellWidth = (double) 1/MazeBoundaryWidth;
 
-            // Set the genome factory
-            GenomeFactory = genomeFactory;
+            // Instantiate new wall gene list
+            WallGeneList = new List<WallGene>();
+
+            // Instantiate new path gene list (at least one path gene will eventually have to be added for this to work)
+            PathGeneList = new List<PathGene>();
         }
 
         /// <summary>
@@ -178,16 +186,15 @@ namespace SharpNeat.Genomes.Maze
         ///     Constructor which constructs a new maze genome with the given unique identifier, birth generation, and list of wall
         ///     genes.
         /// </summary>
-        /// <param name="genomeFactory">Reference to the genome factory.</param>
         /// <param name="id">The unique identifier of the new maze genome.</param>
         /// <param name="birthGeneration">The birth generation.</param>
         /// <param name="height">The base/initial height of the maze genome.</param>
         /// <param name="width">The base/initial width of the maze genome.</param>
         /// <param name="wallGeneList">The list of wall genes.</param>
         /// <param name="pathGeneList">The list of path genes.</param>
-        public MazeGenome(MazeGenomeFactory genomeFactory, uint id, uint birthGeneration, int height, int width,
+        public MazeGenome(uint id, uint birthGeneration, int height, int width,
             IList<WallGene> wallGeneList, IList<PathGene> pathGeneList)
-            : this(genomeFactory, id, birthGeneration, height, width)
+            : this(id, birthGeneration, height, width)
         {
             WallGeneList = wallGeneList;
             PathGeneList = pathGeneList;
@@ -223,7 +230,7 @@ namespace SharpNeat.Genomes.Maze
         /// <summary>
         ///     Computes the complexity of the maze genome.
         /// </summary>
-        public double Complexity => WallGeneList.Count;
+        public double Complexity => PathGeneList.Count;
 
         /// <summary>
         ///     Gets a coordinate that represents the genome's position in the search space (also known
@@ -236,25 +243,28 @@ namespace SharpNeat.Genomes.Maze
             {
                 if (null == _position)
                 {
-                    int interiorWallCount = WallGeneList.Count;
+                    int pathWaypointCount = PathGeneList.Count;
 
                     // Create array of key/value pairs to hold innovation IDs and their corresponding 
                     // "position" in the genetic encoding space                    
-                    KeyValuePair<ulong, double>[] coordElemArray = new KeyValuePair<ulong, double>[interiorWallCount];
+                    KeyValuePair<ulong, double>[] coordElemArray = new KeyValuePair<ulong, double>[pathWaypointCount];
 
-                    for (int i = 0; i < interiorWallCount; i++)
+                    for (int i = 0; i < PathGeneList.Count; i++)
                     {
-                        double wallLocation = WallGeneList[i].WallLocation;
-                        double passageLocation = WallGeneList[i].PassageLocation;
+                        int xPosition = PathGeneList[i].Waypoint.X;
+                        int yPosition = PathGeneList[i].Waypoint.Y;
 
-                        // Calculate cantor pairing of relative wall and passage positions
-                        double compositeGeneCoordinate = ((wallLocation + passageLocation)*
-                                                          (wallLocation + passageLocation + 1))/2 + passageLocation;
+                        // Calculate cantor pairing of X and Y coordinates
+                        double compositeGeneCoordinate = ((xPosition + yPosition)*
+                                                          (xPosition + yPosition + 1))/2 + yPosition;
 
                         // Add gene coordinate to array
-                        coordElemArray[i] = new KeyValuePair<ulong, double>(WallGeneList[i].InnovationId,
+                        coordElemArray[i] = new KeyValuePair<ulong, double>(PathGeneList[i].InnovationId,
                             compositeGeneCoordinate);
                     }
+
+                    // Note that walls are omitted from genome position definition because their placement
+                    // is merely induced by the trajectory, which is itself defined by the waypoints
 
                     // Construct the genome coordinate vector
                     _position = new CoordinateVector(coordElemArray);
@@ -475,11 +485,9 @@ namespace SharpNeat.Genomes.Maze
             double newPassageStartLocation = GenomeFactory.Rng.NextDoubleNonZero();
 
             // Add new gene to the genome
-//            WallGeneList.Add(new WallGene(GenomeFactory.InnovationIdGenerator.NextId, newWallStartLocation,
-//                newPassageStartLocation, GenomeFactory.Rng.NextBool()));
-            // TODO: Evaluating effect of biasing toward vertical walls
             WallGeneList.Add(new WallGene(GenomeFactory.InnovationIdGenerator.NextId, newWallStartLocation,
-                newPassageStartLocation, (GenomeFactory.Rng.NextDoubleNonZero() > 0.72)));
+                newPassageStartLocation,
+                (GenomeFactory.Rng.NextDoubleNonZero() > GenomeFactory.MazeGenomeParameters.VerticalWallBias)));
         }
 
         /// <summary>
@@ -563,7 +571,9 @@ namespace SharpNeat.Genomes.Maze
                         break;
                     }
                 }
-            } while (IsValidLocation(mutatedPoint) == false);
+            } while (
+                MazeUtils.IsValidWaypointLocation(PathGeneList, MazeBoundaryHeight, MazeBoundaryWidth, mutatedPoint) ==
+                false);
 
             // Set the new, validated waypoint
             PathGeneList[geneIdx].Waypoint = mutatedPoint;
@@ -580,7 +590,8 @@ namespace SharpNeat.Genomes.Maze
             do
             {
                 newPoint = GetSparseGridCell();
-            } while (IsValidLocation(newPoint) == false);
+            } while (MazeUtils.IsValidWaypointLocation(PathGeneList, MazeBoundaryHeight, MazeBoundaryWidth, newPoint) ==
+                     false);
 
             // Add the new path gene to the genome
             PathGeneList.Add(new PathGene(GenomeFactory.InnovationIdGenerator.NextId, newPoint,
@@ -606,61 +617,6 @@ namespace SharpNeat.Genomes.Maze
         }
 
         /// <summary>
-        ///     Ensures that the waypoint location (resulting from a mutation) is within the maze boundaries and does not overlap
-        ///     with other waypoints or with the start/end location (which are in the upper-left and lower right cells of the maze
-        ///     respectively). Specifically, the following validity checks are performed:
-        ///     1. Checks X and Y minimum and maximum points are in the horizontal and vertical boundaries of the maze
-        ///     respectively.
-        ///     2. Checks that proposed location does not overlap existing waypoints.
-        ///     3. Checks that proposed location does not overlap start location or target location.
-        ///     4. Checks that proposed location is higher than the next to the last row, or that the proposed location is on the
-        ///     next to the last row but its x-position is less than or equal to existing points on the last row, or that the
-        ///     proposed location is on the last row but its x-position is greater than or equal to existing points on the next to
-        ///     the last row. This is to prevent trajectory overlaps.
-        /// </summary>
-        /// <param name="waypointLocation">The proposed waypoint.</param>
-        /// <returns>Boolean indicating whether the given point is valid per the maze boundary constraints.</returns>
-        private bool IsValidLocation(Point2DInt waypointLocation)
-        {
-            return
-                // Check that x-coordinate is at-or-above minimum maze width
-                waypointLocation.X >= 0 &&
-
-                // Check that x-coordinate is within maze width boundary
-                waypointLocation.X < MazeBoundaryWidth &&
-
-                // Check that y-coordinate is at-or-above minimum maze height
-                waypointLocation.Y >= 0 &&
-
-                // Check that y-coordinate is within maze height boundary
-                waypointLocation.Y < MazeBoundaryHeight &&
-
-                // Check that no existing waypoint overlaps proposed waypoint
-                PathGeneList.Any(g => waypointLocation.Equals(g.Waypoint)) == false &&
-
-                // Check that proposed waypoint does not overlap start position
-                waypointLocation.Equals(new Point2DInt(0, 0)) == false &&
-
-                // Check that proposed waypoint does not overlap target position
-                waypointLocation.Equals(new Point2DInt(MazeBoundaryWidth - 1, MazeBoundaryHeight - 1)) == false &&
-
-                // Check that proposed waypoint is higher than next-to-last row
-                (waypointLocation.Y < MazeBoundaryHeight - 2 ||
-
-                 // If proposed waypoint is on next-to-last row, check that it's further to the left than waypoints on last row 
-                 (waypointLocation.Y == MazeBoundaryHeight - 2 &&
-                  (PathGeneList.Count(g => g.Waypoint.Y == MazeBoundaryHeight - 1) == 0 ||
-                   PathGeneList.Where(g => g.Waypoint.Y == MazeBoundaryHeight - 1).Min(g => g.Waypoint.X) >=
-                   waypointLocation.X) ||
-
-                  // If proposed waypoint is on the last row, check that it's further to the right than waypoints on next-to-last row
-                  (waypointLocation.Y == MazeBoundaryHeight - 1 &&
-                   (PathGeneList.Count(g => g.Waypoint.Y == MazeBoundaryHeight - 2) == 0 ||
-                    PathGeneList.Where(g => g.Waypoint.Y == MazeBoundaryHeight - 2).Max(g => g.Waypoint.X) <=
-                    waypointLocation.X))));
-        }
-
-        /// <summary>
         ///     Extracts a random most sparse cell from among the top N most sparse regions in the maze space.
         /// </summary>
         /// <returns>A randomly selected cell from a list of sparse regions within the maze space.</returns>
@@ -668,7 +624,9 @@ namespace SharpNeat.Genomes.Maze
         {
             // Get count of neighboring cells within neighborhood radius
             var cellNeighborCounts = MazeUtils.ComputeCellNeighborCounts(PathGeneList, MazeBoundaryHeight,
-                MazeBoundaryWidth, (int) Math.Sqrt(MazeBoundaryHeight*MazeBoundaryWidth)/5);
+                MazeBoundaryWidth,
+                (int) Math.Sqrt(MazeBoundaryHeight*MazeBoundaryWidth)/
+                GenomeFactory.MazeGenomeParameters.GridCellNeighborhoodRadius);
 
             // Compute crowd factor scores for each cell by dividing neighbor count by total number of waypoints
             Dictionary<Point2DInt, double> cellCrowdFactor = cellNeighborCounts.ToDictionary(cell => cell.Key,
@@ -676,7 +634,10 @@ namespace SharpNeat.Genomes.Maze
 
             // Extract the specified proportion of most sparse cells and return random cell in set
             return cellCrowdFactor.OrderBy(x => x.Value)
-                .Take((int) Math.Ceiling(0.2*cellCrowdFactor.Count))
+                .Take(
+                    (int)
+                        Math.Ceiling(GenomeFactory.MazeGenomeParameters.SparseCellSelectionProportion*
+                                     cellCrowdFactor.Count))
                 .OrderBy(x => GenomeFactory.Rng.Next())
                 .First().Key;
         }
@@ -723,8 +684,7 @@ namespace SharpNeat.Genomes.Maze
             // If the max complexity is now lower, remove the non-coding genes
             if (MaxComplexity < WallGeneList.Count)
             {
-                ((List<WallGene>) WallGeneList).RemoveRange(WallGeneList.Count - (MaxComplexity - WallGeneList.Count),
-                    MaxComplexity - WallGeneList.Count);
+                ((List<WallGene>) WallGeneList).RemoveRange(MaxComplexity, WallGeneList.Count - MaxComplexity);
             }
         }
 

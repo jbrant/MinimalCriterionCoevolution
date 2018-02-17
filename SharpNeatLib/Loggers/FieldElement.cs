@@ -300,9 +300,10 @@ namespace SharpNeat.Loggers
     }
 
     /// <summary>
-    ///     Fields capturing the XML definition of genomes in the extant population at periodic intervals.
+    ///     Fields capturing the extant genomes (denoted by their ID) during a point in the run, given by the run phase and
+    ///     generation..
     /// </summary>
-    public class PopulationGenomesFieldElements
+    public class PopulationFieldElements
     {
         /// <summary>
         ///     The number of elements in this log file/table.
@@ -310,43 +311,77 @@ namespace SharpNeat.Loggers
         public static readonly int NumFieldElements = 4;
 
         /// <summary>
-        ///     The generation in which the given population is extant.
-        /// </summary>
-        public static readonly FieldElement Generation = new FieldElement(0, "Generation");
-
-        /// <summary>
         ///     The run phase (i.e. initialization or primary) during which the given observation executed.
         /// </summary>
-        public static readonly FieldElement RunPhase = new FieldElement(1, "Run Phase");
+        public static readonly FieldElement RunPhase = new FieldElement(0, "Run Phase");
+
+        /// <summary>
+        ///     The generation in which the given population is extant.
+        /// </summary>
+        public static readonly FieldElement Generation = new FieldElement(1, "Generation");
 
         /// <summary>
         ///     The ID of the genome definition being logged.
         /// </summary>
-        public static readonly FieldElement GenomeId = new FieldElement(2, "Genomd ID");
-
-        /// <summary>
-        ///     The XML definition of the genome.
-        /// </summary>
-        public static readonly FieldElement GenomeXml = new FieldElement(3, "Genome XML");
+        public static readonly FieldElement GenomeId = new FieldElement(2, "Genome ID");
 
         /// <summary>
         ///     The unique identifier for the species of which the genome is a member.
         /// </summary>
-        public static readonly FieldElement SpecieId = new FieldElement(4, "Specie ID");
+        public static readonly FieldElement SpecieId = new FieldElement(3, "Specie ID");
 
         /// <summary>
         ///     Pre-constructs an evaluation log field enable map with all of the fields enabled by default.
         /// </summary>
         /// <returns>Evaluation log field enable map with all fields enabled.</returns>
-        public static Dictionary<FieldElement, bool> PopulatePopulationGenomesFieldElementsEnableMap()
+        public static Dictionary<FieldElement, bool> PopulatePopulationFieldElementsEnableMap()
         {
             return new Dictionary<FieldElement, bool>
             {
+                {RunPhase, true},
                 {Generation, true},
+                {GenomeId, true},
+                {SpecieId, true}
+            };
+        }
+    }
+
+    /// <summary>
+    ///     Fields capturing the XML definition of genomes throughout the course of a run.
+    /// </summary>
+    public class GenomeFieldElements
+    {
+        /// <summary>
+        ///     The number of elements in this log file/table.
+        /// </summary>
+        public static readonly int NumFieldElements = 3;
+
+        /// <summary>
+        ///     The run phase (i.e. initialization or primary) during which the given observation executed.
+        /// </summary>
+        public static readonly FieldElement RunPhase = new FieldElement(0, "Run Phase");
+
+        /// <summary>
+        ///     The ID of the genome definition being logged.
+        /// </summary>
+        public static readonly FieldElement GenomeId = new FieldElement(1, "Genome ID");
+
+        /// <summary>
+        ///     The XML definition of the genome.
+        /// </summary>
+        public static readonly FieldElement GenomeXml = new FieldElement(2, "Genome XML");
+
+        /// <summary>
+        ///     Pre-constructs an evaluation log field enable map with all of the fields enabled by default.
+        /// </summary>
+        /// <returns>Evaluation log field enable map with all fields enabled.</returns>
+        public static Dictionary<FieldElement, bool> PopulateGenomeFieldElementsEnableMap()
+        {
+            return new Dictionary<FieldElement, bool>
+            {
                 {RunPhase, true},
                 {GenomeId, true},
-                {GenomeXml, true},
-                {SpecieId, true}
+                {GenomeXml, true}
             };
         }
     }

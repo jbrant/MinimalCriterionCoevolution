@@ -8,6 +8,7 @@ using System.Xml;
 using SharpNeat.Decoders.Maze;
 using SharpNeat.Genomes.Maze;
 using SharpNeat.Phenomes.Mazes;
+using SharpNeat.Utility;
 
 #endregion
 
@@ -78,6 +79,7 @@ namespace MazeGenomeGenerator
             int mazeWidth = Int32.Parse(_executionConfiguration[ExecutionParameter.MazeWidth]);
 
             // Get the number of interior walls and maze genome output directory
+            int numWaypoints = Int32.Parse(_executionConfiguration[ExecutionParameter.NumWaypoints]);
             int numInteriorWalls = Int32.Parse(_executionConfiguration[ExecutionParameter.NumWalls]);
             string mazeGenomeOutputDirectory = _executionConfiguration[ExecutionParameter.MazeGenomeOutputBaseDirectory];
 
@@ -103,11 +105,12 @@ namespace MazeGenomeGenerator
 
             for (int curMazeCnt = 0; curMazeCnt < numMazes; curMazeCnt++)
             {
-                MazeGenome mazeGenome = null;
+                MazeGenome mazeGenome;
 
                 // Lay out the base file name
-                string fileBaseName = string.Format("GeneratedMazeGenome_{0}_Height_{1}_Width_{2}_Walls_{3}", mazeHeight,
-                    mazeWidth, numInteriorWalls, curMazeCnt);
+                string fileBaseName =
+                    string.Format("GeneratedMazeGenome_{0}_Height_{1}_Width_{2}_Waypoints_{3}_Walls_{4}", mazeHeight,
+                        mazeWidth, numWaypoints, numInteriorWalls, curMazeCnt);
 
                 // With a single output file, the genomes are likely being used for separate experiments, so we
                 // reset the innovation IDs and assign the maze a constant identifier
@@ -119,18 +122,38 @@ namespace MazeGenomeGenerator
                     // Create a new genome and pass in the requisite factory
                     mazeGenome = new MazeGenome(mazeGenomeFactory, 0, 0);
                 }
-                // Otherwise, we leave the innovation ID generator along and create a new maze genome with
+                // Otherwise, we leave the innovation ID generator alone and create a new maze genome with
                 // an identifier that's incremented by one
                 else
                 {
                     mazeGenome = new MazeGenome(mazeGenomeFactory, (uint) curMazeCnt, 0);
                 }
 
+                // Add the specified number of waypoints (less one because center waypoint is created on maze initialization)
+                for (int cnt = 0; cnt < numWaypoints-1; cnt++)
+                {
+                    Point2DInt waypoint;
+
+                    // Iterate until we get a waypoint that's valid
+                    do
+                    {
+                        waypoint = new Point2DInt(mazeGenomeFactory.Rng.Next(mazeGenome.MazeBoundaryWidth - 1),
+                            mazeGenomeFactory.Rng.Next(mazeGenome.MazeBoundaryHeight - 1));
+                    } while (
+                        MazeUtils.IsValidWaypointLocation(mazeGenome.PathGeneList, mazeGenome.MazeBoundaryHeight,
+                            mazeGenome.MazeBoundaryWidth, waypoint) == false);
+
+                    mazeGenome.PathGeneList.Add(new PathGene(mazeGenomeFactory.InnovationIdGenerator.NextId, waypoint,
+                        mazeGenomeFactory.Rng.NextBool()
+                            ? IntersectionOrientation.Horizontal
+                            : IntersectionOrientation.Vertical));
+                }
+
                 // Create the specified number of interior walls (i.e. maze genes)
                 for (int cnt = 0; cnt < numInteriorWalls; cnt++)
                 {
                     // Create new maze gene and add to genome
-                    mazeGenome?.WallGeneList.Add(new WallGene(mazeGenomeFactory.InnovationIdGenerator.NextId,
+                    mazeGenome.WallGeneList.Add(new WallGene(mazeGenomeFactory.InnovationIdGenerator.NextId,
                         rand.NextDouble(), rand.NextDouble(), rand.NextDouble() < 0.5));
                 }
 
@@ -168,8 +191,9 @@ namespace MazeGenomeGenerator
                 using (
                     XmlWriter xmlWriter =
                         XmlWriter.Create(Path.Combine(mazeGenomeOutputDirectory,
-                            string.Format("GeneratedMaze_{0}_Genomes_{1}_Height_{2}_Width_{3}_Walls.xml", numMazes,
-                                mazeHeight, mazeWidth, numInteriorWalls))))
+                            string.Format("GeneratedMaze_{0}_Genomes_{1}_Height_{2}_Width_{3}_Waypoints_{4}_Walls.xml",
+                                numMazes,
+                                mazeHeight, mazeWidth, numWaypoints, numInteriorWalls))))
                 {
                     MazeGenomeXmlIO.WriteComplete(xmlWriter, mazeGenomeList);
                 }

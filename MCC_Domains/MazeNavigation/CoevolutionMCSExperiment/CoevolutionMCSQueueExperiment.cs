@@ -45,7 +45,8 @@ namespace MCC_Domains.MazeNavigation.CoevolutionMCSExperiment
             {
                 // Delete/recreate navigator log files on restart
                 _navigatorEvolutionDataLogger.ResetLog();
-                _navigatorPopulationGenomesDataLogger.ResetLog();
+                _navigatorPopulationDataLogger.ResetLog();
+                _navigatorGenomeDataLogger.ResetLog();
 
                 // Instantiate the internal initialization algorithm
                 _mazeNavigationInitializer.InitializeAlgorithm(ParallelOptions, seedAgentList.ToList(), genomeFactory,
@@ -75,20 +76,22 @@ namespace MCC_Domains.MazeNavigation.CoevolutionMCSExperiment
         /// <param name="name">The name of the experiment.</param>
         /// <param name="xmlConfig">The reference to the XML configuration file.</param>
         /// <param name="navigatorEvolutionLogger">The navigator evolution data logger.</param>
+        /// <param name="navigatorPopulationLogger">The navigator population logger.</param>
         /// <param name="navigatorGenomeLogger">The navigator genome logger.</param>
         /// <param name="mazeEvolutionLogger">The maze evolution data logger.</param>
+        /// <param name="mazePopulationLogger">The maze population logger.</param>
         /// <param name="mazeGenomeLogger">The maze genome logger.</param>
         public override void Initialize(string name, XmlElement xmlConfig,
-            IDataLogger navigatorEvolutionLogger = null, IDataLogger navigatorGenomeLogger = null,
-            IDataLogger mazeEvolutionLogger = null, IDataLogger mazeGenomeLogger = null)
+            IDataLogger navigatorEvolutionLogger = null, IDataLogger navigatorPopulationLogger = null,
+            IDataLogger navigatorGenomeLogger = null,
+            IDataLogger mazeEvolutionLogger = null, IDataLogger mazePopulationLogger = null,
+            IDataLogger mazeGenomeLogger = null)
         {
             // Initialize boiler plate parameters
-            base.Initialize(name, xmlConfig, navigatorEvolutionLogger, navigatorGenomeLogger,
-                mazeEvolutionLogger,
-                mazeGenomeLogger);
+            base.Initialize(name, xmlConfig, navigatorEvolutionLogger, navigatorPopulationLogger, navigatorGenomeLogger,
+                mazeEvolutionLogger, mazePopulationLogger, mazeGenomeLogger);
 
             // Set experiment-specific parameters
-            _maxTimesteps = XmlUtils.GetValueAsInt(xmlConfig, "MaxTimesteps");
             _minSuccessDistance = XmlUtils.GetValueAsInt(xmlConfig, "MinSuccessDistance");
             _mazeHeight = XmlUtils.GetValueAsInt(xmlConfig, "MazeHeight");
             _mazeWidth = XmlUtils.GetValueAsInt(xmlConfig, "MazeWidth");
@@ -103,15 +106,21 @@ namespace MCC_Domains.MazeNavigation.CoevolutionMCSExperiment
             _navigatorEvolutionDataLogger = navigatorEvolutionLogger ??
                                             ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Evolution,
                                                 "NavigatorLoggingConfig");
-            _navigatorPopulationGenomesDataLogger = navigatorGenomeLogger ??
-                                                    ExperimentUtils.ReadDataLogger(xmlConfig,
-                                                        LoggingType.PopulationGenomes, "NavigatorLoggingConfig");
+            _navigatorPopulationDataLogger = navigatorPopulationLogger ??
+                                             ExperimentUtils.ReadDataLogger(xmlConfig,
+                                                 LoggingType.Population, "NavigatorLoggingConfig");
+            _navigatorGenomeDataLogger = navigatorGenomeLogger ??
+                                         ExperimentUtils.ReadDataLogger(xmlConfig,
+                                             LoggingType.Genome, "NavigatorLoggingConfig");
             _mazeEvolutionDataLogger = mazeEvolutionLogger ??
                                        ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Evolution,
                                            "MazeLoggingConfig");
-            _mazePopulationGenomesDataLogger = mazeGenomeLogger ??
-                                               ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.PopulationGenomes,
-                                                   "MazeLoggingConfig");
+            _mazePopulationDataLogger = mazePopulationLogger ??
+                                        ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Population,
+                                            "MazeLoggingConfig");
+            _mazeGenomeDataLogger = mazeGenomeLogger ??
+                                    ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Genome,
+                                        "MazeLoggingConfig");
 
             // Read in the maximum number of initialization evaluations
             _maxInitializationEvaluations = XmlUtils.GetValueAsUInt(xmlConfig, "MaxInitializationEvaluations");
@@ -119,12 +128,20 @@ namespace MCC_Domains.MazeNavigation.CoevolutionMCSExperiment
             // Create new evolution field elements map with all fields enabled
             _navigatorLogFieldEnableMap = EvolutionFieldElements.PopulateEvolutionFieldElementsEnableMap();
 
-            // Also add default population logging configuration
+            // Add default population logging configuration
             foreach (
                 KeyValuePair<FieldElement, bool> populationLoggingPair in
-                    PopulationGenomesFieldElements.PopulatePopulationGenomesFieldElementsEnableMap())
+                    PopulationFieldElements.PopulatePopulationFieldElementsEnableMap())
             {
                 _navigatorLogFieldEnableMap.Add(populationLoggingPair.Key, populationLoggingPair.Value);
+            }
+
+            // Add default genome logging configuration
+            foreach (
+                KeyValuePair<FieldElement, bool> genomeLoggingPair in
+                    GenomeFieldElements.PopulateGenomeFieldElementsEnableMap())
+            {
+                _navigatorLogFieldEnableMap.Add(genomeLoggingPair.Key, genomeLoggingPair.Value);
             }
 
             // Disable logging fields not relevant to coevolution experiment
@@ -157,7 +174,7 @@ namespace MCC_Domains.MazeNavigation.CoevolutionMCSExperiment
 
             // Make on change to the maze logger configuration to switch off run phase logging
             _mazeLogFieldEnableMap[EvolutionFieldElements.RunPhase] = false;
-            _mazeLogFieldEnableMap[PopulationGenomesFieldElements.RunPhase] = false;
+            _mazeLogFieldEnableMap[PopulationFieldElements.RunPhase] = false;
 
             // Read in the number of batches between population logging
             _populationLoggingBatchInterval = XmlUtils.TryGetValueAsInt(xmlConfig, "PopulationLoggingBatchInterval");
@@ -173,7 +190,8 @@ namespace MCC_Domains.MazeNavigation.CoevolutionMCSExperiment
 
             // Set the initialization loggers
             _mazeNavigationInitializer.SetDataLoggers(_navigatorEvolutionDataLogger,
-                _navigatorPopulationGenomesDataLogger, _navigatorLogFieldEnableMap, _populationLoggingBatchInterval);
+                _navigatorPopulationDataLogger, _navigatorGenomeDataLogger, _navigatorLogFieldEnableMap,
+                _populationLoggingBatchInterval);
 
             // Setup initialization algorithm
             _mazeNavigationInitializer.SetAlgorithmParameters(
@@ -326,7 +344,8 @@ namespace MCC_Domains.MazeNavigation.CoevolutionMCSExperiment
                     new ParallelKMeansClusteringStrategy<NeatGenome>(new ManhattanDistanceMetric(1.0, 0.0, 10.0),
                         ParallelOptions), null,
                     NavigatorBatchSize, RunPhase.Primary, false, false, _navigatorEvolutionDataLogger,
-                    _navigatorLogFieldEnableMap, _navigatorPopulationGenomesDataLogger, _populationLoggingBatchInterval,
+                    _navigatorLogFieldEnableMap, _navigatorPopulationDataLogger, _navigatorGenomeDataLogger,
+                    _populationLoggingBatchInterval,
                     _isNavigatorSpecieFixedSize);
 
             // Create the maze queueing evolution algorithm
@@ -341,7 +360,8 @@ namespace MCC_Domains.MazeNavigation.CoevolutionMCSExperiment
                     new ParallelKMeansClusteringStrategy<MazeGenome>(new ManhattanDistanceMetric(1.0, 0.0, 10.0),
                         ParallelOptions), null,
                     MazeBatchSize, RunPhase.Primary, false, false, _mazeEvolutionDataLogger, _mazeLogFieldEnableMap,
-                    _mazePopulationGenomesDataLogger, _populationLoggingBatchInterval, _isMazeSpecieFixedSize);
+                    _mazePopulationDataLogger, _mazeGenomeDataLogger, _populationLoggingBatchInterval,
+                    _isMazeSpecieFixedSize);
 
             // Create the maze phenome evaluator
             IPhenomeEvaluator<MazeStructure, BehaviorInfo> mazeEvaluator =
@@ -391,11 +411,6 @@ namespace MCC_Domains.MazeNavigation.CoevolutionMCSExperiment
         private CoevolutionMazeNavigationInitializer _mazeNavigationInitializer;
 
         /// <summary>
-        ///     The maximum number of timesteps allowed for a single simulation.
-        /// </summary>
-        private int _maxTimesteps;
-
-        /// <summary>
         ///     The minimum distance to the target required in order to have "solved" the maze.
         /// </summary>
         private int _minSuccessDistance;
@@ -438,9 +453,14 @@ namespace MCC_Domains.MazeNavigation.CoevolutionMCSExperiment
         private IDataLogger _navigatorEvolutionDataLogger;
 
         /// <summary>
-        ///     Logs the XML definitions of the extant navigator population on a periodic basis.
+        ///     Logs the IDs of the extant navigator population at every interval.
         /// </summary>
-        private IDataLogger _navigatorPopulationGenomesDataLogger;
+        private IDataLogger _navigatorPopulationDataLogger;
+
+        /// <summary>
+        ///     Logs the definitions of the navigator population over the course of a run.
+        /// </summary>
+        private IDataLogger _navigatorGenomeDataLogger;
 
         /// <summary>
         ///     Logs statistics about the maze populations for every batch.
@@ -448,9 +468,14 @@ namespace MCC_Domains.MazeNavigation.CoevolutionMCSExperiment
         private IDataLogger _mazeEvolutionDataLogger;
 
         /// <summary>
-        ///     Logs the XML definitions of the extant maze population on a periodic basis.
+        ///     Logs the IDs of the extant maze population at every interval.
         /// </summary>
-        private IDataLogger _mazePopulationGenomesDataLogger;
+        private IDataLogger _mazePopulationDataLogger;
+
+        /// <summary>
+        ///     Logs the definitions of the maze population over the course of a run.
+        /// </summary>
+        private IDataLogger _mazeGenomeDataLogger;
 
         /// <summary>
         ///     Dictionary which indicates logger fields to be enabled/disabled for navigator genomes.

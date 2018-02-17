@@ -149,6 +149,9 @@
     </Content>
     <Content Include="MazeNavigation\ExperimentConfigurations\Coevolution MCS Example.config.xml" />
     <Content Include="MazeNavigation\ExperimentConfigurations\Coevolution MCS Template.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\MCC-PathEvolution-Test.config.xml">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Bridging\Queueing MCS - no MC 1.config.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -503,6 +506,33 @@
     <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Dynamic Speciation - Single MC 4.config.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Expanding Maze 1.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Expanding Maze 10.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Expanding Maze 2.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Expanding Maze 3.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Expanding Maze 4.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Expanding Maze 5.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Expanding Maze 6.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Expanding Maze 7-01.config.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Expanding Maze 7-02.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Expanding Maze 7-03.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Expanding Maze 7-04.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Expanding Maze 7-05.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Expanding Maze 7-06.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Expanding Maze 7-07.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Expanding Maze 7-08.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Expanding Maze 7-09.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Expanding Maze 7-10.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Expanding Maze 7-11.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Expanding Maze 7-12.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Expanding Maze 7-13.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Expanding Maze 7-14.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Expanding Maze 7-15.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Expanding Maze 7.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Expanding Maze 8.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Expanding Maze 9.config.xml" />
     <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\Coevolution MCS - Speciation Control - Single MC 1.config.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -1459,6 +1489,9 @@
     <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\ParameterSweeps\Queueing MCS Parameter Sweep 99.config.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\McsExperiments\Coevolution\MCC-PathEvolution-1.config.xml">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="MazeNavigation\ExperimentConfigurations\Queueing MCS Niching Template.config.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -1516,6 +1549,15 @@
     <Content Include="MazeNavigation\SeedMazes\GeneratedMaze_100_Genomes_10_Height_10_Width_2_Walls.xml" />
     <Content Include="MazeNavigation\SeedMazes\GeneratedMaze_100_Genomes_10_Height_10_Width_8_Walls.xml" />
     <Content Include="MazeNavigation\SeedMazes\GeneratedMaze_100_Genomes_8_Walls.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\SeedMazes\GeneratedMaze_1_Genome_10_Height_10_Width_1_Waypoint_0_Walls.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\SeedMazes\GeneratedMaze_10_Genomes_10_Height_10_Width_2_Waypoints_2_Walls.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MazeNavigation\SeedMazes\GeneratedMaze_10_Genomes_10_Height_10_Width_3_Waypoints_2_Walls.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="MazeNavigation\SeedMazes\GeneratedMaze_50_Genomes_8_Walls.xml">

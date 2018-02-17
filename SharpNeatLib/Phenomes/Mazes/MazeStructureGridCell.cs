@@ -90,24 +90,14 @@ namespace SharpNeat.Phenomes.Mazes
         public int Y { get; }
 
         /// <summary>
-        ///     Flag which indicates if cell has a north wall.
-        /// </summary>
-        public bool NorthWall { get; set; }
-
-        /// <summary>
-        ///     Flag which indicates if cell has a south wall.
+        ///     Flag which indicates if cell has a south wall (which is the cell horizontal wall).
         /// </summary>
         public bool SouthWall { get; set; }
 
         /// <summary>
-        ///     Flag which indicates if cell has a east wall.
+        ///     Flag which indicates if cell has a east wall (which is the cell vertical wall).
         /// </summary>
         public bool EastWall { get; set; }
-
-        /// <summary>
-        ///     Flag which indicates if cell has a west wall.
-        /// </summary>
-        public bool WestWall { get; set; }
 
         /// <summary>
         ///     Indicates membership on the solution path and the orientation of the path segment passing through the cell..

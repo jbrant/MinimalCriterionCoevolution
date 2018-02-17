@@ -183,21 +183,21 @@ namespace MCC_Domains.MazeNavigation.Bootstrappers
                 // Add all of the genomes that have solved the maze
                 viableGenomes.AddRange(
                     InitializationEa.GenomeList.Where(
-                        genome => genome.EvaluationInfo.ObjectiveDistance <= MinSuccessDistance)
+                        genome =>
+                            genome.EvaluationInfo != null &&
+                            genome.EvaluationInfo.ObjectiveDistance <= MinSuccessDistance)
                         .Take(MinSuccessfulAgentCount));
 
-                if (viableGenomes.Count < MinSuccessfulAgentCount)
-                {
-                    Console.Out.WriteLine(
-                        "MinSuccessfulAgentCount is [{0}] while we only have [{1}] viable genomes - re-executing initialization...",
-                        MinSuccessfulAgentCount, viableGenomes.Count);
-                }
+                Console.Out.WriteLine("Extracted [{0}] of [{1}] viable genomes in [{2}] evaluations",
+                    viableGenomes.Count, MinSuccessfulAgentCount, InitializationEa.CurrentEvaluations);
             } while (viableGenomes.Count < MinSuccessfulAgentCount);
 
             // Add the remainder of genomes who have not solved the maze
             // (note that the intuition for doing this after the loop is that most will not have solved)
             viableGenomes.AddRange(
-                InitializationEa.GenomeList.Where(genome => genome.EvaluationInfo.ObjectiveDistance > MinSuccessDistance)
+                InitializationEa.GenomeList.Where(
+                    genome =>
+                        genome.EvaluationInfo != null && genome.EvaluationInfo.ObjectiveDistance > MinSuccessDistance)
                     .Take(MinUnsuccessfulAgentCount));
 
             // Ensure that the above statement was able to get the required number of unsuccessful agent genomes

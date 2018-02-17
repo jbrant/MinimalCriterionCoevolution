@@ -373,7 +373,7 @@ namespace SharpNeat.Genomes.Maze
             } while (xr.Read());
 
             // Construct and return loaded MazeGenome
-            return new MazeGenome(null, genomeId, birthGen, height, width, wallGenes, pathGenes);
+            return new MazeGenome(genomeId, birthGen, height, width, wallGenes, pathGenes);
         }
 
         #endregion

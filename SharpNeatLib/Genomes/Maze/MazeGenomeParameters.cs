@@ -94,6 +94,9 @@ namespace SharpNeat.Genomes.Maze
             MutatePathWaypointLocationProbability = DefaultMutatePathWaypointLocationProbability;
             MutateAddPathWaypointProbability = DefaultMutateAddPathWaypointProbability;
             PerturbanceMagnitude = DefaultPerturbanceMagnitude;
+            VerticalWallBias = DefaultVerticalWallBias;
+            GridCellNeighborhoodRadius = DefaultGridCellNeighborhoodRadius;
+            SparseCellSelectionProportion = DefaultSparseCellSelectionProportion;
 
             // Create a new roulette wheel layout with the default probabilities
             RouletteWheelLayout = CreateRouletteWheelLayout();
@@ -113,6 +116,9 @@ namespace SharpNeat.Genomes.Maze
             MutatePathWaypointLocationProbability = copyFrom.MutatePathWaypointLocationProbability;
             MutateAddPathWaypointProbability = copyFrom.MutateAddPathWaypointProbability;
             PerturbanceMagnitude = copyFrom.PerturbanceMagnitude;
+            VerticalWallBias = DefaultVerticalWallBias;
+            GridCellNeighborhoodRadius = DefaultGridCellNeighborhoodRadius;
+            SparseCellSelectionProportion = DefaultSparseCellSelectionProportion;
 
             RouletteWheelLayout = new RouletteWheelLayout(copyFrom.RouletteWheelLayout);
         }
@@ -130,8 +136,11 @@ namespace SharpNeat.Genomes.Maze
         private const double DefaultMutatePathWaypointLocationProbability = 0.05;
         private const double DefaultMutateAddPathWaypointProbability = 0.01;
 
-        // Default perturbance magnitude
+        // Non-mutation related defaults
         private const double DefaultPerturbanceMagnitude = 0.2;
+        private const double DefaultVerticalWallBias = 0.7;
+        private const int DefaultGridCellNeighborhoodRadius = 5;
+        private const double DefaultSparseCellSelectionProportion = 0.2;
 
         #endregion
 
@@ -233,6 +242,25 @@ namespace SharpNeat.Genomes.Maze
         ///     The magnitude of the mutation (only applies to wall and passage position mutations).
         /// </summary>
         public double PerturbanceMagnitude { get; set; }
+
+        /// <summary>
+        ///     The bias to apply toward (or against) selecting vertical walls. This is introduced primarily to offset abundance of
+        ///     horizontal partitions due to the augmentation of horizontal walls with horizontal path "sleeves" (i.e. walls that
+        ///     separate vertically adjacent paths).
+        /// </summary>
+        public double VerticalWallBias { get; set; }
+
+        /// <summary>
+        ///     The neighborhood radius to consider when evaluating the sparsity of a grid cell based on the number of waypoints
+        ///     (i.e. path genes) within its neighborhood.
+        /// </summary>
+        public int GridCellNeighborhoodRadius { get; set; }
+
+        /// <summary>
+        ///     The proportion of "most sparse" cells to consider when determining the location of a newly added waypoint (i.e.
+        ///     path gene).
+        /// </summary>
+        public double SparseCellSelectionProportion { get; set; }
 
         #endregion
     }

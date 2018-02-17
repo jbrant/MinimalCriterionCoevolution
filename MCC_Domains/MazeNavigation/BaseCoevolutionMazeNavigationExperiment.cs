@@ -171,12 +171,15 @@ namespace MCC_Domains.MazeNavigation
         /// <param name="name">The name of the experiment.</param>
         /// <param name="xmlConfig">The reference to the XML configuration file.</param>
         /// <param name="population1EvolutionLogger">The navigator evolution data logger.</param>
+        /// <param name="population1PopulationLogger">The navigator population logger.</param>
         /// <param name="population1GenomeLogger">The navigator genome logger.</param>
         /// <param name="population2EvolutionLogger">The maze evolution data logger.</param>
+        /// <param name="population2PopulationLogger">The maze population logger.</param>
         /// <param name="population2GenomeLogger">The maze genome logger.</param>
         public virtual void Initialize(string name, XmlElement xmlConfig,
-            IDataLogger population1EvolutionLogger = null, IDataLogger population1GenomeLogger = null,
-            IDataLogger population2EvolutionLogger = null, IDataLogger population2GenomeLogger = null)
+            IDataLogger population1EvolutionLogger = null, IDataLogger population1PopulationLogger = null,
+            IDataLogger population1GenomeLogger = null, IDataLogger population2EvolutionLogger = null,
+            IDataLogger population2PopulationLogger = null, IDataLogger population2GenomeLogger = null)
         {
             // Set boiler plate properties
             Name = name;

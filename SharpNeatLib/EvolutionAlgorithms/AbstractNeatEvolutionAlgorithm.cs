@@ -488,11 +488,36 @@ namespace SharpNeat.EvolutionAlgorithms
                 (GenomeList[0] as NeatGenome)?.GetLoggableElements(_logFieldEnabledMap));
             PopulationLogger?.LogHeader(new List<LoggableElement>
             {
-                new LoggableElement(PopulationGenomesFieldElements.Generation, null),
-                new LoggableElement(PopulationGenomesFieldElements.RunPhase, null),
-                new LoggableElement(PopulationGenomesFieldElements.GenomeId, null),
-                new LoggableElement(PopulationGenomesFieldElements.GenomeXml, null),
-                new LoggableElement(PopulationGenomesFieldElements.SpecieId, null)
+                _logFieldEnabledMap.ContainsKey(PopulationFieldElements.RunPhase) &&
+                _logFieldEnabledMap[PopulationFieldElements.RunPhase]
+                    ? new LoggableElement(PopulationFieldElements.RunPhase, null)
+                    : null,
+                _logFieldEnabledMap.ContainsKey(PopulationFieldElements.Generation) &&
+                _logFieldEnabledMap[PopulationFieldElements.Generation]
+                    ? new LoggableElement(PopulationFieldElements.Generation, null)
+                    : null,
+                _logFieldEnabledMap.ContainsKey(PopulationFieldElements.GenomeId) &&
+                _logFieldEnabledMap[PopulationFieldElements.GenomeId]
+                    ? new LoggableElement(PopulationFieldElements.GenomeId, null)
+                    : null,
+                _logFieldEnabledMap[PopulationFieldElements.SpecieId]
+                    ? new LoggableElement(PopulationFieldElements.SpecieId, null)
+                    : null
+            });
+            GenomeLogger?.LogHeader(new List<LoggableElement>
+            {
+                _logFieldEnabledMap.ContainsKey(GenomeFieldElements.RunPhase) &&
+                _logFieldEnabledMap[GenomeFieldElements.RunPhase]
+                    ? new LoggableElement(GenomeFieldElements.RunPhase, null)
+                    : null,
+                _logFieldEnabledMap.ContainsKey(GenomeFieldElements.GenomeId) &&
+                _logFieldEnabledMap[GenomeFieldElements.GenomeId]
+                    ? new LoggableElement(GenomeFieldElements.GenomeId, null)
+                    : null,
+                _logFieldEnabledMap.ContainsKey(GenomeFieldElements.GenomeXml) &&
+                _logFieldEnabledMap[GenomeFieldElements.GenomeXml]
+                    ? new LoggableElement(GenomeFieldElements.GenomeXml, null)
+                    : null
             });
 
             // Initialize the genome evalutor

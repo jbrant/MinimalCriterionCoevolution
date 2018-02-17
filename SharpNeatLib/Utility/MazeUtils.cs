@@ -19,9 +19,21 @@ namespace SharpNeat.Utility
     {
         #region Internal helper methods
 
+        /// <summary>
+        ///     Determines the orientation (i.e. horizontal or vertical) of the given waypoint.
+        /// </summary>
+        /// <param name="prevWaypoint">The waypoint preceding the current waypoint on the trajectory.</param>
+        /// <param name="curWaypoint">The waypoint for which the orientation is being determined.</param>
+        /// <param name="nextWaypoint">The waypoint following the current waypoint on the trajectory.</param>
+        /// <param name="defaultIntersectionOrientation">
+        ///     The default orientation for the current waypoint (this can be overridden,
+        ///     but ensures consistency in the event that either orientation can be assumed).
+        /// </param>
+        /// <param name="grid">The two-dimensional, n x n grid of maze cells.</param>
+        /// <returns>The orientation (i.e. horizontal or vertical) of the given waypoint.</returns>
         private static IntersectionOrientation DetermineWaypointIntersectionOrientation(Point2DInt prevWaypoint,
-            Point2DInt curWaypoint, Point2DInt nextWaypoint, IntersectionOrientation prevIntersectionOrientation,
-            IntersectionOrientation defaultIntersectionOrientation, MazeStructureGridCell[,] grid)
+            Point2DInt curWaypoint, Point2DInt nextWaypoint, IntersectionOrientation defaultIntersectionOrientation,
+            MazeStructureGridCell[,] grid)
         {
             // Start with default intersection orientation specified on the path gene
             IntersectionOrientation intersectionOrientation = defaultIntersectionOrientation;
@@ -107,13 +119,8 @@ namespace SharpNeat.Utility
         ///     The orientation (i.e. horizontal or vertical) of the solution path segment coming into the
         ///     ending point.
         /// </param>
-        /// <param name="isStartPointEasterlyTrajectory">
-        ///     Flag indicating whether start point is on an easterly trajectory (used to
-        ///     determine non-standard trajectory modification for intersecting first point in last row).
-        /// </param>
         private static void MarkSolutionPathSegment(MazeStructureGridCell[,] grid, Point2DInt startPoint,
-            Point2DInt endPoint, Point2DInt nextPoint, IntersectionOrientation orientation,
-            bool isStartPointEasterlyTrajectory)
+            Point2DInt endPoint, Point2DInt nextPoint, IntersectionOrientation orientation)
         {
             if (IntersectionOrientation.Horizontal == orientation)
             {
@@ -244,7 +251,7 @@ namespace SharpNeat.Utility
             List<MazeStructureRoom> subMazes = new List<MazeStructureRoom>();
             MazeStructureGridCell roomStartCell = null;
             bool inRoom = false;
-            
+
             // Handle left submazes
             Point2DInt subMazeStartPoint = new Point2DInt();
             Point2DInt subMazeEndPoint;
@@ -296,9 +303,8 @@ namespace SharpNeat.Utility
                 {
                     inRoom = true;
                 }
-                //else if (inRoom && grid[y, subMazeStartPoint.X].PathOrientation != PathOrientation.None)
                 else if (inRoom &&
-                         IsRightMazeEndRow(grid, y, mazeHeight, mazeWidth, subMazeStartPoint.X, out subMazeEndPoint))
+                         IsRightMazeEndRow(grid, y, subMazeStartPoint.X, mazeWidth, out subMazeEndPoint))
                 {
                     subMazes.Add(new MazeStructureRoom(subMazeStartPoint.X, subMazeStartPoint.Y,
                         mazeWidth - subMazeStartPoint.X, subMazeEndPoint.Y - subMazeStartPoint.Y + 1));
@@ -314,25 +320,29 @@ namespace SharpNeat.Utility
             MazeStructureGridCell prevGridCell = grid[0, 0];
             MazeStructureGridCell curGridCell = grid[0, 0];
 
+            // Mark horizontal separators for trajectories that pass vertically adjacent to each other
             do
             {
+                // Handle the case where this is a juncture (i.e. 90 degree angle in path) or the start cell of the maze
                 if (curGridCell.IsJuncture || curGridCell.IsStartCell)
                 {
                     prevGridCell = curGridCell;
 
+                    // If vertical orientation, no need for horizontal separating line
                     if (curGridCell.PathOrientation == PathOrientation.Vertical)
                     {
                         curGridCell = grid[curGridCell.Y + 1, curGridCell.X];
                     }
                     else
                     {
-                        // Check to see if part of the trajectory passes directly underneath
+                        // Mark a south wall if part of the trajectory passes directly underneath
                         if (curGridCell.Y < mazeHeight - 1 &&
                             grid[curGridCell.Y + 1, curGridCell.X].PathOrientation != PathOrientation.None)
                         {
                             grid[curGridCell.Y, curGridCell.X].SouthWall = true;
                         }
 
+                        // Increment or decrement in the x direction as applicable
                         if (curGridCell.X > 0 &&
                             grid[curGridCell.Y, curGridCell.X - 1].PathOrientation != PathOrientation.None)
                         {
@@ -344,14 +354,17 @@ namespace SharpNeat.Utility
                         }
                     }
                 }
+                // Handle the case where the current cell path orientation is horizontal
                 else if (curGridCell.PathOrientation == PathOrientation.Horizontal)
                 {
+                    // Mark a south wall if part of the trajectory passes directly underneath
                     if (curGridCell.Y < mazeHeight - 1 &&
                         grid[curGridCell.Y + 1, curGridCell.X].PathOrientation != PathOrientation.None)
                     {
                         grid[curGridCell.Y, curGridCell.X].SouthWall = true;
                     }
 
+                    // Increment or decrement in the x direction as applicable
                     if (prevGridCell.X < curGridCell.X)
                     {
                         prevGridCell = curGridCell;
@@ -363,6 +376,7 @@ namespace SharpNeat.Utility
                         curGridCell = grid[curGridCell.Y, curGridCell.X - 1];
                     }
                 }
+                // Otherwise, this is a vertical orientation so go down to the next row
                 else
                 {
                     prevGridCell = curGridCell;
@@ -373,6 +387,19 @@ namespace SharpNeat.Utility
             return subMazes;
         }
 
+        /// <summary>
+        ///     Determines whether a sub-maze to the right of the trajectory exists for the current row. The only scenario where a
+        ///     right sub-maze would not exist would be the case in which the trajectory occupies the last column of the maze,
+        ///     butting up against the right, outer wall.
+        /// </summary>
+        /// <param name="grid">The two-dimensional, n x n grid of maze cells.</param>
+        /// <param name="row">The current maze row.</param>
+        /// <param name="width">The width of the maze.</param>
+        /// <param name="mazeStartPoint">
+        ///     The point at which the sub-maze to the right of the trajectory begins (this is an output
+        ///     parameter).
+        /// </param>
+        /// <returns>Boolean indicator of whether right sub-maze exists for the given row.</returns>
         private static bool IsRightSubmaze(MazeStructureGridCell[,] grid, int row, int width,
             out Point2DInt mazeStartPoint)
         {
@@ -393,7 +420,19 @@ namespace SharpNeat.Utility
             return mazeStartPoint.X > 0 && mazeStartPoint.X < width;
         }
 
-        private static bool IsRightMazeEndRow(MazeStructureGridCell[,] grid, int row, int height, int width, int column,
+        /// <summary>
+        ///     Determines whether the given row and column denote the end of the current sub-maze right of the trajectory.
+        /// </summary>
+        /// <param name="grid">The two-dimensional, n x n grid of maze cells.</param>
+        /// <param name="row">The current maze row.</param>
+        /// <param name="width">The width of the maze.</param>
+        /// <param name="column">The current maze column.</param>
+        /// <param name="mazeEndPoint">
+        ///     The point at which the sub-maze to the right of the trajectory ends (this is an output
+        ///     parameter).
+        /// </param>
+        /// <returns>Boolean indicator of whether current cell demarcates the end of the right sub-maze.</returns>
+        private static bool IsRightMazeEndRow(MazeStructureGridCell[,] grid, int row, int column, int width,
             out Point2DInt mazeEndPoint)
         {
             mazeEndPoint = new Point2DInt();
@@ -413,6 +452,12 @@ namespace SharpNeat.Utility
             return isEndRow;
         }
 
+        /// <summary>
+        ///     Determines the ending column of the sub-maze to the left of the trajectory for the given row.
+        /// </summary>
+        /// <param name="grid">The two-dimensional, n x n grid of maze cells.</param>
+        /// <param name="row">The current maze row.</param>
+        /// <returns>The column that demarcates the right-most boundary of the sub-maze to the left of the trajectory.</returns>
         private static int DetermineLeftSubmazeEndPosition(MazeStructureGridCell[,] grid, int row)
         {
             int pos = 0;
@@ -427,6 +472,18 @@ namespace SharpNeat.Utility
             return pos - 1;
         }
 
+        /// <summary>
+        ///     Determines whether the given row and column denote the end of the current sub-maze left of the trajectory.
+        /// </summary>
+        /// <param name="grid">The two-dimensional, n x n grid of maze cells.</param>
+        /// <param name="row">The current maze row.</param>
+        /// <param name="subMazeEndPos">The end column of the sub-maze.</param>
+        /// <param name="height">The height of the maze.</param>
+        /// <param name="mazeEndPoint">
+        ///     The point at which the sub-maze to the left of the trajectory ends (this is an output
+        ///     parameter).
+        /// </param>
+        /// <returns>Boolean indicator of whether current cell demarcates the end of the left sub-maze.</returns>
         private static bool IsLeftMazeEndRow(MazeStructureGridCell[,] grid, int row, int subMazeEndPos, int height,
             out Point2DInt mazeEndPoint)
         {
@@ -559,29 +616,21 @@ namespace SharpNeat.Utility
         #region Helper methods        
 
         /// <summary>
-        ///     Averages out the number of partitions possible given a partially partitioned maze genome as a starting point. The
-        ///     higher the maze complexity, the more exact the max partitions estimate will be. If the maze is only one wall away
-        ///     from max complexity, the return value will be exact.
+        ///     Determines the maximum number of partitions possible given a partially partitioned maze genome as a starting point.
         /// </summary>
         /// <param name="mazeGenome">The partially complexified genome from which to start max partition estimation.</param>
-        /// <param name="numSamples">
-        ///     The number of sample mazes to attempt partitioning out to get a representative average
-        ///     (defaults to 2,000).
-        /// </param>
         /// <returns>
-        ///     The average number of partitions supportable given the existing maze genome complexity/wall placement and
-        ///     dimensions.
+        ///     The total number of partitions supported given the existing maze genome complexity/wall placement and dimensions.
         /// </returns>
-        public static int DetermineMaxPartitions(MazeGenome mazeGenome, int numSamples = 2000)
+        public static int DetermineMaxPartitions(MazeGenome mazeGenome)
         {
-            int[] maxMazeResolutions = new int[numSamples];
             int maxPartitions = 0;
 
-            // First call maze grid conversion method to decode existing genome
-            MazeStructureGrid mazeGrid = ConvertMazeGenomeToUnscaledStructure(mazeGenome);
+            // Construct maze grid with solution path generated from connected waypoints
+            MazeStructureGridCell[,] mazeGrid = BuildMazeSolutionPath(mazeGenome);
 
             // Extract the "sub-mazes" that are induced by the solution trajectory
-            List<MazeStructureRoom> subMazes = ExtractSubmazes(mazeGrid.Grid, mazeGenome.MazeBoundaryHeight,
+            List<MazeStructureRoom> subMazes = ExtractSubmazes(mazeGrid, mazeGenome.MazeBoundaryHeight,
                 mazeGenome.MazeBoundaryWidth);
 
             // Process all sub-mazes, iteratively bisecting the applicable maze room space
@@ -593,12 +642,12 @@ namespace SharpNeat.Utility
                 // internal partition (if one exists)
                 if (subMaze.AreInternalWallsSupported() && mazeGenome.WallGeneList.Count > 0)
                 {
-                    subMaze.MarkRoomBoundaries(mazeGrid.Grid, mazeGenome.WallGeneList[0].WallLocation,
+                    subMaze.MarkRoomBoundaries(mazeGrid, mazeGenome.WallGeneList[0].WallLocation,
                         mazeGenome.WallGeneList[0].OrientationSeed);
                 }
                 else
                 {
-                    subMaze.MarkRoomBoundaries(mazeGrid.Grid);
+                    subMaze.MarkRoomBoundaries(mazeGrid);
                 }
 
                 if (subMaze.AreInternalWallsSupported() && mazeGenome.WallGeneList.Count > 0)
@@ -613,12 +662,13 @@ namespace SharpNeat.Utility
                     {
                         // Dequeue a room and run division on it
                         Tuple<MazeStructureRoom, MazeStructureRoom> subRooms = mazeRoomQueue.Dequeue()
-                            .DivideRoom(mazeGrid.Grid, mazeGenome.WallGeneList[loopIter % mazeGenome.WallGeneList.Count].WallLocation,
-                                mazeGenome.WallGeneList[loopIter % mazeGenome.WallGeneList.Count].PassageLocation,
-                                mazeGenome.WallGeneList[loopIter % mazeGenome.WallGeneList.Count].OrientationSeed);
-                        
+                            .DivideRoom(mazeGrid,
+                                mazeGenome.WallGeneList[loopIter%mazeGenome.WallGeneList.Count].WallLocation,
+                                mazeGenome.WallGeneList[loopIter%mazeGenome.WallGeneList.Count].PassageLocation,
+                                mazeGenome.WallGeneList[loopIter%mazeGenome.WallGeneList.Count].OrientationSeed);
+
                         // Update max partitions to the max wall iteration depth in the submaze
-                        maxPartitions = Math.Max(loopIter%mazeGenome.WallGeneList.Count, maxPartitions);
+                        maxPartitions = Math.Max(loopIter + 1, maxPartitions);
 
                         if (subRooms != null)
                         {
@@ -631,7 +681,7 @@ namespace SharpNeat.Utility
                     }
                 }
             }
-            
+
             // Return the maximum number of partitions applied in a submaze
             return maxPartitions;
         }
@@ -651,7 +701,7 @@ namespace SharpNeat.Utility
             // Extract the "sub-mazes" that are induced by the solution trajectory
             List<MazeStructureRoom> subMazes = ExtractSubmazes(mazeGrid, genome.MazeBoundaryHeight,
                 genome.MazeBoundaryWidth);
-            
+
             // Process all sub-mazes, iteratively bisecting the applicable maze room space
             foreach (var subMaze in subMazes)
             {
@@ -974,9 +1024,6 @@ namespace SharpNeat.Utility
                 // Get the orientation
                 IntersectionOrientation curOrientation = DetermineWaypointIntersectionOrientation(prevPoint, curPoint,
                     nextPoint,
-                    idx == 0
-                        ? sortedPathGeneList[idx].DefaultOrientation
-                        : sortedPathGeneList[idx - 1].DefaultOrientation,
                     idx == genome.PathGeneList.Count
                         ? sortedPathGeneList[idx - 1].DefaultOrientation
                         : sortedPathGeneList[idx].DefaultOrientation, unscaledGrid);
@@ -991,8 +1038,7 @@ namespace SharpNeat.Utility
                 unscaledGrid[curPoint.Y, curPoint.X].IsWayPoint = true;
 
                 // If there are no overlapping paths, use 
-                MarkSolutionPathSegment(unscaledGrid, prevPoint, curPoint, nextPoint, curOrientation,
-                    easterlyRowTrajectories[prevPoint.Y]);
+                MarkSolutionPathSegment(unscaledGrid, prevPoint, curPoint, nextPoint, curOrientation);
             }
 
             return unscaledGrid;
@@ -1047,7 +1093,67 @@ namespace SharpNeat.Utility
 
             return cellNeighborCounts;
         }
-        
+
+        /// <summary>
+        ///     Ensures that the proposed waypoint location is within the maze boundaries and does not overlap
+        ///     with other waypoints or with the start/end location (which are in the upper-left and lower right cells of the maze
+        ///     respectively). Specifically, the following validity checks are performed:
+        ///     1. Checks X and Y minimum and maximum points are in the horizontal and vertical boundaries of the maze
+        ///     respectively.
+        ///     2. Checks that proposed location does not overlap existing waypoints.
+        ///     3. Checks that proposed location does not overlap start location or target location.
+        ///     4. Checks that proposed location is higher than the next to the last row, or that the proposed location is on the
+        ///     next to the last row but its x-position is less than or equal to existing points on the last row, or that the
+        ///     proposed location is on the last row but its x-position is greater than or equal to existing points on the next to
+        ///     the last row. This is to prevent trajectory overlaps.
+        /// </summary>
+        /// <param name="pathGenes">The existing path genes (i.e. waypoints) against which the proposed waypoint is checked.</param>
+        /// <param name="mazeHeight">The unscaled maze height.</param>
+        /// <param name="mazeWidth">The unscaled maze width.</param>
+        /// <param name="waypointLocation">The proposed waypoint.</param>
+        /// <returns>Boolean indicating whether the given point is valid per the maze boundary constraints.</returns>
+        public static bool IsValidWaypointLocation(IList<PathGene> pathGenes, int mazeHeight, int mazeWidth,
+            Point2DInt waypointLocation)
+        {
+            return
+                // Check that x-coordinate is at-or-above minimum maze width
+                waypointLocation.X >= 0 &&
+
+                // Check that x-coordinate is within maze width boundary
+                waypointLocation.X < mazeWidth &&
+
+                // Check that y-coordinate is at-or-above minimum maze height
+                waypointLocation.Y >= 0 &&
+
+                // Check that y-coordinate is within maze height boundary
+                waypointLocation.Y < mazeHeight &&
+
+                // Check that no existing waypoint overlaps proposed waypoint
+                pathGenes.Any(g => waypointLocation.Equals(g.Waypoint)) == false &&
+
+                // Check that proposed waypoint does not overlap start position
+                waypointLocation.Equals(new Point2DInt(0, 0)) == false &&
+
+                // Check that proposed waypoint does not overlap target position
+                waypointLocation.Equals(new Point2DInt(mazeWidth - 1, mazeHeight - 1)) ==
+                false &&
+
+                // Check that proposed waypoint is higher than next-to-last row
+                (waypointLocation.Y < mazeHeight - 2 ||
+
+                 // If proposed waypoint is on next-to-last row, check that it's further to the left than waypoints on last row 
+                 (waypointLocation.Y == mazeHeight - 2 &&
+                  (pathGenes.Count(g => g.Waypoint.Y == mazeHeight - 1) == 0 ||
+                   pathGenes.Where(g => g.Waypoint.Y == mazeHeight - 1).Min(g => g.Waypoint.X) >=
+                   waypointLocation.X) ||
+
+                  // If proposed waypoint is on the last row, check that it's further to the right than waypoints on next-to-last row
+                  (waypointLocation.Y == mazeHeight - 1 &&
+                   (pathGenes.Count(g => g.Waypoint.Y == mazeHeight - 2) == 0 ||
+                    pathGenes.Where(g => g.Waypoint.Y == mazeHeight - 2).Max(g => g.Waypoint.X) <=
+                    waypointLocation.X))));
+        }
+
         #endregion
     }
 }

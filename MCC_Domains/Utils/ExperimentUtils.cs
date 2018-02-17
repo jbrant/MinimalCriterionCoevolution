@@ -235,10 +235,21 @@ namespace MCC_Domains.Utils
                     "MutatePassageStartLocationProbability");
                 double? addWallProbability = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
                     "MutateAddWallProbability");
+                double? deleteWallProbability = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
+                    "MutateDeleteWallProbability");
+                double? pathWaypointLocationMutationProbability = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
+                    "MutatePathWaypointLocationProbability");
+                double? addPathWaypointMutationProbability = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
+                    "MutateAddPathWaypointProbability");
                 double? expandMazeProbability = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
                     "MutateExpandMazeProbability");
                 double? perturbanceMagnitude = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
                     "PerturbanceMagnitude");
+                double? verticalWallBias = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig, "VerticalWallBias");
+                double? gridCellNeighborhoodRadius = XmlUtils.TryGetValueAsInt(xmlMazeGenomeConfig,
+                    "GridCellNeighborhoodRadius");
+                double? sparseCellSelectionProportion = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
+                    "SparseCellSelectionProportion");
 
                 // Set each if it's specified in the configuration (otherwise, accept the default)
                 if (wallStartMutationProbability != null)
@@ -253,6 +264,19 @@ namespace MCC_Domains.Utils
                 {
                     genomeParameters.MutateAddWallProbability = (double) addWallProbability;
                 }
+                if (deleteWallProbability != null)
+                {
+                    genomeParameters.MutateDeleteWallProbability = (double) deleteWallProbability;
+                }
+                if (pathWaypointLocationMutationProbability != null)
+                {
+                    genomeParameters.MutatePathWaypointLocationProbability =
+                        (double) pathWaypointLocationMutationProbability;
+                }
+                if (addPathWaypointMutationProbability != null)
+                {
+                    genomeParameters.MutateAddPathWaypointProbability = (double) addPathWaypointMutationProbability;
+                }
                 if (expandMazeProbability != null)
                 {
                     genomeParameters.MutateExpandMazeProbability = (double) expandMazeProbability;
@@ -260,6 +284,18 @@ namespace MCC_Domains.Utils
                 if (perturbanceMagnitude != null)
                 {
                     genomeParameters.PerturbanceMagnitude = (double) perturbanceMagnitude;
+                }
+                if (verticalWallBias != null)
+                {
+                    genomeParameters.VerticalWallBias = (double) verticalWallBias;
+                }
+                if (gridCellNeighborhoodRadius != null)
+                {
+                    genomeParameters.GridCellNeighborhoodRadius = (int) gridCellNeighborhoodRadius;
+                }
+                if (sparseCellSelectionProportion != null)
+                {
+                    genomeParameters.SparseCellSelectionProportion = (double) sparseCellSelectionProportion;
                 }
             }
 

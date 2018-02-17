@@ -26,8 +26,14 @@
     <MutateWallStartLocationProbability></MutateWallStartLocationProbability>
     <MutatePassageStartLocationProbability></MutatePassageStartLocationProbability>
     <MutateAddWallProbability></MutateAddWallProbability>
+    <MutateDeleteWallProbability></MutateDeleteWallProbability>
+    <MutatePathWaypointLocationProbability></MutatePathWaypointLocationProbability>
+    <MutateAddPathWaypointProbability></MutateAddPathWaypointProbability>
     <MutateExpandMazeProbability></MutateExpandMazeProbability>
     <PerturbanceMagnitude></PerturbanceMagnitude>
+    <VerticalWallBias></VerticalWallBias>
+    <GridCellNeighborhoodRadius></GridCellNeighborhoodRadius>
+    <SparseCellSelectionProportion></SparseCellSelectionProportion>
   </MazeGenomeConfig>
   <BehaviorConfig>
     <BehaviorCharacterization></BehaviorCharacterization>

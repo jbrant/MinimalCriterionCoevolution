@@ -661,12 +661,20 @@ namespace MCC_Executor.MazeNavigation
                     new FileDataLogger(string.Format("{0}\\{1} - Run{2} - NavigatorEvolution.csv", logFileDirectory,
                         experimentName,
                         runIdx));
+                IDataLogger navigatorPopulationLogger =
+                    new FileDataLogger(string.Format("{0}\\{1} - Run{2} - NavigatorPopulation.csv", logFileDirectory,
+                        experimentName,
+                        runIdx));
                 IDataLogger navigatorGenomesLogger =
                     new FileDataLogger(string.Format("{0}\\{1} - Run{2} - NavigatorGenomes.csv", logFileDirectory,
                         experimentName,
                         runIdx));
                 IDataLogger mazeDataLogger =
                     new FileDataLogger(string.Format("{0}\\{1} - Run{2} - MazeEvolution.csv", logFileDirectory,
+                        experimentName,
+                        runIdx));
+                IDataLogger mazePopulationLogger =
+                    new FileDataLogger(string.Format("{0}\\{1} - Run{2} - MazePopulation.csv", logFileDirectory,
                         experimentName,
                         runIdx));
                 IDataLogger mazeGenomesLogger =
@@ -676,8 +684,9 @@ namespace MCC_Executor.MazeNavigation
 
                 // Initialize new experiment
                 experiment.Initialize(experimentName, xmlConfig.DocumentElement, navigatorDataLogger,
-                    navigatorGenomesLogger, mazeDataLogger, mazeGenomesLogger);
-                
+                    navigatorPopulationLogger, navigatorGenomesLogger, mazeDataLogger, mazePopulationLogger,
+                    mazeGenomesLogger);
+
                 _executionLogger.Info(string.Format("Initialized experiment {0}.", experiment.GetType()));
 
                 // If there were seed population files specified, read them in
@@ -695,8 +704,9 @@ namespace MCC_Executor.MazeNavigation
                 IGenomeFactory<MazeGenome> mazeGenomeFactory = experiment.CreateMazeGenomeFactory();
 
                 // Generate the initial agent population
-                List<NeatGenome> agentGenomeList = agentGenomeFactory.CreateGenomeList(experiment.AgentInitializationGenomeCount,
-                    0);
+                List<NeatGenome> agentGenomeList =
+                    agentGenomeFactory.CreateGenomeList(experiment.AgentInitializationGenomeCount,
+                        0);
 
                 // Read in the seed population
                 List<MazeGenome> mazeGenomeList = ExperimentUtils.ReadSeedMazeGenomes(seedMazePath,
@@ -723,8 +733,10 @@ namespace MCC_Executor.MazeNavigation
 
                 // Close the data loggers
                 navigatorDataLogger.Close();
+                navigatorPopulationLogger.Close();
                 navigatorGenomesLogger.Close();
                 mazeDataLogger.Close();
+                mazePopulationLogger.Close();
                 mazeGenomesLogger.Close();
             }
         }
@@ -856,6 +868,11 @@ namespace MCC_Executor.MazeNavigation
             }
         }
 
+        /// <summary>
+        ///     Print update event specific to coevolutionary algorithm.
+        /// </summary>
+        /// <param name="sender">Sender</param>
+        /// <param name="e">Event arguments</param>
         private static void coevolutionContainer_UpdateEvent(object sender, EventArgs e)
         {
             if (_coevolutionEaContainer.Population1CurrentChampGenome != null &&

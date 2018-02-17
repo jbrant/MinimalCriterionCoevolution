@@ -46,18 +46,20 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <param name="evolutionLogger">The evolution data logger (optional).</param>
         /// <param name="logFieldEnabledMap">Dictionary of logging fields that can be dynamically enabled or disabled.</param>
         /// <param name="populationLogger">The population data logger (optional).</param>
+        /// <param name="genomeLogger">The genome data logger (optional).</param>
         /// <param name="populationLoggingInterval">The interval at which the population is logged.</param>
         public MultiQueueNeatEvolutionAlgorithm(NeatEvolutionAlgorithmParameters eaParams,
             ISpeciationStrategy<TGenome> speciationStrategy, IComplexityRegulationStrategy complexityRegulationStrategy,
             int batchSize, RunPhase runPhase = RunPhase.Primary, IDataLogger evolutionLogger = null,
             IDictionary<FieldElement, bool> logFieldEnabledMap = null, IDataLogger populationLogger = null,
-            int? populationLoggingInterval = null) : base(eaParams)
+            IDataLogger genomeLogger = null, int? populationLoggingInterval = null) : base(eaParams)
         {
             SpeciationStrategy = speciationStrategy;
             ComplexityRegulationStrategy = complexityRegulationStrategy;
             _batchSize = batchSize;
             EvolutionLogger = evolutionLogger;
             PopulationLogger = populationLogger;
+            GenomeLogger = genomeLogger;
             PopulationLoggingInterval = populationLoggingInterval;
             RunPhase = runPhase;
             _logFieldEnabledMap = logFieldEnabledMap;
@@ -138,36 +140,49 @@ namespace SharpNeat.EvolutionAlgorithms
             // Open the loggers
             EvolutionLogger?.Open();
             PopulationLogger?.Open();
+            GenomeLogger?.Open();
 
             // Update the run phase on the loggers
             EvolutionLogger?.UpdateRunPhase(RunPhase);
             PopulationLogger?.UpdateRunPhase(RunPhase);
+            GenomeLogger?.UpdateRunPhase(RunPhase);
 
-            // Write out the headers for both loggers
+            // Write out the headers for all loggers
             EvolutionLogger?.LogHeader(GetLoggableElements(_logFieldEnabledMap),
                 Statistics.GetLoggableElements(_logFieldEnabledMap),
                 GenomeEvaluator.GetLoggableElements(_logFieldEnabledMap),
                 (GenomeList[0] as NeatGenome)?.GetLoggableElements(_logFieldEnabledMap));
             PopulationLogger?.LogHeader(new List<LoggableElement>
             {
-                _logFieldEnabledMap.ContainsKey(PopulationGenomesFieldElements.Generation) &&
-                _logFieldEnabledMap[PopulationGenomesFieldElements.Generation]
-                    ? new LoggableElement(PopulationGenomesFieldElements.Generation, null)
+                _logFieldEnabledMap.ContainsKey(PopulationFieldElements.RunPhase) &&
+                _logFieldEnabledMap[PopulationFieldElements.RunPhase]
+                    ? new LoggableElement(PopulationFieldElements.RunPhase, null)
                     : null,
-                _logFieldEnabledMap.ContainsKey(PopulationGenomesFieldElements.RunPhase) &&
-                _logFieldEnabledMap[PopulationGenomesFieldElements.RunPhase]
-                    ? new LoggableElement(PopulationGenomesFieldElements.RunPhase, null)
+                _logFieldEnabledMap.ContainsKey(PopulationFieldElements.Generation) &&
+                _logFieldEnabledMap[PopulationFieldElements.Generation]
+                    ? new LoggableElement(PopulationFieldElements.Generation, null)
                     : null,
-                _logFieldEnabledMap.ContainsKey(PopulationGenomesFieldElements.GenomeId) &&
-                _logFieldEnabledMap[PopulationGenomesFieldElements.GenomeId]
-                    ? new LoggableElement(PopulationGenomesFieldElements.GenomeId, null)
+                _logFieldEnabledMap.ContainsKey(PopulationFieldElements.GenomeId) &&
+                _logFieldEnabledMap[PopulationFieldElements.GenomeId]
+                    ? new LoggableElement(PopulationFieldElements.GenomeId, null)
                     : null,
-                _logFieldEnabledMap.ContainsKey(PopulationGenomesFieldElements.GenomeXml) &&
-                _logFieldEnabledMap[PopulationGenomesFieldElements.GenomeXml]
-                    ? new LoggableElement(PopulationGenomesFieldElements.GenomeXml, null)
+                _logFieldEnabledMap[PopulationFieldElements.SpecieId]
+                    ? new LoggableElement(PopulationFieldElements.SpecieId, null)
+                    : null
+            });
+            GenomeLogger?.LogHeader(new List<LoggableElement>
+            {
+                _logFieldEnabledMap.ContainsKey(GenomeFieldElements.RunPhase) &&
+                _logFieldEnabledMap[GenomeFieldElements.RunPhase]
+                    ? new LoggableElement(GenomeFieldElements.RunPhase, null)
                     : null,
-                _logFieldEnabledMap[PopulationGenomesFieldElements.SpecieId]
-                    ? new LoggableElement(PopulationGenomesFieldElements.SpecieId, null)
+                _logFieldEnabledMap.ContainsKey(GenomeFieldElements.GenomeId) &&
+                _logFieldEnabledMap[GenomeFieldElements.GenomeId]
+                    ? new LoggableElement(GenomeFieldElements.GenomeId, null)
+                    : null,
+                _logFieldEnabledMap.ContainsKey(GenomeFieldElements.GenomeXml) &&
+                _logFieldEnabledMap[GenomeFieldElements.GenomeXml]
+                    ? new LoggableElement(GenomeFieldElements.GenomeXml, null)
                     : null
             });
 
@@ -238,34 +253,70 @@ namespace SharpNeat.EvolutionAlgorithms
                 Statistics.GetLoggableElements(_logFieldEnabledMap),
                 (CurrentChampGenome as NeatGenome)?.GetLoggableElements(_logFieldEnabledMap));
 
-            // Also, if we're at the appropriate batch interval, dump the population
-            if (PopulationLoggingInterval != null &&
-                (CurrentGeneration == 1 || CurrentGeneration%PopulationLoggingInterval == 0))
+            // Dump the extant population to file
+            foreach (TGenome genome in GenomeList)
+            {
+                PopulationLogger?.LogRow(new List<LoggableElement>
+                {
+                    _logFieldEnabledMap.ContainsKey(PopulationFieldElements.RunPhase) &&
+                    _logFieldEnabledMap[PopulationFieldElements.RunPhase]
+                        ? new LoggableElement(PopulationFieldElements.RunPhase, RunPhase)
+                        : null,
+                    _logFieldEnabledMap.ContainsKey(PopulationFieldElements.Generation) &&
+                    _logFieldEnabledMap[PopulationFieldElements.Generation]
+                        ? new LoggableElement(PopulationFieldElements.Generation, CurrentGeneration)
+                        : null,
+                    _logFieldEnabledMap.ContainsKey(PopulationFieldElements.GenomeId) &&
+                    _logFieldEnabledMap[PopulationFieldElements.GenomeId]
+                        ? new LoggableElement(PopulationFieldElements.GenomeId, genome.Id)
+                        : null,
+                    _logFieldEnabledMap[PopulationFieldElements.SpecieId]
+                        ? new LoggableElement(PopulationFieldElements.SpecieId,
+                            genome.SpecieIdx)
+                        : null
+                });
+            }
+
+            // Dump genome definitions for entire population if this is the first batch
+            if (CurrentGeneration == 1)
             {
                 foreach (TGenome genome in GenomeList)
                 {
-                    PopulationLogger?.LogRow(new List<LoggableElement>
+                    GenomeLogger?.LogRow(new List<LoggableElement>
                     {
-                        _logFieldEnabledMap.ContainsKey(PopulationGenomesFieldElements.Generation) &&
-                        _logFieldEnabledMap[PopulationGenomesFieldElements.Generation]
-                            ? new LoggableElement(PopulationGenomesFieldElements.Generation, CurrentGeneration)
+                        _logFieldEnabledMap.ContainsKey(GenomeFieldElements.RunPhase) &&
+                        _logFieldEnabledMap[GenomeFieldElements.RunPhase]
+                            ? new LoggableElement(GenomeFieldElements.RunPhase, RunPhase)
                             : null,
-                        _logFieldEnabledMap.ContainsKey(PopulationGenomesFieldElements.RunPhase) &&
-                        _logFieldEnabledMap[PopulationGenomesFieldElements.RunPhase]
-                            ? new LoggableElement(PopulationGenomesFieldElements.RunPhase, RunPhase)
+                        _logFieldEnabledMap.ContainsKey(GenomeFieldElements.GenomeId) &&
+                        _logFieldEnabledMap[GenomeFieldElements.GenomeId]
+                            ? new LoggableElement(GenomeFieldElements.GenomeId, genome.Id)
                             : null,
-                        _logFieldEnabledMap.ContainsKey(PopulationGenomesFieldElements.GenomeId) &&
-                        _logFieldEnabledMap[PopulationGenomesFieldElements.GenomeId]
-                            ? new LoggableElement(PopulationGenomesFieldElements.GenomeId, genome.Id)
+                        _logFieldEnabledMap.ContainsKey(GenomeFieldElements.GenomeXml) &&
+                        _logFieldEnabledMap[GenomeFieldElements.GenomeXml]
+                            ? new LoggableElement(GenomeFieldElements.GenomeXml, XmlIoUtils.GetGenomeXml(genome))
+                            : null
+                    });
+                }
+            }
+            // Otherwise, just dump new child genome definitions to file
+            else
+            {
+                foreach (TGenome childGenome in childGenomes)
+                {
+                    GenomeLogger?.LogRow(new List<LoggableElement>
+                    {
+                        _logFieldEnabledMap.ContainsKey(GenomeFieldElements.RunPhase) &&
+                        _logFieldEnabledMap[GenomeFieldElements.RunPhase]
+                            ? new LoggableElement(GenomeFieldElements.RunPhase, RunPhase)
                             : null,
-                        _logFieldEnabledMap.ContainsKey(PopulationGenomesFieldElements.GenomeXml) &&
-                        _logFieldEnabledMap[PopulationGenomesFieldElements.GenomeXml]
-                            ? new LoggableElement(PopulationGenomesFieldElements.GenomeXml,
-                                XmlIoUtils.GetGenomeXml(genome))
+                        _logFieldEnabledMap.ContainsKey(GenomeFieldElements.GenomeId) &&
+                        _logFieldEnabledMap[GenomeFieldElements.GenomeId]
+                            ? new LoggableElement(GenomeFieldElements.GenomeId, childGenome.Id)
                             : null,
-                        _logFieldEnabledMap[PopulationGenomesFieldElements.SpecieId]
-                            ? new LoggableElement(PopulationGenomesFieldElements.SpecieId,
-                                genome.SpecieIdx)
+                        _logFieldEnabledMap.ContainsKey(GenomeFieldElements.GenomeXml) &&
+                        _logFieldEnabledMap[GenomeFieldElements.GenomeXml]
+                            ? new LoggableElement(GenomeFieldElements.GenomeXml, XmlIoUtils.GetGenomeXml(childGenome))
                             : null
                     });
                 }
