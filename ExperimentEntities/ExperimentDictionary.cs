@@ -21,12 +21,15 @@ namespace ExperimentEntities
             this.NoveltyExperimentEvaluationDatas = new HashSet<NoveltyExperimentEvaluationData>();
             this.MCSExperimentEvaluationDatas = new HashSet<MCSExperimentEvaluationData>();
             this.MCSExperimentOrganismStateDatas = new HashSet<MCSExperimentOrganismStateData>();
-            this.CoevolutionMCSNavigatorExperimentEvaluationDatas = new HashSet<CoevolutionMCSNavigatorExperimentEvaluationData>();
-            this.CoevolutionMCSNavigatorExperimentGenomes = new HashSet<CoevolutionMCSNavigatorExperimentGenome>();
-            this.CoevolutionMCSMazeExperimentGenomes = new HashSet<CoevolutionMCSMazeExperimentGenome>();
-            this.CoevolutionMCSMazeExperimentEvaluationDatas = new HashSet<CoevolutionMCSMazeExperimentEvaluationData>();
-            this.CoevolutionMCSMazeNavigatorResults = new HashSet<CoevolutionMCSMazeNavigatorResult>();
-            this.CoevolutionMCSTrajectoryDiversities = new HashSet<CoevolutionMCSTrajectoryDiversity>();
+            this.MCCTrajectoryDiversities = new HashSet<MCCTrajectoryDiversity>();
+            this.MCCExperimentMazeEvaluationDatas = new HashSet<MCCExperimentMazeEvaluationData>();
+            this.MCCExperimentMazeGenomes = new HashSet<MCCExperimentMazeGenome>();
+            this.MCCExperimentNavigatorGenomes = new HashSet<MCCExperimentNavigatorGenome>();
+            this.MCCExperimentNavigatorEvaluationDatas = new HashSet<MCCExperimentNavigatorEvaluationData>();
+            this.MCCMazeNavigatorResults = new HashSet<MCCMazeNavigatorResult>();
+            this.MCCExperimentExtantMazePopulations = new HashSet<MCCExperimentExtantMazePopulation>();
+            this.MCCFullTrajectories = new HashSet<MCCFullTrajectory>();
+            this.MCCExperimentExtantNavigatorPopulations = new HashSet<MCCExperimentExtantNavigatorPopulation>();
         }
     
         public int ExperimentDictionaryID { get; set; }
@@ -155,6 +158,13 @@ namespace ExperimentEntities
         public Nullable<bool> Primary_Maze_SpecieSizeFixed { get; set; }
         public int NumSeedAgentGenomes { get; set; }
         public Nullable<int> NumSeedMazeGenomes { get; set; }
+        public Nullable<double> Primary_Maze_MutateDeleteWallProbability { get; set; }
+        public Nullable<double> Primary_Maze_MutatePathWaypointLocationProbability { get; set; }
+        public Nullable<double> Primary_Maze_MutateAddPathWaypointProbability { get; set; }
+        public Nullable<double> Primary_Maze_MutateExpandMazeProbability { get; set; }
+        public Nullable<double> Primary_Maze_VerticalWallBias { get; set; }
+        public Nullable<int> Primary_Maze_GridCellNeighborhoodRadius { get; set; }
+        public Nullable<double> Primary_Maze_SparseCellSelectionProportion { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<NoveltyExperimentOrganismStateData> NoveltyExperimentOrganismStateDatas { get; set; }
@@ -165,16 +175,22 @@ namespace ExperimentEntities
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<MCSExperimentOrganismStateData> MCSExperimentOrganismStateDatas { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<CoevolutionMCSNavigatorExperimentEvaluationData> CoevolutionMCSNavigatorExperimentEvaluationDatas { get; set; }
+        public virtual ICollection<MCCTrajectoryDiversity> MCCTrajectoryDiversities { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<CoevolutionMCSNavigatorExperimentGenome> CoevolutionMCSNavigatorExperimentGenomes { get; set; }
+        public virtual ICollection<MCCExperimentMazeEvaluationData> MCCExperimentMazeEvaluationDatas { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<CoevolutionMCSMazeExperimentGenome> CoevolutionMCSMazeExperimentGenomes { get; set; }
+        public virtual ICollection<MCCExperimentMazeGenome> MCCExperimentMazeGenomes { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<CoevolutionMCSMazeExperimentEvaluationData> CoevolutionMCSMazeExperimentEvaluationDatas { get; set; }
+        public virtual ICollection<MCCExperimentNavigatorGenome> MCCExperimentNavigatorGenomes { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<CoevolutionMCSMazeNavigatorResult> CoevolutionMCSMazeNavigatorResults { get; set; }
+        public virtual ICollection<MCCExperimentNavigatorEvaluationData> MCCExperimentNavigatorEvaluationDatas { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<CoevolutionMCSTrajectoryDiversity> CoevolutionMCSTrajectoryDiversities { get; set; }
+        public virtual ICollection<MCCMazeNavigatorResult> MCCMazeNavigatorResults { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<MCCExperimentExtantMazePopulation> MCCExperimentExtantMazePopulations { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<MCCFullTrajectory> MCCFullTrajectories { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<MCCExperimentExtantNavigatorPopulation> MCCExperimentExtantNavigatorPopulations { get; set; }
     }
 }

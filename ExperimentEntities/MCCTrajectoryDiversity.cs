@@ -12,7 +12,7 @@ namespace ExperimentEntities
     using System;
     using System.Collections.Generic;
     
-    public partial class CoevolutionMCSTrajectoryDiversity
+    public partial class MCCTrajectoryDiversity
     {
         public int ExperimentDictionaryID { get; set; }
         public int Run { get; set; }

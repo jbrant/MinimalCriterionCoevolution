@@ -113,7 +113,7 @@ namespace MazeNavigationEvaluator
         /// </summary>
         /// <param name="navigationCombos">The combinations of mazes and navigators.</param>
         public void Initialize(
-            IList<Tuple<CoevolutionMCSMazeExperimentGenome, CoevolutionMCSNavigatorExperimentGenome>> navigationCombos)
+            IList<Tuple<MCCExperimentMazeGenome, MCCExperimentNavigatorGenome>> navigationCombos)
         {
             foreach (var navigationCombo in navigationCombos)
             {
@@ -144,12 +144,12 @@ namespace MazeNavigationEvaluator
         /// </summary>
         /// <param name="mazes">The mazes that were in the maze queue during the given batch.</param>
         /// <param name="navigators">The navigators that were in the navigator queue during the given batch.</param>
-        public void Initialize(IList<CoevolutionMCSMazeExperimentGenome> mazes,
-            IList<CoevolutionMCSNavigatorExperimentGenome> navigators)
+        public void Initialize(IList<MCCExperimentMazeGenome> mazes,
+            IList<MCCExperimentNavigatorGenome> navigators)
         {
             IList<NeatGenome> cachedAgents = new List<NeatGenome>(navigators.Count);
 
-            foreach (CoevolutionMCSMazeExperimentGenome serializedMaze in mazes)
+            foreach (MCCExperimentMazeGenome serializedMaze in mazes)
             {
                 MazeGenome mazeGenome;
 
@@ -164,7 +164,7 @@ namespace MazeNavigationEvaluator
                 {
                     // Go through every serialized navigator genome, deserialize it, and use it with the maze to build
                     // a new evaluation unit
-                    foreach (CoevolutionMCSNavigatorExperimentGenome serializedNavigator in navigators)
+                    foreach (MCCExperimentNavigatorGenome serializedNavigator in navigators)
                     {
                         NeatGenome agentGenome;
 
@@ -200,9 +200,9 @@ namespace MazeNavigationEvaluator
         ///     post-hoc analyses that doesn't consider navigator trajectories.
         /// </summary>
         /// <param name="mazes">The mazes that were in the maze queue during the given batch.</param>
-        public void Initialize(IList<CoevolutionMCSMazeExperimentGenome> mazes)
+        public void Initialize(IList<MCCExperimentMazeGenome> mazes)
         {
-            foreach (CoevolutionMCSMazeExperimentGenome serializedMaze in mazes)
+            foreach (MCCExperimentMazeGenome serializedMaze in mazes)
             {
                 MazeGenome mazeGenome;
 
@@ -222,7 +222,7 @@ namespace MazeNavigationEvaluator
         ///     for each non-evaluated agent/maze combination.
         /// </summary>
         /// <param name="agents">The agents that are in the queue at the given time.</param>
-        public void Initialize(IList<CoevolutionMCSNavigatorExperimentGenome> agents)
+        public void Initialize(IList<MCCExperimentNavigatorGenome> agents)
         {
             // Build a separate evaluation unit for each agent/maze combination, but only consider those agents
             // who have not already been evaluated
@@ -273,7 +273,7 @@ namespace MazeNavigationEvaluator
                 delegate(MazeNavigatorEvaluationUnit evaluationUnit)
                 {
                     EvaluationHandler.EvaluateMazeNavigatorUnit(evaluationUnit, _experimentParameters);
-                });
+                });            
         }
 
         #endregion

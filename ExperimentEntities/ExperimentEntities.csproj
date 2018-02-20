@@ -55,27 +55,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CoevolutionMCSFullTrajectory.cs">
-      <DependentUpon>ExperimentModel.tt</DependentUpon>
-    </Compile>
-    <Compile Include="CoevolutionMCSMazeExperimentEvaluationData.cs">
-      <DependentUpon>ExperimentModel.tt</DependentUpon>
-    </Compile>
-    <Compile Include="CoevolutionMCSMazeExperimentGenome.cs">
-      <DependentUpon>ExperimentModel.tt</DependentUpon>
-    </Compile>
-    <Compile Include="CoevolutionMCSMazeNavigatorResult.cs">
-      <DependentUpon>ExperimentModel.tt</DependentUpon>
-    </Compile>
-    <Compile Include="CoevolutionMCSNavigatorExperimentEvaluationData.cs">
-      <DependentUpon>ExperimentModel.tt</DependentUpon>
-    </Compile>
-    <Compile Include="CoevolutionMCSNavigatorExperimentGenome.cs">
-      <DependentUpon>ExperimentModel.tt</DependentUpon>
-    </Compile>
-    <Compile Include="CoevolutionMCSTrajectoryDiversity.cs">
-      <DependentUpon>ExperimentModel.tt</DependentUpon>
-    </Compile>
     <Compile Include="ExperimentDbConfiguration.cs" />
     <Compile Include="ExperimentDbExecutionStrategy.cs" />
     <Compile Include="ExperimentDictionary.cs">
@@ -95,6 +74,33 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>ExperimentModel.edmx</DependentUpon>
+    </Compile>
+    <Compile Include="MCCExperimentExtantMazePopulation.cs">
+      <DependentUpon>ExperimentModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="MCCExperimentExtantNavigatorPopulation.cs">
+      <DependentUpon>ExperimentModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="MCCExperimentMazeEvaluationData.cs">
+      <DependentUpon>ExperimentModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="MCCExperimentMazeGenome.cs">
+      <DependentUpon>ExperimentModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="MCCExperimentNavigatorEvaluationData.cs">
+      <DependentUpon>ExperimentModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="MCCExperimentNavigatorGenome.cs">
+      <DependentUpon>ExperimentModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="MCCFullTrajectory.cs">
+      <DependentUpon>ExperimentModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="MCCMazeNavigatorResult.cs">
+      <DependentUpon>ExperimentModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="MCCTrajectoryDiversity.cs">
+      <DependentUpon>ExperimentModel.tt</DependentUpon>
     </Compile>
     <Compile Include="MCSExperimentEvaluationData.cs">
       <DependentUpon>ExperimentModel.tt</DependentUpon>

@@ -31,12 +31,14 @@ namespace ExperimentEntities
         public virtual DbSet<MCSExperimentEvaluationData> MCSExperimentEvaluationDatas { get; set; }
         public virtual DbSet<MCSExperimentOrganismStateData> MCSExperimentOrganismStateDatas { get; set; }
         public virtual DbSet<RunPhase> RunPhases { get; set; }
-        public virtual DbSet<CoevolutionMCSMazeExperimentEvaluationData> CoevolutionMCSMazeExperimentEvaluationDatas { get; set; }
-        public virtual DbSet<CoevolutionMCSMazeExperimentGenome> CoevolutionMCSMazeExperimentGenomes { get; set; }
-        public virtual DbSet<CoevolutionMCSMazeNavigatorResult> CoevolutionMCSMazeNavigatorResults { get; set; }
-        public virtual DbSet<CoevolutionMCSNavigatorExperimentEvaluationData> CoevolutionMCSNavigatorExperimentEvaluationDatas { get; set; }
-        public virtual DbSet<CoevolutionMCSNavigatorExperimentGenome> CoevolutionMCSNavigatorExperimentGenomes { get; set; }
-        public virtual DbSet<CoevolutionMCSFullTrajectory> CoevolutionMCSFullTrajectories { get; set; }
-        public virtual DbSet<CoevolutionMCSTrajectoryDiversity> CoevolutionMCSTrajectoryDiversities { get; set; }
+        public virtual DbSet<MCCFullTrajectory> MCCFullTrajectories { get; set; }
+        public virtual DbSet<MCCTrajectoryDiversity> MCCTrajectoryDiversities { get; set; }
+        public virtual DbSet<MCCExperimentMazeEvaluationData> MCCExperimentMazeEvaluationDatas { get; set; }
+        public virtual DbSet<MCCExperimentMazeGenome> MCCExperimentMazeGenomes { get; set; }
+        public virtual DbSet<MCCExperimentNavigatorGenome> MCCExperimentNavigatorGenomes { get; set; }
+        public virtual DbSet<MCCExperimentNavigatorEvaluationData> MCCExperimentNavigatorEvaluationDatas { get; set; }
+        public virtual DbSet<MCCMazeNavigatorResult> MCCMazeNavigatorResults { get; set; }
+        public virtual DbSet<MCCExperimentExtantMazePopulation> MCCExperimentExtantMazePopulations { get; set; }
+        public virtual DbSet<MCCExperimentExtantNavigatorPopulation> MCCExperimentExtantNavigatorPopulations { get; set; }
     }
 }

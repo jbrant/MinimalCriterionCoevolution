@@ -42,7 +42,7 @@
   <MazeOffspringBatchSize>5</MazeOffspringBatchSize>
   <MaxEvaluations>
   </MaxEvaluations>
-  <MaxGenerations>2000</MaxGenerations>
+  <MaxGenerations>4000</MaxGenerations>
   <MaxTimesteps>600</MaxTimesteps>
   <MinSuccessDistance>5</MinSuccessDistance>
   <MazeHeight>10</MazeHeight>

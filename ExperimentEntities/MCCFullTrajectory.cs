@@ -12,7 +12,7 @@ namespace ExperimentEntities
     using System;
     using System.Collections.Generic;
     
-    public partial class CoevolutionMCSFullTrajectory
+    public partial class MCCFullTrajectory
     {
         public int ExperimentDictionaryID { get; set; }
         public int Run { get; set; }
@@ -22,5 +22,7 @@ namespace ExperimentEntities
         public int NavigatorGenomeID { get; set; }
         public decimal XPosition { get; set; }
         public decimal YPosition { get; set; }
+    
+        public virtual ExperimentDictionary ExperimentDictionary { get; set; }
     }
 }

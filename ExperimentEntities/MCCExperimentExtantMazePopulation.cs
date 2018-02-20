@@ -12,21 +12,14 @@ namespace ExperimentEntities
     using System;
     using System.Collections.Generic;
     
-    public partial class CoevolutionMCSNavigatorExperimentEvaluationData
+    public partial class MCCExperimentExtantMazePopulation
     {
         public int ExperimentDictionaryID { get; set; }
         public int Run { get; set; }
         public int Generation { get; set; }
-        public int PopulationSize { get; set; }
-        public int ViableOffspringCount { get; set; }
-        public int MinComplexity { get; set; }
-        public int MaxComplexity { get; set; }
-        public double MeanComplexity { get; set; }
-        public int TotalEvaluations { get; set; }
-        public Nullable<int> EvaluationsPerSecond { get; set; }
-        public int RunPhase_FK { get; set; }
+        public int GenomeID { get; set; }
+        public Nullable<int> SpecieID { get; set; }
     
         public virtual ExperimentDictionary ExperimentDictionary { get; set; }
-        public virtual RunPhase RunPhase { get; set; }
     }
 }
