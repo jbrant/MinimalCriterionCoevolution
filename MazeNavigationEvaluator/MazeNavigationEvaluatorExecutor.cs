@@ -133,6 +133,16 @@ namespace MazeNavigationEvaluator
                 _executionConfiguration.ContainsKey(ExecutionParameter.ExecuteInitializationTrials) &&
                 Boolean.Parse(_executionConfiguration[ExecutionParameter.ExecuteInitializationTrials]);
 
+            // Get the number of batches to skip in each iteration
+            int batchInterval = _executionConfiguration.ContainsKey(ExecutionParameter.BatchInterval)
+                ? Int32.Parse(_executionConfiguration[ExecutionParameter.BatchInterval])
+                : 1;
+
+            // Get the image chunk size
+            int chunkSize = _executionConfiguration.ContainsKey(ExecutionParameter.ImageChunkSize)
+                ? Int32.Parse(_executionConfiguration[ExecutionParameter.ImageChunkSize])
+                : 10;
+
             // If bitmap generation was enabled, grab the base output directory
             if (generateTrajectoryBitmaps || generateMazeBitmaps)
             {
@@ -265,16 +275,14 @@ namespace MazeNavigationEvaluator
                                     numRuns, numInitializationBatches));
 
                             // Begin initialization phase results processing
-                            ProcessAndLogPerBatchResults(numInitializationBatches,
+                            ProcessAndLogPerBatchResults(numInitializationBatches, batchInterval,
                                 RunPhase.Initialization,
                                 experimentParameters, inputNeuronCount, outputNeuronCount, curRun, numRuns,
                                 curExperimentConfiguration, generateSimulationResults, generateTrajectoryData,
                                 generateTrajectoryDiversityScores, generateAgentTrajectoryClusters, generateMazeClusters,
                                 generatePopulationEntropy, useGreedySilhouetteEvaluation,
                                 useEvenMazeTrajectoryDistribution, clusterRange,
-                                writeResultsToDatabase, generateMazeBitmaps, generateTrajectoryBitmaps,
-                                baseImageOutputDirectory, sampleSize,
-                                sampleClusterObservationsFromSpecies);
+                                writeResultsToDatabase, sampleSize, sampleClusterObservationsFromSpecies);
                         }
 
                         // Get the number of primary batches in the current run
@@ -287,37 +295,25 @@ namespace MazeNavigationEvaluator
                                 curRun,
                                 numRuns, numBatches));
 
+                        // Image generation is handled more holistically (rather than batch-by-batch) and therefore doesn't align 
+                        // with the manner in which non-image, quantitative experiment data is processed
+                        if (generateMazeBitmaps || generateTrajectoryBitmaps)
+                        {
+                            WriteImageResults(experimentParameters, inputNeuronCount, outputNeuronCount, curRun, numRuns,
+                                curExperimentConfiguration, baseImageOutputDirectory, generateMazeBitmaps,
+                                generateTrajectoryBitmaps, chunkSize);
+                        }
                         // Begin primary phase results processing
-                        ProcessAndLogPerBatchResults(numBatches, RunPhase.Primary, experimentParameters,
-                            inputNeuronCount, outputNeuronCount, curRun, numRuns, curExperimentConfiguration,
-                            generateSimulationResults, generateTrajectoryData, generateTrajectoryDiversityScores,
-                            generateAgentTrajectoryClusters, generateMazeClusters, generatePopulationEntropy,
-                            useGreedySilhouetteEvaluation, useEvenMazeTrajectoryDistribution, clusterRange,
-                            writeResultsToDatabase,
-                            generateMazeBitmaps,
-                            generateTrajectoryBitmaps, baseImageOutputDirectory, sampleSize,
-                            sampleClusterObservationsFromSpecies);
-                    }
-                    // If we want to analyze the entirety of the run as a whole
-                    else if (AnalysisScope.Aggregate == analysisScope)
-                    {
-                        _executionLogger.Info(
-                            string.Format("Executing aggregate analysis for run [{0}/{1}]", curRun, numRuns));
-
-                        // Get the number of primary batches in the current run
-                        int numBatches =
-                            ExperimentDataHandler.GetNumBatchesForRun(
-                                curExperimentConfiguration.ExperimentDictionaryID, curRun, RunPhase.Primary);
-
-                        // Process aggregate run
-                        ProcessAndLogAggregateRunResults(numBatches, experimentParameters, inputNeuronCount,
-                            outputNeuronCount,
-                            curRun, numRuns, curExperimentConfiguration, generateSimulationResults,
-                            generateTrajectoryData, generateTrajectoryDiversityScores, generateAgentTrajectoryClusters,
-                            generateMazeClusters, useGreedySilhouetteEvaluation, useEvenMazeTrajectoryDistribution,
-                            clusterRange,
-                            writeResultsToDatabase, generateMazeBitmaps, generateTrajectoryBitmaps,
-                            baseImageOutputDirectory, sampleSize);
+                        else
+                        {
+                            ProcessAndLogPerBatchResults(numBatches, batchInterval, RunPhase.Primary,
+                                experimentParameters,
+                                inputNeuronCount, outputNeuronCount, curRun, numRuns, curExperimentConfiguration,
+                                generateSimulationResults, generateTrajectoryData, generateTrajectoryDiversityScores,
+                                generateAgentTrajectoryClusters, generateMazeClusters, generatePopulationEntropy,
+                                useGreedySilhouetteEvaluation, useEvenMazeTrajectoryDistribution, clusterRange,
+                                writeResultsToDatabase, sampleSize, sampleClusterObservationsFromSpecies);
+                        }
                     }
                     // Otherwise, we're just analyzing the ending population
                     else
@@ -333,14 +329,12 @@ namespace MazeNavigationEvaluator
                                 curRun, numRuns, finalBatch));
 
                         // Begin maze/navigator trajectory image generation
-                        ProcessAndLogPerBatchResults(finalBatch, RunPhase.Primary,
+                        ProcessAndLogPerBatchResults(finalBatch, batchInterval, RunPhase.Primary,
                             experimentParameters, inputNeuronCount, outputNeuronCount, curRun, numRuns,
                             curExperimentConfiguration, generateSimulationResults, generateTrajectoryData,
                             generateTrajectoryDiversityScores, generateAgentTrajectoryClusters, generateMazeClusters,
                             generatePopulationEntropy, useGreedySilhouetteEvaluation, useEvenMazeTrajectoryDistribution,
-                            clusterRange,
-                            writeResultsToDatabase, generateMazeBitmaps, generateTrajectoryBitmaps,
-                            baseImageOutputDirectory, sampleSize, sampleClusterObservationsFromSpecies);
+                            clusterRange, writeResultsToDatabase, sampleSize, sampleClusterObservationsFromSpecies);
                     }
 
                     // If we're not writing to the database, close the simulation result file writer
@@ -407,10 +401,101 @@ namespace MazeNavigationEvaluator
         }
 
         /// <summary>
+        ///     Runs post-hoc image generation, depicting either the maze or the agent's trajectory through said maze.
+        /// </summary>
+        /// <param name="experimentParameters">Experiment configuration parameters.</param>
+        /// <param name="inputNeuronCount">Count of neurons in controller input layer.</param>
+        /// <param name="outputNeuronCount">Count of neurons in controller output layer.</param>
+        /// <param name="curRun">The run number.</param>
+        /// <param name="numRuns">The total number of runs.</param>
+        /// <param name="curExperimentConfiguration">The experiment configuration parameters.</param>
+        /// <param name="baseImageOutputDirectory">The path to the output directory for the trajectory images.</param>
+        /// <param name="generateMazeBitmaps">Indicates whether to generate maze bitmap images.</param>
+        /// <param name="generateTrajectoryBitmaps">Indicates whether to generate agent trajectory images.</param>
+        /// <param name="chunkSize">The number of maze genomes to process at one time (optional).</param>
+        private static void WriteImageResults(ExperimentParameters experimentParameters, int inputNeuronCount,
+            int outputNeuronCount, int curRun, int numRuns, ExperimentDictionary curExperimentConfiguration,
+            string baseImageOutputDirectory, bool generateMazeBitmaps, bool generateTrajectoryBitmaps,
+            int chunkSize = 10)
+        {
+            // Create the maze/navigator map
+            MapEvaluator mapEvaluator =
+                new MapEvaluator(experimentParameters, inputNeuronCount, outputNeuronCount);
+
+            _executionLogger.Info(string.Format("Executing image generation for run [{0}/{1}]",
+                curRun, numRuns));
+
+            // Get the distinct maze genome IDs for which to produce trajectory images
+            var mazeGenomeIds = ExperimentDataHandler.GetMazeGenomeIds(
+                curExperimentConfiguration.ExperimentDictionaryID, curRun);
+
+            for (int curChunk = 0; curChunk < mazeGenomeIds.Count; curChunk += chunkSize)
+            {
+                // Get maze genome IDs for the current chunk
+                var curMazeGenomeIds = mazeGenomeIds.Skip(curChunk).Take(chunkSize).ToList();
+
+                _executionLogger.Info(string.Format("Evaluating maze genomes with IDs [{0}] through [{1}]",
+                    curMazeGenomeIds.Min(), curMazeGenomeIds.Max()));
+
+                // Get any existing navigation results (this avoids rerunning failed combinations)
+                var perMazeSuccessfulNavigations =
+                    ExperimentDataHandler.GetSuccessfulNavigationPerMaze(
+                        curExperimentConfiguration.ExperimentDictionaryID,
+                        curRun, curMazeGenomeIds);
+
+                List<Tuple<MCCExperimentMazeGenome, MCCExperimentNavigatorGenome>>
+                    successfulGenomeCombos =
+                        new List<Tuple<MCCExperimentMazeGenome, MCCExperimentNavigatorGenome>>
+                            (perMazeSuccessfulNavigations.Count());
+
+                // Get distinct maze and navigator genomes
+                var mazeGenomeData =
+                    ExperimentDataHandler.GetMazeGenomeData(curExperimentConfiguration.ExperimentDictionaryID, curRun,
+                        perMazeSuccessfulNavigations.Select(nav => nav.MazeGenomeID).Distinct().ToList());
+                var navigatorGenomeData =
+                    ExperimentDataHandler.GetNavigatorGenomeData(curExperimentConfiguration.ExperimentDictionaryID,
+                        curRun, RunPhase.Primary,
+                        perMazeSuccessfulNavigations.Select(nav => nav.NavigatorGenomeID).Distinct().ToList());
+
+                // Build list of successful maze/navigator combinations
+                successfulGenomeCombos.AddRange(
+                    perMazeSuccessfulNavigations.Select(
+                        successfulNav =>
+                            new Tuple<MCCExperimentMazeGenome, MCCExperimentNavigatorGenome>(
+                                mazeGenomeData.First(gd => successfulNav.MazeGenomeID == gd.GenomeID),
+                                navigatorGenomeData.First(gd => successfulNav.NavigatorGenomeID == gd.GenomeID))));
+
+                // Initialize the maze/navigator map with combinations that are known to be successful
+                mapEvaluator.Initialize(successfulGenomeCombos);
+
+                // Generate navigator trajectories
+                mapEvaluator.RunTrajectoryEvaluations();
+
+                if (generateMazeBitmaps)
+                {
+                    // Generate bitmaps of distinct mazes extant at the current point in time
+                    ImageGenerationHandler.GenerateMazeBitmaps(baseImageOutputDirectory,
+                        curExperimentConfiguration.ExperimentName, curExperimentConfiguration.ExperimentDictionaryID,
+                        curRun, mapEvaluator.EvaluationUnits);
+                }
+
+                if (generateTrajectoryBitmaps)
+                {
+                    // Generate bitmaps of trajectory for all successful trials
+                    ImageGenerationHandler.GenerateBitmapsForSuccessfulTrials(
+                        baseImageOutputDirectory, curExperimentConfiguration.ExperimentName,
+                        curExperimentConfiguration.ExperimentDictionaryID,
+                        curRun, mapEvaluator.EvaluationUnits, RunPhase.Primary);
+                }
+            }
+        }
+
+        /// <summary>
         ///     Runs post-hoc analysis for all batches in the given experiment/run.  This can be part of either the initialization
         ///     or primary run phase.
         /// </summary>
-        /// <param name="batchesWithGenomeData">The total number of batches containing genome data.</param>
+        /// <param name="numBatches">The total number of batches containing genome data.</param>
+        /// <param name="batchInterval">The number of batches to move forward on each iteration of the analysis loop.</param>
         /// <param name="runPhase">
         ///     Indicates whether this is part of the initialization or primary run phase.
         /// </param>
@@ -450,21 +535,18 @@ namespace MazeNavigationEvaluator
         ///     Indicates whether bitmap files depicting the navigator trajectory should be
         ///     written out.
         /// </param>
-        /// <param name="baseImageOutputDirectory">The path to the output directory for the trajectory images.</param>
         /// <param name="sampleSize">The number of genomes sampled from the extant species for trajectory or clustering analysis.</param>
         /// <param name="sampleClusterObservationsFromSpecies">
         ///     Indicates whether to sample observations used in clustering analysis
         ///     from species or from the population as a whole.
         /// </param>
-        private static void ProcessAndLogPerBatchResults(int batchesWithGenomeData, RunPhase runPhase,
+        private static void ProcessAndLogPerBatchResults(int numBatches, int batchInterval, RunPhase runPhase,
             ExperimentParameters experimentParameters, int inputNeuronCount, int outputNeuronCount, int curRun,
             int numRuns, ExperimentDictionary curExperimentConfiguration, bool generateSimulationResults,
             bool generateTrajectoryData, bool generateTrajectoryDiversityScore, bool generateAgentTrajectoryClustering,
             bool generateMazeClusters, bool generatePopulationEntropy, bool useGreedySilhouetteCalculation,
-            bool useEvenMazeTrajectoryDistribution,
-            int clusterRange, bool writeResultsToDatabase,
-            bool generateMazeBitmaps, bool generateTrajectoryBitmaps, string baseImageOutputDirectory, int sampleSize,
-            bool sampleClusterObservationsFromSpecies)
+            bool useEvenMazeTrajectoryDistribution, int clusterRange, bool writeResultsToDatabase,
+            int sampleSize, bool sampleClusterObservationsFromSpecies)
         {
             IList<MCCExperimentMazeGenome> staticInitializationMazes = null;
 
@@ -478,7 +560,9 @@ namespace MazeNavigationEvaluator
             }
 
             // Iterate through each batch and evaluate maze/navigator combinations
-            for (int curBatch = 1; curBatch <= batchesWithGenomeData; curBatch++)
+            for (int curBatch = 1;
+                curBatch <= numBatches;
+                curBatch += curBatch == 1 ? batchInterval - 1 : batchInterval)
             {
                 // Create the maze/navigator map
                 MapEvaluator mapEvaluator =
@@ -486,8 +570,6 @@ namespace MazeNavigationEvaluator
 
                 _executionLogger.Info(string.Format("Executing {0} run phase analysis for batch [{1}] of run [{2}/{3}]",
                     runPhase, curBatch, curRun, numRuns));
-
-                // TODO: Check first to see if trajectory evaluations already exist
 
                 // Get any existing navigation results (this avoids rerunning failed combinations)
                 var successfulNavigations =
@@ -507,7 +589,8 @@ namespace MazeNavigationEvaluator
                     // Get distinct maze and navigator genomes
                     var mazeGenomeData =
                         ExperimentDataHandler.GetMazeGenomeData(curExperimentConfiguration.ExperimentDictionaryID,
-                            curRun, curBatch, successfulNavigations.Select(n => n.MazeGenomeID).Distinct().ToList());
+                            curRun, curBatch - batchInterval + 1, curBatch,
+                            successfulNavigations.Select(n => n.MazeGenomeID).Distinct().ToList());
                     var navigatorGenomeData =
                         ExperimentDataHandler.GetNavigatorGenomeData(curExperimentConfiguration.ExperimentDictionaryID,
                             curRun, curBatch, runPhase,
@@ -533,16 +616,16 @@ namespace MazeNavigationEvaluator
                         runPhase == RunPhase.Initialization
                             ? staticInitializationMazes
                             : ExperimentDataHandler.GetMazeGenomeData(curExperimentConfiguration.ExperimentDictionaryID,
-                                curRun, curBatch-1, curBatch), ExperimentDataHandler.GetNavigatorGenomeData(
-                                    curExperimentConfiguration.ExperimentDictionaryID, curRun, curBatch, runPhase));
+                                curRun, curBatch - batchInterval + 1, curBatch),
+                        ExperimentDataHandler.GetNavigatorGenomeData(
+                            curExperimentConfiguration.ExperimentDictionaryID, curRun, curBatch, runPhase));
                 }
 
                 // Evaluate all of the maze/navigator combinations in the batch (if analysis is based on trajectory data)
-                if (generateSimulationResults || generateMazeBitmaps || generateTrajectoryBitmaps ||
-                    generateTrajectoryData || generateTrajectoryDiversityScore || generateAgentTrajectoryClustering ||
-                    generatePopulationEntropy)
+                if (generateSimulationResults || generateTrajectoryData || generateTrajectoryDiversityScore ||
+                    generateAgentTrajectoryClustering || generatePopulationEntropy)
                 {
-                    mapEvaluator.RunTrajectoryEvaluations(); 
+                    mapEvaluator.RunTrajectoryEvaluations();
                 }
 
                 if (generateSimulationResults)
@@ -551,23 +634,6 @@ namespace MazeNavigationEvaluator
                     ExperimentDataHandler.WriteNavigatorMazeEvaluationData(
                         curExperimentConfiguration.ExperimentDictionaryID, curRun, curBatch, runPhase,
                         mapEvaluator.EvaluationUnits, CommitPageSize, writeResultsToDatabase);
-                }
-
-                if (generateMazeBitmaps)
-                {
-                    // Generate bitmaps of distinct mazes extant at the current point in time
-                    ImageGenerationHandler.GenerateMazeBitmaps(baseImageOutputDirectory,
-                        curExperimentConfiguration.ExperimentName, curExperimentConfiguration.ExperimentDictionaryID,
-                        curRun, curBatch, mapEvaluator.EvaluationUnits);
-                }
-
-                if (generateTrajectoryBitmaps)
-                {
-                    // Generate bitmaps of trajectory for all successful trials
-                    ImageGenerationHandler.GenerateBitmapsForSuccessfulTrials(
-                        baseImageOutputDirectory, curExperimentConfiguration.ExperimentName,
-                        curExperimentConfiguration.ExperimentDictionaryID,
-                        curRun, curBatch, mapEvaluator.EvaluationUnits, runPhase);
                 }
 
                 if (generateTrajectoryData && runPhase != RunPhase.Initialization)
@@ -663,132 +729,6 @@ namespace MazeNavigationEvaluator
                         curRun, curBatch,
                         EvaluationHandler.CalculatePopulationEntropy(mapEvaluator.EvaluationUnits,
                             curExperimentConfiguration.NumSeedAgentGenomes), writeResultsToDatabase);
-                }
-            }
-        }
-
-        /// <summary>
-        ///     Runs post-hoc analysis for the entire experiment run in aggregate (i.e. not per batch).  This analyzes the primary
-        ///     run phase only.
-        /// </summary>
-        /// <param name="numBatches">The total number of batches containing genome data.</param>
-        /// <param name="experimentParameters">Experiment configuration parameters.</param>
-        /// <param name="inputNeuronCount">Count of neurons in controller input layer.</param>
-        /// <param name="outputNeuronCount">Count of neurons in controller output layer.</param>
-        /// <param name="curRun">The run number.</param>
-        /// <param name="numRuns">The total number of runs.</param>
-        /// <param name="curExperimentConfiguration">The experiment configuration parameters.</param>
-        /// <param name="generateSimulationResults">Indicates whether to write out the results of the batch simulation.</param>
-        /// <param name="writeResultsToDatabase">
-        ///     Indicates whether to write results directly into a database (if not, results are
-        ///     written to a flat file).
-        /// </param>
-        /// <param name="generateTrajectoryData">Indicates whether the full navigator trajectory should be simulated and persisted.</param>
-        /// <param name="generateTrajectoryDiversityScore">
-        ///     Indicates whether quantification of navigator trajectory diversity
-        ///     should be written out.
-        /// </param>
-        /// <param name="generateNaturalClustering">Indicates whether the natural population clusters should be analyzed.</param>
-        /// <param name="generateMazeClusters">Indicates whether the naturally occurring maze clusters should be analyzed.</param>
-        /// <param name="useGreedySilhouetteCalculation">Indicates whether to use greedy silhouette width calculation strategy.</param>
-        /// <param name="useEvenMazeTrajectoryDistribution">
-        ///     Indicates whether to apply trajectory clustering evaluations evenly
-        ///     across extant/navigable mazes (only applicable to non-specie based evaluation unit selection).
-        /// </param>
-        /// <param name="clusterRange">
-        ///     The ceiling on the range of clusters for which to compute the silhouette width when using a
-        ///     non-greedy silhouette width calculation.
-        /// </param>
-        /// <param name="generateMazeBitmaps">Indicates whether bitmap files of the distinct mazes should be written out.</param>
-        /// <param name="generateTrajectoryBitmaps">
-        ///     Indicates whether bitmap files depicting the navigator trajectory should be
-        ///     written out.
-        /// </param>
-        /// <param name="baseImageOutputDirectory">The path to the output directory for the trajectory images.</param>
-        /// <param name="specieSampleSize">The number of genomes sampled from the extant species for clustering analysis.</param>
-        private static void ProcessAndLogAggregateRunResults(int numBatches,
-            ExperimentParameters experimentParameters,
-            int inputNeuronCount, int outputNeuronCount, int curRun,
-            int numRuns, ExperimentDictionary curExperimentConfiguration, bool generateSimulationResults,
-            bool generateTrajectoryData, bool generateTrajectoryDiversityScore, bool generateNaturalClustering,
-            bool generateMazeClusters, bool useGreedySilhouetteCalculation, bool useEvenMazeTrajectoryDistribution,
-            int clusterRange,
-            bool writeResultsToDatabase, bool generateMazeBitmaps, bool generateTrajectoryBitmaps,
-            string baseImageOutputDirectory, int specieSampleSize)
-        {
-            // Create the maze/navigator map
-            MapEvaluator mapEvaluator =
-                new MapEvaluator(experimentParameters, inputNeuronCount, outputNeuronCount);
-
-            _executionLogger.Info(string.Format("Executing aggregate run analysis for run [{0}/{1}]", curRun, numRuns));
-
-            // TODO: Might need to consider the option of pinning the mazes in memory and batching through the agents
-            // TODO: as pulling both into memory simultaneously is probably going to use too much memory
-
-            // Initialize the evaluator with the maze genomes discovered throughout the entire run
-            mapEvaluator.Initialize(
-                ExperimentDataHandler.GetMazeGenomeData(curExperimentConfiguration.ExperimentDictionaryID, curRun));
-
-            // Then evaluate each agent against each maze on a batch-by-batch basis
-            for (int curBatch = 0; curBatch < numBatches; curBatch++)
-            {
-                _executionLogger.Info(string.Format("Executing trajectory for batch [{0}] and run [{1}/{2}]", curBatch,
-                    curRun, numRuns));
-
-                // Initialize with the agent genomes from the current batch
-                mapEvaluator.Initialize(
-                    ExperimentDataHandler.GetNavigatorGenomeData(curExperimentConfiguration.ExperimentDictionaryID,
-                        curRun, curBatch, RunPhase.Primary));
-
-                // Evaluate all of the maze/navigator combinations in the batch
-                mapEvaluator.RunTrajectoryEvaluations();
-
-                if (generateSimulationResults)
-                {
-                    // Save the evaluation results
-                    // TODO: Implement - not sure if this adds a whole lot of value beyond per-batch approach
-                }
-
-                if (generateMazeBitmaps)
-                {
-                    // Generate bitmaps of distinct mazes extant throughout the run
-                    // TODO: Implement - not sure if this adds a whole lot of value beyond per-batch approach
-                }
-
-                if (generateTrajectoryBitmaps)
-                {
-                    // Generate bitmaps of trajectory for all successful trials
-                    // TODO: Implement - not sure if this adds a whole lot of value beyond per-batch approach
-                }
-
-                if (generateTrajectoryData)
-                {
-                    // Write out the full trajectory of all agents through all solved mazes
-                    // TODO: Implement - may end up removing this as it takes up an enormous amount of space
-                }
-
-                // Compare trajectories of agents through maze to get quantitative sense of solution diversity
-                // Mean euclidean distance will be calculated for selected trajectory against:
-                // 1. Other agent trajectories in the current maze only
-                // 2. Other agent trajectories on *another* maze only
-                // 3. All other agent trajectories (regardless of maze)
-                if (generateTrajectoryDiversityScore)
-                {
-                    // TODO: Implement
-                    ExperimentDataHandler.WriteTrajectoryDiversityData(
-                        curExperimentConfiguration.ExperimentDictionaryID, curRun,
-                        EvaluationHandler.CalculateTrajectoryDiversity(mapEvaluator.EvaluationUnits),
-                        writeResultsToDatabase);
-                }
-
-                if (generateNaturalClustering)
-                {
-                    // Calculate natural clustering of the population trajectories throughout the run and persist
-                    ExperimentDataHandler.WriteClusteringDiversityData(
-                        curExperimentConfiguration.ExperimentDictionaryID, curRun,
-                        EvaluationHandler.CalculateAgentTrajectoryClustering(mapEvaluator.EvaluationUnits,
-                            useGreedySilhouetteCalculation, clusterRange),
-                        writeResultsToDatabase);
                 }
             }
         }

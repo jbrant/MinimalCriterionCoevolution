@@ -388,6 +388,48 @@ namespace MazeExperimentSupportLib
         }
 
         /// <summary>
+        ///     Retrieves the maze genome IDs for a particular run/experiment.
+        /// </summary>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <returns>The maze genome IDs.</returns>
+        public static IList<int> GetMazeGenomeIds(int experimentId, int run)
+        {
+            IList<int> mazeGenomeIds = null;
+            bool querySuccess = false;
+            int retryCnt = 0;
+
+            while (querySuccess == false && retryCnt <= MaxQueryRetryCnt)
+            {
+                try
+                {
+                    // Query for the distinct maze genome IDs logged during the run
+                    using (ExperimentDataEntities context = new ExperimentDataEntities())
+                    {
+                        mazeGenomeIds =
+                            context.MCCExperimentMazeGenomes.Where(
+                                expData => expData.ExperimentDictionaryID == experimentId && expData.Run == run)
+                                .Select(m => m.GenomeID)
+                                .ToList();
+                    }
+
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
+                    }
+
+                    querySuccess = true;
+                }
+                catch (Exception e)
+                {
+                    HandleQueryException(MethodBase.GetCurrentMethod().ToString(), retryCnt++, e);
+                }
+            }
+
+            return mazeGenomeIds;
+        }
+
+        /// <summary>
         ///     Retrieves the maze genome XML for a particular batch of a given run/experiment.
         /// </summary>
         /// <param name="experimentId">The experiment that was executed.</param>
@@ -406,17 +448,22 @@ namespace MazeExperimentSupportLib
         /// <param name="run">The run number of the given experiment.</param>
         /// <param name="startBatch">The starting batch.</param>
         /// <param name="endBatch">The ending batch.</param>
+        /// <param name="mazeGenomeIdsInclusive">The maze genome IDs by which to filter the query result set (optional).</param>
+        /// <param name="mazeGenomeIdsExclusive">The maze genome IDs to exclude from the query result set (optional).</param>
         /// <returns>The distinct maze genomes between the start and end batch.</returns>
         public static IList<MCCExperimentMazeGenome> GetMazeGenomeData(int experimentId, int run, int startBatch,
-            int endBatch)
+            int endBatch, IList<int> mazeGenomeIdsInclusive = null, IList<int> mazeGenomeIdsExclusive = null)
         {
             List<MCCExperimentMazeGenome> mazeGenomes = new List<MCCExperimentMazeGenome>();
 
             // Get all maze genome objects between the start and end batch
             for (int curBatch = startBatch; curBatch <= endBatch; curBatch++)
             {
-                mazeGenomes.AddRange(GetMazeGenomeData(experimentId, run, curBatch,
-                    mazeGenomeIdsExclusive: mazeGenomes.Count == 0 ? mazeGenomes.Select(g => g.GenomeID).ToList() : null));
+                mazeGenomes.AddRange(GetMazeGenomeData(experimentId, run, curBatch, mazeGenomeIdsInclusive,
+                    mazeGenomes.Count != 0
+                        ? mazeGenomeIdsExclusive?.Concat(mazeGenomes.Select(g => g.GenomeID)).ToList() ??
+                          mazeGenomes.Select(g => g.GenomeID).ToList()
+                        : mazeGenomeIdsExclusive));
             }
 
             return mazeGenomes;
@@ -444,6 +491,52 @@ namespace MazeExperimentSupportLib
                         mazeGenomes =
                             context.MCCExperimentMazeGenomes.Where(
                                 expData => expData.ExperimentDictionaryID == experimentId && expData.Run == run)
+                                .ToList();
+                    }
+
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
+                    }
+
+                    querySuccess = true;
+                }
+                catch (Exception e)
+                {
+                    HandleQueryException(MethodBase.GetCurrentMethod().ToString(), retryCnt++, e);
+                }
+            }
+
+            return mazeGenomes;
+        }
+
+        /// <summary>
+        ///     Retrieves the maze genome data (i.e. evaluation statistics and XML) for the entirety of a given run/experiment,
+        ///     constrained by the specified genome IDs.
+        /// </summary>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <param name="mazeGenomeIds">The maze genome IDs by which to constrain.</param>
+        /// <returns>The maze genome data.</returns>
+        public static IList<MCCExperimentMazeGenome> GetMazeGenomeData(int experimentId, int run,
+            IList<int> mazeGenomeIds)
+        {
+            IList<MCCExperimentMazeGenome> mazeGenomes = null;
+            bool querySuccess = false;
+            int retryCnt = 0;
+
+            while (querySuccess == false && retryCnt <= MaxQueryRetryCnt)
+            {
+                try
+                {
+                    // Query for the maze genomes corresponding to the specified genome IDs
+                    using (ExperimentDataEntities context = new ExperimentDataEntities())
+                    {
+                        mazeGenomes =
+                            context.MCCExperimentMazeGenomes.Where(
+                                expData =>
+                                    expData.ExperimentDictionaryID == experimentId && expData.Run == run &&
+                                    mazeGenomeIds.Contains(expData.GenomeID))
                                 .ToList();
                     }
 
@@ -572,6 +665,39 @@ namespace MazeExperimentSupportLib
         }
 
         /// <summary>
+        ///     Retrieves the distinct navigator genome data between the given start and end batch.
+        /// </summary>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <param name="startBatch">The starting batch.</param>
+        /// <param name="endBatch">The ending batch.</param>
+        /// <param name="runPhase">
+        ///     Indicates whether this is part of the initialization or primary experiment phase.
+        /// </param>
+        /// <param name="navigatorGenomeIdsInclusive">The navigator genome IDs by which to filter the query result set (optional).</param>
+        /// <param name="navigatorGenomeIdsExclusive">The navigator genome IDs to exclude from the query result set (optional).</param>
+        /// <returns>The distinct navigator genomes between the start and end batch.</returns>
+        public static IList<MCCExperimentNavigatorGenome> GetNavigatorGenomeData(int experimentId, int run,
+            int startBatch, int endBatch, RunPhase runPhase, IList<int> navigatorGenomeIdsInclusive = null,
+            IList<int> navigatorGenomeIdsExclusive = null)
+        {
+            List<MCCExperimentNavigatorGenome> navigatorGenomes = new List<MCCExperimentNavigatorGenome>();
+
+            // Get all navigator genome objects between the start and end batch
+            for (int curBatch = startBatch; curBatch <= endBatch; curBatch++)
+            {
+                navigatorGenomes.AddRange(GetNavigatorGenomeData(experimentId, run, curBatch, runPhase,
+                    navigatorGenomeIdsInclusive,
+                    navigatorGenomes.Count != 0
+                        ? navigatorGenomeIdsExclusive?.Concat(navigatorGenomes.Select(g => g.GenomeID)).ToList() ??
+                          navigatorGenomes.Select(g => g.GenomeID).ToList()
+                        : navigatorGenomeIdsExclusive));
+            }
+
+            return navigatorGenomes;
+        }
+
+        /// <summary>
         ///     Retrieves the navigator genome data (i.e. evaluation statistics and XML) for the entirety of a given
         ///     run/experiment.
         /// </summary>
@@ -600,6 +726,55 @@ namespace MazeExperimentSupportLib
                                 expData =>
                                     expData.ExperimentDictionaryID == experimentId && expData.Run == run &&
                                     expData.RunPhase.RunPhaseName == runPhase.ToString()).ToList();
+                    }
+
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
+                    }
+
+                    querySuccess = true;
+                }
+                catch (Exception e)
+                {
+                    HandleQueryException(MethodBase.GetCurrentMethod().ToString(), retryCnt++, e);
+                }
+            }
+
+            return navigatorGenomes;
+        }
+
+        /// <summary>
+        ///     Retrieves the navigator genome data (i.e. evaluation statistics and XML) for the entirety of a given
+        ///     run/experiment, constrained by the specified genome IDs.
+        /// </summary>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <param name="runPhase">
+        ///     Indicates whether this is part of the initialization or primary experiment phase.
+        /// </param>
+        /// <param name="navigatorGenomeIds">The navigator genome IDs by which to constrain.</param>
+        /// <returns>The navigator genome data.</returns>
+        public static IList<MCCExperimentNavigatorGenome> GetNavigatorGenomeData(int experimentId, int run,
+            RunPhase runPhase, IList<int> navigatorGenomeIds)
+        {
+            IList<MCCExperimentNavigatorGenome> navigatorGenomes = null;
+            bool querySuccess = false;
+            int retryCnt = 0;
+
+            while (querySuccess == false && retryCnt <= MaxQueryRetryCnt)
+            {
+                try
+                {
+                    // Query for the navigator genomes corresponding to the specified genome IDs
+                    using (ExperimentDataEntities context = new ExperimentDataEntities())
+                    {
+                        navigatorGenomes =
+                            context.MCCExperimentNavigatorGenomes.Where(
+                                expData =>
+                                    expData.ExperimentDictionaryID == experimentId && expData.Run == run &&
+                                    expData.RunPhase.RunPhaseName == runPhase.ToString() &&
+                                    navigatorGenomeIds.Contains(expData.GenomeID)).ToList();
                     }
 
                     if (retryCnt > 0)
@@ -853,6 +1028,53 @@ namespace MazeExperimentSupportLib
                                 experimentId == nav.ExperimentDictionaryID && run == nav.Run && batch == nav.Generation &&
                                 RunPhase.Primary.ToString().Equals(nav.RunPhase.RunPhaseName) && nav.IsMazeSolved)
                             .ToList();
+                    }
+
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
+                    }
+
+                    querySuccess = true;
+                }
+                catch (Exception e)
+                {
+                    HandleQueryException(MethodBase.GetCurrentMethod().ToString(), retryCnt++, e);
+                }
+            }
+
+            return navigationResults;
+        }
+
+        /// <summary>
+        ///     For each maze, retrieves the first navigator that solved within the given experiment and run.
+        /// </summary>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <param name="mazeGenomeIds">The list of maze genome IDs by which to filter the navigation results.</param>
+        /// <returns>The list of distinct maze/navigator combinations that were successful for the given experiment and run.</returns>
+        public static IList<MCCMazeNavigatorResult> GetSuccessfulNavigationPerMaze(int experimentId, int run,
+            IList<int> mazeGenomeIds)
+        {
+            IList<MCCMazeNavigatorResult> navigationResults = null;
+            bool querySuccess = false;
+            int retryCnt = 0;
+
+            while (querySuccess == false && retryCnt <= MaxQueryRetryCnt)
+            {
+                try
+                {
+                    using (ExperimentDataEntities context = new ExperimentDataEntities())
+                    {
+                        // Get single navigation result for each of the specified maze IDs over the entirety of the run
+                        navigationResults = context.MCCMazeNavigatorResults.Where(
+                            nav =>
+                                experimentId == nav.ExperimentDictionaryID && run == nav.Run &&
+                                RunPhase.Primary.ToString().Equals(nav.RunPhase.RunPhaseName) &&
+                                nav.IsMazeSolved && mazeGenomeIds.Contains(nav.MazeGenomeID))
+                            .GroupBy(nav => nav.MazeGenomeID)
+                            .Select(m => m.OrderBy(x => x.MazeGenomeID).FirstOrDefault())
+                            .ToList();                            
                     }
 
                     if (retryCnt > 0)

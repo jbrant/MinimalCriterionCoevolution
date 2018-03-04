@@ -24,6 +24,25 @@ namespace MazeExperimentSupportLib
         /// <param name="experimentName">The name of the experiment being analyzed.</param>
         /// <param name="experimentId">The ID of the experiment being analyzed.</param>
         /// <param name="run">The run during which the trial took place.</param>
+        /// <param name="evaluationUnits">The maze/agent combinations to trace.</param>
+        /// <param name="runPhase">The run phase (initialization or primary) for the current set of trials.</param>
+        /// <param name="startEndPointSize">The size of the start and end location points (optional).</param>
+        /// <param name="trajectoryPointSize">The size of a point on the agent's trajectory (optional).</param>
+        public static void GenerateBitmapsForSuccessfulTrials(string baseDirectory, string experimentName,
+            int experimentId, int run, IList<MazeNavigatorEvaluationUnit> evaluationUnits, RunPhase runPhase,
+            int startEndPointSize = 10, int trajectoryPointSize = 3)
+        {
+            GenerateBitmapsForSuccessfulTrials(baseDirectory, experimentName, experimentId, run, 0, evaluationUnits,
+                runPhase, startEndPointSize, trajectoryPointSize);
+        }
+
+        /// <summary>
+        ///     Generates bitmap images depicting the path for all successful trials during a given batch.
+        /// </summary>
+        /// <param name="baseDirectory">The base directory into which write images.</param>
+        /// <param name="experimentName">The name of the experiment being analyzed.</param>
+        /// <param name="experimentId">The ID of the experiment being analyzed.</param>
+        /// <param name="run">The run during which the trial took place.</param>
         /// <param name="batch">The batch during which the trial took place.</param>
         /// <param name="evaluationUnits">The maze/agent combinations to trace.</param>
         /// <param name="runPhase">The run phase (initialization or primary) for the current set of trials.</param>
@@ -35,7 +54,8 @@ namespace MazeExperimentSupportLib
         {
             // Construct the output directory path
             string outputDirectory = Path.Combine(baseDirectory, experimentName,
-                string.Format("Run {0}", run), "Trajectories", runPhase.ToString(), string.Format("Batch {0}", batch));
+                string.Format("Run {0}", run), "Trajectories", runPhase.ToString(),
+                batch != 0 ? string.Format("Batch {0}", batch) : "");
 
             // Create the output directory if it doesn't yet exist
             if (Directory.Exists(outputDirectory) == false)
@@ -54,11 +74,29 @@ namespace MazeExperimentSupportLib
                 {
                     GenerateSingleMazeTrajectoryImage(
                         Path.Combine(outputDirectory,
-                            string.Format("{0}_ExperimentID_{1}_Run_{2}_Batch_{3}_MazeID_{4}_NavigatorID_{5}.bmp",
-                                experimentName, experimentId, run, batch, evaluationUnit.MazeId, evaluationUnit.AgentId)),
+                            batch != 0
+                                ? string.Format("{0}_ExperimentID_{1}_Run_{2}_Batch_{3}_MazeID_{4}_NavigatorID_{5}.bmp",
+                                    experimentName, experimentId, run, batch, evaluationUnit.MazeId,
+                                    evaluationUnit.AgentId)
+                                : string.Format("{0}_ExperimentID_{1}_Run_{2}_MazeID_{3}_NavigatorID_{4}.bmp",
+                                    experimentName, experimentId, run, evaluationUnit.MazeId, evaluationUnit.AgentId)),
                         evaluationUnit.MazePhenome, evaluationUnit.AgentTrajectory, startEndPointSize,
                         trajectoryPointSize);
                 });
+        }
+
+        /// <summary>
+        ///     Generates bitmap images of the extant maze population.
+        /// </summary>
+        /// <param name="baseDirectory">The base directory into which write images.</param>
+        /// <param name="experimentName">The name of the experiment being analyzed.</param>
+        /// <param name="experimentId">The ID of the experiment being analyzed.</param>
+        /// <param name="run">The run during which the trial took place.</param>
+        /// <param name="evaluationUnits">The maze/agent combinations to trace.</param>
+        public static void GenerateMazeBitmaps(string baseDirectory, string experimentName, int experimentId, int run,
+            IList<MazeNavigatorEvaluationUnit> evaluationUnits)
+        {
+            GenerateMazeBitmaps(baseDirectory, experimentName, experimentId, run, 0, evaluationUnits);
         }
 
         /// <summary>
@@ -75,7 +113,7 @@ namespace MazeExperimentSupportLib
         {
             // Construct the output directory path
             string outputDirectory = Path.Combine(baseDirectory, experimentName,
-                string.Format("Run {0}", run), "Mazes", string.Format("Batch {0}", batch));
+                string.Format("Run {0}", run), "Mazes", batch != 0 ? string.Format("Batch {0}", batch) : "");
 
             // Create the output directory if it doesn't yet exist
             if (Directory.Exists(outputDirectory) == false)
@@ -91,8 +129,11 @@ namespace MazeExperimentSupportLib
             {
                 GenerateMazeStructureImage(
                     Path.Combine(outputDirectory,
-                        string.Format("{0}_ExperimentID_{1}_Run_{2}_Batch_{3}_MazeID_{4}.bmp", experimentName,
-                            experimentId, run, batch, mazeId)),
+                        batch != 0
+                            ? string.Format("{0}_ExperimentID_{1}_Run_{2}_Batch_{3}_MazeID_{4}.bmp", experimentName,
+                                experimentId, run, batch, mazeId)
+                            : string.Format("{0}_ExperimentID_{1}_Run_{2}_MazeID_{3}.bmp", experimentName, experimentId,
+                                run, mazeId)),
                     evaluationUnits.Where(unit => unit.MazeId == mazeId).Select(unit => unit.MazePhenome).First(), false);
             });
         }
