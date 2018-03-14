@@ -77,6 +77,20 @@ namespace SharpNeat.Phenomes.Mazes
 
         #endregion
 
+        #region Instance variables
+
+        /// <summary>
+        /// Internal flag which indicates if cell has a south wall (which is the cell horizontal wall).
+        /// </summary>
+        private bool _southWall;
+
+        /// <summary>
+        /// Internal flag which indicates if cell has a east wall (which is the cell vertical wall).
+        /// </summary>
+        private bool _eastWall;
+
+        #endregion
+
         #region Properties
 
         /// <summary>
@@ -92,12 +106,40 @@ namespace SharpNeat.Phenomes.Mazes
         /// <summary>
         ///     Flag which indicates if cell has a south wall (which is the cell horizontal wall).
         /// </summary>
-        public bool SouthWall { get; set; }
+        public bool SouthWall
+        {
+            get
+            {
+                return _southWall;
+            }
+
+            set
+            {
+                // Mark the south cell boundary as processed
+                IsHorizontalBoundaryProcessed = true;
+
+                _southWall = value;
+            }
+        }
 
         /// <summary>
         ///     Flag which indicates if cell has a east wall (which is the cell vertical wall).
         /// </summary>
-        public bool EastWall { get; set; }
+        public bool EastWall
+        {
+            get
+            {
+                return _eastWall;
+            }
+
+            set
+            {
+                // Mark the east cell boundary as processed 
+                IsVerticalBoundaryProcessed = true;
+
+                _eastWall = value;
+            }
+        }
 
         /// <summary>
         ///     Indicates membership on the solution path and the orientation of the path segment passing through the cell..
@@ -123,6 +165,10 @@ namespace SharpNeat.Phenomes.Mazes
         ///     Flag which indicates if this cell is the ending (target) cell in the maze.
         /// </summary>
         public bool IsEndCell { get; }
+
+        public bool IsVerticalBoundaryProcessed { get; set; }
+
+        public bool IsHorizontalBoundaryProcessed { get; set; }
 
         #endregion
     }

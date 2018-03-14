@@ -66,7 +66,7 @@ namespace SharpNeat.Genomes.Maze
         ///     but can also change as a result of a mutation; however, it's stored on the genome instead of being calculated via
         ///     the "get" call because of the computational cost involved in calculating it.
         /// </summary>
-        public int MaxComplexity { get; private set; }
+        public int MaxWallComplexity { get; private set; }
 
         #endregion
 
@@ -179,7 +179,7 @@ namespace SharpNeat.Genomes.Maze
             EvaluationInfo = new EvaluationInfo(copyFrom.EvaluationInfo.FitnessHistoryLength);
 
             // Compute max complexity based on existing genome complexity and maze dimensions
-            MaxComplexity = MazeUtils.DetermineMaxPartitions(this);
+            MaxWallComplexity = MazeUtils.DetermineMaxPartitions(this);
         }
 
         /// <summary>
@@ -200,7 +200,7 @@ namespace SharpNeat.Genomes.Maze
             PathGeneList = pathGeneList;
 
             // Compute max complexity based on existing genome complexity and maze dimensions
-            MaxComplexity = MazeUtils.DetermineMaxPartitions(this);
+            MaxWallComplexity = MazeUtils.DetermineMaxPartitions(this);
         }
 
         #endregion
@@ -324,7 +324,7 @@ namespace SharpNeat.Genomes.Maze
         private void Mutate()
         {
             int outcome;
-
+            
             // If there are not yet any waypoints defined, the mutation must be to add a waypoint
             // (this is really not feasible at all because without any waypoints, the maze would not
             // be navigable)
@@ -344,10 +344,15 @@ namespace SharpNeat.Genomes.Maze
 
             do
             {
-                // Get random mutation to perform
+                // Get random mutation to perform 
+                // (prohibit exceeding max wall complexity and placing more waypoints than there are cells in the maze grid)
                 outcome = RouletteWheel.SingleThrow(GenomeFactory.MazeGenomeParameters.RouletteWheelLayout,
                     GenomeFactory.Rng);
-            } while (WallGeneList.Count >= MaxComplexity && outcome >= 2);
+
+                // TODO: This is for debugging
+                Console.WriteLine(@"Attempting to apply mutation [{0}] on maze genome ID [{1}] at time [{2}]", outcome, Id, DateTime.Now);
+            } while ((WallGeneList.Count >= MaxWallComplexity && outcome == 2) ||
+                     (PathGeneList.Count >= MazeBoundaryHeight*MazeBoundaryWidth && (outcome == 5 || outcome == 6)));
 
             switch (outcome)
             {
@@ -679,12 +684,12 @@ namespace SharpNeat.Genomes.Maze
         private void RemoveNonCodingWallGenes()
         {
             // Recompute max complexity in the event that mutation changed wall/passage placement in a way that reduces the complexity cap
-            MaxComplexity = MazeUtils.DetermineMaxPartitions(this);
+            MaxWallComplexity = MazeUtils.DetermineMaxPartitions(this);
 
             // If the max complexity is now lower, remove the non-coding genes
-            if (MaxComplexity < WallGeneList.Count)
+            if (MaxWallComplexity < WallGeneList.Count)
             {
-                ((List<WallGene>) WallGeneList).RemoveRange(MaxComplexity, WallGeneList.Count - MaxComplexity);
+                ((List<WallGene>) WallGeneList).RemoveRange(MaxWallComplexity, WallGeneList.Count - MaxWallComplexity);
             }
         }
 

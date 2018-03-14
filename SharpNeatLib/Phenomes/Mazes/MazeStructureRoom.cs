@@ -77,34 +77,46 @@ namespace SharpNeat.Phenomes.Mazes
             for (int x = _x; x < _x + _width; x++)
             {
                 // Mark north horizontal boundary
-                if (_y > 0) grid[_y - 1, x].SouthWall = true;
+                if (_y > 0 && grid[_y - 1, x].IsHorizontalBoundaryProcessed == false)
+                {
+                    grid[_y - 1, x].SouthWall = true;
+                }
 
                 // Mark south horizontal boundary
-                grid[_y + _height - 1, x].SouthWall = true;
+                if (grid[_y + _height - 1, x].IsHorizontalBoundaryProcessed == false)
+                {
+                    grid[_y + _height - 1, x].SouthWall = true;
+                }
             }
 
             // Mark vertical east and west boundaries
             for (int y = _y; y < _y + _height; y++)
             {
                 // Mark west vertical boundary
-                if (_x > 0) grid[y, _x - 1].EastWall = true;
+                if (_x > 0 && grid[y, _x - 1].IsVerticalBoundaryProcessed == false)
+                {
+                    grid[y, _x - 1].EastWall = true;
+                }
 
                 // Mark east vertical boundary
-                grid[y, _x + _width - 1].EastWall = true;
+                if (grid[y, _x + _width - 1].IsVerticalBoundaryProcessed == false)
+                {
+                    grid[y, _x + _width - 1].EastWall = true;
+                }
             }
 
             // If the height is such that the maze can't support any internal walls, 
             // open up the side that is not against the maze boundary
-            if (_height < MinimumHeight)
+            if (_height < MinimumHeight || _width < MinimumWidth)
             {
                 grid[_y, _x == 0 ? _x + _width - 1 : _x - 1].EastWall = false;
             }
             // Otherwise, if the width is such that the maze can't support any internal walls, 
             // open up the side that is not against the maze boundary
-            else if (_width < MinimumWidth)
+            /*else if (_width < MinimumWidth)
             {
                 grid[_y == 0 ? _y + _height - 1 : _y - 1, _x].SouthWall = false;
-            }
+            }*/
         }
 
         /// <summary>
