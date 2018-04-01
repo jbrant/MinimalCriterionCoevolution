@@ -352,7 +352,7 @@ namespace SharpNeat.Genomes.Maze
                 // TODO: This is for debugging
                 Console.WriteLine(@"Attempting to apply mutation [{0}] on maze genome ID [{1}] at time [{2}]", outcome, Id, DateTime.Now);
             } while ((WallGeneList.Count >= MaxWallComplexity && outcome == 2) ||
-                     (PathGeneList.Count >= MazeBoundaryHeight*MazeBoundaryWidth && (outcome == 5 || outcome == 6)));
+                     ((PathGeneList.Count >= MazeBoundaryHeight || PathGeneList.Count >= MazeBoundaryWidth) && (outcome == 5 || outcome == 6)));
 
             switch (outcome)
             {
@@ -577,7 +577,7 @@ namespace SharpNeat.Genomes.Maze
                     }
                 }
             } while (
-                MazeUtils.IsValidWaypointLocation(PathGeneList, MazeBoundaryHeight, MazeBoundaryWidth, mutatedPoint) ==
+                MazeUtils.IsValidWaypointLocation(PathGeneList, MazeBoundaryHeight, MazeBoundaryWidth, mutatedPoint, PathGeneList[geneIdx].InnovationId) ==
                 false);
 
             // Set the new, validated waypoint
@@ -594,8 +594,10 @@ namespace SharpNeat.Genomes.Maze
             // Generate new points until we reach one that is valid and is in a sparse region of the maze
             do
             {
-                newPoint = GetSparseGridCell();
-            } while (MazeUtils.IsValidWaypointLocation(PathGeneList, MazeBoundaryHeight, MazeBoundaryWidth, newPoint) ==
+                //newPoint = GetSparseGridCell();
+                newPoint = new Point2DInt(GenomeFactory.Rng.Next(MazeBoundaryWidth),
+                    GenomeFactory.Rng.Next(MazeBoundaryHeight));
+            } while (MazeUtils.IsValidWaypointLocation(PathGeneList, MazeBoundaryHeight, MazeBoundaryWidth, newPoint, UInt32.MaxValue) ==
                      false);
 
             // Add the new path gene to the genome

@@ -130,12 +130,16 @@ namespace SharpNeat.Phenomes.Mazes
         {
             // Mark the fully enclosed sub-maze boundaries
             MarkRoomBoundaries(grid);
-            
+
             // Determine starting location of wall
             int xWallLocation = _x +
-                                (isHorizontal ? 0 : Math.Max(0, (int) ((_width - MinimumWidth+1)*unscaledWallLocation)));
+                                (isHorizontal
+                                    ? 0
+                                    : Math.Max(0, (int) ((_width - MinimumWidth + 1)*unscaledWallLocation)));
             int yWallLocation = _y +
-                                (isHorizontal ? Math.Max(0, (int) ((_height - MinimumHeight+1)*unscaledWallLocation)) : 0);
+                                (isHorizontal
+                                    ? Math.Max(0, (int) ((_height - MinimumHeight + 1)*unscaledWallLocation))
+                                    : 0);
 
             // Determine perpendicular direction
             WallDirection perpendicularDirection = isHorizontal ? WallDirection.East : WallDirection.South;
@@ -175,12 +179,16 @@ namespace SharpNeat.Phenomes.Mazes
         public Tuple<MazeStructureRoom, MazeStructureRoom> DivideRoom(MazeStructureGridCell[,] grid,
             double unscaledWallLocation,
             double unscaledPassageLocation, bool isHorizontal)
-        {            
+        {
             // Determine starting location of wall
             int xWallLocation = _x +
-                                (isHorizontal ? 0 : Math.Max(0, (int) ((_width - MinimumWidth+1)*unscaledWallLocation)));
+                                (isHorizontal
+                                    ? 0
+                                    : Math.Max(0, (int) ((_width - MinimumWidth + 1)*unscaledWallLocation)));
             int yWallLocation = _y +
-                                (isHorizontal ? Math.Max(0, (int) ((_height - MinimumHeight+1)*unscaledWallLocation)) : 0);
+                                (isHorizontal
+                                    ? Math.Max(0, (int) ((_height - MinimumHeight + 1)*unscaledWallLocation))
+                                    : 0);
 
             // Determine the location of the passage 
             // (location can be no further out than width or height minus 1 to prevent passage starting at the wall end point)
@@ -254,6 +262,16 @@ namespace SharpNeat.Phenomes.Mazes
         public bool AreInternalWallsSupported()
         {
             return _height > 1 && _width > 1;
+        }
+
+        /// <summary>
+        ///     Determines whether the given cell lies within the boundaries of the maze room.
+        /// </summary>
+        /// <param name="cell">The cell whose position within or outside of the maze room is to be determined.</param>
+        /// <returns>Flag indicating whether the cell is inside the boundaries of the room or not.</returns>
+        public bool IsCellInRoom(MazeStructureGridCell cell)
+        {
+            return cell.X >= _x && cell.X < _x + _width && cell.Y >= _y && cell.Y < _y + _height;
         }
 
         #endregion
