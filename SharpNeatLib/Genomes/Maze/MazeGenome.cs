@@ -132,7 +132,6 @@ namespace SharpNeat.Genomes.Maze
         ///     Constructor which constructs a new maze genome with the given unique identifier, birth generation, and initial maze
         ///     height/width.
         /// </summary>
-        /// <param name="genomeFactory">Reference to the genome factory.</param>
         /// <param name="id">The unique identifier of the new maze genome.</param>
         /// <param name="birthGeneration">The birth generation.</param>
         /// <param name="height">The base/initial height of the maze genome.</param>
@@ -324,7 +323,7 @@ namespace SharpNeat.Genomes.Maze
         private void Mutate()
         {
             int outcome;
-            
+
             // If there are not yet any waypoints defined, the mutation must be to add a waypoint
             // (this is really not feasible at all because without any waypoints, the maze would not
             // be navigable)
@@ -342,6 +341,13 @@ namespace SharpNeat.Genomes.Maze
                 return;
             }
 
+            // If waypoints have come within two units of one of the maze boundaries, an expand maze mutation will be forced to allow for placement of additional waypoints.
+            if (PathGeneList.Any(g => g.Waypoint.X == MazeBoundaryWidth - 2 || g.Waypoint.Y == MazeBoundaryHeight - 2))
+            {
+                MutateExpandMaze();
+                return;
+            }
+
             do
             {
                 // Get random mutation to perform 
@@ -350,9 +356,11 @@ namespace SharpNeat.Genomes.Maze
                     GenomeFactory.Rng);
 
                 // TODO: This is for debugging
-                Console.WriteLine(@"Attempting to apply mutation [{0}] on maze genome ID [{1}] at time [{2}]", outcome, Id, DateTime.Now);
+                Console.WriteLine(@"Attempting to apply mutation [{0}] on maze genome ID [{1}] at time [{2}]", outcome,
+                    Id, DateTime.Now);
             } while ((WallGeneList.Count >= MaxWallComplexity && outcome == 2) ||
-                     ((PathGeneList.Count >= MazeBoundaryHeight || PathGeneList.Count >= MazeBoundaryWidth) && (outcome == 5 || outcome == 6)));
+                     ((PathGeneList.Count >= MazeBoundaryHeight || PathGeneList.Count >= MazeBoundaryWidth) &&
+                      (outcome == 5 || outcome == 6)));
 
             switch (outcome)
             {
@@ -577,7 +585,8 @@ namespace SharpNeat.Genomes.Maze
                     }
                 }
             } while (
-                MazeUtils.IsValidWaypointLocation(PathGeneList, MazeBoundaryHeight, MazeBoundaryWidth, mutatedPoint, PathGeneList[geneIdx].InnovationId) ==
+                MazeUtils.IsValidWaypointLocation(PathGeneList, MazeBoundaryHeight, MazeBoundaryWidth, mutatedPoint,
+                    PathGeneList[geneIdx].InnovationId) ==
                 false);
 
             // Set the new, validated waypoint
@@ -597,8 +606,13 @@ namespace SharpNeat.Genomes.Maze
                 //newPoint = GetSparseGridCell();
                 newPoint = new Point2DInt(GenomeFactory.Rng.Next(MazeBoundaryWidth),
                     GenomeFactory.Rng.Next(MazeBoundaryHeight));
-            } while (MazeUtils.IsValidWaypointLocation(PathGeneList, MazeBoundaryHeight, MazeBoundaryWidth, newPoint, UInt32.MaxValue) ==
-                     false);
+
+                // TODO: REMOVE THIS
+                //Console.WriteLine(@"Adding path waypoint with coordinates ({0}, {1})", newPoint.X, newPoint.Y);
+            } while (
+                MazeUtils.IsValidWaypointLocation(PathGeneList, MazeBoundaryHeight, MazeBoundaryWidth, newPoint,
+                    UInt32.MaxValue) ==
+                false);
 
             // Add the new path gene to the genome
             PathGeneList.Add(new PathGene(GenomeFactory.InnovationIdGenerator.NextId, newPoint,

@@ -138,7 +138,7 @@ namespace SharpNeat.Genomes.Maze
 
         // Non-mutation related defaults
         private const double DefaultPerturbanceMagnitude = 0.2;
-        private const double DefaultVerticalWallBias = 0.7;
+        private const double DefaultVerticalWallBias = 0.5;
         private const int DefaultGridCellNeighborhoodRadius = 5;
         private const double DefaultSparseCellSelectionProportion = 0.2;
 

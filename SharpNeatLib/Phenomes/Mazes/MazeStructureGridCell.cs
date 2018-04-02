@@ -7,12 +7,43 @@ using SharpNeat.Utility;
 namespace SharpNeat.Phenomes.Mazes
 {
     /// <summary>
+    ///     Indicates whether grid cell is on solution path segment and, if so, the cardinal direction of that segment.
+    /// </summary>
+    public enum PathDirection
+    {
+        /// <summary>
+        ///     Grid cell is not on solution path.
+        /// </summary>
+        None,
+
+        /// <summary>
+        ///     Grid cell is on solution path and part of an eastward path segment.
+        /// </summary>
+        East,
+
+        /// <summary>
+        ///     Grid cell is on solution path and part of an westward path segment.
+        /// </summary>
+        West,
+
+        /// <summary>
+        ///     Grid cell is on solution path and part of a northward path segment.
+        /// </summary>
+        North,
+
+        /// <summary>
+        ///     Grid cell is on solution path and part of a southward path segment.
+        /// </summary>
+        South
+    }
+
+    /// <summary>
     ///     Indicates whether grid cell is on solution path segment and, if so, the orientation of that segment.
     /// </summary>
     public enum PathOrientation
     {
         /// <summary>
-        ///     Grid cell is not on solution path.
+        ///     Grid cell is not on the solution path.
         /// </summary>
         None,
 
@@ -58,7 +89,7 @@ namespace SharpNeat.Phenomes.Mazes
         {
             X = x;
             Y = y;
-            PathOrientation = PathOrientation.None;
+            PathDirection = PathDirection.None;
         }
 
         /// <summary>
@@ -80,12 +111,12 @@ namespace SharpNeat.Phenomes.Mazes
         #region Instance variables
 
         /// <summary>
-        /// Internal flag which indicates if cell has a south wall (which is the cell horizontal wall).
+        ///     Internal flag which indicates if cell has a south wall (which is the cell horizontal wall).
         /// </summary>
         private bool _southWall;
 
         /// <summary>
-        /// Internal flag which indicates if cell has a east wall (which is the cell vertical wall).
+        ///     Internal flag which indicates if cell has a east wall (which is the cell vertical wall).
         /// </summary>
         private bool _eastWall;
 
@@ -108,10 +139,7 @@ namespace SharpNeat.Phenomes.Mazes
         /// </summary>
         public bool SouthWall
         {
-            get
-            {
-                return _southWall;
-            }
+            get { return _southWall; }
 
             set
             {
@@ -127,10 +155,7 @@ namespace SharpNeat.Phenomes.Mazes
         /// </summary>
         public bool EastWall
         {
-            get
-            {
-                return _eastWall;
-            }
+            get { return _eastWall; }
 
             set
             {
@@ -142,9 +167,30 @@ namespace SharpNeat.Phenomes.Mazes
         }
 
         /// <summary>
-        ///     Indicates membership on the solution path and the orientation of the path segment passing through the cell..
+        ///     Indicates membership on the solution path and the cardinal direction of the path segment passing through the cell.
         /// </summary>
-        public PathOrientation PathOrientation { get; set; }
+        public PathDirection PathDirection { get; set; }
+
+        /// <summary>
+        ///     Indicates membership on the solution path and the orientation of the path segment passing through the cell.
+        /// </summary>
+        public PathOrientation PathOrientation
+        {
+            get
+            {
+                switch (PathDirection)
+                {
+                    case PathDirection.West:
+                    case PathDirection.East:
+                        return PathOrientation.Horizontal;
+                    case PathDirection.North:
+                    case PathDirection.South:
+                        return PathOrientation.Vertical;
+                    default:
+                        return PathOrientation.None;
+                }
+            }
+        }
 
         /// <summary>
         ///     Flag which indicates if cell is on a path juncture (i.e. intersection of two perpendicular path components).

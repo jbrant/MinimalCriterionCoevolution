@@ -4,7 +4,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Drawing.Printing;
 using System.Linq;
 using SharpNeat.Genomes.Maze;
 using SharpNeat.Phenomes.Mazes;
@@ -51,7 +50,7 @@ namespace SharpNeat.Utility
                 // has a trajectory cell to its left, and next waypoint is on the next row, and current way point is
                 // not on the left border, vertical intersection would cause overlapping trajectories
                 else if (curWaypoint.Y == prevWaypoint.Y + 1 && curWaypoint.X < prevWaypoint.X &&
-                         grid[prevWaypoint.Y, prevWaypoint.X - 1].PathOrientation != PathOrientation.None &&
+                         grid[prevWaypoint.Y, prevWaypoint.X - 1].PathDirection != PathDirection.None &&
                          curWaypoint.X > 0)
                 {
                     intersectionOrientation = IntersectionOrientation.Horizontal;
@@ -59,7 +58,7 @@ namespace SharpNeat.Utility
                 // If current waypoint is below and to the right of previous waypoint and previous waypoint
                 // has a trajectory cell to its right, vertical intersection would cause overlapping trajectories
                 else if (curWaypoint.Y > prevWaypoint.Y && curWaypoint.X > prevWaypoint.X &&
-                         grid[prevWaypoint.Y, prevWaypoint.X + 1].PathOrientation != PathOrientation.None)
+                         grid[prevWaypoint.Y, prevWaypoint.X + 1].PathDirection != PathDirection.None)
                 {
                     intersectionOrientation = IntersectionOrientation.Horizontal;
                 }
@@ -109,6 +108,19 @@ namespace SharpNeat.Utility
             return intersectionOrientation;
         }
 
+        /// <summary>
+        ///     Marks the orientation and juncture location for each cell on a given solution path segment.
+        /// </summary>
+        /// <param name="grid">The two-dimensional, n x n grid of maze cells.</param>
+        /// <param name="startPoint">The starting point on the solution path segment.</param>
+        /// <param name="endPoint">The ending point on the solution path segment.</param>
+        /// <param name="orientation">
+        ///     The orientation (i.e. horizontal or vertical) of the solution path segment coming into the
+        ///     ending point.
+        /// </param>
+        /// <param name="maxXPosition">The eastern-most (right-most) waypoint X-position.</param>
+        /// ///
+        /// <param name="maxYPosition">The southern-most (lowest) waypoint Y-position.</param>
         private static void MarkSolutionPathSegment(MazeStructureGridCell[,] grid, Point2DInt startPoint,
             Point2DInt endPoint, IntersectionOrientation orientation, int maxXPosition, int maxYPosition)
         {
@@ -116,16 +128,16 @@ namespace SharpNeat.Utility
             Point2DInt curPoint = new Point2DInt(startPoint.X, startPoint.Y);
 
             if (IntersectionOrientation.Horizontal == orientation)
-            {                
+            {
                 // Handle the case where the start waypoint has a vertical orientation and would otherwise overlap
                 if ((endPoint.Y < curPoint.Y &&
-                     grid[curPoint.Y - 1, curPoint.X].PathOrientation != PathOrientation.None) ||
+                     grid[curPoint.Y - 1, curPoint.X].PathDirection != PathDirection.None) ||
                     (endPoint.Y > curPoint.Y &&
-                     grid[curPoint.Y + 1, curPoint.X].PathOrientation != PathOrientation.None))
+                     grid[curPoint.Y + 1, curPoint.X].PathDirection != PathDirection.None))
                 {
                     // Set horizontal orientation on origin and one over to the right
-                    grid[curPoint.Y, curPoint.X].PathOrientation =
-                        grid[curPoint.Y, curPoint.X + 1].PathOrientation = PathOrientation.Horizontal;
+                    grid[curPoint.Y, curPoint.X].PathDirection =
+                        grid[curPoint.Y, curPoint.X + 1].PathDirection = PathDirection.East;
 
                     // Set juncture flag on new point
                     grid[curPoint.Y, curPoint.X + 1].IsJuncture = true;
@@ -142,7 +154,7 @@ namespace SharpNeat.Utility
                     // Mark solution path along y-axis until going one unit below the max y-coordinate
                     for (int yCoord = curPoint.Y; yCoord <= maxYPosition + 1; yCoord++)
                     {
-                        grid[yCoord, curPoint.X].PathOrientation = PathOrientation.Vertical;
+                        grid[yCoord, curPoint.X].PathDirection = PathDirection.South;
 
                         // Update y-position
                         curPoint.Y = yCoord;
@@ -155,8 +167,8 @@ namespace SharpNeat.Utility
                     // the end point if it is up against the western maze boundary
                     for (int xCoord = curPoint.X; xCoord >= endPoint.X - 1 && xCoord > 0; xCoord--)
                     {
-                        grid[curPoint.Y, xCoord].PathOrientation = PathOrientation.Horizontal;
-                        
+                        grid[curPoint.Y, xCoord].PathDirection = PathDirection.West;
+
                         // Update x-position
                         curPoint.X = xCoord;
                     }
@@ -172,7 +184,9 @@ namespace SharpNeat.Utility
                         : yCoord >= endPoint.Y;
                     yCoord += curPoint.Y < endPoint.Y ? 1 : -1)
                 {
-                    grid[yCoord, curPoint.X].PathOrientation = PathOrientation.Vertical;
+                    grid[yCoord, curPoint.X].PathDirection = curPoint.Y < endPoint.Y
+                        ? PathDirection.South
+                        : PathDirection.North;
                 }
 
                 // Mark solution along x-axis, with y-location at current point
@@ -182,7 +196,9 @@ namespace SharpNeat.Utility
                         : xCoord >= endPoint.X;
                     xCoord += curPoint.X < endPoint.X ? 1 : -1)
                 {
-                    grid[endPoint.Y, xCoord].PathOrientation = PathOrientation.Horizontal;
+                    grid[endPoint.Y, xCoord].PathDirection = curPoint.X < endPoint.X
+                        ? PathDirection.East
+                        : PathDirection.West;
                 }
 
                 // Set intermediate juncture point for vertical-horizontal transition
@@ -197,15 +213,15 @@ namespace SharpNeat.Utility
                 // Handles the case where the end waypoint is to the left of the start waypoint (which also means it's below) 
                 // and has X-coordinate less than max X, and start waypoint has Y-coordinate less than max Y (intuition is that 
                 // tracing to the left and down will overlap existing trajectories)
-                if (endPoint.X < curPoint.X && endPoint.X < maxXPosition && curPoint.Y < maxYPosition)
+                if (endPoint.X < curPoint.X && endPoint.X < maxXPosition && curPoint.Y <= maxYPosition)
                 {
                     // If there is an incoming vertical trajectory directly below, move one unit to the right before
                     // beginning downward traversal
-                    if (grid[curPoint.Y + 1, curPoint.X].PathOrientation != PathOrientation.None)
+                    if (grid[curPoint.Y + 1, curPoint.X].PathDirection != PathDirection.None)
                     {
                         // Set horizontal trajectory on origin and one to the right
-                        grid[curPoint.Y, curPoint.X].PathOrientation =
-                            grid[curPoint.Y, curPoint.X + 1].PathOrientation = PathOrientation.Horizontal;
+                        grid[curPoint.Y, curPoint.X].PathDirection =
+                            grid[curPoint.Y, curPoint.X + 1].PathDirection = PathDirection.East;
 
                         // Set juncture flag on new point
                         grid[curPoint.Y, curPoint.X + 1].IsJuncture = true;
@@ -217,7 +233,7 @@ namespace SharpNeat.Utility
                     // Mark solution path along y-axis until going one below the max y-coordinate
                     for (int yCoord = curPoint.Y; yCoord <= maxYPosition + 1; yCoord++)
                     {
-                        grid[yCoord, curPoint.X].PathOrientation = PathOrientation.Vertical;
+                        grid[yCoord, curPoint.X].PathDirection = PathDirection.South;
 
                         // Update y-position
                         curPoint.Y = yCoord;
@@ -228,13 +244,13 @@ namespace SharpNeat.Utility
                 }
                 // Handle the case where the start waypoint has a horizontal orientation and would otherwise overlap
                 else if ((endPoint.X < curPoint.X &&
-                          grid[curPoint.Y, curPoint.X - 1].PathOrientation != PathOrientation.None) ||
+                          grid[curPoint.Y, curPoint.X - 1].PathDirection != PathDirection.None) ||
                          (endPoint.X > curPoint.X &&
-                          grid[curPoint.Y, curPoint.X + 1].PathOrientation != PathOrientation.None))
+                          grid[curPoint.Y, curPoint.X + 1].PathDirection != PathDirection.None))
                 {
                     // Set vertical orientation on origin and one down
-                    grid[curPoint.Y, curPoint.X].PathOrientation =
-                        grid[curPoint.Y + 1, curPoint.X].PathOrientation = PathOrientation.Vertical;
+                    grid[curPoint.Y, curPoint.X].PathDirection =
+                        grid[curPoint.Y + 1, curPoint.X].PathDirection = PathDirection.South;
 
                     // Set juncture flag on new point
                     grid[curPoint.Y + 1, curPoint.X].IsJuncture = true;
@@ -250,7 +266,9 @@ namespace SharpNeat.Utility
                         : xCoord >= endPoint.X;
                     xCoord += curPoint.X < endPoint.X ? 1 : -1)
                 {
-                    grid[curPoint.Y, xCoord].PathOrientation = PathOrientation.Horizontal;
+                    grid[curPoint.Y, xCoord].PathDirection = curPoint.X < endPoint.X
+                        ? PathDirection.East
+                        : PathDirection.West;
                 }
 
                 // Mark solution along y-axis, leaving X-location at current point
@@ -260,7 +278,9 @@ namespace SharpNeat.Utility
                         : yCoord >= endPoint.Y;
                     yCoord += curPoint.Y < endPoint.Y ? 1 : -1)
                 {
-                    grid[yCoord, endPoint.X].PathOrientation = PathOrientation.Vertical;
+                    grid[yCoord, endPoint.X].PathDirection = curPoint.Y < endPoint.Y
+                        ? PathDirection.South
+                        : PathDirection.North;
                 }
 
                 // Set intermediate juncture point for horizontal-vertical transition
@@ -287,135 +307,12 @@ namespace SharpNeat.Utility
         }
 
         /// <summary>
-        ///     Marks the orientation and juncture location for each cell on a given solution path segment.
+        ///     Builds list of submazes, partitioned via the interweaving solution trajectory.
         /// </summary>
         /// <param name="grid">The two-dimensional, n x n grid of maze cells.</param>
-        /// <param name="startPoint">The starting point on the solution path segment.</param>
-        /// <param name="endPoint">The ending point on the solution path segment.</param>
-        /// <param name="nextPoint">The next point after the solution path segment end point.</param>
-        /// <param name="orientation">
-        ///     The orientation (i.e. horizontal or vertical) of the solution path segment coming into the
-        ///     ending point.
-        /// </param>
-        private static void MarkSolutionPathSegment(MazeStructureGridCell[,] grid, Point2DInt startPoint,
-            Point2DInt endPoint, Point2DInt nextPoint, IntersectionOrientation orientation)
-        {
-            if (IntersectionOrientation.Horizontal == orientation)
-            {
-                // If end point is below and less than the start point, but has a next point 
-                // that's on the opposite side of the start point (or vice versa), mark solution 
-                // path one unit to the left or right of the end point respectively so that the 
-                // trajectory doesn't descend into the middle of two points on the same row
-                if (nextPoint.Y == endPoint.Y && startPoint.Y < endPoint.Y &&
-                    ((startPoint.X > endPoint.X && startPoint.X <= nextPoint.X) ||
-                     (startPoint.X < endPoint.X && startPoint.X >= nextPoint.X)))
-                {
-                    Point2DInt curPoint = startPoint;
-
-                    for (int xCoord = startPoint.X;
-                        startPoint.X > endPoint.X && startPoint.X < nextPoint.X
-                            ? xCoord >= endPoint.X - 1
-                            : xCoord <= endPoint.X + 1;
-                        xCoord += startPoint.X > endPoint.X && startPoint.X <= nextPoint.X ? -1 : 1)
-                    {
-                        grid[startPoint.Y, xCoord].PathOrientation = PathOrientation.Horizontal;
-                        curPoint.X = xCoord;
-                    }
-
-                    // Set intermediate juncture point for horizontal-vertical transition
-                    grid[curPoint.Y, curPoint.X].IsJuncture = true;
-
-                    // Set the start point to the point resulting from the above path realignment
-                    startPoint = curPoint;
-                }
-
-                // Mark solution along y-axis, leaving X-location at previous point
-                for (int yCoord = startPoint.Y;
-                    startPoint.Y < endPoint.Y
-                        ? yCoord <= endPoint.Y
-                        : yCoord >= endPoint.Y;
-                    yCoord += startPoint.Y < endPoint.Y ? 1 : -1)
-                {
-                    grid[yCoord, startPoint.X].PathOrientation = PathOrientation.Vertical;
-                }
-
-                // Mark solution along x-axis, with y-location at current point
-                for (int xCoord = startPoint.X;
-                    startPoint.X < endPoint.X
-                        ? xCoord <= endPoint.X
-                        : xCoord >= endPoint.X;
-                    xCoord += startPoint.X < endPoint.X ? 1 : -1)
-                {
-                    grid[endPoint.Y, xCoord].PathOrientation = PathOrientation.Horizontal;
-                }
-
-                // Set intermediate juncture point for vertical-horizontal transition
-                if (startPoint.X != endPoint.X && startPoint.Y != endPoint.Y)
-                {
-                    grid[endPoint.Y, startPoint.X].IsJuncture = true;
-                }
-            }
-            // Mark path for vertical intersection
-            else
-            {
-                // If start point is to the right of end point and it has trajectory points to the west of it,
-                // it must first descend one cell so that trajectory can intersect the end point vertically
-                // without overlapping
-                if (startPoint.X > endPoint.X &&
-                    grid[startPoint.Y, startPoint.X - 1].PathOrientation != PathOrientation.None)
-                {
-                    // Set start point outgoing orientation to vertical
-                    grid[startPoint.Y, startPoint.X].PathOrientation = PathOrientation.Vertical;
-
-                    // Move one cell down
-                    startPoint.Y++;
-
-                    // Mark intersection of cell below as vertical and set it as juncture
-                    grid[startPoint.Y, startPoint.X].PathOrientation = PathOrientation.Vertical;
-                    grid[startPoint.Y, startPoint.X].IsJuncture = true;
-                }
-
-                // Mark solution along x-axis, with y-location at previous point
-                for (int xCoord = startPoint.X;
-                    startPoint.X < endPoint.X
-                        ? xCoord <= endPoint.X
-                        : xCoord >= endPoint.X;
-                    xCoord += startPoint.X < endPoint.X ? 1 : -1)
-                {
-                    grid[startPoint.Y, xCoord].PathOrientation = PathOrientation.Horizontal;
-                }
-
-                // Mark solution along y-axis, leaving X-location at current point
-                for (int yCoord = startPoint.Y;
-                    startPoint.Y < endPoint.Y
-                        ? yCoord <= endPoint.Y
-                        : yCoord >= endPoint.Y;
-                    yCoord += startPoint.Y < endPoint.Y ? 1 : -1)
-                {
-                    grid[yCoord, endPoint.X].PathOrientation = PathOrientation.Vertical;
-                }
-
-                // Set intermediate juncture point for horizontal-vertical transition
-                if (startPoint.X != endPoint.X && startPoint.Y != endPoint.Y)
-                {
-                    grid[startPoint.Y, endPoint.X].IsJuncture = true;
-                }
-            }
-
-            // Set starting waypoint as juncture if incoming and outgoing path segments were perpendicular
-            if ((grid[startPoint.Y, startPoint.X].PathOrientation == PathOrientation.Horizontal &&
-                 (startPoint.Y - 1 >= 0 &&
-                  grid[startPoint.Y - 1, startPoint.X].PathOrientation == PathOrientation.Vertical)) ||
-                (grid[startPoint.Y, startPoint.X].PathOrientation == PathOrientation.Vertical &&
-                 ((startPoint.X - 1 >= 0 &&
-                   grid[startPoint.Y, startPoint.X - 1].PathOrientation == PathOrientation.Horizontal) ||
-                  (startPoint.X + 1 < grid.GetLength(1) &&
-                   grid[startPoint.Y, startPoint.X + 1].PathOrientation == PathOrientation.Horizontal))))
-            {
-                grid[startPoint.Y, startPoint.X].IsJuncture = true;
-            }
-        }
-        
+        /// <param name="mazeHeight">The height of the full maze.</param>
+        /// <param name="mazeWidth">The width of the full maze.</param>
+        /// <returns>List of submazes resulting from solution path.</returns>
         private static List<MazeStructureRoom> ExtractSubmazes(MazeStructureGridCell[,] grid, int mazeHeight,
             int mazeWidth)
         {
@@ -428,7 +325,8 @@ namespace SharpNeat.Utility
                 {
                     // If the trajectory does not intersect the current cell and it's not within an existing room, 
                     // then trace out room and add to list
-                    if (grid[y, x].PathOrientation == PathOrientation.None && subMazes.Count(sm => sm.IsCellInRoom(grid[y,x])) == 0)
+                    if (grid[y, x].PathDirection == PathDirection.None &&
+                        subMazes.Count(sm => sm.IsCellInRoom(grid[y, x])) == 0)
                     {
                         // Set room starting location
                         var roomStartX = x;
@@ -439,7 +337,8 @@ namespace SharpNeat.Utility
 
                         // Traverse to the right-most room edge
                         while (roomEndX + 1 < mazeWidth &&
-                               grid[roomEndY, roomEndX + 1].PathOrientation == PathOrientation.None && subMazes.Count(sm => sm.IsCellInRoom(grid[roomEndY, roomEndX + 1])) == 0)
+                               grid[roomEndY, roomEndX + 1].PathDirection == PathDirection.None &&
+                               subMazes.Count(sm => sm.IsCellInRoom(grid[roomEndY, roomEndX + 1])) == 0)
                         {
                             roomEndX++;
                         }
@@ -447,30 +346,51 @@ namespace SharpNeat.Utility
                         // Traverse to the bottom of the room until an obstruction is hit
                         while (obstructionLocated == false && roomEndY + 1 < mazeHeight)
                         {
-                            roomEndY++;
-
-                            // Check to see if there is an intersecting path segment on the current row
-                            for (int curX = roomStartX; curX <= roomEndX; curX++)
+                            // Check if the trajectory has changed shape (expanded eastward or westward) and close off the room if so
+                            if ((roomEndX + 1 < mazeWidth &&
+                                 grid[roomEndY + 1, roomEndX + 1].PathDirection == PathDirection.None) ||
+                                (roomStartX - 1 > 0 &&
+                                 grid[roomEndY + 1, roomEndX - 1].PathDirection == PathDirection.None))
                             {
-                                // Set obstruction flag and decrement the row position
-                                if (grid[roomEndY, curX].PathOrientation != PathOrientation.None)
+                                obstructionLocated = true;
+                            }
+                            else
+                            {
+                                roomEndY++;
+
+                                // Check to see if there is an intersecting path segment on the current row
+                                for (int curX = roomStartX; curX <= roomEndX; curX++)
                                 {
-                                    obstructionLocated = true;
-                                    roomEndY--;
-                                    break;
+                                    // Set obstruction flag and decrement the row position
+                                    if (grid[roomEndY, curX].PathDirection != PathDirection.None)
+                                    {
+                                        obstructionLocated = true;
+                                        roomEndY--;
+                                        break;
+                                    }
                                 }
                             }
                         }
 
                         // Add maze room
-                        subMazes.Add(new MazeStructureRoom(roomStartX, roomStartY, roomEndX - roomStartX + 1, roomEndY - roomStartY + 1));
+                        subMazes.Add(new MazeStructureRoom(roomStartX, roomStartY, roomEndX - roomStartX + 1,
+                            roomEndY - roomStartY + 1));
                     }
-                }                
+                }
             }
 
             return subMazes;
         }
 
+        /// <summary>
+        ///     Moves along the trajectory and places boundaries between separate trajectory segments that happen to be adjacent
+        ///     (i.e. within one unit of each other). This is to avoid having a big, open space (because there's not room to place
+        ///     maze rooms), which would allow the navigator to simply cut diagonally through no obstructions and make the maze
+        ///     artificially easier to solve despite having what should be a more complicated trajectory.
+        /// </summary>
+        /// <param name="grid">The two-dimensional, n x n grid of maze cells.</param>
+        /// <param name="mazeHeight">The height of the full maze.</param>
+        /// <param name="mazeWidth">The width of the full maze.</param>
         private static void MarkAdjacentTrajectoryBoundaries(MazeStructureGridCell[,] grid, int mazeHeight,
             int mazeWidth)
         {
@@ -482,62 +402,54 @@ namespace SharpNeat.Utility
             // adjacent trajectory segments
             do
             {
-                // Handle horizontally adjacent path segments
+                // Handle adjacent trajectory to the north
+                if (curCell.PathDirection != PathDirection.North && curCell.Y > 0 &&
+                    grid[curCell.Y - 1, curCell.X] != prevCell &&
+                    grid[curCell.Y - 1, curCell.X].PathDirection != PathDirection.None)
+                {
+                    grid[curCell.Y - 1, curCell.X].SouthWall = true;
+                }
+
+                // Handle adjacent trajectory to the south
+                if (curCell.PathDirection != PathDirection.South && curCell.Y < mazeHeight - 1 &&
+                    grid[curCell.Y + 1, curCell.X] != prevCell &&
+                    grid[curCell.Y + 1, curCell.X].PathDirection != PathDirection.None)
+                {
+                    grid[curCell.Y, curCell.X].SouthWall = true;
+                }
+
+                // Handle adjacent trajectory to the west
+                if (curCell.PathDirection != PathDirection.West && curCell.X > 0 &&
+                    grid[curCell.Y, curCell.X - 1] != prevCell &&
+                    grid[curCell.Y, curCell.X - 1].PathDirection != PathDirection.None)
+                {
+                    grid[curCell.Y, curCell.X - 1].EastWall = true;
+                }
+
+                // Handle adjacent trajectory to the east
+                if (curCell.PathDirection != PathDirection.East && curCell.X < mazeWidth - 1 &&
+                    grid[curCell.Y, curCell.X + 1] != prevCell &&
+                    grid[curCell.Y, curCell.X + 1].PathDirection != PathDirection.None)
+                {
+                    grid[curCell.Y, curCell.X].EastWall = true;
+                }
+
+                // Update previous cell to point to the current cell
+                prevCell = curCell;
+
+                // Move east or west
                 if (curCell.PathOrientation == PathOrientation.Horizontal)
                 {
-                    // Handle case where there's an adjacent trajectory above
-                    if (curCell.Y > 0 && grid[curCell.Y - 1, curCell.X] != prevCell &&
-                        grid[curCell.Y - 1, curCell.X].PathOrientation != PathOrientation.None)
-                    {
-                        grid[curCell.Y - 1, curCell.X].SouthWall = true;
-                    }
-                    // Handle case where there's an adjacent trajectory below
-                    else if (curCell.Y < mazeHeight - 1 && grid[curCell.Y + 1, curCell.X] != prevCell &&
-                             grid[curCell.Y + 1, curCell.X].PathOrientation != PathOrientation.None)
-                    {
-                        grid[curCell.Y, curCell.X].SouthWall = true;
-                    }
-
-                    // Move east or west to the next cell
-                    var swapCell = curCell;
-                    curCell =
-                        grid[
-                            curCell.Y,
-                            curCell.X < mazeWidth - 1 &&
-                            grid[curCell.Y, curCell.X + 1] != prevCell &&
-                            grid[curCell.Y, curCell.X + 1].PathOrientation != PathOrientation.None &&
-                            grid[curCell.Y, curCell.X].EastWall == false
-                                ? curCell.X + 1
-                                : curCell.X - 1];
-                    prevCell = swapCell;
+                    curCell = curCell.PathDirection == PathDirection.West
+                        ? grid[curCell.Y, curCell.X - 1]
+                        : grid[curCell.Y, curCell.X + 1];
                 }
-                // Handle vertically adjacent path segments
+                // Move north or south
                 else
                 {
-                    // Handle case where there's an adjacent trajectory to the left
-                    if (curCell.X > 0 && grid[curCell.Y, curCell.X - 1] != prevCell &&
-                        grid[curCell.Y, curCell.X - 1].PathOrientation != PathOrientation.None)
-                    {
-                        grid[curCell.Y, curCell.X - 1].EastWall = true;
-                    }
-                    // Handle case where there's an adjacent trajectory to the right
-                    else if (curCell.X < mazeWidth - 1 && grid[curCell.Y, curCell.X + 1] != prevCell &&
-                             grid[curCell.Y, curCell.X + 1].PathOrientation != PathOrientation.None)
-                    {
-                        grid[curCell.Y, curCell.X].EastWall = true;
-                    }
-
-                    // Move north or south to the next cell
-                    var swapCell = curCell;
-                    curCell =
-                        grid[
-                            curCell.Y < mazeHeight - 1 &&
-                            grid[curCell.Y + 1, curCell.X] != prevCell &&
-                            grid[curCell.Y + 1, curCell.X].PathOrientation != PathOrientation.None &&
-                            grid[curCell.Y, curCell.X].SouthWall == false
-                                ? curCell.Y + 1
-                                : curCell.Y - 1, curCell.X];
-                    prevCell = swapCell;
+                    curCell = curCell.PathDirection == PathDirection.North
+                        ? grid[curCell.Y - 1, curCell.X]
+                        : grid[curCell.Y + 1, curCell.X];
                 }
             } while (curCell.X != mazeWidth - 1 || curCell.Y != mazeHeight - 1);
         }
@@ -565,7 +477,7 @@ namespace SharpNeat.Utility
             for (int y = 0; y < mazeHeight; y++)
             {
                 // Mark start of new sub-maze if there are no path obstructions
-                if (inRoom == false && y != 0 && grid[y, 0].PathOrientation == PathOrientation.None)
+                if (inRoom == false && y != 0 && grid[y, 0].PathDirection == PathDirection.None)
                 {
                     subMazeStartPoint = new Point2DInt(0, y);
                     leftSubmazeEndPos = DetermineLeftSubmazeEndPosition(grid, subMazeStartPoint.Y);
@@ -633,7 +545,7 @@ namespace SharpNeat.Utility
                     prevGridCell = curGridCell;
 
                     // If vertical orientation, no need for horizontal separating line
-                    if (curGridCell.PathOrientation == PathOrientation.Vertical)
+                    if (curGridCell.PathDirection == PathDirection.South)
                     {
                         curGridCell = grid[curGridCell.Y + 1, curGridCell.X];
                     }
@@ -641,14 +553,14 @@ namespace SharpNeat.Utility
                     {
                         // Mark a south wall if part of the trajectory passes directly underneath
                         if (curGridCell.Y < mazeHeight - 1 &&
-                            grid[curGridCell.Y + 1, curGridCell.X].PathOrientation != PathOrientation.None)
+                            grid[curGridCell.Y + 1, curGridCell.X].PathDirection != PathDirection.None)
                         {
                             grid[curGridCell.Y, curGridCell.X].SouthWall = true;
                         }
 
                         // Increment or decrement in the x direction as applicable
                         if (curGridCell.X > 0 &&
-                            grid[curGridCell.Y, curGridCell.X - 1].PathOrientation != PathOrientation.None)
+                            grid[curGridCell.Y, curGridCell.X - 1].PathDirection != PathDirection.None)
                         {
                             curGridCell = grid[curGridCell.Y, curGridCell.X - 1];
                         }
@@ -659,11 +571,12 @@ namespace SharpNeat.Utility
                     }
                 }
                 // Handle the case where the current cell path orientation is horizontal
-                else if (curGridCell.PathOrientation == PathOrientation.Horizontal)
+                else if (curGridCell.PathDirection == PathDirection.West ||
+                         curGridCell.PathDirection == PathDirection.East)
                 {
                     // Mark a south wall if part of the trajectory passes directly underneath
                     if (curGridCell.Y < mazeHeight - 1 &&
-                        grid[curGridCell.Y + 1, curGridCell.X].PathOrientation != PathOrientation.None)
+                        grid[curGridCell.Y + 1, curGridCell.X].PathDirection != PathDirection.None)
                     {
                         grid[curGridCell.Y, curGridCell.X].SouthWall = true;
                     }
@@ -712,7 +625,7 @@ namespace SharpNeat.Utility
             // Loop through each cell in the row and find the right-most trajectory cell
             for (int pos = 0; pos < width; pos++)
             {
-                if (grid[row, pos].PathOrientation != PathOrientation.None)
+                if (grid[row, pos].PathDirection != PathDirection.None)
                 {
                     // Set the start point to the cell to the right of the juncture
                     mazeStartPoint = new Point2DInt(pos + 1, row);
@@ -744,10 +657,10 @@ namespace SharpNeat.Utility
 
             // Check for sub-maze to right of L-intersection (first) and inverted L-intersection (second)
             if (
-                (grid[row, column].PathOrientation != PathOrientation.None &&
-                 grid[row - 1, column].PathOrientation == PathOrientation.None) ||
-                (grid[row, column - 1].PathOrientation == PathOrientation.None &&
-                 grid[row - 1, column - 1].PathOrientation != PathOrientation.None))
+                (grid[row, column].PathDirection != PathDirection.None &&
+                 grid[row - 1, column].PathDirection == PathDirection.None) ||
+                (grid[row, column - 1].PathDirection == PathDirection.None &&
+                 grid[row - 1, column - 1].PathDirection != PathDirection.None))
             {
                 mazeEndPoint = new Point2DInt(width - 1, row - 1);
                 isEndRow = true;
@@ -770,7 +683,7 @@ namespace SharpNeat.Utility
             do
             {
                 pos++;
-            } while (grid[row, pos].PathOrientation == PathOrientation.None);
+            } while (grid[row, pos].PathDirection == PathDirection.None);
 
             // Return the difference between the intersecting trajectory point and the submaze start
             return pos - 1;
@@ -799,14 +712,14 @@ namespace SharpNeat.Utility
             {
                 // If last row is beneath L-intersection on trajectory, set end position one
                 // row above as there needs to be another room below the trajectory
-                mazeEndPoint = grid[row, subMazeEndPos + 1].PathOrientation == PathOrientation.None
+                mazeEndPoint = grid[row, subMazeEndPos + 1].PathDirection == PathDirection.None
                     ? new Point2DInt(subMazeEndPos, row - 1)
                     : new Point2DInt(subMazeEndPos, row);
                 isEndRow = true;
             }
             // Check for sub-maze to left of L-intersection (first) and inverted L-intersection (second)
-            else if (grid[row, subMazeEndPos + 1].PathOrientation == PathOrientation.None ||
-                     grid[row, subMazeEndPos].PathOrientation != PathOrientation.None)
+            else if (grid[row, subMazeEndPos + 1].PathDirection == PathDirection.None ||
+                     grid[row, subMazeEndPos].PathDirection != PathDirection.None)
             {
                 mazeEndPoint = new Point2DInt(subMazeEndPos, row - 1);
                 isEndRow = true;
@@ -854,7 +767,7 @@ namespace SharpNeat.Utility
                         : yCoord >= endPoint.Y;
                     yCoord += startPoint.Y < endPoint.Y ? 1 : -1)
                 {
-                    if ((PathOrientation.None != grid[yCoord, startPoint.X].PathOrientation ||
+                    if ((PathDirection.None != grid[yCoord, startPoint.X].PathDirection ||
                          grid[yCoord, startPoint.X].IsWayPoint) &&
                         false == grid[yCoord, startPoint.X].Equals(startPoint) &&
                         false == grid[yCoord, startPoint.X].Equals(endPoint))
@@ -870,7 +783,7 @@ namespace SharpNeat.Utility
                         : xCoord >= endPoint.X;
                     xCoord += startPoint.X < endPoint.X ? 1 : -1)
                 {
-                    if ((PathOrientation.None != grid[endPoint.Y, xCoord].PathOrientation ||
+                    if ((PathDirection.None != grid[endPoint.Y, xCoord].PathDirection ||
                          grid[endPoint.Y, xCoord].IsWayPoint) && false == grid[endPoint.Y, xCoord].Equals(startPoint) &&
                         false == grid[endPoint.Y, xCoord].Equals(endPoint))
                     {
@@ -887,7 +800,7 @@ namespace SharpNeat.Utility
                         : xCoord >= endPoint.X;
                     xCoord += startPoint.X < endPoint.X ? 1 : -1)
                 {
-                    if ((PathOrientation.None != grid[startPoint.Y, xCoord].PathOrientation ||
+                    if ((PathDirection.None != grid[startPoint.Y, xCoord].PathDirection ||
                          grid[startPoint.Y, xCoord].IsWayPoint) &&
                         false == grid[startPoint.Y, xCoord].Equals(startPoint) &&
                         false == grid[startPoint.Y, xCoord].Equals(endPoint))
@@ -903,7 +816,7 @@ namespace SharpNeat.Utility
                         : yCoord >= endPoint.Y;
                     yCoord += startPoint.Y < endPoint.Y ? 1 : -1)
                 {
-                    if ((PathOrientation.None != grid[yCoord, endPoint.X].PathOrientation ||
+                    if ((PathDirection.None != grid[yCoord, endPoint.X].PathDirection ||
                          grid[yCoord, endPoint.X].IsWayPoint) && false == grid[yCoord, endPoint.X].Equals(startPoint) &&
                         false == grid[yCoord, endPoint.X].Equals(endPoint))
                     {
@@ -985,7 +898,7 @@ namespace SharpNeat.Utility
                     }
                 }
             }
-            
+
             // Return the maximum number of partitions applied in a submaze
             return maxPartitions;
         }
@@ -1247,7 +1160,7 @@ namespace SharpNeat.Utility
         /// <param name="genome">The maze genome.</param>
         /// <returns>The maze grid cells with cells in the path trajectory identified.</returns>
         public static MazeStructureGridCell[,] BuildMazeSolutionPath(MazeGenome genome)
-        {            
+        {
             // Starting location will always be at the top left corner
             Point2DInt startLocation = new Point2DInt(0, 0);
 
@@ -1257,7 +1170,7 @@ namespace SharpNeat.Utility
             // Initialize the grid
             MazeStructureGridCell[,] unscaledGrid = InitializeMazeGrid(genome.MazeBoundaryHeight,
                 genome.MazeBoundaryWidth);
-            
+
             for (int idx = 0; idx <= genome.PathGeneList.Count; idx++)
             {
                 // Get the previous point (if first iteration, previous point is the start location)
@@ -1283,7 +1196,7 @@ namespace SharpNeat.Utility
                     idx > 0 ? genome.PathGeneList.Take(idx).Max(p => p.Waypoint.X) : prevPoint.X,
                     idx > 0 ? genome.PathGeneList.Take(idx).Max(p => p.Waypoint.Y) : prevPoint.Y);
             }
-            
+
             return unscaledGrid;
         }
 
@@ -1354,7 +1267,10 @@ namespace SharpNeat.Utility
         /// <param name="mazeHeight">The unscaled maze height.</param>
         /// <param name="mazeWidth">The unscaled maze width.</param>
         /// <param name="waypointLocation">The proposed waypoint.</param>
-        /// <param name="genomeId">The unique ID (innovation ID) of the path gene. This is used to determine whether the mutation results in a valid ordering.</param>
+        /// <param name="genomeId">
+        ///     The unique ID (innovation ID) of the path gene. This is used to determine whether the mutation
+        ///     results in a valid ordering.
+        /// </param>
         /// <returns>Boolean indicating whether the given point is valid per the maze boundary constraints.</returns>
         public static bool IsValidWaypointLocation(IList<PathGene> pathGenes, int mazeHeight, int mazeWidth,
             Point2DInt waypointLocation, uint genomeId)
@@ -1364,7 +1280,7 @@ namespace SharpNeat.Utility
                 waypointLocation.X >= 0 &&
 
                 // Check that x-coordinate is within maze width boundary
-                waypointLocation.X < mazeWidth &&
+                waypointLocation.X < mazeWidth - 1 &&
 
                 // Check that y-coordinate is at-or-above minimum maze height
                 waypointLocation.Y >= 0 &&
@@ -1375,10 +1291,10 @@ namespace SharpNeat.Utility
                 // Check that waypoints that were added earlier are still above or to the left of mutated waypoint. 
                 // This is because waypoints are connected in the order in which they're added to the genome, and to 
                 // avoid overlaps, waypoints are only added below or to the right of pre-existing waypoints.
-                pathGenes.Any(
-                    g =>
-                        g.InnovationId < genomeId && g.Waypoint.X >= waypointLocation.X &&
-                        g.Waypoint.Y >= waypointLocation.Y) == false &&
+                ((pathGenes.Any(g => g.InnovationId < genomeId && g.Waypoint.X >= waypointLocation.X) == false &&
+                  (pathGenes.Any(g => g.Waypoint.Y == waypointLocation.Y) == false)) ||
+                 (pathGenes.Any(g => g.InnovationId < genomeId && g.Waypoint.Y >= waypointLocation.Y) == false &&
+                  (pathGenes.Any(g => g.Waypoint.X == waypointLocation.X) == false))) &&
 
                 // Check that proposed waypoint does not overlap start position
                 waypointLocation.Equals(new Point2DInt(0, 0)) == false &&

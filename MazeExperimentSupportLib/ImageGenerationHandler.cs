@@ -233,7 +233,7 @@ namespace MazeExperimentSupportLib
                     {
                         for (int x = 0; x < mazeStructure.MazeGrid.Grid.GetLength(1); x++)
                         {
-                            if (PathOrientation.None != mazeStructure.MazeGrid.Grid[y, x].PathOrientation)
+                            if (PathDirection.None != mazeStructure.MazeGrid.Grid[y, x].PathDirection)
                             {
                                 graphics.FillEllipse(Brushes.DarkViolet,
                                     (x*mazeStructure.ScaleMultiplier) + (mazeStructure.ScaleMultiplier/2),

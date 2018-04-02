@@ -43,7 +43,7 @@ namespace SharpNeat.Phenomes.Mazes.Tests
                 {
                     for (int x = 0; x < seedMazeGenome.MazeBoundaryWidth; x++)
                     {
-                        if (PathOrientation.None != grid[y, x].PathOrientation)
+                        if (PathDirection.None != grid[y, x].PathDirection)
                         {
                             if (grid[y, x].IsJuncture)
                             {
@@ -90,12 +90,12 @@ namespace SharpNeat.Phenomes.Mazes.Tests
         [TestMethod]
         public void DivideRoomTest()
         {
-            var baseName = "Upward_Trajectory_Test_Maze";
+            var baseName = "12_MutationIter_4_Waypoints_6_Walls_13_Units";
             int mazeHeight = 1;
             int mazeWidth = 1;
             //var seedMazePath = @"F:\User Data\Jonathan\Documents\school\Jonathan\Graduate\PhD\Development\MCC_Projects\MCC_Executor\MazeNavigation\SeedMazes\" + baseName + ".xml";
             var seedMazePath =
-                @"\\JONATHAN-PC\User Data\Jonathan\Documents\school\Jonathan\Graduate\PhD\Minimal Criteria Search\Analysis\MCC Mazes - Pathway Complexification\Genomes\" +
+                @"\\JONATHAN-PC\User Data\Jonathan\Documents\school\Jonathan\Graduate\PhD\Minimal Criteria Search\ExperimentData\DebugOutput\FullMotionTroubleshooting_5\" +
                 baseName + ".xml";
             var outputPath =
                 @"\\JONATHAN-PC\User Data\Jonathan\Documents\school\Jonathan\Graduate\PhD\Minimal Criteria Search\ExperimentData\DebugOutput";
@@ -132,7 +132,7 @@ namespace SharpNeat.Phenomes.Mazes.Tests
             ImageGenerationHandler.GenerateMazeStructureImage(
                 Path.Combine(outputPath, string.Format("{0}_Maze.bmp", baseName)), mazePhenotype, true);
 
-            seedMazeGenome.CreateOffspring(2);
+            //seedMazeGenome.CreateOffspring(2);
         }
     }
 }
