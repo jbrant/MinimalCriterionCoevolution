@@ -341,8 +341,9 @@ namespace SharpNeat.Genomes.Maze
                 return;
             }
 
-            // If waypoints have come within two units of one of the maze boundaries, an expand maze mutation will be forced to allow for placement of additional waypoints.
-            if (PathGeneList.Any(g => g.Waypoint.X == MazeBoundaryWidth - 2 || g.Waypoint.Y == MazeBoundaryHeight - 2))
+            // If waypoints have come within three units of one of the maze boundaries, an expand maze mutation will be forced 
+            // to allow for placement of additional waypoints.
+            if (PathGeneList.Any(g => g.Waypoint.X >= MazeBoundaryWidth - 3 || g.Waypoint.Y >= MazeBoundaryHeight - 3))
             {
                 MutateExpandMaze();
                 return;
@@ -585,9 +586,7 @@ namespace SharpNeat.Genomes.Maze
                     }
                 }
             } while (
-                MazeUtils.IsValidWaypointLocation(PathGeneList, MazeBoundaryHeight, MazeBoundaryWidth, mutatedPoint,
-                    PathGeneList[geneIdx].InnovationId) ==
-                false);
+                MazeUtils.IsValidWaypointLocation(this, mutatedPoint, PathGeneList[geneIdx].InnovationId) == false);
 
             // Set the new, validated waypoint
             PathGeneList[geneIdx].Waypoint = mutatedPoint;
@@ -610,8 +609,7 @@ namespace SharpNeat.Genomes.Maze
                 // TODO: REMOVE THIS
                 //Console.WriteLine(@"Adding path waypoint with coordinates ({0}, {1})", newPoint.X, newPoint.Y);
             } while (
-                MazeUtils.IsValidWaypointLocation(PathGeneList, MazeBoundaryHeight, MazeBoundaryWidth, newPoint,
-                    UInt32.MaxValue) ==
+                MazeUtils.IsValidWaypointLocation(this, newPoint, UInt32.MaxValue) ==
                 false);
 
             // Add the new path gene to the genome

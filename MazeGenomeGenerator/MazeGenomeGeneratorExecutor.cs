@@ -140,8 +140,7 @@ namespace MazeGenomeGenerator
                         waypoint = new Point2DInt(mazeGenomeFactory.Rng.Next(mazeGenome.MazeBoundaryWidth - 1),
                             mazeGenomeFactory.Rng.Next(mazeGenome.MazeBoundaryHeight - 1));
                     } while (
-                        MazeUtils.IsValidWaypointLocation(mazeGenome.PathGeneList, mazeGenome.MazeBoundaryHeight,
-                            mazeGenome.MazeBoundaryWidth, waypoint, UInt32.MaxValue) == false);
+                        MazeUtils.IsValidWaypointLocation(mazeGenome, waypoint, UInt32.MaxValue) == false);
 
                     mazeGenome.PathGeneList.Add(new PathGene(mazeGenomeFactory.InnovationIdGenerator.NextId, waypoint,
                         mazeGenomeFactory.Rng.NextBool()

@@ -90,12 +90,12 @@ namespace SharpNeat.Phenomes.Mazes.Tests
         [TestMethod]
         public void DivideRoomTest()
         {
-            var baseName = "12_MutationIter_4_Waypoints_6_Walls_13_Units";
+            var baseName = "34_MutationIter_12_Waypoints_6_Walls_27_Units";
             int mazeHeight = 1;
             int mazeWidth = 1;
             //var seedMazePath = @"F:\User Data\Jonathan\Documents\school\Jonathan\Graduate\PhD\Development\MCC_Projects\MCC_Executor\MazeNavigation\SeedMazes\" + baseName + ".xml";
             var seedMazePath =
-                @"\\JONATHAN-PC\User Data\Jonathan\Documents\school\Jonathan\Graduate\PhD\Minimal Criteria Search\ExperimentData\DebugOutput\FullMotionTroubleshooting_5\" +
+                @"\\JONATHAN-PC\User Data\Jonathan\Documents\school\Jonathan\Graduate\PhD\Minimal Criteria Search\ExperimentData\DebugOutput\FullMotionTroubleshooting_6\" +
                 baseName + ".xml";
             var outputPath =
                 @"\\JONATHAN-PC\User Data\Jonathan\Documents\school\Jonathan\Graduate\PhD\Minimal Criteria Search\ExperimentData\DebugOutput";
