@@ -111,12 +111,6 @@ namespace SharpNeat.Phenomes.Mazes
             {
                 grid[_y, _x == 0 ? _x + _width - 1 : _x - 1].EastWall = false;
             }
-            // Otherwise, if the width is such that the maze can't support any internal walls, 
-            // open up the side that is not against the maze boundary
-            /*else if (_width < MinimumWidth)
-            {
-                grid[_y == 0 ? _y + _height - 1 : _y - 1, _x].SouthWall = false;
-            }*/
         }
 
         /// <summary>
@@ -124,8 +118,13 @@ namespace SharpNeat.Phenomes.Mazes
         /// </summary>
         /// <param name="grid">The matrix of maze cells.</param>
         /// <param name="unscaledWallLocation">The relative location of the first internal dividing wall.</param>
+        /// <param name="unscaledPassageLocation">
+        ///     The relative location of the passage (opening) with the first internal dividing
+        ///     wall.
+        /// </param>
         /// <param name="isHorizontal">Indicator of whether the first internal wall is horizontal or vertical.</param>
         public void MarkRoomBoundaries(MazeStructureGridCell[,] grid, double unscaledWallLocation,
+            double unscaledPassageLocation,
             bool isHorizontal)
         {
             // Mark the fully enclosed sub-maze boundaries
@@ -144,11 +143,17 @@ namespace SharpNeat.Phenomes.Mazes
             // Determine perpendicular direction
             WallDirection perpendicularDirection = isHorizontal ? WallDirection.East : WallDirection.South;
 
-            // Insert horizontal gap either above or below the sub-maze
+            // Insert vertical gap level with the vertical wall passage
             if (perpendicularDirection == WallDirection.South)
             {
-                grid[yWallLocation == 0 ? _height + yWallLocation - 1 : yWallLocation - 1, xWallLocation].SouthWall =
-                    false;
+                // Determine the location of the passage 
+                int yPassageLocation = yWallLocation +
+                                       (isHorizontal
+                                           ? 0
+                                           : Math.Min(_height - 1, (int) (_height*unscaledPassageLocation)));
+
+                // Place vertical gap on side not facing the edge of the maze
+                grid[yPassageLocation, _x == 0 ? _width - 1 : _x - 1].EastWall = false;
             }
             // Insert vertical gap either to the left or right of the sub-maze
             else

@@ -90,12 +90,12 @@ namespace SharpNeat.Phenomes.Mazes.Tests
         [TestMethod]
         public void DivideRoomTest()
         {
-            var baseName = "TheCulpritMazeGenome";
+            var baseName = "25_MutationIter_6_Waypoints_4_Walls_16_Units";
             int mazeHeight = 1;
             int mazeWidth = 1;
             //var seedMazePath = @"F:\User Data\Jonathan\Documents\school\Jonathan\Graduate\PhD\Development\MCC_Projects\MCC_Executor\MazeNavigation\SeedMazes\" + baseName + ".xml";
             var seedMazePath =
-                @"\\JONATHAN-PC\User Data\Jonathan\Documents\school\Jonathan\Graduate\PhD\Minimal Criteria Search\ExperimentData\DebugOutput\ProblemMazeGenomes\MCC-PathEvolution-FM-5\" +
+                @"\\JONATHAN-PC\User Data\Jonathan\Documents\school\Jonathan\Graduate\PhD\Minimal Criteria Search\Analysis\MCC Expand Maze and Pathway Evolution\MCC Mazes - Pathway Complexification - FullMovement\Genomes\" +
                 baseName + ".xml";
             var outputPath =
                 @"\\JONATHAN-PC\User Data\Jonathan\Documents\school\Jonathan\Graduate\PhD\Minimal Criteria Search\ExperimentData\DebugOutput";
@@ -132,7 +132,7 @@ namespace SharpNeat.Phenomes.Mazes.Tests
             ImageGenerationHandler.GenerateMazeStructureImage(
                 Path.Combine(outputPath, string.Format("{0}_Maze.bmp", baseName)), mazePhenotype, true);
 
-            seedMazeGenome.CreateOffspring(2);
+            //seedMazeGenome.CreateOffspring(2);
         }
     }
 }

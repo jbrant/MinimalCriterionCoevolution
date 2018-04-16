@@ -40,27 +40,10 @@ namespace SharpNeat.Utility
 
             if (IntersectionOrientation.Horizontal == orientation)
             {
-                // Handle the case where the start waypoint has a vertical orientation and would otherwise overlap
-                if ((endPoint.Y < curPoint.Y &&
-                     grid[curPoint.Y - 1, curPoint.X].PathDirection != PathDirection.None) ||
-                    (endPoint.Y > curPoint.Y &&
-                     grid[curPoint.Y + 1, curPoint.X].PathDirection != PathDirection.None))
-                {
-                    // Set horizontal orientation on origin and one over to the right
-                    grid[curPoint.Y, curPoint.X].PathDirection =
-                        grid[curPoint.Y, curPoint.X + 1].PathDirection = PathDirection.East;
-
-                    // Set juncture flag on new point
-                    grid[curPoint.Y, curPoint.X + 1].IsJuncture = true;
-
-                    // Move the starting X-coordinate 1 to the right
-                    curPoint.X++;
-                }
-
                 // Handle the case where the start waypoint is below and to the left of the next waypoint 
                 // (which would overlap existing components of the trajectory if it were allowed to ascend 
                 // vertically then cut over to the right)
-                if (endPoint.Y < curPoint.Y && endPoint.X > startPoint.X)
+                if (endPoint.Y < curPoint.Y && endPoint.X > curPoint.X)
                 {
                     // If there is an incoming westward trajectory, descend one unit
                     if (grid[curPoint.Y, curPoint.X + 1].PathDirection != PathDirection.None)
@@ -88,6 +71,19 @@ namespace SharpNeat.Utility
 
                     // Set juncture flag on pivot point (as next move is vertical)
                     grid[curPoint.Y, curPoint.X].IsJuncture = true;
+                }
+                // Handle the case where the start waypoint has a vertical orientation and would otherwise overlap
+                else if (endPoint.Y > curPoint.Y && grid[curPoint.Y + 1, curPoint.X].PathDirection != PathDirection.None)
+                {
+                    // Set horizontal orientation on origin and one over to the right
+                    grid[curPoint.Y, curPoint.X].PathDirection =
+                        grid[curPoint.Y, curPoint.X + 1].PathDirection = PathDirection.East;
+
+                    // Set juncture flag on new point
+                    grid[curPoint.Y, curPoint.X + 1].IsJuncture = true;
+
+                    // Move the starting X-coordinate 1 to the right
+                    curPoint.X++;
                 }
 
                 // Mark solution along y-axis, leaving X-location at previous point
@@ -123,10 +119,9 @@ namespace SharpNeat.Utility
             // Mark path for vertical intersection
             else
             {
-                // Handles the case where the end waypoint is to the left of the start waypoint (which also means it's below) 
-                // and has X-coordinate less than max X, and start waypoint has Y-coordinate less than max Y (intuition is that 
+                // Handles the case where the end waypoint is to the left of and below the start waypoint (intuition is that 
                 // tracing to the left and down will overlap existing trajectories)
-                if (endPoint.X < curPoint.X && endPoint.X < maxXPosition && curPoint.Y <= maxYPosition)
+                if (endPoint.X < curPoint.X && endPoint.Y > curPoint.Y)
                 {
                     // If there is an incoming vertical trajectory directly below, move one unit to the right before
                     // beginning downward traversal
@@ -157,10 +152,7 @@ namespace SharpNeat.Utility
                     grid[curPoint.Y, curPoint.X].IsJuncture = true;
                 }
                 // Handle the case where the start waypoint has a horizontal orientation and would otherwise overlap
-                else if ((endPoint.X < curPoint.X &&
-                          grid[curPoint.Y, curPoint.X - 1].PathDirection != PathDirection.None) ||
-                         (endPoint.X > curPoint.X &&
-                          grid[curPoint.Y, curPoint.X + 1].PathDirection != PathDirection.None))
+                else if (endPoint.X > curPoint.X && grid[curPoint.Y, curPoint.X + 1].PathDirection != PathDirection.None)
                 {
                     // Set vertical orientation on origin and one down
                     grid[curPoint.Y, curPoint.X].PathDirection =
@@ -427,7 +419,7 @@ namespace SharpNeat.Utility
                 if (subMaze.AreInternalWallsSupported() && mazeGenome.WallGeneList.Count > 0)
                 {
                     subMaze.MarkRoomBoundaries(mazeGrid, mazeGenome.WallGeneList[0].WallLocation,
-                        mazeGenome.WallGeneList[0].OrientationSeed);
+                        mazeGenome.WallGeneList[0].PassageLocation, mazeGenome.WallGeneList[0].OrientationSeed);
                 }
                 else
                 {
@@ -499,7 +491,7 @@ namespace SharpNeat.Utility
                 if (subMaze.AreInternalWallsSupported() && genome.WallGeneList.Count > 0)
                 {
                     subMaze.MarkRoomBoundaries(mazeGrid, genome.WallGeneList[0].WallLocation,
-                        genome.WallGeneList[0].OrientationSeed);
+                        genome.WallGeneList[0].PassageLocation, genome.WallGeneList[0].OrientationSeed);
                 }
                 else
                 {
