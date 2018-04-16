@@ -90,12 +90,12 @@ namespace SharpNeat.Phenomes.Mazes.Tests
         [TestMethod]
         public void DivideRoomTest()
         {
-            var baseName = "34_MutationIter_12_Waypoints_6_Walls_27_Units";
+            var baseName = "TheCulpritMazeGenome";
             int mazeHeight = 1;
             int mazeWidth = 1;
             //var seedMazePath = @"F:\User Data\Jonathan\Documents\school\Jonathan\Graduate\PhD\Development\MCC_Projects\MCC_Executor\MazeNavigation\SeedMazes\" + baseName + ".xml";
             var seedMazePath =
-                @"\\JONATHAN-PC\User Data\Jonathan\Documents\school\Jonathan\Graduate\PhD\Minimal Criteria Search\ExperimentData\DebugOutput\FullMotionTroubleshooting_6\" +
+                @"\\JONATHAN-PC\User Data\Jonathan\Documents\school\Jonathan\Graduate\PhD\Minimal Criteria Search\ExperimentData\DebugOutput\ProblemMazeGenomes\MCC-PathEvolution-FM-5\" +
                 baseName + ".xml";
             var outputPath =
                 @"\\JONATHAN-PC\User Data\Jonathan\Documents\school\Jonathan\Graduate\PhD\Minimal Criteria Search\ExperimentData\DebugOutput";
@@ -111,8 +111,8 @@ namespace SharpNeat.Phenomes.Mazes.Tests
             genomeParameters.MutateAddWallProbability = 0;
             genomeParameters.MutateWallStartLocationProbability = 0;
             genomeParameters.MutatePassageStartLocationProbability = 0;
-            genomeParameters.MutateAddPathWaypointProbability = 1;
-            genomeParameters.MutatePathWaypointLocationProbability = 0;
+            genomeParameters.MutateAddPathWaypointProbability = 0;
+            genomeParameters.MutatePathWaypointLocationProbability = 1;
 
             var mazeGenomeFactory = new MazeGenomeFactory(genomeParameters, mazeHeight, mazeWidth);
 
@@ -132,7 +132,7 @@ namespace SharpNeat.Phenomes.Mazes.Tests
             ImageGenerationHandler.GenerateMazeStructureImage(
                 Path.Combine(outputPath, string.Format("{0}_Maze.bmp", baseName)), mazePhenotype, true);
 
-            //seedMazeGenome.CreateOffspring(2);
+            seedMazeGenome.CreateOffspring(2);
         }
     }
 }

@@ -130,9 +130,14 @@ namespace MazeGenomeGenerator
                 }
 
                 // Add the specified number of waypoints (less one because center waypoint is created on maze initialization)
-                for (int cnt = 0; cnt < numWaypoints-1; cnt++)
+                for (int cnt = 0; cnt < numWaypoints - 1; cnt++)
                 {
                     Point2DInt waypoint;
+
+                    // Randomly select an orientation
+                    IntersectionOrientation newPointOrientation = mazeGenomeFactory.Rng.NextBool()
+                        ? IntersectionOrientation.Horizontal
+                        : IntersectionOrientation.Vertical;
 
                     // Iterate until we get a waypoint that's valid
                     do
@@ -140,12 +145,11 @@ namespace MazeGenomeGenerator
                         waypoint = new Point2DInt(mazeGenomeFactory.Rng.Next(mazeGenome.MazeBoundaryWidth - 1),
                             mazeGenomeFactory.Rng.Next(mazeGenome.MazeBoundaryHeight - 1));
                     } while (
-                        MazeUtils.IsValidWaypointLocation(mazeGenome, waypoint, UInt32.MaxValue) == false);
+                        MazeUtils.IsValidWaypointLocation(mazeGenome, waypoint, UInt32.MaxValue, newPointOrientation) ==
+                        false);
 
                     mazeGenome.PathGeneList.Add(new PathGene(mazeGenomeFactory.InnovationIdGenerator.NextId, waypoint,
-                        mazeGenomeFactory.Rng.NextBool()
-                            ? IntersectionOrientation.Horizontal
-                            : IntersectionOrientation.Vertical));
+                        newPointOrientation));
                 }
 
                 // Create the specified number of interior walls (i.e. maze genes)

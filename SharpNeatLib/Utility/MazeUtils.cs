@@ -20,95 +20,6 @@ namespace SharpNeat.Utility
         #region Internal helper methods
 
         /// <summary>
-        ///     Determines the orientation (i.e. horizontal or vertical) of the given waypoint.
-        /// </summary>
-        /// <param name="prevWaypoint">The waypoint preceding the current waypoint on the trajectory.</param>
-        /// <param name="curWaypoint">The waypoint for which the orientation is being determined.</param>
-        /// <param name="nextWaypoint">The waypoint following the current waypoint on the trajectory.</param>
-        /// <param name="defaultIntersectionOrientation">
-        ///     The default orientation for the current waypoint (this can be overridden,
-        ///     but ensures consistency in the event that either orientation can be assumed).
-        /// </param>
-        /// <param name="grid">The two-dimensional, n x n grid of maze cells.</param>
-        /// <returns>The orientation (i.e. horizontal or vertical) of the given waypoint.</returns>
-        private static IntersectionOrientation DetermineWaypointIntersectionOrientation(Point2DInt prevWaypoint,
-            Point2DInt curWaypoint, Point2DInt nextWaypoint, IntersectionOrientation defaultIntersectionOrientation,
-            MazeStructureGridCell[,] grid)
-        {
-            // Start with default intersection orientation specified on the path gene
-            IntersectionOrientation intersectionOrientation = defaultIntersectionOrientation;
-
-            // Handle vertical intersection exceptions         
-            if (defaultIntersectionOrientation == IntersectionOrientation.Vertical)
-            {
-                // If current and previous waypoint are on the same row, vertical intersection is not possible
-                if (curWaypoint.Y == prevWaypoint.Y)
-                {
-                    intersectionOrientation = IntersectionOrientation.Horizontal;
-                }
-                // If current waypoint is directly below and to the left of previous waypoint and previous waypoint
-                // has a trajectory cell to its left, and next waypoint is on the next row, and current way point is
-                // not on the left border, vertical intersection would cause overlapping trajectories
-                else if (curWaypoint.Y == prevWaypoint.Y + 1 && curWaypoint.X < prevWaypoint.X &&
-                         grid[prevWaypoint.Y, prevWaypoint.X - 1].PathDirection != PathDirection.None &&
-                         curWaypoint.X > 0)
-                {
-                    intersectionOrientation = IntersectionOrientation.Horizontal;
-                }
-                // If current waypoint is below and to the right of previous waypoint and previous waypoint
-                // has a trajectory cell to its right, vertical intersection would cause overlapping trajectories
-                else if (curWaypoint.Y > prevWaypoint.Y && curWaypoint.X > prevWaypoint.X &&
-                         grid[prevWaypoint.Y, prevWaypoint.X + 1].PathDirection != PathDirection.None)
-                {
-                    intersectionOrientation = IntersectionOrientation.Horizontal;
-                }
-            }
-            // Handle horizontal intersection exceptions
-            else
-            {
-                // If current waypoint is below and to the left of previous waypoint and next waypoint is on
-                // the same row, horizontal intersection would cause overlapping trajectories
-                if (curWaypoint.Y > prevWaypoint.Y && curWaypoint.X < prevWaypoint.X && curWaypoint.Y == nextWaypoint.Y &&
-                    curWaypoint.X < nextWaypoint.X)
-                {
-                    intersectionOrientation = IntersectionOrientation.Vertical;
-                }
-                // If current waypoint is below and to the right of the previous waypoint, and next waypoint
-                // is on the same row as the current waypoint but to the left of it, and the current waypoint 
-                // is not the end point, then intersection must be vertical because the maze boundary prevents 
-                // routing to the right of the current waypoint and intersecting horizontally
-                if (curWaypoint.Y > prevWaypoint.Y && curWaypoint.Y == nextWaypoint.Y &&
-                    curWaypoint.X >= prevWaypoint.X && curWaypoint.X > nextWaypoint.X &&
-                    curWaypoint.Equals(nextWaypoint) == false)
-                {
-                    intersectionOrientation = IntersectionOrientation.Vertical;
-                }
-                // If current waypoint is directly below or below and to the left of the previous waypoint, and
-                // next waypoint is on the same row and directyl below or to the right of the previous waypoint, 
-                // and current waypoint is against the left maze boundary, then intersection must be vertical
-                // because the maze boundary prevents routing to the left of the current waypoint and 
-                // intersecting horizontally
-                else if (curWaypoint.Y > prevWaypoint.Y && curWaypoint.Y == nextWaypoint.Y &&
-                         curWaypoint.X <= prevWaypoint.X && nextWaypoint.X >= prevWaypoint.X && curWaypoint.X == 0)
-                {
-                    intersectionOrientation = IntersectionOrientation.Vertical;
-                }
-                // If current waypoint is below and to the right of the previous waypoint, and next waypoint is to
-                // the left of the current waypoint and is on the last row, and the current waypoint is on the next
-                // to the last row, then intersection must be vertical so that trajectory can back-track to intersect 
-                // next waypoint without overlapping
-                else if (curWaypoint.Y > prevWaypoint.Y && curWaypoint.X > prevWaypoint.X &&
-                         curWaypoint.X > nextWaypoint.X && nextWaypoint.Y == grid.GetLength(0) - 1 &&
-                         curWaypoint.Y == grid.GetLength(0) - 2)
-                {
-                    intersectionOrientation = IntersectionOrientation.Vertical;
-                }
-            }
-
-            return intersectionOrientation;
-        }
-
-        /// <summary>
         ///     Marks the orientation and juncture location for each cell on a given solution path segment.
         /// </summary>
         /// <param name="grid">The two-dimensional, n x n grid of maze cells.</param>
@@ -353,7 +264,7 @@ namespace SharpNeat.Utility
                             if ((roomEndX + 1 < mazeWidth &&
                                  grid[roomEndY + 1, roomEndX + 1].PathDirection == PathDirection.None) ||
                                 (roomStartX - 1 > 0 &&
-                                 grid[roomEndY + 1, roomEndX - 1].PathDirection == PathDirection.None))
+                                 grid[roomEndY + 1, roomStartX - 1].PathDirection == PathDirection.None))
                             {
                                 obstructionLocated = true;
                             }
@@ -455,130 +366,6 @@ namespace SharpNeat.Utility
                         : grid[curCell.Y + 1, curCell.X];
                 }
             } while (curCell.X != mazeWidth - 1 || curCell.Y != mazeHeight - 1);
-        }
-
-        /// <summary>
-        ///     Determines whether a sub-maze to the right of the trajectory exists for the current row. The only scenario where a
-        ///     right sub-maze would not exist would be the case in which the trajectory occupies the last column of the maze,
-        ///     butting up against the right, outer wall.
-        /// </summary>
-        /// <param name="grid">The two-dimensional, n x n grid of maze cells.</param>
-        /// <param name="row">The current maze row.</param>
-        /// <param name="width">The width of the maze.</param>
-        /// <param name="mazeStartPoint">
-        ///     The point at which the sub-maze to the right of the trajectory begins (this is an output
-        ///     parameter).
-        /// </param>
-        /// <returns>Boolean indicator of whether right sub-maze exists for the given row.</returns>
-        private static bool IsRightSubmaze(MazeStructureGridCell[,] grid, int row, int width,
-            out Point2DInt mazeStartPoint)
-        {
-            mazeStartPoint = new Point2DInt();
-
-            // Loop through each cell in the row and find the right-most trajectory cell
-            for (int pos = 0; pos < width; pos++)
-            {
-                if (grid[row, pos].PathDirection != PathDirection.None)
-                {
-                    // Set the start point to the cell to the right of the juncture
-                    mazeStartPoint = new Point2DInt(pos + 1, row);
-                }
-            }
-
-            // A valid starting location has been found if the X location is between the
-            // first and last column
-            return mazeStartPoint.X > 0 && mazeStartPoint.X < width;
-        }
-
-        /// <summary>
-        ///     Determines whether the given row and column denote the end of the current sub-maze right of the trajectory.
-        /// </summary>
-        /// <param name="grid">The two-dimensional, n x n grid of maze cells.</param>
-        /// <param name="row">The current maze row.</param>
-        /// <param name="width">The width of the maze.</param>
-        /// <param name="column">The current maze column.</param>
-        /// <param name="mazeEndPoint">
-        ///     The point at which the sub-maze to the right of the trajectory ends (this is an output
-        ///     parameter).
-        /// </param>
-        /// <returns>Boolean indicator of whether current cell demarcates the end of the right sub-maze.</returns>
-        private static bool IsRightMazeEndRow(MazeStructureGridCell[,] grid, int row, int column, int width,
-            out Point2DInt mazeEndPoint)
-        {
-            mazeEndPoint = new Point2DInt();
-            bool isEndRow = false;
-
-            // Check for sub-maze to right of L-intersection (first) and inverted L-intersection (second)
-            if (
-                (grid[row, column].PathDirection != PathDirection.None &&
-                 grid[row - 1, column].PathDirection == PathDirection.None) ||
-                (grid[row, column - 1].PathDirection == PathDirection.None &&
-                 grid[row - 1, column - 1].PathDirection != PathDirection.None))
-            {
-                mazeEndPoint = new Point2DInt(width - 1, row - 1);
-                isEndRow = true;
-            }
-
-            return isEndRow;
-        }
-
-        /// <summary>
-        ///     Determines the ending column of the sub-maze to the left of the trajectory for the given row.
-        /// </summary>
-        /// <param name="grid">The two-dimensional, n x n grid of maze cells.</param>
-        /// <param name="row">The current maze row.</param>
-        /// <returns>The column that demarcates the right-most boundary of the sub-maze to the left of the trajectory.</returns>
-        private static int DetermineLeftSubmazeEndPosition(MazeStructureGridCell[,] grid, int row)
-        {
-            int pos = 0;
-
-            // Increment until trajectory point cutting off the left submaze is found
-            do
-            {
-                pos++;
-            } while (grid[row, pos].PathDirection == PathDirection.None);
-
-            // Return the difference between the intersecting trajectory point and the submaze start
-            return pos - 1;
-        }
-
-        /// <summary>
-        ///     Determines whether the given row and column denote the end of the current sub-maze left of the trajectory.
-        /// </summary>
-        /// <param name="grid">The two-dimensional, n x n grid of maze cells.</param>
-        /// <param name="row">The current maze row.</param>
-        /// <param name="subMazeEndPos">The end column of the sub-maze.</param>
-        /// <param name="height">The height of the maze.</param>
-        /// <param name="mazeEndPoint">
-        ///     The point at which the sub-maze to the left of the trajectory ends (this is an output
-        ///     parameter).
-        /// </param>
-        /// <returns>Boolean indicator of whether current cell demarcates the end of the left sub-maze.</returns>
-        private static bool IsLeftMazeEndRow(MazeStructureGridCell[,] grid, int row, int subMazeEndPos, int height,
-            out Point2DInt mazeEndPoint)
-        {
-            mazeEndPoint = new Point2DInt();
-            bool isEndRow = false;
-
-            // If this is the last row of the maze, it's the end position by default
-            if (row == height - 1)
-            {
-                // If last row is beneath L-intersection on trajectory, set end position one
-                // row above as there needs to be another room below the trajectory
-                mazeEndPoint = grid[row, subMazeEndPos + 1].PathDirection == PathDirection.None
-                    ? new Point2DInt(subMazeEndPos, row - 1)
-                    : new Point2DInt(subMazeEndPos, row);
-                isEndRow = true;
-            }
-            // Check for sub-maze to left of L-intersection (first) and inverted L-intersection (second)
-            else if (grid[row, subMazeEndPos + 1].PathDirection == PathDirection.None ||
-                     grid[row, subMazeEndPos].PathDirection != PathDirection.None)
-            {
-                mazeEndPoint = new Point2DInt(subMazeEndPos, row - 1);
-                isEndRow = true;
-            }
-
-            return isEndRow;
         }
 
         /// <summary>
@@ -935,49 +722,62 @@ namespace SharpNeat.Utility
         }
 
         /// <summary>
-        ///     Constructs the maze solution trajectory based on the waypoints defined in the maze genome.
+        ///     Constructs the maze solution trajectory based on the given list of path genes (waypoints) and maze dimensions.
         /// </summary>
-        /// <param name="genome">The maze genome.</param>
+        /// <param name="pathGenes">The list of path (waypoint) genes.</param>
+        /// <param name="mazeHeight">The height of the maze.</param>
+        /// <param name="mazeWidth">The width of the maze.</param>
         /// <returns>The maze grid cells with cells in the path trajectory identified.</returns>
-        public static MazeStructureGridCell[,] BuildMazeSolutionPath(MazeGenome genome)
+        public static MazeStructureGridCell[,] BuildMazeSolutionPath(IList<PathGene> pathGenes, int mazeHeight,
+            int mazeWidth)
         {
             // Starting location will always be at the top left corner
             Point2DInt startLocation = new Point2DInt(0, 0);
 
             // Ending location will always be at the bottom right corner
-            Point2DInt targetLocation = new Point2DInt(genome.MazeBoundaryWidth - 1, genome.MazeBoundaryHeight - 1);
+            Point2DInt targetLocation = new Point2DInt(mazeWidth - 1, mazeHeight - 1);
 
             // Initialize the grid
-            MazeStructureGridCell[,] unscaledGrid = InitializeMazeGrid(genome.MazeBoundaryHeight,
-                genome.MazeBoundaryWidth);
+            MazeStructureGridCell[,] unscaledGrid = InitializeMazeGrid(mazeHeight,
+                mazeWidth);
 
-            for (int idx = 0; idx <= genome.PathGeneList.Count; idx++)
+            for (int idx = 0; idx <= pathGenes.Count; idx++)
             {
                 // Get the previous point (if first iteration, previous point is the start location)
                 Point2DInt prevPoint = idx == 0
                     ? startLocation
-                    : genome.PathGeneList[idx - 1].Waypoint;
+                    : pathGenes[idx - 1].Waypoint;
 
                 // Get the current point (if last iteration, current point is the target location)
-                Point2DInt curPoint = idx == genome.PathGeneList.Count
+                Point2DInt curPoint = idx == pathGenes.Count
                     ? targetLocation
-                    : genome.PathGeneList[idx].Waypoint;
+                    : pathGenes[idx].Waypoint;
 
                 // Set the waypoint intersection orientation
                 IntersectionOrientation curOrientation = curPoint.Equals(targetLocation)
-                    ? genome.PathGeneList[idx - 1].DefaultOrientation
-                    : genome.PathGeneList[idx].DefaultOrientation;
+                    ? pathGenes[idx - 1].DefaultOrientation
+                    : pathGenes[idx].DefaultOrientation;
 
                 // Mark current waypoint
                 unscaledGrid[curPoint.Y, curPoint.X].IsWayPoint = true;
 
                 // Denote the resulting solution path on the grid
                 MarkSolutionPathSegment(unscaledGrid, prevPoint, curPoint, curOrientation,
-                    idx > 0 ? genome.PathGeneList.Take(idx).Max(p => p.Waypoint.X) : prevPoint.X,
-                    idx > 0 ? genome.PathGeneList.Take(idx).Max(p => p.Waypoint.Y) : prevPoint.Y);
+                    idx > 0 ? pathGenes.Take(idx).Max(p => p.Waypoint.X) : prevPoint.X,
+                    idx > 0 ? pathGenes.Take(idx).Max(p => p.Waypoint.Y) : prevPoint.Y);
             }
 
             return unscaledGrid;
+        }
+
+        /// <summary>
+        ///     Constructs the maze solution trajectory based on the waypoints defined in the maze genome.
+        /// </summary>
+        /// <param name="genome">The maze genome.</param>
+        /// <returns>The maze grid cells with cells in the path trajectory identified.</returns>
+        public static MazeStructureGridCell[,] BuildMazeSolutionPath(MazeGenome genome)
+        {
+            return BuildMazeSolutionPath(genome.PathGeneList, genome.MazeBoundaryHeight, genome.MazeBoundaryWidth);
         }
 
         /// <summary>
@@ -1045,13 +845,14 @@ namespace SharpNeat.Utility
         /// </summary>
         /// <param name="genome">The maze genome undergoing mutation.</param>
         /// <param name="waypointLocation">The proposed waypoint.</param>
-        /// <param name="genomeId">
+        /// <param name="geneId">
         ///     The unique ID (innovation ID) of the path gene. This is used to determine whether the mutation
         ///     results in a valid ordering.
         /// </param>
+        /// <param name="waypointOrientation">The orientation of the proposed waypoint.</param>
         /// <returns>Boolean indicating whether the given point is valid per the maze boundary constraints.</returns>
         public static bool IsValidWaypointLocation(MazeGenome genome,
-            Point2DInt waypointLocation, uint genomeId)
+            Point2DInt waypointLocation, uint geneId, IntersectionOrientation waypointOrientation)
         {
             return
                 // Check that x-coordinate is at-or-above minimum maze width
@@ -1076,17 +877,96 @@ namespace SharpNeat.Utility
                 // Check that waypoints that were added earlier are still at least two units above or to the left of mutated waypoint. 
                 // This is because waypoints are connected in the order in which they're added to the genome, and to 
                 // avoid overlaps, waypoints are only added below or to the right of pre-existing waypoints.
-                ((genome.PathGeneList.Any(g => g.InnovationId < genomeId && g.Waypoint.X + 1 >= waypointLocation.X) ==
+                ((genome.PathGeneList.Any(g => g.InnovationId < geneId && g.Waypoint.X + 1 >= waypointLocation.X) ==
                   false &&
                   (genome.PathGeneList.Any(g => g.Waypoint.Y == waypointLocation.Y) == false)) ||
-                 (genome.PathGeneList.Any(g => g.InnovationId < genomeId && g.Waypoint.Y + 1 >= waypointLocation.Y) ==
+                 (genome.PathGeneList.Any(g => g.InnovationId < geneId && g.Waypoint.Y + 1 >= waypointLocation.Y) ==
                   false &&
                   (genome.PathGeneList.Any(g => g.Waypoint.X == waypointLocation.X) == false))) &&
 
                 // Check that new waypoint does not overlap existing trajectory
-                BuildMazeSolutionPath(genome)[waypointLocation.Y, waypointLocation.X].PathDirection ==
-                PathDirection.None
+                //BuildMazeSolutionPath(genome)[waypointLocation.Y, waypointLocation.X].PathDirection ==
+                //PathDirection.None
+
+                // Check that new waypoint does not induce a trajectory overlap
+                DoesTrajectoryOverlap(genome.PathGeneList, geneId, waypointLocation, waypointOrientation,
+                    genome.MazeBoundaryHeight, genome.MazeBoundaryWidth) == false
                 ;
+        }
+
+        /// <summary>
+        ///     Incorporates the candidate waypoint into the list of existing waypoints, builds out the resulting trajectory, and
+        ///     walks that trajectory checking for overlaps.
+        /// </summary>
+        /// <param name="waypoints">The existing list of path (waypoint) genes.</param>
+        /// <param name="candidateWaypointId">The gene ID of the candidate waypoint.</param>
+        /// <param name="candidateWaypointLocation">The cartesian coordinates of the candidate waypoint.</param>
+        /// <param name="candidateWaypointOrientation">The orientation (i.e. vertical/horizontal) of the candidate waypoint.</param>
+        /// <param name="mazeHeight">The unscaled maze height.</param>
+        /// <param name="mazeWidth">The unscaled maze width.</param>
+        /// <returns>Boolean indicator of whether the trajectory overlaps upon itself.</returns>
+        public static bool DoesTrajectoryOverlap(IList<PathGene> waypoints, uint candidateWaypointId,
+            Point2DInt candidateWaypointLocation, IntersectionOrientation candidateWaypointOrientation, int mazeHeight,
+            int mazeWidth)
+        {
+            bool isOverlap = false;
+
+            // Make a copy of the wayoint list
+            var modifiedWaypoints = new List<PathGene>(waypoints);
+
+            // Create new path gene
+            var candidatePathGene = new PathGene(candidateWaypointId, candidateWaypointLocation,
+                candidateWaypointOrientation);
+
+            // Replace the existing waypoint if matching waypoint ID already exists, otherwise
+            // append new candidate waypoint to the list
+            if (modifiedWaypoints.Any(g => g.InnovationId == candidateWaypointId))
+            {
+                modifiedWaypoints[
+                    modifiedWaypoints.IndexOf(modifiedWaypoints.Single(g => g.InnovationId == candidateWaypointId))] =
+                    candidatePathGene;
+            }
+            else
+            {
+                modifiedWaypoints.Add(candidatePathGene);
+            }
+
+            // Build out maze grid
+            var mazeGrid = BuildMazeSolutionPath(modifiedWaypoints, mazeHeight, mazeWidth);
+
+            // Setup the start/end points
+            var startCell = mazeGrid[0, 0];
+            var endCell = mazeGrid[mazeGrid.GetLength(0) - 1, mazeGrid.GetLength(1) - 1];
+            var curCell = startCell;
+            var prevCell = curCell;
+
+            // Walk the trajectory
+            do
+            {
+                // If direction of current and previous cell don't match and neither are junctures, 
+                // this means there's been a trajectory overlap so set overlap flag to true and break
+                if (curCell.PathDirection != prevCell.PathDirection && curCell.IsJuncture == false &&
+                    prevCell.IsJuncture == false)
+                {
+                    isOverlap = true;
+                }
+                else if (curCell.PathOrientation == PathOrientation.Vertical)
+                {
+                    prevCell = curCell;
+                    curCell = curCell.PathDirection == PathDirection.North
+                        ? mazeGrid[curCell.Y - 1, curCell.X]
+                        : mazeGrid[curCell.Y + 1, curCell.X];
+                }
+                else
+                {
+                    prevCell = curCell;
+                    curCell = curCell.PathDirection == PathDirection.West
+                        ? mazeGrid[curCell.Y, curCell.X - 1]
+                        : mazeGrid[curCell.Y, curCell.X + 1];
+                }
+            } while (!curCell.Equals(endCell) && isOverlap == false);
+
+            return isOverlap;
         }
 
         #endregion

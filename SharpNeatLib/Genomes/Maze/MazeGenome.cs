@@ -355,10 +355,6 @@ namespace SharpNeat.Genomes.Maze
                 // (prohibit exceeding max wall complexity and placing more waypoints than there are cells in the maze grid)
                 outcome = RouletteWheel.SingleThrow(GenomeFactory.MazeGenomeParameters.RouletteWheelLayout,
                     GenomeFactory.Rng);
-
-                // TODO: This is for debugging
-                Console.WriteLine(@"Attempting to apply mutation [{0}] on maze genome ID [{1}] at time [{2}]", outcome,
-                    Id, DateTime.Now);
             } while ((WallGeneList.Count >= MaxWallComplexity && outcome == 2) ||
                      ((PathGeneList.Count >= MazeBoundaryHeight || PathGeneList.Count >= MazeBoundaryWidth) &&
                       (outcome == 5 || outcome == 6)));
@@ -586,7 +582,8 @@ namespace SharpNeat.Genomes.Maze
                     }
                 }
             } while (
-                MazeUtils.IsValidWaypointLocation(this, mutatedPoint, PathGeneList[geneIdx].InnovationId) == false);
+                MazeUtils.IsValidWaypointLocation(this, mutatedPoint, PathGeneList[geneIdx].InnovationId,
+                    PathGeneList[geneIdx].DefaultOrientation) == false);
 
             // Set the new, validated waypoint
             PathGeneList[geneIdx].Waypoint = mutatedPoint;
@@ -599,22 +596,23 @@ namespace SharpNeat.Genomes.Maze
         {
             Point2DInt newPoint;
 
+            // Randomly select an orientation
+            IntersectionOrientation newPointOrientation = GenomeFactory.Rng.NextBool()
+                ? IntersectionOrientation.Horizontal
+                : IntersectionOrientation.Vertical;
+
             // Generate new points until we reach one that is valid and is in a sparse region of the maze
             do
             {
                 //newPoint = GetSparseGridCell();
                 newPoint = new Point2DInt(GenomeFactory.Rng.Next(MazeBoundaryWidth),
                     GenomeFactory.Rng.Next(MazeBoundaryHeight));
-
-                // TODO: REMOVE THIS
-                //Console.WriteLine(@"Adding path waypoint with coordinates ({0}, {1})", newPoint.X, newPoint.Y);
             } while (
-                MazeUtils.IsValidWaypointLocation(this, newPoint, UInt32.MaxValue) ==
+                MazeUtils.IsValidWaypointLocation(this, newPoint, UInt32.MaxValue, newPointOrientation) ==
                 false);
 
             // Add the new path gene to the genome
-            PathGeneList.Add(new PathGene(GenomeFactory.InnovationIdGenerator.NextId, newPoint,
-                GenomeFactory.Rng.NextBool() ? IntersectionOrientation.Horizontal : IntersectionOrientation.Vertical));
+            PathGeneList.Add(new PathGene(GenomeFactory.InnovationIdGenerator.NextId, newPoint, newPointOrientation));
         }
 
         #endregion
