@@ -323,6 +323,7 @@ namespace SharpNeat.Genomes.Maze
         private void Mutate()
         {
             int outcome;
+            var isMutationSuccessful = true;
 
             // If there are not yet any waypoints defined, the mutation must be to add a waypoint
             // (this is really not feasible at all because without any waypoints, the maze would not
@@ -351,38 +352,42 @@ namespace SharpNeat.Genomes.Maze
 
             do
             {
-                // Get random mutation to perform 
-                // (prohibit exceeding max wall complexity and placing more waypoints than there are cells in the maze grid)
-                outcome = RouletteWheel.SingleThrow(GenomeFactory.MazeGenomeParameters.RouletteWheelLayout,
-                    GenomeFactory.Rng);
-            } while ((WallGeneList.Count >= MaxWallComplexity && outcome == 2) ||
-                     ((PathGeneList.Count >= MazeBoundaryHeight || PathGeneList.Count >= MazeBoundaryWidth) &&
-                      (outcome == 5 || outcome == 6)));
+                // Attempt random mutation until a successful/valid mutation is applied
+                do
+                {
+                    // Get random mutation to perform 
+                    // (prohibit exceeding max wall complexity and placing more waypoints than there are cells in the maze grid)
+                    outcome = RouletteWheel.SingleThrow(GenomeFactory.MazeGenomeParameters.RouletteWheelLayout,
+                        GenomeFactory.Rng);
+                } while ((WallGeneList.Count >= MaxWallComplexity && outcome == 2) ||
+                         ((PathGeneList.Count >= MazeBoundaryHeight || PathGeneList.Count >= MazeBoundaryWidth) &&
+                          (outcome == 5 || outcome == 6)));
 
-            switch (outcome)
-            {
-                case 0:
-                    MutateWallStartLocations();
-                    break;
-                case 1:
-                    MutatePassageStartLocations();
-                    break;
-                case 2:
-                    MutateAddWall();
-                    break;
-                case 3:
-                    MutateDeleteWall();
-                    break;
-                case 4:
-                    MutateExpandMaze();
-                    break;
-                case 5:
-                    MutatePathWaypointLocation();
-                    break;
-                case 6:
-                    MutateAddPathWaypoint();
-                    break;
-            }
+                switch (outcome)
+                {
+                    case 0:
+                        isMutationSuccessful = MutateWallStartLocations();
+                        break;
+                    case 1:
+                        isMutationSuccessful = MutatePassageStartLocations();
+                        break;
+                    case 2:
+                        MutateAddWall();
+                        break;
+                    case 3:
+                        MutateDeleteWall();
+                        break;
+                    case 4:
+                        MutateExpandMaze();
+                        break;
+                    case 5:
+                        isMutationSuccessful = MutatePathWaypointLocation();
+                        break;
+                    case 6:
+                        isMutationSuccessful = MutateAddPathWaypoint();
+                        break;
+                }
+            } while (isMutationSuccessful == false);
 
             // If the mutation caused a reduction in max complexity, remove non-coding genes
             RemoveNonCodingWallGenes();
@@ -391,14 +396,15 @@ namespace SharpNeat.Genomes.Maze
         /// <summary>
         ///     Mutates the location of the wall based on both the wall start mutation probability and the perturbance magnitude.
         /// </summary>
-        private void MutateWallStartLocations()
+        /// <returns>Flag indicating whether the wall start location mutation was successful.</returns>
+        private bool MutateWallStartLocations()
         {
             bool mutationOccurred = false;
             int mazeTreeDepth = (int) Math.Log(WallGeneList.Count, 2) + 1;
 
             // Don't try to mutate if the gene list is empty
             if (WallGeneList.Count <= 0)
-                return;
+                return false;
 
             // Iterate through each gene (wall) and probabilistically shift its location (scaling perturbance magnitude by wall effect size)
             for (int geneIdx = 0; geneIdx < WallGeneList.Count; geneIdx++)
@@ -433,20 +439,23 @@ namespace SharpNeat.Genomes.Maze
                                                                                   1)/
                                                                               mazeTreeDepth)));
             }
+
+            return true;
         }
 
         /// <summary>
         ///     Mutates the location of the wall passage based on both the passage start mutation probability and the perturbance
         ///     magnitude.
         /// </summary>
-        private void MutatePassageStartLocations()
+        /// <returns>Flag indicating whether the passage start location mutation was successful.</returns>
+        private bool MutatePassageStartLocations()
         {
             bool mutationOccurred = false;
             int mazeTreeDepth = (int) Math.Log(WallGeneList.Count, 2) + 1;
 
             // Don't try to mutate if the gene list is empty
             if (WallGeneList.Count <= 0)
-                return;
+                return false;
 
             // Iterate through each gene (wall) and probabilistically shift its passage location (scaling perturbance magnitude by wall effect size)
             for (int geneIdx = 0; geneIdx < WallGeneList.Count; geneIdx++)
@@ -483,6 +492,8 @@ namespace SharpNeat.Genomes.Maze
                                                                                      1)/
                                                                                  mazeTreeDepth)));
             }
+
+            return true;
         }
 
         /// <summary>
@@ -537,62 +548,70 @@ namespace SharpNeat.Genomes.Maze
         /// <summary>
         ///     Probabalistically shifts one of the waypoints by one unit in the horizontal or vertical direction.
         /// </summary>
-        private void MutatePathWaypointLocation()
+        /// <returns>Flag indicating whether the path waypoint location mutation was successful.</returns>
+        private bool MutatePathWaypointLocation()
         {
             Point2DInt mutatedPoint = new Point2DInt();
             int geneIdx;
 
             // Don't try to mutate if the gene list is empty
             if (PathGeneList.Count <= 0)
-                return;
+                return false;
 
-            // Attempt to mutate a waypoint on the path until we get a valid point
+            // Attempt to mutate a waypoint on the path
             // (only one waypoint point at a time is mutated to avoid drastically changing the path)
-            do
-            {
-                // Select a random gene to mutate
-                geneIdx = GenomeFactory.Rng.Next(PathGeneList.Count);
 
-                // Apply the appropriate transformation based on the point shift direction
-                switch ((PointShift) (GenomeFactory.Rng.Next(1, 5)))
+            // Select a random gene to mutate
+            geneIdx = GenomeFactory.Rng.Next(PathGeneList.Count);
+
+            // Apply the appropriate transformation based on the point shift direction
+            switch ((PointShift) (GenomeFactory.Rng.Next(1, 5)))
+            {
+                case PointShift.Down:
                 {
-                    case PointShift.Down:
-                    {
-                        mutatedPoint = new Point2DInt(PathGeneList[geneIdx].Waypoint.X,
-                            PathGeneList[geneIdx].Waypoint.Y + 1);
-                        break;
-                    }
-                    case PointShift.Up:
-                    {
-                        mutatedPoint = new Point2DInt(PathGeneList[geneIdx].Waypoint.X,
-                            PathGeneList[geneIdx].Waypoint.Y - 1);
-                        break;
-                    }
-                    case PointShift.Left:
-                    {
-                        mutatedPoint = new Point2DInt(PathGeneList[geneIdx].Waypoint.X - 1,
-                            PathGeneList[geneIdx].Waypoint.Y);
-                        break;
-                    }
-                    case PointShift.Right:
-                    {
-                        mutatedPoint = new Point2DInt(PathGeneList[geneIdx].Waypoint.X + 1,
-                            PathGeneList[geneIdx].Waypoint.Y);
-                        break;
-                    }
+                    mutatedPoint = new Point2DInt(PathGeneList[geneIdx].Waypoint.X,
+                        PathGeneList[geneIdx].Waypoint.Y + 1);
+                    break;
                 }
-            } while (
-                MazeUtils.IsValidWaypointLocation(this, mutatedPoint, PathGeneList[geneIdx].InnovationId,
-                    PathGeneList[geneIdx].DefaultOrientation) == false);
+                case PointShift.Up:
+                {
+                    mutatedPoint = new Point2DInt(PathGeneList[geneIdx].Waypoint.X,
+                        PathGeneList[geneIdx].Waypoint.Y - 1);
+                    break;
+                }
+                case PointShift.Left:
+                {
+                    mutatedPoint = new Point2DInt(PathGeneList[geneIdx].Waypoint.X - 1,
+                        PathGeneList[geneIdx].Waypoint.Y);
+                    break;
+                }
+                case PointShift.Right:
+                {
+                    mutatedPoint = new Point2DInt(PathGeneList[geneIdx].Waypoint.X + 1,
+                        PathGeneList[geneIdx].Waypoint.Y);
+                    break;
+                }
+            }
+
+            // Determine whether the mutated waypoint is valid
+            bool isWaypointValid = MazeUtils.IsValidWaypointLocation(this, mutatedPoint,
+                PathGeneList[geneIdx].InnovationId,
+                PathGeneList[geneIdx].DefaultOrientation);
 
             // Set the new, validated waypoint
-            PathGeneList[geneIdx].Waypoint = mutatedPoint;
+            if (isWaypointValid)
+            {
+                PathGeneList[geneIdx].Waypoint = mutatedPoint;
+            }
+
+            return isWaypointValid;
         }
 
         /// <summary>
         ///     Probabalistically adds a single new waypoint in the maze solution path.
         /// </summary>
-        private void MutateAddPathWaypoint()
+        /// <returns>Flag indicating whether the path waypoint addition mutation was successful.</returns>
+        private bool MutateAddPathWaypoint()
         {
             Point2DInt newPoint;
 
@@ -601,18 +620,21 @@ namespace SharpNeat.Genomes.Maze
                 ? IntersectionOrientation.Horizontal
                 : IntersectionOrientation.Vertical;
 
-            // Generate new points until we reach one that is valid and is in a sparse region of the maze
-            do
-            {
-                //newPoint = GetSparseGridCell();
-                newPoint = new Point2DInt(GenomeFactory.Rng.Next(MazeBoundaryWidth),
-                    GenomeFactory.Rng.Next(MazeBoundaryHeight));
-            } while (
-                MazeUtils.IsValidWaypointLocation(this, newPoint, UInt32.MaxValue, newPointOrientation) ==
-                false);
+            // Generate new point
+            newPoint = new Point2DInt(GenomeFactory.Rng.Next(MazeBoundaryWidth),
+                GenomeFactory.Rng.Next(MazeBoundaryHeight));
+
+            // Determine whether new waypoint is valid
+            bool isWaypointValid =
+                MazeUtils.IsValidWaypointLocation(this, newPoint, UInt32.MaxValue, newPointOrientation);
 
             // Add the new path gene to the genome
-            PathGeneList.Add(new PathGene(GenomeFactory.InnovationIdGenerator.NextId, newPoint, newPointOrientation));
+            if (isWaypointValid)
+            {
+                PathGeneList.Add(new PathGene(GenomeFactory.InnovationIdGenerator.NextId, newPoint, newPointOrientation));
+            }
+
+            return isWaypointValid;
         }
 
         #endregion
@@ -631,32 +653,6 @@ namespace SharpNeat.Genomes.Maze
             if (proposedLocation > 1)
                 return 1;
             return proposedLocation;
-        }
-
-        /// <summary>
-        ///     Extracts a random most sparse cell from among the top N most sparse regions in the maze space.
-        /// </summary>
-        /// <returns>A randomly selected cell from a list of sparse regions within the maze space.</returns>
-        private Point2DInt GetSparseGridCell()
-        {
-            // Get count of neighboring cells within neighborhood radius
-            var cellNeighborCounts = MazeUtils.ComputeCellNeighborCounts(PathGeneList, MazeBoundaryHeight,
-                MazeBoundaryWidth,
-                (int) Math.Sqrt(MazeBoundaryHeight*MazeBoundaryWidth)/
-                GenomeFactory.MazeGenomeParameters.GridCellNeighborhoodRadius);
-
-            // Compute crowd factor scores for each cell by dividing neighbor count by total number of waypoints
-            Dictionary<Point2DInt, double> cellCrowdFactor = cellNeighborCounts.ToDictionary(cell => cell.Key,
-                cell => (double) cell.Value/PathGeneList.Count);
-
-            // Extract the specified proportion of most sparse cells and return random cell in set
-            return cellCrowdFactor.OrderBy(x => x.Value)
-                .Take(
-                    (int)
-                        Math.Ceiling(GenomeFactory.MazeGenomeParameters.SparseCellSelectionProportion*
-                                     cellCrowdFactor.Count))
-                .OrderBy(x => GenomeFactory.Rng.Next())
-                .First().Key;
         }
 
         /// <summary>

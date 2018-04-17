@@ -876,19 +876,15 @@ namespace SharpNeat.Utility
                   false &&
                   (genome.PathGeneList.Any(g => g.Waypoint.X == waypointLocation.X) == false))) &&
 
-                // Check that new waypoint does not overlap existing trajectory
-                //BuildMazeSolutionPath(genome)[waypointLocation.Y, waypointLocation.X].PathDirection ==
-                //PathDirection.None
-
-                // Check that new waypoint does not induce a trajectory overlap
-                DoesTrajectoryOverlap(genome.PathGeneList, geneId, waypointLocation, waypointOrientation,
-                    genome.MazeBoundaryHeight, genome.MazeBoundaryWidth) == false
+                // Check that new waypoint does not induce a trajectory overlap nor does it cause other waypoints to not be visited
+                IsTrajectoryValid(genome.PathGeneList, geneId, waypointLocation, waypointOrientation,
+                    genome.MazeBoundaryHeight, genome.MazeBoundaryWidth)
                 ;
         }
 
         /// <summary>
         ///     Incorporates the candidate waypoint into the list of existing waypoints, builds out the resulting trajectory, and
-        ///     walks that trajectory checking for overlaps.
+        ///     walks that trajectory checking for overlaps. Also ensures that all waypoints in the maze are visited.
         /// </summary>
         /// <param name="waypoints">The existing list of path (waypoint) genes.</param>
         /// <param name="candidateWaypointId">The gene ID of the candidate waypoint.</param>
@@ -897,7 +893,7 @@ namespace SharpNeat.Utility
         /// <param name="mazeHeight">The unscaled maze height.</param>
         /// <param name="mazeWidth">The unscaled maze width.</param>
         /// <returns>Boolean indicator of whether the trajectory overlaps upon itself.</returns>
-        public static bool DoesTrajectoryOverlap(IList<PathGene> waypoints, uint candidateWaypointId,
+        public static bool IsTrajectoryValid(IList<PathGene> waypoints, uint candidateWaypointId,
             Point2DInt candidateWaypointLocation, IntersectionOrientation candidateWaypointOrientation, int mazeHeight,
             int mazeWidth)
         {
@@ -923,6 +919,12 @@ namespace SharpNeat.Utility
                 modifiedWaypoints.Add(candidatePathGene);
             }
 
+            // Create list of visited waypoints
+            List<Point2DInt> visitedWaypointLocations = new List<Point2DInt>();
+
+            // Get all waypoints in the maze
+            var mazeWaypointLocations = waypoints.Select(pg => new Point2DInt(pg.Waypoint.X, pg.Waypoint.Y)).ToList();
+
             // Build out maze grid
             var mazeGrid = BuildMazeSolutionPath(modifiedWaypoints, mazeHeight, mazeWidth);
 
@@ -935,6 +937,12 @@ namespace SharpNeat.Utility
             // Walk the trajectory
             do
             {
+                // If the current cell is a waypoint, add to the list of visited waypoints
+                if (curCell.IsWayPoint)
+                {
+                    visitedWaypointLocations.Add(new Point2DInt(curCell.X, curCell.Y));
+                }
+
                 // If direction of current and previous cell don't match and neither are junctures, 
                 // this means there's been a trajectory overlap so set overlap flag to true and break
                 if (curCell.PathDirection != prevCell.PathDirection && curCell.IsJuncture == false &&
@@ -958,7 +966,10 @@ namespace SharpNeat.Utility
                 }
             } while (!curCell.Equals(endCell) && isOverlap == false);
 
-            return isOverlap;
+            // Get any unvisited waypoints
+            var unvisitedWaypoints = mazeWaypointLocations.Except(visitedWaypointLocations);
+
+            return isOverlap == false && !unvisitedWaypoints.Any();
         }
 
         #endregion
