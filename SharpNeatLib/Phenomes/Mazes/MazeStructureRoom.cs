@@ -185,6 +185,10 @@ namespace SharpNeat.Phenomes.Mazes
             double unscaledWallLocation,
             double unscaledPassageLocation, bool isHorizontal)
         {
+            // Ensure that wall location does not reach 1 
+            // (otherwise, this may cause room to not split and result in an endless loop)
+            unscaledWallLocation = Math.Min(999999e-6, unscaledWallLocation);
+
             // Determine starting location of wall
             int xWallLocation = _x +
                                 (isHorizontal
