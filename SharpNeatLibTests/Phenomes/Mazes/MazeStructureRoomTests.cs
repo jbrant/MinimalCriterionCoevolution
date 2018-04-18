@@ -90,12 +90,12 @@ namespace SharpNeat.Phenomes.Mazes.Tests
         [TestMethod]
         public void DivideRoomTest()
         {
-            var baseName = "ProblemMaze_7";
+            var baseName = "ProblemMaze";
             int mazeHeight = 1;
             int mazeWidth = 1;
             //var seedMazePath = @"F:\User Data\Jonathan\Documents\school\Jonathan\Graduate\PhD\Development\MCC_Projects\MCC_Executor\MazeNavigation\SeedMazes\" + baseName + ".xml";
             var seedMazePath =
-                @"\\JONATHAN-PC\User Data\Jonathan\Documents\school\Jonathan\Graduate\PhD\Minimal Criteria Search\Analysis\MCC Mazes - Pathway Complexification\Genomes\" +
+                @"\\JONATHAN-PC\User Data\Jonathan\Documents\school\Jonathan\Graduate\PhD\Minimal Criteria Search\ExperimentData\DebugOutput\ProblemMazeGenomes\MCC-PathEvolution-4\" +
                 baseName + ".xml";
             var outputPath =
                 @"\\JONATHAN-PC\User Data\Jonathan\Documents\school\Jonathan\Graduate\PhD\Minimal Criteria Search\ExperimentData\DebugOutput";
@@ -109,9 +109,9 @@ namespace SharpNeat.Phenomes.Mazes.Tests
             genomeParameters.MutateExpandMazeProbability = 0;
             genomeParameters.MutateDeleteWallProbability = 0;
             genomeParameters.MutateAddWallProbability = 0;
-            genomeParameters.MutateWallStartLocationProbability = 0;
+            genomeParameters.MutateWallStartLocationProbability = 1;
             genomeParameters.MutatePassageStartLocationProbability = 0;
-            genomeParameters.MutateAddPathWaypointProbability = 1;
+            genomeParameters.MutateAddPathWaypointProbability = 0;
             genomeParameters.MutatePathWaypointLocationProbability = 0;
 
             var mazeGenomeFactory = new MazeGenomeFactory(genomeParameters, mazeHeight, mazeWidth);

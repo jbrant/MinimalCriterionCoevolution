@@ -130,12 +130,16 @@ namespace SharpNeat.Phenomes.Mazes
         {
             // Mark the fully enclosed sub-maze boundaries
             MarkRoomBoundaries(grid);
-            
+
             // Determine starting location of wall
             int xWallLocation = _x +
-                                (isHorizontal ? 0 : Math.Max(0, (int) ((_width - MinimumWidth+1)*unscaledWallLocation)));
+                                (isHorizontal
+                                    ? 0
+                                    : Math.Max(0, (int) ((_width - MinimumWidth + 1)*unscaledWallLocation)));
             int yWallLocation = _y +
-                                (isHorizontal ? Math.Max(0, (int) ((_height - MinimumHeight+1)*unscaledWallLocation)) : 0);
+                                (isHorizontal
+                                    ? Math.Max(0, (int) ((_height - MinimumHeight + 1)*unscaledWallLocation))
+                                    : 0);
 
             // Determine perpendicular direction
             WallDirection perpendicularDirection = isHorizontal ? WallDirection.East : WallDirection.South;
@@ -175,12 +179,20 @@ namespace SharpNeat.Phenomes.Mazes
         public Tuple<MazeStructureRoom, MazeStructureRoom> DivideRoom(MazeStructureGridCell[,] grid,
             double unscaledWallLocation,
             double unscaledPassageLocation, bool isHorizontal)
-        {            
+        {
+            // Ensure that wall location does not reach 1 
+            // (otherwise, this may cause room to not split and result in an endless loop)
+            unscaledWallLocation = Math.Min(999999e-6, unscaledWallLocation);
+
             // Determine starting location of wall
             int xWallLocation = _x +
-                                (isHorizontal ? 0 : Math.Max(0, (int) ((_width - MinimumWidth+1)*unscaledWallLocation)));
+                                (isHorizontal
+                                    ? 0
+                                    : Math.Max(0, (int) ((_width - MinimumWidth + 1)*unscaledWallLocation)));
             int yWallLocation = _y +
-                                (isHorizontal ? Math.Max(0, (int) ((_height - MinimumHeight+1)*unscaledWallLocation)) : 0);
+                                (isHorizontal
+                                    ? Math.Max(0, (int) ((_height - MinimumHeight + 1)*unscaledWallLocation))
+                                    : 0);
 
             // Determine the location of the passage 
             // (location can be no further out than width or height minus 1 to prevent passage starting at the wall end point)
