@@ -643,7 +643,7 @@ namespace SharpNeat.Utility
                 if (subMaze.AreInternalWallsSupported() && mazeGenome.WallGeneList.Count > 0)
                 {
                     subMaze.MarkRoomBoundaries(mazeGrid, mazeGenome.WallGeneList[0].WallLocation,
-                        mazeGenome.WallGeneList[0].OrientationSeed);
+                        mazeGenome.WallGeneList[0].PassageLocation, mazeGenome.WallGeneList[0].OrientationSeed);
                 }
                 else
                 {
@@ -701,7 +701,7 @@ namespace SharpNeat.Utility
             // Extract the "sub-mazes" that are induced by the solution trajectory
             List<MazeStructureRoom> subMazes = ExtractSubmazes(mazeGrid, genome.MazeBoundaryHeight,
                 genome.MazeBoundaryWidth);
-            
+
             // Process all sub-mazes, iteratively bisecting the applicable maze room space
             foreach (var subMaze in subMazes)
             {
@@ -712,7 +712,7 @@ namespace SharpNeat.Utility
                 if (subMaze.AreInternalWallsSupported() && genome.WallGeneList.Count > 0)
                 {
                     subMaze.MarkRoomBoundaries(mazeGrid, genome.WallGeneList[0].WallLocation,
-                        genome.WallGeneList[0].OrientationSeed);
+                        genome.WallGeneList[0].PassageLocation, genome.WallGeneList[0].OrientationSeed);
                 }
                 else
                 {
