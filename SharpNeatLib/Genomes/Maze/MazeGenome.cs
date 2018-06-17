@@ -20,6 +20,12 @@ namespace SharpNeat.Genomes.Maze
 
         private CoordinateVector _position;
 
+        /// <summary>
+        ///     The maximum number of times a particular mutation can be attempted until a different mutation type is reandomly
+        ///     selected.
+        /// </summary>
+        private const int MaxMutationRetries = 10;
+
         #endregion
 
         #region Maze Properties
@@ -549,6 +555,8 @@ namespace SharpNeat.Genomes.Maze
         {
             Point2DInt mutatedPoint = new Point2DInt();
             int geneIdx;
+            int mutationRetryCount = 0;
+            bool isWaypointValid = false;
 
             // Don't try to mutate if the gene list is empty
             if (PathGeneList.Count <= 0)
@@ -556,48 +564,54 @@ namespace SharpNeat.Genomes.Maze
 
             // Attempt to mutate a waypoint on the path
             // (only one waypoint point at a time is mutated to avoid drastically changing the path)
-
-            // Select a random gene to mutate
-            geneIdx = GenomeFactory.Rng.Next(PathGeneList.Count);
-
-            // Apply the appropriate transformation based on the point shift direction
-            switch ((PointShift) (GenomeFactory.Rng.Next(1, 5)))
+            do
             {
-                case PointShift.Down:
-                {
-                    mutatedPoint = new Point2DInt(PathGeneList[geneIdx].Waypoint.X,
-                        PathGeneList[geneIdx].Waypoint.Y + 1);
-                    break;
-                }
-                case PointShift.Up:
-                {
-                    mutatedPoint = new Point2DInt(PathGeneList[geneIdx].Waypoint.X,
-                        PathGeneList[geneIdx].Waypoint.Y - 1);
-                    break;
-                }
-                case PointShift.Left:
-                {
-                    mutatedPoint = new Point2DInt(PathGeneList[geneIdx].Waypoint.X - 1,
-                        PathGeneList[geneIdx].Waypoint.Y);
-                    break;
-                }
-                case PointShift.Right:
-                {
-                    mutatedPoint = new Point2DInt(PathGeneList[geneIdx].Waypoint.X + 1,
-                        PathGeneList[geneIdx].Waypoint.Y);
-                    break;
-                }
-            }
+                // Select a random gene to mutate
+                geneIdx = GenomeFactory.Rng.Next(PathGeneList.Count);
 
-            // Determine whether the mutated waypoint is valid
-            bool isWaypointValid = MazeUtils.IsValidWaypointLocation(PathGeneList, MazeBoundaryHeight, MazeBoundaryWidth,
-                mutatedPoint);
+                // Apply the appropriate transformation based on the point shift direction
+                switch ((PointShift) (GenomeFactory.Rng.Next(1, 5)))
+                {
+                    case PointShift.Down:
+                    {
+                        mutatedPoint = new Point2DInt(PathGeneList[geneIdx].Waypoint.X,
+                            PathGeneList[geneIdx].Waypoint.Y + 1);
+                        break;
+                    }
+                    case PointShift.Up:
+                    {
+                        mutatedPoint = new Point2DInt(PathGeneList[geneIdx].Waypoint.X,
+                            PathGeneList[geneIdx].Waypoint.Y - 1);
+                        break;
+                    }
+                    case PointShift.Left:
+                    {
+                        mutatedPoint = new Point2DInt(PathGeneList[geneIdx].Waypoint.X - 1,
+                            PathGeneList[geneIdx].Waypoint.Y);
+                        break;
+                    }
+                    case PointShift.Right:
+                    {
+                        mutatedPoint = new Point2DInt(PathGeneList[geneIdx].Waypoint.X + 1,
+                            PathGeneList[geneIdx].Waypoint.Y);
+                        break;
+                    }
+                }
 
-            // Set the new, validated waypoint
-            if (isWaypointValid)
-            {
-                PathGeneList[geneIdx].Waypoint = mutatedPoint;
-            }
+                // Determine whether the mutated waypoint is valid
+                isWaypointValid = MazeUtils.IsValidWaypointLocation(PathGeneList, MazeBoundaryHeight,
+                    MazeBoundaryWidth,
+                    mutatedPoint);
+
+                // Set the new, validated waypoint
+                if (isWaypointValid)
+                {
+                    PathGeneList[geneIdx].Waypoint = mutatedPoint;
+                }
+
+                // Increment mutation retries
+                mutationRetryCount++;
+            } while (isWaypointValid == false && mutationRetryCount <= MaxMutationRetries);
 
             return isWaypointValid;
         }
@@ -609,25 +623,34 @@ namespace SharpNeat.Genomes.Maze
         private bool MutateAddPathWaypoint()
         {
             Point2DInt newPoint;
+            int mutationRetryCount = 0;
+            bool isWaypointValid = false;
 
-            // Randomly select an orientation
-            IntersectionOrientation newPointOrientation = GenomeFactory.Rng.NextBool()
-                ? IntersectionOrientation.Horizontal
-                : IntersectionOrientation.Vertical;
-
-            // Generate new point
-            newPoint = new Point2DInt(GenomeFactory.Rng.Next(MazeBoundaryWidth),
-                GenomeFactory.Rng.Next(MazeBoundaryHeight));
-
-            // Determine whether new waypoint is valid
-            bool isWaypointValid =
-                MazeUtils.IsValidWaypointLocation(PathGeneList, MazeBoundaryHeight, MazeBoundaryWidth, newPoint);
-
-            // Add the new path gene to the genome
-            if (isWaypointValid)
+            do
             {
-                PathGeneList.Add(new PathGene(GenomeFactory.InnovationIdGenerator.NextId, newPoint, newPointOrientation));
-            }
+                // Randomly select an orientation
+                IntersectionOrientation newPointOrientation = GenomeFactory.Rng.NextBool()
+                    ? IntersectionOrientation.Horizontal
+                    : IntersectionOrientation.Vertical;
+
+                // Generate new point
+                newPoint = new Point2DInt(GenomeFactory.Rng.Next(MazeBoundaryWidth),
+                    GenomeFactory.Rng.Next(MazeBoundaryHeight));
+
+                // Determine whether new waypoint is valid
+                isWaypointValid =
+                    MazeUtils.IsValidWaypointLocation(PathGeneList, MazeBoundaryHeight, MazeBoundaryWidth, newPoint);
+
+                // Add the new path gene to the genome
+                if (isWaypointValid)
+                {
+                    PathGeneList.Add(new PathGene(GenomeFactory.InnovationIdGenerator.NextId, newPoint,
+                        newPointOrientation));
+                }
+
+                // Increment mutation retries
+                mutationRetryCount++;
+            } while (isWaypointValid == false && mutationRetryCount <= MaxMutationRetries);
 
             return isWaypointValid;
         }
