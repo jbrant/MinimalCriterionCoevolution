@@ -416,13 +416,13 @@ namespace SharpNeat.Utility
             {
                 Queue<MazeStructureRoom> mazeRoomQueue = new Queue<MazeStructureRoom>();
 
-                // Get the current wall gene index
-                wallGeneIdx = loopIter++ % mazeGenome.WallGeneList.Count;
-                
                 // Mark boundaries for current submaze, including perpendicular opening next to first 
                 // internal partition (if one exists)
                 if (subMaze.AreInternalWallsSupported() && mazeGenome.WallGeneList.Count > 0)
                 {
+                    // Get the current wall gene index
+                    wallGeneIdx = loopIter++ % mazeGenome.WallGeneList.Count;
+                    
                     subMaze.MarkRoomBoundaries(mazeGrid, mazeGenome.WallGeneList[wallGeneIdx].WallLocation,
                         mazeGenome.WallGeneList[wallGeneIdx].PassageLocation,
                         mazeGenome.WallGeneList[wallGeneIdx].OrientationSeed);
@@ -489,13 +489,13 @@ namespace SharpNeat.Utility
             {
                 Queue<MazeStructureRoom> mazeRoomQueue = new Queue<MazeStructureRoom>();
 
-                // Get the current wall gene index
-                wallGeneIdx = loopIter++ % genome.WallGeneList.Count;
-                
                 // Mark boundaries for current submaze, including perpendicular opening next to first 
                 // internal partition (if one exists)
                 if (subMaze.AreInternalWallsSupported() && genome.WallGeneList.Count > 0)
                 {
+                    // Get the current wall gene index
+                    wallGeneIdx = loopIter++ % genome.WallGeneList.Count;
+                    
                     subMaze.MarkRoomBoundaries(mazeGrid, genome.WallGeneList[wallGeneIdx].WallLocation,
                         genome.WallGeneList[wallGeneIdx].PassageLocation,
                         genome.WallGeneList[wallGeneIdx].OrientationSeed);                    
@@ -852,6 +852,9 @@ namespace SharpNeat.Utility
         public static bool IsValidWaypointLocation(MazeGenome genome,
             Point2DInt waypointLocation, uint geneId, IntersectionOrientation waypointOrientation)
         {
+            var prevPathGenes = genome.PathGeneList.Where(g => g.InnovationId < geneId)
+                .OrderByDescending(g => g.InnovationId).ToList();
+            
             return
                 // Check that x-coordinate is at-or-above minimum maze width
                 waypointLocation.X >= 0 &&
@@ -875,12 +878,12 @@ namespace SharpNeat.Utility
                 // Check that waypoints that were added earlier are still at least two units above or to the left of mutated waypoint. 
                 // This is because waypoints are connected in the order in which they're added to the genome, and to 
                 // avoid overlaps, waypoints are only added below or to the right of pre-existing waypoints.
-                ((genome.PathGeneList.Any(g => g.InnovationId < geneId && g.Waypoint.X + 1 >= waypointLocation.X) ==
-                  false &&
-                  (genome.PathGeneList.Any(g => g.Waypoint.Y == waypointLocation.Y) == false)) ||
-                 (genome.PathGeneList.Any(g => g.InnovationId < geneId && g.Waypoint.Y + 1 >= waypointLocation.Y) ==
-                  false &&
-                  (genome.PathGeneList.Any(g => g.Waypoint.X == waypointLocation.X) == false))) &&
+                (prevPathGenes.Count == 0 ||
+                    ((prevPathGenes.Any(g => g.Waypoint.X + 1 >= waypointLocation.X) == false &&
+                      (prevPathGenes.First().Waypoint.Y == waypointLocation.Y == false)) ||
+                     (prevPathGenes.Any(g => g.Waypoint.Y + 1 >= waypointLocation.Y) == false &&
+                      (prevPathGenes.First().Waypoint.X == waypointLocation.X == false)))
+                ) &&
 
                 // Check that new waypoint does not induce a trajectory overlap nor does it cause other waypoints to not be visited
                 IsTrajectoryValid(genome.PathGeneList, geneId, waypointLocation, waypointOrientation,
@@ -929,7 +932,8 @@ namespace SharpNeat.Utility
             List<Point2DInt> visitedWaypointLocations = new List<Point2DInt>();
 
             // Get all waypoints in the maze
-            var mazeWaypointLocations = waypoints.Select(pg => new Point2DInt(pg.Waypoint.X, pg.Waypoint.Y)).ToList();
+            var mazeWaypointLocations =
+                modifiedWaypoints.Select(pg => new Point2DInt(pg.Waypoint.X, pg.Waypoint.Y)).ToList();
 
             // Build out maze grid
             var mazeGrid = BuildMazeSolutionPath(modifiedWaypoints, mazeHeight, mazeWidth);

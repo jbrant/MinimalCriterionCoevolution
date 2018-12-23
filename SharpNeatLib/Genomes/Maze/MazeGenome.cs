@@ -552,7 +552,7 @@ namespace SharpNeat.Genomes.Maze
         }
 
         /// <summary>
-        ///     Probabalistically shifts one of the waypoints by one unit in the horizontal or vertical direction.
+        ///     Probabilistically shifts one of the waypoints by one unit in the horizontal or vertical direction.
         /// </summary>
         /// <returns>Flag indicating whether the path waypoint location mutation was successful.</returns>
         private bool MutatePathWaypointLocation()

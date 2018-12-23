@@ -90,13 +90,13 @@ namespace SharpNeat.Phenomes.Mazes.Tests
         [TestMethod]
         public void DivideRoomTest()
         {
-            var baseName = "32_MutationIter_10_Waypoints_15_Walls_25_Units";
+            var baseName = "Test_PathEvo_OneWaypoint_Center";
             int mazeHeight = 1;
             int mazeWidth = 1;
-            //var seedMazePath = @"F:\User Data\Jonathan\Documents\school\Jonathan\Graduate\PhD\Development\MCC_Projects\MCC_Executor\MazeNavigation\SeedMazes\" + baseName + ".xml";
-            var seedMazePath =
+            var seedMazePath = @"F:\User Data\Jonathan\Documents\school\Jonathan\Graduate\PhD\Development\MCC_Projects\MCC_Executor\MazeNavigation\SeedMazes\" + baseName + ".xml";
+            /*var seedMazePath =
                 @"\\JONATHAN-PC\User Data\Jonathan\Documents\school\Jonathan\Graduate\PhD\Minimal Criteria Search\Temp\" +
-                baseName + ".xml";
+                baseName + ".xml";*/            
             var outputPath =
                 @"\\JONATHAN-PC\User Data\Jonathan\Documents\school\Jonathan\Graduate\PhD\Minimal Criteria Search\ExperimentData\DebugOutput";
 
@@ -132,7 +132,8 @@ namespace SharpNeat.Phenomes.Mazes.Tests
             ImageGenerationHandler.GenerateMazeStructureImage(
                 Path.Combine(outputPath, string.Format("{0}_Maze.bmp", baseName)), mazePhenotype, true);
 
-            //seedMazeGenome.CreateOffspring(2);
+            var child1 = seedMazeGenome.CreateOffspring(2);
+            var child2 = child1.CreateOffspring(3);
         }
     }
 }
