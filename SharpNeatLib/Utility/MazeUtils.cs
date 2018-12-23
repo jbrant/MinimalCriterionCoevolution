@@ -473,6 +473,7 @@ namespace SharpNeat.Utility
         {
             List<MazeStructureRoom> mazeRooms = new List<MazeStructureRoom>();
             int partitionCount = 0;
+            int loopIter = 0;
 
             // Extract the "sub-mazes" that are induced by the solution trajectory
             List<MazeStructureRoom> subMazes = ExtractSubmazes(mazeGrid, genome.MazeBoundaryHeight,
@@ -499,9 +500,7 @@ namespace SharpNeat.Utility
                 }
 
                 if (subMaze.AreInternalWallsSupported() && genome.WallGeneList.Count > 0)
-                {
-                    int loopIter = 0;
-
+                {                    
                     // Queue up the first "room" (which will encompass the entirety of the submaze grid)
                     mazeRoomQueue.Enqueue(subMaze);
 
