@@ -233,13 +233,17 @@ namespace SharpNeat.Utility
                     // then trace out room and add to list
                     if (grid[y, x].PathDirection == PathDirection.None &&
                         subMazes.Count(sm => sm.IsCellInRoom(grid[y, x])) == 0)
-                    {
+                    {                        
                         // Set room starting location
                         var roomStartX = x;
                         var roomStartY = y;
                         var roomEndX = roomStartX;
                         var roomEndY = roomStartY;
                         var obstructionLocated = false;
+                        
+                        // TODO: POSSIBLY REMOVE
+                        var maxRoomHeight = 5;
+                        var maxRoomWidth = 5;
 
                         // Traverse to the right-most room edge
                         while (roomEndX + 1 < mazeWidth &&
@@ -278,16 +282,68 @@ namespace SharpNeat.Utility
                             }
                         }
 
-                        // Add maze room
-                        subMazes.Add(new MazeStructureRoom(roomStartX, roomStartY, roomEndX - roomStartX + 1,
-                            roomEndY - roomStartY + 1));
+                        var submazeHeight = roomEndY - roomStartY + 1;
+                        var submazeWidth = roomEndX - roomStartX + 1;                        
+
+                        var isHeightPrime = Utilities.IsPrime(submazeHeight);
+                        var isWidthPrime = Utilities.IsPrime(submazeWidth);                        
+                        
+                        // If submaze exceeds width and height constraints, split into equal-sized (or as close to
+                        // equal as possible) quadrants
+                        if (submazeWidth > maxRoomWidth || submazeHeight > maxRoomHeight)
+                        {
+                            var quadrantHeight =
+                                Utilities.FindMaxEvenDivisor(isHeightPrime ? submazeHeight + 1 : submazeHeight, 2,
+                                    maxRoomHeight);
+                            var quadrantWidth =
+                                Utilities.FindMaxEvenDivisor(isWidthPrime ? submazeWidth + 1 : submazeWidth, 2,
+                                    maxRoomWidth);                            
+
+                            if (submazeHeight > maxRoomHeight && submazeWidth > maxRoomWidth)
+                            {
+                                for (var yQuadPos = 0; yQuadPos < submazeHeight; yQuadPos += quadrantHeight)
+                                {
+                                    for (var xQuadPos = 0; xQuadPos < submazeWidth; xQuadPos += quadrantWidth)
+                                    {
+                                        subMazes.Add(new MazeStructureRoom(xQuadPos, yQuadPos, quadrantWidth,
+                                            quadrantHeight));
+                                    }
+                                }
+                            }
+                            else if (submazeHeight > maxRoomHeight)
+                            {
+                                for (var yQuadPos = 0; yQuadPos < submazeHeight; yQuadPos += quadrantHeight)
+                                {
+                                    subMazes.Add(new MazeStructureRoom(roomStartX, yQuadPos, roomEndX - roomStartX + 1,
+                                        yQuadPos + quadrantHeight > roomEndY
+                                            ? quadrantHeight - (yQuadPos + quadrantHeight - roomEndY)
+                                            : quadrantHeight));
+                                }
+                            }
+                            else
+                            {
+                                for (var xQuadPos = 0; xQuadPos < submazeWidth; xQuadPos += quadrantWidth)
+                                {
+                                    subMazes.Add(new MazeStructureRoom(xQuadPos, roomStartY,
+                                        xQuadPos + quadrantWidth > roomEndX
+                                            ? quadrantWidth - (xQuadPos + quadrantWidth - roomEndX)
+                                            : quadrantWidth, roomEndY - roomStartY + 1));
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // Add maze room
+                            subMazes.Add(new MazeStructureRoom(roomStartX, roomStartY, roomEndX - roomStartX + 1,
+                                roomEndY - roomStartY + 1));
+                        }                        
                     }
                 }
             }
 
             return subMazes;
         }
-
+        
         /// <summary>
         ///     Moves along the trajectory and places boundaries between separate trajectory segments that happen to be adjacent
         ///     (i.e. within one unit of each other). This is to avoid having a big, open space (because there's not room to place
