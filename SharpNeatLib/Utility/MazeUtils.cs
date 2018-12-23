@@ -400,8 +400,9 @@ namespace SharpNeat.Utility
         /// </returns>
         public static int DetermineMaxPartitions(MazeGenome mazeGenome)
         {
-            int maxPartitions = 0;
-            int loopIter = 0;
+            var maxPartitions = 0;
+            var loopIter = 0;
+            var wallGeneIdx = 0;
 
             // Construct maze grid with solution path generated from connected waypoints
             MazeStructureGridCell[,] mazeGrid = BuildMazeSolutionPath(mazeGenome);
@@ -415,12 +416,16 @@ namespace SharpNeat.Utility
             {
                 Queue<MazeStructureRoom> mazeRoomQueue = new Queue<MazeStructureRoom>();
 
+                // Get the current wall gene index
+                wallGeneIdx = loopIter++ % mazeGenome.WallGeneList.Count;
+                
                 // Mark boundaries for current submaze, including perpendicular opening next to first 
                 // internal partition (if one exists)
                 if (subMaze.AreInternalWallsSupported() && mazeGenome.WallGeneList.Count > 0)
                 {
-                    subMaze.MarkRoomBoundaries(mazeGrid, mazeGenome.WallGeneList[0].WallLocation,
-                        mazeGenome.WallGeneList[0].PassageLocation, mazeGenome.WallGeneList[0].OrientationSeed);
+                    subMaze.MarkRoomBoundaries(mazeGrid, mazeGenome.WallGeneList[wallGeneIdx].WallLocation,
+                        mazeGenome.WallGeneList[wallGeneIdx].PassageLocation,
+                        mazeGenome.WallGeneList[wallGeneIdx].OrientationSeed);
                 }
                 else
                 {
@@ -435,12 +440,14 @@ namespace SharpNeat.Utility
                     // Make sure there are rooms left in the queue before attempting to dequeue and bisect
                     while (mazeRoomQueue.Count > 0)
                     {
+                        // Get the next wall gene index
+                        wallGeneIdx = loopIter++ % mazeGenome.WallGeneList.Count;
+                        
                         // Dequeue a room and run division on it
                         Tuple<MazeStructureRoom, MazeStructureRoom> subRooms = mazeRoomQueue.Dequeue()
-                            .DivideRoom(mazeGrid,
-                                mazeGenome.WallGeneList[loopIter%mazeGenome.WallGeneList.Count].WallLocation,
-                                mazeGenome.WallGeneList[loopIter%mazeGenome.WallGeneList.Count].PassageLocation,
-                                mazeGenome.WallGeneList[loopIter%mazeGenome.WallGeneList.Count].OrientationSeed);
+                            .DivideRoom(mazeGrid, mazeGenome.WallGeneList[wallGeneIdx].WallLocation,
+                                mazeGenome.WallGeneList[wallGeneIdx].PassageLocation,
+                                mazeGenome.WallGeneList[wallGeneIdx].OrientationSeed);
 
                         if (subRooms != null)
                         {
@@ -448,14 +455,12 @@ namespace SharpNeat.Utility
                             if (subRooms.Item1 != null) mazeRoomQueue.Enqueue(subRooms.Item1);
                             if (subRooms.Item2 != null) mazeRoomQueue.Enqueue(subRooms.Item2);
                         }
-
-                        loopIter++;
                     }
                 }
             }
 
             // Return the maximum number of partitions applied in a submaze
-            return loopIter;
+            return loopIter - 1;
         }
 
         /// <summary>
@@ -467,9 +472,10 @@ namespace SharpNeat.Utility
         public static MazeStructureGrid BuildMazeStructureAroundPath(MazeGenome genome,
             MazeStructureGridCell[,] mazeGrid)
         {
-            List<MazeStructureRoom> mazeRooms = new List<MazeStructureRoom>();
-            int partitionCount = 0;
-            int loopIter = 0;
+            var mazeRooms = new List<MazeStructureRoom>();
+            var partitionCount = 0;
+            var loopIter = 0;
+            var wallGeneIdx = 0;
 
             // Extract the "sub-mazes" that are induced by the solution trajectory
             List<MazeStructureRoom> subMazes = ExtractSubmazes(mazeGrid, genome.MazeBoundaryHeight,
@@ -483,12 +489,16 @@ namespace SharpNeat.Utility
             {
                 Queue<MazeStructureRoom> mazeRoomQueue = new Queue<MazeStructureRoom>();
 
+                // Get the current wall gene index
+                wallGeneIdx = loopIter++ % genome.WallGeneList.Count;
+                
                 // Mark boundaries for current submaze, including perpendicular opening next to first 
                 // internal partition (if one exists)
                 if (subMaze.AreInternalWallsSupported() && genome.WallGeneList.Count > 0)
                 {
-                    subMaze.MarkRoomBoundaries(mazeGrid, genome.WallGeneList[0].WallLocation,
-                        genome.WallGeneList[0].PassageLocation, genome.WallGeneList[0].OrientationSeed);
+                    subMaze.MarkRoomBoundaries(mazeGrid, genome.WallGeneList[wallGeneIdx].WallLocation,
+                        genome.WallGeneList[wallGeneIdx].PassageLocation,
+                        genome.WallGeneList[wallGeneIdx].OrientationSeed);                    
                 }
                 else
                 {
@@ -503,11 +513,14 @@ namespace SharpNeat.Utility
                     // Make sure there are rooms left in the queue before attempting to dequeue and bisect
                     while (mazeRoomQueue.Count > 0)
                     {
+                        // Get the next wall gene index
+                        wallGeneIdx = loopIter++ % genome.WallGeneList.Count;
+                        
                         // Dequeue a room and run division on it
                         Tuple<MazeStructureRoom, MazeStructureRoom> subRooms = mazeRoomQueue.Dequeue()
-                            .DivideRoom(mazeGrid, genome.WallGeneList[loopIter%genome.WallGeneList.Count].WallLocation,
-                                genome.WallGeneList[loopIter%genome.WallGeneList.Count].PassageLocation,
-                                genome.WallGeneList[loopIter%genome.WallGeneList.Count].OrientationSeed);
+                            .DivideRoom(mazeGrid, genome.WallGeneList[wallGeneIdx].WallLocation,
+                                genome.WallGeneList[wallGeneIdx].PassageLocation,
+                                genome.WallGeneList[wallGeneIdx].OrientationSeed);
 
                         if (subRooms != null)
                         {
@@ -518,8 +531,6 @@ namespace SharpNeat.Utility
                             if (subRooms.Item1 != null) mazeRoomQueue.Enqueue(subRooms.Item1);
                             if (subRooms.Item2 != null) mazeRoomQueue.Enqueue(subRooms.Item2);
                         }
-
-                        loopIter++;
                     }
                 }
             }
