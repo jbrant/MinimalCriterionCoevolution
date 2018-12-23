@@ -401,6 +401,7 @@ namespace SharpNeat.Utility
         public static int DetermineMaxPartitions(MazeGenome mazeGenome)
         {
             int maxPartitions = 0;
+            int loopIter = 0;
 
             // Construct maze grid with solution path generated from connected waypoints
             MazeStructureGridCell[,] mazeGrid = BuildMazeSolutionPath(mazeGenome);
@@ -428,8 +429,6 @@ namespace SharpNeat.Utility
 
                 if (subMaze.AreInternalWallsSupported() && mazeGenome.WallGeneList.Count > 0)
                 {
-                    int loopIter = 0;
-
                     // Queue up the first "room" (which will encompass the entirety of the submaze grid)
                     mazeRoomQueue.Enqueue(subMaze);
 
@@ -442,9 +441,6 @@ namespace SharpNeat.Utility
                                 mazeGenome.WallGeneList[loopIter%mazeGenome.WallGeneList.Count].WallLocation,
                                 mazeGenome.WallGeneList[loopIter%mazeGenome.WallGeneList.Count].PassageLocation,
                                 mazeGenome.WallGeneList[loopIter%mazeGenome.WallGeneList.Count].OrientationSeed);
-
-                        // Update max partitions to the max wall iteration depth in the submaze
-                        maxPartitions = Math.Max(loopIter + 1, maxPartitions);
 
                         if (subRooms != null)
                         {
@@ -459,7 +455,7 @@ namespace SharpNeat.Utility
             }
 
             // Return the maximum number of partitions applied in a submaze
-            return maxPartitions;
+            return loopIter;
         }
 
         /// <summary>
@@ -473,6 +469,7 @@ namespace SharpNeat.Utility
         {
             List<MazeStructureRoom> mazeRooms = new List<MazeStructureRoom>();
             int partitionCount = 0;
+            int loopIter = 0;
 
             // Extract the "sub-mazes" that are induced by the solution trajectory
             List<MazeStructureRoom> subMazes = ExtractSubmazes(mazeGrid, genome.MazeBoundaryHeight,
@@ -499,9 +496,7 @@ namespace SharpNeat.Utility
                 }
 
                 if (subMaze.AreInternalWallsSupported() && genome.WallGeneList.Count > 0)
-                {
-                    int loopIter = 0;
-
+                {                    
                     // Queue up the first "room" (which will encompass the entirety of the submaze grid)
                     mazeRoomQueue.Enqueue(subMaze);
 
