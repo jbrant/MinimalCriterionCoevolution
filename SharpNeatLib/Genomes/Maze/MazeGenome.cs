@@ -116,8 +116,8 @@ namespace SharpNeat.Genomes.Maze
             MazeBoundaryWidth = genomeFactory.BaseMazeWidth;
 
             // Set relative cell height and width
-            RelativeCellHeight = (double) 1/MazeBoundaryHeight;
-            RelativeCellWidth = (double) 1/MazeBoundaryWidth;
+            RelativeCellHeight = (double) 1 / MazeBoundaryHeight;
+            RelativeCellWidth = (double) 1 / MazeBoundaryWidth;
 
             // Set the genome factory
             GenomeFactory = genomeFactory;
@@ -129,8 +129,10 @@ namespace SharpNeat.Genomes.Maze
             PathGeneList = new List<PathGene>
             {
                 new PathGene(GenomeFactory.InnovationIdGenerator.NextId,
-                    new Point2DInt(MazeBoundaryWidth/2, MazeBoundaryHeight/2),
-                    GenomeFactory.Rng.NextBool() ? IntersectionOrientation.Horizontal : IntersectionOrientation.Vertical)
+                    new Point2DInt(MazeBoundaryWidth / 2, MazeBoundaryHeight / 2),
+                    GenomeFactory.Rng.NextBool()
+                        ? IntersectionOrientation.Horizontal
+                        : IntersectionOrientation.Vertical)
             };
         }
 
@@ -150,8 +152,8 @@ namespace SharpNeat.Genomes.Maze
             MazeBoundaryWidth = width;
 
             // Set relative cell height and width
-            RelativeCellHeight = (double) 1/MazeBoundaryHeight;
-            RelativeCellWidth = (double) 1/MazeBoundaryWidth;
+            RelativeCellHeight = (double) 1 / MazeBoundaryHeight;
+            RelativeCellWidth = (double) 1 / MazeBoundaryWidth;
 
             // Instantiate new wall gene list
             WallGeneList = new List<WallGene>();
@@ -260,8 +262,8 @@ namespace SharpNeat.Genomes.Maze
                         int yPosition = PathGeneList[i].Waypoint.Y;
 
                         // Calculate cantor pairing of X and Y coordinates
-                        double compositeGeneCoordinate = ((xPosition + yPosition)*
-                                                          (xPosition + yPosition + 1))/2 + yPosition;
+                        double compositeGeneCoordinate = ((xPosition + yPosition) *
+                                                          (xPosition + yPosition + 1)) / 2 + yPosition;
 
                         // Add gene coordinate to array
                         coordElemArray[i] = new KeyValuePair<ulong, double>(PathGeneList[i].InnovationId,
@@ -328,7 +330,6 @@ namespace SharpNeat.Genomes.Maze
         /// </summary>
         private void Mutate()
         {
-            int outcome;
             var isMutationSuccessful = true;
 
             // If there are not yet any waypoints defined, the mutation must be to add a waypoint
@@ -348,8 +349,8 @@ namespace SharpNeat.Genomes.Maze
                 return;
             }
 
-            // If waypoints have come within three units of one of the maze boundaries, an expand maze mutation will be forced 
-            // to allow for placement of additional waypoints.
+            // If waypoints have come within three units of one of the maze boundaries, an expand maze mutation will
+            // be forced to allow for placement of additional waypoints.
             if (PathGeneList.Any(g => g.Waypoint.X >= MazeBoundaryWidth - 3 || g.Waypoint.Y >= MazeBoundaryHeight - 3))
             {
                 MutateExpandMaze();
@@ -359,10 +360,12 @@ namespace SharpNeat.Genomes.Maze
             do
             {
                 // Attempt random mutation until a successful/valid mutation is applied
+                int outcome;
                 do
                 {
                     // Get random mutation to perform 
-                    // (prohibit exceeding max wall complexity and placing more waypoints than there are cells in the maze grid)
+                    // (prohibit exceeding max wall complexity and placing more waypoints than there are cells in
+                    // the maze grid)
                     outcome = RouletteWheel.SingleThrow(GenomeFactory.MazeGenomeParameters.RouletteWheelLayout,
                         GenomeFactory.Rng);
                 } while ((WallGeneList.Count >= MaxWallComplexity && outcome == 2) ||
@@ -419,11 +422,12 @@ namespace SharpNeat.Genomes.Maze
                     GenomeFactory.MazeGenomeParameters.MutateWallStartLocationProbability)
                 {
                     WallGeneList[geneIdx].WallLocation = BoundStartLocation(WallGeneList[geneIdx].WallLocation +
-                                                                            (((GenomeFactory.Rng.NextDouble()*2) - 1)*
+                                                                            (((GenomeFactory.Rng.NextDouble() * 2) -
+                                                                              1) *
                                                                              GenomeFactory.MazeGenomeParameters
-                                                                                 .PerturbanceMagnitude*
+                                                                                 .PerturbanceMagnitude *
                                                                              ((double)
-                                                                                 ((int) (Math.Log(geneIdx + 1, 2)) + 1)/
+                                                                              ((int) (Math.Log(geneIdx + 1, 2)) + 1) /
                                                                               mazeTreeDepth)));
                     mutationOccurred = true;
                 }
@@ -437,12 +441,13 @@ namespace SharpNeat.Genomes.Maze
 
                 // Perform mutation
                 WallGeneList[mazeGeneIdx].WallLocation = BoundStartLocation(WallGeneList[mazeGeneIdx].WallLocation +
-                                                                            (((GenomeFactory.Rng.NextDouble()*2) - 1)*
+                                                                            (((GenomeFactory.Rng.NextDouble() * 2) -
+                                                                              1) *
                                                                              GenomeFactory.MazeGenomeParameters
-                                                                                 .PerturbanceMagnitude*
+                                                                                 .PerturbanceMagnitude *
                                                                              ((double)
-                                                                                 ((int) (Math.Log(mazeGeneIdx + 1, 2)) +
-                                                                                  1)/
+                                                                              ((int) (Math.Log(mazeGeneIdx + 1, 2)) +
+                                                                               1) /
                                                                               mazeTreeDepth)));
             }
 
@@ -470,12 +475,13 @@ namespace SharpNeat.Genomes.Maze
                     GenomeFactory.MazeGenomeParameters.MutatePassageStartLocationProbability)
                 {
                     WallGeneList[geneIdx].PassageLocation = BoundStartLocation(WallGeneList[geneIdx].PassageLocation +
-                                                                               (((GenomeFactory.Rng.NextDouble()*2) - 1)*
+                                                                               (((GenomeFactory.Rng.NextDouble() * 2) -
+                                                                                 1) *
                                                                                 GenomeFactory.MazeGenomeParameters
-                                                                                    .PerturbanceMagnitude*
+                                                                                    .PerturbanceMagnitude *
                                                                                 ((double)
-                                                                                    ((int) (Math.Log(geneIdx + 1, 2)) +
-                                                                                     1)/
+                                                                                 ((int) (Math.Log(geneIdx + 1, 2)) +
+                                                                                  1) /
                                                                                  mazeTreeDepth)));
 
                     mutationOccurred = true;
@@ -489,13 +495,14 @@ namespace SharpNeat.Genomes.Maze
                 int mazeGeneIdx = GenomeFactory.Rng.Next(WallGeneList.Count);
 
                 WallGeneList[mazeGeneIdx].PassageLocation = BoundStartLocation(WallGeneList[mazeGeneIdx].WallLocation +
-                                                                               (((GenomeFactory.Rng.NextDouble()*2) - 1)*
+                                                                               (((GenomeFactory.Rng.NextDouble() * 2) -
+                                                                                 1) *
                                                                                 GenomeFactory.MazeGenomeParameters
-                                                                                    .PerturbanceMagnitude*
+                                                                                    .PerturbanceMagnitude *
                                                                                 ((double)
-                                                                                    ((int)
-                                                                                        (Math.Log(mazeGeneIdx + 1, 2)) +
-                                                                                     1)/
+                                                                                 ((int)
+                                                                                  (Math.Log(mazeGeneIdx + 1, 2)) +
+                                                                                  1) /
                                                                                  mazeTreeDepth)));
             }
 
@@ -547,8 +554,8 @@ namespace SharpNeat.Genomes.Maze
             MazeBoundaryWidth += 1;
 
             // Update relative cell width/height
-            RelativeCellHeight = (double) 1/MazeBoundaryHeight;
-            RelativeCellWidth = (double) 1/MazeBoundaryWidth;
+            RelativeCellHeight = (double) 1 / MazeBoundaryHeight;
+            RelativeCellWidth = (double) 1 / MazeBoundaryWidth;
         }
 
         /// <summary>
@@ -557,78 +564,74 @@ namespace SharpNeat.Genomes.Maze
         /// <returns>Flag indicating whether the path waypoint location mutation was successful.</returns>
         private bool MutatePathWaypointLocation()
         {
-            Point2DInt mutatedPoint = new Point2DInt();
             int geneIdx;
-            int mutationRetryCount = 0;
-            bool isWaypointValid = false;
+            bool validMutationsFound = false;
 
             // Don't try to mutate if the gene list is empty
             if (PathGeneList.Count <= 0)
                 return false;
 
-            // Attempt to mutate a waypoint on the path
+            // List to store valid waypoint perturbations
+            // (size is based on 4 cardinal directions in which point can be moved)
+            IList<Point2DInt> validMutations = new List<Point2DInt>(4);
+
+            // Copy off the path gene list
+            var candidatePathGenes = PathGeneList.ToList();
+
+            // Randomly select a waypoint for which valid mutations exist
             // (only one waypoint point at a time is mutated to avoid drastically changing the path)
             do
             {
-                // Select a random gene to mutate
-                geneIdx = GenomeFactory.Rng.Next(PathGeneList.Count);
+                // Select a random path gene to mutate
+                geneIdx = GenomeFactory.Rng.Next(candidatePathGenes.Count);
 
-                // Apply the appropriate transformation based on the point shift direction
-                switch ((PointShift) (GenomeFactory.Rng.Next(1, 5)))
+                // Determine valid waypoint mutations
+                foreach (var pointShift in Enum.GetValues(typeof(PointShift)).Cast<PointShift>())
                 {
-                    case PointShift.Down:
-                    {
-                        mutatedPoint = new Point2DInt(PathGeneList[geneIdx].Waypoint.X,
-                            PathGeneList[geneIdx].Waypoint.Y + 1);
-                        break;
-                    }
-                    case PointShift.Up:
-                    {
-                        mutatedPoint = new Point2DInt(PathGeneList[geneIdx].Waypoint.X,
-                            PathGeneList[geneIdx].Waypoint.Y - 1);
-                        break;
-                    }
-                    case PointShift.Left:
-                    {
-                        mutatedPoint = new Point2DInt(PathGeneList[geneIdx].Waypoint.X - 1,
-                            PathGeneList[geneIdx].Waypoint.Y);
-                        break;
-                    }
-                    case PointShift.Right:
-                    {
-                        mutatedPoint = new Point2DInt(PathGeneList[geneIdx].Waypoint.X + 1,
-                            PathGeneList[geneIdx].Waypoint.Y);
-                        break;
-                    }
+                    // Get the mutated point resulting from the point shift
+                    var mutatedPoint =
+                        GetMutatedWaypoint(candidatePathGenes[geneIdx], pointShift, out var isWaypointValid);
+
+                    // Continue to the next point shift if the current perturbation is not valid
+                    if (!isWaypointValid) continue;
+
+                    // If this point is reached, mutation is valid so add it to valid mutations list and flag that
+                    // a valid mutation has been discovered
+                    validMutations.Add(mutatedPoint);
                 }
 
-                // Determine whether the mutated waypoint is valid
-                isWaypointValid = MazeUtils.IsValidWaypointLocation(this, mutatedPoint,
-                    PathGeneList[geneIdx].InnovationId,
-                    PathGeneList[geneIdx].DefaultOrientation);
-
-                // Set the new, validated waypoint
-                if (isWaypointValid)
+                // If valid mutations were discovered, set a flag to indicate such and record index of applicable gene
+                // in the path gene list
+                if (validMutations.Count > 0)
                 {
-                    PathGeneList[geneIdx].Waypoint = mutatedPoint;
+                    validMutationsFound = true;
+                    geneIdx = PathGeneList.IndexOf(candidatePathGenes[geneIdx]);
                 }
+                // Otherwise, remove from the list of candidate path genes and try the next gene (if one exists)
+                else
+                {
+                    candidatePathGenes.RemoveAt(geneIdx);
+                }
+            } while (validMutationsFound == false && candidatePathGenes.Count > 0);
 
-                // Increment mutation retries
-                mutationRetryCount++;
-            } while (isWaypointValid == false && mutationRetryCount <= MaxMutationRetries);
+            // Randomly select from list of valid perturbations for the current waypoint
+            if (validMutationsFound)
+            {
+                PathGeneList[geneIdx].Waypoint = validMutations[GenomeFactory.Rng.Next(validMutations.Count)];
+            }
 
-            return isWaypointValid;
+            return validMutationsFound;
         }
 
         /// <summary>
-        ///     Probabalistically adds a single new waypoint in the maze solution path.
+        ///     Probabilistically adds a single new waypoint in the maze solution path.
         /// </summary>
         /// <returns>Flag indicating whether the path waypoint addition mutation was successful.</returns>
         private bool MutateAddPathWaypoint()
         {
             Point2DInt newPoint;
             int mutationRetryCount = 0;
-            bool isWaypointValid = false;
+            bool isWaypointValid;
 
             do
             {
@@ -721,6 +724,54 @@ namespace SharpNeat.Genomes.Maze
             {
                 ((List<WallGene>) WallGeneList).RemoveRange(MaxWallComplexity, WallGeneList.Count - MaxWallComplexity);
             }
+        }
+
+        /// <summary>
+        ///     Derives the waypoint resulting from the specified perturbation (shift) applied to the given path gene and
+        ///     dispositions the validity of said perturbation.
+        /// </summary>
+        /// <param name="pathGene">
+        ///     The path gene containing the original waypoint along with its associated unique identifier and
+        ///     positional orientation (i.e. horizontal or vertical).
+        /// </param>
+        /// <param name="shiftDirection">The cardinal direction in which to shift the waypoint.</param>
+        /// <param name="isValid">Output parameter denoting validity of waypoint perturbation.</param>
+        /// <returns>The waypoint coordinate resulting from the shift.</returns>
+        private Point2DInt GetMutatedWaypoint(PathGene pathGene, PointShift shiftDirection, out bool isValid)
+        {
+            var mutatedPoint = new Point2DInt();
+
+            // Apply perturbation specified by the given point shift direction (one unit in one of four
+            // cardinal directions)
+            switch (shiftDirection)
+            {
+                case PointShift.Down:
+                {
+                    mutatedPoint = new Point2DInt(pathGene.Waypoint.X, pathGene.Waypoint.Y + 1);
+                    break;
+                }
+                case PointShift.Up:
+                {
+                    mutatedPoint = new Point2DInt(pathGene.Waypoint.X, pathGene.Waypoint.Y - 1);
+                    break;
+                }
+                case PointShift.Left:
+                {
+                    mutatedPoint = new Point2DInt(pathGene.Waypoint.X - 1, pathGene.Waypoint.Y);
+                    break;
+                }
+                case PointShift.Right:
+                {
+                    mutatedPoint = new Point2DInt(pathGene.Waypoint.X + 1, pathGene.Waypoint.Y);
+                    break;
+                }
+            }
+
+            // Test validity of perturbation
+            isValid = MazeUtils.IsValidWaypointLocation(this, mutatedPoint, pathGene.InnovationId,
+                pathGene.DefaultOrientation);
+
+            return mutatedPoint;
         }
 
         #endregion
