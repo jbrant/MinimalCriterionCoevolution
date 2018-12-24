@@ -21,7 +21,7 @@ namespace SharpNeat.EvolutionAlgorithms
     /// </summary>
     /// <typeparam name="TGenome1">The genome type for the first population.</typeparam>
     /// <typeparam name="TGenome2">The genome type for the second population.</typeparam>
-    public class IMCCAlgorithmContainer<TGenome1, TGenome2> : Core.IMCCAlgorithmContainer<TGenome1, TGenome2>
+    public class MCCAlgorithmContainer<TGenome1, TGenome2> : IMCCAlgorithmContainer<TGenome1, TGenome2>
         where TGenome1 : class, IGenome<TGenome1>
         where TGenome2 : class, IGenome<TGenome2>
     {
@@ -38,7 +38,7 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <param name="algorithm1">The evolutionary algorithm for the first population.</param>
         /// <param name="algorithm2">The evolutionary algorithm for the second population.</param>
         /// <param name="logFieldEnabledMap">Allows enabling/disabling of certain fields.</param>
-        public IMCCAlgorithmContainer(IEvolutionAlgorithm<TGenome1> algorithm1,
+        public MCCAlgorithmContainer(IEvolutionAlgorithm<TGenome1> algorithm1,
             IEvolutionAlgorithm<TGenome2> algorithm2, IDictionary<FieldElement, bool> logFieldEnabledMap = null)
         {
             _evolutionAlgorithm1 = algorithm1;
