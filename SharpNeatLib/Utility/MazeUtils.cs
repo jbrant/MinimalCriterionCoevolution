@@ -854,7 +854,7 @@ namespace SharpNeat.Utility
         {
             var prevPathGenes = genome.PathGeneList.Where(g => g.InnovationId < geneId)
                 .OrderByDescending(g => g.InnovationId).ToList();
-            
+
             return
                 // Check that x-coordinate is at-or-above minimum maze width
                 waypointLocation.X >= 0 &&

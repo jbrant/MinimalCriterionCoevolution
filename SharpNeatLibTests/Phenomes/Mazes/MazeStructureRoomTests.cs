@@ -90,13 +90,13 @@ namespace SharpNeat.Phenomes.Mazes.Tests
         [TestMethod]
         public void DivideRoomTest()
         {
-            var baseName = "Test_PathEvo_OneWaypoint_Center";
+            var baseName = "32_MutationIter_10_Waypoints_15_Walls_25_Units";
             int mazeHeight = 1;
             int mazeWidth = 1;
-            var seedMazePath = @"F:\User Data\Jonathan\Documents\school\Jonathan\Graduate\PhD\Development\MCC_Projects\MCC_Executor\MazeNavigation\SeedMazes\" + baseName + ".xml";
-            /*var seedMazePath =
+            //var seedMazePath = @"F:\User Data\Jonathan\Documents\school\Jonathan\Graduate\PhD\Development\MCC_Projects\MCC_Executor\MazeNavigation\SeedMazes\" + baseName + ".xml";
+            var seedMazePath =
                 @"\\JONATHAN-PC\User Data\Jonathan\Documents\school\Jonathan\Graduate\PhD\Minimal Criteria Search\Temp\" +
-                baseName + ".xml";*/            
+                baseName + ".xml";            
             var outputPath =
                 @"\\JONATHAN-PC\User Data\Jonathan\Documents\school\Jonathan\Graduate\PhD\Minimal Criteria Search\ExperimentData\DebugOutput";
 
@@ -111,11 +111,11 @@ namespace SharpNeat.Phenomes.Mazes.Tests
             genomeParameters.MutateAddWallProbability = 0;
             genomeParameters.MutateWallStartLocationProbability = 0;
             genomeParameters.MutatePassageStartLocationProbability = 0;
-            genomeParameters.MutateAddPathWaypointProbability = 0;
-            genomeParameters.MutatePathWaypointLocationProbability = 1;
+            genomeParameters.MutateAddPathWaypointProbability = 1;
+            genomeParameters.MutatePathWaypointLocationProbability = 0;
 
             var mazeGenomeFactory = new MazeGenomeFactory(genomeParameters, mazeHeight, mazeWidth);
-
+            
             var seedMazeGenome = ExperimentUtils.ReadSeedMazeGenomes(seedMazePath, mazeGenomeFactory).First();
             
             var grid = MazeUtils.BuildMazeSolutionPath(seedMazeGenome);
@@ -130,10 +130,16 @@ namespace SharpNeat.Phenomes.Mazes.Tests
             mazePhenotype.ConvertGridArrayToWalls(structure);
 
             ImageGenerationHandler.GenerateMazeStructureImage(
-                Path.Combine(outputPath, string.Format("{0}_Maze.bmp", baseName)), mazePhenotype, true);
-
+                Path.Combine(outputPath, $"{baseName}_Maze.bmp"), mazePhenotype, true);
+/*
             var child1 = seedMazeGenome.CreateOffspring(2);
+            produceTrajectory(child1, MazeUtils.BuildMazeSolutionPath(child1), scaleFactor, startEndPointSize,
+                startLocationXY, outputPath, string.Format("{0}_child1", baseName));
+            
             var child2 = child1.CreateOffspring(3);
+            produceTrajectory(child2, MazeUtils.BuildMazeSolutionPath(child2), scaleFactor, startEndPointSize,
+                startLocationXY, outputPath, $"{baseName}_child2");
+               */
         }
     }
 }

@@ -21,7 +21,7 @@ namespace SharpNeat.Genomes.Maze
         private CoordinateVector _position;
 
         /// <summary>
-        ///     The maximum number of times a particular mutation can be attempted until a different mutation type is reandomly
+        ///     The maximum number of times a particular mutation can be attempted until a different mutation type is randomly
         ///     selected.
         /// </summary>
         private const int MaxMutationRetries = 10;
@@ -629,10 +629,29 @@ namespace SharpNeat.Genomes.Maze
         /// <returns>Flag indicating whether the path waypoint addition mutation was successful.</returns>
         private bool MutateAddPathWaypoint()
         {
-            Point2DInt newPoint;
-            int mutationRetryCount = 0;
             bool isWaypointValid;
 
+            IList<Point2DInt> candidatePoints = new List<Point2DInt>();
+
+            // Generate points to the right of existing points
+            for (var x = PathGeneList.Max(p => p.Waypoint.X) + 1; x < MazeBoundaryWidth; x++)
+            {
+                for (var y = 0; y < MazeBoundaryHeight; y++)
+                {
+                    candidatePoints.Add(new Point2DInt(x, y));
+                }
+            }
+
+            // Generate points below existing points
+            for (var y = PathGeneList.Max(p => p.Waypoint.Y) + 1; y < MazeBoundaryHeight; y++)
+            {
+                for (var x = 0; x < MazeBoundaryWidth; x++)
+                {
+                    candidatePoints.Add(new Point2DInt(x, y));
+                }
+            }
+
+            // Randomly select one of the pregenerated waypoints until a valid one is found or the list is exhausted
             do
             {
                 // Randomly select an orientation
@@ -640,9 +659,8 @@ namespace SharpNeat.Genomes.Maze
                     ? IntersectionOrientation.Horizontal
                     : IntersectionOrientation.Vertical;
 
-                // Generate new point
-                newPoint = new Point2DInt(GenomeFactory.Rng.Next(MazeBoundaryWidth),
-                    GenomeFactory.Rng.Next(MazeBoundaryHeight));
+                // Select random new point
+                var newPoint = candidatePoints[GenomeFactory.Rng.Next(candidatePoints.Count)];
 
                 // Determine whether new waypoint is valid
                 isWaypointValid =
@@ -654,10 +672,7 @@ namespace SharpNeat.Genomes.Maze
                     PathGeneList.Add(new PathGene(GenomeFactory.InnovationIdGenerator.NextId, newPoint,
                         newPointOrientation));
                 }
-
-                // Increment mutation retries
-                mutationRetryCount++;
-            } while (isWaypointValid == false && mutationRetryCount <= MaxMutationRetries);
+            } while (isWaypointValid == false && candidatePoints.Count > 0);
 
             return isWaypointValid;
         }
