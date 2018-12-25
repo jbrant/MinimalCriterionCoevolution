@@ -337,7 +337,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         /// <param name="populationSize1">The agent population size.</param>
         /// <param name="populationSize2">The maze population size.</param>
         /// <returns>The instantiated MCC algorithm container.</returns>
-        public override SharpNeat.Core.IMCCAlgorithmContainer<NeatGenome, MazeGenome> CreateMCCAlgorithmContainer(
+        public override IMCCAlgorithmContainer<NeatGenome, MazeGenome> CreateMCCAlgorithmContainer(
             int populationSize1, int populationSize2)
         {
             // Create a genome factory for the NEAT genomes
