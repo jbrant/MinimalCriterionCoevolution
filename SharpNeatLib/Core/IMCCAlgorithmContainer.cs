@@ -21,7 +21,7 @@
 
 using System;
 using System.Collections.Generic;
-using SharpNeat.EvolutionAlgorithms;
+using SharpNeat.EvolutionAlgorithms.Statistics;
 
 #endregion
 
@@ -72,12 +72,12 @@ namespace SharpNeat.Core
         /// <summary>
         ///     Descriptive statistics for the first population.
         /// </summary>
-        NeatAlgorithmStats Population1Statistics { get; }
+        IEvolutionAlgorithmStats Population1Statistics { get; }
 
         /// <summary>
         ///     Descriptive statistics for the second population.
         /// </summary>
-        NeatAlgorithmStats Population2Statistics { get; }
+        IEvolutionAlgorithmStats Population2Statistics { get; }
 
         /// <summary>
         ///     Notifies listeners that some state change has occured.

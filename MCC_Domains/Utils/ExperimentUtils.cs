@@ -343,10 +343,10 @@ namespace MCC_Domains.Utils
         /// </summary>
         /// <param name="xmlConfig">The reference to the XML configuration file.</param>
         /// <returns>An initialized NEAT evolution algorithm parameters object.</returns>
-        public static NeatEvolutionAlgorithmParameters ReadNeatEvolutionAlgorithmParameters(XmlElement xmlConfig)
+        public static EvolutionAlgorithmParameters ReadNeatEvolutionAlgorithmParameters(XmlElement xmlConfig)
         {
             // Create new NEAT EA parameters with default values
-            return new NeatEvolutionAlgorithmParameters
+            return new EvolutionAlgorithmParameters
             {
                 SpecieCount = XmlUtils.TryGetValueAsInt(xmlConfig, "SpecieCount") ?? default(int),
                 ElitismProportion = XmlUtils.TryGetValueAsDouble(xmlConfig, "ElitismProportion") ?? default(double),
@@ -366,12 +366,12 @@ namespace MCC_Domains.Utils
         /// <param name="experimentDictionary">Reference to the experiment dictionary table.</param>
         /// <param name="isPrimary">Flag indicating whether this is the primary or an initialization algorithm.</param>
         /// <returns>Initialized NEAT evolution algorithm parameters.</returns>
-        public static NeatEvolutionAlgorithmParameters ReadNeatEvolutionAlgorithmParameters(
+        public static EvolutionAlgorithmParameters ReadNeatEvolutionAlgorithmParameters(
             ExperimentDictionary experimentDictionary,
             bool isPrimary)
         {
             return (isPrimary
-                ? new NeatEvolutionAlgorithmParameters
+                ? new EvolutionAlgorithmParameters
                 {
                     SpecieCount = experimentDictionary.Primary_NumSpecies,
                     InterspeciesMatingProportion = experimentDictionary.Primary_InterspeciesMatingProbability,
@@ -380,7 +380,7 @@ namespace MCC_Domains.Utils
                     OffspringAsexualProportion = experimentDictionary.Primary_AsexualProbability,
                     OffspringSexualProportion = experimentDictionary.Primary_CrossoverProbability
                 }
-                : new NeatEvolutionAlgorithmParameters
+                : new EvolutionAlgorithmParameters
                 {
                     SpecieCount = experimentDictionary.Initialization_NumSpecies ?? default(int),
                     InterspeciesMatingProportion =

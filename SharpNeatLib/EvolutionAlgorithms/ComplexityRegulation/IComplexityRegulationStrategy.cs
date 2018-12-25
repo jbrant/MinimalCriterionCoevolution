@@ -17,6 +17,8 @@
  * along with SharpNEAT.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using SharpNeat.EvolutionAlgorithms.Statistics;
+
 namespace SharpNeat.EvolutionAlgorithms.ComplexityRegulation
 {
     /// <summary>
@@ -35,8 +37,8 @@ namespace SharpNeat.EvolutionAlgorithms.ComplexityRegulation
     {
         /// <summary>
         /// Determine which complexity regulation mode the search should be in given the provided
-        /// NEAT algorithm stats.
+        /// evolutionary algorithm stats.
         /// </summary>
-        ComplexityRegulationMode DetermineMode(NeatAlgorithmStats stats);
+        ComplexityRegulationMode DetermineMode(IEvolutionAlgorithmStats stats);
     }
 }

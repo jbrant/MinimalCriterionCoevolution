@@ -7,6 +7,7 @@ using System.Linq;
 using SharpNeat.Core;
 using SharpNeat.DistanceMetrics;
 using SharpNeat.EvolutionAlgorithms.ComplexityRegulation;
+using SharpNeat.EvolutionAlgorithms.Statistics;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Loggers;
 using SharpNeat.SpeciationStrategies;
@@ -20,7 +21,7 @@ namespace SharpNeat.EvolutionAlgorithms
     ///     Implementation of a queue-based NEAT evolution algorithm.  Note that reproduction is asexual only.
     /// </summary>
     /// <typeparam name="TGenome">The genome type that the algorithm will operate on.</typeparam>
-    public class QueueingNeatEvolutionAlgorithm<TGenome> : AbstractNeatEvolutionAlgorithm<TGenome>
+    public class QueueingEvolutionAlgorithm<TGenome> : AbstractComplexifyingEvolutionAlgorithm<TGenome>
         where TGenome : class, IGenome<TGenome>
     {
         #region Instance Fields
@@ -524,42 +525,10 @@ namespace SharpNeat.EvolutionAlgorithms
         #region Constructors
 
         /// <summary>
-        ///     Constructs steady state evolution algorithm with the default clustering strategy (k-means clustering) using
-        ///     manhattan distance and null complexity regulation strategy.
+        ///     Constructs queueing evolution algorithm with the given EA parameters and complexity regulation strategy.
         /// </summary>
-        /// <param name="logger">The data logger (optional).</param>
-        /// <param name="runPhase">
-        ///     The experiment phase indicating whether this is an initialization process or the primary
-        ///     algorithm.
-        /// </param>
-        /// <param name="isBridgingEnabled">Flag that indicates whether bridging is enabled.</param>
-        /// <param name="isDynamicMinimalCriteria">
-        ///     Flag that indicates whether the minimal criteria is automatically/dynamically
-        ///     determined.
-        /// </param>
-        /// <param name="isFixedSpecieSize">Flag that indicates whether the species sizes should be capped.</param>
-        /// <param name="mcUpdateInterval">
-        ///     The number of batches/generations that are permitted to elapse between updates to the
-        ///     minimal criteria.
-        /// </param>
-        public QueueingNeatEvolutionAlgorithm(IDataLogger logger = null, RunPhase runPhase = RunPhase.Primary,
-            bool isBridgingEnabled = false, bool isDynamicMinimalCriteria = false, bool isFixedSpecieSize = false,
-            int mcUpdateInterval = 0)
-            : this(
-                new KMeansClusteringStrategy<TGenome>(new ManhattanDistanceMetric()),
-                new NullComplexityRegulationStrategy(), 10, runPhase, isBridgingEnabled, isDynamicMinimalCriteria,
-                logger)
-        {
-            SpeciationStrategy = new KMeansClusteringStrategy<TGenome>(new ManhattanDistanceMetric());
-            ComplexityRegulationStrategy = new NullComplexityRegulationStrategy();
-            _batchSize = 10;
-            _mcUpdateInterval = mcUpdateInterval;
-            _isFixedSpecieSize = isFixedSpecieSize;
-        }
-
-        /// <summary>
-        ///     Constructs steady state evolution algorithm with the given NEAT parameters and complexity regulation strategy.
-        /// </summary>
+        /// <param name="eaParams">The evolution algorithm parameters.</param>
+        /// <param name="stats">The evolution algorithm statistics container.</param>
         /// <param name="speciationStrategy">The speciation strategy.</param>
         /// <param name="complexityRegulationStrategy">The complexity regulation strategy.</param>
         /// <param name="batchSize">The batch size of offspring to produce, evaluate, and remove.</param>
@@ -582,7 +551,7 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     The number of batches/generations that are permitted to elapse between updates to the
         ///     minimal criteria.
         /// </param>
-        public QueueingNeatEvolutionAlgorithm(
+        public QueueingEvolutionAlgorithm(EvolutionAlgorithmParameters eaParams, IEvolutionAlgorithmStats stats,
             ISpeciationStrategy<TGenome> speciationStrategy,
             IComplexityRegulationStrategy complexityRegulationStrategy,
             int batchSize,
@@ -594,62 +563,7 @@ namespace SharpNeat.EvolutionAlgorithms
             IDataLogger genomeLogger = null,
             int? populationLoggingInterval = null,
             bool isFixedSpecieSize = false,
-            int mcUpdateInterval = 0)
-        {
-            SpeciationStrategy = speciationStrategy;
-            ComplexityRegulationStrategy = complexityRegulationStrategy;
-            _batchSize = batchSize;
-            EvolutionLogger = logger;
-            RunPhase = runPhase;
-            _isBridgingEnabled = isBridgingEnabled;
-            _isDynamicMinimalCriteria = isDynamicMinimalCriteria;
-            _logFieldEnabledMap = logFieldEnabledMap;
-            PopulationLogger = populationLogger;
-            GenomeLogger = genomeLogger;
-            PopulationLoggingInterval = populationLoggingInterval;
-            _mcUpdateInterval = mcUpdateInterval;
-            _isFixedSpecieSize = isFixedSpecieSize;
-        }
-
-        /// <summary>
-        ///     Constructs steady state evolution algorithm with the given NEAT parameters and complexity regulation strategy.
-        /// </summary>
-        /// <param name="eaParams">The NEAT algorithm parameters.</param>
-        /// <param name="speciationStrategy">The speciation strategy.</param>
-        /// <param name="complexityRegulationStrategy">The complexity regulation strategy.</param>
-        /// <param name="batchSize">The batch size of offspring to produce, evaluate, and remove.</param>
-        /// <param name="runPhase">
-        ///     The experiment phase indicating whether this is an initialization process or the primary
-        ///     algorithm.
-        /// </param>
-        /// <param name="isBridgingEnabled">Flag that indicates whether bridging is enabled.</param>
-        /// <param name="isDynamicMinimalCriteria">
-        ///     Flag that indicates whether the minimal criteria is automatically/dynamically
-        ///     determined.
-        /// </param>
-        /// <param name="logger">The evolution data logger (optional).</param>
-        /// <param name="logFieldEnabledMap">Dictionary of logging fields that can be dynamically enabled or disabled.</param>
-        /// <param name="populationLogger">The population data logger (optional).</param>
-        /// <param name="genomeLogger">The genome data logger (optional).</param>
-        /// <param name="populationLoggingInterval">The interval at which the population is logged.</param>
-        /// <param name="isFixedSpecieSize">Flag that indicates whether the species sizes should be capped.</param>
-        /// <param name="mcUpdateInterval">
-        ///     The number of batches/generations that are permitted to elapse between updates to the
-        ///     minimal criteria.
-        /// </param>
-        public QueueingNeatEvolutionAlgorithm(NeatEvolutionAlgorithmParameters eaParams,
-            ISpeciationStrategy<TGenome> speciationStrategy,
-            IComplexityRegulationStrategy complexityRegulationStrategy,
-            int batchSize,
-            RunPhase runPhase = RunPhase.Primary,
-            bool isBridgingEnabled = false,
-            bool isDynamicMinimalCriteria = false,
-            IDataLogger logger = null, IDictionary<FieldElement, bool> logFieldEnabledMap = null,
-            IDataLogger populationLogger = null,
-            IDataLogger genomeLogger = null,
-            int? populationLoggingInterval = null,
-            bool isFixedSpecieSize = false,
-            int mcUpdateInterval = 0) : base(eaParams)
+            int mcUpdateInterval = 0) : base(eaParams, stats)
         {
             SpeciationStrategy = speciationStrategy;
             ComplexityRegulationStrategy = complexityRegulationStrategy;

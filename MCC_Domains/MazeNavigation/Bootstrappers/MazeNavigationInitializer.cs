@@ -52,7 +52,7 @@ namespace MCC_Domains.MazeNavigation.Bootstrappers
             NeatGenomeParameters.FeedforwardOnly = NetworkActivationScheme.CreateAcyclicScheme().AcyclicNetwork;
 
             // Read NEAT evolution parameters
-            NeatEvolutionAlgorithmParameters = ExperimentUtils.ReadNeatEvolutionAlgorithmParameters(xmlConfig);
+            EvolutionAlgorithmParameters = ExperimentUtils.ReadNeatEvolutionAlgorithmParameters(xmlConfig);
 
             // Get complexity constraint parameters
             ComplexityRegulationStrategyDefinition = XmlUtils.TryGetValueAsString(xmlConfig,
@@ -106,7 +106,7 @@ namespace MCC_Domains.MazeNavigation.Bootstrappers
         /// <summary>
         ///     The evolutionary algorithm supporting the initialization process.
         /// </summary>
-        protected AbstractNeatEvolutionAlgorithm<NeatGenome> InitializationEa;
+        protected AbstractComplexifyingEvolutionAlgorithm<NeatGenome> InitializationEa;
 
         /// <summary>
         ///     The genome parameters specifically for the initialization algorithm (this is because the initialization algorithm
@@ -125,7 +125,7 @@ namespace MCC_Domains.MazeNavigation.Bootstrappers
         /// <summary>
         ///     The parameters controlling the NEAT algorithm.
         /// </summary>
-        protected NeatEvolutionAlgorithmParameters NeatEvolutionAlgorithmParameters;
+        protected EvolutionAlgorithmParameters EvolutionAlgorithmParameters;
 
         /// <summary>
         ///     The complexity regulation strategy.

@@ -9,12 +9,12 @@ namespace SharpNeat.Loggers
     /// <summary>
     ///     Fields capturing data related to population statistics per generation/batch.
     /// </summary>
-    public class EvolutionFieldElements
+    public static class EvolutionFieldElements
     {
         /// <summary>
         ///     The number of elements in this log file/table.
         /// </summary>
-        public static readonly int NumFieldElements = 32;
+        public static readonly int NumFieldElements = 50;
 
         /// <summary>
         ///     The generation of the observation.
@@ -60,7 +60,8 @@ namespace SharpNeat.Loggers
         /// <summary>
         ///     The current minimal criteria threshold (only changes if dynamic).
         /// </summary>
-        public static readonly FieldElement MinimalCriteriaThreshold = new FieldElement(8, "Minimal Criteria Threshold");
+        public static readonly FieldElement
+            MinimalCriteriaThreshold = new FieldElement(8, "Minimal Criteria Threshold");
 
         /// <summary>
         ///     The X position of the minimal criteria point in euclidean space.
@@ -186,6 +187,99 @@ namespace SharpNeat.Loggers
         public static readonly FieldElement ChampGenomeXml = new FieldElement(31, "Champ Genome XML");
 
         /// <summary>
+        ///     The minimum number of walls in a maze within the maze population.
+        /// </summary>
+        public static readonly FieldElement MinWalls = new FieldElement(32, "Min Walls");
+
+        /// <summary>
+        ///     The maximum number of walls in a maze within the maze population.
+        /// </summary>
+        public static readonly FieldElement MaxWalls = new FieldElement(33, "Max Walls");
+
+        /// <summary>
+        ///     The mean number of walls among mazes within the maze population.
+        /// </summary>
+        public static readonly FieldElement MeanWalls = new FieldElement(34, "Mean Walls");
+
+        /// <summary>
+        ///     The minimum number of waypoints in a maze within the maze population.
+        /// </summary>
+        public static readonly FieldElement MinWaypoints = new FieldElement(35, "Min Waypoints");
+
+        /// <summary>
+        ///     The maximum number of waypoints in a maze within the maze population.
+        /// </summary>
+        public static readonly FieldElement MaxWaypoints = new FieldElement(36, "Max Waypoints");
+
+        /// <summary>
+        ///     The mean number of waypoints among mazes within the maze population.
+        /// </summary>
+        public static readonly FieldElement MeanWaypoints = new FieldElement(37, "Mean Waypoints");
+
+        /// <summary>
+        ///     The minimum number of junctures in a maze within the maze population.
+        /// </summary>
+        public static readonly FieldElement MinJunctures = new FieldElement(38, "Min Junctures");
+
+        /// <summary>
+        ///     The maximum number of junctures in a maze within the maze population.
+        /// </summary>
+        public static readonly FieldElement MaxJunctures = new FieldElement(39, "Max Junctures");
+
+        /// <summary>
+        ///     The mean number of junctures among mazes within the maze population.
+        /// </summary>
+        public static readonly FieldElement MeanJunctures = new FieldElement(40, "Mean Junctures");
+
+        /// <summary>
+        ///     The minimum number of openings facing the trajectory in a maze within the maze population.
+        /// </summary>
+        public static readonly FieldElement MinTrajectoryFacingOpenings =
+            new FieldElement(41, "Min Trajectory Facing Openings");
+
+        /// <summary>
+        ///     The maximum number of openings facing the trajectory in a maze within the maze population.
+        /// </summary>
+        public static readonly FieldElement MaxTrajectoryFacingOpenings =
+            new FieldElement(42, "Max Trajectory Facing Openings");
+
+        /// <summary>
+        ///     The mean number of openings facing the trajectory among mazes within the maze population.
+        /// </summary>
+        public static readonly FieldElement MeanTrajectoryFacingOpenings =
+            new FieldElement(43, "Mean Trajectory Facing Openings");
+
+        /// <summary>
+        ///     The minimum height of a maze within the maze population.
+        /// </summary>
+        public static readonly FieldElement MinHeight = new FieldElement(44, "Min Height");
+
+        /// <summary>
+        ///     The maximum height of a maze within the maze population.
+        /// </summary>
+        public static readonly FieldElement MaxHeight = new FieldElement(45, "Max Height");
+
+        /// <summary>
+        ///     The mean height among mazes within the maze population.
+        /// </summary>
+        public static readonly FieldElement MeanHeight = new FieldElement(46, "Mean Height");
+
+        /// <summary>
+        ///     The minimum width of a maze within the maze population.
+        /// </summary>
+        public static readonly FieldElement MinWidth = new FieldElement(47, "Min Width");
+
+        /// <summary>
+        ///     The maximum width of a maze within the maze population.
+        /// </summary>
+        public static readonly FieldElement MaxWidth = new FieldElement(48, "Max Width");
+
+        /// <summary>
+        ///     The mean width among mazes within the maze population.
+        /// </summary>
+        public static readonly FieldElement MeanWidth = new FieldElement(49, "Mean Width");
+
+        /// <summary>
         ///     Pre-constructs an evolution log field enable map with all of the fields enabled by default.
         /// </summary>
         /// <returns>Evolution log field enable map with all fields enabled.</returns>
@@ -224,7 +318,25 @@ namespace SharpNeat.Loggers
                 {ChampGenomeBehaviorX, true},
                 {ChampGenomeBehaviorY, true},
                 {ChampGenomeDistanceToTarget, true},
-                {ChampGenomeXml, true}
+                {ChampGenomeXml, true},
+                {MinWalls, true},
+                {MaxWalls, true},
+                {MeanWalls, true},
+                {MinWaypoints, true},
+                {MaxWaypoints, true},
+                {MeanWaypoints, true},
+                {MinJunctures, true},
+                {MaxJunctures, true},
+                {MeanJunctures, true},
+                {MinTrajectoryFacingOpenings, true},
+                {MaxTrajectoryFacingOpenings, true},
+                {MeanTrajectoryFacingOpenings, true},
+                {MinHeight, true},
+                {MaxHeight, true},
+                {MeanHeight, true},
+                {MinWidth, true},
+                {MaxWidth, true},
+                {MeanWidth, true}
             };
         }
     }
@@ -232,7 +344,7 @@ namespace SharpNeat.Loggers
     /// <summary>
     ///     Fields capturing data related to individual organism evaluations.
     /// </summary>
-    public class EvaluationFieldElements
+    public static class EvaluationFieldElements
     {
         /// <summary>
         ///     The number of elements in this log file/table.
@@ -303,7 +415,7 @@ namespace SharpNeat.Loggers
     ///     Fields capturing the extant genomes (denoted by their ID) during a point in the run, given by the run phase and
     ///     generation..
     /// </summary>
-    public class PopulationFieldElements
+    public static class PopulationFieldElements
     {
         /// <summary>
         ///     The number of elements in this log file/table.
@@ -349,7 +461,7 @@ namespace SharpNeat.Loggers
     /// <summary>
     ///     Fields capturing the XML definition of genomes throughout the course of a run.
     /// </summary>
-    public class GenomeFieldElements
+    public static class GenomeFieldElements
     {
         /// <summary>
         ///     The number of elements in this log file/table.
@@ -405,11 +517,11 @@ namespace SharpNeat.Loggers
         /// <summary>
         ///     The absolute position of the field within the log file/table.
         /// </summary>
-        public int Position { get; private set; }
+        public int Position { get; }
 
         /// <summary>
         ///     The name of the field.
         /// </summary>
-        public string FriendlyName { get; private set; }
+        public string FriendlyName { get; }
     }
 }

@@ -47,7 +47,7 @@ namespace MCC_Domains.MazeNavigation.Bootstrappers
             base.InitializeAlgorithm(parallelOptions, genomeList, genomeDecoder, startingEvaluations);
 
             // Create the initialization evolution algorithm.
-            InitializationEa = new GenerationalNeatEvolutionAlgorithm<NeatGenome>(SpeciationStrategy,
+            InitializationEa = new GenerationalComplexifyingEvolutionAlgorithm<NeatGenome>(SpeciationStrategy,
                 ComplexityRegulationStrategy, RunPhase.Initialization);
 
             // Create IBlackBox evaluator.

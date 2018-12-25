@@ -73,7 +73,8 @@ namespace SharpNeat.Utility
                     grid[curPoint.Y, curPoint.X].IsJuncture = true;
                 }
                 // Handle the case where the start waypoint has a vertical orientation and would otherwise overlap
-                else if (endPoint.Y > curPoint.Y && grid[curPoint.Y + 1, curPoint.X].PathDirection != PathDirection.None)
+                else if (endPoint.Y > curPoint.Y &&
+                         grid[curPoint.Y + 1, curPoint.X].PathDirection != PathDirection.None)
                 {
                     // Set horizontal orientation on origin and one over to the right
                     grid[curPoint.Y, curPoint.X].PathDirection =
@@ -152,7 +153,8 @@ namespace SharpNeat.Utility
                     grid[curPoint.Y, curPoint.X].IsJuncture = true;
                 }
                 // Handle the case where the start waypoint has a horizontal orientation and would otherwise overlap
-                else if (endPoint.X > curPoint.X && grid[curPoint.Y, curPoint.X + 1].PathDirection != PathDirection.None)
+                else if (endPoint.X > curPoint.X &&
+                         grid[curPoint.Y, curPoint.X + 1].PathDirection != PathDirection.None)
                 {
                     // Set vertical orientation on origin and one down
                     grid[curPoint.Y, curPoint.X].PathDirection =
@@ -381,7 +383,7 @@ namespace SharpNeat.Utility
             // Evenly distribute internal walls among sub-mazes
             for (int wallCnt = 0; wallCnt < wallGenes.Count; wallCnt++)
             {
-                subMazeWallsMap[subMazesWithWalls[wallCnt%subMazesWithWalls.Count]].Add(wallGenes[wallCnt]);
+                subMazeWallsMap[subMazesWithWalls[wallCnt % subMazesWithWalls.Count]].Add(wallGenes[wallCnt]);
             }
 
             return subMazeWallsMap;
@@ -422,7 +424,7 @@ namespace SharpNeat.Utility
                 {
                     // Get the current wall gene index
                     wallGeneIdx = loopIter++ % mazeGenome.WallGeneList.Count;
-                    
+
                     subMaze.MarkRoomBoundaries(mazeGrid, mazeGenome.WallGeneList[wallGeneIdx].WallLocation,
                         mazeGenome.WallGeneList[wallGeneIdx].PassageLocation,
                         mazeGenome.WallGeneList[wallGeneIdx].OrientationSeed);
@@ -442,7 +444,7 @@ namespace SharpNeat.Utility
                     {
                         // Get the next wall gene index
                         wallGeneIdx = loopIter++ % mazeGenome.WallGeneList.Count;
-                        
+
                         // Dequeue a room and run division on it
                         Tuple<MazeStructureRoom, MazeStructureRoom> subRooms = mazeRoomQueue.Dequeue()
                             .DivideRoom(mazeGrid, mazeGenome.WallGeneList[wallGeneIdx].WallLocation,
@@ -495,10 +497,10 @@ namespace SharpNeat.Utility
                 {
                     // Get the current wall gene index
                     wallGeneIdx = loopIter++ % genome.WallGeneList.Count;
-                    
+
                     subMaze.MarkRoomBoundaries(mazeGrid, genome.WallGeneList[wallGeneIdx].WallLocation,
                         genome.WallGeneList[wallGeneIdx].PassageLocation,
-                        genome.WallGeneList[wallGeneIdx].OrientationSeed);                    
+                        genome.WallGeneList[wallGeneIdx].OrientationSeed);
                 }
                 else
                 {
@@ -506,7 +508,7 @@ namespace SharpNeat.Utility
                 }
 
                 if (subMaze.AreInternalWallsSupported() && genome.WallGeneList.Count > 0)
-                {                    
+                {
                     // Queue up the first "room" (which will encompass the entirety of the submaze grid)
                     mazeRoomQueue.Enqueue(subMaze);
 
@@ -515,7 +517,7 @@ namespace SharpNeat.Utility
                     {
                         // Get the next wall gene index
                         wallGeneIdx = loopIter++ % genome.WallGeneList.Count;
-                        
+
                         // Dequeue a room and run division on it
                         Tuple<MazeStructureRoom, MazeStructureRoom> subRooms = mazeRoomQueue.Dequeue()
                             .DivideRoom(mazeGrid, genome.WallGeneList[wallGeneIdx].WallLocation,
@@ -779,6 +781,37 @@ namespace SharpNeat.Utility
         }
 
         /// <summary>
+        ///     Computes the number of junctures (trajectory segments perpendicular to each other where the agent has to turn 90
+        ///     degrees) in the solution path.
+        /// </summary>
+        /// <param name="genome">The maze genome.</param>
+        /// <returns>The number of junctures in the solution path.</returns>
+        public static int GetNumJunctures(MazeGenome genome)
+        {
+            // Construct the solution path
+            var solutionPath = BuildMazeSolutionPath(genome);
+
+            // Count and return the number of cells that are junctures
+            return solutionPath.Cast<MazeStructureGridCell>().Count(cell => cell.IsJuncture);
+        }
+
+        /// <summary>
+        ///     Computes the number of subroom openings facing the trajectory. In the current implementation, each subroom has only
+        ///     one opening against the trajectory, so this is equivalent to the number of subrooms induced by the trajectory.
+        /// </summary>
+        /// <param name="genome">The maze genome.</param>
+        /// <returns>The number of subroom openings facing the trajectory.</returns>
+        public static int GetNumRoomOpenings(MazeGenome genome)
+        {
+            // Construct the solution path
+            var solutionPath = BuildMazeSolutionPath(genome);
+
+            // Count and return the number of openings (which currently is equivalent to the number of subrooms
+            // induced by the trajectory)
+            return ExtractSubmazes(solutionPath, genome.MazeBoundaryHeight, genome.MazeBoundaryWidth).Count;
+        }
+
+        /// <summary>
         ///     Converts relative, decimal coordinates to unscaled integer coordinates.
         /// </summary>
         /// <param name="relativeCoordinates">The relative coordinate pair on the path gene.</param>
@@ -788,8 +821,8 @@ namespace SharpNeat.Utility
         public static Point2DInt GetUnscaledCoordinates(Point2DDouble relativeCoordinates, double relativeCellWidth,
             double relativeCellHeight)
         {
-            return new Point2DInt(Convert.ToInt32(Math.Floor(relativeCoordinates.X/relativeCellWidth)),
-                Convert.ToInt32(Math.Floor(relativeCoordinates.Y/relativeCellHeight)));
+            return new Point2DInt(Convert.ToInt32(Math.Floor(relativeCoordinates.X / relativeCellWidth)),
+                Convert.ToInt32(Math.Floor(relativeCoordinates.Y / relativeCellHeight)));
         }
 
         /// <summary>
@@ -804,7 +837,7 @@ namespace SharpNeat.Utility
         public static Dictionary<Point2DInt, int> ComputeCellNeighborCounts(IList<PathGene> waypoints, int mazeHeight,
             int mazeWidth, int neighborhoodRadius)
         {
-            Dictionary<Point2DInt, int> cellNeighborCounts = new Dictionary<Point2DInt, int>(mazeHeight*mazeWidth);
+            Dictionary<Point2DInt, int> cellNeighborCounts = new Dictionary<Point2DInt, int>(mazeHeight * mazeWidth);
 
             // Iterate through each grid cell and compute number of waypoints in neighborhood
             // Note that cells which are themselves waypoints are discarded
@@ -821,7 +854,8 @@ namespace SharpNeat.Utility
                         waypoints.Count(p => (p.Waypoint.X >= Math.Max(curWidth - neighborhoodRadius, 0) &&
                                               p.Waypoint.X <= Math.Min(curWidth + neighborhoodRadius, mazeWidth - 1)) &&
                                              (p.Waypoint.Y >= Math.Max(curHeight - neighborhoodRadius, 0) &&
-                                              p.Waypoint.Y <= Math.Min(curHeight + neighborhoodRadius, mazeHeight - 1))));
+                                              p.Waypoint.Y <= Math.Min(curHeight + neighborhoodRadius,
+                                                  mazeHeight - 1))));
                 }
             }
 
@@ -879,10 +913,10 @@ namespace SharpNeat.Utility
                 // This is because waypoints are connected in the order in which they're added to the genome, and to 
                 // avoid overlaps, waypoints are only added below or to the right of pre-existing waypoints.
                 (prevPathGenes.Count == 0 ||
-                    ((prevPathGenes.Any(g => g.Waypoint.X + 1 >= waypointLocation.X) == false &&
-                      (prevPathGenes.First().Waypoint.Y == waypointLocation.Y == false)) ||
-                     (prevPathGenes.Any(g => g.Waypoint.Y + 1 >= waypointLocation.Y) == false &&
-                      (prevPathGenes.First().Waypoint.X == waypointLocation.X == false)))
+                 ((prevPathGenes.Any(g => g.Waypoint.X + 1 >= waypointLocation.X) == false &&
+                   (prevPathGenes.First().Waypoint.Y == waypointLocation.Y == false)) ||
+                  (prevPathGenes.Any(g => g.Waypoint.Y + 1 >= waypointLocation.Y) == false &&
+                   (prevPathGenes.First().Waypoint.X == waypointLocation.X == false)))
                 ) &&
 
                 // Check that new waypoint does not induce a trajectory overlap nor does it cause other waypoints to not be visited
@@ -920,7 +954,8 @@ namespace SharpNeat.Utility
             if (modifiedWaypoints.Any(g => g.InnovationId == candidateWaypointId))
             {
                 modifiedWaypoints[
-                    modifiedWaypoints.IndexOf(modifiedWaypoints.Single(g => g.InnovationId == candidateWaypointId))] =
+                        modifiedWaypoints.IndexOf(modifiedWaypoints.Single(g => g.InnovationId == candidateWaypointId))]
+                    =
                     candidatePathGene;
             }
             else

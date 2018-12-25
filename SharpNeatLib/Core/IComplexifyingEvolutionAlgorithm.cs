@@ -1,16 +1,18 @@
 ﻿using System.Collections.Generic;
 using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.EvolutionAlgorithms.ComplexityRegulation;
+using SharpNeat.EvolutionAlgorithms.Statistics;
+using NeatAlgorithmStats = SharpNeat.EvolutionAlgorithms.Statistics.NeatAlgorithmStats;
 
 namespace SharpNeat.Core
 {
-    public interface INeatEvolutionAlgorithm<TGenome> : IEvolutionAlgorithm<TGenome>
+    public interface IComplexifyingEvolutionAlgorithm<TGenome> : IEvolutionAlgorithm<TGenome>
         where TGenome : class, IGenome<TGenome>
     {
         /// <summary>
         /// Gets the algorithm statistics object.
         /// </summary>
-        NeatAlgorithmStats Statistics { get; }
+        IEvolutionAlgorithmStats Statistics { get; }
 
         /// <summary>
         /// Gets the current complexity regulation mode.

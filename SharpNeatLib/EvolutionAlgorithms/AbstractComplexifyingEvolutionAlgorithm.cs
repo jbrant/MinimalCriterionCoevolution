@@ -26,6 +26,7 @@ using System.Reflection;
 using log4net;
 using SharpNeat.Core;
 using SharpNeat.EvolutionAlgorithms.ComplexityRegulation;
+using SharpNeat.EvolutionAlgorithms.Statistics;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Loggers;
 using SharpNeat.NoveltyArchives;
@@ -43,8 +44,8 @@ namespace SharpNeat.EvolutionAlgorithms
     ///     Abstract class providing some common/baseline data and methods for implementions of INeatEvolutionAlgorithm.
     /// </summary>
     /// <typeparam name="TGenome">The genome type that the algorithm will operate on.</typeparam>
-    public abstract class AbstractNeatEvolutionAlgorithm<TGenome> : AbstractEvolutionAlgorithm<TGenome>,
-        INeatEvolutionAlgorithm<TGenome>, ILoggable
+    public abstract class AbstractComplexifyingEvolutionAlgorithm<TGenome> : AbstractEvolutionAlgorithm<TGenome>,
+        IComplexifyingEvolutionAlgorithm<TGenome>, ILoggable
         where TGenome : class, IGenome<TGenome>
     {
         private static readonly ILog __log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
@@ -83,26 +84,14 @@ namespace SharpNeat.EvolutionAlgorithms
         #region Base Constructor
 
         /// <summary>
-        ///     Abstract paramaterless constructor.
-        /// </summary>
-        protected AbstractNeatEvolutionAlgorithm()
-        {
-            EaParams = new NeatEvolutionAlgorithmParameters();
-            EaParamsComplexifying = EaParams;
-            EaParamsSimplifying = EaParams.CreateSimplifyingParameters();
-            Statistics = new NeatAlgorithmStats(EaParams);
-            ComplexityRegulationMode = ComplexityRegulationMode.Complexifying;
-        }
-
-        /// <summary>
         ///     Abstract constructor accepting custom NEAT parameters.
         /// </summary>
-        protected AbstractNeatEvolutionAlgorithm(NeatEvolutionAlgorithmParameters eaParams)
+        protected AbstractComplexifyingEvolutionAlgorithm(EvolutionAlgorithmParameters eaParams, IEvolutionAlgorithmStats stats)
         {
             EaParams = eaParams;
             EaParamsComplexifying = EaParams;
             EaParamsSimplifying = EaParams.CreateSimplifyingParameters();
-            Statistics = new NeatAlgorithmStats(EaParams);
+            Statistics = stats;
             ComplexityRegulationMode = ComplexityRegulationMode.Complexifying;
         }
 
@@ -330,7 +319,7 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <summary>
         ///     Gets the algorithm statistics object.
         /// </summary>
-        public NeatAlgorithmStats Statistics { get; protected set; }
+        public IEvolutionAlgorithmStats Statistics { get; protected set; }
 
         /// <summary>
         ///     Gets the current complexity regulation mode.
@@ -350,17 +339,17 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <summary>
         ///     Parameters for NEAT evolutionary algorithm control (mutation rate, crossover rate, etc.).
         /// </summary>
-        protected NeatEvolutionAlgorithmParameters EaParams;
+        protected EvolutionAlgorithmParameters EaParams;
 
         /// <summary>
         ///     EA Parameters for complexification.
         /// </summary>
-        protected NeatEvolutionAlgorithmParameters EaParamsComplexifying;
+        protected EvolutionAlgorithmParameters EaParamsComplexifying;
 
         /// <summary>
         ///     EA Parameters for simplification.
         /// </summary>
-        protected NeatEvolutionAlgorithmParameters EaParamsSimplifying;
+        protected EvolutionAlgorithmParameters EaParamsSimplifying;
 
         /// <summary>
         ///     The speciation strategy.

@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using SharpNeat.Core;
 using SharpNeat.EvolutionAlgorithms.ComplexityRegulation;
+using SharpNeat.EvolutionAlgorithms.Statistics;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Loggers;
 using SharpNeat.Utility;
@@ -18,7 +19,7 @@ namespace SharpNeat.EvolutionAlgorithms
     ///     Implementation of a queue-based NEAT evolution algorithm, with each species having its own, logical queue
     ///     ("logical" because all genomes are ultimately part of the same global population).
     /// </summary>
-    public class MultiQueueNeatEvolutionAlgorithm<TGenome> : AbstractNeatEvolutionAlgorithm<TGenome>
+    public class MultiQueueEvolutionAlgorithm<TGenome> : AbstractComplexifyingEvolutionAlgorithm<TGenome>
         where TGenome : class, IGenome<TGenome>
     {
         #region Instance Fields
@@ -36,6 +37,7 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     Constructs multi-queue evolution algorithm with the given EA parameters.
         /// </summary>
         /// <param name="eaParams">The NEAT algorithm parameters.c</param>
+        /// <param name="stats">The evolution algorithm statistics container.</param>
         /// <param name="speciationStrategy">The speciation strategy.</param>
         /// <param name="complexityRegulationStrategy">The complexity regulation strategy.</param>
         /// <param name="batchSize">The batch size of offspring to produce, evaluate, and remove.</param>
@@ -48,11 +50,11 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <param name="populationLogger">The population data logger (optional).</param>
         /// <param name="genomeLogger">The genome data logger (optional).</param>
         /// <param name="populationLoggingInterval">The interval at which the population is logged.</param>
-        public MultiQueueNeatEvolutionAlgorithm(NeatEvolutionAlgorithmParameters eaParams,
+        public MultiQueueEvolutionAlgorithm(EvolutionAlgorithmParameters eaParams, IEvolutionAlgorithmStats stats,
             ISpeciationStrategy<TGenome> speciationStrategy, IComplexityRegulationStrategy complexityRegulationStrategy,
             int batchSize, RunPhase runPhase = RunPhase.Primary, IDataLogger evolutionLogger = null,
             IDictionary<FieldElement, bool> logFieldEnabledMap = null, IDataLogger populationLogger = null,
-            IDataLogger genomeLogger = null, int? populationLoggingInterval = null) : base(eaParams)
+            IDataLogger genomeLogger = null, int? populationLoggingInterval = null) : base(eaParams, stats)
         {
             SpeciationStrategy = speciationStrategy;
             ComplexityRegulationStrategy = complexityRegulationStrategy;

@@ -115,8 +115,12 @@
     <Compile Include="Core\RunPhase.cs" />
     <Compile Include="Decoders\Maze\MazeDecoder.cs" />
     <Compile Include="EvolutionAlgorithms\MCCAlgorithmContainer.cs" />
-    <Compile Include="EvolutionAlgorithms\MultiQueueNeatEvolutionAlgorithm.cs" />
-    <Compile Include="EvolutionAlgorithms\QueueingNeatEvolutionAlgorithm.cs" />
+    <Compile Include="EvolutionAlgorithms\MultiQueueEvolutionAlgorithm.cs" />
+    <Compile Include="EvolutionAlgorithms\QueueingEvolutionAlgorithm.cs" />
+    <Compile Include="EvolutionAlgorithms\Statistics\AbstractEvolutionAlgorithmStats.cs" />
+    <Compile Include="EvolutionAlgorithms\Statistics\IEvolutionAlgorithmStats.cs" />
+    <Compile Include="EvolutionAlgorithms\Statistics\MazeAlgorithmStats.cs" />
+    <Compile Include="EvolutionAlgorithms\Statistics\NeatAlgorithmStats.cs" />
     <Compile Include="Genomes\Maze\BaseMazeGene.cs" />
     <Compile Include="Genomes\Maze\WallGene.cs" />
     <Compile Include="Genomes\Maze\MazeGenome.cs" />
@@ -186,7 +190,7 @@
     <Compile Include="EvolutionAlgorithms\ComplexityRegulation\DefaultComplexityRegulationStrategy.cs" />
     <Compile Include="EvolutionAlgorithms\ComplexityRegulation\IComplexityRegulationStrategy.cs" />
     <Compile Include="EvolutionAlgorithms\ComplexityRegulation\NullComplexityRegulationStrategy.cs" />
-    <Compile Include="Core\INeatEvolutionAlgorithm.cs" />
+    <Compile Include="Core\IComplexifyingEvolutionAlgorithm.cs" />
     <Compile Include="EvolutionAlgorithms\NeatAlgorithmStats.cs" />
     <None Include="DeadCode\PhasedSearch\Triggers\AbsoluteMeanComplexityCeilingTrigger.cs" />
     <None Include="DeadCode\PhasedSearch\Triggers\SimplificationStallGenerationsTrigger.cs" />
@@ -197,8 +201,8 @@
     <None Include="DeadCode\PhasedSearch\Triggers\MovingMeanComplexityCeilingTrigger.cs" />
     <None Include="DeadCode\PhasedSearch\Triggers\IPhaseTransitionTrigger.cs" />
     <Compile Include="EvolutionAlgorithms\GenerationalNeatEvolutionAlgorithm.cs" />
-    <Compile Include="EvolutionAlgorithms\AbstractNeatEvolutionAlgorithm.cs" />
-    <Compile Include="EvolutionAlgorithms\NeatEvolutionAlgorithmParameters.cs" />
+    <Compile Include="EvolutionAlgorithms\AbstractComplexifyingEvolutionAlgorithm.cs" />
+    <Compile Include="EvolutionAlgorithms\EvolutionAlgorithmParameters.cs" />
     <Compile Include="EvolutionAlgorithms\ComplexityRegulation\ComplexityRegulationMode.cs" />
     <None Include="DeadCode\PhasedSearchStats.cs" />
     <None Include="DeadCode\PhasedSearch\Triggers\SimplificationStallClockTimeTrigger.cs" />

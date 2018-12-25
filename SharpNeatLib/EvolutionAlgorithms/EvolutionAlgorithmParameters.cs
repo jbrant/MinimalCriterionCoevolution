@@ -20,9 +20,9 @@
 namespace SharpNeat.EvolutionAlgorithms
 {
     /// <summary>
-    ///     Parameters specific to the NEAT evolution algorithm.
+    ///     Parameters specific to a complexifying evolution algorithm.
     /// </summary>
-    public class NeatEvolutionAlgorithmParameters
+    public class EvolutionAlgorithmParameters
     {
         #region Private Methods
 
@@ -44,12 +44,12 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     Creates a set of parameters based on the current set and that are suitable for the simplifying
         ///     phase of the evolution algorithm when running with complexity regulation enabled.
         /// </summary>
-        public NeatEvolutionAlgorithmParameters CreateSimplifyingParameters()
+        public EvolutionAlgorithmParameters CreateSimplifyingParameters()
         {
             // Make a copy of the current 'complexifying' parameters (as required by complexity regulation)
             // and modify the copy to be suitable for simplifcation. Basically we disable sexual reproduction
             // whle in simplifying mode to prevent proliferation of structure through sexual reproduction.
-            NeatEvolutionAlgorithmParameters eaParams = new NeatEvolutionAlgorithmParameters(this)
+            EvolutionAlgorithmParameters eaParams = new EvolutionAlgorithmParameters(this)
             {
                 OffspringAsexualProportion = 1.0,
                 OffspringSexualProportion = 0.0
@@ -81,7 +81,7 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <summary>
         ///     Constructs with the default parameters.
         /// </summary>
-        public NeatEvolutionAlgorithmParameters()
+        public EvolutionAlgorithmParameters()
         {
             SpecieCount = DefaultSpecieCount;
             ElitismProportion = DefaultElitismProportion;
@@ -101,7 +101,7 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <summary>
         ///     Copy constructor.
         /// </summary>
-        public NeatEvolutionAlgorithmParameters(NeatEvolutionAlgorithmParameters copyFrom)
+        public EvolutionAlgorithmParameters(EvolutionAlgorithmParameters copyFrom)
         {
             SpecieCount = copyFrom.SpecieCount;
             ElitismProportion = copyFrom.ElitismProportion;

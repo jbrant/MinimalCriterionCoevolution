@@ -57,7 +57,7 @@ namespace MCC_Domains.MazeNavigation
             MaxRestarts = XmlUtils.TryGetValueAsInt(xmlConfig, "MaxRestarts");
 
             // Set evolution/genome parameters
-            NeatEvolutionAlgorithmParameters = ExperimentUtils.ReadNeatEvolutionAlgorithmParameters(xmlConfig);
+            EvolutionAlgorithmParameters = ExperimentUtils.ReadNeatEvolutionAlgorithmParameters(xmlConfig);
             NeatGenomeParameters = ExperimentUtils.ReadNeatGenomeParameters(xmlConfig);
             NeatGenomeParameters.FeedforwardOnly = _activationScheme.AcyclicNetwork;
 
@@ -89,7 +89,7 @@ namespace MCC_Domains.MazeNavigation
             MaxRestarts = experimentDictionary.MaxRestarts;
 
             // Set evolution/genome parameters
-            NeatEvolutionAlgorithmParameters = ExperimentUtils.ReadNeatEvolutionAlgorithmParameters(
+            EvolutionAlgorithmParameters = ExperimentUtils.ReadNeatEvolutionAlgorithmParameters(
                 experimentDictionary, true);
             NeatGenomeParameters = ExperimentUtils.ReadNeatGenomeParameters(experimentDictionary, true);
             NeatGenomeParameters.FeedforwardOnly = _activationScheme.AcyclicNetwork;
@@ -144,7 +144,7 @@ namespace MCC_Domains.MazeNavigation
         ///     sub-parts of the algorithm are also constructed and connected up.  Uses the default population size.
         /// </summary>
         /// <returns>NEAT evolutionary algorithm</returns>
-        public INeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm()
+        public IComplexifyingEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm()
         {
             return CreateEvolutionAlgorithm(DefaultPopulationSize);
         }
@@ -155,7 +155,7 @@ namespace MCC_Domains.MazeNavigation
         /// </summary>
         /// <param name="populationSize">The genome population size</param>
         /// <returns>NEAT evoluationary algorithm</returns>
-        public INeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(int populationSize)
+        public IComplexifyingEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(int populationSize)
         {
             // Create a genome factory with our neat genome parameters object and the appropriate number of input and output neuron genes.
             var genomeFactory = CreateGenomeFactory();
@@ -175,7 +175,7 @@ namespace MCC_Domains.MazeNavigation
         /// <param name="genomeFactory">The genome factory from which to generate new genomes</param>
         /// <param name="genomeList">The current genome population</param>
         /// <returns>Constructed evolutionary algorithm</returns>
-        public INeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(
+        public IComplexifyingEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(
             IGenomeFactory<NeatGenome> genomeFactory,
             List<NeatGenome> genomeList)
         {
@@ -191,7 +191,7 @@ namespace MCC_Domains.MazeNavigation
         /// <param name="genomeList">The current genome population</param>
         /// <param name="startingEvaluations">The number of evaluations that have been executed prior to the current run.</param>
         /// <returns>Constructed evolutionary algorithm</returns>
-        public abstract INeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(
+        public abstract IComplexifyingEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(
             IGenomeFactory<NeatGenome> genomeFactory,
             List<NeatGenome> genomeList, ulong startingEvaluations);
 
@@ -235,7 +235,7 @@ namespace MCC_Domains.MazeNavigation
         /// <summary>
         ///     The NEAT parameters to use for the experiment.
         /// </summary>
-        public NeatEvolutionAlgorithmParameters NeatEvolutionAlgorithmParameters { get; private set; }
+        public EvolutionAlgorithmParameters EvolutionAlgorithmParameters { get; private set; }
 
         /// <summary>
         ///     The NEAT genome parameters to use for the experiment.

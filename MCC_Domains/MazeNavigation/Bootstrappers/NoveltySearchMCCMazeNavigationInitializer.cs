@@ -91,7 +91,7 @@ namespace MCC_Domains.MazeNavigation.Bootstrappers
             base.InitializeAlgorithm(parallelOptions, genomeList, genomeDecoder, startingEvaluations);
 
             // Create the initialization evolution algorithm.
-            InitializationEa = new SteadyStateNeatEvolutionAlgorithm<NeatGenome>(NeatEvolutionAlgorithmParameters,
+            InitializationEa = new SteadyStateComplexifyingEvolutionAlgorithm<NeatGenome>(EvolutionAlgorithmParameters,
                 SpeciationStrategy, ComplexityRegulationStrategy, _batchSize, _populationEvaluationFrequency,
                 RunPhase.Initialization, NavigatorEvolutionDataLogger, NavigatorEvolutionLogFieldEnableMap,
                 NavigatorPopulationDataLogger, PopulationLoggingBatchInterval);

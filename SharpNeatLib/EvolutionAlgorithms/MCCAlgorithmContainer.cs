@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Threading;
 using log4net;
 using SharpNeat.Core;
+using SharpNeat.EvolutionAlgorithms.Statistics;
 using SharpNeat.Loggers;
 
 #endregion
@@ -159,14 +160,14 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <summary>
         ///     Descriptive statistics for the first population.
         /// </summary>
-        public NeatAlgorithmStats Population1Statistics
-            => ((AbstractNeatEvolutionAlgorithm<TGenome1>) _evolutionAlgorithm1).Statistics;
+        public IEvolutionAlgorithmStats Population1Statistics
+            => ((AbstractComplexifyingEvolutionAlgorithm<TGenome1>) _evolutionAlgorithm1).Statistics;
 
         /// <summary>
         ///     Descriptive statistics for the second population.
         /// </summary>
-        public NeatAlgorithmStats Population2Statistics
-            => ((AbstractNeatEvolutionAlgorithm<TGenome2>) _evolutionAlgorithm2).Statistics;
+        public IEvolutionAlgorithmStats Population2Statistics
+            => ((AbstractComplexifyingEvolutionAlgorithm<TGenome2>) _evolutionAlgorithm2).Statistics;
 
         #endregion
 

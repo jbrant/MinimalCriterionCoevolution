@@ -11,6 +11,7 @@ using SharpNeat.Decoders.Maze;
 using SharpNeat.Decoders.Neat;
 using SharpNeat.DistanceMetrics;
 using SharpNeat.EvolutionAlgorithms;
+using SharpNeat.EvolutionAlgorithms.Statistics;
 using SharpNeat.Genomes.Maze;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Loggers;
@@ -18,6 +19,7 @@ using SharpNeat.Phenomes;
 using SharpNeat.Phenomes.Mazes;
 using SharpNeat.SpeciationStrategies;
 using SharpNeat.Utility;
+using NeatAlgorithmStats = SharpNeat.EvolutionAlgorithms.Statistics.NeatAlgorithmStats;
 
 #endregion
 
@@ -144,7 +146,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
                 _navigatorLogFieldEnableMap.Add(genomeLoggingPair.Key, genomeLoggingPair.Value);
             }
 
-            // Disable logging fields not relevant to MCC experiment
+            // Disable logging fields not relevant to agent evolution in MCC experiment
             _navigatorLogFieldEnableMap[EvolutionFieldElements.SpecieCount] = false;
             _navigatorLogFieldEnableMap[EvolutionFieldElements.AsexualOffspringCount] = false;
             _navigatorLogFieldEnableMap[EvolutionFieldElements.SexualOffspringCount] = false;
@@ -168,13 +170,51 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeBehaviorY] = false;
             _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeDistanceToTarget] = false;
             _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeXml] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MinWalls] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MaxWalls] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MeanWalls] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MinWaypoints] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MaxWaypoints] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MeanWaypoints] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MinJunctures] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MaxJunctures] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MeanJunctures] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MinTrajectoryFacingOpenings] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MaxTrajectoryFacingOpenings] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MeanTrajectoryFacingOpenings] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MinHeight] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MaxHeight] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MeanHeight] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MinWidth] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MaxWidth] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MeanWidth] = false;
 
             // Create a maze logger configuration with the same configuration as the navigator one
             _mazeLogFieldEnableMap = new Dictionary<FieldElement, bool>(_navigatorLogFieldEnableMap);
 
-            // Make on change to the maze logger configuration to switch off run phase logging
+            // Switch off run phase logging for maze evolution
             _mazeLogFieldEnableMap[EvolutionFieldElements.RunPhase] = false;
             _mazeLogFieldEnableMap[PopulationFieldElements.RunPhase] = false;
+            
+            // Turn additional maze logging back on
+            _mazeLogFieldEnableMap[EvolutionFieldElements.MinWalls] = true;
+            _mazeLogFieldEnableMap[EvolutionFieldElements.MaxWalls] = true;
+            _mazeLogFieldEnableMap[EvolutionFieldElements.MeanWalls] = true;
+            _mazeLogFieldEnableMap[EvolutionFieldElements.MinWaypoints] = true;
+            _mazeLogFieldEnableMap[EvolutionFieldElements.MaxWaypoints] = true;
+            _mazeLogFieldEnableMap[EvolutionFieldElements.MeanWaypoints] = true;
+            _mazeLogFieldEnableMap[EvolutionFieldElements.MinJunctures] = true;
+            _mazeLogFieldEnableMap[EvolutionFieldElements.MaxJunctures] = true;
+            _mazeLogFieldEnableMap[EvolutionFieldElements.MeanJunctures] = true;
+            _mazeLogFieldEnableMap[EvolutionFieldElements.MinTrajectoryFacingOpenings] = true;
+            _mazeLogFieldEnableMap[EvolutionFieldElements.MaxTrajectoryFacingOpenings] = true;
+            _mazeLogFieldEnableMap[EvolutionFieldElements.MeanTrajectoryFacingOpenings] = true;
+            _mazeLogFieldEnableMap[EvolutionFieldElements.MinHeight] = true;
+            _mazeLogFieldEnableMap[EvolutionFieldElements.MaxHeight] = true;
+            _mazeLogFieldEnableMap[EvolutionFieldElements.MeanHeight] = true;
+            _mazeLogFieldEnableMap[EvolutionFieldElements.MinWidth] = true;
+            _mazeLogFieldEnableMap[EvolutionFieldElements.MaxWidth] = true;
+            _mazeLogFieldEnableMap[EvolutionFieldElements.MeanWidth] = true;
 
             // Read in the number of batches between population logging
             _populationLoggingBatchInterval = XmlUtils.TryGetValueAsInt(xmlConfig, "PopulationLoggingBatchInterval");
@@ -330,17 +370,29 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
                 mazeGenome.EvaluationInfo.SetFitness(0);
             }
 
+            // Create the NEAT evolution algorithm parameters
+            var neatEaParams = new EvolutionAlgorithmParameters
+            {
+                SpecieCount = AgentNumSpecies,
+                MaxSpecieSize =
+                    AgentNumSpecies > 0
+                        ? AgentDefaultPopulationSize/AgentNumSpecies
+                        : AgentDefaultPopulationSize
+            };
+            
+            // Create the maze evolution algorithm parameters
+            var mazeEaParams = new EvolutionAlgorithmParameters
+            {
+                SpecieCount = MazeNumSpecies,
+                MaxSpecieSize =
+                    MazeNumSpecies > 0 ? MazeDefaultPopulationSize / MazeNumSpecies : MazeDefaultPopulationSize
+            };
+            
             // Create the NEAT (i.e. navigator) queueing evolution algorithm
             AbstractEvolutionAlgorithm<NeatGenome> neatEvolutionAlgorithm =
-                new QueueingNeatEvolutionAlgorithm<NeatGenome>(
-                    new NeatEvolutionAlgorithmParameters
-                    {
-                        SpecieCount = AgentNumSpecies,
-                        MaxSpecieSize =
-                            AgentNumSpecies > 0
-                                ? AgentDefaultPopulationSize/AgentNumSpecies
-                                : AgentDefaultPopulationSize
-                    },
+                new QueueingEvolutionAlgorithm<NeatGenome>(
+                    neatEaParams,
+                    new NeatAlgorithmStats(neatEaParams), 
                     new ParallelKMeansClusteringStrategy<NeatGenome>(new ManhattanDistanceMetric(1.0, 0.0, 10.0),
                         ParallelOptions), null,
                     NavigatorBatchSize, RunPhase.Primary, false, false, _navigatorEvolutionDataLogger,
@@ -350,13 +402,9 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
 
             // Create the maze queueing evolution algorithm
             AbstractEvolutionAlgorithm<MazeGenome> mazeEvolutionAlgorithm =
-                new QueueingNeatEvolutionAlgorithm<MazeGenome>(
-                    new NeatEvolutionAlgorithmParameters
-                    {
-                        SpecieCount = MazeNumSpecies,
-                        MaxSpecieSize =
-                            MazeNumSpecies > 0 ? MazeDefaultPopulationSize/MazeNumSpecies : MazeDefaultPopulationSize
-                    },
+                new QueueingEvolutionAlgorithm<MazeGenome>(
+                    mazeEaParams,
+                    new MazeAlgorithmStats(mazeEaParams), 
                     new ParallelKMeansClusteringStrategy<MazeGenome>(new ManhattanDistanceMetric(1.0, 0.0, 10.0),
                         ParallelOptions), null,
                     MazeBatchSize, RunPhase.Primary, false, false, _mazeEvolutionDataLogger, _mazeLogFieldEnableMap,

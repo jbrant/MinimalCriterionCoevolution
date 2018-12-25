@@ -93,7 +93,7 @@ namespace MCC_Executor.MazeNavigation
     /// </summary>
     public class MazeNavigationExperimentExecutor
     {
-        private static INeatEvolutionAlgorithm<NeatGenome> _ea;
+        private static IComplexifyingEvolutionAlgorithm<NeatGenome> _ea;
         private static IMCCAlgorithmContainer<NeatGenome, MazeGenome> _imccEaContainer;
         private static ILog _executionLogger;
 

@@ -22,7 +22,7 @@ namespace SharpNeat.EvolutionAlgorithms
     ///     - Creating offspring via both sexual and asexual reproduction.
     /// </summary>
     /// <typeparam name="TGenome">The genome type that the algorithm will operate on.</typeparam>
-    public class SteadyStateNeatEvolutionAlgorithm<TGenome> : AbstractNeatEvolutionAlgorithm<TGenome>
+    public class SteadyStateComplexifyingEvolutionAlgorithm<TGenome> : AbstractComplexifyingEvolutionAlgorithm<TGenome>
         where TGenome : class, IGenome<TGenome>
     {
         #region Overridden Methods
@@ -33,7 +33,7 @@ namespace SharpNeat.EvolutionAlgorithms
         public override void PerformOneGeneration()
         {
             // Re-evaluate the fitness of the population after the specified number of evaluations have elapsed
-            if (CurrentGeneration%_populationEvaluationFrequency == 0)
+            if (CurrentGeneration % _populationEvaluationFrequency == 0)
             {
                 // Evaluate all genomes fitness, but don't run the simulation 
                 // (this ensures that the total number of evaluations is not incremented)
@@ -190,15 +190,11 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     The experiment phase indicating whether this is an initialization process or the primary
         ///     algorithm.
         /// </param>
-        public SteadyStateNeatEvolutionAlgorithm(IDataLogger logger = null, RunPhase runPhase = RunPhase.Primary)
+        public SteadyStateComplexifyingEvolutionAlgorithm(IDataLogger logger = null, RunPhase runPhase = RunPhase.Primary)
             : this(
                 new KMeansClusteringStrategy<TGenome>(new ManhattanDistanceMetric()),
                 new NullComplexityRegulationStrategy(), 10, 100, runPhase, logger)
         {
-            SpeciationStrategy = new KMeansClusteringStrategy<TGenome>(new ManhattanDistanceMetric());
-            ComplexityRegulationStrategy = new NullComplexityRegulationStrategy();
-            _batchSize = 10;
-            _populationEvaluationFrequency = 100;
         }
 
         /// <summary>
@@ -217,7 +213,7 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <param name="logFieldEnabledMap">Dictionary of logging fields that can be dynamically enabled or disabled.</param>
         /// <param name="populationLogger">The data logger for serializing the contents of the extant population (optional).</param>
         /// <param name="populationLoggingInterval">The interval at which the population should be logged.</param>
-        public SteadyStateNeatEvolutionAlgorithm(
+        public SteadyStateComplexifyingEvolutionAlgorithm(
             ISpeciationStrategy<TGenome> speciationStrategy,
             IComplexityRegulationStrategy complexityRegulationStrategy,
             int batchSize,
@@ -226,17 +222,10 @@ namespace SharpNeat.EvolutionAlgorithms
             IDataLogger logger = null,
             IDictionary<FieldElement, bool> logFieldEnabledMap = null,
             IDataLogger populationLogger = null,
-            int? populationLoggingInterval = null)
+            int? populationLoggingInterval = null) : this(new EvolutionAlgorithmParameters(), speciationStrategy,
+            complexityRegulationStrategy, batchSize, populationEvaluationFrequency, runPhase, logger,
+            logFieldEnabledMap, populationLogger, populationLoggingInterval)
         {
-            SpeciationStrategy = speciationStrategy;
-            ComplexityRegulationStrategy = complexityRegulationStrategy;
-            _batchSize = batchSize;
-            _populationEvaluationFrequency = populationEvaluationFrequency;
-            RunPhase = runPhase;
-            EvolutionLogger = logger;
-            _logFieldEnabledMap = logFieldEnabledMap;
-            PopulationLogger = populationLogger;
-            PopulationLoggingInterval = populationLoggingInterval;
         }
 
         /// <summary>
@@ -256,7 +245,7 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <param name="logFieldEnabledMap">Dictionary of logging fields that can be dynamically enabled or disabled.</param>
         /// <param name="populationLogger">The data logger for serializing the contents of the extant population (optional).</param>
         /// <param name="populationLoggingInterval">The interval at which the population should be logged.</param>
-        public SteadyStateNeatEvolutionAlgorithm(NeatEvolutionAlgorithmParameters eaParams,
+        public SteadyStateComplexifyingEvolutionAlgorithm(EvolutionAlgorithmParameters eaParams,
             ISpeciationStrategy<TGenome> speciationStrategy,
             IComplexityRegulationStrategy complexityRegulationStrategy,
             int batchSize,
@@ -264,7 +253,7 @@ namespace SharpNeat.EvolutionAlgorithms
             RunPhase runPhase = RunPhase.Primary,
             IDataLogger logger = null, IDictionary<FieldElement, bool> logFieldEnabledMap = null,
             IDataLogger populationLogger = null,
-            int? populationLoggingInterval = null) : base(eaParams)
+            int? populationLoggingInterval = null) : base(eaParams, new Statistics.NeatAlgorithmStats(eaParams))
         {
             SpeciationStrategy = speciationStrategy;
             ComplexityRegulationStrategy = complexityRegulationStrategy;

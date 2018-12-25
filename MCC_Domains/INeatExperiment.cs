@@ -68,7 +68,7 @@ namespace MCC_Domains
         ///     modified. Calls to CreateEvolutionAlgorithm() make a copy of and use this object in whatever state it is in
         ///     at the time of the call.
         /// </summary>
-        NeatEvolutionAlgorithmParameters NeatEvolutionAlgorithmParameters { get; }
+        EvolutionAlgorithmParameters EvolutionAlgorithmParameters { get; }
 
         /// <summary>
         ///     Gets the NeatGenomeParameters to be used for the experiment. Parameters on this object can be modified. Calls
@@ -115,7 +115,7 @@ namespace MCC_Domains
         ///     sub-parts of the algorithm are also constructed and connected up.
         ///     Uses the experiments default population size defined in the experiment's config XML.
         /// </summary>
-        INeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm();
+        IComplexifyingEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm();
 
         /// <summary>
         ///     Create and return a NeatEvolutionAlgorithm object ready for running the NEAT algorithm/search. Various
@@ -123,14 +123,14 @@ namespace MCC_Domains
         ///     This overload accepts a population size parameter that specifies how many genomes to create in an initial randomly
         ///     generated population.
         /// </summary>
-        INeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(int populationSize);
+        IComplexifyingEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(int populationSize);
 
         /// <summary>
         ///     Create and return a NeatEvolutionAlgorithm object ready for running the NEAT algorithm/search. Various
         ///     sub-parts of the algorithm are also constructed and connected up.
         ///     This overload accepts a pre-built genome population and their associated/parent genome factory.
         /// </summary>
-        INeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(IGenomeFactory<NeatGenome> genomeFactory,
+        IComplexifyingEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(IGenomeFactory<NeatGenome> genomeFactory,
             List<NeatGenome> genomeList);
 
         /// <summary>
@@ -138,7 +138,7 @@ namespace MCC_Domains
         ///     sub-parts of the algorithm are also constructed and connected up.
         ///     This overload accepts a pre-built genome population and their associated/parent genome factory.
         /// </summary>
-        INeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(IGenomeFactory<NeatGenome> genomeFactory,
+        IComplexifyingEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(IGenomeFactory<NeatGenome> genomeFactory,
             List<NeatGenome> genomeList, ulong startingEvaluations);
     }
 }

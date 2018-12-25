@@ -40,7 +40,7 @@ namespace SharpNeat.EvolutionAlgorithms
     ///     - Creating offspring via both sexual and asexual reproduction.
     /// </summary>
     /// <typeparam name="TGenome">The genome type that the algorithm will operate on.</typeparam>
-    public class GenerationalNeatEvolutionAlgorithm<TGenome> : AbstractNeatEvolutionAlgorithm<TGenome>
+    public class GenerationalComplexifyingEvolutionAlgorithm<TGenome> : AbstractComplexifyingEvolutionAlgorithm<TGenome>
         where TGenome : class, IGenome<TGenome>
     {
         #region Evolution Algorithm Main Method [PerformOneGeneration]
@@ -94,6 +94,7 @@ namespace SharpNeat.EvolutionAlgorithms
                 // Integrate offspring into the existing species. 
                 SpeciationStrategy.SpeciateOffspring(offspringList, SpecieList, true);
             }
+
             Debug.Assert(!SpeciationUtils<TGenome>.TestEmptySpecies(SpecieList),
                 "Speciation resulted in one or more empty species.");
 
@@ -155,6 +156,7 @@ namespace SharpNeat.EvolutionAlgorithms
                     emptySpeciesFlag = true;
                 }
             }
+
             return emptySpeciesFlag;
         }
 
@@ -172,7 +174,7 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     algorithm.
         /// </param>
         /// <param name="logger">The data logger (optional).</param>
-        public GenerationalNeatEvolutionAlgorithm(RunPhase runPhase = RunPhase.Primary, IDataLogger logger = null)
+        public GenerationalComplexifyingEvolutionAlgorithm(RunPhase runPhase = RunPhase.Primary, IDataLogger logger = null)
             : this(
                 new KMeansClusteringStrategy<TGenome>(new ManhattanDistanceMetric()),
                 new NullComplexityRegulationStrategy(), runPhase, logger)
@@ -190,7 +192,7 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </param>
         /// <param name="eaParams">The NEAT parameters to use for controlling evolution.</param>
         /// <param name="logger">The data logger (optional).</param>
-        public GenerationalNeatEvolutionAlgorithm(NeatEvolutionAlgorithmParameters eaParams,
+        public GenerationalComplexifyingEvolutionAlgorithm(EvolutionAlgorithmParameters eaParams,
             RunPhase runPhase = RunPhase.Primary, IDataLogger logger = null)
             : this(
                 eaParams, new KMeansClusteringStrategy<TGenome>(new ManhattanDistanceMetric()),
@@ -209,9 +211,9 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     algorithm.
         /// </param>
         /// <param name="logger">The data logger (optional).</param>
-        public GenerationalNeatEvolutionAlgorithm(ISpeciationStrategy<TGenome> speciationStrategy,
+        public GenerationalComplexifyingEvolutionAlgorithm(ISpeciationStrategy<TGenome> speciationStrategy,
             IComplexityRegulationStrategy complexityRegulationStrategy, RunPhase runPhase = RunPhase.Primary,
-            IDataLogger logger = null)
+            IDataLogger logger = null) : this(new EvolutionAlgorithmParameters(), runPhase, logger)
         {
             SpeciationStrategy = speciationStrategy;
             ComplexityRegulationStrategy = complexityRegulationStrategy;
@@ -230,10 +232,10 @@ namespace SharpNeat.EvolutionAlgorithms
         ///     algorithm.
         /// </param>
         /// <param name="logger">The data logger (optional).</param>
-        public GenerationalNeatEvolutionAlgorithm(NeatEvolutionAlgorithmParameters eaParams,
+        public GenerationalComplexifyingEvolutionAlgorithm(EvolutionAlgorithmParameters eaParams,
             ISpeciationStrategy<TGenome> speciationStrategy,
             IComplexityRegulationStrategy complexityRegulationStrategy, RunPhase runPhase = RunPhase.Primary,
-            IDataLogger logger = null) : base(eaParams)
+            IDataLogger logger = null) : base(eaParams, new Statistics.NeatAlgorithmStats(eaParams))
         {
             SpeciationStrategy = speciationStrategy;
             ComplexityRegulationStrategy = complexityRegulationStrategy;
@@ -278,7 +280,7 @@ namespace SharpNeat.EvolutionAlgorithms
             {
                 // Handle specific case where all genomes/species have a zero fitness. 
                 // Assign all species an equal targetSize.
-                double targetSizeReal = PopulationSize/(double) specieCount;
+                double targetSizeReal = PopulationSize / (double) specieCount;
 
                 for (int i = 0; i < specieCount; i++)
                 {
@@ -299,7 +301,7 @@ namespace SharpNeat.EvolutionAlgorithms
                 for (int i = 0; i < specieCount; i++)
                 {
                     SpecieStats inst = specieStatsArr[i];
-                    inst.TargetSizeReal = (inst.MeanFitness/totalMeanFitness)*PopulationSize;
+                    inst.TargetSizeReal = (inst.MeanFitness / totalMeanFitness) * PopulationSize;
 
                     // Discretize targetSize (stochastic rounding).
                     inst.TargetSizeInt = (int) Utilities.ProbabilisticRound(inst.TargetSizeReal, RandomNumGenerator);
@@ -438,6 +440,7 @@ namespace SharpNeat.EvolutionAlgorithms
                                 break;
                             }
                         }
+
                         if (!done)
                         {
                             throw new SharpNeatException(
@@ -461,7 +464,7 @@ namespace SharpNeat.EvolutionAlgorithms
                 }
 
                 // Discretize the real size with a probabilistic handling of the fractional part.
-                double eliteSizeReal = SpecieList[i].GenomeList.Count*EaParams.ElitismProportion;
+                double eliteSizeReal = SpecieList[i].GenomeList.Count * EaParams.ElitismProportion;
                 int eliteSizeInt = (int) Utilities.ProbabilisticRound(eliteSizeReal, RandomNumGenerator);
 
                 // Ensure eliteSizeInt is no larger than the current target size (remember it was calculated 
@@ -484,14 +487,14 @@ namespace SharpNeat.EvolutionAlgorithms
 
                 // While we're here we determine the split between asexual and sexual reproduction. Again using 
                 // some probabilistic logic to compensate for any rounding bias.
-                double offspringAsexualCountReal = inst.OffspringCount*EaParams.OffspringAsexualProportion;
+                double offspringAsexualCountReal = inst.OffspringCount * EaParams.OffspringAsexualProportion;
                 inst.OffspringAsexualCount =
                     (int) Utilities.ProbabilisticRound(offspringAsexualCountReal, RandomNumGenerator);
                 inst.OffspringSexualCount = inst.OffspringCount - inst.OffspringAsexualCount;
 
                 // Also while we're here we calculate the selectionSize. The number of the specie's fittest genomes
                 // that are selected from to create offspring. This should always be at least 1.
-                double selectionSizeReal = SpecieList[i].GenomeList.Count*EaParams.SelectionProportion;
+                double selectionSizeReal = SpecieList[i].GenomeList.Count * EaParams.SelectionProportion;
                 inst.SelectionSize = Math.Max(1,
                     (int) Utilities.ProbabilisticRound(selectionSizeReal, RandomNumGenerator));
             }
@@ -535,6 +538,7 @@ namespace SharpNeat.EvolutionAlgorithms
                 {
                     probabilities[j] = genomeList[j].EvaluationInfo.Fitness;
                 }
+
                 rwlArr[i] = new RouletteWheelLayout(probabilities);
             }
 
@@ -558,6 +562,7 @@ namespace SharpNeat.EvolutionAlgorithms
                     TGenome offspring = genomeList[genomeIdx].CreateOffspring(CurrentGeneration);
                     offspringList.Add(offspring);
                 }
+
                 Statistics._asexualOffspringCount += (ulong) inst.OffspringAsexualCount;
 
                 // --- Produce the required number of offspring from sexual reproduction.
@@ -567,7 +572,7 @@ namespace SharpNeat.EvolutionAlgorithms
                 int crossSpecieMatings = nonZeroSpecieCount == 1
                     ? 0
                     : (int) Utilities.ProbabilisticRound(EaParams.InterspeciesMatingProportion
-                                                         *inst.OffspringSexualCount, RandomNumGenerator);
+                                                         * inst.OffspringSexualCount, RandomNumGenerator);
                 Statistics._sexualOffspringCount += (ulong) (inst.OffspringSexualCount - crossSpecieMatings);
                 Statistics._interspeciesOffspringCount += (ulong) crossSpecieMatings;
 
@@ -575,7 +580,8 @@ namespace SharpNeat.EvolutionAlgorithms
                 int matingsCount = 0;
                 for (; matingsCount < crossSpecieMatings; matingsCount++)
                 {
-                    TGenome offspring = CreateOffspring_CrossSpecieMating(rwl, rwlArr, rwlSpecies, specieIdx, genomeList);
+                    TGenome offspring =
+                        CreateOffspring_CrossSpecieMating(rwl, rwlArr, rwlSpecies, specieIdx, genomeList);
                     offspringList.Add(offspring);
                 }
 
