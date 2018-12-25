@@ -107,8 +107,8 @@ namespace MCC_Domains.MazeNavigation.Bootstrappers
                        RunState.Paused != InitializationEa.RunState)
                 {
                     Console.WriteLine(@"Current Evaluations: {0}  Mean Complexity: {1}  Closest Genome Distance: {2}",
-                        InitializationEa.CurrentEvaluations, InitializationEa.Statistics._meanComplexity,
-                        MaxDistanceToTarget - InitializationEa.Statistics._maxFitness);
+                        InitializationEa.CurrentEvaluations, InitializationEa.Statistics.MeanComplexity,
+                        MaxDistanceToTarget - InitializationEa.Statistics.MaxFitness);
 
                     if (InitializationEa.CurrentEvaluations >= maxEvaluations)
                     {

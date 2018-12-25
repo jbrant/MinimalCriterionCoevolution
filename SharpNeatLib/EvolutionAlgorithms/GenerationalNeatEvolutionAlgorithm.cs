@@ -563,7 +563,7 @@ namespace SharpNeat.EvolutionAlgorithms
                     offspringList.Add(offspring);
                 }
 
-                Statistics._asexualOffspringCount += (ulong) inst.OffspringAsexualCount;
+                Statistics.AsexualOffspringCount += (ulong) inst.OffspringAsexualCount;
 
                 // --- Produce the required number of offspring from sexual reproduction.
                 // Cross-specie mating.
@@ -573,8 +573,8 @@ namespace SharpNeat.EvolutionAlgorithms
                     ? 0
                     : (int) Utilities.ProbabilisticRound(EaParams.InterspeciesMatingProportion
                                                          * inst.OffspringSexualCount, RandomNumGenerator);
-                Statistics._sexualOffspringCount += (ulong) (inst.OffspringSexualCount - crossSpecieMatings);
-                Statistics._interspeciesOffspringCount += (ulong) crossSpecieMatings;
+                Statistics.SexualOffspringCount += (ulong) (inst.OffspringSexualCount - crossSpecieMatings);
+                Statistics.InterspeciesOffspringCount += (ulong) crossSpecieMatings;
 
                 // An index that keeps track of how many offspring have been produced in total.
                 int matingsCount = 0;
@@ -627,7 +627,7 @@ namespace SharpNeat.EvolutionAlgorithms
                 }
             }
 
-            Statistics._totalOffspringCount += (ulong) offspringCount;
+            Statistics.TotalOffspringCount += (ulong) offspringCount;
             return offspringList;
         }
 

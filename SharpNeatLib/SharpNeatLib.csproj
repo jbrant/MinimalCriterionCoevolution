@@ -191,7 +191,6 @@
     <Compile Include="EvolutionAlgorithms\ComplexityRegulation\IComplexityRegulationStrategy.cs" />
     <Compile Include="EvolutionAlgorithms\ComplexityRegulation\NullComplexityRegulationStrategy.cs" />
     <Compile Include="Core\IComplexifyingEvolutionAlgorithm.cs" />
-    <Compile Include="EvolutionAlgorithms\NeatAlgorithmStats.cs" />
     <None Include="DeadCode\PhasedSearch\Triggers\AbsoluteMeanComplexityCeilingTrigger.cs" />
     <None Include="DeadCode\PhasedSearch\Triggers\SimplificationStallGenerationsTrigger.cs" />
     <None Include="DeadCode\PhasedSearch\Triggers\ElapsedClockTimeTrigger.cs" />

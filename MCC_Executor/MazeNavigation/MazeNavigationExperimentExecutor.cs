@@ -592,9 +592,9 @@ namespace MCC_Executor.MazeNavigation
                         "Generation={0:N0} Evaluations={1:N0} Population1BestFitness={2:N2} Population1MaxComplexity={3:N2} Population2BestFitness={4:N2}, Population2MaxComplexity={5:N2}",
                         _imccEaContainer.CurrentGeneration, _imccEaContainer.CurrentEvaluations,
                         _imccEaContainer.Population1CurrentChampGenome.EvaluationInfo.Fitness,
-                        _imccEaContainer.Population1Statistics._maxComplexity,
+                        _imccEaContainer.Population1Statistics.MaxComplexity,
                         _imccEaContainer.Population2CurrentChampGenome.EvaluationInfo.Fitness,
-                        _imccEaContainer.Population2Statistics._maxComplexity));
+                        _imccEaContainer.Population2Statistics.MaxComplexity));
             }
         }
 

@@ -413,7 +413,7 @@ namespace SharpNeat.EvolutionAlgorithms
             }
 
             // Update the total offspring count based on the number of *viable* offspring produced
-            Statistics._totalOffspringCount = (ulong) childGenomes.Count;
+            Statistics.TotalOffspringCount = (ulong) childGenomes.Count;
 
             // Don't speciate until the queue size is greater than the desired number of species
             if (SpecieList != null && GenomeList.Count > SpecieList.Count)

@@ -1,58 +1,74 @@
 // This is a test of setting the file header.
 
+#region
+
 using System;
+using System.Collections.Generic;
 using Redzen.Structures;
 using SharpNeat.Core;
 
+#endregion
+
 namespace SharpNeat.EvolutionAlgorithms.Statistics
 {
+    /// <summary>
+    ///     Encapsulates generic, descriptive statistics about the state of an evolutionary algorithm.
+    /// </summary>
     public interface IEvolutionAlgorithmStats : ILoggable
     {
+        /// <summary>
+        ///     Computes genome implementation-specific details about the population.
+        /// </summary>
+        /// <param name="population">The population from which to compute more specific, descriptive statistics.</param>
+        /// <typeparam name="TGenome">The genome type generic.</typeparam>
+        void ComputeAlgorithmSpecificPopulationStats<TGenome>(IList<TGenome> population)
+            where TGenome : IGenome<TGenome>;
+
         #region General Stats
 
         /// <summary>
         ///     The current generation number.
         /// </summary>
-        uint _generation { get; set; }
+        uint Generation { get; set; }
 
         /// <summary>
         ///     The total number of genome evaluations for the current NEAT search.
         /// </summary>
-        ulong _totalEvaluationCount { get; set; }
+        ulong TotalEvaluationCount { get; set; }
 
         /// <summary>
         ///     Current evaluations per second reading.
         /// </summary>
-        int _evaluationsPerSec { get; set; }
+        int EvaluationsPerSec { get; set; }
 
         /// <summary>
         ///     The clock time of the last update to _evaluationsPerSec.
         /// </summary>
-        DateTime _evalsPerSecLastSampleTime { get; set; }
+        DateTime EvalsPerSecLastSampleTime { get; set; }
 
         /// <summary>
         ///     The total evaluation count at the last update to _evaluationsPerSec.
         /// </summary>
-        ulong _evalsCountAtLastUpdate { get; set; }
+        ulong EvalsCountAtLastUpdate { get; set; }
 
         #endregion
-        
+
         #region Fitness Stats
 
         /// <summary>
         ///     The fitness of the best genome.
         /// </summary>
-        double _maxFitness { get; set; }
+        double MaxFitness { get; set; }
 
         /// <summary>
         ///     The mean genome fitness.
         /// </summary>
-        double _meanFitness { get; set; }
+        double MeanFitness { get; set; }
 
         /// <summary>
         ///     The mean fitness of current specie champions.
         /// </summary>
-        double _meanSpecieChampFitness { get; set; }
+        double MeanSpecieChampFitness { get; set; }
 
         #endregion
 
@@ -61,17 +77,17 @@ namespace SharpNeat.EvolutionAlgorithms.Statistics
         /// <summary>
         ///     The complexity of the least complex genome.
         /// </summary>
-        double _minComplexity { get; set; }
+        double MinComplexity { get; set; }
 
         /// <summary>
         ///     The complexity of the most complex genome.
         /// </summary>
-        double _maxComplexity { get; set; }
+        double MaxComplexity { get; set; }
 
         /// <summary>
         ///     The mean genome complexity.
         /// </summary>
-        double _meanComplexity { get; set; }
+        double MeanComplexity { get; set; }
 
         #endregion
 
@@ -80,23 +96,23 @@ namespace SharpNeat.EvolutionAlgorithms.Statistics
         /// <summary>
         ///     Total number of offspring created in the lifetime of a NEAT search.
         /// </summary>
-        ulong _totalOffspringCount { get; set; }
+        ulong TotalOffspringCount { get; set; }
 
         /// <summary>
         ///     Total number of genomes created from asexual reproduction.
         /// </summary>
-        ulong _asexualOffspringCount { get; set; }
+        ulong AsexualOffspringCount { get; set; }
 
         /// <summary>
         ///     Total number of genomes created from sexual reproduction. This includes
         ///     the number of offspring created from interspecies reproduction.
         /// </summary>
-        ulong _sexualOffspringCount { get; set; }
+        ulong SexualOffspringCount { get; set; }
 
         /// <summary>
         ///     Total number of genomes created from interspecies sexual reproduction.
         /// </summary>
-        ulong _interspeciesOffspringCount { get; set; }
+        ulong InterspeciesOffspringCount { get; set; }
 
         #endregion
 
@@ -105,12 +121,12 @@ namespace SharpNeat.EvolutionAlgorithms.Statistics
         /// <summary>
         ///     The number of genomes in the smallest specie.
         /// </summary>
-        int _minSpecieSize { get; set; }
+        int MinSpecieSize { get; set; }
 
         /// <summary>
         ///     The number of genomes in the largest specie.
         /// </summary>
-        int _maxSpecieSize { get; set; }
+        int MaxSpecieSize { get; set; }
 
         #endregion
 
@@ -119,37 +135,37 @@ namespace SharpNeat.EvolutionAlgorithms.Statistics
         /// <summary>
         ///     A buffer of the N most recent best fitness values. Allows the calculation of a moving average.
         /// </summary>
-        DoubleCircularBufferWithStats _bestFitnessMA { get; set; }
+        DoubleCircularBufferWithStats BestFitnessMa { get; set; }
 
         /// <summary>
         ///     A buffer of the N most recent mean specie champ fitness values (the average fitness of all specie champs).
         ///     Allows the calculation of a moving average.
         /// </summary>
-        DoubleCircularBufferWithStats _meanSpecieChampFitnessMA { get; set; }
+        DoubleCircularBufferWithStats MeanSpecieChampFitnessMa { get; set; }
 
         /// <summary>
         ///     A buffer of the N most recent population mean complexity values.
         ///     Allows the calculation of a moving average.
         /// </summary>
-        DoubleCircularBufferWithStats _complexityMA { get; set; }
+        DoubleCircularBufferWithStats ComplexityMa { get; set; }
 
         /// <summary>
         ///     The previous moving average value for the 'best fitness' series. Allows testing for fitness stalling by comparing
         ///     with the current MA value.
         /// </summary>
-        double _prevBestFitnessMA { get; set; }
+        double PrevBestFitnessMa { get; set; }
 
         /// <summary>
         ///     The previous moving average value for the 'mean specie champ fitness' series. Allows testing for fitness stalling
         ///     by comparing with the current MA value.
         /// </summary>
-        double _prevMeanSpecieChampFitnessMA { get; set; }
+        double PrevMeanSpecieChampFitnessMa { get; set; }
 
         /// <summary>
         ///     The previous moving average value for the complexity series. Allows testing for stalling during the simplification
         ///     phase of complexity regulation.
         /// </summary>
-        double _prevComplexityMA { get; set; }
+        double PrevComplexityMa { get; set; }
 
         #endregion
     }

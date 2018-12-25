@@ -244,7 +244,7 @@ namespace SharpNeat.EvolutionAlgorithms
             UpdateStats(true);
 
             // Update the total offspring count based on the number of *viable* offspring produced
-            Statistics._totalOffspringCount = (ulong) childGenomes.Count;
+            Statistics.TotalOffspringCount = (ulong) childGenomes.Count;
 
             // Ensure that the 
             Debug.Assert(GenomeList.Count <= PopulationSize);
