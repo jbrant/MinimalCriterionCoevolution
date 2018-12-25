@@ -506,8 +506,8 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
                     SelectionType.Queueing, SearchType.MinimalCriteriaSearch, ParallelOptions);
 
             // Create the MCC container
-            SharpNeat.Core.IMCCAlgorithmContainer<NeatGenome, MazeGenome> imccAlgorithmContainer =
-                new SharpNeat.EvolutionAlgorithms.MCCAlgorithmContainer<NeatGenome, MazeGenome>(neatEvolutionAlgorithm, mazeEvolutionAlgorithm);
+            IMCCAlgorithmContainer<NeatGenome, MazeGenome> imccAlgorithmContainer =
+                new MCCAlgorithmContainer<NeatGenome, MazeGenome>(neatEvolutionAlgorithm, mazeEvolutionAlgorithm);
 
             // Initialize the container and component algorithms
             imccAlgorithmContainer.Initialize(navigatorFitnessEvaluator, genomeFactory1, seedAgentPopulation,
