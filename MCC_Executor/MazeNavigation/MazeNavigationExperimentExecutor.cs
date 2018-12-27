@@ -91,16 +91,16 @@ namespace MCC_Executor.MazeNavigation
     /// <summary>
     ///     Handles automated, command-line execution for all maze navigation based experiments.
     /// </summary>
-    public class MazeNavigationExperimentExecutor
+    public static class MazeNavigationExperimentExecutor
     {
         private static IComplexifyingEvolutionAlgorithm<NeatGenome> _ea;
-        private static IMCCAlgorithmContainer<NeatGenome, MazeGenome> _imccEaContainer;
+        private static IMCCAlgorithmContainer<NeatGenome, MazeGenome> _mccEaContainer;
         private static ILog _executionLogger;
 
-        private static readonly Dictionary<ExecutionParameter, String> _executionConfiguration =
+        private static readonly Dictionary<ExecutionParameter, string> _executionConfiguration =
             new Dictionary<ExecutionParameter, string>();
 
-        public static void execute(string[] args)
+        public static void Execute(string[] args)
         {
             // Initialise log4net (log to console and file).
             XmlConfigurator.Configure(new FileInfo("log4net.properties"));
@@ -115,7 +115,7 @@ namespace MCC_Executor.MazeNavigation
             // Determine whether this is a distributed execution
             var isDistributedExecution =
                 _executionConfiguration.ContainsKey(ExecutionParameter.IsDistributedExecution) &&
-                Boolean.Parse(_executionConfiguration[ExecutionParameter.IsDistributedExecution]);
+                bool.Parse(_executionConfiguration[ExecutionParameter.IsDistributedExecution]);
 
             // Set the execution source (file or database)
             var executionSource = _executionConfiguration[ExecutionParameter.ExperimentSource].ToLowerInvariant();
@@ -124,15 +124,11 @@ namespace MCC_Executor.MazeNavigation
             // will only execute a single run, so the number of runs will be equivalent to the run to start from
             // (this ensures that the ensuing loop that executes all of the runs executes exactly once)
             var startFromRun = _executionConfiguration.ContainsKey(ExecutionParameter.StartFromRun)
-                ? Int32.Parse(_executionConfiguration[ExecutionParameter.StartFromRun])
+                ? int.Parse(_executionConfiguration[ExecutionParameter.StartFromRun])
                 : 1;
             var numRuns = isDistributedExecution
                 ? startFromRun
-                : Int32.Parse(_executionConfiguration[ExecutionParameter.NumRuns]);
-
-            // Determine whether to log organism state data
-            var logOrganismStateData = _executionConfiguration.ContainsKey(ExecutionParameter.LogOrganismStateData) &&
-                                       Boolean.Parse(_executionConfiguration[ExecutionParameter.LogOrganismStateData]);
+                : int.Parse(_executionConfiguration[ExecutionParameter.NumRuns]);
 
             // Array of initial genome population files
 
@@ -216,7 +212,7 @@ namespace MCC_Executor.MazeNavigation
                 foreach (var executionArgument in executionArguments)
                 {
                     // Get the key/value pair
-                    string[] parameterValuePair = executionArgument.Split('=');
+                    var parameterValuePair = executionArgument.Split('=');
 
                     // Attempt to parse the current parameter
                     isConfigurationValid =
@@ -254,8 +250,7 @@ namespace MCC_Executor.MazeNavigation
                         // Ensure that a valid number of runs was specified
                         case ExecutionParameter.NumRuns:
                         case ExecutionParameter.StartFromRun:
-                            int testInt;
-                            if (Int32.TryParse(parameterValuePair[1], out testInt) == false)
+                            if (int.TryParse(parameterValuePair[1], out _) == false)
                             {
                                 _executionLogger.Error($"The value for parameter [{curParameter}] must be an integer.");
                                 isConfigurationValid = false;
@@ -267,8 +262,7 @@ namespace MCC_Executor.MazeNavigation
                         case ExecutionParameter.GeneratePopulation:
                         case ExecutionParameter.LogOrganismStateData:
                         case ExecutionParameter.IsDistributedExecution:
-                            bool testBool;
-                            if (Boolean.TryParse(parameterValuePair[1], out testBool) == false)
+                            if (bool.TryParse(parameterValuePair[1], out _) == false)
                             {
                                 _executionLogger.Error($"The value for parameter [{curParameter}] must be a boolean.");
                                 isConfigurationValid = false;
@@ -424,7 +418,7 @@ namespace MCC_Executor.MazeNavigation
             }
 
             // Instantiate XML reader for configuration file
-            XmlDocument xmlConfig = new XmlDocument();
+            var xmlConfig = new XmlDocument();
             xmlConfig.Load(experimentConfigurationFiles[0]);
 
             // Determine which experiment to execute
@@ -461,21 +455,19 @@ namespace MCC_Executor.MazeNavigation
                     throw new NotImplementedException("Currently unable to read in serialized maze genomes.");
                 }
 
-                // Otherwise, generate the starting population
                 // Create a new agent genome factory
-                IGenomeFactory<NeatGenome> agentGenomeFactory = experiment.CreateAgentGenomeFactory();
+                var agentGenomeFactory = experiment.CreateAgentGenomeFactory();
 
                 // Create a new maze genome factory
-                IGenomeFactory<MazeGenome> mazeGenomeFactory = experiment.CreateMazeGenomeFactory();
+                var mazeGenomeFactory = experiment.CreateMazeGenomeFactory();
 
                 // Generate the initial agent population
-                List<NeatGenome> agentGenomeList =
-                    agentGenomeFactory.CreateGenomeList(experiment.AgentInitializationGenomeCount,
-                        0);
+                var agentGenomeList = agentGenomeFactory.CreateGenomeList(experiment.AgentInitializationGenomeCount, 0);
 
                 // Read in the seed population
-                List<MazeGenome> mazeGenomeList = ExperimentUtils.ReadSeedMazeGenomes(seedMazePath,
-                    (MazeGenomeFactory) mazeGenomeFactory).Take(experiment.MazeSeedGenomeCount).ToList();
+                var mazeGenomeList = ExperimentUtils
+                    .ReadSeedMazeGenomes(seedMazePath, (MazeGenomeFactory) mazeGenomeFactory)
+                    .Take(experiment.MazeSeedGenomeCount).ToList();
 
                 // Check for insufficient number of genomes in the seed maze file
                 if (mazeGenomeList.Count < experiment.MazeSeedGenomeCount)
@@ -522,10 +514,10 @@ namespace MCC_Executor.MazeNavigation
             try
             {
                 // Create evolution algorithm and attach update event.
-                _imccEaContainer = experiment.CreateMCCAlgorithmContainer(agentGenomeFactory,
+                _mccEaContainer = experiment.CreateMCCAlgorithmContainer(agentGenomeFactory,
                     mazeGenomeFactory, agentGenomeList,
                     mazeGenomeList);
-                _imccEaContainer.UpdateEvent += ImccContainerUpdateEvent;
+                _mccEaContainer.UpdateEvent += MccContainerUpdateEvent;
             }
             catch (Exception exception)
             {
@@ -537,10 +529,10 @@ namespace MCC_Executor.MazeNavigation
             _executionLogger.Info($"Executing Experiment {experimentName}, Run {runIdx} of {numRuns}");
 
             // Start algorithm (it will run on a background thread).
-            _imccEaContainer.StartContinue();
+            _mccEaContainer.StartContinue();
 
-            while (RunState.Terminated != _imccEaContainer.RunState &&
-                   RunState.Paused != _imccEaContainer.RunState)
+            while (RunState.Terminated != _mccEaContainer.RunState &&
+                   RunState.Paused != _mccEaContainer.RunState)
             {
                 Thread.Sleep(2000);
             }
@@ -551,13 +543,13 @@ namespace MCC_Executor.MazeNavigation
         /// </summary>
         /// <param name="sender">Sender</param>
         /// <param name="e">Event arguments</param>
-        private static void ImccContainerUpdateEvent(object sender, EventArgs e)
+        private static void MccContainerUpdateEvent(object sender, EventArgs e)
         {
-            if (_imccEaContainer.Population1CurrentChampGenome != null &&
-                _imccEaContainer.Population2CurrentChampGenome != null)
+            if (_mccEaContainer.Population1CurrentChampGenome != null &&
+                _mccEaContainer.Population2CurrentChampGenome != null)
             {
                 _executionLogger.Info(
-                    $"Generation={_imccEaContainer.CurrentGeneration:N0} Evaluations={_imccEaContainer.CurrentEvaluations:N0} Population1BestFitness={_imccEaContainer.Population1CurrentChampGenome.EvaluationInfo.Fitness:N2} Population1MaxComplexity={_imccEaContainer.Population1Statistics.MaxComplexity:N2} Population2BestFitness={_imccEaContainer.Population2CurrentChampGenome.EvaluationInfo.Fitness:N2}, Population2MaxComplexity={_imccEaContainer.Population2Statistics.MaxComplexity:N2}");
+                    $"Generation={_mccEaContainer.CurrentGeneration:N0} Evaluations={_mccEaContainer.CurrentEvaluations:N0} Population1BestFitness={_mccEaContainer.Population1CurrentChampGenome.EvaluationInfo.Fitness:N2} Population1MaxComplexity={_mccEaContainer.Population1Statistics.MaxComplexity:N2} Population2BestFitness={_mccEaContainer.Population2CurrentChampGenome.EvaluationInfo.Fitness:N2}, Population2MaxComplexity={_mccEaContainer.Population2Statistics.MaxComplexity:N2}");
             }
         }
 
@@ -567,8 +559,7 @@ namespace MCC_Executor.MazeNavigation
         /// </summary>
         /// <param name="xmlConfig">The reference to the root node of the XML configuration file.</param>
         /// <returns>The appropriate maze navigation experiment class.</returns>
-        private static BaseMCCMazeNavigationExperiment DetermineMCCMazeNavigationExperiment(
-            XmlElement xmlConfig)
+        private static BaseMCCMazeNavigationExperiment DetermineMCCMazeNavigationExperiment(XmlElement xmlConfig)
         {
             // Get the search and selection algorithm types
             var searchAlgorithm = XmlUtils.TryGetValueAsString(xmlConfig, "SearchAlgorithm");
@@ -596,17 +587,17 @@ namespace MCC_Executor.MazeNavigation
             string searchAlgorithmName, string selectionAlgorithmName)
         {
             // Extract the corresponding search and selection algorithm domain types
-            SearchType searchType = AlgorithmTypeUtil.ConvertStringToSearchType(searchAlgorithmName);
-            SelectionType selectionType = AlgorithmTypeUtil.ConvertStringToSelectionType(selectionAlgorithmName);
+            var searchType = AlgorithmTypeUtil.ConvertStringToSearchType(searchAlgorithmName);
+            var selectionType = AlgorithmTypeUtil.ConvertStringToSelectionType(selectionAlgorithmName);
 
             // Queueing MCC experiment with separate (currently per-species) queues
             if (SelectionType.MultipleQueueing.Equals(selectionType))
             {
-                return new MCCMultiQueueExperiment();
+                return new MCCSpeciationExperiment();
             }
 
             // Otherwise, go with the single maze, single queue MCC experiment
-            return new MCCQueueExperiment();
+            return new MCCControlExperiment();
         }
     }
 }

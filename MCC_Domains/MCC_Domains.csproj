@@ -99,8 +99,8 @@
     <Compile Include="INeatExperiment.cs" />
     <Compile Include="Utils\MathUtils.cs" />
     <Compile Include="MazeNavigation\Bootstrappers\NoveltySearchMCCMazeNavigationInitializer.cs" />
-    <Compile Include="MazeNavigation\MCCExperiment\MCCSpecieQueueExperiment.cs" />
-    <Compile Include="MazeNavigation\MCCExperiment\MCCQueueExperiment.cs" />
+    <Compile Include="MazeNavigation\MCCExperiment\MCCSpeciationExperiment.cs" />
+    <Compile Include="MazeNavigation\MCCExperiment\MCCControlExperiment.cs" />
     <Compile Include="MazeNavigation\MCCExperiment\MazeEnvironmentMCCEvaluator.cs" />
     <Compile Include="MazeNavigation\MCCExperiment\MazeNavigatorMCCEvaluator.cs" />
     <Compile Include="MazeNavigation\MCCExperiment\MazeNavigatorFitnessInitializationEvaluator.cs" />

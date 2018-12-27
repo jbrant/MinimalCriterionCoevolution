@@ -58,8 +58,8 @@ namespace SharpNeat.Utility
 
                 // Evaluate the behavior, update the genome's behavior characterization, calculate the distance to the domain objective,
                 // and indicate if the genome is viable based on whether the minimal criteria was satisfied
-                var behaviorInfo = phenomeEvaluator.Evaluate(phenome, currentGeneration, enableBridging,
-                    evaluationLogger, genomeXml);
+                var behaviorInfo = phenomeEvaluator.Evaluate(phenome, currentGeneration,
+                    evaluationLogger);
                 genome.EvaluationInfo.BehaviorCharacterization = behaviorInfo.Behaviors;
                 genome.EvaluationInfo.ObjectiveDistance = behaviorInfo.ObjectiveDistance;
                 genome.EvaluationInfo.IsViable = behaviorInfo.DoesBehaviorSatisfyMinimalCriteria;
@@ -112,8 +112,8 @@ namespace SharpNeat.Utility
 
                 // Evaluate the behavior, update the genome's behavior characterization, calculate the distance to the domain objective,
                 // and indicate if the genome is viable based on whether the minimal criteria was satisfied
-                var behaviorInfo = phenomeEvaluator.Evaluate(phenome, currentGeneration, enableBridging,
-                    evaluationLogger, genomeXml);
+                var behaviorInfo = phenomeEvaluator.Evaluate(phenome, currentGeneration,
+                    evaluationLogger);
                 genome.EvaluationInfo.BehaviorCharacterization = behaviorInfo.Behaviors;
                 genome.EvaluationInfo.ObjectiveDistance = behaviorInfo.ObjectiveDistance;
                 genome.EvaluationInfo.IsViable = behaviorInfo.DoesBehaviorSatisfyMinimalCriteria;
@@ -156,8 +156,8 @@ namespace SharpNeat.Utility
                 }
 
                 // Run evaluation and set fitness/auxiliary fitness
-                FitnessInfo fitnessInfo = phenomeEvaluator.Evaluate(phenome, currentGeneration, enableBridging,
-                    evaluationLogger, genomeXml);
+                FitnessInfo fitnessInfo = phenomeEvaluator.Evaluate(phenome, currentGeneration,
+                    evaluationLogger);
                 genome.EvaluationInfo.SetFitness(fitnessInfo.Fitness);
                 genome.EvaluationInfo.AuxFitnessArr = fitnessInfo.AuxFitnessArr;
                 genome.EvaluationInfo.NicheId = fitnessInfo.NicheId;
@@ -207,8 +207,8 @@ namespace SharpNeat.Utility
                     genomeXml = DecodeGenomeToXmlString(genome);
                 }
 
-                FitnessInfo fitnessInfo = phenomeEvaluator.Evaluate(phenome, currentGeneration, enableBridging,
-                    evaluationLogger, genomeXml);
+                FitnessInfo fitnessInfo = phenomeEvaluator.Evaluate(phenome, currentGeneration,
+                    evaluationLogger);
                 genome.EvaluationInfo.SetFitness(fitnessInfo.Fitness);
                 genome.EvaluationInfo.AuxFitnessArr = fitnessInfo.AuxFitnessArr;
                 genome.EvaluationInfo.NicheId = fitnessInfo.NicheId;

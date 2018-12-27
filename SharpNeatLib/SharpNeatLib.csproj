@@ -115,8 +115,7 @@
     <Compile Include="Core\RunPhase.cs" />
     <Compile Include="Decoders\Maze\MazeDecoder.cs" />
     <Compile Include="EvolutionAlgorithms\MCCAlgorithmContainer.cs" />
-    <Compile Include="EvolutionAlgorithms\MultiQueueEvolutionAlgorithm.cs" />
-    <Compile Include="EvolutionAlgorithms\QueueingEvolutionAlgorithm.cs" />
+    <Compile Include="EvolutionAlgorithms\QueueEvolutionAlgorithm.cs" />
     <Compile Include="EvolutionAlgorithms\Statistics\AbstractEvolutionAlgorithmStats.cs" />
     <Compile Include="EvolutionAlgorithms\Statistics\IEvolutionAlgorithmStats.cs" />
     <Compile Include="EvolutionAlgorithms\Statistics\MazeAlgorithmStats.cs" />

@@ -11,6 +11,7 @@ using SharpNeat.Phenomes;
 
 namespace MCC_Domains.MazeNavigation
 {
+    /// <inheritdoc />
     /// <summary>
     ///     Sets up and runs the maze navigation simulation.
     /// </summary>
@@ -62,7 +63,7 @@ namespace MCC_Domains.MazeNavigation
         /// <summary>
         ///     Creates the maze navigation world (environment) given the experiment parameters.
         /// </summary>
-        /// <param name="walls">The walls in the maze environemnt.</param>
+        /// <param name="walls">The walls in the maze environment.</param>
         /// <param name="navigatorLocation">The starting location of the maze navigator.</param>
         /// <param name="goalLocation">The location of the goal (target).</param>
         /// <param name="minSuccessDistance">The minimum distance from the target for the trial to be considered a success.</param>
@@ -70,7 +71,7 @@ namespace MCC_Domains.MazeNavigation
         /// <param name="maxTimeSteps">The maximum number of time steps to run a given trial.</param>
         /// <param name="numBridgingApplications">The number of times to apply bridging during a given trial.</param>
         /// <param name="behaviorCharacterization">The behavior characterization for a navigator.</param>
-        public MazeNavigationWorld(List<Wall> walls, DoublePoint navigatorLocation,
+        private MazeNavigationWorld(List<Wall> walls, DoublePoint navigatorLocation,
             DoublePoint goalLocation,
             int minSuccessDistance,
             int maxDistanceToTarget, int maxTimeSteps,
@@ -89,6 +90,7 @@ namespace MCC_Domains.MazeNavigation
             _navigator = new MazeNavigator(navigatorLocation);
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Creates the maze navigation world, omitting the maze niche grid and number of bridging applications.
         /// </summary>
@@ -108,6 +110,7 @@ namespace MCC_Domains.MazeNavigation
         {
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Creates the maze navigation world, omitting the maze niche grid, maximum distance to the target (required for
         ///     fitness-based evaluations), and number of bridging applications.
@@ -174,6 +177,7 @@ namespace MCC_Domains.MazeNavigation
 
         #region Public methods
 
+        /// <inheritdoc />
         /// <summary>
         ///     Returns MazeNavigationWorld LoggableElements.
         /// </summary>
@@ -219,7 +223,7 @@ namespace MCC_Domains.MazeNavigation
             ITrialInfo trialInfo;
 
             // Initialize the starting number of bridging applications
-            int curBridgingApplications = 0;
+            var curBridgingApplications = 0;
 
             // Default the goal reached parameter to false
             goalReached = false;
@@ -245,7 +249,7 @@ namespace MCC_Domains.MazeNavigation
                     }
                 }
 
-                double fitness = _maxDistanceToTarget - GetDistanceToTarget();
+                var fitness = _maxDistanceToTarget - GetDistanceToTarget();
                 trialInfo = new FitnessInfo(fitness, fitness);
             }
             // Otherwise, this is a behavioral evaluation, so return the ending 
@@ -255,7 +259,8 @@ namespace MCC_Domains.MazeNavigation
                 // Run for the given number of timesteps or until the goal is reached
                 for (var curTimestep = 0; curTimestep < _maxTimesteps; curTimestep++)
                 {
-                    RunTimestep(agent, (curBridgingApplications < _numBridgingApplications), ref curBridgingApplications);
+                    RunTimestep(agent, (curBridgingApplications < _numBridgingApplications),
+                        ref curBridgingApplications);
 
                     _behaviorCharacterization.UpdateBehaviors(new List<double>
                     {

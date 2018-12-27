@@ -11,9 +11,9 @@ using SharpNeat.Phenomes.Mazes;
 
 namespace MCC_Domains.MazeNavigation.MCCExperiment
 {
+    /// <inheritdoc />
     /// <summary>
-    ///     Defines evaluation rules and process for an evaluation of the minimal criteria search (MCS) for maze navigators
-    ///     within the MCC algorithm.
+    ///     Defines evaluation routine for agents (maze navigators) within a minimal criterion coevolution (MCC) framework.
     /// </summary>
     public class MazeNavigatorMCSEvaluator : IPhenomeEvaluator<IBlackBox, BehaviorInfo>
     {
@@ -35,7 +35,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             _agentNumSuccessesCriteria = agentNumSuccessesCriteria;
             EvaluationCount = 0;
 
-            // Create factory for generating multiple mazzes
+            // Create factory for generating multiple mazes
             _multiMazeWorldFactory = new MultiMazeNavigationWorldFactory<BehaviorInfo>(minSuccessDistance);
         }
 
@@ -67,75 +67,70 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
 
         #region Public Properties
 
+        /// <inheritdoc />
         /// <summary>
         ///     Gets the total number of evaluations that have been performed.
         /// </summary>
         public ulong EvaluationCount { get; private set; }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Gets a value indicating whether some goal fitness has been achieved and that the evolutionary algorithm/search
         ///     should stop.  This property's value can remain false to allow the algorithm to run indefinitely.
         /// </summary>
-        public bool StopConditionSatisfied { get; private set; }
+        public bool StopConditionSatisfied => false;
 
         #endregion
 
         #region Public Methods
 
+        /// <inheritdoc />
         /// <summary>
         ///     Runs an agent (i.e. the maze navigator) through a collection of mazes until the minimal criteria is satisfied.
         /// </summary>
         /// <param name="agent">The maze navigator brain (ANN).</param>
         /// <param name="currentGeneration">The current generation or evaluation batch.</param>
-        /// <param name="isBridgingEvaluation">Indicates whether bridging is enabled for this evaluation (not applicable).</param>
         /// <param name="evaluationLogger">Reference to the evaluation logger.</param>
-        /// <param name="genomeXml">The string-representation of the genome (for logging purposes).</param>
         /// <returns>A behavior info (which is a type of behavior-based trial information).</returns>
-        public BehaviorInfo Evaluate(IBlackBox agent, uint currentGeneration, bool isBridgingEvaluation,
-            IDataLogger evaluationLogger,
-            string genomeXml)
+        public BehaviorInfo Evaluate(IBlackBox agent, uint currentGeneration,
+            IDataLogger evaluationLogger)
         {
-            ulong threadLocalEvaluationCount = default(ulong);
-            int curSuccesses = 0;
+            var curSuccesses = 0;
 
             // TODO: Note that this will get overwritten until the last successful attempt (may need a better way of handling this for logging purposes)
-            BehaviorInfo trialInfo = BehaviorInfo.NoBehavior;
+            var trialInfo = BehaviorInfo.NoBehavior;
 
-            for (int cnt = 0; cnt < _multiMazeWorldFactory.NumMazes && curSuccesses < _agentNumSuccessesCriteria; cnt++)
+            for (var cnt = 0; cnt < _multiMazeWorldFactory.NumMazes && curSuccesses < _agentNumSuccessesCriteria; cnt++)
             {
+                var threadLocalEvaluationCount = default(ulong);
                 lock (_evaluationLock)
                 {
                     // Increment evaluation count
                     threadLocalEvaluationCount = EvaluationCount++;
                 }
 
-                // Default the stop condition satisfied to false
-                bool goalReached = false;
-
                 // Generate new behavior characterization
-                IBehaviorCharacterization behaviorCharacterization =
-                    _behaviorCharacterizationFactory.CreateBehaviorCharacterization();
+                var behaviorCharacterization = _behaviorCharacterizationFactory.CreateBehaviorCharacterization();
 
                 // Generate a new maze world
-                MazeNavigationWorld<BehaviorInfo> world = _multiMazeWorldFactory.CreateMazeNavigationWorld(cnt,
-                    behaviorCharacterization);
+                var world = _multiMazeWorldFactory.CreateMazeNavigationWorld(cnt, behaviorCharacterization);
 
                 // Run a single trial
-                trialInfo = world.RunTrial(agent, SearchType.MinimalCriteriaSearch,
-                    out goalReached);
+                trialInfo = world.RunTrial(agent, SearchType.MinimalCriteriaSearch, out var goalReached);
 
                 // Set the objective distance
                 trialInfo.ObjectiveDistance = world.GetDistanceToTarget();
 
                 // Log trial information
                 evaluationLogger?.LogRow(new List<LoggableElement>
-                {
-                    new LoggableElement(EvaluationFieldElements.Generation, currentGeneration),
-                    new LoggableElement(EvaluationFieldElements.EvaluationCount, threadLocalEvaluationCount),
-                    new LoggableElement(EvaluationFieldElements.StopConditionSatisfied, StopConditionSatisfied),
-                    new LoggableElement(EvaluationFieldElements.RunPhase, RunPhase.Primary),
-                    new LoggableElement(EvaluationFieldElements.IsViable, trialInfo.DoesBehaviorSatisfyMinimalCriteria)
-                },
+                    {
+                        new LoggableElement(EvaluationFieldElements.Generation, currentGeneration),
+                        new LoggableElement(EvaluationFieldElements.EvaluationCount, threadLocalEvaluationCount),
+                        new LoggableElement(EvaluationFieldElements.StopConditionSatisfied, StopConditionSatisfied),
+                        new LoggableElement(EvaluationFieldElements.RunPhase, RunPhase.Primary),
+                        new LoggableElement(EvaluationFieldElements.IsViable,
+                            trialInfo.DoesBehaviorSatisfyMinimalCriteria)
+                    },
                     world.GetLoggableElements());
 
                 // If the navigator reached the goal, update the running count of successes
@@ -153,6 +148,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             return trialInfo;
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Initializes the logger and writes header.
         /// </summary>
@@ -173,6 +169,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             }, _multiMazeWorldFactory.CreateMazeNavigationWorld(new MazeStructure(0, 0, 1), null).GetLoggableElements());
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Update the evaluator based on some characteristic of the given population.
         /// </summary>
@@ -183,6 +180,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Updates the collection of mazes to use for future evaluations.
         /// </summary>
@@ -192,6 +190,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             _multiMazeWorldFactory.SetMazeConfigurations((IList<MazeStructure>) evaluatorPhenomes);
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Resets the internal state of the evaluation scheme.  This may not be needed for the maze navigation task.
         /// </summary>
@@ -199,6 +198,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         {
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Returns MazeNavigatorMCSEvaluator loggable elements.
         /// </summary>

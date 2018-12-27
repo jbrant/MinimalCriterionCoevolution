@@ -46,6 +46,7 @@ namespace MCC_Domains.MazeNavigation
             _mazeConfigurations = new ConcurrentDictionary<int, MazeConfiguration>();
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Constructor which sets the given minimum distance for success and omits the maximum distance to target.
         /// </summary>
@@ -68,10 +69,10 @@ namespace MCC_Domains.MazeNavigation
             // Convert maze structure into experiment domain-specific maze, but only run conversion 
             // if maze hasn't been cached from a previous conversion
             foreach (
-                MazeStructure mazeStructure in
-                    mazeStructures.Where(
+                var mazeStructure in
+                mazeStructures.Where(
                         mazeStructure => _mazeConfigurations.ContainsKey(mazeStructure.GetHashCode()) == false)
-                        .AsParallel())
+                    .AsParallel())
             {
                 _mazeConfigurations.Add(mazeStructure.GetHashCode(),
                     new MazeConfiguration(ExtractMazeWalls(mazeStructure.Walls),
@@ -80,10 +81,10 @@ namespace MCC_Domains.MazeNavigation
             }
 
             // Build the list of current maze hashes
-            IEnumerable<int> curHashCodes = mazeStructures.Select(mazeStructure => mazeStructure.GetHashCode());
+            var curHashCodes = mazeStructures.Select(mazeStructure => mazeStructure.GetHashCode());
 
             // Remove mazes that are no longer in the current population of mazes
-            foreach (int key in _mazeConfigurations.Keys.Where(key => curHashCodes.Contains(key) == false).AsParallel())
+            foreach (var key in _mazeConfigurations.Keys.Where(key => curHashCodes.Contains(key) == false).AsParallel())
             {
                 _mazeConfigurations.Remove(key);
             }
@@ -129,7 +130,7 @@ namespace MCC_Domains.MazeNavigation
             IBehaviorCharacterization behaviorCharacterization)
         {
             // Build the single maze configuration
-            MazeConfiguration mazeConfig = new MazeConfiguration(ExtractMazeWalls(mazeStructure.Walls),
+            var mazeConfig = new MazeConfiguration(ExtractMazeWalls(mazeStructure.Walls),
                 ExtractStartEndPoint(mazeStructure.StartLocation), ExtractStartEndPoint(mazeStructure.TargetLocation),
                 mazeStructure.MaxTimesteps);
 
@@ -167,12 +168,11 @@ namespace MCC_Domains.MazeNavigation
         /// </summary>
         /// <param name="mazeStructureWalls">The evolved walls.</param>
         /// <returns>List of the experiment-specific walls.</returns>
-        private List<Wall> ExtractMazeWalls(List<MazeStructureWall> mazeStructureWalls)
+        private static List<Wall> ExtractMazeWalls(List<MazeStructureWall> mazeStructureWalls)
         {
-            List<Wall> mazeWalls = new List<Wall>(mazeStructureWalls.Count);
+            var mazeWalls = new List<Wall>(mazeStructureWalls.Count);
 
             // Convert each of the maze structure walls to the experiment domain wall
-            // TODO: Can this also be parallelized?
             mazeWalls.AddRange(
                 mazeStructureWalls.Select(
                     mazeStructureWall =>
@@ -189,7 +189,7 @@ namespace MCC_Domains.MazeNavigation
         /// </summary>
         /// <param name="point">The point to convert.</param>
         /// <returns>The domain-specific point object.</returns>
-        private DoublePoint ExtractStartEndPoint(MazeStructurePoint point)
+        private static DoublePoint ExtractStartEndPoint(MazeStructurePoint point)
         {
             return new DoublePoint(point.X, point.Y);
         }

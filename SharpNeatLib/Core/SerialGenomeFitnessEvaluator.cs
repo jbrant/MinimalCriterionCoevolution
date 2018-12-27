@@ -246,8 +246,8 @@ namespace SharpNeat.Core
                 }
                 else
                 {
-                    FitnessInfo fitnessInfo = _phenomeEvaluator.Evaluate(phenome, currentGeneration, false,
-                        _evaluationLogger, null);
+                    FitnessInfo fitnessInfo = _phenomeEvaluator.Evaluate(phenome, currentGeneration,
+                        _evaluationLogger);
                     genome.EvaluationInfo.SetFitness(fitnessInfo.Fitness);
                     genome.EvaluationInfo.AuxFitnessArr = fitnessInfo.AuxFitnessArr;
                 }
@@ -275,8 +275,8 @@ namespace SharpNeat.Core
                 }
                 else
                 {
-                    FitnessInfo fitnessInfo = _phenomeEvaluator.Evaluate(phenome, currentGeneration, false,
-                        _evaluationLogger, null);
+                    FitnessInfo fitnessInfo = _phenomeEvaluator.Evaluate(phenome, currentGeneration,
+                        _evaluationLogger);
                     genome.EvaluationInfo.SetFitness(fitnessInfo.Fitness);
                     genome.EvaluationInfo.AuxFitnessArr = fitnessInfo.AuxFitnessArr;
                 }

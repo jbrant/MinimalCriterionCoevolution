@@ -46,11 +46,11 @@ namespace SharpNeat.Core
         /// <summary>
         ///     EvaluateFitness the provided agent and return its fitness score.
         /// </summary>
-        TTrialInfo Evaluate(TPhenome agent, uint currentGeneration, bool isBridgingEvaluation,
-            IDataLogger evaluationLogger, string genomeXml);
+        TTrialInfo Evaluate(TPhenome agent, uint currentGeneration,
+            IDataLogger evaluationLogger);
 
         /// <summary>
-        ///     Initializes state variables in the agent evalutor.
+        ///     Initializes state variables in the agent evaluator.
         /// </summary>
         void Initialize(IDataLogger evaluationLogger);
 

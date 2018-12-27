@@ -19,13 +19,15 @@ using SharpNeat.Phenomes;
 using SharpNeat.Phenomes.Mazes;
 using SharpNeat.SpeciationStrategies;
 using SharpNeat.Utility;
-using NeatAlgorithmStats = SharpNeat.EvolutionAlgorithms.Statistics.NeatAlgorithmStats;
 
 #endregion
 
 namespace MCC_Domains.MazeNavigation.MCCExperiment
 {
-    public class MCCMultiQueueExperiment : BaseMCCMazeNavigationExperiment
+    /// <summary>
+    ///     Initial MCC experiment with two, unspeciated population queues (one queue for agents, and the other for mazes).
+    /// </summary>
+    public class MCCControlExperiment : BaseMCCMazeNavigationExperiment
     {
         #region Private methods
 
@@ -36,7 +38,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         /// <param name="seedAgentList">The seed population of agents.</param>
         /// <param name="mazeStructure">The maze structure on which agents are to be evaluated.</param>
         /// <returns></returns>
-        private List<NeatGenome> EvolveViableAgents(IGenomeFactory<NeatGenome> genomeFactory,
+        private IEnumerable<NeatGenome> EvolveViableAgents(IGenomeFactory<NeatGenome> genomeFactory,
             List<NeatGenome> seedAgentList, MazeStructure mazeStructure)
         {
             List<NeatGenome> viableMazeAgents;
@@ -45,6 +47,11 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
 
             do
             {
+                // Delete/recreate navigator log files on restart
+                _navigatorEvolutionDataLogger.ResetLog();
+                _navigatorPopulationDataLogger.ResetLog();
+                _navigatorGenomeDataLogger.ResetLog();
+
                 // Instantiate the internal initialization algorithm
                 _mazeNavigationInitializer.InitializeAlgorithm(ParallelOptions, seedAgentList.ToList(), genomeFactory,
                     mazeStructure, new NeatGenomeDecoder(ActivationScheme), 0);
@@ -64,7 +71,381 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
 
         #endregion
 
-        #region Private members
+        #region Public Methods
+
+        /// <inheritdoc />
+        /// <summary>
+        ///     Initializes the MCC maze navigation experiment by reading in all of the configuration parameters and
+        ///     setting up the bootstrapping/initialization algorithm.
+        /// </summary>
+        /// <param name="name">The name of the experiment.</param>
+        /// <param name="xmlConfig">The reference to the XML configuration file.</param>
+        /// <param name="navigatorEvolutionLogger">The navigator evolution data logger.</param>
+        /// <param name="navigatorPopulationLogger">The navigator population logger.</param>
+        /// <param name="navigatorGenomeLogger">The navigator genome logger.</param>
+        /// <param name="mazeEvolutionLogger">The maze evolution data logger.</param>
+        /// <param name="mazePopulationLogger">The maze population logger.</param>
+        /// <param name="mazeGenomeLogger">The maze genome logger.</param>
+        public override void Initialize(string name, XmlElement xmlConfig,
+            IDataLogger navigatorEvolutionLogger = null, IDataLogger navigatorPopulationLogger = null,
+            IDataLogger navigatorGenomeLogger = null,
+            IDataLogger mazeEvolutionLogger = null, IDataLogger mazePopulationLogger = null,
+            IDataLogger mazeGenomeLogger = null)
+        {
+            // Initialize boiler plate parameters
+            base.Initialize(name, xmlConfig, navigatorEvolutionLogger, navigatorPopulationLogger, navigatorGenomeLogger,
+                mazeEvolutionLogger, mazePopulationLogger, mazeGenomeLogger);
+
+            // Set experiment-specific parameters
+            _minSuccessDistance = XmlUtils.GetValueAsInt(xmlConfig, "MinSuccessDistance");
+            _mazeHeight = XmlUtils.GetValueAsInt(xmlConfig, "MazeHeight");
+            _mazeWidth = XmlUtils.GetValueAsInt(xmlConfig, "MazeWidth");
+            _mazeScaleMultiplier = XmlUtils.GetValueAsInt(xmlConfig, "MazeScaleMultiplier");
+
+            // Get success/failure criteria constraints
+            _numMazeSuccessCriteria = XmlUtils.GetValueAsInt(xmlConfig, "NumMazesSolvedCriteria");
+            _numAgentSuccessCriteria = XmlUtils.GetValueAsInt(xmlConfig, "NumAgentsSolvedCriteria");
+            _numAgentFailedCriteria = XmlUtils.GetValueAsInt(xmlConfig, "NumAgentsFailedCriteria");
+
+            // Read in log file path/name
+            _navigatorEvolutionDataLogger = navigatorEvolutionLogger ??
+                                            ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Evolution,
+                                                "NavigatorLoggingConfig");
+            _navigatorPopulationDataLogger = navigatorPopulationLogger ??
+                                             ExperimentUtils.ReadDataLogger(xmlConfig,
+                                                 LoggingType.Population, "NavigatorLoggingConfig");
+            _navigatorGenomeDataLogger = navigatorGenomeLogger ??
+                                         ExperimentUtils.ReadDataLogger(xmlConfig,
+                                             LoggingType.Genome, "NavigatorLoggingConfig");
+            _mazeEvolutionDataLogger = mazeEvolutionLogger ??
+                                       ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Evolution,
+                                           "MazeLoggingConfig");
+            _mazePopulationDataLogger = mazePopulationLogger ??
+                                        ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Population,
+                                            "MazeLoggingConfig");
+            _mazeGenomeDataLogger = mazeGenomeLogger ??
+                                    ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Genome,
+                                        "MazeLoggingConfig");
+
+            // Read in the maximum number of initialization evaluations
+            _maxInitializationEvaluations = XmlUtils.GetValueAsUInt(xmlConfig, "MaxInitializationEvaluations");
+
+            // Create new evolution field elements map with all fields enabled
+            _navigatorLogFieldEnableMap = EvolutionFieldElements.PopulateEvolutionFieldElementsEnableMap();
+
+            // Add default population logging configuration
+            foreach (var populationLoggingPair in PopulationFieldElements.PopulatePopulationFieldElementsEnableMap())
+            {
+                _navigatorLogFieldEnableMap.Add(populationLoggingPair.Key, populationLoggingPair.Value);
+            }
+
+            // Add default genome logging configuration
+            foreach (var genomeLoggingPair in GenomeFieldElements.PopulateGenomeFieldElementsEnableMap())
+            {
+                _navigatorLogFieldEnableMap.Add(genomeLoggingPair.Key, genomeLoggingPair.Value);
+            }
+
+            // Disable logging fields not relevant to agent evolution in MCC experiment
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.SpecieCount] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.AsexualOffspringCount] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.SexualOffspringCount] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.InterspeciesOffspringCount] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MinimalCriteriaThreshold] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MinimalCriteriaPointX] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MinimalCriteriaPointY] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MaxFitness] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MeanFitness] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MeanSpecieChampFitness] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MinSpecieSize] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MaxSpecieSize] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeGenomeId] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeFitness] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeBirthGeneration] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeConnectionGeneCount] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeNeuronGeneCount] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeTotalGeneCount] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeEvaluationCount] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeBehaviorX] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeBehaviorY] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeDistanceToTarget] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeXml] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MinWalls] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MaxWalls] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MeanWalls] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MinWaypoints] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MaxWaypoints] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MeanWaypoints] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MinJunctures] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MaxJunctures] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MeanJunctures] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MinTrajectoryFacingOpenings] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MaxTrajectoryFacingOpenings] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MeanTrajectoryFacingOpenings] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MinHeight] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MaxHeight] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MeanHeight] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MinWidth] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MaxWidth] = false;
+            _navigatorLogFieldEnableMap[EvolutionFieldElements.MeanWidth] = false;
+
+            // Create a maze logger configuration with the same configuration as the navigator one
+            _mazeLogFieldEnableMap = new Dictionary<FieldElement, bool>(_navigatorLogFieldEnableMap)
+            {
+                [EvolutionFieldElements.RunPhase] = false,
+                [PopulationFieldElements.RunPhase] = false,
+                [EvolutionFieldElements.MinWalls] = true,
+                [EvolutionFieldElements.MaxWalls] = true,
+                [EvolutionFieldElements.MeanWalls] = true,
+                [EvolutionFieldElements.MinWaypoints] = true,
+                [EvolutionFieldElements.MaxWaypoints] = true,
+                [EvolutionFieldElements.MeanWaypoints] = true,
+                [EvolutionFieldElements.MinJunctures] = true,
+                [EvolutionFieldElements.MaxJunctures] = true,
+                [EvolutionFieldElements.MeanJunctures] = true,
+                [EvolutionFieldElements.MinTrajectoryFacingOpenings] = true,
+                [EvolutionFieldElements.MaxTrajectoryFacingOpenings] = true,
+                [EvolutionFieldElements.MeanTrajectoryFacingOpenings] = true,
+                [EvolutionFieldElements.MinHeight] = true,
+                [EvolutionFieldElements.MaxHeight] = true,
+                [EvolutionFieldElements.MeanHeight] = true,
+                [EvolutionFieldElements.MinWidth] = true,
+                [EvolutionFieldElements.MaxWidth] = true,
+                [EvolutionFieldElements.MeanWidth] = true
+            };
+
+            // Read in the number of batches between population logging
+            _populationLoggingBatchInterval = XmlUtils.TryGetValueAsInt(xmlConfig, "PopulationLoggingBatchInterval");
+
+            // Read in whether the individual navigator and maze specie sizes are being capped (defaults to false)
+            _isNavigatorSpecieFixedSize =
+                XmlUtils.TryGetValueAsBool(xmlConfig, "AgentSpecieSizeFixed") ?? default(bool);
+            _isMazeSpecieFixedSize = XmlUtils.TryGetValueAsBool(xmlConfig, "MazeSpecieSizeFixed") ?? default(bool);
+
+            // Initialize the initialization algorithm
+            _mazeNavigationInitializer =
+                ExperimentUtils.DetermineMCCInitializer(
+                    xmlConfig.GetElementsByTagName("InitializationAlgorithmConfig", "")[0] as XmlElement);
+
+            // Set the initialization loggers
+            _mazeNavigationInitializer.SetDataLoggers(_navigatorEvolutionDataLogger,
+                _navigatorPopulationDataLogger, _navigatorGenomeDataLogger, _navigatorLogFieldEnableMap,
+                _populationLoggingBatchInterval);
+
+            // Setup initialization algorithm
+            _mazeNavigationInitializer.SetAlgorithmParameters(
+                xmlConfig.GetElementsByTagName("InitializationAlgorithmConfig", "")[0] as XmlElement, AnnInputCount,
+                AnnOutputCount, _numAgentSuccessCriteria, _numAgentFailedCriteria);
+
+            // Pass in maze experiment specific parameters 
+            // (note that a new maze structure is created here for the sole purpose of extracting the maze dimensions and calculating max distance to target)
+            _mazeNavigationInitializer.SetEnvironmentParameters(_minSuccessDistance,
+                new MazeDecoder(_mazeScaleMultiplier).Decode(
+                    new MazeGenomeFactory(MazeGenomeParameters, _mazeHeight, _mazeWidth).CreateGenome(0)));
+
+            // Propagate the initialization seed genome size up to the base experiment level
+            // so that we know how to generate the bootstrap population
+            AgentInitializationGenomeCount = _mazeNavigationInitializer.PopulationSize;
+        }
+
+        /// <summary>
+        ///     Zero argument wrapper method for instantiating the coveolution algorithm container.  This uses default agent and
+        ///     maze population sizes as the only configuration parameters.
+        /// </summary>
+        /// <returns>The instantiated MCC algorithm container.</returns>
+        public override IMCCAlgorithmContainer<NeatGenome, MazeGenome> CreateMCCAlgorithmContainer()
+        {
+            return CreateMCCAlgorithmContainer(AgentSeedGenomeCount, MazeSeedGenomeCount);
+        }
+
+        /// <summary>
+        ///     Creates the MCC algorithm container using the given agent and maze population sizes.
+        /// </summary>
+        /// <param name="populationSize1">The agent population size.</param>
+        /// <param name="populationSize2">The maze population size.</param>
+        /// <returns>The instantiated MCC algorithm container.</returns>
+        public override IMCCAlgorithmContainer<NeatGenome, MazeGenome> CreateMCCAlgorithmContainer(
+            int populationSize1, int populationSize2)
+        {
+            // Create a genome factory for the NEAT genomes
+            IGenomeFactory<NeatGenome> neatGenomeFactory = new NeatGenomeFactory(AnnInputCount, AnnOutputCount,
+                NeatGenomeParameters);
+
+            // Create a genome factory for the maze genomes
+            IGenomeFactory<MazeGenome> mazeGenomeFactory = new MazeGenomeFactory(MazeGenomeParameters, _mazeHeight,
+                _mazeWidth);
+
+            // Create an initial population of maze navigators
+            var neatGenomeList = neatGenomeFactory.CreateGenomeList(populationSize1, 0);
+
+            // Create an initial population of mazes
+            // NOTE: the population is set to 1 here because we're just starting with a single, completely open maze space
+            var mazeGenomeList = mazeGenomeFactory.CreateGenomeList(populationSize2, 0);
+
+            // Create the evolution algorithm container
+            return CreateMCCAlgorithmContainer(neatGenomeFactory, mazeGenomeFactory, neatGenomeList,
+                mazeGenomeList);
+        }
+
+        /// <inheritdoc />
+        /// <summary>
+        ///     Creates the evolution algorithm container using the given factories and genome lists.
+        /// </summary>
+        /// <param name="genomeFactory1">The agent genome factory.</param>
+        /// <param name="genomeFactory2">The maze genome factory.</param>
+        /// <param name="genomeList1">The agent genome list.</param>
+        /// <param name="genomeList2">The maze genome list.</param>
+        /// <returns>The instantiated MCC algorithm container.</returns>
+        public override IMCCAlgorithmContainer<NeatGenome, MazeGenome> CreateMCCAlgorithmContainer(
+            IGenomeFactory<NeatGenome> genomeFactory1, IGenomeFactory<MazeGenome> genomeFactory2,
+            List<NeatGenome> genomeList1, List<MazeGenome> genomeList2)
+        {
+            var seedAgentPopulation = new List<NeatGenome>();
+
+            // Create maze decoder to decode initialization mazes
+            var mazeDecoder = new MazeDecoder(_mazeScaleMultiplier);
+
+            // Loop through every maze and evolve the requisite number of viable genomes that solve it
+            for (var idx = 0; idx < genomeList2.Count; idx++)
+            {
+                Console.WriteLine(@"Evolving viable agents for maze population index {0} and maze ID {1}", idx,
+                    genomeList2[idx].Id);
+
+                // Evolve the number of agents required to meet the success MC for the current maze                
+                var viableMazeAgents = EvolveViableAgents(genomeFactory1, genomeList1.ToList(),
+                    mazeDecoder.Decode(genomeList2[idx]));
+
+                // Add the viable agent genomes who solve the current maze (but avoid adding duplicates, as identified by the genome ID)
+                // Note that it's fine to have multiple mazes solved by the same agent, so in this case, we'll leave the agent
+                // in the pool of seed agent genomes
+                foreach (
+                    var viableMazeAgent in
+                    viableMazeAgents.Where(
+                        viableMazeAgent =>
+                            seedAgentPopulation.Select(sap => sap.Id).Contains(viableMazeAgent.Id) == false))
+                {
+                    seedAgentPopulation.Add(viableMazeAgent);
+                }
+            }
+
+            // If we still lack the genomes to fill out the agent seed genome count while still satisfying the maze MC,
+            // iteratively pick a random maze and evolve agents on that maze until we reach the requisite number
+            while (seedAgentPopulation.ToList().Count < AgentSeedGenomeCount)
+            {
+                var rndMazePicker = new FastRandom();
+
+                // Pick a random maze on which to evolve agent(s)
+                var mazeGenome = genomeList2[rndMazePicker.Next(genomeList2.Count - 1)];
+
+                Console.WriteLine(
+                    @"Continuing viable agent evolution on maze {0}, with {1} of {2} required agents in place",
+                    mazeGenome.Id, seedAgentPopulation.Count, AgentSeedGenomeCount);
+
+                // Evolve the number of agents required to meet the success MC for the maze
+                var viableMazeAgents = EvolveViableAgents(genomeFactory1, genomeList1.ToList(),
+                    mazeDecoder.Decode(mazeGenome));
+
+                // Iterate through each viable agent and remove them if they've already solved a maze or add them to the list
+                // of viable agents if they have not
+                foreach (var viableMazeAgent in viableMazeAgents)
+                {
+                    // If they agent has already solved maze and is in the list of viable agents, remove that agent
+                    // from the pool of seed genomes (this is done because here, we're interested in getting unique
+                    // agents and want to avoid an endless loop wherein the same viable agents are returned)
+                    if (seedAgentPopulation.Select(sap => sap.Id).Contains(viableMazeAgent.Id))
+                    {
+                        genomeList1.Remove(viableMazeAgent);
+                    }
+                    // Otherwise, add that agent to the list of viable agents
+                    else
+                    {
+                        seedAgentPopulation.Add(viableMazeAgent);
+                    }
+                }
+            }
+
+            // Set dummy fitness so that seed maze(s) will be marked as evaluated
+            foreach (var mazeGenome in genomeList2)
+            {
+                mazeGenome.EvaluationInfo.SetFitness(0);
+            }
+
+            // Create the NEAT evolution algorithm parameters
+            var neatEaParams = new EvolutionAlgorithmParameters
+            {
+                SpecieCount = AgentNumSpecies,
+                MaxSpecieSize =
+                    AgentNumSpecies > 0
+                        ? AgentDefaultPopulationSize / AgentNumSpecies
+                        : AgentDefaultPopulationSize
+            };
+
+            // Create the maze evolution algorithm parameters
+            var mazeEaParams = new EvolutionAlgorithmParameters
+            {
+                SpecieCount = MazeNumSpecies,
+                MaxSpecieSize =
+                    MazeNumSpecies > 0 ? MazeDefaultPopulationSize / MazeNumSpecies : MazeDefaultPopulationSize
+            };
+
+            // Create the NEAT (i.e. navigator) queueing evolution algorithm
+            AbstractEvolutionAlgorithm<NeatGenome> neatEvolutionAlgorithm = new QueueEvolutionAlgorithm<NeatGenome>(
+                neatEaParams, new NeatAlgorithmStats(neatEaParams), null, NavigatorBatchSize, RunPhase.Primary,
+                _navigatorEvolutionDataLogger, _navigatorLogFieldEnableMap, _navigatorPopulationDataLogger,
+                _navigatorGenomeDataLogger, _populationLoggingBatchInterval);
+
+            // Create the maze queueing evolution algorithm
+            AbstractEvolutionAlgorithm<MazeGenome> mazeEvolutionAlgorithm = new QueueEvolutionAlgorithm<MazeGenome>(
+                mazeEaParams, new MazeAlgorithmStats(mazeEaParams), null, MazeBatchSize, RunPhase.Primary,
+                _mazeEvolutionDataLogger, _mazeLogFieldEnableMap, _mazePopulationDataLogger, _mazeGenomeDataLogger,
+                _populationLoggingBatchInterval);
+
+            // Create the maze phenome evaluator
+            IPhenomeEvaluator<MazeStructure, BehaviorInfo> mazeEvaluator =
+                new MazeEnvironmentMCCEvaluator(_minSuccessDistance, BehaviorCharacterizationFactory,
+                    _numAgentSuccessCriteria, _numAgentFailedCriteria);
+
+            // Create navigator phenome evaluator
+            IPhenomeEvaluator<IBlackBox, BehaviorInfo> navigatorEvaluator =
+                new MazeNavigatorMCSEvaluator(_minSuccessDistance, BehaviorCharacterizationFactory,
+                    _numMazeSuccessCriteria);
+
+            // Create maze genome decoder
+            IGenomeDecoder<MazeGenome, MazeStructure> mazeGenomeDecoder = new MazeDecoder(_mazeScaleMultiplier);
+
+            // Create navigator genome decoder
+            IGenomeDecoder<NeatGenome, IBlackBox> navigatorGenomeDecoder = new NeatGenomeDecoder(ActivationScheme);
+
+            // Create the maze genome evaluator
+            IGenomeEvaluator<MazeGenome> mazeFitnessEvaluator =
+                new ParallelGenomeBehaviorEvaluator<MazeGenome, MazeStructure>(mazeGenomeDecoder, mazeEvaluator,
+                    SelectionType.Queueing, SearchType.MinimalCriteriaSearch, ParallelOptions);
+
+            // Create navigator genome evaluator
+            IGenomeEvaluator<NeatGenome> navigatorFitnessEvaluator =
+                new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(navigatorGenomeDecoder, navigatorEvaluator,
+                    SelectionType.Queueing, SearchType.MinimalCriteriaSearch, ParallelOptions);
+
+            // Create the MCC container
+            IMCCAlgorithmContainer<NeatGenome, MazeGenome> mccAlgorithmContainer =
+                new MCCAlgorithmContainer<NeatGenome, MazeGenome>(neatEvolutionAlgorithm, mazeEvolutionAlgorithm);
+
+            // Initialize the container and component algorithms
+            mccAlgorithmContainer.Initialize(navigatorFitnessEvaluator, genomeFactory1, seedAgentPopulation,
+                AgentDefaultPopulationSize, mazeFitnessEvaluator, genomeFactory2, genomeList2,
+                MazeDefaultPopulationSize,
+                MaxGenerations, MaxEvaluations);
+
+            return mccAlgorithmContainer;
+        }
+
+        #endregion
+
+        #region Instance Variables
+
+        /// <summary>
+        ///     Initialization algorithm for producing an initial population with the requisite number of viable genomes.
+        /// </summary>
+        private MCCMazeNavigationInitializer _mazeNavigationInitializer;
 
         /// <summary>
         ///     The minimum distance to the target required in order to have "solved" the maze.
@@ -81,6 +462,12 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         ///     criteria.
         /// </summary>
         private int _numAgentSuccessCriteria;
+
+        /// <summary>
+        ///     The minimum number of agents that must fail to solve the maze under evaluation in order to meet this portion of the
+        ///     minimal criteria.
+        /// </summary>
+        private int _numAgentFailedCriteria;
 
         /// <summary>
         ///     The width of the evolved maze environments.
@@ -143,379 +530,19 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         private int? _populationLoggingBatchInterval;
 
         /// <summary>
-        ///     Initialization algorithm for producing an initial population with the requisite number of viable genomes.
+        ///     Indicates whether each navigator population species should be capped at a maximum size.
         /// </summary>
-        private MCCMazeNavigationInitializer _mazeNavigationInitializer;
+        private bool _isNavigatorSpecieFixedSize;
+
+        /// <summary>
+        ///     Indicates whether each maze population species should be capped at a maximum size.
+        /// </summary>
+        private bool _isMazeSpecieFixedSize;
 
         /// <summary>
         ///     The maximum number of evaluations allowed during the initialization phase before it is restarted.
         /// </summary>
         private uint? _maxInitializationEvaluations;
-
-        #endregion
-
-        #region Overridden methods
-
-        /// <summary>
-        ///     Initializes the MCC maze navigation experiment by reading in all of the configuration parameters and
-        ///     setting up the bootstrapping/initialization algorithm.
-        /// </summary>
-        /// <param name="name">The name of the experiment.</param>
-        /// <param name="xmlConfig">The reference to the XML configuration file.</param>
-        /// <param name="navigatorEvolutionLogger">The navigator evolution data logger.</param>
-        /// <param name="navigatorPopulationLogger">The navigator population logger.</param>
-        /// <param name="navigatorGenomeLogger">The navigator genome logger.</param>
-        /// <param name="mazeEvolutionLogger">The maze evolution data logger.</param>
-        /// <param name="mazePopulationLogger">The maze population logger.</param>
-        /// <param name="mazeGenomeLogger">The maze genome logger.</param>
-        public override void Initialize(string name, XmlElement xmlConfig, IDataLogger navigatorEvolutionLogger = null,
-            IDataLogger navigatorPopulationLogger = null, IDataLogger navigatorGenomeLogger = null,
-            IDataLogger mazeEvolutionLogger = null, IDataLogger mazePopulationLogger = null,
-            IDataLogger mazeGenomeLogger = null)
-        {
-            base.Initialize(name, xmlConfig, navigatorEvolutionLogger, navigatorGenomeLogger, mazeEvolutionLogger,
-                mazeGenomeLogger);
-
-            // Set experiment-specific parameters
-            _minSuccessDistance = XmlUtils.GetValueAsInt(xmlConfig, "MinSuccessDistance");
-            _mazeHeight = XmlUtils.GetValueAsInt(xmlConfig, "MazeHeight");
-            _mazeWidth = XmlUtils.GetValueAsInt(xmlConfig, "MazeWidth");
-            _mazeScaleMultiplier = XmlUtils.GetValueAsInt(xmlConfig, "MazeScaleMultiplier");
-
-            // Get success/failure criteria constraints
-            _numMazeSuccessCriteria = XmlUtils.GetValueAsInt(xmlConfig, "NumMazesSolvedCriteria");
-            _numAgentSuccessCriteria = XmlUtils.GetValueAsInt(xmlConfig, "NumAgentsSolvedCriteria");
-
-            // Read in log file path/name
-            _navigatorEvolutionDataLogger = navigatorEvolutionLogger ??
-                                            ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Evolution,
-                                                "NavigatorLoggingConfig");
-            _navigatorPopulationDataLogger = navigatorPopulationLogger ?? ExperimentUtils.ReadDataLogger(xmlConfig,
-                LoggingType.Population, "NavigatorLoggingConfig");
-            _navigatorGenomeDataLogger = navigatorGenomeLogger ??
-                                         ExperimentUtils.ReadDataLogger(xmlConfig,
-                                             LoggingType.Genome, "NavigatorLoggingConfig");
-            _mazeEvolutionDataLogger = mazeEvolutionLogger ??
-                                       ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Evolution,
-                                           "MazeLoggingConfig");
-            _mazePopulationDataLogger = mazePopulationLogger ??
-                                        ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Population,
-                                            "MazeLoggingConfig");
-            _mazeGenomeDataLogger = mazeGenomeLogger ??
-                                    ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Genome,
-                                        "MazeLoggingConfig");
-
-            // Read in the maximum number of initialization evaluations
-            _maxInitializationEvaluations = XmlUtils.GetValueAsUInt(xmlConfig, "MaxInitializationEvaluations");
-
-            // Create new evolution field elements map with all fields enabled
-            _navigatorLogFieldEnableMap = EvolutionFieldElements.PopulateEvolutionFieldElementsEnableMap();
-
-            // Add default population logging configuration
-            foreach (
-                KeyValuePair<FieldElement, bool> populationLoggingPair in
-                    PopulationFieldElements.PopulatePopulationFieldElementsEnableMap())
-            {
-                _navigatorLogFieldEnableMap.Add(populationLoggingPair.Key, populationLoggingPair.Value);
-            }
-
-            // Add default genome logging configuration
-            foreach (
-                KeyValuePair<FieldElement, bool> genomeLoggingPair in
-                    GenomeFieldElements.PopulateGenomeFieldElementsEnableMap())
-            {
-                _navigatorLogFieldEnableMap.Add(genomeLoggingPair.Key, genomeLoggingPair.Value);
-            }
-
-            // Disable logging fields not relevant to agent evolution in MCC experiment
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.SpecieCount] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.AsexualOffspringCount] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.SexualOffspringCount] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.InterspeciesOffspringCount] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MinimalCriteriaThreshold] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MinimalCriteriaPointX] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MinimalCriteriaPointY] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MaxFitness] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MeanFitness] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MeanSpecieChampFitness] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MinSpecieSize] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MaxSpecieSize] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeGenomeId] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeFitness] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeBirthGeneration] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeConnectionGeneCount] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeNeuronGeneCount] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeTotalGeneCount] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeEvaluationCount] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeBehaviorX] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeBehaviorY] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeDistanceToTarget] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeXml] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MinWalls] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MaxWalls] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MeanWalls] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MinWaypoints] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MaxWaypoints] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MeanWaypoints] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MinJunctures] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MaxJunctures] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MeanJunctures] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MinTrajectoryFacingOpenings] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MaxTrajectoryFacingOpenings] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MeanTrajectoryFacingOpenings] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MinHeight] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MaxHeight] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MeanHeight] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MinWidth] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MaxWidth] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MeanWidth] = false;
-
-            // Create a maze logger configuration with the same configuration as the navigator one
-            _mazeLogFieldEnableMap = new Dictionary<FieldElement, bool>(_navigatorLogFieldEnableMap);
-
-            // Switch off run phase logging for maze evolution
-            _mazeLogFieldEnableMap[EvolutionFieldElements.RunPhase] = false;
-            _mazeLogFieldEnableMap[PopulationFieldElements.RunPhase] = false;
-            
-            // Turn additional maze logging back on
-            _mazeLogFieldEnableMap[EvolutionFieldElements.MinWalls] = true;
-            _mazeLogFieldEnableMap[EvolutionFieldElements.MaxWalls] = true;
-            _mazeLogFieldEnableMap[EvolutionFieldElements.MeanWalls] = true;
-            _mazeLogFieldEnableMap[EvolutionFieldElements.MinWaypoints] = true;
-            _mazeLogFieldEnableMap[EvolutionFieldElements.MaxWaypoints] = true;
-            _mazeLogFieldEnableMap[EvolutionFieldElements.MeanWaypoints] = true;
-            _mazeLogFieldEnableMap[EvolutionFieldElements.MinJunctures] = true;
-            _mazeLogFieldEnableMap[EvolutionFieldElements.MaxJunctures] = true;
-            _mazeLogFieldEnableMap[EvolutionFieldElements.MeanJunctures] = true;
-            _mazeLogFieldEnableMap[EvolutionFieldElements.MinTrajectoryFacingOpenings] = true;
-            _mazeLogFieldEnableMap[EvolutionFieldElements.MaxTrajectoryFacingOpenings] = true;
-            _mazeLogFieldEnableMap[EvolutionFieldElements.MeanTrajectoryFacingOpenings] = true;
-            _mazeLogFieldEnableMap[EvolutionFieldElements.MinHeight] = true;
-            _mazeLogFieldEnableMap[EvolutionFieldElements.MaxHeight] = true;
-            _mazeLogFieldEnableMap[EvolutionFieldElements.MeanHeight] = true;
-            _mazeLogFieldEnableMap[EvolutionFieldElements.MinWidth] = true;
-            _mazeLogFieldEnableMap[EvolutionFieldElements.MaxWidth] = true;
-            _mazeLogFieldEnableMap[EvolutionFieldElements.MeanWidth] = true;
-
-            // Read in the number of batches between population logging
-            _populationLoggingBatchInterval = XmlUtils.TryGetValueAsInt(xmlConfig, "PopulationLoggingBatchInterval");
-
-            // Initialize the initialization algorithm
-            _mazeNavigationInitializer =
-                ExperimentUtils.DetermineMCCInitializer(
-                    xmlConfig.GetElementsByTagName("InitializationAlgorithmConfig", "")[0] as XmlElement);
-
-            // Setup initialization algorithm
-            _mazeNavigationInitializer.SetAlgorithmParameters(
-                xmlConfig.GetElementsByTagName("InitializationAlgorithmConfig", "")[0] as XmlElement, AnnInputCount,
-                AnnOutputCount, _numAgentSuccessCriteria, 0);
-
-            // Pass in maze experiment specific parameters 
-            // (note that a new maze structure is created here for the sole purpose of extracting the maze dimensions and calculating max distance to target)
-            _mazeNavigationInitializer.SetEnvironmentParameters(_minSuccessDistance,
-                new MazeDecoder(_mazeScaleMultiplier).Decode(
-                    new MazeGenomeFactory(MazeGenomeParameters, _mazeHeight, _mazeWidth).CreateGenome(0)));
-
-            // Propagate the initialization seed genome size up to the base experiment level
-            // so that we know how to generate the bootstrap population
-            AgentInitializationGenomeCount = _mazeNavigationInitializer.PopulationSize;
-        }
-
-        /// <summary>
-        ///     Zero argument wrapper method for instantiating the coveolution algorithm container.  This uses default agent and
-        ///     maze population sizes as the only configuration parameters.
-        /// </summary>
-        /// <returns>The instantiated MCC algorithm container.</returns>
-        public override IMCCAlgorithmContainer<NeatGenome, MazeGenome> CreateMCCAlgorithmContainer()
-        {
-            return CreateMCCAlgorithmContainer(AgentSeedGenomeCount, MazeSeedGenomeCount);
-        }
-
-        /// <summary>
-        ///     Creates the MCC algorithm container using the given agent and maze population sizes.
-        /// </summary>
-        /// <param name="populationSize1">The agent population size.</param>
-        /// <param name="populationSize2">The maze population size.</param>
-        /// <returns>The instantiated MCC algorithm container.</returns>
-        public override IMCCAlgorithmContainer<NeatGenome, MazeGenome> CreateMCCAlgorithmContainer(
-            int populationSize1, int populationSize2)
-        {
-            // Create a genome factory for the NEAT genomes
-            IGenomeFactory<NeatGenome> neatGenomeFactory = new NeatGenomeFactory(AnnInputCount, AnnOutputCount,
-                NeatGenomeParameters);
-
-            // Create a genome factory for the maze genomes
-            IGenomeFactory<MazeGenome> mazeGenomeFactory = new MazeGenomeFactory(MazeGenomeParameters, _mazeHeight,
-                _mazeWidth);
-
-            // Create an initial population of maze navigators
-            List<NeatGenome> neatGenomeList = neatGenomeFactory.CreateGenomeList(populationSize1, 0);
-
-            // Create an initial population of mazes
-            // NOTE: the population is set to 1 here because we're just starting with a single, completely open maze space
-            List<MazeGenome> mazeGenomeList = mazeGenomeFactory.CreateGenomeList(populationSize2, 0);
-
-            // Create the evolution algorithm container
-            return CreateMCCAlgorithmContainer(neatGenomeFactory, mazeGenomeFactory, neatGenomeList,
-                mazeGenomeList);
-        }
-
-        /// <summary>
-        ///     Creates the evolution algorithm container using the given factories and genome lists.
-        /// </summary>
-        /// <param name="genomeFactory1">The agent genome factory.</param>
-        /// <param name="genomeFactory2">The maze genome factory.</param>
-        /// <param name="genomeList1">The agent genome list.</param>
-        /// <param name="genomeList2">The maze genome list.</param>
-        /// <returns>The instantiated MCC algorithm container.</returns>
-        public override IMCCAlgorithmContainer<NeatGenome, MazeGenome> CreateMCCAlgorithmContainer(
-            IGenomeFactory<NeatGenome> genomeFactory1,
-            IGenomeFactory<MazeGenome> genomeFactory2, List<NeatGenome> genomeList1, List<MazeGenome> genomeList2)
-        {
-            List<NeatGenome> seedAgentPopulation = new List<NeatGenome>();
-
-            // Create maze decoder to decode initialization mazes
-            MazeDecoder mazeDecoder = new MazeDecoder(_mazeScaleMultiplier);
-
-            // Loop through every maze and evolve the requisite number of viable genomes that solve it
-            for (int idx = 0; idx < genomeList2.Count; idx++)
-            {
-                Console.WriteLine(@"Evolving viable agents for maze population index {0} and maze ID {1}", idx,
-                    genomeList2[idx].Id);
-
-                // Evolve the number of agents required to meet the success MC for the current maze                
-                List<NeatGenome> viableMazeAgents = EvolveViableAgents(genomeFactory1, genomeList1.ToList(),
-                    mazeDecoder.Decode(genomeList2[idx]));
-
-                // Add the viable agent genomes who solve the current maze (but avoid adding duplicates, as identified by the genome ID)
-                // Note that it's fine to have multiple mazes solved by the same agent, so in this case, we'll leave the agent
-                // in the pool of seed agent genomes
-                foreach (
-                    NeatGenome viableMazeAgent in
-                        viableMazeAgents.Where(
-                            viableMazeAgent =>
-                                seedAgentPopulation.Select(sap => sap.Id).Contains(viableMazeAgent.Id) == false))
-                {
-                    seedAgentPopulation.Add(viableMazeAgent);
-                }
-            }
-
-            // If we still lack the genomes to fill out agent specie count while still satisfying the maze MC,
-            // iteratively pick a random maze and evolve agents on that maze until we reach the requisite number
-            while (seedAgentPopulation.ToList().Count < _numAgentSuccessCriteria*AgentNumSpecies)
-            {
-                FastRandom rndMazePicker = new FastRandom();
-
-                // Pick a random maze on which to evolve agent(s)
-                MazeGenome mazeGenome = genomeList2[rndMazePicker.Next(genomeList2.Count - 1)];
-
-                Console.WriteLine(
-                    @"Continuing viable agent evolution on maze {0}, with {1} of {2} required agents in place",
-                    mazeGenome.Id, seedAgentPopulation.Count, (_numAgentSuccessCriteria*AgentNumSpecies));
-
-                // Evolve the number of agents required to meet the success MC for the maze
-                List<NeatGenome> viableMazeAgents = EvolveViableAgents(genomeFactory1, genomeList1.ToList(),
-                    mazeDecoder.Decode(mazeGenome));
-
-                // Iterate through each viable agent and remove them if they've already solved a maze or add them to the list
-                // of viable agents if they have not
-                foreach (NeatGenome viableMazeAgent in viableMazeAgents)
-                {
-                    // If they agent has already solved maze and is in the list of viable agents, remove that agent
-                    // from the pool of seed genomes (this is done because here, we're interested in getting unique
-                    // agents and want to avoid an endless loop wherein the same viable agents are returned)
-                    if (seedAgentPopulation.Select(sap => sap.Id).Contains(viableMazeAgent.Id))
-                    {
-                        genomeList1.Remove(viableMazeAgent);
-                    }
-                    // Otherwise, add that agent to the list of viable agents
-                    else
-                    {
-                        seedAgentPopulation.Add(viableMazeAgent);
-                    }
-                }
-            }
-
-            // Set dummy fitness so that seed maze(s) will be marked as evaluated
-            foreach (MazeGenome mazeGenome in genomeList2)
-            {
-                mazeGenome.EvaluationInfo.SetFitness(0);
-            }
-
-            // Reset primary NEAT genome parameters on agent genome factory
-            ((NeatGenomeFactory) genomeFactory1).ResetNeatGenomeParameters(NeatGenomeParameters);
-
-            // Create the NEAT evolution algorithm parameters 
-            var neatEaParams = new EvolutionAlgorithmParameters
-            {
-                SpecieCount = AgentNumSpecies,
-                MaxSpecieSize = AgentDefaultPopulationSize / AgentNumSpecies
-            };
-            
-            // Create the maze evolution algorithm parameters
-            var mazeEaParams = new EvolutionAlgorithmParameters
-            {
-                SpecieCount = MazeNumSpecies,
-                MaxSpecieSize = MazeDefaultPopulationSize / MazeNumSpecies
-            };
-            
-            // Create the NEAT (i.e. navigator) queueing evolution algorithm
-            AbstractEvolutionAlgorithm<NeatGenome> neatEvolutionAlgorithm =
-                new MultiQueueEvolutionAlgorithm<NeatGenome>(
-                    neatEaParams,
-                    new NeatAlgorithmStats(neatEaParams), 
-                    new ParallelKMeansClusteringStrategy<NeatGenome>(new ManhattanDistanceMetric(1.0, 0.0, 10.0),
-                        ParallelOptions), null, NavigatorBatchSize, RunPhase.Primary, _navigatorEvolutionDataLogger,
-                    _navigatorLogFieldEnableMap, _navigatorPopulationDataLogger, _navigatorGenomeDataLogger,
-                    _populationLoggingBatchInterval);
-
-            // Create the maze queueing evolution algorithm
-            AbstractEvolutionAlgorithm<MazeGenome> mazeEvolutionAlgorithm =
-                new MultiQueueEvolutionAlgorithm<MazeGenome>(
-                    mazeEaParams,
-                    new MazeAlgorithmStats(mazeEaParams), 
-                    new ParallelKMeansClusteringStrategy<MazeGenome>(new ManhattanDistanceMetric(1.0, 0.0, 10.0),
-                        ParallelOptions), null, MazeBatchSize, RunPhase.Primary, _mazeEvolutionDataLogger,
-                    _mazeLogFieldEnableMap, _mazePopulationDataLogger, _mazeGenomeDataLogger,
-                    _populationLoggingBatchInterval);
-
-            // Create the maze phenome evaluator
-            IPhenomeEvaluator<MazeStructure, BehaviorInfo> mazeEvaluator =
-                new MazeEnvironmentMCSEvaluator(_minSuccessDistance, BehaviorCharacterizationFactory,
-                    _numAgentSuccessCriteria, 0);
-
-            // Create navigator phenome evaluator
-            IPhenomeEvaluator<IBlackBox, BehaviorInfo> navigatorEvaluator =
-                new MazeNavigatorMCSEvaluator(_minSuccessDistance, BehaviorCharacterizationFactory,
-                    _numMazeSuccessCriteria);
-
-            // Create maze genome decoder
-            IGenomeDecoder<MazeGenome, MazeStructure> mazeGenomeDecoder = new MazeDecoder(_mazeScaleMultiplier);
-
-            // Create navigator genome decoder
-            IGenomeDecoder<NeatGenome, IBlackBox> navigatorGenomeDecoder = new NeatGenomeDecoder(ActivationScheme);
-
-            // Create the maze genome evaluator
-            IGenomeEvaluator<MazeGenome> mazeFitnessEvaluator =
-                new ParallelGenomeBehaviorEvaluator<MazeGenome, MazeStructure>(mazeGenomeDecoder, mazeEvaluator,
-                    SelectionType.Queueing, SearchType.MinimalCriteriaSearch, ParallelOptions);
-
-            // Create navigator genome evaluator
-            IGenomeEvaluator<NeatGenome> navigatorFitnessEvaluator =
-                new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(navigatorGenomeDecoder, navigatorEvaluator,
-                    SelectionType.Queueing, SearchType.MinimalCriteriaSearch, ParallelOptions);
-
-            // Create the MCC container
-            IMCCAlgorithmContainer<NeatGenome, MazeGenome> imccAlgorithmContainer =
-                new MCCAlgorithmContainer<NeatGenome, MazeGenome>(neatEvolutionAlgorithm, mazeEvolutionAlgorithm);
-
-            // Initialize the container and component algorithms
-            imccAlgorithmContainer.Initialize(navigatorFitnessEvaluator, genomeFactory1, seedAgentPopulation,
-                AgentDefaultPopulationSize, mazeFitnessEvaluator, genomeFactory2, genomeList2, MazeDefaultPopulationSize,
-                MaxGenerations, MaxEvaluations);
-
-            return imccAlgorithmContainer;
-        }
 
         #endregion
     }

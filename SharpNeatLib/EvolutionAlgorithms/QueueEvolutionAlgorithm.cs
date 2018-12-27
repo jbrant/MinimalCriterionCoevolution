@@ -15,11 +15,12 @@ using SharpNeat.Utility;
 
 namespace SharpNeat.EvolutionAlgorithms
 {
+    /// <inheritdoc />
     /// <summary>
     ///     Implementation of a queue-based NEAT evolution algorithm, with each species having its own, logical queue
     ///     ("logical" because all genomes are ultimately part of the same global population).
     /// </summary>
-    public class MultiQueueEvolutionAlgorithm<TGenome> : AbstractComplexifyingEvolutionAlgorithm<TGenome>
+    public class QueueEvolutionAlgorithm<TGenome> : AbstractComplexifyingEvolutionAlgorithm<TGenome>
         where TGenome : class, IGenome<TGenome>
     {
         #region Instance Fields
@@ -33,8 +34,9 @@ namespace SharpNeat.EvolutionAlgorithms
 
         #region Constructors
 
+        /// <inheritdoc />
         /// <summary>
-        ///     Constructs multi-queue evolution algorithm with the given EA parameters.
+        ///     QueueEvolutionAlgorithm constructor.
         /// </summary>
         /// <param name="eaParams">The NEAT algorithm parameters.c</param>
         /// <param name="stats">The evolution algorithm statistics container.</param>
@@ -50,7 +52,7 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <param name="populationLogger">The population data logger (optional).</param>
         /// <param name="genomeLogger">The genome data logger (optional).</param>
         /// <param name="populationLoggingInterval">The interval at which the population is logged.</param>
-        public MultiQueueEvolutionAlgorithm(EvolutionAlgorithmParameters eaParams, IEvolutionAlgorithmStats stats,
+        public QueueEvolutionAlgorithm(EvolutionAlgorithmParameters eaParams, IEvolutionAlgorithmStats stats,
             ISpeciationStrategy<TGenome> speciationStrategy, IComplexityRegulationStrategy complexityRegulationStrategy,
             int batchSize, RunPhase runPhase = RunPhase.Primary, IDataLogger evolutionLogger = null,
             IDictionary<FieldElement, bool> logFieldEnabledMap = null, IDataLogger populationLogger = null,
@@ -67,25 +69,53 @@ namespace SharpNeat.EvolutionAlgorithms
             _logFieldEnabledMap = logFieldEnabledMap;
         }
 
+        /// <inheritdoc />
+        /// <summary>
+        ///     QueueEvolutionAlgorithm constructor omitting speciation strategy.
+        /// </summary>
+        /// <param name="eaParams">The NEAT algorithm parameters.c</param>
+        /// <param name="stats">The evolution algorithm statistics container.</param>
+        /// <param name="complexityRegulationStrategy">The complexity regulation strategy.</param>
+        /// <param name="batchSize">The batch size of offspring to produce, evaluate, and remove.</param>
+        /// <param name="runPhase">
+        ///     The experiment phase indicating whether this is an initialization process or the primary
+        ///     algorithm.
+        /// </param>
+        /// <param name="evolutionLogger">The evolution data logger (optional).</param>
+        /// <param name="logFieldEnabledMap">Dictionary of logging fields that can be dynamically enabled or disabled.</param>
+        /// <param name="populationLogger">The population data logger (optional).</param>
+        /// <param name="genomeLogger">The genome data logger (optional).</param>
+        /// <param name="populationLoggingInterval">The interval at which the population is logged.</param>
+        public QueueEvolutionAlgorithm(EvolutionAlgorithmParameters eaParams, IEvolutionAlgorithmStats stats,
+            IComplexityRegulationStrategy complexityRegulationStrategy,
+            int batchSize, RunPhase runPhase = RunPhase.Primary, IDataLogger evolutionLogger = null,
+            IDictionary<FieldElement, bool> logFieldEnabledMap = null, IDataLogger populationLogger = null,
+            IDataLogger genomeLogger = null, int? populationLoggingInterval = null) : this(eaParams, stats, null,
+            complexityRegulationStrategy, batchSize, runPhase, evolutionLogger, logFieldEnabledMap, populationLogger,
+            genomeLogger, populationLoggingInterval)
+        {
+        }
+
         #endregion
 
         #region Private methods
 
         /// <summary>
-        ///     Creates the specified number of offspring asexually using the desired offspring count as a gauge for the FIFO
-        ///     parent selection (it's a one-to-one mapping).
+        ///     Creates the specified number of offspring by selecting the equivalent number of parents from the given species and
+        ///     reproducing.
         /// </summary>
         /// <param name="offspringCount">The number of offspring to produce.</param>
+        /// <param name="species">The species from which the parents are selected.</param>
         /// <returns>The list of offspring.</returns>
-        private List<TGenome> CreateOffspring(int offspringCount, Specie<TGenome> specie)
+        private IEnumerable<TGenome> CreateOffspring(int offspringCount, Specie<TGenome> species)
         {
-            List<TGenome> offspringList = new List<TGenome>(offspringCount);
+            var offspringList = new List<TGenome>(offspringCount);
 
             // Get the parent genomes
-            List<TGenome> parentList = specie.GenomeList.GetRange(0, offspringCount);
+            var parentList = species.GenomeList.GetRange(0, offspringCount);
 
             // Remove the parents from the queue
-            specie.GenomeList.RemoveRange(0, offspringCount);
+            species.GenomeList.RemoveRange(0, offspringCount);
 
             // Generate an offspring asexually for each parent genome (this is not done asexually 
             // because depending on the batch size, we may not be able to have genomes from the 
@@ -93,7 +123,32 @@ namespace SharpNeat.EvolutionAlgorithms
             offspringList.AddRange(parentList.Select(parentGenome => parentGenome.CreateOffspring(CurrentGeneration)));
 
             // Move the parents who replaced offspring to the back of the queue (list)
-            specie.GenomeList.AddRange(parentList);
+            species.GenomeList.AddRange(parentList);
+
+            return offspringList;
+        }
+
+        /// <summary>
+        ///     Creates the specified number of offspring by selecting the equivalent number of parents from the population queue
+        ///     and reproducing.
+        /// </summary>
+        /// <param name="offspringCount">The number of offspring to produce.</param>
+        /// <returns>The list of offspring.</returns>
+        private List<TGenome> CreateOffspring(int offspringCount)
+        {
+            var offspringList = new List<TGenome>(offspringCount);
+
+            // Get the parent genomes
+            var parentList = ((List<TGenome>) GenomeList).GetRange(0, offspringCount);
+
+            // Remove the parents from the queue
+            ((List<TGenome>) GenomeList).RemoveRange(0, offspringCount);
+
+            // Generate the specified number of offspring
+            offspringList.AddRange(parentList.Select(parentGenome => parentGenome.CreateOffspring(CurrentGeneration)));
+
+            // Move the parents who replaced offspring to the back of the queue (list)
+            ((List<TGenome>) GenomeList).AddRange(parentList);
 
             return offspringList;
         }
@@ -106,26 +161,44 @@ namespace SharpNeat.EvolutionAlgorithms
             // Iterate over each species and remove the oldest genomes from any that have exceeded their cap
             foreach (var specie in SpecieList.ToList())
             {
-                if (specie.GenomeList.Count > EaParams.MaxSpecieSize)
+                if (specie.GenomeList.Count <= EaParams.MaxSpecieSize) continue;
+
+                // Sort the specie population by age (oldest to youngest)
+                IEnumerable<TGenome> ageSortedPopulation =
+                    specie.GenomeList.OrderBy(g => g.BirthGeneration).AsParallel();
+
+                // Select the specified number of oldest genomes
+                var oldestGenomes = ageSortedPopulation.Take(specie.GenomeList.Count - EaParams.MaxSpecieSize);
+
+                // Remove the oldest genomes from the specie/population
+                foreach (var oldestGenome in oldestGenomes)
                 {
-                    // Sort the specie population by age (oldest to youngest)
-                    IEnumerable<TGenome> ageSortedPopulation =
-                        specie.GenomeList.OrderBy(g => g.BirthGeneration).AsParallel();
+                    // Remove from the population
+                    ((List<TGenome>) GenomeList).Remove(oldestGenome);
 
-                    // Select the specified number of oldest genomes
-                    IEnumerable<TGenome> oldestGenomes =
-                        ageSortedPopulation.Take(specie.GenomeList.Count - EaParams.MaxSpecieSize);
-
-                    // Remove the oldest genomes from the specie/population
-                    foreach (TGenome oldestGenome in oldestGenomes)
-                    {
-                        // Remove from the population
-                        ((List<TGenome>) GenomeList).Remove(oldestGenome);
-
-                        // Remove the genome reference from the specie
-                        SpecieList[specie.Idx].GenomeList.Remove(oldestGenome);
-                    }
+                    // Remove the genome reference from the specie
+                    SpecieList[specie.Idx].GenomeList.Remove(oldestGenome);
                 }
+            }
+        }
+
+        /// <summary>
+        ///     Removes the specified number of oldest genomes from the population queue.
+        /// </summary>
+        /// <param name="numGenomesToRemove">The number of oldest genomes to remove from the population.</param>
+        private void RemoveGlobalOldestGenomes(int numGenomesToRemove)
+        {
+            // Sort the population by age (oldest to youngest)
+            IEnumerable<TGenome> ageSortedPopulation =
+                ((List<TGenome>) GenomeList).OrderBy(g => g.BirthGeneration).AsParallel();
+
+            // Select the specified number of oldest genomes
+            var oldestGenomes = ageSortedPopulation.Take(numGenomesToRemove);
+
+            // Remove the oldest genomes from the population
+            foreach (var oldestGenome in oldestGenomes)
+            {
+                ((List<TGenome>) GenomeList).Remove(oldestGenome);
             }
         }
 
@@ -133,6 +206,7 @@ namespace SharpNeat.EvolutionAlgorithms
 
         #region Overridden methods
 
+        /// <inheritdoc />
         /// <summary>
         ///     Overrides the base initialization method, with the primary difference being that the initial population is expected
         ///     to have already undergone evaluation (via a bootstrapping process).
@@ -188,7 +262,7 @@ namespace SharpNeat.EvolutionAlgorithms
                     : null
             });
 
-            // Initialize the genome evalutor
+            // Initialize the genome evaluator
             GenomeEvaluator.Initialize();
 
             // Ensure that all genomes have been evaluated
@@ -202,25 +276,39 @@ namespace SharpNeat.EvolutionAlgorithms
             // will be the first and only iteration of speciation executed.  Each species is henceforth 
             // considered to have its own queue (even though the global population itself is physically 
             // stored in the same data structure).
-            SpecieList = SpeciationStrategy.InitializeSpeciation(GenomeList, EaParams.SpecieCount);
+            if (EaParams.SpecieCount > 0)
+                SpecieList = SpeciationStrategy.InitializeSpeciation(GenomeList, EaParams.SpecieCount);
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Progress forward by one evaluation. Perform one iteration of the evolution algorithm.
         /// </summary>
         public override void PerformOneGeneration()
         {
-            List<TGenome> childGenomes = new List<TGenome>(_batchSize*SpecieList.Count);
+            List<TGenome> childGenomes;
 
-            // Iterate through each species and asexually reproduce offspring
-            foreach (var specie in SpecieList)
+            if (EaParams.SpecieCount > 0)
             {
-                // Get the batch size for this iteration, which will be lower-bounded by
-                // the number of genomes in the current species
-                int curSpecieBatchSize = Math.Min(_batchSize, specie.GenomeList.Count);
+                childGenomes = new List<TGenome>(_batchSize * SpecieList.Count);
 
-                // Produce number of offspring equivalent to the batch size
-                childGenomes.AddRange(CreateOffspring(curSpecieBatchSize, specie));
+                // Iterate through each species and asexually reproduce offspring
+                foreach (var specie in SpecieList)
+                {
+                    // Get the batch size for this iteration, which will be lower-bounded by
+                    // the number of genomes in the current species
+                    var curSpecieBatchSize = Math.Min(_batchSize, specie.GenomeList.Count);
+
+                    // Produce number of offspring equivalent to the batch size
+                    childGenomes.AddRange(CreateOffspring(curSpecieBatchSize, specie));
+                }
+            }
+            else
+            {
+                var curBatchSize = Math.Min(_batchSize, GenomeList.Count);
+
+                // Produce number of offspring equivalent to the given batch size
+                childGenomes = CreateOffspring(curBatchSize);
             }
 
             // First evaluate the offspring batch with bridging disabled
@@ -232,21 +320,36 @@ namespace SharpNeat.EvolutionAlgorithms
             // Add offspring to the global population
             (GenomeList as List<TGenome>)?.AddRange(childGenomes);
 
-            // Recompute centroids and assign child genomes to species with closest genetic 
-            // similarity (but don't respeciate)
-            SpeciationStrategy.SpeciateOffspring(childGenomes, SpecieList, false);
+            if (EaParams.SpecieCount > 0)
+            {
+                // Recompute centroids and assign child genomes to species with closest genetic 
+                // similarity (but don't respeciate)
+                SpeciationStrategy.SpeciateOffspring(childGenomes, SpecieList, false);
 
-            // Perform per-species removals based on whether the cap for that species has been exceeded
-            RemoveOldestFromOverfullSpecies();
+                // Perform per-species removals based on whether the cap for that species has been exceeded
+                RemoveOldestFromOverfullSpecies();
 
-            // Update the best genome within each species and the population statistics
-            UpdateBestGenome(false);
-            UpdateStats(true);
+                // Update the best genome within each species and the population statistics
+                UpdateBestGenome(false);
+                UpdateStats(true);
+            }
+            else
+            {
+                // Calculate number of genomes to remove
+                var genomesToRemove = GenomeList.Count - PopulationSize;
+
+                // Remove the above-computed number of oldest genomes from the population
+                RemoveGlobalOldestGenomes(genomesToRemove);
+
+                // Update the global best genome and the population statistics
+                UpdateBestGenomeWithoutSpeciation(false, false);
+                UpdateStats(false);
+            }
 
             // Update the total offspring count based on the number of *viable* offspring produced
             Statistics.TotalOffspringCount = (ulong) childGenomes.Count;
 
-            // Ensure that the 
+            // Ensure that the population remains within the given size constraints
             Debug.Assert(GenomeList.Count <= PopulationSize);
 
             // If there is a logger defined, log the generation stats
@@ -256,7 +359,7 @@ namespace SharpNeat.EvolutionAlgorithms
                 (CurrentChampGenome as NeatGenome)?.GetLoggableElements(_logFieldEnabledMap));
 
             // Dump the extant population to file
-            foreach (TGenome genome in GenomeList)
+            foreach (var genome in GenomeList)
             {
                 PopulationLogger?.LogRow(new List<LoggableElement>
                 {
@@ -282,7 +385,7 @@ namespace SharpNeat.EvolutionAlgorithms
             // Dump genome definitions for entire population if this is the first batch
             if (CurrentGeneration == 1)
             {
-                foreach (TGenome genome in GenomeList)
+                foreach (var genome in GenomeList)
                 {
                     GenomeLogger?.LogRow(new List<LoggableElement>
                     {
@@ -304,7 +407,7 @@ namespace SharpNeat.EvolutionAlgorithms
             // Otherwise, just dump new child genome definitions to file
             else
             {
-                foreach (TGenome childGenome in childGenomes)
+                foreach (var childGenome in childGenomes)
                 {
                     GenomeLogger?.LogRow(new List<LoggableElement>
                     {

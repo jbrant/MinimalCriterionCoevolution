@@ -13,44 +13,54 @@ using SharpNeat.Genomes.Neat;
 
 namespace MCC_Domains.MazeNavigation
 {
+    /// <inheritdoc />
+    /// <summary>
+    ///     Base class for maze navigation MCC experiments.
+    /// </summary>
     public abstract class BaseMCCMazeNavigationExperiment : IMCCExperiment
     {
         #region Public Properties
 
+        /// <inheritdoc />
         /// <summary>
         ///     The name of the experiment.
         /// </summary>
-        public string Name { get; protected set; }
+        public string Name { get; private set; }
 
+        /// <inheritdoc />
         /// <summary>
         ///     The description of the experiment.
         /// </summary>
-        public string Description { get; protected set; }
+        public string Description { get; private set; }
 
+        /// <inheritdoc />
         /// <summary>
         ///     The default (max) agent population size.
         /// </summary>
-        public int AgentDefaultPopulationSize { get; protected set; }
+        public int AgentDefaultPopulationSize { get; private set; }
 
+        /// <inheritdoc />
         /// <summary>
         ///     The default (max) maze population size.
         /// </summary>
-        public int MazeDefaultPopulationSize { get; protected set; }
+        public int MazeDefaultPopulationSize { get; private set; }
 
         /// <summary>
         ///     The number of agent genomes needed for the initialization algorithm.
         /// </summary>
         public int AgentInitializationGenomeCount { get; protected set; }
 
+        /// <inheritdoc />
         /// <summary>
         ///     The number of agent genomes in the agent seed population.
         /// </summary>
-        public int AgentSeedGenomeCount { get; protected set; }
+        public int AgentSeedGenomeCount { get; private set; }
 
+        /// <inheritdoc />
         /// <summary>
         ///     The number of maze genomes in the maze seed population.
         /// </summary>
-        public int MazeSeedGenomeCount { get; protected set; }
+        public int MazeSeedGenomeCount { get; private set; }
 
         #endregion
 
@@ -130,6 +140,7 @@ namespace MCC_Domains.MazeNavigation
 
         #region Public Methods
 
+        /// <inheritdoc />
         /// <summary>
         ///     Creates a new genome factory for maze navigator agents.
         /// </summary>
@@ -139,6 +150,7 @@ namespace MCC_Domains.MazeNavigation
             return new NeatGenomeFactory(AnnInputCount, AnnOutputCount, NeatGenomeParameters);
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Creates a new genome factory for mazes.
         /// </summary>
@@ -148,6 +160,7 @@ namespace MCC_Domains.MazeNavigation
             return new MazeGenomeFactory(MazeGenomeParameters);
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Save a population of agent genomes to an XmlWriter.
         /// </summary>
@@ -156,6 +169,7 @@ namespace MCC_Domains.MazeNavigation
             NeatGenomeXmlIO.WriteComplete(xw, agentGenomeList, false);
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Save a population of maze genomes to an XmlWriter.
         /// </summary>
@@ -164,6 +178,7 @@ namespace MCC_Domains.MazeNavigation
             MazeGenomeXmlIO.WriteComplete(xw, mazeGenomeList);
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Initializes the MCC maze navigation experiment by reading in all of the configuration parameters and
         ///     setting up the bootstrapping/initialization algorithm.
@@ -210,6 +225,7 @@ namespace MCC_Domains.MazeNavigation
             MaxEvaluations = XmlUtils.TryGetValueAsULong(xmlConfig, "MaxEvaluations");
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Zero argument wrapper method for instantiating the coveolution algorithm container.  This uses default agent and
         ///     maze population sizes as the only configuration parameters.
@@ -217,6 +233,7 @@ namespace MCC_Domains.MazeNavigation
         /// <returns>The instantiated MCC algorithm container.</returns>
         public abstract IMCCAlgorithmContainer<NeatGenome, MazeGenome> CreateMCCAlgorithmContainer();
 
+        /// <inheritdoc />
         /// <summary>
         ///     Creates the MCC algorithm container using the given agent and maze population sizes.
         /// </summary>
@@ -226,6 +243,7 @@ namespace MCC_Domains.MazeNavigation
         public abstract IMCCAlgorithmContainer<NeatGenome, MazeGenome> CreateMCCAlgorithmContainer(
             int populationSize1, int populationSize2);
 
+        /// <inheritdoc />
         /// <summary>
         ///     Creates the evolution algorithm container using the given factories and genome lists.
         /// </summary>

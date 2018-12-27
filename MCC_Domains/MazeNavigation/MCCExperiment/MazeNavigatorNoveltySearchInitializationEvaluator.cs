@@ -11,6 +11,7 @@ using SharpNeat.Phenomes.Mazes;
 
 namespace MCC_Domains.MazeNavigation.MCCExperiment
 {
+    /// <inheritdoc />
     /// <summary>
     ///     Defines evaluation rules and process for an initialization evaluation of the novelty search algorithm.
     /// </summary>
@@ -37,6 +38,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
                 maxDistanceToTarget);
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Maze Navigator fitness initialization evaluator constructor.
         /// </summary>
@@ -81,11 +83,13 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
 
         #region Public properties
 
+        /// <inheritdoc />
         /// <summary>
         ///     Gets the total number of evaluations that have been performed.
         /// </summary>
         public ulong EvaluationCount { get; private set; }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Gets a value indicating whether some goal fitness has been achieved and that the evolutionary algorithm/search
         ///     should stop.  This property's value can remain false to allow the algorithm to run indefinitely.
@@ -101,34 +105,25 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         /// </summary>
         /// <param name="agent">The maze navigator brain (ANN).</param>
         /// <param name="currentGeneration">The current generation or evaluation batch.</param>
-        /// <param name="isBridgingEvaluation">Not used by this evaluator configuration.</param>
         /// <param name="evaluationLogger">Reference to the evaluation logger.</param>
-        /// <param name="genomeXml">The string-representation of the genome (for logging purposes).</param>
         /// <returns>A fitness info (which is a function of the euclidean distance to the target).</returns>
-        public BehaviorInfo Evaluate(IBlackBox agent, uint currentGeneration, bool isBridgingEvaluation,
-            IDataLogger evaluationLogger,
-            string genomeXml)
+        public BehaviorInfo Evaluate(IBlackBox agent, uint currentGeneration,
+            IDataLogger evaluationLogger)
         {
-            ulong threadLocalEvaluationCount;
             lock (_evaluationLock)
             {
                 // Increment evaluation count
-                threadLocalEvaluationCount = EvaluationCount++;
+                EvaluationCount++;
             }
 
-            // Default the stop condition satisfied to false
-            bool goalReached = false;
-
             // Generate new behavior characterization
-            IBehaviorCharacterization behaviorCharacterization =
-                _behaviorCharacterizationFactory.CreateBehaviorCharacterization();
+            var behaviorCharacterization = _behaviorCharacterizationFactory.CreateBehaviorCharacterization();
 
             // Instantiate the maze world
-            MazeNavigationWorld<BehaviorInfo> world =
-                _multiMazeWorldFactory.CreateMazeNavigationWorld(behaviorCharacterization);
+            var world = _multiMazeWorldFactory.CreateMazeNavigationWorld(behaviorCharacterization);
 
             // Run a single trial
-            BehaviorInfo trialInfo = world.RunTrial(agent, SearchType.NoveltySearch, out goalReached);
+            var trialInfo = world.RunTrial(agent, SearchType.NoveltySearch, out var goalReached);
 
             // Set the objective distance
             trialInfo.ObjectiveDistance = world.GetDistanceToTarget();
@@ -139,17 +134,18 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
 
             // Log trial information (only log for non-bridging evaluations)
             evaluationLogger?.LogRow(new List<LoggableElement>
-            {
-                new LoggableElement(EvaluationFieldElements.Generation, currentGeneration),
-                new LoggableElement(EvaluationFieldElements.EvaluationCount, EvaluationCount),
-                new LoggableElement(EvaluationFieldElements.StopConditionSatisfied, StopConditionSatisfied),
-                new LoggableElement(EvaluationFieldElements.RunPhase, RunPhase.Initialization)
-            },
+                {
+                    new LoggableElement(EvaluationFieldElements.Generation, currentGeneration),
+                    new LoggableElement(EvaluationFieldElements.EvaluationCount, EvaluationCount),
+                    new LoggableElement(EvaluationFieldElements.StopConditionSatisfied, StopConditionSatisfied),
+                    new LoggableElement(EvaluationFieldElements.RunPhase, RunPhase.Initialization)
+                },
                 world.GetLoggableElements());
 
             return trialInfo;
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Initializes the logger and writes header.
         /// </summary>
@@ -170,6 +166,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             }, _multiMazeWorldFactory.CreateMazeNavigationWorld(new MazeStructure(0, 0, 1), null).GetLoggableElements());
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Update the evaluator based on some characteristic of the given population.
         /// </summary>
@@ -180,6 +177,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Updates the environment or other evaluation criteria against which the phenomes under evaluation are being
         ///     compared.  This is typically used in a MCC context.
@@ -190,6 +188,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Resets the internal state of the evaluation scheme.  This may not be needed for the maze navigation task.
         /// </summary>
@@ -197,6 +196,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         {
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Returns MazeNavigationMCSInitializationEvaluator loggable elements.
         /// </summary>
