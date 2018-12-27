@@ -113,56 +113,53 @@ namespace MCC_Executor.MazeNavigation
                 Environment.Exit(0);
 
             // Determine whether this is a distributed execution
-            bool isDistributedExecution =
+            var isDistributedExecution =
                 _executionConfiguration.ContainsKey(ExecutionParameter.IsDistributedExecution) &&
                 Boolean.Parse(_executionConfiguration[ExecutionParameter.IsDistributedExecution]);
 
             // Set the execution source (file or database)
-            string executionSource = _executionConfiguration[ExecutionParameter.ExperimentSource].ToLowerInvariant();
+            var executionSource = _executionConfiguration[ExecutionParameter.ExperimentSource].ToLowerInvariant();
 
             // Read number of runs and run to start from.  Note that if this is a distributed execution, each node
             // will only execute a single run, so the number of runs will be equivalent to the run to start from
             // (this ensures that the ensuing loop that executes all of the runs executes exactly once)
-            int startFromRun = _executionConfiguration.ContainsKey(ExecutionParameter.StartFromRun)
+            var startFromRun = _executionConfiguration.ContainsKey(ExecutionParameter.StartFromRun)
                 ? Int32.Parse(_executionConfiguration[ExecutionParameter.StartFromRun])
                 : 1;
-            int numRuns = isDistributedExecution
+            var numRuns = isDistributedExecution
                 ? startFromRun
                 : Int32.Parse(_executionConfiguration[ExecutionParameter.NumRuns]);
 
             // Determine whether to log organism state data
-            bool logOrganismStateData = _executionConfiguration.ContainsKey(ExecutionParameter.LogOrganismStateData) &&
-                                        Boolean.Parse(_executionConfiguration[ExecutionParameter.LogOrganismStateData]);
+            var logOrganismStateData = _executionConfiguration.ContainsKey(ExecutionParameter.LogOrganismStateData) &&
+                                       Boolean.Parse(_executionConfiguration[ExecutionParameter.LogOrganismStateData]);
 
             // Array of initial genome population files
-            string[] seedPopulationFiles = null;
 
-            if (Boolean.Parse(_executionConfiguration[ExecutionParameter.GeneratePopulation]) == false)
+            if (bool.Parse(_executionConfiguration[ExecutionParameter.GeneratePopulation]) == false)
             {
                 // Read in the seed population files
                 // Note that two assumptions are made here
                 // 1. Files can be naturally sorted and match the naming convention "*Run01", "*Run02", etc.
                 // 2. The number of files in the directory matches the number of runs (this is checked for below)
-                seedPopulationFiles =
+                var seedPopulationFiles =
                     Directory.GetFiles(_executionConfiguration[ExecutionParameter.SeedPopulationDirectory]);
 
                 // Make sure that the appropriate number of seed population have been specified
                 if (seedPopulationFiles.Count() < numRuns)
                 {
                     _executionLogger.Error(
-                        string.Format(
-                            "Number of seed population files [{0}] not sufficient for the specified number of runs [{1}]",
-                            seedPopulationFiles.Count(), numRuns));
+                        $"Number of seed population files [{seedPopulationFiles.Count()}] not sufficient for the specified number of runs [{numRuns}]");
                     Environment.Exit(0);
                 }
             }
 
             // Extract the experiment names
-            string[] experimentNames = _executionConfiguration[ExecutionParameter.ExperimentNames].Split(',');
+            var experimentNames = _executionConfiguration[ExecutionParameter.ExperimentNames].Split(',');
 
-            foreach (string curExperimentName in experimentNames)
+            foreach (var curExperimentName in experimentNames)
             {
-                _executionLogger.Info(string.Format("Executing Experiment {0}", curExperimentName));
+                _executionLogger.Info($"Executing Experiment {curExperimentName}");
 
                 if ("file".Equals(executionSource))
                 {
@@ -184,9 +181,9 @@ namespace MCC_Executor.MazeNavigation
                 if (isDistributedExecution)
                 {
                     using (
-                        File.Create(string.Format("{0} - Run {1} - COMPLETE",
-                            Path.Combine(_executionConfiguration[ExecutionParameter.OutputFileDirectory],
-                                curExperimentName), startFromRun)))
+                        File.Create(
+                            $"{Path.Combine(_executionConfiguration[ExecutionParameter.OutputFileDirectory], curExperimentName)} - Run {startFromRun} - COMPLETE")
+                    )
                     {
                     }
                 }
@@ -195,9 +192,9 @@ namespace MCC_Executor.MazeNavigation
                 {
                     // Write sentinel file to the given output directory
                     using (
-                        File.Create(string.Format("{0} - COMPLETE",
-                            Path.Combine(_executionConfiguration[ExecutionParameter.OutputFileDirectory],
-                                curExperimentName))))
+                        File.Create(
+                            $"{Path.Combine(_executionConfiguration[ExecutionParameter.OutputFileDirectory], curExperimentName)} - COMPLETE")
+                    )
                     {
                     }
                 }
@@ -211,26 +208,24 @@ namespace MCC_Executor.MazeNavigation
         /// <returns>Boolean status indicating whether parsing the configuration suceeded.</returns>
         private static bool ParseAndValidateConfiguration(string[] executionArguments)
         {
-            bool isConfigurationValid = executionArguments != null;
+            var isConfigurationValid = executionArguments != null;
 
             // Only continue if there are execution arguments
             if (executionArguments != null && executionArguments.Length > 0)
             {
-                foreach (string executionArgument in executionArguments)
+                foreach (var executionArgument in executionArguments)
                 {
-                    ExecutionParameter curParameter;
-
                     // Get the key/value pair
                     string[] parameterValuePair = executionArgument.Split('=');
 
                     // Attempt to parse the current parameter
-                    isConfigurationValid = Enum.TryParse(parameterValuePair[0], true, out curParameter);
+                    isConfigurationValid =
+                        Enum.TryParse(parameterValuePair[0], true, out ExecutionParameter curParameter);
 
                     // If the current parameter is not valid, break out of the loop and return
                     if (isConfigurationValid == false)
                     {
-                        _executionLogger.Error(string.Format("[{0}] is not a valid configuration parameter.",
-                            parameterValuePair[0]));
+                        _executionLogger.Error($"[{parameterValuePair[0]}] is not a valid configuration parameter.");
                         break;
                     }
 
@@ -238,9 +233,7 @@ namespace MCC_Executor.MazeNavigation
                     if (_executionConfiguration.ContainsKey(curParameter))
                     {
                         _executionLogger.Error(
-                            string.Format(
-                                "Ambiguous configuration - parameter [{0}] has been specified more than once.",
-                                curParameter));
+                            $"Ambiguous configuration - parameter [{curParameter}] has been specified more than once.");
                         break;
                     }
 
@@ -252,10 +245,10 @@ namespace MCC_Executor.MazeNavigation
                                 "database".Equals(parameterValuePair[1].ToLowerInvariant()) == false)
                             {
                                 _executionLogger.Error(
-                                    string.Format("The value for parameter [{0}] must be either file or database.",
-                                        curParameter));
+                                    $"The value for parameter [{curParameter}] must be either file or database.");
                                 isConfigurationValid = false;
                             }
+
                             break;
 
                         // Ensure that a valid number of runs was specified
@@ -264,11 +257,10 @@ namespace MCC_Executor.MazeNavigation
                             int testInt;
                             if (Int32.TryParse(parameterValuePair[1], out testInt) == false)
                             {
-                                _executionLogger.Error(string.Format(
-                                    "The value for parameter [{0}] must be an integer.",
-                                    curParameter));
+                                _executionLogger.Error($"The value for parameter [{curParameter}] must be an integer.");
                                 isConfigurationValid = false;
                             }
+
                             break;
 
                         // Ensure that valid boolean values were given
@@ -278,10 +270,10 @@ namespace MCC_Executor.MazeNavigation
                             bool testBool;
                             if (Boolean.TryParse(parameterValuePair[1], out testBool) == false)
                             {
-                                _executionLogger.Error(string.Format("The value for parameter [{0}] must be a boolean.",
-                                    curParameter));
+                                _executionLogger.Error($"The value for parameter [{curParameter}] must be a boolean.");
                                 isConfigurationValid = false;
                             }
+
                             break;
 
                         // Ensure that the seed population and experiments configuration directories actually exist
@@ -290,10 +282,10 @@ namespace MCC_Executor.MazeNavigation
                             if (Directory.Exists(parameterValuePair[1]) == false)
                             {
                                 _executionLogger.Error(
-                                    string.Format("The given experiment configuration directory [{0}] does not exist",
-                                        parameterValuePair[1]));
+                                    $"The given experiment configuration directory [{parameterValuePair[1]}] does not exist");
                                 isConfigurationValid = false;
                             }
+
                             break;
                     }
 
@@ -309,21 +301,19 @@ namespace MCC_Executor.MazeNavigation
 
             // If the per-parameter configuration is valid but not a full list of parameters were specified, makes sure the necessary ones are present
             if (isConfigurationValid && (_executionConfiguration.Count ==
-                                         Enum.GetNames(typeof (ExecutionParameter)).Length) == false)
+                                         Enum.GetNames(typeof(ExecutionParameter)).Length) == false)
             {
                 // Check for existence of experiment source
                 if (_executionConfiguration.ContainsKey(ExecutionParameter.ExperimentSource) == false)
                 {
-                    _executionLogger.Error(string.Format("Parameter [{0}] must be specified.",
-                        ExecutionParameter.ExperimentSource));
+                    _executionLogger.Error($"Parameter [{ExecutionParameter.ExperimentSource}] must be specified.");
                     isConfigurationValid = false;
                 }
 
                 // Check for existence of experiment names
                 if (_executionConfiguration.ContainsKey(ExecutionParameter.ExperimentNames) == false)
                 {
-                    _executionLogger.Error(string.Format("Parameter [{0}] must be specified.",
-                        ExecutionParameter.ExperimentNames));
+                    _executionLogger.Error($"Parameter [{ExecutionParameter.ExperimentNames}] must be specified.");
                     isConfigurationValid = false;
                 }
 
@@ -332,16 +322,14 @@ namespace MCC_Executor.MazeNavigation
                      Convert.ToBoolean(_executionConfiguration[ExecutionParameter.IsDistributedExecution]) == false) &&
                     _executionConfiguration.ContainsKey(ExecutionParameter.NumRuns) == false)
                 {
-                    _executionLogger.Error(string.Format("Parameter [{0}] must be specified.",
-                        ExecutionParameter.NumRuns));
+                    _executionLogger.Error($"Parameter [{ExecutionParameter.NumRuns}] must be specified.");
                     isConfigurationValid = false;
                 }
 
                 // Check for existence of output file directory
                 if (_executionConfiguration.ContainsKey(ExecutionParameter.OutputFileDirectory) == false)
                 {
-                    _executionLogger.Error(string.Format("Parameter [{0}] must be specified.",
-                        ExecutionParameter.OutputFileDirectory));
+                    _executionLogger.Error($"Parameter [{ExecutionParameter.OutputFileDirectory}] must be specified.");
                     isConfigurationValid = false;
                 }
 
@@ -349,8 +337,8 @@ namespace MCC_Executor.MazeNavigation
                 if ("file".Equals(_executionConfiguration[ExecutionParameter.ExperimentSource].ToLowerInvariant()) &&
                     _executionConfiguration.ContainsKey(ExecutionParameter.ExperimentConfigDirectory) == false)
                 {
-                    _executionLogger.Error(string.Format("Parameter [{0}] must be specified.",
-                        ExecutionParameter.ExperimentConfigDirectory));
+                    _executionLogger.Error(
+                        $"Parameter [{ExecutionParameter.ExperimentConfigDirectory}] must be specified.");
                     isConfigurationValid = false;
                 }
 
@@ -421,8 +409,8 @@ namespace MCC_Executor.MazeNavigation
             int numRuns, int startFromRun)
         {
             // Read in the configuration files that match the given experiment name (should only be 1 file)
-            string[] experimentConfigurationFiles = Directory.GetFiles(experimentConfigurationDirectory,
-                string.Format("{0}.*", experimentName));
+            var experimentConfigurationFiles =
+                Directory.GetFiles(experimentConfigurationDirectory, $"{experimentName}.*");
 
             // Make sure there's only one configuration file that matches the experiment name
             // (otherwise, we don't know for sure which configuration to use)
@@ -440,47 +428,34 @@ namespace MCC_Executor.MazeNavigation
             xmlConfig.Load(experimentConfigurationFiles[0]);
 
             // Determine which experiment to execute
-            BaseMCCMazeNavigationExperiment experiment =
-                DetermineMCCMazeNavigationExperiment(xmlConfig.DocumentElement);
+            var experiment = DetermineMCCMazeNavigationExperiment(xmlConfig.DocumentElement);
 
             // Execute the experiment for the specified number of runs
             for (int runIdx = startFromRun; runIdx <= numRuns; runIdx++)
             {
                 // Initialize the data loggers for the given run
                 IDataLogger navigatorDataLogger =
-                    new FileDataLogger(string.Format("{0}\\{1} - Run{2} - NavigatorEvolution.csv", logFileDirectory,
-                        experimentName,
-                        runIdx));
+                    new FileDataLogger($"{logFileDirectory}\\{experimentName} - Run{runIdx} - NavigatorEvolution.csv");
                 IDataLogger navigatorPopulationLogger =
-                    new FileDataLogger(string.Format("{0}\\{1} - Run{2} - NavigatorPopulation.csv", logFileDirectory,
-                        experimentName,
-                        runIdx));
+                    new FileDataLogger($"{logFileDirectory}\\{experimentName} - Run{runIdx} - NavigatorPopulation.csv");
                 IDataLogger navigatorGenomesLogger =
-                    new FileDataLogger(string.Format("{0}\\{1} - Run{2} - NavigatorGenomes.csv", logFileDirectory,
-                        experimentName,
-                        runIdx));
+                    new FileDataLogger($"{logFileDirectory}\\{experimentName} - Run{runIdx} - NavigatorGenomes.csv");
                 IDataLogger mazeDataLogger =
-                    new FileDataLogger(string.Format("{0}\\{1} - Run{2} - MazeEvolution.csv", logFileDirectory,
-                        experimentName,
-                        runIdx));
+                    new FileDataLogger($"{logFileDirectory}\\{experimentName} - Run{runIdx} - MazeEvolution.csv");
                 IDataLogger mazePopulationLogger =
-                    new FileDataLogger(string.Format("{0}\\{1} - Run{2} - MazePopulation.csv", logFileDirectory,
-                        experimentName,
-                        runIdx));
+                    new FileDataLogger($"{logFileDirectory}\\{experimentName} - Run{runIdx} - MazePopulation.csv");
                 IDataLogger mazeGenomesLogger =
-                    new FileDataLogger(string.Format("{0}\\{1} - Run{2} - MazeGenomes.csv", logFileDirectory,
-                        experimentName,
-                        runIdx));
+                    new FileDataLogger($"{logFileDirectory}\\{experimentName} - Run{runIdx} - MazeGenomes.csv");
 
                 // Initialize new experiment
                 experiment.Initialize(experimentName, xmlConfig.DocumentElement, navigatorDataLogger,
                     navigatorPopulationLogger, navigatorGenomesLogger, mazeDataLogger, mazePopulationLogger,
                     mazeGenomesLogger);
 
-                _executionLogger.Info(string.Format("Initialized experiment {0}.", experiment.GetType()));
+                _executionLogger.Info($"Initialized experiment {experiment.GetType()}.");
 
                 // If there were seed population files specified, read them in
-                if (Boolean.Parse(_executionConfiguration[ExecutionParameter.GeneratePopulation]) == false)
+                if (bool.Parse(_executionConfiguration[ExecutionParameter.GeneratePopulation]) == false)
                 {
                     // TODO: Need to implement ability to load maze seed genomes
                     throw new NotImplementedException("Currently unable to read in serialized maze genomes.");
@@ -506,14 +481,11 @@ namespace MCC_Executor.MazeNavigation
                 if (mazeGenomeList.Count < experiment.MazeSeedGenomeCount)
                 {
                     throw new SharpNeatException(
-                        string.Format(
-                            "The maze genome input file contains only {0} genomes while the experiment configuration requires {1} genomes.",
-                            mazeGenomeList.Count, experiment.MazeDefaultPopulationSize));
+                        $"The maze genome input file contains only {mazeGenomeList.Count} genomes while the experiment configuration requires {experiment.MazeDefaultPopulationSize} genomes.");
                 }
 
                 _executionLogger.Info(
-                    string.Format("Loaded [{0}] navigator genomes and [{1}] seed maze genomes as initial populations.",
-                        agentGenomeList.Count, mazeGenomeList.Count));
+                    $"Loaded [{agentGenomeList.Count}] navigator genomes and [{mazeGenomeList.Count}] seed maze genomes as initial populations.");
 
                 _executionLogger.Info("Kicking off Experiment initialization/execution");
 
@@ -557,15 +529,12 @@ namespace MCC_Executor.MazeNavigation
             }
             catch (Exception exception)
             {
-                _executionLogger.Error(string.Format("Experiment {0}, Run {1} of {2} failed to initialize",
-                    experimentName,
-                    runIdx, numRuns));
+                _executionLogger.Error($"Experiment {experimentName}, Run {runIdx} of {numRuns} failed to initialize");
                 _executionLogger.Error(exception.Message);
                 Environment.Exit(0);
             }
 
-            _executionLogger.Info(string.Format("Executing Experiment {0}, Run {1} of {2}", experimentName, runIdx,
-                numRuns));
+            _executionLogger.Info($"Executing Experiment {experimentName}, Run {runIdx} of {numRuns}");
 
             // Start algorithm (it will run on a background thread).
             _imccEaContainer.StartContinue();
@@ -588,13 +557,7 @@ namespace MCC_Executor.MazeNavigation
                 _imccEaContainer.Population2CurrentChampGenome != null)
             {
                 _executionLogger.Info(
-                    string.Format(
-                        "Generation={0:N0} Evaluations={1:N0} Population1BestFitness={2:N2} Population1MaxComplexity={3:N2} Population2BestFitness={4:N2}, Population2MaxComplexity={5:N2}",
-                        _imccEaContainer.CurrentGeneration, _imccEaContainer.CurrentEvaluations,
-                        _imccEaContainer.Population1CurrentChampGenome.EvaluationInfo.Fitness,
-                        _imccEaContainer.Population1Statistics.MaxComplexity,
-                        _imccEaContainer.Population2CurrentChampGenome.EvaluationInfo.Fitness,
-                        _imccEaContainer.Population2Statistics.MaxComplexity));
+                    $"Generation={_imccEaContainer.CurrentGeneration:N0} Evaluations={_imccEaContainer.CurrentEvaluations:N0} Population1BestFitness={_imccEaContainer.Population1CurrentChampGenome.EvaluationInfo.Fitness:N2} Population1MaxComplexity={_imccEaContainer.Population1Statistics.MaxComplexity:N2} Population2BestFitness={_imccEaContainer.Population2CurrentChampGenome.EvaluationInfo.Fitness:N2}, Population2MaxComplexity={_imccEaContainer.Population2Statistics.MaxComplexity:N2}");
             }
         }
 
@@ -608,8 +571,8 @@ namespace MCC_Executor.MazeNavigation
             XmlElement xmlConfig)
         {
             // Get the search and selection algorithm types
-            string searchAlgorithm = XmlUtils.TryGetValueAsString(xmlConfig, "SearchAlgorithm");
-            string selectionAlgorithm = XmlUtils.TryGetValueAsString(xmlConfig, "SelectionAlgorithm");
+            var searchAlgorithm = XmlUtils.TryGetValueAsString(xmlConfig, "SearchAlgorithm");
+            var selectionAlgorithm = XmlUtils.TryGetValueAsString(xmlConfig, "SelectionAlgorithm");
 
             // Make sure both the search algorithm and selection algorithm have been set in the configuration file
             if (searchAlgorithm == null || selectionAlgorithm == null)
@@ -635,8 +598,6 @@ namespace MCC_Executor.MazeNavigation
             // Extract the corresponding search and selection algorithm domain types
             SearchType searchType = AlgorithmTypeUtil.ConvertStringToSearchType(searchAlgorithmName);
             SelectionType selectionType = AlgorithmTypeUtil.ConvertStringToSelectionType(selectionAlgorithmName);
-
-            // TODO: Currently, the coevoultion experiments are implemented with only one search algorithm: MCS
 
             // Queueing MCC experiment with separate (currently per-species) queues
             if (SelectionType.MultipleQueueing.Equals(selectionType))
