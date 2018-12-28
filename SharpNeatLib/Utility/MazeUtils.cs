@@ -779,43 +779,6 @@ namespace SharpNeat.Utility
         }
 
         /// <summary>
-        ///     Iterates through every cell of the maze grid and determines the number of waypoints that are within the
-        ///     "neighborhood" of that cell.
-        /// </summary>
-        /// <param name="waypoints">The list of waypoints (i.e. path genes).</param>
-        /// <param name="mazeHeight">The unscaled maze height.</param>
-        /// <param name="mazeWidth">The unscaled maze width.</param>
-        /// <param name="neighborhoodRadius">The radius of a maze cell neighborhood in which to search for nearby waypoints.</param>
-        /// <returns>Dictionary containing each non-waypoint cell and the number of waypoints within that cell's neighborhood.</returns>
-        public static Dictionary<Point2DInt, int> ComputeCellNeighborCounts(IList<PathGene> waypoints, int mazeHeight,
-            int mazeWidth, int neighborhoodRadius)
-        {
-            var cellNeighborCounts = new Dictionary<Point2DInt, int>(mazeHeight * mazeWidth);
-
-            // Iterate through each grid cell and compute number of waypoints in neighborhood
-            // Note that cells which are themselves waypoints are discarded
-            for (var curHeight = 0; curHeight < mazeHeight; curHeight++)
-            {
-                for (var curWidth = 0; curWidth < mazeWidth; curWidth++)
-                {
-                    // Skip points that already contain a waypoint
-                    if (waypoints.Any(p => p.Waypoint.X == curWidth && p.Waypoint.Y == curHeight))
-                        continue;
-
-                    // Count waypoints in cell neighborhood
-                    cellNeighborCounts.Add(new Point2DInt(curWidth, curHeight),
-                        waypoints.Count(p => (p.Waypoint.X >= Math.Max(curWidth - neighborhoodRadius, 0) &&
-                                              p.Waypoint.X <= Math.Min(curWidth + neighborhoodRadius, mazeWidth - 1)) &&
-                                             (p.Waypoint.Y >= Math.Max(curHeight - neighborhoodRadius, 0) &&
-                                              p.Waypoint.Y <= Math.Min(curHeight + neighborhoodRadius,
-                                                  mazeHeight - 1))));
-                }
-            }
-
-            return cellNeighborCounts;
-        }
-
-        /// <summary>
         ///     Ensures that the proposed waypoint location is within the maze boundaries and does not overlap
         ///     with other waypoints or with the start/end location (which are in the upper-left and lower right cells of the maze
         ///     respectively). Specifically, the following validity checks are performed:

@@ -144,13 +144,13 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="MazeNavigation\ExperimentConfigurations\MCC-Template.config.xml" />
-    <Content Include="MazeNavigation\ExperimentConfigurations\MCC-PathEvolution-Test.config.xml">
+    <Content Include="MazeNavigation\ExperimentConfigurations\MCC Control.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\MCC Speciation.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\MCC-PathEvolution-1.config.xml">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="MazeNavigation\ExperimentConfigurations\MCCExperiments\MCC Control.config.xml" />
-    <Content Include="MazeNavigation\ExperimentConfigurations\MCCExperiments\MCC Speciation.config.xml" />
-    <Content Include="MazeNavigation\ExperimentConfigurations\MCCExperiments\MCC-PathEvolution-1.config.xml">
+    <Content Include="MazeNavigation\ExperimentConfigurations\MCC-Template.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\MCC-PathEvolution-Test.config.xml">
       <SubType>Designer</SubType>
     </Content>
     <Content Include="MazeNavigation\SeedAgents\SeedAgents_20_Genomes_MazeSolved_10_Size_2_Waypoints_2_Walls.xml" />

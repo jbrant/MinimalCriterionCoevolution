@@ -244,10 +244,6 @@ namespace MCC_Domains.Utils
                 var perturbanceMagnitude = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
                     "PerturbanceMagnitude");
                 var verticalWallBias = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig, "VerticalWallBias");
-                var gridCellNeighborhoodRadius = XmlUtils.TryGetValueAsInt(xmlMazeGenomeConfig,
-                    "GridCellNeighborhoodRadius");
-                var sparseCellSelectionProportion = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
-                    "SparseCellSelectionProportion");
 
                 // Set each if it's specified in the configuration (otherwise, accept the default)
                 if (wallStartMutationProbability != null)
@@ -294,16 +290,6 @@ namespace MCC_Domains.Utils
                 if (verticalWallBias != null)
                 {
                     genomeParameters.VerticalWallBias = (double) verticalWallBias;
-                }
-
-                if (gridCellNeighborhoodRadius != null)
-                {
-                    genomeParameters.GridCellNeighborhoodRadius = (int) gridCellNeighborhoodRadius;
-                }
-
-                if (sparseCellSelectionProportion != null)
-                {
-                    genomeParameters.SparseCellSelectionProportion = (double) sparseCellSelectionProportion;
                 }
             }
 
