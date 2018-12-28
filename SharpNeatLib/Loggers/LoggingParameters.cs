@@ -38,19 +38,14 @@ namespace SharpNeat.Loggers
     }
 
     /// <summary>
-    ///     Captures the destinations to which logs can be written.
+    ///     Captures the destinations to which logs can be written. Currently, a flat file is the only destination, but others could be added (e.g. database, message queue, etc).
     /// </summary>
     public enum LoggingDestination
     {
         /// <summary>
         ///     Indicates a flat file-based log destination.
         /// </summary>
-        File,
-
-        /// <summary>
-        ///     Indicates a database logging destination.
-        /// </summary>
-        Database
+        File
     }
 
     /// <summary>
@@ -94,20 +89,6 @@ namespace SharpNeat.Loggers
 
             // Otherwise, it's null (no logging)
             return LoggingType.None;
-        }
-
-        /// <summary>
-        ///     Converts the given string into the appropriate logging destination.
-        /// </summary>
-        /// <param name="strLoggingDestination">The string to convert.</param>
-        /// <returns>The corresponding logging destination enum.</returns>
-        public static LoggingDestination ConvertStringToLoggingDestination(string strLoggingDestination)
-        {
-            // Return appropriate logging destination
-            return LoggingDestination.Database.ToString()
-                .Equals(strLoggingDestination, StringComparison.InvariantCultureIgnoreCase)
-                ? LoggingDestination.Database
-                : LoggingDestination.File;
         }
     }
 }

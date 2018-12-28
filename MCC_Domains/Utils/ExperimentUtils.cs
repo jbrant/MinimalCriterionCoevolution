@@ -52,28 +52,28 @@ namespace MCC_Domains.Utils
         public static NetworkActivationScheme CreateActivationScheme(XmlElement xmlConfig, string activationElemName)
         {
             // Get root activation element.
-            XmlNodeList nodeList = xmlConfig.GetElementsByTagName(activationElemName, "");
+            var nodeList = xmlConfig.GetElementsByTagName(activationElemName, "");
             if (nodeList.Count != 1)
             {
                 throw new ArgumentException("Missing or invalid activation XML config setting.");
             }
 
-            XmlElement xmlActivation = nodeList[0] as XmlElement;
-            string schemeStr = XmlUtils.TryGetValueAsString(xmlActivation, "Scheme");
+            var xmlActivation = nodeList[0] as XmlElement;
+            var schemeStr = XmlUtils.TryGetValueAsString(xmlActivation, "Scheme");
             switch (schemeStr)
             {
                 case "Acyclic":
                     return NetworkActivationScheme.CreateAcyclicScheme();
                 case "CyclicFixedIters":
-                    int iters = XmlUtils.GetValueAsInt(xmlActivation, "Iters");
+                    var iters = XmlUtils.GetValueAsInt(xmlActivation, "Iters");
                     return NetworkActivationScheme.CreateCyclicFixedTimestepsScheme(iters);
                 case "CyclicRelax":
-                    double deltaThreshold = XmlUtils.GetValueAsDouble(xmlActivation, "Threshold");
-                    int maxIters = XmlUtils.GetValueAsInt(xmlActivation, "MaxIters");
+                    var deltaThreshold = XmlUtils.GetValueAsDouble(xmlActivation, "Threshold");
+                    var maxIters = XmlUtils.GetValueAsInt(xmlActivation, "MaxIters");
                     return NetworkActivationScheme.CreateCyclicRelaxingActivationScheme(deltaThreshold, maxIters);
             }
-            throw new ArgumentException(string.Format("Invalid or missing ActivationScheme XML config setting [{0}]",
-                schemeStr));
+
+            throw new ArgumentException($"Invalid or missing ActivationScheme XML config setting [{schemeStr}]");
         }
 
         /// <summary>
@@ -82,17 +82,15 @@ namespace MCC_Domains.Utils
         public static IComplexityRegulationStrategy CreateComplexityRegulationStrategy(string strategyTypeStr,
             int? threshold)
         {
-            ComplexityCeilingType ceilingType;
-            if (!Enum.TryParse(strategyTypeStr, out ceilingType))
+            if (!Enum.TryParse(strategyTypeStr, out ComplexityCeilingType ceilingType))
             {
                 return new NullComplexityRegulationStrategy();
             }
 
             if (null == threshold)
             {
-                throw new ArgumentNullException("threshold",
-                    string.Format("threshold must be provided for complexity regulation strategy type [{0}]",
-                        ceilingType));
+                throw new ArgumentNullException(nameof(threshold),
+                    $@"threshold must be provided for complexity regulation strategy type [{ceilingType}]");
             }
 
             return new DefaultComplexityRegulationStrategy(ceilingType, threshold.Value);
@@ -105,18 +103,13 @@ namespace MCC_Domains.Utils
         /// <returns></returns>
         public static ParallelOptions ReadParallelOptions(XmlElement xmlConfig)
         {
-            // Get parallel options.
-            ParallelOptions parallelOptions;
-            int? maxDegreeOfParallelism = XmlUtils.TryGetValueAsInt(xmlConfig, "MaxDegreeOfParallelism");
-            if (null != maxDegreeOfParallelism)
-            {
-                parallelOptions = new ParallelOptions {MaxDegreeOfParallelism = maxDegreeOfParallelism.Value};
-            }
-            else
-            {
-                parallelOptions = new ParallelOptions();
-            }
-            return parallelOptions;
+            // Read in upper bound on parallelism
+            var maxDegreeOfParallelism = XmlUtils.TryGetValueAsInt(xmlConfig, "MaxDegreeOfParallelism");
+
+            // Construct parallel options configuration with upper bound if specified, otherwise use default
+            return null != maxDegreeOfParallelism
+                ? new ParallelOptions {MaxDegreeOfParallelism = maxDegreeOfParallelism.Value}
+                : new ParallelOptions();
         }
 
         /// <summary>
@@ -126,15 +119,15 @@ namespace MCC_Domains.Utils
             out double mutationSigmaRadius)
         {
             // Get root activation element.
-            XmlNodeList nodeList = xmlConfig.GetElementsByTagName("RbfAuxArgMutationConfig", "");
+            var nodeList = xmlConfig.GetElementsByTagName("RbfAuxArgMutationConfig", "");
             if (nodeList.Count != 1)
             {
                 throw new ArgumentException("Missing or invalid RbfAuxArgMutationConfig XML config settings.");
             }
 
-            XmlElement xmlRbfConfig = nodeList[0] as XmlElement;
-            double? center = XmlUtils.TryGetValueAsDouble(xmlRbfConfig, "MutationSigmaCenter");
-            double? radius = XmlUtils.TryGetValueAsDouble(xmlRbfConfig, "MutationSigmaRadius");
+            var xmlRbfConfig = nodeList[0] as XmlElement;
+            var center = XmlUtils.TryGetValueAsDouble(xmlRbfConfig, "MutationSigmaCenter");
+            var radius = XmlUtils.TryGetValueAsDouble(xmlRbfConfig, "MutationSigmaRadius");
             if (null == center || null == radius)
             {
                 throw new ArgumentException("Missing or invalid RbfAuxArgMutationConfig XML config settings.");
@@ -165,16 +158,16 @@ namespace MCC_Domains.Utils
                 var xmlNeatGenomeConfig = nodeList[0] as XmlElement;
 
                 // Read all of the applicable parameters in
-                double? initialConnectionProportion = XmlUtils.TryGetValueAsDouble(xmlNeatGenomeConfig,
+                var initialConnectionProportion = XmlUtils.TryGetValueAsDouble(xmlNeatGenomeConfig,
                     "InitialConnectionProportion");
-                double? weightMutationProbability = XmlUtils.TryGetValueAsDouble(xmlNeatGenomeConfig,
+                var weightMutationProbability = XmlUtils.TryGetValueAsDouble(xmlNeatGenomeConfig,
                     "WeightMutationProbability");
-                double? addConnectionProbability = XmlUtils.TryGetValueAsDouble(xmlNeatGenomeConfig,
+                var addConnectionProbability = XmlUtils.TryGetValueAsDouble(xmlNeatGenomeConfig,
                     "AddConnnectionProbability");
-                double? addNodeProbability = XmlUtils.TryGetValueAsDouble(xmlNeatGenomeConfig, "AddNodeProbability");
-                double? deleteConnectionProbability = XmlUtils.TryGetValueAsDouble(xmlNeatGenomeConfig,
+                var addNodeProbability = XmlUtils.TryGetValueAsDouble(xmlNeatGenomeConfig, "AddNodeProbability");
+                var deleteConnectionProbability = XmlUtils.TryGetValueAsDouble(xmlNeatGenomeConfig,
                     "DeleteConnectionProbability");
-                double? connectionWeightRange = XmlUtils.TryGetValueAsDouble(xmlNeatGenomeConfig,
+                var connectionWeightRange = XmlUtils.TryGetValueAsDouble(xmlNeatGenomeConfig,
                     "ConnectionWeightRange");
 
                 // Set each if it's specified in the configuration (otherwise, accept the default)
@@ -182,23 +175,28 @@ namespace MCC_Domains.Utils
                 {
                     genomeParameters.InitialInterconnectionsProportion = initialConnectionProportion ?? default(double);
                 }
+
                 if (weightMutationProbability != null)
                 {
                     genomeParameters.ConnectionWeightMutationProbability = weightMutationProbability ?? default(double);
                 }
+
                 if (addConnectionProbability != null)
                 {
                     genomeParameters.AddConnectionMutationProbability = addConnectionProbability ?? default(double);
                 }
+
                 if (addNodeProbability != null)
                 {
                     genomeParameters.AddNodeMutationProbability = addNodeProbability ?? default(double);
                 }
+
                 if (deleteConnectionProbability != null)
                 {
                     genomeParameters.DeleteConnectionMutationProbability = deleteConnectionProbability ??
                                                                            default(double);
                 }
+
                 if (connectionWeightRange != null)
                 {
                     genomeParameters.ConnectionWeightRange = connectionWeightRange ?? default(double);
@@ -216,39 +214,39 @@ namespace MCC_Domains.Utils
         public static MazeGenomeParameters ReadMazeGenomeParameters(XmlElement xmlConfig)
         {
             // Create new NEAT genome parameters with default values
-            MazeGenomeParameters genomeParameters = new MazeGenomeParameters();
+            var genomeParameters = new MazeGenomeParameters();
 
             // Get root of neat genome configuration section
-            XmlNodeList nodeList = xmlConfig.GetElementsByTagName("MazeGenomeConfig", "");
+            var nodeList = xmlConfig.GetElementsByTagName("MazeGenomeConfig", "");
 
             // Note that if there are multiple defined (such as would be the case with an experiment that uses multiple EAs), 
             // the first one is used here, which will accurately correspond to the current algorithm under consideration
             if (nodeList.Count >= 1)
             {
                 // Convert to an XML element
-                XmlElement xmlMazeGenomeConfig = nodeList[0] as XmlElement;
+                var xmlMazeGenomeConfig = nodeList[0] as XmlElement;
 
                 // Read all of the applicable parameters in
-                double? wallStartMutationProbability = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
+                var wallStartMutationProbability = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
                     "MutateWallStartLocationProbability");
-                double? passageStartMutationProbability = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
+                var passageStartMutationProbability = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
                     "MutatePassageStartLocationProbability");
-                double? addWallProbability = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
+                var addWallProbability = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
                     "MutateAddWallProbability");
-                double? deleteWallProbability = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
+                var deleteWallProbability = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
                     "MutateDeleteWallProbability");
-                double? pathWaypointLocationMutationProbability = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
+                var pathWaypointLocationMutationProbability = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
                     "MutatePathWaypointLocationProbability");
-                double? addPathWaypointMutationProbability = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
+                var addPathWaypointMutationProbability = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
                     "MutateAddPathWaypointProbability");
-                double? expandMazeProbability = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
+                var expandMazeProbability = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
                     "MutateExpandMazeProbability");
-                double? perturbanceMagnitude = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
+                var perturbanceMagnitude = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
                     "PerturbanceMagnitude");
-                double? verticalWallBias = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig, "VerticalWallBias");
-                double? gridCellNeighborhoodRadius = XmlUtils.TryGetValueAsInt(xmlMazeGenomeConfig,
+                var verticalWallBias = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig, "VerticalWallBias");
+                var gridCellNeighborhoodRadius = XmlUtils.TryGetValueAsInt(xmlMazeGenomeConfig,
                     "GridCellNeighborhoodRadius");
-                double? sparseCellSelectionProportion = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
+                var sparseCellSelectionProportion = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
                     "SparseCellSelectionProportion");
 
                 // Set each if it's specified in the configuration (otherwise, accept the default)
@@ -256,43 +254,53 @@ namespace MCC_Domains.Utils
                 {
                     genomeParameters.MutateWallStartLocationProbability = (double) wallStartMutationProbability;
                 }
+
                 if (passageStartMutationProbability != null)
                 {
                     genomeParameters.MutatePassageStartLocationProbability = (double) passageStartMutationProbability;
                 }
+
                 if (addWallProbability != null)
                 {
                     genomeParameters.MutateAddWallProbability = (double) addWallProbability;
                 }
+
                 if (deleteWallProbability != null)
                 {
                     genomeParameters.MutateDeleteWallProbability = (double) deleteWallProbability;
                 }
+
                 if (pathWaypointLocationMutationProbability != null)
                 {
                     genomeParameters.MutatePathWaypointLocationProbability =
                         (double) pathWaypointLocationMutationProbability;
                 }
+
                 if (addPathWaypointMutationProbability != null)
                 {
                     genomeParameters.MutateAddPathWaypointProbability = (double) addPathWaypointMutationProbability;
                 }
+
                 if (expandMazeProbability != null)
                 {
                     genomeParameters.MutateExpandMazeProbability = (double) expandMazeProbability;
                 }
+
                 if (perturbanceMagnitude != null)
                 {
                     genomeParameters.PerturbanceMagnitude = (double) perturbanceMagnitude;
                 }
+
                 if (verticalWallBias != null)
                 {
                     genomeParameters.VerticalWallBias = (double) verticalWallBias;
                 }
+
                 if (gridCellNeighborhoodRadius != null)
                 {
                     genomeParameters.GridCellNeighborhoodRadius = (int) gridCellNeighborhoodRadius;
                 }
+
                 if (sparseCellSelectionProportion != null)
                 {
                     genomeParameters.SparseCellSelectionProportion = (double) sparseCellSelectionProportion;
@@ -319,7 +327,8 @@ namespace MCC_Domains.Utils
                         experimentDictionary.Primary_MutateConnectionWeightsProbability,
                     AddConnectionMutationProbability = experimentDictionary.Primary_MutateAddConnectionProbability,
                     AddNodeMutationProbability = experimentDictionary.Primary_MutateAddNeuronProbability,
-                    DeleteConnectionMutationProbability = experimentDictionary.Primary_MutateDeleteConnectionProbability,
+                    DeleteConnectionMutationProbability =
+                        experimentDictionary.Primary_MutateDeleteConnectionProbability,
                     ConnectionWeightRange = experimentDictionary.Primary_ConnectionWeightRange
                 }
                 : new NeatGenomeParameters
@@ -434,31 +443,19 @@ namespace MCC_Domains.Utils
         }
 
         /// <summary>
-        ///     Reads the experiment logging configuration with the default top-level configuration element "LoggingConfig".
-        /// </summary>
-        /// <param name="xmlConfig">The reference to the XML configuration file.</param>
-        /// <param name="loggingType">The type of logging (evolution, evaluation, etc.).</param>
-        /// <returns>A constructed data logger.</returns>
-        public static IDataLogger ReadDataLogger(XmlElement xmlConfig, LoggingType loggingType)
-        {
-            return ReadDataLogger(xmlConfig, loggingType, "LoggingConfig");
-        }
-
-        /// <summary>
         ///     Reads the experiment logging configuration.
         /// </summary>
         /// <param name="xmlConfig">The reference to the XML configuration file.</param>
         /// <param name="loggingType">The type of logging (evolution, evaluation, etc.).</param>
         /// <param name="parentElementName">The name of the top-level logging configuration element.</param>
         /// <returns>A constructed data logger.</returns>
-        public static IDataLogger ReadDataLogger(XmlElement xmlConfig, LoggingType loggingType, string parentElementName)
+        public static IDataLogger ReadDataLogger(XmlElement xmlConfig, LoggingType loggingType,
+            string parentElementName = "LoggingConfig")
         {
-            IDataLogger dataLogger = null;
             XmlElement xmlLoggingConfig = null;
-            int cnt = 0;
 
             // Get root of novelty configuration section
-            XmlNodeList nodeList = xmlConfig.GetElementsByTagName(parentElementName, "");
+            var nodeList = xmlConfig.GetElementsByTagName(parentElementName, "");
 
             // Iterate through the list of logging configurations, finding one that matches the specified logging type
             foreach (XmlElement curXmlLoggingConfig in nodeList)
@@ -475,38 +472,11 @@ namespace MCC_Domains.Utils
             // If no appropriate logger was found, just return null (meaning there won't be any logging for this type)
             if (xmlLoggingConfig == null) return null;
 
-            // Get the logging destination
-            LoggingDestination loggingDestination =
-                LoggingParameterUtils.ConvertStringToLoggingDestination(
-                    XmlUtils.TryGetValueAsString(xmlLoggingConfig,
-                        "Destination"));
+            // Read in the log file name
+            var logFileName = XmlUtils.TryGetValueAsString(xmlLoggingConfig, "LogFile");
 
-            // Configure a file-based logger
-            if (LoggingDestination.File == loggingDestination)
-            {
-                // Read in the log file name
-                string logFileName = XmlUtils.TryGetValueAsString(xmlLoggingConfig, "LogFile");
-
-                // Instantiate the file data logger
-                dataLogger = new FileDataLogger(logFileName);
-            }
-            else if (LoggingDestination.Database == loggingDestination)
-            {
-                // Read in the experiment configuration and run number
-                string experimentConfigurationName = XmlUtils.TryGetValueAsString(xmlLoggingConfig,
-                    "ExperimentConfigurationName");
-
-                if (LoggingType.Evolution == loggingType)
-                {
-                    // Instantiate the evolution database data logger
-                    dataLogger = new NoveltyExperimentEvaluationEntityDataLogger(experimentConfigurationName);
-                }
-                else if (LoggingType.Evaluation == loggingType)
-                {
-                    // Instantiate the evaluation database data logger
-                    dataLogger = new NoveltyExperimentOrganismStateEntityDataLogger(experimentConfigurationName);
-                }
-            }
+            // Instantiate the file data logger
+            IDataLogger dataLogger = new FileDataLogger(logFileName);
 
             return dataLogger;
         }
@@ -521,7 +491,7 @@ namespace MCC_Domains.Utils
             string behaviorConfigTagName)
         {
             // Get root of behavior configuration section
-            XmlNodeList behaviorNodeList = xmlConfig.GetElementsByTagName(behaviorConfigTagName, "");
+            var behaviorNodeList = xmlConfig.GetElementsByTagName(behaviorConfigTagName, "");
 
             // Ensure that the behavior node list was found
             if (behaviorNodeList.Count != 1)
@@ -529,24 +499,23 @@ namespace MCC_Domains.Utils
                 throw new ArgumentException("Missing or invalid BehaviorConfig XML config settings.");
             }
 
-            XmlElement xmlBehaviorConfig = behaviorNodeList[0] as XmlElement;
+            var xmlBehaviorConfig = behaviorNodeList[0] as XmlElement;
             IMinimalCriteria minimalCriteria = null;
 
             // Try to get the child minimal criteria configuration
-            XmlNodeList minimalCriteriaNodeList = xmlBehaviorConfig.GetElementsByTagName("MinimalCriteriaConfig", "");
+            var minimalCriteriaNodeList = xmlBehaviorConfig.GetElementsByTagName("MinimalCriteriaConfig", "");
 
             // If a minimal criteria is specified, read in its configuration and add it to the behavior characterization
             if (minimalCriteriaNodeList.Count == 1)
             {
-                XmlElement xmlMinimalCriteriaConfig = minimalCriteriaNodeList[0] as XmlElement;
+                var xmlMinimalCriteriaConfig = minimalCriteriaNodeList[0] as XmlElement;
 
                 // Extract the minimal criteria constraint name
-                string minimalCriteriaConstraint = XmlUtils.TryGetValueAsString(xmlMinimalCriteriaConfig,
+                var minimalCriteriaConstraint = XmlUtils.TryGetValueAsString(xmlMinimalCriteriaConfig,
                     "MinimalCriteriaConstraint");
 
                 // Get the appropriate minimal criteria type
-                MinimalCriteriaType mcType =
-                    BehaviorCharacterizationUtil.ConvertStringToMinimalCriteria(minimalCriteriaConstraint);
+                var mcType = BehaviorCharacterizationUtil.ConvertStringToMinimalCriteria(minimalCriteriaConstraint);
 
                 // Starting location used in most criterias
                 double xStart, yStart;
@@ -556,10 +525,10 @@ namespace MCC_Domains.Utils
                     case MinimalCriteriaType.EuclideanLocation:
 
                         // Read in the min/max location bounds
-                        double xMin = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "XMin");
-                        double xMax = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "XMax");
-                        double yMin = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "YMin");
-                        double yMax = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "YMax");
+                        var xMin = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "XMin");
+                        var xMax = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "XMax");
+                        var yMin = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "YMin");
+                        var yMax = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "YMax");
 
                         // Set the euclidean location minimal criteria on the behavior characterization
                         minimalCriteria = new EuclideanLocationCriteria(xMin, xMax, yMin, yMax);
@@ -571,7 +540,7 @@ namespace MCC_Domains.Utils
                         // Read in the starting coordinates and the minimum required distance traveled
                         xStart = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "XStart");
                         yStart = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "YStart");
-                        double minimumDistanceTraveled = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig,
+                        var minimumDistanceTraveled = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig,
                             "MinimumRequiredDistance");
                         double? maxDistanceUpdateCyclesWithoutChange =
                             XmlUtils.TryGetValueAsInt(xmlMinimalCriteriaConfig,
@@ -586,7 +555,7 @@ namespace MCC_Domains.Utils
                     case MinimalCriteriaType.PopulationCentroidEuclideanDistance:
 
                         // Read in the starting minimum required distance (if applicable)
-                        double minimuCentroidDistance = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig,
+                        var minimuCentroidDistance = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig,
                             "MinimumRequiredDistance");
 
                         // Set the population centroid euclidean distance criteria on the behavior characterization
@@ -599,7 +568,7 @@ namespace MCC_Domains.Utils
                         // Read in the starting coordinates and minimum required total distance traveled (mileage)
                         xStart = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "XStart");
                         yStart = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "YStart");
-                        double minimumMileage = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "MinimumMileage");
+                        var minimumMileage = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "MinimumMileage");
                         double? maxMileageUpdateCyclesWithoutChange = XmlUtils.TryGetValueAsInt(
                             xmlMinimalCriteriaConfig,
                             "MaxUpdateCyclesWithoutChange");
@@ -613,7 +582,7 @@ namespace MCC_Domains.Utils
             }
 
             // Parse and generate the appropriate behavior characterization factory
-            IBehaviorCharacterizationFactory behaviorCharacterizationFactory =
+            var behaviorCharacterizationFactory =
                 BehaviorCharacterizationUtil.GenerateBehaviorCharacterizationFactory(
                     XmlUtils.TryGetValueAsString(xmlBehaviorConfig, "BehaviorCharacterization"), minimalCriteria);
 
@@ -634,7 +603,7 @@ namespace MCC_Domains.Utils
             bool isPrimary)
         {
             // Read behavior characterization
-            String behaviorCharacterizationName = isPrimary
+            var behaviorCharacterizationName = isPrimary
                 ? experiment.Primary_BehaviorCharacterizationName
                 : experiment.Initialization_BehaviorCharacterizationName;
 
@@ -647,7 +616,7 @@ namespace MCC_Domains.Utils
             IMinimalCriteria minimalCriteria = null;
 
             // Get the appropriate minimal criteria type
-            MinimalCriteriaType mcType = BehaviorCharacterizationUtil.ConvertStringToMinimalCriteria(isPrimary
+            var mcType = BehaviorCharacterizationUtil.ConvertStringToMinimalCriteria(isPrimary
                 ? experiment.Primary_MCS_MinimalCriteriaName
                 : experiment.Initialization_MCS_MinimalCriteriaName);
 
@@ -671,7 +640,7 @@ namespace MCC_Domains.Utils
                     yStart = isPrimary
                         ? experiment.Primary_MCS_MinimalCriteriaStartY ?? default(double)
                         : experiment.Initialization_MCS_MinimalCriteriaStartY ?? default(double);
-                    double minimumDistanceTraveled = isPrimary
+                    var minimumDistanceTraveled = isPrimary
                         ? experiment.Primary_MCS_MinimalCriteriaThreshold ?? default(double)
                         : experiment.Initialization_MCS_MinimalCriteriaThreshold ?? default(double);
 
@@ -690,7 +659,7 @@ namespace MCC_Domains.Utils
                     yStart = isPrimary
                         ? experiment.Primary_MCS_MinimalCriteriaStartY ?? default(double)
                         : experiment.Initialization_MCS_MinimalCriteriaStartY ?? default(double);
-                    double minimumMileage = isPrimary
+                    var minimumMileage = isPrimary
                         ? experiment.Primary_MCS_MinimalCriteriaThreshold ?? default(double)
                         : experiment.Initialization_MCS_MinimalCriteriaThreshold ?? default(double);
 
@@ -701,7 +670,7 @@ namespace MCC_Domains.Utils
             }
 
             // Parse and generate the appropriate behavior characterization factory
-            IBehaviorCharacterizationFactory behaviorCharacterizationFactory =
+            var behaviorCharacterizationFactory =
                 BehaviorCharacterizationUtil.GenerateBehaviorCharacterizationFactory(behaviorCharacterizationName,
                     minimalCriteria);
 
@@ -709,16 +678,16 @@ namespace MCC_Domains.Utils
         }
 
         /// <summary>
-        /// Get all of the XML genome files in the given directory.
+        ///     Get all of the XML genome files in the given directory.
         /// </summary>
         /// <param name="filePath">The path to the directory containing the genome files or the genome file path itself.</param>
         /// <returns>An array of genome file paths.</returns>
-        public static string[] GetGenomeFiles(string filePath)
+        public static IEnumerable<string> GetGenomeFiles(string filePath)
         {
             string[] genomeFiles;
-            
+
             // Get the attributes of the given path/file
-            FileAttributes fileAttributes = File.GetAttributes(filePath);
+            var fileAttributes = File.GetAttributes(filePath);
 
             // Determine whether this is a directory or a file
             if ((fileAttributes & FileAttributes.Directory) == FileAttributes.Directory)
@@ -752,7 +721,7 @@ namespace MCC_Domains.Utils
             var neatGenomeFiles = GetGenomeFiles(seedNeatPath);
 
             // Read in all NEAT genomes and add them to the list
-            foreach (string neatGenomeFile in neatGenomeFiles)
+            foreach (var neatGenomeFile in neatGenomeFiles)
             {
                 using (var xr = XmlReader.Create(neatGenomeFile))
                 {
@@ -766,7 +735,7 @@ namespace MCC_Domains.Utils
 
             return neatGenomes;
         }
-        
+
         /// <summary>
         ///     Reads in seed maze genomes used to bootstrap MCC experiments.
         /// </summary>
@@ -776,7 +745,8 @@ namespace MCC_Domains.Utils
         /// </param>
         /// <param name="mazeGenomeFactory">The maze genome factory to assign to each genome.</param>
         /// <returns>The list of seed maze genomes.</returns>
-        public static List<MazeGenome> ReadSeedMazeGenomes(string seedMazePath, MazeGenomeFactory mazeGenomeFactory)
+        public static IEnumerable<MazeGenome> ReadSeedMazeGenomes(string seedMazePath,
+            MazeGenomeFactory mazeGenomeFactory)
         {
             var mazeGenomes = new List<MazeGenome>();
 
@@ -784,7 +754,7 @@ namespace MCC_Domains.Utils
             var mazeGenomeFiles = GetGenomeFiles(seedMazePath);
 
             // Read in all maze genomes and add them to the list
-            foreach (string mazeGenomeFile in mazeGenomeFiles)
+            foreach (var mazeGenomeFile in mazeGenomeFiles)
             {
                 using (var xr = XmlReader.Create(mazeGenomeFile))
                 {
@@ -809,19 +779,19 @@ namespace MCC_Domains.Utils
         public static List<MazeGenome> GenerateMazeGenomes(int numMazeGenomes, int numPartitions,
             MazeGenomeFactory mazeGenomeFactory)
         {
-            List<MazeGenome> mazeGenomes = new List<MazeGenome>(numMazeGenomes);
-            Random rand = new Random();
+            var mazeGenomes = new List<MazeGenome>(numMazeGenomes);
+            var rand = new Random();
 
-            for (int curMazeCnt = 0; curMazeCnt < numMazeGenomes; curMazeCnt++)
+            for (var curMazeCnt = 0; curMazeCnt < numMazeGenomes; curMazeCnt++)
             {
                 // Reset innovation IDs
                 mazeGenomeFactory.InnovationIdGenerator.Reset();
 
                 // Create a new genome and pass in the requisite factory
-                MazeGenome mazeGenome = new MazeGenome(mazeGenomeFactory, 0, 0);
+                var mazeGenome = new MazeGenome(mazeGenomeFactory, 0, 0);
 
                 // Create the specified number of interior partitions (i.e. maze genes)
-                for (int cnt = 0; cnt < numPartitions; cnt++)
+                for (var cnt = 0; cnt < numPartitions; cnt++)
                 {
                     // Create new maze gene and add to genome
                     mazeGenome.WallGeneList.Add(new WallGene(mazeGenomeFactory.InnovationIdGenerator.NextId,
@@ -849,7 +819,7 @@ namespace MCC_Domains.Utils
             }
 
             // Extract the corresponding search and selection algorithm domain types
-            SearchType searchType =
+            var searchType =
                 AlgorithmTypeUtil.ConvertStringToSearchType(XmlUtils.TryGetValueAsString(xmlConfig, "SearchAlgorithm"));
 
             // There's currently just two MCC initializers: fitness and novelty search

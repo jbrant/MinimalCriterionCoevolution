@@ -128,8 +128,6 @@
     <Compile Include="Genomes\Maze\PathGene.cs" />
     <Compile Include="Loggers\AbstractEntityDataLogger.cs" />
     <Compile Include="Loggers\LoggingParameters.cs" />
-    <Compile Include="Loggers\NoveltyExperimentOrganismStateEntityDataLogger.cs" />
-    <Compile Include="Loggers\NoveltyExperimentEvaluationEntityDataLogger.cs" />
     <Compile Include="Loggers\FieldElement.cs" />
     <Compile Include="MinimalCriterias\PopulationCentroidEuclideanDistanceCriteria.cs" />
     <Compile Include="MinimalCriterias\FixedPointEuclideanDistanceCriteria.cs" />

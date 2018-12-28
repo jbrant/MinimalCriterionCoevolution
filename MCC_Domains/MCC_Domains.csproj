@@ -111,7 +111,6 @@
     <Compile Include="MazeNavigation\Components\Radar.cs" />
     <Compile Include="MazeNavigation\Components\RangeFinder.cs" />
     <Compile Include="MazeNavigation\Components\Wall.cs" />
-    <Compile Include="MazeNavigation\BaseMazeNavigationExperiment.cs" />
     <Compile Include="MazeNavigation\MazeConfiguration.cs" />
     <Compile Include="MazeNavigation\MazeNavigationWorld.cs" />
     <Compile Include="MazeNavigation\MultiMazeNavigationWorldFactory.cs" />
