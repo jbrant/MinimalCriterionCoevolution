@@ -115,9 +115,13 @@ namespace MCC_Domains
         /// <param name="genomeFactory2">The second population genome factory.</param>
         /// <param name="genomeList1">The first population genome list.</param>
         /// <param name="genomeList2">The second population genome list.</param>
+        /// <param name="isGenomeList1Preevolved">
+        ///     Indicates whether the genomes in the first population genome list have been
+        ///     pre-evolved to satisfy the MC with respect to population 2.
+        /// </param>
         /// <returns>MCC algorithm container.</returns>
         IMCCAlgorithmContainer<NeatGenome, MazeGenome> CreateMCCAlgorithmContainer(
             IGenomeFactory<NeatGenome> genomeFactory1, IGenomeFactory<MazeGenome> genomeFactory2,
-            List<NeatGenome> genomeList1, List<MazeGenome> genomeList2);
+            List<NeatGenome> genomeList1, List<MazeGenome> genomeList2, bool isGenomeList1Preevolved);
     }
 }

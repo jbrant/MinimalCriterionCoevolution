@@ -147,6 +147,7 @@ namespace SharpNeat.SpeciationStrategies
 
             // Now allocate the remaining genomes based on their distance from the centroids.
             int genomeCount = genomeList.Count;
+            
             Parallel.For(specieCount, genomeCount, _parallelOptions, delegate(int i)
             {
                 TGenome genome = genomeList[i];

@@ -81,7 +81,7 @@ namespace MCC_Domains.MazeNavigation.Bootstrappers
         ///     The number of evaluations that preceeded this from which this process will pick up
         ///     (this is used in the case where we're restarting a run because it failed to find a solution in the allotted time).
         /// </param>
-        public virtual void InitializeAlgorithm(ParallelOptions parallelOptions, List<NeatGenome> genomeList,
+        protected void InitializeAlgorithm(ParallelOptions parallelOptions, List<NeatGenome> genomeList,
             IGenomeDecoder<NeatGenome, IBlackBox> genomeDecoder, ulong startingEvaluations)
         {
             ParallelOptions = parallelOptions;

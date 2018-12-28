@@ -1,11 +1,9 @@
 ﻿#region
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Xml;
-using MCC_Domains.MazeNavigation.Bootstrappers;
 using MCC_Domains.Utils;
+using SharpNeat;
 using SharpNeat.Core;
 using SharpNeat.Decoders.Maze;
 using SharpNeat.Decoders.Neat;
@@ -18,7 +16,6 @@ using SharpNeat.Loggers;
 using SharpNeat.Phenomes;
 using SharpNeat.Phenomes.Mazes;
 using SharpNeat.SpeciationStrategies;
-using SharpNeat.Utility;
 
 #endregion
 
@@ -31,75 +28,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
     /// </summary>
     public class MCCSpeciationExperiment : BaseMCCMazeNavigationExperiment
     {
-        #region Private methods
-
-        /// <summary>
-        ///     Evolves the requisite number of agents who satisfy the MC of the given maze.
-        /// </summary>
-        /// <param name="genomeFactory">The agent genome factory.</param>
-        /// <param name="seedAgentList">The seed population of agents.</param>
-        /// <param name="mazeStructure">The maze structure on which agents are to be evaluated.</param>
-        /// <returns></returns>
-        private IEnumerable<NeatGenome> EvolveViableAgents(IGenomeFactory<NeatGenome> genomeFactory,
-            List<NeatGenome> seedAgentList, MazeStructure mazeStructure)
-        {
-            List<NeatGenome> viableMazeAgents;
-            uint restartCount = 0;
-            ulong initializationEvaluations;
-
-            do
-            {
-                // Instantiate the internal initialization algorithm
-                _mazeNavigationInitializer.InitializeAlgorithm(ParallelOptions, seedAgentList.ToList(), genomeFactory,
-                    mazeStructure, new NeatGenomeDecoder(ActivationScheme), 0);
-
-                // Run the initialization algorithm until the requested number of viable seed genomes are found
-                viableMazeAgents = _mazeNavigationInitializer.EvolveViableGenomes(out initializationEvaluations,
-                    _maxInitializationEvaluations, restartCount);
-
-                restartCount++;
-
-                // Repeat if maximum allotted evaluations is exceeded
-            } while (_maxInitializationEvaluations != null && viableMazeAgents == null &&
-                     initializationEvaluations > _maxInitializationEvaluations);
-
-            return viableMazeAgents;
-        }
-
-        #endregion
-
         #region Private members
-
-        /// <summary>
-        ///     The minimum distance to the target required in order to have "solved" the maze.
-        /// </summary>
-        private int _minSuccessDistance;
-
-        /// <summary>
-        ///     The minimum number of mazes that the agent under evaluation must solve in order to meet the minimal criteria.
-        /// </summary>
-        private int _numMazeSuccessCriteria;
-
-        /// <summary>
-        ///     The minimum number of agents that must solve the maze under evaluation in order to meet this portion of the minimal
-        ///     criteria.
-        /// </summary>
-        private int _numAgentSuccessCriteria;
-
-        /// <summary>
-        ///     The width of the evolved maze environments.
-        /// </summary>
-        private int _mazeHeight;
-
-        /// <summary>
-        ///     The height of the evolved maze environments.
-        /// </summary>
-        private int _mazeWidth;
-
-        /// <summary>
-        ///     The multiplier for scaling the maze to larger sizes.
-        /// </summary>
-        private int _mazeScaleMultiplier;
 
         /// <summary>
         ///     Logs statistics about the navigator populations for every batch.
@@ -146,16 +75,6 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         /// </summary>
         private int? _populationLoggingBatchInterval;
 
-        /// <summary>
-        ///     Initialization algorithm for producing an initial population with the requisite number of viable genomes.
-        /// </summary>
-        private MCCMazeNavigationInitializer _mazeNavigationInitializer;
-
-        /// <summary>
-        ///     The maximum number of evaluations allowed during the initialization phase before it is restarted.
-        /// </summary>
-        private uint? _maxInitializationEvaluations;
-
         #endregion
 
         #region Overridden methods
@@ -181,16 +100,6 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             base.Initialize(name, xmlConfig, navigatorEvolutionLogger, navigatorGenomeLogger, mazeEvolutionLogger,
                 mazeGenomeLogger);
 
-            // Set experiment-specific parameters
-            _minSuccessDistance = XmlUtils.GetValueAsInt(xmlConfig, "MinSuccessDistance");
-            _mazeHeight = XmlUtils.GetValueAsInt(xmlConfig, "MazeHeight");
-            _mazeWidth = XmlUtils.GetValueAsInt(xmlConfig, "MazeWidth");
-            _mazeScaleMultiplier = XmlUtils.GetValueAsInt(xmlConfig, "MazeScaleMultiplier");
-
-            // Get success/failure criteria constraints
-            _numMazeSuccessCriteria = XmlUtils.GetValueAsInt(xmlConfig, "NumMazesSolvedCriteria");
-            _numAgentSuccessCriteria = XmlUtils.GetValueAsInt(xmlConfig, "NumAgentsSolvedCriteria");
-
             // Read in log file path/name
             _navigatorEvolutionDataLogger = navigatorEvolutionLogger ??
                                             ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Evolution,
@@ -209,9 +118,6 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             _mazeGenomeDataLogger = mazeGenomeLogger ??
                                     ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Genome,
                                         "MazeLoggingConfig");
-
-            // Read in the maximum number of initialization evaluations
-            _maxInitializationEvaluations = XmlUtils.GetValueAsUInt(xmlConfig, "MaxInitializationEvaluations");
 
             // Create new evolution field elements map with all fields enabled
             _navigatorLogFieldEnableMap = EvolutionFieldElements.PopulateEvolutionFieldElementsEnableMap();
@@ -298,31 +204,11 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
 
             // Read in the number of batches between population logging
             _populationLoggingBatchInterval = XmlUtils.TryGetValueAsInt(xmlConfig, "PopulationLoggingBatchInterval");
-
-            // Initialize the initialization algorithm
-            _mazeNavigationInitializer =
-                ExperimentUtils.DetermineMCCInitializer(
-                    xmlConfig.GetElementsByTagName("InitializationAlgorithmConfig", "")[0] as XmlElement);
-
-            // Setup initialization algorithm
-            _mazeNavigationInitializer.SetAlgorithmParameters(
-                xmlConfig.GetElementsByTagName("InitializationAlgorithmConfig", "")[0] as XmlElement, AnnInputCount,
-                AnnOutputCount, _numAgentSuccessCriteria, 0);
-
-            // Pass in maze experiment specific parameters 
-            // (note that a new maze structure is created here for the sole purpose of extracting the maze dimensions and calculating max distance to target)
-            _mazeNavigationInitializer.SetEnvironmentParameters(_minSuccessDistance,
-                new MazeDecoder(_mazeScaleMultiplier).Decode(
-                    new MazeGenomeFactory(MazeGenomeParameters, _mazeHeight, _mazeWidth).CreateGenome(0)));
-
-            // Propagate the initialization seed genome size up to the base experiment level
-            // so that we know how to generate the bootstrap population
-            AgentInitializationGenomeCount = _mazeNavigationInitializer.PopulationSize;
         }
 
         /// <inheritdoc />
         /// <summary>
-        ///     Zero argument wrapper method for instantiating the coveolution algorithm container.  This uses default agent and
+        ///     Zero argument wrapper method for instantiating the coevolution algorithm container.  This uses default agent and
         ///     maze population sizes as the only configuration parameters.
         /// </summary>
         /// <returns>The instantiated MCC algorithm container.</returns>
@@ -346,8 +232,8 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
                 NeatGenomeParameters);
 
             // Create a genome factory for the maze genomes
-            IGenomeFactory<MazeGenome> mazeGenomeFactory = new MazeGenomeFactory(MazeGenomeParameters, _mazeHeight,
-                _mazeWidth);
+            IGenomeFactory<MazeGenome> mazeGenomeFactory = new MazeGenomeFactory(MazeGenomeParameters, MazeHeight,
+                MazeWidth);
 
             // Create an initial population of maze navigators
             var neatGenomeList = neatGenomeFactory.CreateGenomeList(populationSize1, 0);
@@ -358,7 +244,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
 
             // Create the evolution algorithm container
             return CreateMCCAlgorithmContainer(neatGenomeFactory, mazeGenomeFactory, neatGenomeList,
-                mazeGenomeList);
+                mazeGenomeList, false);
         }
 
         /// <inheritdoc />
@@ -369,74 +255,20 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         /// <param name="genomeFactory2">The maze genome factory.</param>
         /// <param name="genomeList1">The agent genome list.</param>
         /// <param name="genomeList2">The maze genome list.</param>
+        /// <param name="isAgentListPreevolved">
+        ///     Indicates whether the given agents have been pre-evolved to satisfy the MC with
+        ///     respect to the maze population.
+        /// </param>
         /// <returns>The instantiated MCC algorithm container.</returns>
         public override IMCCAlgorithmContainer<NeatGenome, MazeGenome> CreateMCCAlgorithmContainer(
             IGenomeFactory<NeatGenome> genomeFactory1,
-            IGenomeFactory<MazeGenome> genomeFactory2, List<NeatGenome> genomeList1, List<MazeGenome> genomeList2)
+            IGenomeFactory<MazeGenome> genomeFactory2, List<NeatGenome> genomeList1, List<MazeGenome> genomeList2,
+            bool isAgentListPreevolved)
         {
-            var seedAgentPopulation = new List<NeatGenome>();
-
-            // Create maze decoder to decode initialization mazes
-            var mazeDecoder = new MazeDecoder(_mazeScaleMultiplier);
-
-            // Loop through every maze and evolve the requisite number of viable genomes that solve it
-            for (var idx = 0; idx < genomeList2.Count; idx++)
-            {
-                Console.WriteLine(@"Evolving viable agents for maze population index {0} and maze ID {1}", idx,
-                    genomeList2[idx].Id);
-
-                // Evolve the number of agents required to meet the success MC for the current maze                
-                var viableMazeAgents = EvolveViableAgents(genomeFactory1, genomeList1.ToList(),
-                    mazeDecoder.Decode(genomeList2[idx]));
-
-                // Add the viable agent genomes who solve the current maze (but avoid adding duplicates, as identified by the genome ID)
-                // Note that it's fine to have multiple mazes solved by the same agent, so in this case, we'll leave the agent
-                // in the pool of seed agent genomes
-                foreach (
-                    var viableMazeAgent in
-                    viableMazeAgents.Where(
-                        viableMazeAgent =>
-                            seedAgentPopulation.Select(sap => sap.Id).Contains(viableMazeAgent.Id) == false))
-                {
-                    seedAgentPopulation.Add(viableMazeAgent);
-                }
-            }
-
-            // If we still lack the genomes to fill out agent specie count while still satisfying the maze MC,
-            // iteratively pick a random maze and evolve agents on that maze until we reach the requisite number
-            while (seedAgentPopulation.ToList().Count < _numAgentSuccessCriteria * AgentNumSpecies)
-            {
-                var rndMazePicker = new FastRandom();
-
-                // Pick a random maze on which to evolve agent(s)
-                var mazeGenome = genomeList2[rndMazePicker.Next(genomeList2.Count - 1)];
-
-                Console.WriteLine(
-                    @"Continuing viable agent evolution on maze {0}, with {1} of {2} required agents in place",
-                    mazeGenome.Id, seedAgentPopulation.Count, (_numAgentSuccessCriteria * AgentNumSpecies));
-
-                // Evolve the number of agents required to meet the success MC for the maze
-                var viableMazeAgents =
-                    EvolveViableAgents(genomeFactory1, genomeList1.ToList(), mazeDecoder.Decode(mazeGenome));
-
-                // Iterate through each viable agent and remove them if they've already solved a maze or add them to the list
-                // of viable agents if they have not
-                foreach (var viableMazeAgent in viableMazeAgents)
-                {
-                    // If they agent has already solved maze and is in the list of viable agents, remove that agent
-                    // from the pool of seed genomes (this is done because here, we're interested in getting unique
-                    // agents and want to avoid an endless loop wherein the same viable agents are returned)
-                    if (seedAgentPopulation.Select(sap => sap.Id).Contains(viableMazeAgent.Id))
-                    {
-                        genomeList1.Remove(viableMazeAgent);
-                    }
-                    // Otherwise, add that agent to the list of viable agents
-                    else
-                    {
-                        seedAgentPopulation.Add(viableMazeAgent);
-                    }
-                }
-            }
+            // Either use pre-evolved agents or evolve the seed agents that meet the MC
+            var seedAgentPopulation = isAgentListPreevolved
+                ? genomeList1
+                : EvolveSeedAgents(genomeList1, genomeList2, genomeFactory1, AgentSeedGenomeCount);
 
             // Set dummy fitness so that seed maze(s) will be marked as evaluated
             foreach (var mazeGenome in genomeList2)
@@ -479,16 +311,16 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
 
             // Create the maze phenome evaluator
             IPhenomeEvaluator<MazeStructure, BehaviorInfo> mazeEvaluator =
-                new MazeEnvironmentMCCEvaluator(_minSuccessDistance, BehaviorCharacterizationFactory,
-                    _numAgentSuccessCriteria, 0);
+                new MazeEnvironmentMCCEvaluator(MinSuccessDistance, BehaviorCharacterizationFactory,
+                    NumAgentSuccessCriteria, 0);
 
             // Create navigator phenome evaluator
             IPhenomeEvaluator<IBlackBox, BehaviorInfo> navigatorEvaluator =
-                new MazeNavigatorMCSEvaluator(_minSuccessDistance, BehaviorCharacterizationFactory,
-                    _numMazeSuccessCriteria);
+                new MazeNavigatorMCCEvaluator(MinSuccessDistance, BehaviorCharacterizationFactory,
+                    NumMazeSuccessCriteria);
 
             // Create maze genome decoder
-            IGenomeDecoder<MazeGenome, MazeStructure> mazeGenomeDecoder = new MazeDecoder(_mazeScaleMultiplier);
+            IGenomeDecoder<MazeGenome, MazeStructure> mazeGenomeDecoder = new MazeDecoder(MazeScaleMultiplier);
 
             // Create navigator genome decoder
             IGenomeDecoder<NeatGenome, IBlackBox> navigatorGenomeDecoder = new NeatGenomeDecoder(ActivationScheme);
@@ -502,6 +334,15 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             IGenomeEvaluator<NeatGenome> navigatorFitnessEvaluator =
                 new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(navigatorGenomeDecoder, navigatorEvaluator,
                     SelectionType.Queueing, SearchType.MinimalCriteriaSearch, ParallelOptions);
+
+            // Verify that the seed agent population satisfies MC constraints of both populations so that MCC starts in
+            // a valid state
+            if (isAgentListPreevolved &&
+                VerifyPreevolvedSeedAgents(genomeList1, genomeList2, navigatorFitnessEvaluator, mazeFitnessEvaluator) ==
+                false)
+            {
+                throw new SharpNeatException("Seed agent population failed viability verification.");
+            }
 
             // Create the MCC container
             IMCCAlgorithmContainer<NeatGenome, MazeGenome> mccAlgorithmContainer =

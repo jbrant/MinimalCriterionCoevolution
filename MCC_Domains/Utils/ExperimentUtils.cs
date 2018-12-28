@@ -709,6 +709,65 @@ namespace MCC_Domains.Utils
         }
 
         /// <summary>
+        /// Get all of the XML genome files in the given directory.
+        /// </summary>
+        /// <param name="filePath">The path to the directory containing the genome files or the genome file path itself.</param>
+        /// <returns>An array of genome file paths.</returns>
+        public static string[] GetGenomeFiles(string filePath)
+        {
+            string[] genomeFiles;
+            
+            // Get the attributes of the given path/file
+            FileAttributes fileAttributes = File.GetAttributes(filePath);
+
+            // Determine whether this is a directory or a file
+            if ((fileAttributes & FileAttributes.Directory) == FileAttributes.Directory)
+            {
+                // Get all of the genome files in the directory
+                genomeFiles = Directory.GetFiles(filePath, "*.xml");
+            }
+            else
+            {
+                // There's only one file, so make array length 1 and add that file
+                genomeFiles = new string[1];
+                genomeFiles[0] = filePath;
+            }
+
+            return genomeFiles;
+        }
+
+        /// <summary>
+        ///     Reads in seed NEAT genomes used to bootstrap MCC experiments.
+        /// </summary>
+        /// <param name="seedNeatPath">
+        ///     The path of the single NEAT genome or a directory containing multiple XML genome definitions.
+        /// </param>
+        /// <param name="neatGenomeFactory">The NEAT genome factory to assign to each genome.</param>
+        /// <returns>The list of seed NEAT genomes.</returns>
+        public static List<NeatGenome> ReadSeedNeatGenomes(string seedNeatPath, NeatGenomeFactory neatGenomeFactory)
+        {
+            var neatGenomes = new List<NeatGenome>();
+
+            // Get the NEAT genome files in the given path
+            var neatGenomeFiles = GetGenomeFiles(seedNeatPath);
+
+            // Read in all NEAT genomes and add them to the list
+            foreach (string neatGenomeFile in neatGenomeFiles)
+            {
+                using (var xr = XmlReader.Create(neatGenomeFile))
+                {
+                    // Read in the NEAT genomes
+                    var curNeatGenomes = NeatGenomeXmlIO.ReadCompleteGenomeList(xr, false, neatGenomeFactory);
+
+                    // Add the genomes to the overall genome list
+                    neatGenomes.AddRange(curNeatGenomes);
+                }
+            }
+
+            return neatGenomes;
+        }
+        
+        /// <summary>
         ///     Reads in seed maze genomes used to bootstrap MCC experiments.
         /// </summary>
         /// <param name="seedMazePath">
@@ -719,38 +778,18 @@ namespace MCC_Domains.Utils
         /// <returns>The list of seed maze genomes.</returns>
         public static List<MazeGenome> ReadSeedMazeGenomes(string seedMazePath, MazeGenomeFactory mazeGenomeFactory)
         {
-            string[] mazeGenomeFiles;
-            List<MazeGenome> mazeGenomes = new List<MazeGenome>();
+            var mazeGenomes = new List<MazeGenome>();
 
-            // Get the attributes of the given path/file
-            FileAttributes fileAttributes = File.GetAttributes(seedMazePath);
-
-            // Determine whether this is a directory or a file
-            if ((fileAttributes & FileAttributes.Directory) == FileAttributes.Directory)
-            {
-                // Get all of the genome files in the directory
-                mazeGenomeFiles = Directory.GetFiles(seedMazePath, "*.xml");
-            }
-            else
-            {
-                // There's only one file, so make array length 1 and add that file
-                mazeGenomeFiles = new string[1];
-                mazeGenomeFiles[0] = seedMazePath;
-            }
+            // Get the maze genome files in the given path
+            var mazeGenomeFiles = GetGenomeFiles(seedMazePath);
 
             // Read in all maze genomes and add them to the list
             foreach (string mazeGenomeFile in mazeGenomeFiles)
             {
-                using (XmlReader xr = XmlReader.Create(mazeGenomeFile))
+                using (var xr = XmlReader.Create(mazeGenomeFile))
                 {
                     // Read in the maze genomes
-                    List<MazeGenome> curMazeGenomes = MazeGenomeXmlIO.ReadCompleteGenomeList(xr, mazeGenomeFactory);
-
-                    // Assign the genome factory
-                    foreach (MazeGenome curMazeGenome in curMazeGenomes)
-                    {
-                        curMazeGenome.GenomeFactory = mazeGenomeFactory;
-                    }
+                    var curMazeGenomes = MazeGenomeXmlIO.ReadCompleteGenomeList(xr, mazeGenomeFactory);
 
                     // Add the genomes to the overall genome list
                     mazeGenomes.AddRange(curMazeGenomes);

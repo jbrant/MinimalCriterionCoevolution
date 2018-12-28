@@ -15,7 +15,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
     /// <summary>
     ///     Defines evaluation routine for agents (maze navigators) within a minimal criterion coevolution (MCC) framework.
     /// </summary>
-    public class MazeNavigatorMCSEvaluator : IPhenomeEvaluator<IBlackBox, BehaviorInfo>
+    public class MazeNavigatorMCCEvaluator : IPhenomeEvaluator<IBlackBox, BehaviorInfo>
     {
         #region Constructors
 
@@ -28,7 +28,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         ///     The number of mazes that must be solved successfully in order to satisfy the
         ///     minimal criterion.
         /// </param>
-        public MazeNavigatorMCSEvaluator(int minSuccessDistance,
+        public MazeNavigatorMCCEvaluator(int minSuccessDistance,
             IBehaviorCharacterizationFactory behaviorCharacterizationFactory, int agentNumSuccessesCriteria)
         {
             _behaviorCharacterizationFactory = behaviorCharacterizationFactory;

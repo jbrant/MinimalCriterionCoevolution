@@ -16,6 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with SharpNEAT.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+using System;
+
 namespace SharpNeat.Phenomes
 {
     /// <summary>
@@ -71,5 +74,11 @@ namespace SharpNeat.Phenomes
         /// Reset any internal state.
         /// </summary>
         void ResetState();
+
+        /// <summary>
+        /// Creates a new instance of the black box model.
+        /// </summary>
+        /// <returns>A new instance of the black box model.</returns>
+        IBlackBox Clone();
     }
 }

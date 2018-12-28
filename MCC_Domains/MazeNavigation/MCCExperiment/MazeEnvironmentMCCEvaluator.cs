@@ -13,7 +13,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
 {
     /// <inheritdoc />
     /// <summary>
-    /// Defines evaluation routine for mazes within a minimal criterion coevolution (MCC) framework.
+    ///     Defines evaluation routine for mazes within a minimal criterion coevolution (MCC) framework.
     /// </summary>
     public class MazeEnvironmentMCCEvaluator : IPhenomeEvaluator<MazeStructure, BehaviorInfo>
     {
@@ -64,9 +64,9 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         private readonly MultiMazeNavigationWorldFactory<BehaviorInfo> _multiMazeWorldFactory;
 
         /// <summary>
-        ///     The list of of maze navigators against which to evaluate the given maze configurations.
+        ///     The list of of maze navigator controllers against which to evaluate the given maze configurations.
         /// </summary>
-        private IList<IBlackBox> _mazeNavigators;
+        private IList<IBlackBox> _agentControllers;
 
         /// <summary>
         ///     The number of navigation attempts that must succeed for meeting the minimal criteria.
@@ -120,7 +120,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             var trialInfo = BehaviorInfo.NoBehavior;
 
             for (var cnt = 0;
-                cnt < _mazeNavigators.Count &&
+                cnt < _agentControllers.Count &&
                 (curSuccesses < _numAgentsSolvedCriteria || curFailures < _numAgentsFailedCriteria);
                 cnt++)
             {
@@ -138,20 +138,22 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
                 var world = _multiMazeWorldFactory.CreateMazeNavigationWorld(mazeStructure, behaviorCharacterization);
 
                 // Run a single trial
-                trialInfo = world.RunTrial(_mazeNavigators[cnt], SearchType.MinimalCriteriaSearch, out var goalReached);
+                trialInfo = world.RunTrial(_agentControllers[cnt].Clone(), SearchType.MinimalCriteriaSearch,
+                    out var goalReached);
 
                 // Set the objective distance
                 trialInfo.ObjectiveDistance = world.GetDistanceToTarget();
 
                 // Log trial information
                 evaluationLogger?.LogRow(new List<LoggableElement>
-                {
-                    new LoggableElement(EvaluationFieldElements.Generation, currentGeneration),
-                    new LoggableElement(EvaluationFieldElements.EvaluationCount, threadLocalEvaluationCount),
-                    new LoggableElement(EvaluationFieldElements.StopConditionSatisfied, StopConditionSatisfied),
-                    new LoggableElement(EvaluationFieldElements.RunPhase, RunPhase.Primary),
-                    new LoggableElement(EvaluationFieldElements.IsViable, trialInfo.DoesBehaviorSatisfyMinimalCriteria)
-                },
+                    {
+                        new LoggableElement(EvaluationFieldElements.Generation, currentGeneration),
+                        new LoggableElement(EvaluationFieldElements.EvaluationCount, threadLocalEvaluationCount),
+                        new LoggableElement(EvaluationFieldElements.StopConditionSatisfied, StopConditionSatisfied),
+                        new LoggableElement(EvaluationFieldElements.RunPhase, RunPhase.Primary),
+                        new LoggableElement(EvaluationFieldElements.IsViable,
+                            trialInfo.DoesBehaviorSatisfyMinimalCriteria)
+                    },
                     world.GetLoggableElements());
 
                 // If the navigator reached the goal, increment the running count of successes
@@ -211,7 +213,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         /// <param name="evaluatorPhenomes">The complete collection of available maze navigators.</param>
         public void UpdateEvaluatorPhenotypes(IEnumerable<object> evaluatorPhenomes)
         {
-            _mazeNavigators = (IList<IBlackBox>) evaluatorPhenomes;
+            _agentControllers = (IList<IBlackBox>) evaluatorPhenomes;
         }
 
         /// <inheritdoc />
