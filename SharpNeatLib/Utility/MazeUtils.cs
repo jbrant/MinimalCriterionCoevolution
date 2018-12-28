@@ -36,7 +36,7 @@ namespace SharpNeat.Utility
             Point2DInt endPoint, IntersectionOrientation orientation, int maxXPosition, int maxYPosition)
         {
             // Copy the start coordinate to track edge case trajectory adjustments
-            Point2DInt curPoint = new Point2DInt(startPoint.X, startPoint.Y);
+            var curPoint = new Point2DInt(startPoint.X, startPoint.Y);
 
             if (IntersectionOrientation.Horizontal == orientation)
             {
@@ -61,7 +61,7 @@ namespace SharpNeat.Utility
 
                     // Mark solution along x-axis until going two units to the east of the max x-coordinate
                     // (to avoid overlapping with trajectories in the space between the end point and the next rightmost point)
-                    for (int xCoord = curPoint.X; xCoord <= maxXPosition + 2; xCoord++)
+                    for (var xCoord = curPoint.X; xCoord <= maxXPosition + 2; xCoord++)
                     {
                         grid[curPoint.Y, xCoord].PathDirection = PathDirection.East;
 
@@ -88,7 +88,7 @@ namespace SharpNeat.Utility
                 }
 
                 // Mark solution along y-axis, leaving X-location at previous point
-                for (int yCoord = curPoint.Y;
+                for (var yCoord = curPoint.Y;
                     curPoint.Y < endPoint.Y
                         ? yCoord <= endPoint.Y
                         : yCoord >= endPoint.Y;
@@ -100,7 +100,7 @@ namespace SharpNeat.Utility
                 }
 
                 // Mark solution along x-axis, with y-location at current point
-                for (int xCoord = curPoint.X;
+                for (var xCoord = curPoint.X;
                     curPoint.X < endPoint.X
                         ? xCoord <= endPoint.X
                         : xCoord >= endPoint.X;
@@ -141,7 +141,7 @@ namespace SharpNeat.Utility
 
                     // Mark solution path along y-axis until going two below the max y-coordinate
                     // (to avoid overlapping with trajectories in the space between the end point and the next lowest point)
-                    for (int yCoord = curPoint.Y; yCoord <= maxYPosition + 2; yCoord++)
+                    for (var yCoord = curPoint.Y; yCoord <= maxYPosition + 2; yCoord++)
                     {
                         grid[yCoord, curPoint.X].PathDirection = PathDirection.South;
 
@@ -168,7 +168,7 @@ namespace SharpNeat.Utility
                 }
 
                 // Mark solution along x-axis, with y-location at previous point
-                for (int xCoord = curPoint.X;
+                for (var xCoord = curPoint.X;
                     curPoint.X < endPoint.X
                         ? xCoord <= endPoint.X
                         : xCoord >= endPoint.X;
@@ -180,7 +180,7 @@ namespace SharpNeat.Utility
                 }
 
                 // Mark solution along y-axis, leaving X-location at current point
-                for (int yCoord = curPoint.Y;
+                for (var yCoord = curPoint.Y;
                     curPoint.Y < endPoint.Y
                         ? yCoord <= endPoint.Y
                         : yCoord >= endPoint.Y;
@@ -224,66 +224,67 @@ namespace SharpNeat.Utility
         private static List<MazeStructureRoom> ExtractSubmazes(MazeStructureGridCell[,] grid, int mazeHeight,
             int mazeWidth)
         {
-            List<MazeStructureRoom> subMazes = new List<MazeStructureRoom>();
+            var subMazes = new List<MazeStructureRoom>();
 
             // Process mazes line-by-line
-            for (int y = 0; y < mazeHeight; y++)
+            for (var y = 0; y < mazeHeight; y++)
             {
-                for (int x = 0; x < mazeWidth; x++)
+                for (var x = 0; x < mazeWidth; x++)
                 {
-                    // If the trajectory does not intersect the current cell and it's not within an existing room, 
-                    // then trace out room and add to list
-                    if (grid[y, x].PathDirection == PathDirection.None &&
-                        subMazes.Count(sm => sm.IsCellInRoom(grid[y, x])) == 0)
+                    // If we're still on the trajectory or within an existing room, then move to the next cell
+                    if (grid[y, x].PathDirection != PathDirection.None ||
+                        subMazes.Count(sm => sm.IsCellInRoom(grid[y, x])) != 0) continue;
+
+                    // Otherwise, the trajectory does not intersect the current cell and it's not within an existing
+                    // room, so trace out room and add to list
+
+                    // Set room starting location
+                    var roomStartX = x;
+                    var roomStartY = y;
+                    var roomEndX = roomStartX;
+                    var roomEndY = roomStartY;
+                    var obstructionLocated = false;
+
+                    // Traverse to the right-most room edge
+                    while (roomEndX + 1 < mazeWidth &&
+                           grid[roomEndY, roomEndX + 1].PathDirection == PathDirection.None &&
+                           subMazes.Count(sm => sm.IsCellInRoom(grid[roomEndY, roomEndX + 1])) == 0)
                     {
-                        // Set room starting location
-                        var roomStartX = x;
-                        var roomStartY = y;
-                        var roomEndX = roomStartX;
-                        var roomEndY = roomStartY;
-                        var obstructionLocated = false;
+                        roomEndX++;
+                    }
 
-                        // Traverse to the right-most room edge
-                        while (roomEndX + 1 < mazeWidth &&
-                               grid[roomEndY, roomEndX + 1].PathDirection == PathDirection.None &&
-                               subMazes.Count(sm => sm.IsCellInRoom(grid[roomEndY, roomEndX + 1])) == 0)
+                    // Traverse to the bottom of the room until an obstruction is hit
+                    while (obstructionLocated == false && roomEndY + 1 < mazeHeight)
+                    {
+                        // Check if the trajectory has changed shape (expanded eastward or westward) and close off the room if so
+                        if ((roomEndX + 1 < mazeWidth &&
+                             grid[roomEndY + 1, roomEndX + 1].PathDirection == PathDirection.None) ||
+                            (roomStartX - 1 > 0 &&
+                             grid[roomEndY + 1, roomStartX - 1].PathDirection == PathDirection.None))
                         {
-                            roomEndX++;
+                            obstructionLocated = true;
                         }
-
-                        // Traverse to the bottom of the room until an obstruction is hit
-                        while (obstructionLocated == false && roomEndY + 1 < mazeHeight)
+                        else
                         {
-                            // Check if the trajectory has changed shape (expanded eastward or westward) and close off the room if so
-                            if ((roomEndX + 1 < mazeWidth &&
-                                 grid[roomEndY + 1, roomEndX + 1].PathDirection == PathDirection.None) ||
-                                (roomStartX - 1 > 0 &&
-                                 grid[roomEndY + 1, roomStartX - 1].PathDirection == PathDirection.None))
-                            {
-                                obstructionLocated = true;
-                            }
-                            else
-                            {
-                                roomEndY++;
+                            roomEndY++;
 
-                                // Check to see if there is an intersecting path segment on the current row
-                                for (int curX = roomStartX; curX <= roomEndX; curX++)
+                            // Check to see if there is an intersecting path segment on the current row
+                            for (var curX = roomStartX; curX <= roomEndX; curX++)
+                            {
+                                // Set obstruction flag and decrement the row position
+                                if (grid[roomEndY, curX].PathDirection != PathDirection.None)
                                 {
-                                    // Set obstruction flag and decrement the row position
-                                    if (grid[roomEndY, curX].PathDirection != PathDirection.None)
-                                    {
-                                        obstructionLocated = true;
-                                        roomEndY--;
-                                        break;
-                                    }
+                                    obstructionLocated = true;
+                                    roomEndY--;
+                                    break;
                                 }
                             }
                         }
-
-                        // Add maze room
-                        subMazes.Add(new MazeStructureRoom(roomStartX, roomStartY, roomEndX - roomStartX + 1,
-                            roomEndY - roomStartY + 1));
                     }
+
+                    // Add maze room
+                    subMazes.Add(new MazeStructureRoom(roomStartX, roomStartY, roomEndX - roomStartX + 1,
+                        roomEndY - roomStartY + 1));
                 }
             }
 
@@ -373,215 +374,20 @@ namespace SharpNeat.Utility
             List<MazeStructureRoom> subMazes, IList<WallGene> wallGenes)
         {
             // Filter out mazes that are too narrow to support internal walls
-            List<MazeStructureRoom> subMazesWithWalls = subMazes.Where(m => m.AreInternalWallsSupported()).ToList();
+            var subMazesWithWalls = subMazes.Where(m => m.AreInternalWallsSupported()).ToList();
 
             // Filter out mazes that are too narrow to support internal walls and 
             // convert to dictionary of sub mazes and associated internal walls
-            Dictionary<MazeStructureRoom, List<WallGene>> subMazeWallsMap =
-                subMazes.Where(m => m.AreInternalWallsSupported()).ToDictionary(k => k, v => new List<WallGene>());
+            var subMazeWallsMap = subMazes.Where(m => m.AreInternalWallsSupported())
+                .ToDictionary(k => k, v => new List<WallGene>());
 
             // Evenly distribute internal walls among sub-mazes
-            for (int wallCnt = 0; wallCnt < wallGenes.Count; wallCnt++)
+            for (var wallCnt = 0; wallCnt < wallGenes.Count; wallCnt++)
             {
                 subMazeWallsMap[subMazesWithWalls[wallCnt % subMazesWithWalls.Count]].Add(wallGenes[wallCnt]);
             }
 
             return subMazeWallsMap;
-        }
-
-        #endregion
-
-        #region Helper methods        
-
-        /// <summary>
-        ///     Determines the maximum number of partitions possible given a partially partitioned maze genome as a starting point.
-        /// </summary>
-        /// <param name="mazeGenome">The partially complexified genome from which to start max partition estimation.</param>
-        /// <returns>
-        ///     The total number of partitions supported given the existing maze genome complexity/wall placement and dimensions.
-        /// </returns>
-        public static int DetermineMaxPartitions(MazeGenome mazeGenome)
-        {
-            var maxPartitions = 0;
-            var loopIter = 0;
-            var wallGeneIdx = 0;
-
-            // Construct maze grid with solution path generated from connected waypoints
-            MazeStructureGridCell[,] mazeGrid = BuildMazeSolutionPath(mazeGenome);
-
-            // Extract the "sub-mazes" that are induced by the solution trajectory
-            List<MazeStructureRoom> subMazes = ExtractSubmazes(mazeGrid, mazeGenome.MazeBoundaryHeight,
-                mazeGenome.MazeBoundaryWidth);
-
-            // Process all sub-mazes, iteratively bisecting the applicable maze room space
-            foreach (var subMaze in subMazes)
-            {
-                Queue<MazeStructureRoom> mazeRoomQueue = new Queue<MazeStructureRoom>();
-
-                // Mark boundaries for current submaze, including perpendicular opening next to first 
-                // internal partition (if one exists)
-                if (subMaze.AreInternalWallsSupported() && mazeGenome.WallGeneList.Count > 0)
-                {
-                    // Get the current wall gene index
-                    wallGeneIdx = loopIter++ % mazeGenome.WallGeneList.Count;
-
-                    subMaze.MarkRoomBoundaries(mazeGrid, mazeGenome.WallGeneList[wallGeneIdx].WallLocation,
-                        mazeGenome.WallGeneList[wallGeneIdx].PassageLocation,
-                        mazeGenome.WallGeneList[wallGeneIdx].OrientationSeed);
-                }
-                else
-                {
-                    subMaze.MarkRoomBoundaries(mazeGrid);
-                }
-
-                if (subMaze.AreInternalWallsSupported() && mazeGenome.WallGeneList.Count > 0)
-                {
-                    // Queue up the first "room" (which will encompass the entirety of the submaze grid)
-                    mazeRoomQueue.Enqueue(subMaze);
-
-                    // Make sure there are rooms left in the queue before attempting to dequeue and bisect
-                    while (mazeRoomQueue.Count > 0)
-                    {
-                        // Get the next wall gene index
-                        wallGeneIdx = loopIter++ % mazeGenome.WallGeneList.Count;
-
-                        // Dequeue a room and run division on it
-                        Tuple<MazeStructureRoom, MazeStructureRoom> subRooms = mazeRoomQueue.Dequeue()
-                            .DivideRoom(mazeGrid, mazeGenome.WallGeneList[wallGeneIdx].WallLocation,
-                                mazeGenome.WallGeneList[wallGeneIdx].PassageLocation,
-                                mazeGenome.WallGeneList[wallGeneIdx].OrientationSeed);
-
-                        if (subRooms != null)
-                        {
-                            // Get the two resulting sub rooms and enqueue both of them
-                            if (subRooms.Item1 != null) mazeRoomQueue.Enqueue(subRooms.Item1);
-                            if (subRooms.Item2 != null) mazeRoomQueue.Enqueue(subRooms.Item2);
-                        }
-                    }
-                }
-            }
-
-            // Return the maximum number of partitions applied in a submaze
-            return loopIter - 1;
-        }
-
-        /// <summary>
-        ///     Constructs maze sub-rooms around the path and distributes internal wall genes within said subrooms.
-        /// </summary>
-        /// <param name="genome">The maze genome containing internal wall genes.</param>
-        /// <param name="mazeGrid">The two-dimensional, n x n grid of maze cells.</param>
-        /// <returns>The maze structure grid with sub-mazes and internal walls appropriately placed.</returns>
-        public static MazeStructureGrid BuildMazeStructureAroundPath(MazeGenome genome,
-            MazeStructureGridCell[,] mazeGrid)
-        {
-            var mazeRooms = new List<MazeStructureRoom>();
-            var partitionCount = 0;
-            var loopIter = 0;
-            var wallGeneIdx = 0;
-
-            // Extract the "sub-mazes" that are induced by the solution trajectory
-            List<MazeStructureRoom> subMazes = ExtractSubmazes(mazeGrid, genome.MazeBoundaryHeight,
-                genome.MazeBoundaryWidth);
-
-            // Mark walls between trajectory segments that are adjacent
-            MarkAdjacentTrajectoryBoundaries(mazeGrid, genome.MazeBoundaryHeight, genome.MazeBoundaryWidth);
-
-            // Process all sub-mazes, iteratively bisecting the applicable maze room space
-            foreach (var subMaze in subMazes)
-            {
-                Queue<MazeStructureRoom> mazeRoomQueue = new Queue<MazeStructureRoom>();
-
-                // Mark boundaries for current submaze, including perpendicular opening next to first 
-                // internal partition (if one exists)
-                if (subMaze.AreInternalWallsSupported() && genome.WallGeneList.Count > 0)
-                {
-                    // Get the current wall gene index
-                    wallGeneIdx = loopIter++ % genome.WallGeneList.Count;
-
-                    subMaze.MarkRoomBoundaries(mazeGrid, genome.WallGeneList[wallGeneIdx].WallLocation,
-                        genome.WallGeneList[wallGeneIdx].PassageLocation,
-                        genome.WallGeneList[wallGeneIdx].OrientationSeed);
-                }
-                else
-                {
-                    subMaze.MarkRoomBoundaries(mazeGrid);
-                }
-
-                if (subMaze.AreInternalWallsSupported() && genome.WallGeneList.Count > 0)
-                {
-                    // Queue up the first "room" (which will encompass the entirety of the submaze grid)
-                    mazeRoomQueue.Enqueue(subMaze);
-
-                    // Make sure there are rooms left in the queue before attempting to dequeue and bisect
-                    while (mazeRoomQueue.Count > 0)
-                    {
-                        // Get the next wall gene index
-                        wallGeneIdx = loopIter++ % genome.WallGeneList.Count;
-
-                        // Dequeue a room and run division on it
-                        Tuple<MazeStructureRoom, MazeStructureRoom> subRooms = mazeRoomQueue.Dequeue()
-                            .DivideRoom(mazeGrid, genome.WallGeneList[wallGeneIdx].WallLocation,
-                                genome.WallGeneList[wallGeneIdx].PassageLocation,
-                                genome.WallGeneList[wallGeneIdx].OrientationSeed);
-
-                        if (subRooms != null)
-                        {
-                            // Increment the count of partitions
-                            partitionCount++;
-
-                            // Get the two resulting sub rooms and enqueue both of them
-                            if (subRooms.Item1 != null) mazeRoomQueue.Enqueue(subRooms.Item1);
-                            if (subRooms.Item2 != null) mazeRoomQueue.Enqueue(subRooms.Item2);
-                        }
-                    }
-                }
-            }
-
-            return new MazeStructureGrid(mazeGrid, partitionCount, mazeRooms);
-        }
-
-        /// <summary>
-        ///     Decodes the given maze genome to an unscaled grid structure, indicating wall placement and orientation on a
-        ///     cell-by-cell basis.
-        /// </summary>
-        /// <param name="genome">The genome to decode.</param>
-        /// <returns>The unscaled, maze grid structure.</returns>
-        public static MazeStructureGrid ConvertMazeGenomeToUnscaledStructure(MazeGenome genome)
-        {
-            Queue<MazeStructureRoom> mazeRoomQueue = new Queue<MazeStructureRoom>();
-            MazeStructureGridCell[,] unscaledGrid = InitializeMazeGrid(genome.MazeBoundaryHeight,
-                genome.MazeBoundaryWidth);
-            int partitionCount = 0;
-
-            // Queue up the first "room" (which will encompass the entirety of the maze grid)
-            mazeRoomQueue.Enqueue(new MazeStructureRoom(0, 0, genome.MazeBoundaryWidth, genome.MazeBoundaryHeight));
-
-            // Iterate through all of the genes, generating 
-            foreach (WallGene wallGene in genome.WallGeneList)
-            {
-                // Make sure there are rooms left in the queue before attempting to dequeue and bisect
-                if (mazeRoomQueue.Count > 0)
-                {
-                    // Dequeue a room and run division on it
-                    Tuple<MazeStructureRoom, MazeStructureRoom> subRooms = mazeRoomQueue.Dequeue()
-                        .DivideRoom(unscaledGrid, wallGene.WallLocation,
-                            wallGene.PassageLocation,
-                            wallGene.OrientationSeed);
-
-                    if (subRooms != null)
-                    {
-                        // Increment the count of partitions
-                        partitionCount++;
-
-                        // Get the two resulting sub rooms and enqueue both of them
-                        if (subRooms.Item1 != null) mazeRoomQueue.Enqueue(subRooms.Item1);
-                        if (subRooms.Item2 != null) mazeRoomQueue.Enqueue(subRooms.Item2);
-                    }
-                }
-            }
-
-            // Construct and return the maze grid structure
-            return new MazeStructureGrid(unscaledGrid, partitionCount, mazeRoomQueue.ToList());
         }
 
         /// <summary>
@@ -592,7 +398,7 @@ namespace SharpNeat.Utility
         /// <param name="mazeHeight">The height of the maze.</param>
         /// <param name="mazeWidth">The width of the maze.</param>
         /// <returns>The target point reached by the flood fill process, containing a pointer chain back to the starting location.</returns>
-        public static MazeStructureLinkedPoint FloodFillToTarget(MazeStructureGrid mazeGrid, int mazeHeight,
+        private static MazeStructureLinkedPoint FloodFillToTarget(MazeStructureGrid mazeGrid, int mazeHeight,
             int mazeWidth)
         {
             MazeStructureLinkedPoint curPoint = null;
@@ -601,19 +407,19 @@ namespace SharpNeat.Utility
             var pointGrid = new MazeStructureLinkedPoint[mazeHeight, mazeWidth];
 
             // Convert to grid of maze structure points
-            for (int x = 0; x < mazeHeight; x++)
+            for (var x = 0; x < mazeHeight; x++)
             {
-                for (int y = 0; y < mazeWidth; y++)
+                for (var y = 0; y < mazeWidth; y++)
                 {
                     pointGrid[x, y] = new MazeStructureLinkedPoint(x, y);
                 }
             }
 
             // Define queue in which to store cells as they're discovered and visited
-            Queue<MazeStructureLinkedPoint> cellQueue = new Queue<MazeStructureLinkedPoint>(pointGrid.Length);
+            var cellQueue = new Queue<MazeStructureLinkedPoint>(pointGrid.Length);
 
             // Define a list to store visited cells in the order they were visited
-            List<MazeStructureLinkedPoint> visitedCells = new List<MazeStructureLinkedPoint>();
+            var visitedCells = new List<MazeStructureLinkedPoint>();
 
             // Enqueue the starting location
             cellQueue.Enqueue(new MazeStructureLinkedPoint(pointGrid[0, 0]));
@@ -670,6 +476,178 @@ namespace SharpNeat.Utility
         }
 
         /// <summary>
+        ///     Creates a two-dimensional array (grid) of empty maze grid cells.
+        /// </summary>
+        /// <param name="height">Height of the grid.</param>
+        /// <param name="width">Width of the grid.</param>
+        /// <returns>Grid initialized with empty cells.</returns>
+        private static MazeStructureGridCell[,] InitializeMazeGrid(int height, int width)
+        {
+            // Create the two-dimensional grid
+            var grid = new MazeStructureGridCell[height, width];
+
+            // Iterate through and create an empty cell for each position
+            for (var heightIdx = 0; heightIdx < height; heightIdx++)
+            {
+                for (var widthIdx = 0; widthIdx < width; widthIdx++)
+                {
+                    grid[heightIdx, widthIdx] = new MazeStructureGridCell(widthIdx, heightIdx,
+                        heightIdx == 0 && widthIdx == 0, heightIdx == height - 1 && widthIdx == width - 1);
+                }
+            }
+
+            return grid;
+        }
+
+        #endregion
+
+        #region Helper methods        
+
+        /// <summary>
+        ///     Determines the maximum number of partitions possible given a partially partitioned maze genome as a starting point.
+        /// </summary>
+        /// <param name="mazeGenome">The partially complexified genome from which to start max partition estimation.</param>
+        /// <returns>
+        ///     The total number of partitions supported given the existing maze genome complexity/wall placement and dimensions.
+        /// </returns>
+        public static int DetermineMaxPartitions(MazeGenome mazeGenome)
+        {
+            var loopIter = 0;
+
+            // Construct maze grid with solution path generated from connected waypoints
+            var mazeGrid = BuildMazeSolutionPath(mazeGenome);
+
+            // Extract the "sub-mazes" that are induced by the solution trajectory
+            var subMazes = ExtractSubmazes(mazeGrid, mazeGenome.MazeBoundaryHeight, mazeGenome.MazeBoundaryWidth);
+
+            // Process all sub-mazes, iteratively bisecting the applicable maze room space
+            foreach (var subMaze in subMazes)
+            {
+                var mazeRoomQueue = new Queue<MazeStructureRoom>();
+
+                // Mark boundaries for current submaze, including perpendicular opening next to first 
+                // internal partition (if one exists)
+                var wallGeneIdx = 0;
+                if (subMaze.AreInternalWallsSupported() && mazeGenome.WallGeneList.Count > 0)
+                {
+                    // Get the current wall gene index
+                    wallGeneIdx = loopIter++ % mazeGenome.WallGeneList.Count;
+
+                    subMaze.MarkRoomBoundaries(mazeGrid, mazeGenome.WallGeneList[wallGeneIdx].WallLocation,
+                        mazeGenome.WallGeneList[wallGeneIdx].PassageLocation,
+                        mazeGenome.WallGeneList[wallGeneIdx].OrientationSeed);
+                }
+                else
+                {
+                    subMaze.MarkRoomBoundaries(mazeGrid);
+                }
+
+                // If internal walls are not supported or if there are no wall genes, go to the next submaze
+                if (!subMaze.AreInternalWallsSupported() || mazeGenome.WallGeneList.Count == 0) continue;
+
+                // Queue up the first "room" (which will encompass the entirety of the submaze grid)
+                mazeRoomQueue.Enqueue(subMaze);
+
+                // Make sure there are rooms left in the queue before attempting to dequeue and bisect
+                while (mazeRoomQueue.Count > 0)
+                {
+                    // Get the next wall gene index
+                    wallGeneIdx = loopIter++ % mazeGenome.WallGeneList.Count;
+
+                    // Dequeue a room and run division on it
+                    var subRooms = mazeRoomQueue.Dequeue().DivideRoom(mazeGrid,
+                        mazeGenome.WallGeneList[wallGeneIdx].WallLocation,
+                        mazeGenome.WallGeneList[wallGeneIdx].PassageLocation,
+                        mazeGenome.WallGeneList[wallGeneIdx].OrientationSeed);
+
+                    if (subRooms != null)
+                    {
+                        // Get the two resulting sub rooms and enqueue both of them
+                        if (subRooms.Item1 != null) mazeRoomQueue.Enqueue(subRooms.Item1);
+                        if (subRooms.Item2 != null) mazeRoomQueue.Enqueue(subRooms.Item2);
+                    }
+                }
+            }
+
+            // Return the maximum number of partitions applied in a submaze
+            return loopIter - 1;
+        }
+
+        /// <summary>
+        ///     Constructs maze sub-rooms around the path and distributes internal wall genes within said subrooms.
+        /// </summary>
+        /// <param name="genome">The maze genome containing internal wall genes.</param>
+        /// <param name="mazeGrid">The two-dimensional, n x n grid of maze cells.</param>
+        /// <returns>The maze structure grid with sub-mazes and internal walls appropriately placed.</returns>
+        public static MazeStructureGrid BuildMazeStructureAroundPath(MazeGenome genome,
+            MazeStructureGridCell[,] mazeGrid)
+        {
+            var mazeRooms = new List<MazeStructureRoom>();
+            var partitionCount = 0;
+            var loopIter = 0;
+
+            // Extract the "sub-mazes" that are induced by the solution trajectory
+            var subMazes = ExtractSubmazes(mazeGrid, genome.MazeBoundaryHeight,
+                genome.MazeBoundaryWidth);
+
+            // Mark walls between trajectory segments that are adjacent
+            MarkAdjacentTrajectoryBoundaries(mazeGrid, genome.MazeBoundaryHeight, genome.MazeBoundaryWidth);
+
+            // Process all sub-mazes, iteratively bisecting the applicable maze room space
+            foreach (var subMaze in subMazes)
+            {
+                var mazeRoomQueue = new Queue<MazeStructureRoom>();
+
+                // Mark boundaries for current submaze, including perpendicular opening next to first 
+                // internal partition (if one exists)
+                var wallGeneIdx = 0;
+                if (subMaze.AreInternalWallsSupported() && genome.WallGeneList.Count > 0)
+                {
+                    // Get the current wall gene index
+                    wallGeneIdx = loopIter++ % genome.WallGeneList.Count;
+
+                    subMaze.MarkRoomBoundaries(mazeGrid, genome.WallGeneList[wallGeneIdx].WallLocation,
+                        genome.WallGeneList[wallGeneIdx].PassageLocation,
+                        genome.WallGeneList[wallGeneIdx].OrientationSeed);
+                }
+                else
+                {
+                    subMaze.MarkRoomBoundaries(mazeGrid);
+                }
+
+                // If internal walls are not supported or if there are no wall genes, go to the next submaze
+                if (!subMaze.AreInternalWallsSupported() || genome.WallGeneList.Count <= 0) continue;
+
+                // Queue up the first "room" (which will encompass the entirety of the submaze grid)
+                mazeRoomQueue.Enqueue(subMaze);
+
+                // Make sure there are rooms left in the queue before attempting to dequeue and bisect
+                while (mazeRoomQueue.Count > 0)
+                {
+                    // Get the next wall gene index
+                    wallGeneIdx = loopIter++ % genome.WallGeneList.Count;
+
+                    // Dequeue a room and run division on it
+                    var subRooms = mazeRoomQueue.Dequeue().DivideRoom(mazeGrid,
+                        genome.WallGeneList[wallGeneIdx].WallLocation, genome.WallGeneList[wallGeneIdx].PassageLocation,
+                        genome.WallGeneList[wallGeneIdx].OrientationSeed);
+
+                    if (subRooms != null)
+                    {
+                        // Increment the count of partitions
+                        partitionCount++;
+
+                        // Get the two resulting sub rooms and enqueue both of them
+                        if (subRooms.Item1 != null) mazeRoomQueue.Enqueue(subRooms.Item1);
+                        if (subRooms.Item2 != null) mazeRoomQueue.Enqueue(subRooms.Item2);
+                    }
+                }
+            }
+
+            return new MazeStructureGrid(mazeGrid, partitionCount, mazeRooms);
+        }
+
+        /// <summary>
         ///     Computes the (unscaled) distance from the starting location in the maze grid to the target location.
         /// </summary>
         /// <param name="mazeGrid">The grid of maze points.</param>
@@ -697,31 +675,6 @@ namespace SharpNeat.Utility
         }
 
         /// <summary>
-        ///     Creates a two-dimensional array (grid) of empty maze grid cells.
-        /// </summary>
-        /// <param name="height">Height of the grid.</param>
-        /// <param name="width">Width of the grid.</param>
-        /// <returns>Grid initialized with empty cells.</returns>
-        public static MazeStructureGridCell[,] InitializeMazeGrid(int height, int width)
-        {
-            // Create the two-dimensional grid
-            MazeStructureGridCell[,] grid =
-                new MazeStructureGridCell[height, width];
-
-            // Iterate through and create an empty cell for each position
-            for (int heightIdx = 0; heightIdx < height; heightIdx++)
-            {
-                for (int widthIdx = 0; widthIdx < width; widthIdx++)
-                {
-                    grid[heightIdx, widthIdx] = new MazeStructureGridCell(widthIdx, heightIdx,
-                        heightIdx == 0 && widthIdx == 0, heightIdx == height - 1 && widthIdx == width - 1);
-                }
-            }
-
-            return grid;
-        }
-
-        /// <summary>
         ///     Constructs the maze solution trajectory based on the given list of path genes (waypoints) and maze dimensions.
         /// </summary>
         /// <param name="pathGenes">The list of path (waypoint) genes.</param>
@@ -732,29 +685,29 @@ namespace SharpNeat.Utility
             int mazeWidth)
         {
             // Starting location will always be at the top left corner
-            Point2DInt startLocation = new Point2DInt(0, 0);
+            var startLocation = new Point2DInt(0, 0);
 
             // Ending location will always be at the bottom right corner
-            Point2DInt targetLocation = new Point2DInt(mazeWidth - 1, mazeHeight - 1);
+            var targetLocation = new Point2DInt(mazeWidth - 1, mazeHeight - 1);
 
             // Initialize the grid
-            MazeStructureGridCell[,] unscaledGrid = InitializeMazeGrid(mazeHeight,
+            var unscaledGrid = InitializeMazeGrid(mazeHeight,
                 mazeWidth);
 
-            for (int idx = 0; idx <= pathGenes.Count; idx++)
+            for (var idx = 0; idx <= pathGenes.Count; idx++)
             {
                 // Get the previous point (if first iteration, previous point is the start location)
-                Point2DInt prevPoint = idx == 0
+                var prevPoint = idx == 0
                     ? startLocation
                     : pathGenes[idx - 1].Waypoint;
 
                 // Get the current point (if last iteration, current point is the target location)
-                Point2DInt curPoint = idx == pathGenes.Count
+                var curPoint = idx == pathGenes.Count
                     ? targetLocation
                     : pathGenes[idx].Waypoint;
 
                 // Set the waypoint intersection orientation
-                IntersectionOrientation curOrientation = curPoint.Equals(targetLocation)
+                var curOrientation = curPoint.Equals(targetLocation)
                     ? pathGenes[idx - 1].DefaultOrientation
                     : pathGenes[idx].DefaultOrientation;
 
@@ -837,13 +790,13 @@ namespace SharpNeat.Utility
         public static Dictionary<Point2DInt, int> ComputeCellNeighborCounts(IList<PathGene> waypoints, int mazeHeight,
             int mazeWidth, int neighborhoodRadius)
         {
-            Dictionary<Point2DInt, int> cellNeighborCounts = new Dictionary<Point2DInt, int>(mazeHeight * mazeWidth);
+            var cellNeighborCounts = new Dictionary<Point2DInt, int>(mazeHeight * mazeWidth);
 
             // Iterate through each grid cell and compute number of waypoints in neighborhood
             // Note that cells which are themselves waypoints are discarded
-            for (int curHeight = 0; curHeight < mazeHeight; curHeight++)
+            for (var curHeight = 0; curHeight < mazeHeight; curHeight++)
             {
-                for (int curWidth = 0; curWidth < mazeWidth; curWidth++)
+                for (var curWidth = 0; curWidth < mazeWidth; curWidth++)
                 {
                     // Skip points that already contain a waypoint
                     if (waypoints.Any(p => p.Waypoint.X == curWidth && p.Waypoint.Y == curHeight))
@@ -936,11 +889,11 @@ namespace SharpNeat.Utility
         /// <param name="mazeHeight">The unscaled maze height.</param>
         /// <param name="mazeWidth">The unscaled maze width.</param>
         /// <returns>Boolean indicator of whether the trajectory overlaps upon itself.</returns>
-        public static bool IsTrajectoryValid(IList<PathGene> waypoints, uint candidateWaypointId,
+        public static bool IsTrajectoryValid(IEnumerable<PathGene> waypoints, uint candidateWaypointId,
             Point2DInt candidateWaypointLocation, IntersectionOrientation candidateWaypointOrientation, int mazeHeight,
             int mazeWidth)
         {
-            bool isOverlap = false;
+            var isOverlap = false;
 
             // Make a copy of the wayoint list
             var modifiedWaypoints = new List<PathGene>(waypoints);
@@ -964,7 +917,7 @@ namespace SharpNeat.Utility
             }
 
             // Create list of visited waypoints
-            List<Point2DInt> visitedWaypointLocations = new List<Point2DInt>();
+            var visitedWaypointLocations = new List<Point2DInt>();
 
             // Get all waypoints in the maze
             var mazeWaypointLocations =

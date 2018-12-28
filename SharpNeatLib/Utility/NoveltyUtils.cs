@@ -32,11 +32,9 @@ namespace SharpNeat.Utility
 
             // Iterate through each genome in the population, calculating the distance from it 
             // to the genome under evaluation and recording said distance
-            List<double> distances =
-                population.Select(
-                    genome =>
-                        BehaviorInfo.CalculateDistance(genomeBehaviors, genome.EvaluationInfo.BehaviorCharacterization))
-                    .ToList();
+            var distances = population.Select(genome =>
+                    BehaviorInfo.CalculateDistance(genomeBehaviors, genome.EvaluationInfo.BehaviorCharacterization))
+                .ToList();
 
             // If a novelty archive is being maintained, also calculate the distance between 
             // the genome under evaluation and every genome in the novelty archive
@@ -59,14 +57,14 @@ namespace SharpNeat.Utility
                 nearestNeighbors = distances.Count;
 
             // Iterate through each of the nearest neighbors, summing the distance to each
-            for (int neighbor = 0; neighbor < nearestNeighbors; neighbor++)
+            for (var neighbor = 0; neighbor < nearestNeighbors; neighbor++)
             {
                 totalDistance += distances[neighbor];
             }
 
             // Return the novelty score as the sum of the distances to each of the k-nearest neighbors 
             // divided by the number of nearest neighbors
-            return totalDistance/nearestNeighbors;
+            return totalDistance / nearestNeighbors;
         }
     }
 }

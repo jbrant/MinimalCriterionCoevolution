@@ -62,7 +62,7 @@ namespace SharpNeat.Core
         /// <param name="genomeList">The list of genomes to decode.</param>
         /// <returns></returns>
         IEnumerable<object> DecodeGenomes(IList<TGenome> genomeList);
-        
+
         /// <summary>
         ///     Evaluates the fitness or behavioral novelty of a list of genomes.
         /// </summary>
@@ -72,9 +72,7 @@ namespace SharpNeat.Core
         ///     Determines whether to run the simulation to get behavioral characteristics before
         ///     evaluating fitness or behavioral novelty.
         /// </param>
-        /// <param name="enableBridging">Determines whether bridging is enabled on genome evaluations.</param>
-        void Evaluate(IList<TGenome> genomeList, uint currentGeneration, bool runSimulation = true,
-            bool enableBridging = false);
+        void Evaluate(IList<TGenome> genomeList, uint currentGeneration, bool runSimulation = true);
 
         /// <summary>
         ///     Evalutes the fitness or behavioral novelty of a single genome and potentially against a list of other genomes.
@@ -87,8 +85,7 @@ namespace SharpNeat.Core
         ///     Determines whether to run the simulation to get behavioral characteristics before
         ///     evaluating fitness or behavioral novelty.
         /// </param>
-        /// <param name="enableBridging">Determines whether bridging is enabled on genome evaluations.</param>
         void Evaluate(IList<TGenome> genomesToEvaluate, IList<TGenome> population, uint currentGeneration,
-            bool runSimulation = true, bool enableBridging = false);
+            bool runSimulation = true);
     }
 }

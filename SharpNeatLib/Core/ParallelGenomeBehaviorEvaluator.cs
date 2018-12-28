@@ -19,7 +19,6 @@
 
 #region
 
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using SharpNeat.Loggers;
@@ -30,6 +29,7 @@ using SharpNeat.Utility;
 
 namespace SharpNeat.Core
 {
+    /// <inheritdoc />
     /// <summary>
     ///     A concrete implementation of IGenomeFitnessEvaluator that evaulates genome's phenotypic behaviors independently of
     ///     each other and in parallel (on multiple execution threads).
@@ -40,16 +40,9 @@ namespace SharpNeat.Core
         where TGenome : class, IGenome<TGenome>
         where TPhenome : class
     {
-        #region Lock objects
-
-        private readonly Object _archiveEvaluationLock = new object();
-
-        #endregion
-
         #region Private Instance fields
 
         private readonly AbstractNoveltyArchive<TGenome> _noveltyArchive;
-        private readonly bool _enablePhenomeCaching;
         private readonly PopulationEvaluationMethod _populationEvaluationMethod;
         private readonly BatchEvaluationMethod _batchEvaluationMethod;
         private readonly IGenomeDecoder<TGenome, TPhenome> _genomeDecoder;
@@ -57,7 +50,6 @@ namespace SharpNeat.Core
         private readonly ParallelOptions _parallelOptions;
         private readonly IPhenomeEvaluator<TPhenome, BehaviorInfo> _phenomeEvaluator;
         private readonly IDataLogger _evaluationLogger;
-        private readonly SelectionType _selectionType;
         private readonly SearchType _searchType;
         private readonly bool _decodeGenomeToXml;
 
@@ -74,9 +66,8 @@ namespace SharpNeat.Core
         ///     Determines whether to run the simulation to get behavioral characteristics before
         ///     evaluating fitness or behavioral novelty.
         /// </param>
-        /// <param name="enableBridging">Determines whether bridging is enabled on genome evaluations.</param>
         private delegate void PopulationEvaluationMethod(
-            IList<TGenome> genomeList, uint currentGeneration, bool runSimulation, bool enableBridging = false);
+            IList<TGenome> genomeList, uint currentGeneration, bool runSimulation);
 
         /// <summary>
         ///     Delegate for batch (steady-state) evaluation.
@@ -88,15 +79,14 @@ namespace SharpNeat.Core
         ///     Determines whether to run the simulation to get behavioral characteristics before
         ///     evaluating fitness or behavioral novelty.
         /// </param>
-        /// <param name="enableBridging">Determines whether bridging is enabled on genome evaluations.</param>
         private delegate void BatchEvaluationMethod(
-            IList<TGenome> genomesToEvaluate, IList<TGenome> population, uint currentGeneration, bool runSimulation,
-            bool enableBridging = false);
+            IList<TGenome> genomesToEvaluate, IList<TGenome> population, uint currentGeneration, bool runSimulation);
 
         #endregion
 
         #region Constructors
 
+        /// <inheritdoc />
         /// <summary>
         ///     Construct with the provided IGenomeDecoder and IPhenomeEvaluator.
         ///     Phenome caching is enabled by default and the evaluation logger is optional.
@@ -104,31 +94,6 @@ namespace SharpNeat.Core
         /// </summary>
         /// <param name="genomeDecoder">The genome decoder to use.</param>
         /// <param name="phenomeEvaluator">The phenome evaluator.</param>
-        /// <param name="selectionType">The selection algorithm type.</param>
-        /// <param name="searchType">The search algorithm type.</param>
-        /// <param name="evaluationLogger">A reference to the evaluation data logger (optional).</param>
-        /// <param name="decodeGenomeToXml">
-        ///     Whether a genome should be decoded to its XML string representation (generally used to
-        ///     support logging).
-        /// </param>
-        public ParallelGenomeBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
-            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, SelectionType selectionType,
-            SearchType searchType,
-            IDataLogger evaluationLogger = null, bool decodeGenomeToXml = false)
-            : this(
-                genomeDecoder, phenomeEvaluator, selectionType, searchType, new ParallelOptions(), true, 0, null,
-                evaluationLogger, decodeGenomeToXml)
-        {
-        }
-
-        /// <summary>
-        ///     Construct with the provided IGenomeDecoder and IPhenomeEvaluator.
-        ///     Phenome caching is enabled by default and the evaluation logger is optional.
-        ///     The number of parallel threads defaults to Environment.ProcessorCount.
-        /// </summary>
-        /// <param name="genomeDecoder">The genome decoder to use.</param>
-        /// <param name="phenomeEvaluator">The phenome evaluator.</param>
-        /// <param name="selectionType">The selection algorithm type.</param>
         /// <param name="searchType">The search algorithm type.</param>
         /// <param name="parallelOptions">Controls the number of parallel evaluations.</param>
         /// <param name="evaluationLogger">A reference to the evaluation data logger (optional).</param>
@@ -137,15 +102,16 @@ namespace SharpNeat.Core
         ///     support logging).
         /// </param>
         public ParallelGenomeBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
-            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, SelectionType selectionType,
+            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator,
             SearchType searchType, ParallelOptions parallelOptions, IDataLogger evaluationLogger = null,
             bool decodeGenomeToXml = false)
             : this(
-                genomeDecoder, phenomeEvaluator, selectionType, searchType, parallelOptions, true, 0, null,
+                genomeDecoder, phenomeEvaluator, searchType, parallelOptions, true, 0, null,
                 evaluationLogger, decodeGenomeToXml)
         {
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Construct with the provided IGenomeDecoder and IPhenomeEvaluator.
         ///     Phenome caching is enabled by default.
@@ -153,7 +119,6 @@ namespace SharpNeat.Core
         /// </summary>
         /// <param name="genomeDecoder">The genome decoder to use.</param>
         /// <param name="phenomeEvaluator">The phenome evaluator.</param>
-        /// <param name="selectionType">The selection algorithm type.</param>
         /// <param name="searchType">The search algorithm type.</param>
         /// <param name="nearestNeighbors">The number of nearest neighbors to use in behavior distance calculations.</param>
         /// <param name="archive">A reference to the elite archive (optional).</param>
@@ -163,42 +128,13 @@ namespace SharpNeat.Core
         ///     support logging).
         /// </param>
         public ParallelGenomeBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
-            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, SelectionType selectionType,
+            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator,
             SearchType searchType,
-            int nearestNeighbors,
-            AbstractNoveltyArchive<TGenome> archive = null, IDataLogger evaluationLogger = null,
+            int nearestNeighbors, AbstractNoveltyArchive<TGenome> archive = null, IDataLogger evaluationLogger = null,
             bool decodeGenomeToXml = false)
             : this(
-                genomeDecoder, phenomeEvaluator, selectionType, searchType, new ParallelOptions(), true,
+                genomeDecoder, phenomeEvaluator, searchType, new ParallelOptions(), true,
                 nearestNeighbors, archive,
-                evaluationLogger, decodeGenomeToXml)
-        {
-        }
-
-        /// <summary>
-        ///     Construct with the provided IGenomeDecoder, IPhenomeEvaluator and ParalleOptions.
-        ///     Phenome caching is enabled by default.
-        ///     The number of parallel threads defaults to Environment.ProcessorCount.
-        /// </summary>
-        /// <param name="genomeDecoder">The genome decoder to use.</param>
-        /// <param name="phenomeEvaluator">The phenome evaluator.</param>
-        /// <param name="selectionType">The selection algorithm type.</param>
-        /// <param name="searchType">The search algorithm type.</param>
-        /// <param name="options">Controls the number of parallel evaluations.</param>
-        /// <param name="nearestNeighbors">The number of nearest neighbors to use in behavior distance calculations.</param>
-        /// <param name="archive">A reference to the elite archive (optional).</param>
-        /// <param name="evaluationLogger">A reference to the evaluation data logger (optional).</param>
-        /// <param name="decodeGenomeToXml">
-        ///     Whether a genome should be decoded to its XML string representation (generally used to
-        ///     support logging).
-        /// </param>
-        public ParallelGenomeBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
-            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, SelectionType selectionType,
-            SearchType searchType,
-            ParallelOptions options, int nearestNeighbors, AbstractNoveltyArchive<TGenome> archive = null,
-            IDataLogger evaluationLogger = null, bool decodeGenomeToXml = false)
-            : this(
-                genomeDecoder, phenomeEvaluator, selectionType, searchType, options, true, nearestNeighbors, archive,
                 evaluationLogger, decodeGenomeToXml)
         {
         }
@@ -208,7 +144,6 @@ namespace SharpNeat.Core
         /// </summary>
         /// <param name="genomeDecoder">The genome decoder to use.</param>
         /// <param name="phenomeEvaluator">The phenome evaluator.</param>
-        /// <param name="selectionType">The selection algorithm type.</param>
         /// <param name="searchType">The search algorithm type.</param>
         /// <param name="options">Controls the number of parallel evaluations.</param>
         /// <param name="enablePhenomeCaching">Whether or not to enable phenome caching.</param>
@@ -220,7 +155,7 @@ namespace SharpNeat.Core
         ///     support logging).
         /// </param>
         private ParallelGenomeBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
-            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, SelectionType selectionType,
+            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator,
             SearchType searchType,
             ParallelOptions options, bool enablePhenomeCaching, int nearestNeighbors,
             AbstractNoveltyArchive<TGenome> archive = null, IDataLogger evaluationLogger = null,
@@ -228,17 +163,15 @@ namespace SharpNeat.Core
         {
             _genomeDecoder = genomeDecoder;
             _phenomeEvaluator = phenomeEvaluator;
-            _selectionType = selectionType;
             _searchType = searchType;
             _parallelOptions = options;
-            _enablePhenomeCaching = enablePhenomeCaching;
             _nearestNeighbors = nearestNeighbors;
             _noveltyArchive = archive;
             _evaluationLogger = evaluationLogger;
             _decodeGenomeToXml = decodeGenomeToXml;
 
             // Determine the appropriate evaluation method.
-            if (_enablePhenomeCaching)
+            if (enablePhenomeCaching)
             {
                 _populationEvaluationMethod = EvaluateAllBehaviors_Caching;
                 _batchEvaluationMethod = EvaluateBatchBehaviors_Caching;
@@ -254,11 +187,13 @@ namespace SharpNeat.Core
 
         #region Properties
 
+        /// <inheritdoc />
         /// <summary>
         ///     Gets the total number of individual genome evaluations that have been performed by this evaluator.
         /// </summary>
         public ulong EvaluationCount => _phenomeEvaluator.EvaluationCount;
 
+        /// <inheritdoc />
         /// <summary>
         ///     Gets a value indicating whether some goal fitness has been achieved and that
         ///     the the evolutionary algorithm/search should stop. This property's value can remain false
@@ -270,6 +205,7 @@ namespace SharpNeat.Core
 
         #region Public Evaluate and Reset methods
 
+        /// <inheritdoc />
         /// <summary>
         ///     Reset the internal state of the evaluation scheme if any exists.
         /// </summary>
@@ -278,6 +214,7 @@ namespace SharpNeat.Core
             _phenomeEvaluator.Reset();
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Initializes state variables in the genome evalutor (primarily the logger).
         /// </summary>
@@ -290,6 +227,7 @@ namespace SharpNeat.Core
             _phenomeEvaluator.Initialize(_evaluationLogger);
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Cleans up evaluator state after end of execution or upon execution interruption.  In particular, this closes out
         ///     any existing evaluation logger instance.
@@ -299,6 +237,7 @@ namespace SharpNeat.Core
             _evaluationLogger?.Close();
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Update the genome evaluator based on some characteristic of the given population.
         /// </summary>
@@ -310,6 +249,7 @@ namespace SharpNeat.Core
             _phenomeEvaluator.Update(population);
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Updates the environment or other evaluation criteria against which the evaluated genomes are being compared.  This
         ///     is typically used in a coevoluationary context.
@@ -320,6 +260,7 @@ namespace SharpNeat.Core
             _phenomeEvaluator.UpdateEvaluatorPhenotypes(comparisonPhenomes);
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Decodes a list of genomes to their corresponding phenotypes.
         /// </summary>
@@ -330,6 +271,7 @@ namespace SharpNeat.Core
             return EvaluationUtils<TGenome, TPhenome>.DecodeGenomes(genomeList, _genomeDecoder);
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Evaluates a list of genomes. Here we decode each genome in using the contained IGenomeDecoder
         ///     and evaluate the resulting TPhenome using the contained IPhenomeEvaluator.
@@ -340,13 +282,12 @@ namespace SharpNeat.Core
         ///     Determines whether to run the simulation to get behavioral characteristics before
         ///     evaluating fitness or behavioral novelty.
         /// </param>
-        /// <param name="enableBridging">Determines whether bridging is enabled on genome evaluations.</param>
-        public void Evaluate(IList<TGenome> genomeList, uint currentGeneration, bool runSimulation = true,
-            bool enableBridging = false)
+        public void Evaluate(IList<TGenome> genomeList, uint currentGeneration, bool runSimulation = true)
         {
-            _populationEvaluationMethod(genomeList, currentGeneration, runSimulation, enableBridging);
+            _populationEvaluationMethod(genomeList, currentGeneration, runSimulation);
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Evalutes a single genome alone and against a list of other genomes.
         /// </summary>
@@ -357,13 +298,13 @@ namespace SharpNeat.Core
         ///     Determines whether to run the simulation to get behavioral characteristics before
         ///     evaluating fitness or behavioral novelty.
         /// </param>
-        /// <param name="enableBridging">Determines whether bridging is enabled on genome evaluations.</param>
         public void Evaluate(IList<TGenome> genomesToEvaluate, IList<TGenome> population, uint currentGeneration,
-            bool runSimulation = true, bool enableBridging = false)
+            bool runSimulation = true)
         {
-            _batchEvaluationMethod(genomesToEvaluate, population, currentGeneration, runSimulation, enableBridging);
+            _batchEvaluationMethod(genomesToEvaluate, population, currentGeneration, runSimulation);
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Returns ParallelGenomeBehaviorEvaluator loggable elements.
         /// </summary>
@@ -390,9 +331,8 @@ namespace SharpNeat.Core
         ///     Determines whether to run the simulation to get behavioral characteristics before
         ///     evaluating fitness or behavioral novelty.
         /// </param>
-        /// <param name="enableBridging">Determines whether bridging is enabled on genome evaluations.</param>
         private void EvaluateAllBehaviors_NonCaching(IList<TGenome> genomeList, uint currentGeneration,
-            bool runSimulation, bool enableBridging = false)
+            bool runSimulation)
         {
             if (runSimulation)
             {
@@ -400,7 +340,7 @@ namespace SharpNeat.Core
                     delegate(TGenome genome)
                     {
                         EvaluationUtils<TGenome, TPhenome>.EvaluateBehavior_NonCaching(genome, _genomeDecoder,
-                            _phenomeEvaluator, currentGeneration, enableBridging, _evaluationLogger, _decodeGenomeToXml);
+                            _phenomeEvaluator, currentGeneration, _evaluationLogger, _decodeGenomeToXml);
                     });
             }
 
@@ -448,9 +388,8 @@ namespace SharpNeat.Core
         ///     Determines whether to run the simulation to get behavioral characteristics before
         ///     evaluating fitness or behavioral novelty.
         /// </param>
-        /// <param name="enableBridging">Determines whether bridging is enabled on genome evaluations.</param>
         private void EvaluateBatchBehaviors_NonCaching(IList<TGenome> genomesToEvaluate, IList<TGenome> population,
-            uint currentGeneration, bool runSimulation, bool enableBridging = false)
+            uint currentGeneration, bool runSimulation)
         {
             if (runSimulation)
             {
@@ -459,7 +398,7 @@ namespace SharpNeat.Core
                     delegate(TGenome genome)
                     {
                         EvaluationUtils<TGenome, TPhenome>.EvaluateBehavior_NonCaching(genome, _genomeDecoder,
-                            _phenomeEvaluator, currentGeneration, enableBridging, _evaluationLogger, _decodeGenomeToXml);
+                            _phenomeEvaluator, currentGeneration, _evaluationLogger, _decodeGenomeToXml);
                     });
             }
 
@@ -505,9 +444,7 @@ namespace SharpNeat.Core
         ///     Determines whether to run the simulation to get behavioral characteristics before
         ///     evaluating fitness or behavioral novelty.
         /// </param>
-        /// <param name="enableBridging">Determines whether bridging is enabled on genome evaluations.</param>
-        private void EvaluateAllBehaviors_Caching(IList<TGenome> genomeList, uint currentGeneration, bool runSimulation,
-            bool enableBridging = false)
+        private void EvaluateAllBehaviors_Caching(IList<TGenome> genomeList, uint currentGeneration, bool runSimulation)
         {
             if (runSimulation)
             {
@@ -515,7 +452,7 @@ namespace SharpNeat.Core
                     delegate(TGenome genome)
                     {
                         EvaluationUtils<TGenome, TPhenome>.EvaluateBehavior_Caching(genome, _genomeDecoder,
-                            _phenomeEvaluator, currentGeneration, enableBridging, _evaluationLogger, _decodeGenomeToXml);
+                            _phenomeEvaluator, currentGeneration, _evaluationLogger, _decodeGenomeToXml);
                     });
             }
 
@@ -564,9 +501,8 @@ namespace SharpNeat.Core
         ///     Determines whether to run the simulation to get behavioral characteristics before
         ///     evaluating fitness or behavioral novelty.
         /// </param>
-        /// <param name="enableBridging">Determines whether bridging is enabled on genome evaluations.</param>
         private void EvaluateBatchBehaviors_Caching(IList<TGenome> genomesToEvaluate, IList<TGenome> population,
-            uint currentGeneration, bool runSimulation, bool enableBridging = false)
+            uint currentGeneration, bool runSimulation)
         {
             if (runSimulation)
             {
@@ -575,7 +511,7 @@ namespace SharpNeat.Core
                     delegate(TGenome genome)
                     {
                         EvaluationUtils<TGenome, TPhenome>.EvaluateBehavior_Caching(genome, _genomeDecoder,
-                            _phenomeEvaluator, currentGeneration, enableBridging, _evaluationLogger, _decodeGenomeToXml);
+                            _phenomeEvaluator, currentGeneration, _evaluationLogger, _decodeGenomeToXml);
                     });
             }
 

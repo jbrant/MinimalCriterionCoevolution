@@ -273,13 +273,11 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
 
             // Create the maze genome evaluator
             IGenomeEvaluator<MazeGenome> mazeFitnessEvaluator =
-                new ParallelGenomeBehaviorEvaluator<MazeGenome, MazeStructure>(mazeGenomeDecoder, mazeEvaluator,
-                    SelectionType.Queueing, SearchType.MinimalCriteriaSearch, ParallelOptions);
+                new ParallelGenomeBehaviorEvaluator<MazeGenome, MazeStructure>(mazeGenomeDecoder, mazeEvaluator, SearchType.MinimalCriteriaSearch, ParallelOptions);
 
             // Create navigator genome evaluator
             IGenomeEvaluator<NeatGenome> navigatorFitnessEvaluator =
-                new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(navigatorGenomeDecoder, navigatorEvaluator,
-                    SelectionType.Queueing, SearchType.MinimalCriteriaSearch, ParallelOptions);
+                new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(navigatorGenomeDecoder, navigatorEvaluator, SearchType.MinimalCriteriaSearch, ParallelOptions);
 
             // Verify that the seed agent population satisfies MC constraints of both populations so that MCC starts in
             // a valid state
