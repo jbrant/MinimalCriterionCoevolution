@@ -311,7 +311,7 @@ namespace SharpNeat.EvolutionAlgorithms
                 childGenomes = CreateOffspring(curBatchSize);
             }
 
-            // First evaluate the offspring batch with bridging disabled
+            // Evaluate child genomes
             GenomeEvaluator.Evaluate(childGenomes, CurrentGeneration);
 
             // Remove offspring that are not viable

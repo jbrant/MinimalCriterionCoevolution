@@ -9,19 +9,15 @@ using ExperimentEntities;
 
 namespace SharpNeat.Loggers
 {
+    /// <inheritdoc />
     /// <summary>
     ///     Entity data logger class for novelty experiment evaluation data.
     /// </summary>
     public class NoveltyExperimentOrganismStateEntityDataLogger : AbstractEntityDataLogger
     {
-        #region Private members
-
-        private readonly object writeLock = new Object();
-
-        #endregion
-
         #region Constructors
 
+        /// <inheritdoc />
         /// <summary>
         ///     Novelty experiment organism state constructor (simply passes parameters to base constructor).
         /// </summary>
@@ -35,6 +31,7 @@ namespace SharpNeat.Loggers
 
         #region Logging Control Methods
 
+        /// <inheritdoc />
         /// <summary>
         ///     Defers to the base method to instantiate the database connection and then reads in the maximum run ID so that we
         ///     have a starting point for the new experiment run.
@@ -50,11 +47,13 @@ namespace SharpNeat.Loggers
                 DbContext.NoveltyExperimentOrganismStateDatas.Count(
                     c => c.ExperimentDictionaryID == ExperimentConfiguration.ExperimentDictionaryID) > 0
                     ? DbContext.NoveltyExperimentOrganismStateDatas.Where(
-                        w => w.ExperimentDictionaryID == ExperimentConfiguration.ExperimentDictionaryID).Max(m => m.Run) +
+                              w => w.ExperimentDictionaryID == ExperimentConfiguration.ExperimentDictionaryID)
+                          .Max(m => m.Run) +
                       1
                     : 1;
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Maps applicable entity fields for the novelty experiment organism state entity and persists to the database.
         /// </summary>
@@ -62,16 +61,16 @@ namespace SharpNeat.Loggers
         public override void LogRow(params List<LoggableElement>[] loggableElements)
         {
             // Initialize new DB context
-            ExperimentDataEntities localDbContext = new ExperimentDataEntities
+            var localDbContext = new ExperimentDataEntities
             {
                 Configuration = {AutoDetectChangesEnabled = false, ValidateOnSaveEnabled = false}
             };
 
             // Combine and sort the loggable elements
-            LoggableElement[] combinedElements = ExtractLoggableElementArray(EvaluationFieldElements.NumFieldElements,
+            var combinedElements = ExtractLoggableElementArray(EvaluationFieldElements.NumFieldElements,
                 loggableElements);
 
-            NoveltyExperimentOrganismStateData noveltyData = new NoveltyExperimentOrganismStateData
+            var noveltyData = new NoveltyExperimentOrganismStateData
             {
                 ExperimentDictionaryID = ExperimentConfiguration.ExperimentDictionaryID,
                 Run = Run
@@ -79,30 +78,30 @@ namespace SharpNeat.Loggers
 
             noveltyData.Generation =
                 (int)
-                    Convert.ChangeType(combinedElements[EvaluationFieldElements.Generation.Position].Value,
-                        noveltyData.Generation.GetType());
+                Convert.ChangeType(combinedElements[EvaluationFieldElements.Generation.Position].Value,
+                    noveltyData.Generation.GetType());
             noveltyData.Evaluation =
                 (int)
-                    Convert.ChangeType(combinedElements[EvaluationFieldElements.EvaluationCount.Position].Value,
-                        noveltyData.Evaluation.GetType());
+                Convert.ChangeType(combinedElements[EvaluationFieldElements.EvaluationCount.Position].Value,
+                    noveltyData.Evaluation.GetType());
             noveltyData.StopConditionSatisfied =
                 (bool)
-                    Convert.ChangeType(
-                        combinedElements[EvaluationFieldElements.StopConditionSatisfied.Position].Value,
-                        noveltyData.StopConditionSatisfied.GetType());
+                Convert.ChangeType(
+                    combinedElements[EvaluationFieldElements.StopConditionSatisfied.Position].Value,
+                    noveltyData.StopConditionSatisfied.GetType());
             noveltyData.DistanceToTarget =
                 (double)
-                    Convert.ChangeType(
-                        combinedElements[EvaluationFieldElements.DistanceToTarget.Position].Value,
-                        noveltyData.DistanceToTarget.GetType());
+                Convert.ChangeType(
+                    combinedElements[EvaluationFieldElements.DistanceToTarget.Position].Value,
+                    noveltyData.DistanceToTarget.GetType());
             noveltyData.AgentXLocation =
                 (double)
-                    Convert.ChangeType(combinedElements[EvaluationFieldElements.AgentXLocation.Position].Value,
-                        noveltyData.AgentXLocation.GetType());
+                Convert.ChangeType(combinedElements[EvaluationFieldElements.AgentXLocation.Position].Value,
+                    noveltyData.AgentXLocation.GetType());
             noveltyData.AgentYLocation =
                 (double)
-                    Convert.ChangeType(combinedElements[EvaluationFieldElements.AgentYLocation.Position].Value,
-                        noveltyData.AgentYLocation.GetType());
+                Convert.ChangeType(combinedElements[EvaluationFieldElements.AgentYLocation.Position].Value,
+                    noveltyData.AgentYLocation.GetType());
 
             // Add the new organism state observation
             localDbContext.NoveltyExperimentOrganismStateDatas.Add(noveltyData);

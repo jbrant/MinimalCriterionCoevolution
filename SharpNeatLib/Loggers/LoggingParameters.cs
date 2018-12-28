@@ -70,18 +70,21 @@ namespace SharpNeat.Loggers
             {
                 return LoggingType.Evolution;
             }
+
             // Check if this is evaluation logging
             if (LoggingType.Evaluation.ToString()
                 .Equals(strLoggingType, StringComparison.InvariantCultureIgnoreCase))
             {
                 return LoggingType.Evaluation;
             }
-            // Chec if this is population logging
+
+            // Check if this is population logging
             if (LoggingType.Population.ToString()
                 .Equals(strLoggingType, StringComparison.InvariantCultureIgnoreCase))
             {
                 return LoggingType.Population;
             }
+
             // Check if this is genome logging
             if (LoggingType.Genome.ToString()
                 .Equals(strLoggingType, StringComparison.InvariantCultureIgnoreCase))
@@ -100,15 +103,11 @@ namespace SharpNeat.Loggers
         /// <returns>The corresponding logging destination enum.</returns>
         public static LoggingDestination ConvertStringToLoggingDestination(string strLoggingDestination)
         {
-            // Check if this is a database destination
-            if (LoggingDestination.Database.ToString()
-                .Equals(strLoggingDestination, StringComparison.InvariantCultureIgnoreCase))
-            {
-                return LoggingDestination.Database;
-            }
-
-            // Otherwise, default to file destination
-            return LoggingDestination.File;
+            // Return appropriate logging destination
+            return LoggingDestination.Database.ToString()
+                .Equals(strLoggingDestination, StringComparison.InvariantCultureIgnoreCase)
+                ? LoggingDestination.Database
+                : LoggingDestination.File;
         }
     }
 }
