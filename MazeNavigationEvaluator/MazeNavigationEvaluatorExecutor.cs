@@ -15,16 +15,25 @@ using RunPhase = SharpNeat.Core.RunPhase;
 
 namespace MazeNavigationEvaluator
 {
-    internal class NavigatorMazeMapEvaluatorExecutor
+    /// <summary>
+    ///     Handles post-hoc evaluation of maze navigation results and compute key metrics therefrom.
+    /// </summary>
+    internal static class NavigatorMazeMapEvaluatorExecutor
     {
         /// <summary>
         ///     This is the number of records that are written to the database in one pass.
         /// </summary>
         private const int CommitPageSize = 1000;
 
-        private static readonly Dictionary<ExecutionParameter, String> _executionConfiguration =
+        /// <summary>
+        ///     Encapsulates configuration parameters specified at runtime.
+        /// </summary>
+        private static readonly Dictionary<ExecutionParameter, string> _executionConfiguration =
             new Dictionary<ExecutionParameter, string>();
 
+        /// <summary>
+        ///     Console logger for reporting execution status.
+        /// </summary>
         private static ILog _executionLogger;
 
         private static void Main(string[] args)
@@ -44,103 +53,104 @@ namespace MazeNavigationEvaluator
             _executionLogger.Info("Invocation parameters validated - continuing with experiment execution.");
 
             // Get boolean indicator dictating whether to analyze the whole run or just the last batch (default is true - full run)
-            AnalysisScope analysisScope =
-                AnalysisScopeUtil.ConvertStringToAnalysisScope(_executionConfiguration[ExecutionParameter.AnalysisScope]);
+            var analysisScope =
+                AnalysisScopeUtil.ConvertStringToAnalysisScope(
+                    _executionConfiguration[ExecutionParameter.AnalysisScope]);
 
             // Get input and output neurons counts for navigator agent
-            int inputNeuronCount = Int32.Parse(_executionConfiguration[ExecutionParameter.AgentNeuronInputCount]);
-            int outputNeuronCount = Int32.Parse(_executionConfiguration[ExecutionParameter.AgentNeuronOutputCount]);
+            var inputNeuronCount = int.Parse(_executionConfiguration[ExecutionParameter.AgentNeuronInputCount]);
+            var outputNeuronCount = int.Parse(_executionConfiguration[ExecutionParameter.AgentNeuronOutputCount]);
 
             // Get boolean indicator dictating whether to generate trajectory data (default is false)
-            bool generateTrajectoryData =
+            var generateTrajectoryData =
                 _executionConfiguration.ContainsKey(ExecutionParameter.GenerateTrajectoryData) &&
                 Boolean.Parse(_executionConfiguration[ExecutionParameter.GenerateTrajectoryData]);
 
             // Get boolean indicator dictating whether to write out numeric results of the batch simulations (default is true)
-            bool generateSimulationResults =
+            var generateSimulationResults =
                 _executionConfiguration.ContainsKey(ExecutionParameter.GenerateSimulationResults) == false ||
-                Boolean.Parse(_executionConfiguration[ExecutionParameter.GenerateSimulationResults]);
+                bool.Parse(_executionConfiguration[ExecutionParameter.GenerateSimulationResults]);
 
             // Get boolean indicator dictating whether to generate bitmaps of mazes (default is true)
-            bool generateMazeBitmaps = _executionConfiguration.ContainsKey(ExecutionParameter.GenerateMazeBitmaps) ==
-                                       false ||
-                                       Boolean.Parse(_executionConfiguration[ExecutionParameter.GenerateMazeBitmaps]);
+            var generateMazeBitmaps = _executionConfiguration.ContainsKey(ExecutionParameter.GenerateMazeBitmaps) ==
+                                      false ||
+                                      bool.Parse(_executionConfiguration[ExecutionParameter.GenerateMazeBitmaps]);
 
             // Get boolean indicator dictating whether to generate bitmaps of agent trajectories (default is true)
-            bool generateTrajectoryBitmaps =
+            var generateTrajectoryBitmaps =
                 _executionConfiguration.ContainsKey(ExecutionParameter.GenerateAgentTrajectoryBitmaps) == false ||
-                Boolean.Parse(_executionConfiguration[ExecutionParameter.GenerateAgentTrajectoryBitmaps]);
+                bool.Parse(_executionConfiguration[ExecutionParameter.GenerateAgentTrajectoryBitmaps]);
 
             // Get boolean indicator dictating whether to write simulation results to database (default is false)
-            bool writeResultsToDatabase =
+            var writeResultsToDatabase =
                 _executionConfiguration.ContainsKey(ExecutionParameter.WriteResultsToDatabase) &&
-                Boolean.Parse(_executionConfiguration[ExecutionParameter.WriteResultsToDatabase]);
+                bool.Parse(_executionConfiguration[ExecutionParameter.WriteResultsToDatabase]);
 
             // Determine whether this is a distributed execution
-            bool isDistributedExecution =
+            var isDistributedExecution =
                 _executionConfiguration.ContainsKey(ExecutionParameter.IsDistributedExecution) &&
-                Boolean.Parse(_executionConfiguration[ExecutionParameter.IsDistributedExecution]);
+                bool.Parse(_executionConfiguration[ExecutionParameter.IsDistributedExecution]);
 
             // Get boolean indicator dictating whether to write out trajectory diversity scores (default is false)
-            bool generateTrajectoryDiversityScores =
+            var generateTrajectoryDiversityScores =
                 _executionConfiguration.ContainsKey(ExecutionParameter.GenerateDiversityScores) &&
-                Boolean.Parse(_executionConfiguration[ExecutionParameter.GenerateDiversityScores]);
+                bool.Parse(_executionConfiguration[ExecutionParameter.GenerateDiversityScores]);
 
             // Get boolean indicator dictating whether to write out natural agent trajectory clusters (default is false)
-            bool generateAgentTrajectoryClusters =
+            var generateAgentTrajectoryClusters =
                 _executionConfiguration.ContainsKey(ExecutionParameter.GenerateAgentTrajectoryClusters) &&
-                Boolean.Parse(_executionConfiguration[ExecutionParameter.GenerateAgentTrajectoryClusters]);
+                bool.Parse(_executionConfiguration[ExecutionParameter.GenerateAgentTrajectoryClusters]);
 
             // Get boolean indicator dictating whether to write out natural maze clusters (default is false)
-            bool generateMazeClusters =
+            var generateMazeClusters =
                 _executionConfiguration.ContainsKey(ExecutionParameter.GenerateMazeClusters) &&
-                Boolean.Parse(_executionConfiguration[ExecutionParameter.GenerateMazeClusters]);
+                bool.Parse(_executionConfiguration[ExecutionParameter.GenerateMazeClusters]);
 
             // If the generate natural clusters or trajectory diversity flag is set, get the sample size
-            int sampleSize = (generateAgentTrajectoryClusters || generateTrajectoryDiversityScores)
-                ? Int32.Parse(_executionConfiguration[ExecutionParameter.SampleSize])
+            var sampleSize = (generateAgentTrajectoryClusters || generateTrajectoryDiversityScores)
+                ? int.Parse(_executionConfiguration[ExecutionParameter.SampleSize])
                 : 0;
 
             // Get boolean indicator dictating whether to sample the clustering data points from 
             // species or from the population (default is false, meaning sample from population)
-            bool sampleClusterObservationsFromSpecies =
+            var sampleClusterObservationsFromSpecies =
                 _executionConfiguration.ContainsKey(ExecutionParameter.SampleFromSpecies) &&
-                Boolean.Parse(_executionConfiguration[ExecutionParameter.SampleFromSpecies]);
+                bool.Parse(_executionConfiguration[ExecutionParameter.SampleFromSpecies]);
 
             // Get boolean indicator dictating whether silhouette calculation should be performed greedily
-            bool useGreedySilhouetteEvaluation =
+            var useGreedySilhouetteEvaluation =
                 _executionConfiguration.ContainsKey(ExecutionParameter.UseGreedySilhouetteCalculation) == false ||
-                Boolean.Parse(_executionConfiguration[ExecutionParameter.UseGreedySilhouetteCalculation]);
+                bool.Parse(_executionConfiguration[ExecutionParameter.UseGreedySilhouetteCalculation]);
 
             // Get boolean indicator dictating whether trajectory clustering samples should be applied evenly 
             // to all extant, and successfully navigable mazes
-            bool useEvenMazeTrajectoryDistribution =
+            var useEvenMazeTrajectoryDistribution =
                 _executionConfiguration.ContainsKey(ExecutionParameter.UseEvenMazeTrajectoryDistribution) &&
-                Boolean.Parse(_executionConfiguration[ExecutionParameter.UseEvenMazeTrajectoryDistribution]);
+                bool.Parse(_executionConfiguration[ExecutionParameter.UseEvenMazeTrajectoryDistribution]);
 
             // If greedy silhouette evaluation is NOT being used, then get the range of clusters for which to compute silhouette width
-            int clusterRange = useGreedySilhouetteEvaluation == false
-                ? Int32.Parse(_executionConfiguration[ExecutionParameter.ClusterRange])
+            var clusterRange = useGreedySilhouetteEvaluation == false
+                ? int.Parse(_executionConfiguration[ExecutionParameter.ClusterRange])
                 : 0;
 
             // Get boolean indicator dictating whether to write out population entropy scores (default is false)
-            bool generatePopulationEntropy =
+            var generatePopulationEntropy =
                 _executionConfiguration.ContainsKey(ExecutionParameter.GeneratePopulationEntropy) &&
-                Boolean.Parse(_executionConfiguration[ExecutionParameter.GeneratePopulationEntropy]);
+                bool.Parse(_executionConfiguration[ExecutionParameter.GeneratePopulationEntropy]);
 
             // Get boolean indicator dictating whether to execute initialization trial analysis (default is false)
-            bool runInitializationAnalysis =
+            var runInitializationAnalysis =
                 _executionConfiguration.ContainsKey(ExecutionParameter.ExecuteInitializationTrials) &&
-                Boolean.Parse(_executionConfiguration[ExecutionParameter.ExecuteInitializationTrials]);
+                bool.Parse(_executionConfiguration[ExecutionParameter.ExecuteInitializationTrials]);
 
             // Get the number of batches to skip in each iteration
-            int batchInterval = _executionConfiguration.ContainsKey(ExecutionParameter.BatchInterval)
-                ? Int32.Parse(_executionConfiguration[ExecutionParameter.BatchInterval])
+            var batchInterval = _executionConfiguration.ContainsKey(ExecutionParameter.BatchInterval)
+                ? int.Parse(_executionConfiguration[ExecutionParameter.BatchInterval])
                 : 1;
 
             // Get the image chunk size
-            int chunkSize = _executionConfiguration.ContainsKey(ExecutionParameter.ImageChunkSize)
-                ? Int32.Parse(_executionConfiguration[ExecutionParameter.ImageChunkSize])
+            var chunkSize = _executionConfiguration.ContainsKey(ExecutionParameter.ImageChunkSize)
+                ? int.Parse(_executionConfiguration[ExecutionParameter.ImageChunkSize])
                 : 10;
 
             // If bitmap generation was enabled, grab the base output directory
@@ -150,33 +160,31 @@ namespace MazeNavigationEvaluator
             }
 
             // Extract the experiment names
-            string[] experimentNames = _executionConfiguration[ExecutionParameter.ExperimentNames].Split(',');
+            var experimentNames = _executionConfiguration[ExecutionParameter.ExperimentNames].Split(',');
 
-            _executionLogger.Info(string.Format("[{0}] experiments specified for analysis.", experimentNames.Count()));
+            _executionLogger.Info($"[{experimentNames.Count()}] experiments specified for analysis.");
 
             // Process each experiment
-            foreach (string experimentName in experimentNames)
+            foreach (var experimentName in experimentNames)
             {
                 // Get the run from which to start execution (if specified)
-                int startingRun = _executionConfiguration.ContainsKey(ExecutionParameter.StartFromRun)
-                    ? Int32.Parse(_executionConfiguration[ExecutionParameter.StartFromRun])
+                var startingRun = _executionConfiguration.ContainsKey(ExecutionParameter.StartFromRun)
+                    ? int.Parse(_executionConfiguration[ExecutionParameter.StartFromRun])
                     : 1;
 
                 // Lookup the current experiment configuration
-                ExperimentDictionary curExperimentConfiguration =
-                    ExperimentDataHandler.LookupExperimentConfiguration(experimentName);
+                var curExperimentConfiguration = ExperimentDataHandler.LookupExperimentConfiguration(experimentName);
 
                 // Ensure that experiment configuration was found
                 if (curExperimentConfiguration == null)
                 {
                     _executionLogger.Error(
-                        string.Format("Unable to lookup experiment configuration for experiment with name [{0}]",
-                            experimentName));
+                        $"Unable to lookup experiment configuration for experiment with name [{experimentName}]");
                     Environment.Exit(0);
                 }
 
                 // Construct the experiment parameters
-                ExperimentParameters experimentParameters =
+                var experimentParameters =
                     new ExperimentParameters(curExperimentConfiguration.MaxTimesteps,
                         curExperimentConfiguration.MinSuccessDistance,
                         curExperimentConfiguration.Primary_Maze_MazeHeight,
@@ -186,16 +194,15 @@ namespace MazeNavigationEvaluator
                 // Get the number of runs in the experiment. Note that if this is a distributed execution, each node
                 // will only execute a single run analysis, so the number of runs will be equivalent to the run 
                 // to start from (this ensures that the ensuing loop that executes all of the runs executes exactly once)
-                int numRuns = isDistributedExecution
+                var numRuns = isDistributedExecution
                     ? startingRun
                     : ExperimentDataHandler.GetNumRuns(curExperimentConfiguration.ExperimentDictionaryID);
 
-                _executionLogger.Info(string.Format("Preparing to execute analysis for [{0}] runs of experiment [{1}]",
-                    numRuns,
-                    curExperimentConfiguration.ExperimentName));
+                _executionLogger.Info(
+                    $"Preparing to execute analysis for [{numRuns}] runs of experiment [{curExperimentConfiguration.ExperimentName}]");
 
                 // Process each experiment run
-                for (int curRun = startingRun; curRun <= numRuns; curRun++)
+                for (var curRun = startingRun; curRun <= numRuns; curRun++)
                 {
                     // If simulation result generation is enabled and we're not writing to 
                     // the database, open the simulation result file writer
@@ -203,8 +210,7 @@ namespace MazeNavigationEvaluator
                     {
                         ExperimentDataHandler.OpenFileWriter(
                             Path.Combine(_executionConfiguration[ExecutionParameter.DataFileOutputDirectory],
-                                string.Format("{0} - Run{1}.csv", experimentName, curRun)),
-                            OutputFileType.NavigatorMazeEvaluationData);
+                                $"{experimentName} - Run{curRun}.csv"), OutputFileType.NavigatorMazeEvaluationData);
                     }
 
                     // If trajectory data generation is enabled and we're not writing
@@ -213,8 +219,7 @@ namespace MazeNavigationEvaluator
                     {
                         ExperimentDataHandler.OpenFileWriter(
                             Path.Combine(_executionConfiguration[ExecutionParameter.DataFileOutputDirectory],
-                                string.Format("{0} - TrajectoryData - Run{1}.csv", experimentName, curRun)),
-                            OutputFileType.TrajectoryData);
+                                $"{experimentName} - TrajectoryData - Run{curRun}.csv"), OutputFileType.TrajectoryData);
                     }
 
                     // If trajectory diversity score generation is enabled and we're not writing to 
@@ -223,8 +228,7 @@ namespace MazeNavigationEvaluator
                     {
                         ExperimentDataHandler.OpenFileWriter(
                             Path.Combine(_executionConfiguration[ExecutionParameter.DataFileOutputDirectory],
-                                string.Format("{0} - TrajectoryDiversity - {1} - Run{2}.csv", experimentName,
-                                    analysisScope, curRun)),
+                                $"{experimentName} - TrajectoryDiversity - {analysisScope} - Run{curRun}.csv"),
                             OutputFileType.TrajectoryDiversityData);
                     }
 
@@ -232,8 +236,7 @@ namespace MazeNavigationEvaluator
                     {
                         ExperimentDataHandler.OpenFileWriter(
                             Path.Combine(_executionConfiguration[ExecutionParameter.DataFileOutputDirectory],
-                                string.Format("{0} - NaturalClusters - {1} - Run{2}.csv", experimentName, analysisScope,
-                                    curRun)),
+                                $"{experimentName} - NaturalClusters - {analysisScope} - Run{curRun}.csv"),
                             OutputFileType.NaturalClusterData);
                     }
 
@@ -241,8 +244,7 @@ namespace MazeNavigationEvaluator
                     {
                         ExperimentDataHandler.OpenFileWriter(
                             Path.Combine(_executionConfiguration[ExecutionParameter.DataFileOutputDirectory],
-                                string.Format("{0} - MazeClusters - {1} - Run{2}.csv", experimentName, analysisScope,
-                                    curRun)),
+                                $"{experimentName} - MazeClusters - {analysisScope} - Run{curRun}.csv"),
                             OutputFileType.MazeClusterData);
                     }
 
@@ -250,9 +252,7 @@ namespace MazeNavigationEvaluator
                     {
                         ExperimentDataHandler.OpenFileWriter(
                             Path.Combine(_executionConfiguration[ExecutionParameter.DataFileOutputDirectory],
-                                string.Format("{0} - PopulationEntropy - {1} - Run{2}.csv", experimentName,
-                                    analysisScope,
-                                    curRun)),
+                                $"{experimentName} - PopulationEntropy - {analysisScope} - Run{curRun}.csv"),
                             OutputFileType.PopulationEntropyData);
                     }
 
@@ -261,7 +261,7 @@ namespace MazeNavigationEvaluator
                     if (AnalysisScope.Full == analysisScope)
                     {
                         // Get the number of initialization batches in the current run
-                        int numInitializationBatches =
+                        var numInitializationBatches =
                             ExperimentDataHandler.GetNumBatchesForRun(
                                 curExperimentConfiguration.ExperimentDictionaryID, curRun, RunPhase.Initialization);
 
@@ -269,37 +269,33 @@ namespace MazeNavigationEvaluator
                         if (runInitializationAnalysis && numInitializationBatches > 0)
                         {
                             _executionLogger.Info(
-                                string.Format(
-                                    "Executing initialization phase analysis for run [{0}/{1}] with [{2}] batches",
-                                    curRun,
-                                    numRuns, numInitializationBatches));
+                                $"Executing initialization phase analysis for run [{curRun}/{numRuns}] with [{numInitializationBatches}] batches");
 
                             // Begin initialization phase results processing
                             ProcessAndLogPerBatchResults(numInitializationBatches, batchInterval,
                                 RunPhase.Initialization,
                                 experimentParameters, inputNeuronCount, outputNeuronCount, curRun, numRuns,
                                 curExperimentConfiguration, generateSimulationResults, generateTrajectoryData,
-                                generateTrajectoryDiversityScores, generateAgentTrajectoryClusters, generateMazeClusters,
+                                generateTrajectoryDiversityScores, generateAgentTrajectoryClusters,
+                                generateMazeClusters,
                                 generatePopulationEntropy, useGreedySilhouetteEvaluation,
                                 useEvenMazeTrajectoryDistribution, clusterRange,
                                 writeResultsToDatabase, sampleSize, sampleClusterObservationsFromSpecies);
                         }
 
                         // Get the number of primary batches in the current run
-                        int numBatches =
-                            ExperimentDataHandler.GetNumBatchesForRun(
-                                curExperimentConfiguration.ExperimentDictionaryID, curRun, RunPhase.Primary);
+                        var numBatches = ExperimentDataHandler.GetNumBatchesForRun(
+                            curExperimentConfiguration.ExperimentDictionaryID, curRun, RunPhase.Primary);
 
                         _executionLogger.Info(
-                            string.Format("Executing primary phase analysis for run [{0}/{1}] with [{2}] batches",
-                                curRun,
-                                numRuns, numBatches));
+                            $"Executing primary phase analysis for run [{curRun}/{numRuns}] with [{numBatches}] batches");
 
                         // Image generation is handled more holistically (rather than batch-by-batch) and therefore doesn't align 
                         // with the manner in which non-image, quantitative experiment data is processed
                         if (generateMazeBitmaps || generateTrajectoryBitmaps)
                         {
-                            WriteImageResults(experimentParameters, inputNeuronCount, outputNeuronCount, curRun, numRuns,
+                            WriteImageResults(experimentParameters, inputNeuronCount, outputNeuronCount, curRun,
+                                numRuns,
                                 curExperimentConfiguration, baseImageOutputDirectory, generateMazeBitmaps,
                                 generateTrajectoryBitmaps, chunkSize);
                         }
@@ -319,14 +315,12 @@ namespace MazeNavigationEvaluator
                     else
                     {
                         // Get the last batch in the current run
-                        int finalBatch =
+                        var finalBatch =
                             ExperimentDataHandler.GetNumBatchesForRun(
                                 curExperimentConfiguration.ExperimentDictionaryID, curRun, RunPhase.Primary);
 
                         _executionLogger.Info(
-                            string.Format(
-                                "Executing analysis of end-stage mazes and navigator trajectories for run [{0}/{1}] batch [{2}]",
-                                curRun, numRuns, finalBatch));
+                            $"Executing analysis of end-stage mazes and navigator trajectories for run [{curRun}/{numRuns}] batch [{finalBatch}]");
 
                         // Begin maze/navigator trajectory image generation
                         ProcessAndLogPerBatchResults(finalBatch, batchInterval, RunPhase.Primary,
@@ -354,7 +348,7 @@ namespace MazeNavigationEvaluator
                         ExperimentDataHandler.CloseFileWriter(OutputFileType.TrajectoryData);
                         ExperimentDataHandler.WriteSentinelFile(
                             Path.Combine(_executionConfiguration[ExecutionParameter.DataFileOutputDirectory],
-                                string.Format("{0} - TrajectoryData", experimentName)), curRun);
+                                $"{experimentName} - TrajectoryData"), curRun);
                     }
 
                     // If we're not writing to the database, close the trajectory diversity 
@@ -364,7 +358,7 @@ namespace MazeNavigationEvaluator
                         ExperimentDataHandler.CloseFileWriter(OutputFileType.TrajectoryDiversityData);
                         ExperimentDataHandler.WriteSentinelFile(
                             Path.Combine(_executionConfiguration[ExecutionParameter.DataFileOutputDirectory],
-                                string.Format("{0} - TrajectoryDiversity - {1}", experimentName, analysisScope)), curRun);
+                                $"{experimentName} - TrajectoryDiversity - {analysisScope}"), curRun);
                     }
 
                     // If we're not writing to the database, close the natural clustering file writer
@@ -374,7 +368,7 @@ namespace MazeNavigationEvaluator
                         ExperimentDataHandler.CloseFileWriter(OutputFileType.NaturalClusterData);
                         ExperimentDataHandler.WriteSentinelFile(
                             Path.Combine(_executionConfiguration[ExecutionParameter.DataFileOutputDirectory],
-                                string.Format("{0} - NaturalClusters - {1}", experimentName, analysisScope)), curRun);
+                                $"{experimentName} - NaturalClusters - {analysisScope}"), curRun);
                     }
 
                     // If we're not writing to the database, close the maze clustering file writer
@@ -384,7 +378,7 @@ namespace MazeNavigationEvaluator
                         ExperimentDataHandler.CloseFileWriter(OutputFileType.MazeClusterData);
                         ExperimentDataHandler.WriteSentinelFile(
                             Path.Combine(_executionConfiguration[ExecutionParameter.DataFileOutputDirectory],
-                                string.Format("{0} - MazeClusters - {1}", experimentName, analysisScope)), curRun);
+                                $"{experimentName} - MazeClusters - {analysisScope}"), curRun);
                     }
 
                     // If we're not writing to the database, close the population entropy file writer
@@ -394,7 +388,7 @@ namespace MazeNavigationEvaluator
                         ExperimentDataHandler.CloseFileWriter(OutputFileType.PopulationEntropyData);
                         ExperimentDataHandler.WriteSentinelFile(
                             Path.Combine(_executionConfiguration[ExecutionParameter.DataFileOutputDirectory],
-                                string.Format("{0} - PopulationEntropy - {1}", experimentName, analysisScope)), curRun);
+                                $"{experimentName} - PopulationEntropy - {analysisScope}"), curRun);
                     }
                 }
             }
@@ -419,23 +413,21 @@ namespace MazeNavigationEvaluator
             int chunkSize = 10)
         {
             // Create the maze/navigator map
-            MapEvaluator mapEvaluator =
-                new MapEvaluator(experimentParameters, inputNeuronCount, outputNeuronCount);
+            var mapEvaluator = new MapEvaluator(experimentParameters, inputNeuronCount, outputNeuronCount);
 
-            _executionLogger.Info(string.Format("Executing image generation for run [{0}/{1}]",
-                curRun, numRuns));
+            _executionLogger.Info($"Executing image generation for run [{curRun}/{numRuns}]");
 
             // Get the distinct maze genome IDs for which to produce trajectory images
             var mazeGenomeIds = ExperimentDataHandler.GetMazeGenomeIds(
                 curExperimentConfiguration.ExperimentDictionaryID, curRun);
 
-            for (int curChunk = 0; curChunk < mazeGenomeIds.Count; curChunk += chunkSize)
+            for (var curChunk = 0; curChunk < mazeGenomeIds.Count; curChunk += chunkSize)
             {
                 // Get maze genome IDs for the current chunk
                 var curMazeGenomeIds = mazeGenomeIds.Skip(curChunk).Take(chunkSize).ToList();
 
-                _executionLogger.Info(string.Format("Evaluating maze genomes with IDs [{0}] through [{1}]",
-                    curMazeGenomeIds.Min(), curMazeGenomeIds.Max()));
+                _executionLogger.Info(
+                    $"Evaluating maze genomes with IDs [{curMazeGenomeIds.Min()}] through [{curMazeGenomeIds.Max()}]");
 
                 // Get any existing navigation results (this avoids rerunning failed combinations)
                 var perMazeSuccessfulNavigations =
@@ -443,10 +435,9 @@ namespace MazeNavigationEvaluator
                         curExperimentConfiguration.ExperimentDictionaryID,
                         curRun, curMazeGenomeIds);
 
-                List<Tuple<MCCExperimentMazeGenome, MCCExperimentNavigatorGenome>>
-                    successfulGenomeCombos =
-                        new List<Tuple<MCCExperimentMazeGenome, MCCExperimentNavigatorGenome>>
-                            (perMazeSuccessfulNavigations.Count());
+                var successfulGenomeCombos =
+                    new List<Tuple<MCCExperimentMazeGenome, MCCExperimentNavigatorGenome>>(perMazeSuccessfulNavigations
+                        .Count());
 
                 // Get distinct maze and navigator genomes
                 var mazeGenomeData =
@@ -530,11 +521,6 @@ namespace MazeNavigationEvaluator
         ///     The ceiling on the range of clusters for which to compute the silhouette width when using a
         ///     non-greedy silhouette width calculation.
         /// </param>
-        /// <param name="generateMazeBitmaps">Indicates whether bitmap files of the distinct mazes should be written out.</param>
-        /// <param name="generateTrajectoryBitmaps">
-        ///     Indicates whether bitmap files depicting the navigator trajectory should be
-        ///     written out.
-        /// </param>
         /// <param name="sampleSize">The number of genomes sampled from the extant species for trajectory or clustering analysis.</param>
         /// <param name="sampleClusterObservationsFromSpecies">
         ///     Indicates whether to sample observations used in clustering analysis
@@ -560,16 +546,15 @@ namespace MazeNavigationEvaluator
             }
 
             // Iterate through each batch and evaluate maze/navigator combinations
-            for (int curBatch = 1;
+            for (var curBatch = 1;
                 curBatch <= numBatches;
                 curBatch += curBatch == 1 ? batchInterval - 1 : batchInterval)
             {
                 // Create the maze/navigator map
-                MapEvaluator mapEvaluator =
-                    new MapEvaluator(experimentParameters, inputNeuronCount, outputNeuronCount);
+                var mapEvaluator = new MapEvaluator(experimentParameters, inputNeuronCount, outputNeuronCount);
 
-                _executionLogger.Info(string.Format("Executing {0} run phase analysis for batch [{1}] of run [{2}/{3}]",
-                    runPhase, curBatch, curRun, numRuns));
+                _executionLogger.Info(
+                    $"Executing {runPhase} run phase analysis for batch [{curBatch}] of run [{curRun}/{numRuns}]");
 
                 // Get any existing navigation results (this avoids rerunning failed combinations)
                 var successfulNavigations =
@@ -581,10 +566,9 @@ namespace MazeNavigationEvaluator
                 if (generateSimulationResults == false && successfulNavigations != null &&
                     successfulNavigations.Count > 0)
                 {
-                    List<Tuple<MCCExperimentMazeGenome, MCCExperimentNavigatorGenome>>
-                        successfulGenomeCombos =
-                            new List<Tuple<MCCExperimentMazeGenome, MCCExperimentNavigatorGenome>>
-                                (successfulNavigations.Count());
+                    var successfulGenomeCombos =
+                        new List<Tuple<MCCExperimentMazeGenome, MCCExperimentNavigatorGenome>>(successfulNavigations
+                            .Count());
 
                     // Get distinct maze and navigator genomes
                     var mazeGenomeData =
@@ -654,7 +638,7 @@ namespace MazeNavigationEvaluator
                     // instead of an exhaustive evaluation
                     if (sampleSize > 0)
                     {
-                        Random rnd = new Random();
+                        var rnd = new Random();
 
                         ExperimentDataHandler.WriteTrajectoryDiversityData(
                             curExperimentConfiguration.ExperimentDictionaryID, curRun, curBatch,
@@ -718,7 +702,8 @@ namespace MazeNavigationEvaluator
                         EvaluationHandler.CalculateMazeClustering(
                             ExperimentDataHandler.GetMazeGenomeXml(curExperimentConfiguration.ExperimentDictionaryID,
                                 curRun,
-                                curBatch), useGreedySilhouetteCalculation, clusterRange), OutputFileType.MazeClusterData,
+                                curBatch), useGreedySilhouetteCalculation, clusterRange),
+                        OutputFileType.MazeClusterData,
                         writeResultsToDatabase);
                 }
 
@@ -740,26 +725,24 @@ namespace MazeNavigationEvaluator
         /// <returns>Boolean status indicating whether parsing the configuration suceeded.</returns>
         private static bool ParseAndValidateConfiguration(string[] executionArguments)
         {
-            bool isConfigurationValid = executionArguments != null;
+            var isConfigurationValid = executionArguments != null;
 
             // Only continue if there are execution arguments
             if (executionArguments != null && executionArguments.Length > 0)
             {
-                foreach (string executionArgument in executionArguments)
+                foreach (var executionArgument in executionArguments)
                 {
-                    ExecutionParameter curParameter;
-
                     // Get the key/value pair
-                    string[] parameterValuePair = executionArgument.Split('=');
+                    var parameterValuePair = executionArgument.Split('=');
 
                     // Attempt to parse the current parameter
-                    isConfigurationValid = Enum.TryParse(parameterValuePair[0], true, out curParameter);
+                    isConfigurationValid =
+                        Enum.TryParse(parameterValuePair[0], true, out ExecutionParameter curParameter);
 
                     // If the current parameter is not valid, break out of the loop and return
                     if (isConfigurationValid == false)
                     {
-                        _executionLogger.Error(string.Format("[{0}] is not a valid configuration parameter.",
-                            parameterValuePair[0]));
+                        _executionLogger.Error($"[{parameterValuePair[0]}] is not a valid configuration parameter.");
                         break;
                     }
 
@@ -767,9 +750,7 @@ namespace MazeNavigationEvaluator
                     if (_executionConfiguration.ContainsKey(curParameter))
                     {
                         _executionLogger.Error(
-                            string.Format(
-                                "Ambiguous configuration - parameter [{0}] has been specified more than once.",
-                                curParameter));
+                            $"Ambiguous configuration - parameter [{curParameter}] has been specified more than once.");
                         break;
                     }
 
@@ -781,13 +762,12 @@ namespace MazeNavigationEvaluator
                         case ExecutionParameter.StartFromRun:
                         case ExecutionParameter.SampleSize:
                             int testInt;
-                            if (Int32.TryParse(parameterValuePair[1], out testInt) == false)
+                            if (int.TryParse(parameterValuePair[1], out testInt) == false)
                             {
-                                _executionLogger.Error(string.Format(
-                                    "The value for parameter [{0}] must be an integer.",
-                                    curParameter));
+                                _executionLogger.Error($"The value for parameter [{curParameter}] must be an integer.");
                                 isConfigurationValid = false;
                             }
+
                             break;
 
                         // Ensure that valid boolean values were given
@@ -805,13 +785,12 @@ namespace MazeNavigationEvaluator
                         case ExecutionParameter.ExecuteInitializationTrials:
                         case ExecutionParameter.SampleFromSpecies:
                         case ExecutionParameter.UseEvenMazeTrajectoryDistribution:
-                            bool testBool;
-                            if (Boolean.TryParse(parameterValuePair[1], out testBool) == false)
+                            if (bool.TryParse(parameterValuePair[1], out _) == false)
                             {
-                                _executionLogger.Error(string.Format("The value for parameter [{0}] must be a boolean.",
-                                    curParameter));
+                                _executionLogger.Error($"The value for parameter [{curParameter}] must be a boolean.");
                                 isConfigurationValid = false;
                             }
+
                             break;
                     }
 
@@ -827,29 +806,28 @@ namespace MazeNavigationEvaluator
 
             // If the per-parameter configuration is valid but not a full list of parameters were specified, makes sure the necessary ones are present
             if (isConfigurationValid && (_executionConfiguration.Count ==
-                                         Enum.GetNames(typeof (ExecutionParameter)).Length) == false)
+                                         Enum.GetNames(typeof(ExecutionParameter)).Length) == false)
             {
                 // Check for existence of experiment names to execute
                 if (_executionConfiguration.ContainsKey(ExecutionParameter.ExperimentNames) == false)
                 {
-                    _executionLogger.Error(string.Format("Parameter [{0}] must be specified.",
-                        ExecutionParameter.ExperimentNames));
+                    _executionLogger.Error($"Parameter [{ExecutionParameter.ExperimentNames}] must be specified.");
                     isConfigurationValid = false;
                 }
 
                 // Check for existence of input neuron count
                 if (_executionConfiguration.ContainsKey(ExecutionParameter.AgentNeuronInputCount) == false)
                 {
-                    _executionLogger.Error(string.Format("Parameter [{0}] must be specified.",
-                        ExecutionParameter.AgentNeuronInputCount));
+                    _executionLogger.Error(
+                        $"Parameter [{ExecutionParameter.AgentNeuronInputCount}] must be specified.");
                     isConfigurationValid = false;
                 }
 
                 // Check for existence of output neuron count
                 if (_executionConfiguration.ContainsKey(ExecutionParameter.AgentNeuronOutputCount) == false)
                 {
-                    _executionLogger.Error(string.Format("Parameter [{0}] must be specified.",
-                        ExecutionParameter.AgentNeuronOutputCount));
+                    _executionLogger.Error(
+                        $"Parameter [{ExecutionParameter.AgentNeuronOutputCount}] must be specified.");
                     isConfigurationValid = false;
                 }
 
@@ -881,7 +859,7 @@ namespace MazeNavigationEvaluator
                     Convert.ToBoolean(_executionConfiguration[ExecutionParameter.UseGreedySilhouetteCalculation]) ==
                     false &&
                     (_executionConfiguration.ContainsKey(ExecutionParameter.ClusterRange) == false ||
-                     Int32.Parse(_executionConfiguration[ExecutionParameter.ClusterRange]) <= 0))
+                     int.Parse(_executionConfiguration[ExecutionParameter.ClusterRange]) <= 0))
                 {
                     _executionLogger.Error(
                         "The cluster range must be specified and set to a value greater than 0 if non-greedy silhouette calculations are being used.");
@@ -923,7 +901,7 @@ namespace MazeNavigationEvaluator
                 // Ensure that the analysis scope was specified and that it matches one of the defined scopes
                 if (_executionConfiguration.ContainsKey(ExecutionParameter.AnalysisScope) == false ||
                     (_executionConfiguration[ExecutionParameter.AnalysisScope].Equals(AnalysisScope.Full.ToString(),
-                        StringComparison.InvariantCultureIgnoreCase) &&
+                         StringComparison.InvariantCultureIgnoreCase) &&
                      _executionConfiguration[ExecutionParameter.AnalysisScope].Equals(
                          AnalysisScope.Aggregate.ToString(), StringComparison.InvariantCultureIgnoreCase) &&
                      _executionConfiguration[ExecutionParameter.AnalysisScope].Equals(AnalysisScope.Last.ToString(),
