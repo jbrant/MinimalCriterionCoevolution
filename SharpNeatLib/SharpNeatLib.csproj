@@ -120,7 +120,6 @@
     <Compile Include="EvolutionAlgorithms\Statistics\IEvolutionAlgorithmStats.cs" />
     <Compile Include="EvolutionAlgorithms\Statistics\MazeAlgorithmStats.cs" />
     <Compile Include="EvolutionAlgorithms\Statistics\NeatAlgorithmStats.cs" />
-    <Compile Include="Genomes\Maze\BaseMazeGene.cs" />
     <Compile Include="Genomes\Maze\WallGene.cs" />
     <Compile Include="Genomes\Maze\MazeGenome.cs" />
     <Compile Include="Genomes\Maze\MazeGenomeFactory.cs" />
