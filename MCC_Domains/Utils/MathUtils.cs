@@ -11,14 +11,14 @@ namespace MCC_Domains.Utils
     /// </summary>
     public static class MathUtils
     {
-        private const double ROUNDING_ERROR = 1e-12;
+        private const double RoundingError = 1e-12;
 
         /// <summary>
         ///     Converts a given in angle (in degrees) to radians.
         /// </summary>
         /// <param name="angleInDegrees">The angle in degrees.</param>
         /// <returns>The corresponding value in radians.</returns>
-        public static double toRadians(double angleInDegrees)
+        public static double ToRadians(double angleInDegrees)
         {
             return (Math.PI/180)*angleInDegrees;
         }
@@ -28,7 +28,7 @@ namespace MCC_Domains.Utils
         /// </summary>
         /// <param name="angleInRadians">The angle in radians.</param>
         /// <returns>The corresponding angle in degrees.</returns>
-        public static double toDegrees(double angleInRadians)
+        public static double ToDegrees(double angleInRadians)
         {
             return (180/Math.PI)*angleInRadians;
         }
@@ -42,10 +42,10 @@ namespace MCC_Domains.Utils
         /// <returns>Whether the first is greater than or equal to the last.</returns>
         public static bool AlmostGreaterThanOrEqual(double item1, double item2)
         {
-            bool result = false;
+            var result = false;
 
             // Check if values are equal
-            if (Math.Abs(item1 - item2) <= ROUNDING_ERROR)
+            if (Math.Abs(item1 - item2) <= RoundingError)
             {
                 result = true;
             }
@@ -67,10 +67,10 @@ namespace MCC_Domains.Utils
         /// <returns>Whether the first is less than or equal to the last.</returns>
         public static bool AlmostLessThanOrEqual(double item1, double item2)
         {
-            bool result = false;
+            var result = false;
 
             // Check if values are equal
-            if (Math.Abs(item1 - item2) <= ROUNDING_ERROR)
+            if (Math.Abs(item1 - item2) <= RoundingError)
             {
                 result = true;
             }

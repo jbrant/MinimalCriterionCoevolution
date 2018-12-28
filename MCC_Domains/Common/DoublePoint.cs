@@ -9,7 +9,7 @@ using MCC_Domains.Utils;
 
 // ReSharper disable CompareOfFloatsByEqualityOperator
 
-namespace SharpNeat.Domains
+namespace MCC_Domains.Common
 {
     /// <summary>
     ///     Defines a 2D point with double-precision cartesian coordinates.
@@ -51,7 +51,7 @@ namespace SharpNeat.Domains
         public void RotatePoint(double angle, DoublePoint point)
         {
             // Convert angle to radians
-            double radianAngle = MathUtils.toRadians(angle);
+            double radianAngle = MathUtils.ToRadians(angle);
 
             // Decrement this point by the given point about which to rotate
             this -= point;
@@ -177,7 +177,7 @@ namespace SharpNeat.Domains
 
             // Calculate the slope (this would just be Y/X since it's compared to the 
             // origin) and take the arc tangent (which yields the angle in radians)
-            var angle = MathUtils.toDegrees(Math.Atan(a.Y/a.X));
+            var angle = MathUtils.ToDegrees(Math.Atan(a.Y/a.X));
 
             // If the X coordinate is positive, just return the calculated angle
             if (a.X > 0)

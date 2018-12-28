@@ -6,7 +6,6 @@ using System.Linq;
 using MCC_Domains.Common;
 using MCC_Domains.MazeNavigation.Components;
 using SharpNeat.Core;
-using SharpNeat.Domains;
 using SharpNeat.Phenomes.Mazes;
 
 #endregion

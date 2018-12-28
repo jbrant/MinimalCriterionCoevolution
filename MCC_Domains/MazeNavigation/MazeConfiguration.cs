@@ -1,8 +1,8 @@
 ﻿#region
 
 using System.Collections.Generic;
+using MCC_Domains.Common;
 using MCC_Domains.MazeNavigation.Components;
-using SharpNeat.Domains;
 
 #endregion
 

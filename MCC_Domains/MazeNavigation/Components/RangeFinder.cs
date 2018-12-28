@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using MCC_Domains.Common;
 using MCC_Domains.Utils;
-using SharpNeat.Domains;
 
 #endregion
 
@@ -16,6 +15,11 @@ namespace MCC_Domains.MazeNavigation.Components
     public class RangeFinder
     {
         /// <summary>
+        ///     The angle of the range finder with respect to the navigator.
+        /// </summary>
+        private readonly double _angle;
+
+        /// <summary>
         ///     Creates a new range finder with the given default range, angle (with respect to the navigator orientation) and
         ///     output (which changes based on proximity to an obstacle).
         /// </summary>
@@ -25,7 +29,7 @@ namespace MCC_Domains.MazeNavigation.Components
         internal RangeFinder(double range, double angle, double output)
         {
             Range = range;
-            Angle = angle;
+            _angle = angle;
             Output = output;
         }
 
@@ -35,14 +39,9 @@ namespace MCC_Domains.MazeNavigation.Components
         internal double Range { get; }
 
         /// <summary>
-        ///     The angle of the range finder with respect to the navigator.
-        /// </summary>
-        internal double Angle { get; }
-
-        /// <summary>
         ///     The output of the range finder (scaled by the distance from the nearest obstacle).
         /// </summary>
-        internal double Output { get; set; }
+        internal double Output { get; private set; }
 
         /// <summary>
         ///     Updates each of the range finders based on obstacles along their trajectory.  This amounts to setting the output of
@@ -52,14 +51,14 @@ namespace MCC_Domains.MazeNavigation.Components
         /// <param name="walls">The list of walls in the environment.</param>
         /// <param name="heading">The heading of the navigator (in degrees).</param>
         /// <param name="location">The location of the navigator in the environment.</param>
-        internal void Update(List<Wall> walls, double heading, DoublePoint location)
+        internal void Update(IEnumerable<Wall> walls, double heading, DoublePoint location)
         {
             // Convert rangefinder angle to radians
-            var radianAngle = MathUtils.toRadians(Angle);
+            var radianAngle = MathUtils.ToRadians(_angle);
 
             // Project a point from the navigator location outward
-            var projectedPoint = new DoublePoint(location.X + Math.Cos(radianAngle)*Range,
-                location.Y + Math.Sin(radianAngle)*Range);
+            var projectedPoint = new DoublePoint(location.X + Math.Cos(radianAngle) * Range,
+                location.Y + Math.Sin(radianAngle) * Range);
 
             //  Rotate the point based on the navigator's heading
             projectedPoint.RotatePoint(heading, location);
@@ -73,27 +72,25 @@ namespace MCC_Domains.MazeNavigation.Components
 
             foreach (var wall in walls)
             {
-                // Initialize the intersection indicator to false
-                var intersectionFound = false;
-
                 // Get the intersection point between wall and projected trajectory
                 // (if one exists)
                 var wallIntersectionPoint = DoubleLine.CalculateLineIntersection(wall.WallLine, projectedLine,
-                    out intersectionFound);
+                    out var intersectionFound);
 
-                // If trajectory intersects with a wall, adjust the range to the point
+                // Skip to next wall if there's no intersection for current one
+                if (!intersectionFound) continue;
+
+                // Otherwise, if trajectory intersects with a wall, adjust the range to the point
                 // of intersection (as the range finder cannot penetrate walls)
-                if (intersectionFound)
-                {
-                    // Get the distance from the wall
-                    var wallRange = DoublePoint.CalculateEuclideanDistance(wallIntersectionPoint, location);
 
-                    // If the current wall range is shorter than the current adjusted range,
-                    // update the adjusted range to the shorter value
-                    if (wallRange < adjustedRange)
-                    {
-                        adjustedRange = wallRange;
-                    }
+                // Get the distance from the wall
+                var wallRange = DoublePoint.CalculateEuclideanDistance(wallIntersectionPoint, location);
+
+                // If the current wall range is shorter than the current adjusted range,
+                // update the adjusted range to the shorter value
+                if (wallRange < adjustedRange)
+                {
+                    adjustedRange = wallRange;
                 }
             }
 

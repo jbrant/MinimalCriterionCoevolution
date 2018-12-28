@@ -106,7 +106,6 @@
     <Compile Include="MazeNavigation\MCCExperiment\MazeNavigatorFitnessInitializationEvaluator.cs" />
     <Compile Include="MazeNavigation\MCCExperiment\MazeNavigatorNoveltySearchInitializationEvaluator.cs" />
     <Compile Include="MazeNavigation\Components\MazeNavigator.cs" />
-    <Compile Include="MazeNavigation\Components\MazeVariant.cs" />
     <Compile Include="MazeNavigation\Components\PieSliceSensorArray.cs" />
     <Compile Include="MazeNavigation\Components\Radar.cs" />
     <Compile Include="MazeNavigation\Components\RangeFinder.cs" />

@@ -1,5 +1,4 @@
 ﻿using MCC_Domains.Common;
-using SharpNeat.Domains;
 
 namespace MCC_Domains.MazeNavigation.Components
 {

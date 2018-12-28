@@ -1,7 +1,7 @@
 ﻿#region
 
 using System.Collections.Generic;
-using SharpNeat.Domains;
+using MCC_Domains.Common;
 
 #endregion
 
@@ -14,11 +14,16 @@ namespace MCC_Domains.MazeNavigation.Components
     public class PieSliceSensorArray
     {
         /// <summary>
+        ///     The list of radars.
+        /// </summary>
+        private readonly List<Radar> _radars;
+
+        /// <summary>
         ///     Creates a new array of radars with the default fields of view.
         /// </summary>
         internal PieSliceSensorArray()
         {
-            Radars = new List<Radar>(4)
+            _radars = new List<Radar>(4)
             {
                 new Radar(315, 405, 0),
                 new Radar(45, 135, 0),
@@ -28,14 +33,9 @@ namespace MCC_Domains.MazeNavigation.Components
         }
 
         /// <summary>
-        ///     The list of radars.
-        /// </summary>
-        internal List<Radar> Radars { get; }
-
-        /// <summary>
         ///     The number of radars in the array.
         /// </summary>
-        internal int NumRadars => Radars.Count;
+        internal int NumRadars => _radars.Count;
 
         /// <summary>
         ///     Updates each radar in the array based on the given navigator heading and the goal location.
@@ -58,7 +58,7 @@ namespace MCC_Domains.MazeNavigation.Components
             var navigatorTargetAngle = DoublePoint.CalculateAngleFromOrigin(target);
 
             // Update every radar in the array based on target alignment
-            foreach (var radar in Radars)
+            foreach (var radar in _radars)
             {
                 radar.UpdateRadar(navigatorTargetAngle);
             }
@@ -68,14 +68,14 @@ namespace MCC_Domains.MazeNavigation.Components
         ///     Converts all of the radar outputs into a double array to be fed into the neural network.
         /// </summary>
         /// <returns>The double array of radars outputs.</returns>
-        internal double[] GetRadarOutputs()
+        internal IEnumerable<double> GetRadarOutputs()
         {
             var radarOutputs = new double[NumRadars];
 
             // Iterate through every radar in the array and collect its output
             for (var cnt = 0; cnt < NumRadars; cnt++)
             {
-                radarOutputs[cnt] = Radars[cnt].Output;
+                radarOutputs[cnt] = _radars[cnt].Output;
             }
 
             return radarOutputs;

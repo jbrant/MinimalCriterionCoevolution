@@ -140,7 +140,7 @@ namespace MCC_Executor.MazeNavigation
             var seedAgentFile = ExecutionConfiguration.ContainsKey(ExecutionParameter.SeedAgentFile)
                 ? ExecutionConfiguration[ExecutionParameter.SeedAgentFile]
                 : null;
-            
+
             // Extract the experiment names
             var experimentNames = ExecutionConfiguration[ExecutionParameter.ExperimentNames].Split(',');
 
@@ -260,8 +260,18 @@ namespace MCC_Executor.MazeNavigation
 
                             break;
 
-                        // Ensure that the seed population and experiments configuration directories actually exist
+                        // Ensure that the seed maze and agent file exists (if specified)
+                        case ExecutionParameter.SeedMazeFile:
                         case ExecutionParameter.SeedAgentFile:
+                            if (File.Exists(parameterValuePair[1]) == false)
+                            {
+                                _executionLogger.Error(
+                                    $"The given seed genome file [{parameterValuePair[1]}] specified for parameter [{curParameter}] does not exist");
+                            }
+
+                            break;
+
+                        // Ensure that the seed population and experiments configuration directories actually exist
                         case ExecutionParameter.ExperimentConfigDirectory:
                             if (Directory.Exists(parameterValuePair[1]) == false)
                             {
@@ -272,6 +282,10 @@ namespace MCC_Executor.MazeNavigation
 
                             break;
                     }
+
+                    // Break out of loop if invalid parameter found
+                    if (isConfigurationValid == false)
+                        break;
 
                     // If all else checks out, add the parameter to the map
                     ExecutionConfiguration.Add(curParameter, parameterValuePair[1]);
@@ -359,7 +373,7 @@ namespace MCC_Executor.MazeNavigation
                     ExecutionParameter.ExperimentConfigDirectory, ExecutionParameter.OutputFileDirectory,
                     ExecutionParameter.LogOrganismStateData, ExecutionParameter.SeedAgentFile,
                     ExecutionParameter.SeedMazeFile, ExecutionParameter.IsDistributedExecution,
-                    ExecutionParameter.ExperimentNames, "file|database", "true|false", "# runs", "starting run #", 
+                    ExecutionParameter.ExperimentNames, "file|database", "true|false", "# runs", "starting run #",
                     "directory", "agent genome file", "maze genome file", "experiment,experiment,..."));
 
             // If we've reached this point, the configuration is indeed invalid
@@ -448,7 +462,7 @@ namespace MCC_Executor.MazeNavigation
                     throw new SharpNeatException(
                         $"The maze genome input file contains only {mazeGenomeList.Count} genomes while the experiment configuration requires {experiment.MazeDefaultPopulationSize} genomes.");
                 }
-                
+
                 _executionLogger.Info(
                     $"Loaded [{agentGenomeList.Count}] navigator genomes and [{mazeGenomeList.Count}] seed maze genomes as initial populations.");
 
@@ -475,12 +489,18 @@ namespace MCC_Executor.MazeNavigation
         /// <param name="mazeGenomeFactory">The factory for producing maze genomes.</param>
         /// <param name="agentGenomeList">The list of initial agent genomes (navigator population).</param>
         /// <param name="mazeGenomeList">The list of initial maze genomes (maze population).</param>
-        /// <param name="areAgentsPreevolved">Indicates whether the agents have been pre-evolved and loaded from a file or another source.</param>
+        /// <param name="areAgentsPreevolved">
+        ///     Indicates whether the agents have been pre-evolved and loaded from a file or another
+        ///     source.
+        /// </param>
         /// <param name="experimentName">The name of the MCC experiment to execute.</param>
         /// <param name="experiment">Reference to the initialized experiment.</param>
         /// <param name="numRuns">Total number of runs being executed.</param>
         /// <param name="runIdx">The current run being executed.</param>
-        private static void RunExperiment(IGenomeFactory<NeatGenome> agentGenomeFactory, IGenomeFactory<MazeGenome> mazeGenomeFactory, List<NeatGenome> agentGenomeList, List<MazeGenome> mazeGenomeList, bool areAgentsPreevolved, string experimentName, IMCCExperiment experiment, int numRuns, int runIdx)
+        private static void RunExperiment(IGenomeFactory<NeatGenome> agentGenomeFactory,
+            IGenomeFactory<MazeGenome> mazeGenomeFactory, List<NeatGenome> agentGenomeList,
+            List<MazeGenome> mazeGenomeList, bool areAgentsPreevolved, string experimentName, IMCCExperiment experiment,
+            int numRuns, int runIdx)
         {
             try
             {
