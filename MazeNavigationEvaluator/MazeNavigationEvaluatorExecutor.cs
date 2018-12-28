@@ -64,7 +64,7 @@ namespace MazeNavigationEvaluator
             // Get boolean indicator dictating whether to generate trajectory data (default is false)
             var generateTrajectoryData =
                 _executionConfiguration.ContainsKey(ExecutionParameter.GenerateTrajectoryData) &&
-                Boolean.Parse(_executionConfiguration[ExecutionParameter.GenerateTrajectoryData]);
+                bool.Parse(_executionConfiguration[ExecutionParameter.GenerateTrajectoryData]);
 
             // Get boolean indicator dictating whether to write out numeric results of the batch simulations (default is true)
             var generateSimulationResults =
