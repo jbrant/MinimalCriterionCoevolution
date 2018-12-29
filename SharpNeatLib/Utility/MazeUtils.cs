@@ -293,40 +293,45 @@ namespace SharpNeat.Utility
                         if (submazeWidth > maxRoomWidth || submazeHeight > maxRoomHeight)
                         {
                             var quadrantHeight =
-                                Utilities.FindMaxEvenDivisor(isHeightPrime ? submazeHeight + 1 : submazeHeight, 2,
+                                Utilities.FindMaxEvenDivisor(isHeightPrime ? submazeHeight + 1 : submazeHeight, 1,
                                     maxRoomHeight);
                             var quadrantWidth =
-                                Utilities.FindMaxEvenDivisor(isWidthPrime ? submazeWidth + 1 : submazeWidth, 2,
+                                Utilities.FindMaxEvenDivisor(isWidthPrime ? submazeWidth + 1 : submazeWidth, 1,
                                     maxRoomWidth);                            
 
                             if (submazeHeight > maxRoomHeight && submazeWidth > maxRoomWidth)
                             {
-                                for (var yQuadPos = 0; yQuadPos < submazeHeight; yQuadPos += quadrantHeight)
+                                for (var yQuadPos = roomStartY; yQuadPos < submazeHeight + roomStartY; yQuadPos += quadrantHeight)
                                 {
-                                    for (var xQuadPos = 0; xQuadPos < submazeWidth; xQuadPos += quadrantWidth)
+                                    for (var xQuadPos = roomStartX; xQuadPos < submazeWidth + roomStartX; xQuadPos += quadrantWidth)
                                     {
-                                        subMazes.Add(new MazeStructureRoom(xQuadPos, yQuadPos, quadrantWidth,
-                                            quadrantHeight));
+                                        subMazes.Add(new MazeStructureRoom(xQuadPos, yQuadPos,
+                                            xQuadPos + quadrantWidth > roomEndX + 1
+                                                ? quadrantWidth - (xQuadPos + quadrantWidth - roomEndX) + 1
+                                                : quadrantWidth,
+                                            yQuadPos + quadrantHeight > roomEndY + 1
+                                                ? quadrantHeight - (yQuadPos + quadrantHeight - roomEndY) + 1
+                                                : quadrantHeight));
                                     }
                                 }
                             }
                             else if (submazeHeight > maxRoomHeight)
                             {
-                                for (var yQuadPos = 0; yQuadPos < submazeHeight; yQuadPos += quadrantHeight)
+                                for (var yQuadPos = roomStartY; yQuadPos < submazeHeight + roomStartY - 1; yQuadPos += quadrantHeight)
                                 {
                                     subMazes.Add(new MazeStructureRoom(roomStartX, yQuadPos, roomEndX - roomStartX + 1,
-                                        yQuadPos + quadrantHeight > roomEndY
-                                            ? quadrantHeight - (yQuadPos + quadrantHeight - roomEndY)
+                                        yQuadPos + quadrantHeight > roomEndY + 1
+                                            ? quadrantHeight - (yQuadPos + quadrantHeight - roomEndY) + 1
                                             : quadrantHeight));
                                 }
                             }
                             else
                             {
-                                for (var xQuadPos = 0; xQuadPos < submazeWidth; xQuadPos += quadrantWidth)
+                                for (var xQuadPos = roomStartX; xQuadPos < submazeWidth + roomStartX - 1; xQuadPos += quadrantWidth)
                                 {
                                     subMazes.Add(new MazeStructureRoom(xQuadPos, roomStartY,
-                                        xQuadPos + quadrantWidth > roomEndX
-                                            ? quadrantWidth - (xQuadPos + quadrantWidth - roomEndX)
+                                        xQuadPos + quadrantWidth > roomEndX + 1
+                                            ? quadrantWidth - (xQuadPos + quadrantWidth - roomEndX) + 1
                                             : quadrantWidth, roomEndY - roomStartY + 1));
                                 }
                             }

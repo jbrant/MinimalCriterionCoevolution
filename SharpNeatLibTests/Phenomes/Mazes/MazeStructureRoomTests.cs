@@ -111,6 +111,7 @@ namespace SharpNeat.Phenomes.Mazes.Tests
             genomeParameters.MutateAddWallProbability = 0;
             genomeParameters.MutateWallStartLocationProbability = 0;
             genomeParameters.MutatePassageStartLocationProbability = 0;
+            genomeParameters.MutatePassageStartLocationProbability = 0;
             genomeParameters.MutateAddPathWaypointProbability = 0;
             genomeParameters.MutatePathWaypointLocationProbability = 1;
 
