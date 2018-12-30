@@ -221,8 +221,8 @@ namespace SharpNeat.Utility
         /// <param name="mazeHeight">The height of the full maze.</param>
         /// <param name="mazeWidth">The width of the full maze.</param>
         /// <returns>List of submazes resulting from solution path.</returns>
-        private static List<MazeStructureRoom> ExtractSubmazes(MazeStructureGridCell[,] grid, int mazeHeight,
-            int mazeWidth)
+        private static IEnumerable<MazeStructureRoom> ExtractSubmazes(MazeStructureGridCell[,] grid, int mazeHeight,
+            int mazeWidth, int maxSubmazeHeight = 5, int maxSubmazeWidth = 5)
         {
             var subMazes = new List<MazeStructureRoom>();
 
@@ -282,9 +282,75 @@ namespace SharpNeat.Utility
                         }
                     }
 
-                    // Add maze room
-                    subMazes.Add(new MazeStructureRoom(roomStartX, roomStartY, roomEndX - roomStartX + 1,
-                        roomEndY - roomStartY + 1));
+                    // Compute the height and width of the submaze
+                    var submazeHeight = roomEndY - roomStartY + 1;
+                    var submazeWidth = roomEndX - roomStartX + 1;
+
+                    // If submaze exceeds width and height constraints AND is greater than 1 unit in both height
+                    // and width, split into equal-sized (or as close to equal as possible) quadrants
+                    if ((submazeWidth > maxSubmazeWidth || submazeHeight > maxSubmazeHeight) && submazeWidth > 1 &&
+                        submazeHeight > 1)
+                    {
+                        // Determine the quadrant sizes in which to break up the submaze based on the minimum of
+                        // the height/width of the current submaze vs. the max allowable height/width
+                        var quadrantHeight = Math.Min(submazeHeight, maxSubmazeHeight);
+                        var quadrantWidth = Math.Min(submazeWidth, maxSubmazeWidth);
+
+                        // If submaze is both taller and wider than allowable height/width, split into multiple
+                        // quadrants stacked both horizontally and vertically
+                        if (submazeHeight > maxSubmazeHeight && submazeWidth > maxSubmazeWidth)
+                        {
+                            for (var yQuadPos = roomStartY;
+                                yQuadPos < submazeHeight + roomStartY;
+                                yQuadPos += quadrantHeight)
+                            {
+                                for (var xQuadPos = roomStartX;
+                                    xQuadPos < submazeWidth + roomStartX;
+                                    xQuadPos += quadrantWidth)
+                                {
+                                    subMazes.Add(new MazeStructureRoom(xQuadPos, yQuadPos,
+                                        xQuadPos + quadrantWidth > roomEndX + 1
+                                            ? quadrantWidth - (xQuadPos + quadrantWidth - roomEndX) + 1
+                                            : quadrantWidth,
+                                        yQuadPos + quadrantHeight > roomEndY + 1
+                                            ? quadrantHeight - (yQuadPos + quadrantHeight - roomEndY) + 1
+                                            : quadrantHeight));
+                                }
+                            }
+                        }
+                        // If submaze is taller than allowable height, split into quadrants stacked vertically
+                        else if (submazeHeight > maxSubmazeHeight)
+                        {
+                            for (var yQuadPos = roomStartY;
+                                yQuadPos < submazeHeight + roomStartY;
+                                yQuadPos += quadrantHeight)
+                            {
+                                subMazes.Add(new MazeStructureRoom(roomStartX, yQuadPos, roomEndX - roomStartX + 1,
+                                    yQuadPos + quadrantHeight > roomEndY + 1
+                                        ? quadrantHeight - (yQuadPos + quadrantHeight - roomEndY) + 1
+                                        : quadrantHeight));
+                            }
+                        }
+                        // Otherwise, submaze is wider than allowable width, so split into quadrants stacked horizontally
+                        else
+                        {
+                            for (var xQuadPos = roomStartX;
+                                xQuadPos < submazeWidth + roomStartX;
+                                xQuadPos += quadrantWidth)
+                            {
+                                subMazes.Add(new MazeStructureRoom(xQuadPos, roomStartY,
+                                    xQuadPos + quadrantWidth > roomEndX + 1
+                                        ? quadrantWidth - (xQuadPos + quadrantWidth - roomEndX) + 1
+                                        : quadrantWidth, roomEndY - roomStartY + 1));
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Add maze room
+                        subMazes.Add(new MazeStructureRoom(roomStartX, roomStartY, roomEndX - roomStartX + 1,
+                            roomEndY - roomStartY + 1));
+                    }
                 }
             }
 
@@ -535,11 +601,12 @@ namespace SharpNeat.Utility
 
                     subMaze.MarkRoomBoundaries(mazeGrid, mazeGenome.WallGeneList[wallGeneIdx].WallLocation,
                         mazeGenome.WallGeneList[wallGeneIdx].PassageLocation,
-                        mazeGenome.WallGeneList[wallGeneIdx].OrientationSeed);
+                        mazeGenome.WallGeneList[wallGeneIdx].OrientationSeed, mazeGenome.MazeBoundaryHeight,
+                        mazeGenome.MazeBoundaryWidth);
                 }
                 else
                 {
-                    subMaze.MarkRoomBoundaries(mazeGrid);
+                    subMaze.MarkRoomBoundaries(mazeGrid, mazeGenome.MazeBoundaryHeight, mazeGenome.MazeBoundaryWidth);
                 }
 
                 // If internal walls are not supported or if there are no wall genes, go to the next submaze
@@ -587,8 +654,7 @@ namespace SharpNeat.Utility
             var loopIter = 0;
 
             // Extract the "sub-mazes" that are induced by the solution trajectory
-            var subMazes = ExtractSubmazes(mazeGrid, genome.MazeBoundaryHeight,
-                genome.MazeBoundaryWidth);
+            var subMazes = ExtractSubmazes(mazeGrid, genome.MazeBoundaryHeight, genome.MazeBoundaryWidth);
 
             // Mark walls between trajectory segments that are adjacent
             MarkAdjacentTrajectoryBoundaries(mazeGrid, genome.MazeBoundaryHeight, genome.MazeBoundaryWidth);
@@ -608,11 +674,12 @@ namespace SharpNeat.Utility
 
                     subMaze.MarkRoomBoundaries(mazeGrid, genome.WallGeneList[wallGeneIdx].WallLocation,
                         genome.WallGeneList[wallGeneIdx].PassageLocation,
-                        genome.WallGeneList[wallGeneIdx].OrientationSeed);
+                        genome.WallGeneList[wallGeneIdx].OrientationSeed, genome.MazeBoundaryHeight,
+                        genome.MazeBoundaryWidth);
                 }
                 else
                 {
-                    subMaze.MarkRoomBoundaries(mazeGrid);
+                    subMaze.MarkRoomBoundaries(mazeGrid, genome.MazeBoundaryHeight, genome.MazeBoundaryWidth);
                 }
 
                 // If internal walls are not supported or if there are no wall genes, go to the next submaze
@@ -754,14 +821,67 @@ namespace SharpNeat.Utility
         /// </summary>
         /// <param name="genome">The maze genome.</param>
         /// <returns>The number of subroom openings facing the trajectory.</returns>
-        public static int GetNumRoomOpenings(MazeGenome genome)
+        public static int GetNumPathFacingRoomOpenings(MazeGenome genome)
         {
-            // Construct the solution path
-            var solutionPath = BuildMazeSolutionPath(genome);
+            var numPathFacingOpenings = 0;
 
-            // Count and return the number of openings (which currently is equivalent to the number of subrooms
-            // induced by the trajectory)
-            return ExtractSubmazes(solutionPath, genome.MazeBoundaryHeight, genome.MazeBoundaryWidth).Count;
+            // Construct the solution path
+            var mazeGrid = BuildMazeSolutionPath(genome);
+
+            // Setup the start/end points
+            var startCell = mazeGrid[0, 0];
+            var endCell = mazeGrid[mazeGrid.GetLength(0) - 1, mazeGrid.GetLength(1) - 1];
+            var curCell = startCell;
+
+            // Walk the path and count the number of room openings facing path segments
+            do
+            {
+                // Check for opening to the north
+                if (curCell.Y > 0 && mazeGrid[curCell.Y - 1, curCell.X].PathOrientation == PathOrientation.None &&
+                    mazeGrid[curCell.Y - 1, curCell.X].SouthWall == false)
+                {
+                    numPathFacingOpenings++;
+                }
+
+                // Check for opening to the south
+                if (curCell.Y < genome.MazeBoundaryHeight &&
+                    mazeGrid[curCell.Y + 1, curCell.X].PathOrientation == PathOrientation.None &&
+                    mazeGrid[curCell.Y, curCell.X].SouthWall == false)
+                {
+                    numPathFacingOpenings++;
+                }
+
+                // Check for opening to the west
+                if (curCell.X > 0 && mazeGrid[curCell.Y, curCell.X - 1].PathOrientation == PathOrientation.None &&
+                    mazeGrid[curCell.Y, curCell.X - 1].EastWall == false)
+                {
+                    numPathFacingOpenings++;
+                }
+
+                // Check for opening to the east
+                if (curCell.X < genome.MazeBoundaryWidth &&
+                    mazeGrid[curCell.Y, curCell.X + 1].PathOrientation == PathOrientation.None &&
+                    mazeGrid[curCell.Y, curCell.X].EastWall == false)
+                {
+                    numPathFacingOpenings++;
+                }
+
+                // Increment current cell to next location on path
+                if (curCell.PathOrientation == PathOrientation.Vertical)
+                {
+                    curCell = curCell.PathDirection == PathDirection.North
+                        ? mazeGrid[curCell.Y - 1, curCell.X]
+                        : mazeGrid[curCell.Y + 1, curCell.X];
+                }
+                else
+                {
+                    curCell = curCell.PathDirection == PathDirection.West
+                        ? mazeGrid[curCell.Y, curCell.X - 1]
+                        : mazeGrid[curCell.Y, curCell.X + 1];
+                }
+            } while (curCell != endCell);
+
+            return numPathFacingOpenings;
         }
 
         /// <summary>

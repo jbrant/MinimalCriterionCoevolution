@@ -154,9 +154,9 @@ namespace SharpNeat.EvolutionAlgorithms.Statistics
             MeanJunctures = mazePopulation.Average(MazeUtils.GetNumJunctures);
 
             // Compute trajectories facing opening
-            MinTrajectoryFacingOpenings = mazePopulation.Min(MazeUtils.GetNumRoomOpenings);
-            MaxTrajectoryFacingOpenings = mazePopulation.Max(MazeUtils.GetNumRoomOpenings);
-            MeanTrajectoryFacingOpenings = mazePopulation.Average(MazeUtils.GetNumRoomOpenings);
+            MinTrajectoryFacingOpenings = mazePopulation.Min(MazeUtils.GetNumPathFacingRoomOpenings);
+            MaxTrajectoryFacingOpenings = mazePopulation.Max(MazeUtils.GetNumPathFacingRoomOpenings);
+            MeanTrajectoryFacingOpenings = mazePopulation.Average(MazeUtils.GetNumPathFacingRoomOpenings);
 
             // Compute maze dimension statistics
             MinHeight = mazePopulation.Min(g => g.MazeBoundaryHeight);

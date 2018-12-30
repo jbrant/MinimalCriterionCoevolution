@@ -153,7 +153,6 @@
     <Content Include="MazeNavigation\ExperimentConfigurations\MCC-PathEvolution-Test.config.xml">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="MazeNavigation\SeedAgents\SeedAgents_20_Genomes_MazeSolved_10_Size_2_Waypoints_2_Walls.xml" />
     <Content Include="MazeNavigation\SeedMazes\GeneratedMazeGenome_15_Size_0_Walls.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -231,6 +230,9 @@
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="MazeNavigation\SeedAgents" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
