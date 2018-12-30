@@ -119,20 +119,6 @@ namespace SharpNeat.Utility
             return true;
         }
 
-        public static int FindMaxEvenDivisor(int number, int lowerBound = -1, int upperBound = -1)
-        {
-            var start = upperBound == -1 ? number/2 : Math.Max(Math.Min(upperBound, number/2), lowerBound);
-            var end = lowerBound == -1 ? 1 : lowerBound;
-
-            for (var i = upperBound; i >= lowerBound; i--)
-            {
-                if (number % i == 0)
-                    return i;
-            }
-
-            return lowerBound;
-        }
-
         /// <summary>
         ///     Indicates if a list of doubles is sorted into ascending order.
         /// </summary>
