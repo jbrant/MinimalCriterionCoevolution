@@ -341,7 +341,7 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <Property Name="Primary_Maze_MazeHeight" Type="int" />
           <Property Name="Primary_Maze_MazeWidth" Type="int" />
           <Property Name="Primary_Maze_QuadrantHeight" Type="int" />
-          <Property Name="Primary_MazeQuadrantWidth" Type="int" />
+          <Property Name="Primary_Maze_QuadrantWidth" Type="int" />
           <Property Name="Primary_Maze_MazeScaleMultiplier" Type="int" />
           <Property Name="Primary_Maze_MinimumWalls" Type="smallint" />
           <Property Name="Primary_Maze_SpecieSizeFixed" Type="bit" />
@@ -564,7 +564,7 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
     [ExperimentDictionary_vw].[Primary_Maze_MazeHeight] AS [Primary_Maze_MazeHeight], 
     [ExperimentDictionary_vw].[Primary_Maze_MazeWidth] AS [Primary_Maze_MazeWidth], 
     [ExperimentDictionary_vw].[Primary_Maze_QuadrantHeight] AS [Primary_Maze_QuadrantHeight], 
-    [ExperimentDictionary_vw].[Primary_MazeQuadrantWidth] AS [Primary_MazeQuadrantWidth], 
+    [ExperimentDictionary_vw].[Primary_Maze_QuadrantWidth] AS [Primary_Maze_QuadrantWidth], 
     [ExperimentDictionary_vw].[Primary_Maze_MazeScaleMultiplier] AS [Primary_Maze_MazeScaleMultiplier], 
     [ExperimentDictionary_vw].[Primary_Maze_MinimumWalls] AS [Primary_Maze_MinimumWalls], 
     [ExperimentDictionary_vw].[Primary_Maze_SpecieSizeFixed] AS [Primary_Maze_SpecieSizeFixed], 
@@ -915,7 +915,7 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <NavigationProperty Name="MCCFullTrajectories" Relationship="ExperimentDataModel.MCCFullTrajectoryExperimentDictionary" FromRole="ExperimentDictionary" ToRole="MCCFullTrajectory" />
           <NavigationProperty Name="MCCExperimentExtantNavigatorPopulations" Relationship="ExperimentDataModel.MCCExperimentExtantNavigatorPopulationExperimentDictionary" FromRole="ExperimentDictionary" ToRole="MCCExperimentExtantNavigatorPopulation" />
           <Property Name="Primary_Maze_QuadrantHeight" Type="Int32" />
-          <Property Name="Primary_MazeQuadrantWidth" Type="Int32" />
+          <Property Name="Primary_Maze_QuadrantWidth" Type="Int32" />
         </EntityType>
         <EntityType Name="NoveltyExperimentOrganismStateData">
           <Key>
@@ -1431,7 +1431,7 @@ warning 6002: The table/view 'ExperimentData.dbo.ExperimentDictionary_vw' does n
           <EntitySetMapping Name="ExperimentDictionaries">
             <EntityTypeMapping TypeName="ExperimentDataModel.ExperimentDictionary">
               <MappingFragment StoreEntitySet="ExperimentDictionary_vw">
-                <ScalarProperty Name="Primary_MazeQuadrantWidth" ColumnName="Primary_MazeQuadrantWidth" />
+                <ScalarProperty Name="Primary_MazeQuadrant_Width" ColumnName="Primary_Maze_QuadrantWidth" />
                 <ScalarProperty Name="Primary_Maze_QuadrantHeight" ColumnName="Primary_Maze_QuadrantHeight" />
                 <ScalarProperty Name="Primary_Maze_VerticalWallBias" ColumnName="Primary_Maze_VerticalWallBias" />
                 <ScalarProperty Name="Primary_Maze_MutateExpandMazeProbability" ColumnName="Primary_Maze_MutateExpandMazeProbability" />
