@@ -17,9 +17,9 @@
   <GenomeConfig>
     <InitialConnectionProportion>1</InitialConnectionProportion>
     <WeightMutationProbability>0.6</WeightMutationProbability>
-    <AddConnnectionProbability>0.01</AddConnnectionProbability>
+    <AddConnnectionProbability>0.1</AddConnnectionProbability>
     <AddNodeProbability>0.01</AddNodeProbability>
-    <DeleteConnectionProbability>0.001</DeleteConnectionProbability>
+    <DeleteConnectionProbability>0.05</DeleteConnectionProbability>
     <ConnectionWeightRange>5</ConnectionWeightRange>
   </GenomeConfig>
   <MazeGenomeConfig>
@@ -40,7 +40,7 @@
   <MazeOffspringBatchSize>1</MazeOffspringBatchSize>
   <MaxEvaluations>
   </MaxEvaluations>
-  <MaxGenerations>4000</MaxGenerations>
+  <MaxGenerations>2000</MaxGenerations>
   <MaxTimesteps>600</MaxTimesteps>
   <MinSuccessDistance>5</MinSuccessDistance>
   <MazeHeight>10</MazeHeight>
