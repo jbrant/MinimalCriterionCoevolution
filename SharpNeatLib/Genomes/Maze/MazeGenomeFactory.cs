@@ -22,16 +22,7 @@ namespace SharpNeat.Genomes.Maze
         ///     Maze Genome Factory default constructor.
         /// </summary>
         public MazeGenomeFactory()
-            : this(new MazeGenomeParameters())
-        {
-        }
-
-        /// <inheritdoc />
-        /// <summary>
-        ///     Maze Genome Factory constructor which takes custom maze genome parameters.
-        /// </summary>
-        /// <param name="mazeGenomeParameters">The maze genome parameters.</param>
-        public MazeGenomeFactory(MazeGenomeParameters mazeGenomeParameters) : this(mazeGenomeParameters, 0, 0)
+            : this(new MazeGenomeParameters(), 10, 10, 5, 5)
         {
         }
 
@@ -41,18 +32,24 @@ namespace SharpNeat.Genomes.Maze
         /// </summary>
         /// <param name="mazeHeight">The height of the maze.</param>
         /// <param name="mazeWidth">The width of the maze.</param>
-        public MazeGenomeFactory(int mazeHeight, int mazeWidth)
-            : this(new MazeGenomeParameters(), mazeHeight, mazeWidth)
+        /// <param name="mazeQuadrantHeight">Maximum height of quadrants (i.e. rooms or submazes) within a maze.</param>
+        /// <param name="mazeQuadrantWidth">Maximum width of quadrants (i.e. rooms or submazes) within a maze.</param>
+        public MazeGenomeFactory(int mazeHeight, int mazeWidth, int mazeQuadrantHeight, int mazeQuadrantWidth)
+            : this(new MazeGenomeParameters(), mazeHeight, mazeWidth, mazeQuadrantHeight, mazeQuadrantWidth)
         {
         }
 
         /// <summary>
-        ///     Maze Genome Factory constructor which takes custom maze genome parameters and initial maze height and width.
+        ///     Maze Genome Factory constructor which takes custom maze genome parameters, initial maze height and width and
+        ///     maximum height and width of maze quadrants (subdivisions within the maze).
         /// </summary>
         /// <param name="mazeGenomeParameters">The maze genome parameters.</param>
         /// <param name="mazeHeight">The height of the maze.</param>
         /// <param name="mazeWidth">The width of the maze.</param>
-        public MazeGenomeFactory(MazeGenomeParameters mazeGenomeParameters, int mazeHeight, int mazeWidth)
+        /// <param name="quadrantHeight">Maximum height of quadrants (i.e. rooms or submazes) within a maze.</param>
+        /// <param name="quadrantWidth">Maximum width of quadrants (i.e. rooms or submazes) within a maze.</param>
+        public MazeGenomeFactory(MazeGenomeParameters mazeGenomeParameters, int mazeHeight, int mazeWidth,
+            int quadrantHeight, int quadrantWidth)
         {
             MazeGenomeParameters = mazeGenomeParameters;
             GenomeIdGenerator = new UInt32IdGenerator();
@@ -61,6 +58,10 @@ namespace SharpNeat.Genomes.Maze
             // Set the initial maze height and width
             BaseMazeHeight = mazeHeight;
             BaseMazeWidth = mazeWidth;
+
+            // Set quadrant height and width
+            MazeQuadrantHeight = quadrantHeight;
+            MazeQuadrantWidth = quadrantWidth;
         }
 
         #endregion
@@ -139,6 +140,16 @@ namespace SharpNeat.Genomes.Maze
         ///     The width of the initial (base) maze genome (at the evolved resolution).
         /// </summary>
         public int BaseMazeWidth { get; }
+
+        /// <summary>
+        ///     Maximum height of quadrants (i.e. rooms or submazes) within a maze.
+        /// </summary>
+        public int MazeQuadrantHeight { get; }
+
+        /// <summary>
+        ///     Maximum width of quadrants (i.e. rooms or submazes) within a maze.
+        /// </summary>
+        public int MazeQuadrantWidth { get; }
 
         #endregion
 

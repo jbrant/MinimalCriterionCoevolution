@@ -44,6 +44,8 @@
   <MinSuccessDistance></MinSuccessDistance>
   <MazeHeight></MazeHeight>
   <MazeWidth></MazeWidth>
+  <MazeQuadrantHeight></MazeQuadrantHeight>
+  <MazeQuadrantWidth></MazeQuadrantWidth>
   <MazeScaleMultiplier></MazeScaleMultiplier>
   <NumMazesSolvedCriteria></NumMazesSolvedCriteria>
   <NumAgentsSolvedCriteria></NumAgentsSolvedCriteria>

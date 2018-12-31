@@ -91,8 +91,10 @@ namespace SharpNeat.Phenomes.Mazes.Tests
         public void DivideRoomTest()
         {
             var baseName = "First_Seed_Maze";
-            int mazeHeight = 1;
-            int mazeWidth = 1;
+            int mazeHeight = 10;
+            int mazeWidth = 10;
+            int mazeQuadrantHeight = 5;
+            int mazeQuadrantWidth = 5;
             //var seedMazePath = @"F:\User Data\Jonathan\Documents\school\Jonathan\Graduate\PhD\Development\MCC_Projects\MCC_Executor\MazeNavigation\SeedMazes\" + baseName + ".xml";
             var seedMazePath =
                 @"\\JONATHAN-PC\User Data\Jonathan\Documents\school\Jonathan\Graduate\PhD\Minimal Criteria Search\Temp\" +
@@ -114,7 +116,8 @@ namespace SharpNeat.Phenomes.Mazes.Tests
             genomeParameters.MutateAddPathWaypointProbability = 1;
             genomeParameters.MutatePathWaypointLocationProbability = 0;
 
-            var mazeGenomeFactory = new MazeGenomeFactory(genomeParameters, mazeHeight, mazeWidth);
+            var mazeGenomeFactory = new MazeGenomeFactory(genomeParameters, mazeHeight, mazeWidth, mazeQuadrantHeight,
+                mazeQuadrantWidth);
             
             var seedMazeGenome = ExperimentUtils.ReadSeedMazeGenomes(seedMazePath, mazeGenomeFactory).First();
 

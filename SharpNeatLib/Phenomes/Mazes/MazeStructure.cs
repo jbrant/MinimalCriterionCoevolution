@@ -159,7 +159,7 @@ namespace SharpNeat.Phenomes.Mazes
             // Get the unscaled distance to the target location
             var unscaledDistance = MazeUtils.ComputeDistanceToTarget(MazeGrid, _mazeHeight, _mazeWidth);
 
-            // Compute the maximum time steps by distributing the unscalled distance evenly across both dimensions 
+            // Compute the maximum time steps by distributing the unscaled distance evenly across both dimensions 
             // (i.e. halving it) and multiplying by the scale multiplier for both dimensions
             // TODO: Need to experiment with polynomial timestep increase here
             MaxTimesteps = 2 * (ScaleMultiplier * (unscaledDistance / 2));

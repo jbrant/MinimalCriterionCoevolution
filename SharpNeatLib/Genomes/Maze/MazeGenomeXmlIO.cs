@@ -215,7 +215,7 @@ namespace SharpNeat.Genomes.Maze
                 // Read maze elements
                 do
                 {
-                    var genome = ReadGenome(xrSubtree);
+                    var genome = ReadGenome(xrSubtree, genomeFactory);
                     genomeList.Add(genome);
                 } while (xrSubtree.ReadToNextSibling(ElemMaze));
             }
@@ -242,12 +242,6 @@ namespace SharpNeat.Genomes.Maze
             genomeFactory.InnovationIdGenerator.Reset(Math.Max(genomeFactory.InnovationIdGenerator.Peek,
                 maxInnovationId + 1));
 
-            // Retrospecitively assign the genome factory to the genomes
-            foreach (var genome in genomeList)
-            {
-                genome.GenomeFactory = genomeFactory;
-            }
-
             return genomeList;
         }
 
@@ -268,7 +262,7 @@ namespace SharpNeat.Genomes.Maze
         /// </summary>
         /// <param name="xr">Reference to the XmlReader.</param>
         /// <returns>Instantiated maze genome.</returns>
-        public static MazeGenome ReadGenome(XmlReader xr)
+        public static MazeGenome ReadGenome(XmlReader xr, MazeGenomeFactory genomeFactory)
         {
             // Find <Maze>
             XmlIoUtils.MoveToElement(xr, false, ElemMaze);
@@ -369,7 +363,7 @@ namespace SharpNeat.Genomes.Maze
             } while (xr.Read());
 
             // Construct and return loaded MazeGenome
-            return new MazeGenome(genomeId, birthGen, height, width, wallGenes, pathGenes);
+            return new MazeGenome(genomeFactory, genomeId, birthGen, height, width, wallGenes, pathGenes);
         }
 
         #endregion

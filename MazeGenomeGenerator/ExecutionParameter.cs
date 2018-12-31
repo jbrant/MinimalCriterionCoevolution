@@ -40,6 +40,16 @@
         ///     The width of the maze being generated.
         /// </summary>
         MazeWidth,
+        
+        /// <summary>
+        /// The maximum quadrant height of the maze being generated.
+        /// </summary>
+        MazeQuadrantHeight,
+        
+        /// <summary>
+        /// The maximum quadrant width of the maze being generated.
+        /// </summary>
+        MazeQuadrantWidth,
 
         /// <summary>
         ///     The scale by which to scale out the maze (i.e. the multiplier factor for enlarging the maze structure).

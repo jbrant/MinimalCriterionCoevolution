@@ -233,7 +233,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
 
             // Create a genome factory for the maze genomes
             IGenomeFactory<MazeGenome> mazeGenomeFactory = new MazeGenomeFactory(MazeGenomeParameters, MazeHeight,
-                MazeWidth);
+                MazeWidth, MazeQuadrantHeight, MazeQuadrantWidth);
 
             // Create an initial population of maze navigators
             var neatGenomeList = neatGenomeFactory.CreateGenomeList(populationSize1, 0);

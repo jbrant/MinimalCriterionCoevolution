@@ -220,9 +220,11 @@ namespace SharpNeat.Utility
         /// <param name="grid">The two-dimensional, n x n grid of maze cells.</param>
         /// <param name="mazeHeight">The height of the full maze.</param>
         /// <param name="mazeWidth">The width of the full maze.</param>
+        /// <param name="maxSubmazeHeight">The maximum height of quadrants formed within the submaze.</param>
+        /// <param name="maxSubmazeWidth">The maximum width of quadrants formed within the submaze.</param>
         /// <returns>List of submazes resulting from solution path.</returns>
         private static IEnumerable<MazeStructureRoom> ExtractSubmazes(MazeStructureGridCell[,] grid, int mazeHeight,
-            int mazeWidth, int maxSubmazeHeight = 5, int maxSubmazeWidth = 5)
+            int mazeWidth, int maxSubmazeHeight, int maxSubmazeWidth)
         {
             var subMazes = new List<MazeStructureRoom>();
 
@@ -584,7 +586,8 @@ namespace SharpNeat.Utility
             var mazeGrid = BuildMazeSolutionPath(mazeGenome);
 
             // Extract the "sub-mazes" that are induced by the solution trajectory
-            var subMazes = ExtractSubmazes(mazeGrid, mazeGenome.MazeBoundaryHeight, mazeGenome.MazeBoundaryWidth);
+            var subMazes = ExtractSubmazes(mazeGrid, mazeGenome.MazeBoundaryHeight, mazeGenome.MazeBoundaryWidth,
+                mazeGenome.MazeQuadrantHeight, mazeGenome.MazeQuadrantWidth);
 
             // Process all sub-mazes, iteratively bisecting the applicable maze room space
             foreach (var subMaze in subMazes)
@@ -654,7 +657,8 @@ namespace SharpNeat.Utility
             var loopIter = 0;
 
             // Extract the "sub-mazes" that are induced by the solution trajectory
-            var subMazes = ExtractSubmazes(mazeGrid, genome.MazeBoundaryHeight, genome.MazeBoundaryWidth);
+            var subMazes = ExtractSubmazes(mazeGrid, genome.MazeBoundaryHeight, genome.MazeBoundaryWidth,
+                genome.MazeQuadrantHeight, genome.MazeQuadrantWidth);
 
             // Mark walls between trajectory segments that are adjacent
             MarkAdjacentTrajectoryBoundaries(mazeGrid, genome.MazeBoundaryHeight, genome.MazeBoundaryWidth);

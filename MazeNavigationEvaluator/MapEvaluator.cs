@@ -95,8 +95,10 @@ namespace MazeNavigationEvaluator
             // Initialize evaluation units
             EvaluationUnits = new List<MazeNavigatorEvaluationUnit>();
 
-            // Create default maze factory (NEAT factory will be set later based on structure of first genome encountered)
-            _mazeGenomeFactory = new MazeGenomeFactory();
+            // Create maze factory with default dimensions (NEAT factory will be set later based on structure of first
+            // genome encountered)
+            _mazeGenomeFactory = new MazeGenomeFactory(experimentParameters.MazeHeight, experimentParameters.MazeWidth,
+                experimentParameters.MazeQuadrantHeight, experimentParameters.MazeQuadrantWidth);
             _neatGenomeFactory = new NeatGenomeFactory(agentInputNeuronCount, agentOutputNeuronCount);
 
             // Set experiment parameters

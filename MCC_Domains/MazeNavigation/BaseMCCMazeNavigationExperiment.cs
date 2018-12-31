@@ -169,6 +169,16 @@ namespace MCC_Domains.MazeNavigation
         protected int MazeWidth;
 
         /// <summary>
+        ///     The maximum height of maze quadrants.
+        /// </summary>
+        protected int MazeQuadrantHeight;
+
+        /// <summary>
+        ///     The maximum width of maze quadrants.
+        /// </summary>
+        protected int MazeQuadrantWidth;
+
+        /// <summary>
         ///     The multiplier for scaling the maze to larger sizes.
         /// </summary>
         protected int MazeScaleMultiplier;
@@ -208,7 +218,8 @@ namespace MCC_Domains.MazeNavigation
         /// <returns>The constructed maze genome factory.</returns>
         public IGenomeFactory<MazeGenome> CreateMazeGenomeFactory()
         {
-            return new MazeGenomeFactory(MazeGenomeParameters);
+            return new MazeGenomeFactory(MazeGenomeParameters, MazeHeight, MazeWidth, MazeQuadrantHeight,
+                MazeQuadrantWidth);
         }
 
         /// <inheritdoc />
@@ -278,6 +289,8 @@ namespace MCC_Domains.MazeNavigation
             MinSuccessDistance = XmlUtils.GetValueAsInt(xmlConfig, "MinSuccessDistance");
             MazeHeight = XmlUtils.GetValueAsInt(xmlConfig, "MazeHeight");
             MazeWidth = XmlUtils.GetValueAsInt(xmlConfig, "MazeWidth");
+            MazeQuadrantHeight = XmlUtils.GetValueAsInt(xmlConfig, "MazeQuadrantHeight");
+            MazeQuadrantWidth = XmlUtils.GetValueAsInt(xmlConfig, "MazeQuadrantWidth");
             MazeScaleMultiplier = XmlUtils.GetValueAsInt(xmlConfig, "MazeScaleMultiplier");
 
             // Get success/failure criteria constraints
@@ -302,7 +315,8 @@ namespace MCC_Domains.MazeNavigation
             // (note that a new maze structure is created here for the sole purpose of extracting the maze dimensions and calculating max distance to target)
             _mazeNavigationInitializer.SetEnvironmentParameters(MinSuccessDistance,
                 new MazeDecoder(MazeScaleMultiplier).Decode(
-                    new MazeGenomeFactory(MazeGenomeParameters, MazeHeight, MazeWidth).CreateGenome(0)));
+                    new MazeGenomeFactory(MazeGenomeParameters, MazeHeight, MazeWidth, MazeQuadrantHeight,
+                        MazeQuadrantWidth).CreateGenome(0)));
 
             // The size of the randomly generated agent genome pool from which to evolve agent bootstraps
             AgentInitializationGenomeCount = _mazeNavigationInitializer.PopulationSize;
