@@ -184,7 +184,7 @@ namespace MCC_Domains.MazeNavigation.Bootstrappers
                     InitializationEa.GenomeList.Where(
                         genome =>
                             genome.EvaluationInfo != null &&
-                            genome.EvaluationInfo.ObjectiveDistance <= MinSuccessDistance)
+                            genome.EvaluationInfo.ObjectiveDistance < MinSuccessDistance)
                         .Take(MinSuccessfulAgentCount));
 
                 Console.Out.WriteLine("Extracted [{0}] of [{1}] viable genomes in [{2}] evaluations",

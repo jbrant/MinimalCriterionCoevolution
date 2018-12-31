@@ -102,7 +102,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
 
             for (var cnt = 0; cnt < _multiMazeWorldFactory.NumMazes && curSuccesses < _agentNumSuccessesCriteria; cnt++)
             {
-                var threadLocalEvaluationCount = default(ulong);
+                ulong threadLocalEvaluationCount;
                 lock (_evaluationLock)
                 {
                     // Increment evaluation count

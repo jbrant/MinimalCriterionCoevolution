@@ -76,7 +76,6 @@ namespace SharpNeat.Core
         /// </summary>
         /// <param name="genomeDecoder">The genome decoder to use.</param>
         /// <param name="phenomeEvaluator">The phenome evaluator.</param>
-        /// <param name="selectionType">The selection algorithm type.</param>
         /// <param name="searchType">The search algorithm type.</param>
         /// <param name="evaluationLogger">A reference to the evaluation data logger (optional).</param>
         /// <param name="decodeGenomeToXml">
@@ -84,11 +83,9 @@ namespace SharpNeat.Core
         ///     support logging).
         /// </param>
         public SerialGenomeBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
-            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, SelectionType selectionType,
-            SearchType searchType,
-            IDataLogger evaluationLogger = null, bool decodeGenomeToXml = false) : this(
-            genomeDecoder, phenomeEvaluator, searchType, true, 0, null, evaluationLogger,
-            decodeGenomeToXml)
+            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, SearchType searchType,
+            IDataLogger evaluationLogger = null, bool decodeGenomeToXml = false) : this(genomeDecoder, phenomeEvaluator,
+            searchType, true, 0, null, evaluationLogger, decodeGenomeToXml)
         {
         }
 
@@ -100,7 +97,6 @@ namespace SharpNeat.Core
         /// </summary>
         /// <param name="genomeDecoder">The genome decoder to use.</param>
         /// <param name="phenomeEvaluator">The phenome evaluator.</param>
-        /// <param name="selectionType">The selection algorithm type.</param>
         /// <param name="searchType">The search algorithm type.</param>
         /// <param name="nearestNeighbors">The number of nearest neighbors to use in behavior distance calculations.</param>
         /// <param name="archive">A reference to the elite archive (optional).</param>
@@ -110,14 +106,10 @@ namespace SharpNeat.Core
         ///     support logging).
         /// </param>
         public SerialGenomeBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
-            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, SelectionType selectionType,
-            SearchType searchType,
-            int nearestNeighbors,
+            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, SearchType searchType, int nearestNeighbors,
             AbstractNoveltyArchive<TGenome> archive = null, IDataLogger evaluationLogger = null,
-            bool decodeGenomeToXml = false)
-            : this(
-                genomeDecoder, phenomeEvaluator, searchType, true, nearestNeighbors, archive,
-                evaluationLogger, decodeGenomeToXml)
+            bool decodeGenomeToXml = false) : this(genomeDecoder, phenomeEvaluator, searchType, true, nearestNeighbors,
+            archive, evaluationLogger, decodeGenomeToXml)
         {
         }
 
@@ -138,8 +130,7 @@ namespace SharpNeat.Core
         ///     support logging).
         /// </param>
         public SerialGenomeBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
-            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator,
-            SearchType searchType,
+            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, SearchType searchType,
             bool enablePhenomeCaching, int nearestNeighbors, AbstractNoveltyArchive<TGenome> archive = null,
             IDataLogger evaluationLogger = null, bool decodeGenomeToXml = false)
         {
@@ -167,11 +158,13 @@ namespace SharpNeat.Core
 
         #region Properties
 
+        /// <inheritdoc />
         /// <summary>
         ///     Gets the total number of individual genome evaluations that have been performed by this evaluator.
         /// </summary>
         public ulong EvaluationCount => _phenomeEvaluator.EvaluationCount;
 
+        /// <inheritdoc />
         /// <summary>
         ///     Gets a value indicating whether some goal fitness has been achieved and that
         ///     the the evolutionary algorithm/search should stop. This property's value can remain false

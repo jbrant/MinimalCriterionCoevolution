@@ -31,9 +31,8 @@
     <MutateAddPathWaypointProbability>0.1</MutateAddPathWaypointProbability>
     <MutateExpandMazeProbability>0.05</MutateExpandMazeProbability>
     <PerturbanceMagnitude>0.1</PerturbanceMagnitude>
-    <VerticalWallBias>0.7</VerticalWallBias>
-    <GridCellNeighborhoodRadius>5</GridCellNeighborhoodRadius>
-    <SparseCellSelectionProportion>0.2</SparseCellSelectionProportion>
+    <VerticalWallBias>0.6</VerticalWallBias>
+    
   </MazeGenomeConfig>
   <BehaviorConfig>
     <BehaviorCharacterization>End Point</BehaviorCharacterization>

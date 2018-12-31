@@ -825,8 +825,8 @@ namespace SharpNeat.Utility
         {
             var numPathFacingOpenings = 0;
 
-            // Construct the solution path
-            var mazeGrid = BuildMazeSolutionPath(genome);
+            // Construct the solution path and maze structure
+            var mazeGrid = BuildMazeStructureAroundPath(genome, BuildMazeSolutionPath(genome)).Grid;
 
             // Setup the start/end points
             var startCell = mazeGrid[0, 0];
@@ -844,7 +844,7 @@ namespace SharpNeat.Utility
                 }
 
                 // Check for opening to the south
-                if (curCell.Y < genome.MazeBoundaryHeight &&
+                if (curCell.Y < genome.MazeBoundaryHeight - 1 &&
                     mazeGrid[curCell.Y + 1, curCell.X].PathOrientation == PathOrientation.None &&
                     mazeGrid[curCell.Y, curCell.X].SouthWall == false)
                 {
@@ -859,7 +859,7 @@ namespace SharpNeat.Utility
                 }
 
                 // Check for opening to the east
-                if (curCell.X < genome.MazeBoundaryWidth &&
+                if (curCell.X < genome.MazeBoundaryWidth - 1 &&
                     mazeGrid[curCell.Y, curCell.X + 1].PathOrientation == PathOrientation.None &&
                     mazeGrid[curCell.Y, curCell.X].EastWall == false)
                 {

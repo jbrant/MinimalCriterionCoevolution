@@ -90,7 +90,7 @@ namespace SharpNeat.Phenomes.Mazes.Tests
         [TestMethod]
         public void DivideRoomTest()
         {
-            var baseName = "32_MutationIter_10_Waypoints_15_Walls_25_Units";
+            var baseName = "First_Seed_Maze";
             int mazeHeight = 1;
             int mazeWidth = 1;
             //var seedMazePath = @"F:\User Data\Jonathan\Documents\school\Jonathan\Graduate\PhD\Development\MCC_Projects\MCC_Executor\MazeNavigation\SeedMazes\" + baseName + ".xml";
@@ -117,7 +117,7 @@ namespace SharpNeat.Phenomes.Mazes.Tests
             var mazeGenomeFactory = new MazeGenomeFactory(genomeParameters, mazeHeight, mazeWidth);
             
             var seedMazeGenome = ExperimentUtils.ReadSeedMazeGenomes(seedMazePath, mazeGenomeFactory).First();
-            
+
             var grid = MazeUtils.BuildMazeSolutionPath(seedMazeGenome);
 
             // Write trajectory image out to file
