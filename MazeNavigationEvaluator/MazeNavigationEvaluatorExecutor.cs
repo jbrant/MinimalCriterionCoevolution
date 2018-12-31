@@ -184,14 +184,13 @@ namespace MazeNavigationEvaluator
                 }
 
                 // Construct the experiment parameters
-                // TODO: Null values passed in for quadrant height/width need to be populated from experiment dictionary
                 var experimentParameters =
                     new ExperimentParameters(curExperimentConfiguration.MaxTimesteps,
                         curExperimentConfiguration.MinSuccessDistance,
                         curExperimentConfiguration.Primary_Maze_MazeHeight,
                         curExperimentConfiguration.Primary_Maze_MazeWidth,
-                        null, 
-                        null,
+                        curExperimentConfiguration.Primary_Maze_QuadrantHeight,
+                        curExperimentConfiguration.Primary_MazeQuadrantWidth,
                         curExperimentConfiguration.Primary_Maze_MazeScaleMultiplier);
 
                 // Get the number of runs in the experiment. Note that if this is a distributed execution, each node

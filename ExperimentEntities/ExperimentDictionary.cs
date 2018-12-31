@@ -163,8 +163,8 @@ namespace ExperimentEntities
         public Nullable<double> Primary_Maze_MutateAddPathWaypointProbability { get; set; }
         public Nullable<double> Primary_Maze_MutateExpandMazeProbability { get; set; }
         public Nullable<double> Primary_Maze_VerticalWallBias { get; set; }
-        public Nullable<int> Primary_Maze_GridCellNeighborhoodRadius { get; set; }
-        public Nullable<double> Primary_Maze_SparseCellSelectionProportion { get; set; }
+        public Nullable<int> Primary_Maze_QuadrantHeight { get; set; }
+        public Nullable<int> Primary_MazeQuadrantWidth { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<NoveltyExperimentOrganismStateData> NoveltyExperimentOrganismStateDatas { get; set; }
