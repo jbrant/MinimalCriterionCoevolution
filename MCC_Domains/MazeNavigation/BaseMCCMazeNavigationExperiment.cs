@@ -308,8 +308,8 @@ namespace MCC_Domains.MazeNavigation
 
             // Setup initialization algorithm
             _mazeNavigationInitializer.SetAlgorithmParameters(
-                xmlConfig.GetElementsByTagName("InitializationAlgorithmConfig", "")[0] as XmlElement, AnnInputCount,
-                AnnOutputCount, NumAgentSuccessCriteria, 0);
+                xmlConfig.GetElementsByTagName("InitializationAlgorithmConfig", "")[0] as XmlElement,
+                ActivationScheme.AcyclicNetwork, NumAgentSuccessCriteria, 0);
 
             // Pass in maze experiment specific parameters 
             // (note that a new maze structure is created here for the sole purpose of extracting the maze dimensions and calculating max distance to target)

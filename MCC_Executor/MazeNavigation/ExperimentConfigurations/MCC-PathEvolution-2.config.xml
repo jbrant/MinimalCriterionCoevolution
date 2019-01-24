@@ -12,15 +12,14 @@
   <AgentSpecieSizeFixed>True</AgentSpecieSizeFixed>
   <MazeSpecieSizeFixed>True</MazeSpecieSizeFixed>
   <Activation>
-    <Scheme>CyclicFixedIters</Scheme>
-    <Iters>5</Iters>
+    <Scheme>Acyclic</Scheme>
   </Activation>
   <GenomeConfig>
     <InitialConnectionProportion>1</InitialConnectionProportion>
     <WeightMutationProbability>0.6</WeightMutationProbability>
     <AddConnnectionProbability>0.1</AddConnnectionProbability>
     <AddNodeProbability>0.01</AddNodeProbability>
-    <DeleteConnectionProbability>0.05</DeleteConnectionProbability>
+    <DeleteConnectionProbability>0.005</DeleteConnectionProbability>
     <ConnectionWeightRange>5</ConnectionWeightRange>
   </GenomeConfig>
   <MazeGenomeConfig>
@@ -30,7 +29,7 @@
     <MutateDeleteWallProbability>0.005</MutateDeleteWallProbability>
     <MutatePathWaypointLocationProbability>0.05</MutatePathWaypointLocationProbability>
     <MutateAddPathWaypointProbability>0.1</MutateAddPathWaypointProbability>
-    <MutateExpandMazeProbability>0.05</MutateExpandMazeProbability>
+    <MutateExpandMazeProbability>0.1</MutateExpandMazeProbability>
     <PerturbanceMagnitude>0.1</PerturbanceMagnitude>
     <VerticalWallBias>0.6</VerticalWallBias>
   </MazeGenomeConfig>

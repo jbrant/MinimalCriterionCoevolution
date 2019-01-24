@@ -191,8 +191,11 @@ namespace MazeNavigationEvaluator
                         curExperimentConfiguration.Primary_Maze_MazeWidth,
                         curExperimentConfiguration.Primary_Maze_QuadrantHeight,
                         curExperimentConfiguration.Primary_Maze_QuadrantWidth,
-                        curExperimentConfiguration.Primary_Maze_MazeScaleMultiplier);
-
+                        curExperimentConfiguration.Primary_Maze_MazeScaleMultiplier,
+                        curExperimentConfiguration.Primary_ActivationScheme,
+                        curExperimentConfiguration.Primary_ActivationIters,
+                        curExperimentConfiguration.Primary_ActivationDeltaThreshold);
+                
                 // Get the number of runs in the experiment. Note that if this is a distributed execution, each node
                 // will only execute a single run analysis, so the number of runs will be equivalent to the run 
                 // to start from (this ensures that the ensuing loop that executes all of the runs executes exactly once)

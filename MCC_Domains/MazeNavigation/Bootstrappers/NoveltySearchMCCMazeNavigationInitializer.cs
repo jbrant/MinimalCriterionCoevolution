@@ -43,16 +43,15 @@ namespace MCC_Domains.MazeNavigation.Bootstrappers
         ///     particular, this sets additional novelty search configuration parameters.
         /// </summary>
         /// <param name="xmlConfig">The XML configuration for the initialization algorithm.</param>
-        /// <param name="inputCount">The number of input neurons.</param>
-        /// <param name="outputCount">The number of output neurons.</param>
+        /// <param name="isAcyclic">Flag indicating whether the network is acyclic (i.e. does not have recurrent connections).</param>
         /// <param name="numSuccessfulAgents">The minimum number of successful maze navigators that must be produced.</param>
         /// <param name="numUnsuccessfulAgents">The minimum number of unsuccessful maze navigators that must be produced.</param>
         /// <returns>The constructed initialization algorithm.</returns>
-        public override void SetAlgorithmParameters(XmlElement xmlConfig, int inputCount, int outputCount,
-            int numSuccessfulAgents, int numUnsuccessfulAgents)
+        public override void SetAlgorithmParameters(XmlElement xmlConfig, bool isAcyclic, int numSuccessfulAgents,
+            int numUnsuccessfulAgents)
         {
             // Set the boiler plate MCC parameters and minimal criterions
-            base.SetAlgorithmParameters(xmlConfig, inputCount, outputCount, numSuccessfulAgents, numUnsuccessfulAgents);
+            base.SetAlgorithmParameters(xmlConfig, isAcyclic, numSuccessfulAgents, numUnsuccessfulAgents);
 
             // Read in the behavior characterization
             _behaviorCharacterizationFactory = ExperimentUtils.ReadBehaviorCharacterizationFactory(xmlConfig,
@@ -109,7 +108,8 @@ namespace MCC_Domains.MazeNavigation.Bootstrappers
 
             // Create the genome evaluator
             IGenomeEvaluator<NeatGenome> fitnessEvaluator =
-                new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigatorEvaluator, SearchType.NoveltySearch, _nearestNeighbors);
+                new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigatorEvaluator,
+                    SearchType.NoveltySearch, _nearestNeighbors);
 
             // Only pull the number of genomes from the list equivalent to the initialization algorithm population size
             // (this is to handle the case where the list was created in accordance with the primary algorithm 
@@ -182,9 +182,9 @@ namespace MCC_Domains.MazeNavigation.Bootstrappers
                 // Add all of the genomes that have solved the maze
                 viableGenomes.AddRange(
                     InitializationEa.GenomeList.Where(
-                        genome =>
-                            genome.EvaluationInfo != null &&
-                            genome.EvaluationInfo.ObjectiveDistance < MinSuccessDistance)
+                            genome =>
+                                genome.EvaluationInfo != null &&
+                                genome.EvaluationInfo.ObjectiveDistance < MinSuccessDistance)
                         .Take(MinSuccessfulAgentCount));
 
                 Console.Out.WriteLine("Extracted [{0}] of [{1}] viable genomes in [{2}] evaluations",
@@ -195,8 +195,9 @@ namespace MCC_Domains.MazeNavigation.Bootstrappers
             // (note that the intuition for doing this after the loop is that most will not have solved)
             viableGenomes.AddRange(
                 InitializationEa.GenomeList.Where(
-                    genome =>
-                        genome.EvaluationInfo != null && genome.EvaluationInfo.ObjectiveDistance > MinSuccessDistance)
+                        genome =>
+                            genome.EvaluationInfo != null &&
+                            genome.EvaluationInfo.ObjectiveDistance > MinSuccessDistance)
                     .Take(MinUnsuccessfulAgentCount));
 
             // Ensure that the above statement was able to get the required number of unsuccessful agent genomes

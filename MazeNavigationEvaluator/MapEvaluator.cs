@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using ExperimentEntities;
 using MazeExperimentSupportLib;
+using MCC_Domains.Utils;
 using SharpNeat.Decoders;
 using SharpNeat.Decoders.Maze;
 using SharpNeat.Decoders.Neat;
@@ -87,7 +88,8 @@ namespace MazeNavigationEvaluator
             int agentOutputNeuronCount)
         {
             // Create the NEAT genome (agent) decoder - acyclic activation is always used
-            _agentDecoder = new NeatGenomeDecoder(NetworkActivationScheme.CreateAcyclicScheme());
+            _agentDecoder = new NeatGenomeDecoder(CreateActivationScheme(experimentParameters.ActivationScheme,
+                experimentParameters.ActivationIters, experimentParameters.ActivationDeltaThreshold));
 
             // Create the maze decoder
             _mazeDecoder = new MazeDecoder(experimentParameters.MazeScaleMultiplier);
@@ -274,6 +276,51 @@ namespace MazeNavigationEvaluator
                 {
                     EvaluationHandler.EvaluateMazeNavigatorUnit(evaluationUnit, _experimentParameters);
                 });
+        }
+
+        #endregion
+
+        #region Private methods
+
+        /// <summary>
+        /// Creates a cyclic or acyclic activation scheme for the network.
+        /// </summary>
+        private NetworkActivationScheme CreateActivationScheme(string activationScheme, int? activationIters,
+            double? activationDeltaThreshold)
+        {
+            switch (activationScheme)
+            {
+                case "Acyclic":
+                    return NetworkActivationScheme.CreateAcyclicScheme();
+                case "CyclicFixedIters":
+
+                    if (activationIters == null)
+                    {
+                        throw new ArgumentException(
+                            "Maximum iterations must be specified for cyclic activation scheme");
+                    }
+
+                    var iters = activationIters.Value;
+                    return NetworkActivationScheme.CreateCyclicFixedTimestepsScheme(iters);
+                case "CyclicRelax":
+
+                    if (activationIters == null)
+                    {
+                        throw new ArgumentException(
+                            "Maximum iterations must be specified for cyclic relaxation scheme");
+                    }
+
+                    if (activationDeltaThreshold == null)
+                    {
+                        throw new ArgumentException("Delta threshold must be specified for cyclic relaxation scheme");
+                    }
+
+                    var deltaThreshold = activationDeltaThreshold.Value;
+                    var maxIters = activationIters.Value;
+                    return NetworkActivationScheme.CreateCyclicRelaxingActivationScheme(deltaThreshold, maxIters);
+            }
+
+            throw new ArgumentException($"Invalid ActivationScheme setting [{activationScheme}]");
         }
 
         #endregion

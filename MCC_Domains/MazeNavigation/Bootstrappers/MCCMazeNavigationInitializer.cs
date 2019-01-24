@@ -48,17 +48,16 @@ namespace MCC_Domains.MazeNavigation.Bootstrappers
         /// <summary>
         ///     Constructs and initializes the maze navigator initialization algorithm (fitness using generational selection).
         /// </summary>
-        /// <param name="xmlConfig">The XML configuration for the initialization algorithm.</param>
-        /// <param name="inputCount">The number of input neurons.</param>
-        /// <param name="outputCount">The number of output neurons.</param>
+        /// <param name="xmlConfig">The XML configuration for the initialization algorithm.</param>        
+        /// <param name="isAcyclic">Flag indicating whether the network is acyclic (i.e. does not have recurrent connections).</param>
         /// <param name="numSuccessfulAgents">The minimum number of successful maze navigators that must be produced.</param>
         /// <param name="numUnsuccessfulAgents">The minimum number of unsuccessful maze navigators that must be produced.</param>
         /// <returns>The constructed initialization algorithm.</returns>
-        public virtual void SetAlgorithmParameters(XmlElement xmlConfig, int inputCount, int outputCount,
-            int numSuccessfulAgents, int numUnsuccessfulAgents)
+        public virtual void SetAlgorithmParameters(XmlElement xmlConfig, bool isAcyclic, int numSuccessfulAgents,
+            int numUnsuccessfulAgents)
         {
             // Set the boiler plate parameters
-            base.SetAlgorithmParameters(xmlConfig, inputCount, outputCount);
+            base.SetAlgorithmParameters(xmlConfig, isAcyclic);
 
             // Set the static population size
             PopulationSize = XmlUtils.GetValueAsInt(xmlConfig, "PopulationSize");

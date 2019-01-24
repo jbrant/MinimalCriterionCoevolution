@@ -165,6 +165,9 @@ namespace ExperimentEntities
         public Nullable<double> Primary_Maze_VerticalWallBias { get; set; }
         public Nullable<int> Primary_Maze_QuadrantHeight { get; set; }
         public Nullable<int> Primary_Maze_QuadrantWidth { get; set; }
+        public string Primary_ActivationScheme { get; set; }
+        public Nullable<int> Primary_ActivationIters { get; set; }
+        public Nullable<double> Primary_ActivationDeltaThreshold { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<NoveltyExperimentOrganismStateData> NoveltyExperimentOrganismStateDatas { get; set; }

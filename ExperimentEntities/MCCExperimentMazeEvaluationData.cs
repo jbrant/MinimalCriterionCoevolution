@@ -33,6 +33,12 @@ namespace ExperimentEntities
         public Nullable<double> MeanWidth { get; set; }
         public int TotalEvaluations { get; set; }
         public Nullable<int> EvaluationsPerSecond { get; set; }
+        public Nullable<int> MinJunctures { get; set; }
+        public Nullable<int> MaxJunctures { get; set; }
+        public Nullable<double> MeanJunctures { get; set; }
+        public Nullable<int> MinTrajectoryFacingOpenings { get; set; }
+        public Nullable<int> MaxTrajectoryFacingOpenings { get; set; }
+        public Nullable<double> MeanTrajectoryFacingOpenings { get; set; }
     
         public virtual ExperimentDictionary ExperimentDictionary { get; set; }
     }

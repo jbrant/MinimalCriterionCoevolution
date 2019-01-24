@@ -40,16 +40,15 @@ namespace MCC_Domains.MazeNavigation.Bootstrappers
         ///     Constructs and initializes the initialization algorithm.
         /// </summary>
         /// <param name="xmlConfig">The XML configuration for the initialization algorithm.</param>
-        /// <param name="inputCount">The number of input neurons.</param>
-        /// <param name="outputCount">The number of output neurons.</param>
+        /// <param name="isAcyclic">Flag indicating whether the network is acyclic (i.e. does not have recurrent connections).</param>
         /// <returns>The constructed initialization algorithm.</returns>
-        public virtual void SetAlgorithmParameters(XmlElement xmlConfig, int inputCount, int outputCount)
+        public virtual void SetAlgorithmParameters(XmlElement xmlConfig, bool isAcyclic)
         {
             // Read NEAT genome parameters
             // Save off genome parameters specifically for the initialization algorithm 
             // (this is primarily because the initialization algorithm will quite likely have different NEAT parameters)
             NeatGenomeParameters = ExperimentUtils.ReadNeatGenomeParameters(xmlConfig);
-            NeatGenomeParameters.FeedforwardOnly = NetworkActivationScheme.CreateAcyclicScheme().AcyclicNetwork;
+            NeatGenomeParameters.FeedforwardOnly = isAcyclic;
 
             // Read NEAT evolution parameters
             EvolutionAlgorithmParameters = ExperimentUtils.ReadNeatEvolutionAlgorithmParameters(xmlConfig);
@@ -156,7 +155,7 @@ namespace MCC_Domains.MazeNavigation.Bootstrappers
         ///     The maximum distance to the target possible.
         /// </summary>
         protected int MaxDistanceToTarget;
-        
+
         /// <summary>
         ///     The minimum distance to the target permitted for the navigator to have successfully solved the maze.
         /// </summary>

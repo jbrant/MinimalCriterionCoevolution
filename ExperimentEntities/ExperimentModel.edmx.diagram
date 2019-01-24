@@ -13,6 +13,9 @@
         <EntityTypeShape EntityType="ExperimentDataModel.RunPhase" Width="1.5" PointX="0.75" PointY="11.875" />
         <AssociationConnector Association="ExperimentDataModel.FK_MCSExperimentEvaluationData_RunPhase" />
         <AssociationConnector Association="ExperimentDataModel.FK_MCSExperimentOrganismStateData_RunPhase" />
+        <EntityTypeShape EntityType="ExperimentDataModel.MCCExperimentExtantNavigatorPopulation" Width="1.5" PointX="3" PointY="11.875" />
+        <AssociationConnector Association="ExperimentDataModel.FK_MCCExperimentExtantNavigatorPopulation_RunPhase" />
+        <AssociationConnector Association="ExperimentDataModel.MCCExperimentExtantNavigatorPopulationExperimentDictionary" />
       </Diagram>
       <Diagram DiagramId="f3bab535c2fa4fa6ba0a74e76d67658f" Name="Coevolution MCS Experiment Model" ZoomLevel="83" >
         <EntityTypeShape EntityType="ExperimentDataModel.ExperimentDictionary" Width="4.375" PointX="6.75" PointY="8.5" IsExpanded="true" />
