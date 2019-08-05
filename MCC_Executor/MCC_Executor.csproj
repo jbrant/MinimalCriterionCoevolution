@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MCC_Executor</RootNamespace>
     <AssemblyName>MCC_Executor</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
@@ -29,6 +29,7 @@
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <LangVersion>7</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -147,6 +148,8 @@
     <Content Include="MazeNavigation\ExperimentConfigurations\MCC-PathEvolution-1.config.xml">
       <SubType>Designer</SubType>
     </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\MCC-PathEvolution-2.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\MCC-PathEvolution-Recurrent.xml" />
     <Content Include="MazeNavigation\ExperimentConfigurations\MCC-Template.config.xml" />
     <Content Include="MazeNavigation\ExperimentConfigurations\MCC-PathEvolution-Test.config.xml">
       <SubType>Designer</SubType>
@@ -154,56 +157,7 @@
     <Content Include="MazeNavigation\ExperimentConfigurations\OriginalConfigs\MCC Control.config.xml" />
     <Content Include="MazeNavigation\ExperimentConfigurations\OriginalConfigs\MCC Speciation.config.xml" />
     <Content Include="MazeNavigation\SeedAgents\SeedAgents_20_Genomes_MazeSolved_10_Size_2_Waypoints_2_Walls.xml" />
-    <Content Include="MazeNavigation\SeedMazes\GeneratedMazeGenome_15_Size_0_Walls.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="MazeNavigation\SeedMazes\GeneratedMazeGenome_15_Size_12_Walls.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="MazeNavigation\SeedMazes\GeneratedMazeGenome_15_Size_16_Walls.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="MazeNavigation\SeedMazes\GeneratedMazeGenome_15_Size_4_Walls.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="MazeNavigation\SeedMazes\GeneratedMazeGenome_15_Size_8_Walls.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="MazeNavigation\SeedMazes\GeneratedMazeGenome_6_Walls.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="MazeNavigation\SeedMazes\GeneratedMazeGenome_0_Walls.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="MazeNavigation\SeedMazes\GeneratedMazeGenome_2_Walls.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="MazeNavigation\SeedMazes\GeneratedMazeGenome_3_Walls.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="MazeNavigation\SeedMazes\GeneratedMazeGenome_4_Walls.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="MazeNavigation\SeedMazes\GeneratedMazeGenome_12_Walls.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="MazeNavigation\SeedMazes\GeneratedMazeGenome_16_Walls.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="MazeNavigation\SeedMazes\GeneratedMazeGenome_20_Walls.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="MazeNavigation\SeedMazes\GeneratedMazeGenome_24_Walls.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="MazeNavigation\SeedMazes\GeneratedMazeGenome_8_Walls.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="MazeNavigation\SeedMazes\GeneratedMaze_100_Genomes_10_Height_10_Width_2_Walls.xml" />
     <Content Include="MazeNavigation\SeedMazes\GeneratedMaze_100_Genomes_10_Height_10_Width_8_Walls.xml" />
-    <Content Include="MazeNavigation\SeedMazes\GeneratedMaze_100_Genomes_8_Walls.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="MazeNavigation\SeedMazes\GeneratedMaze_1_Genome_10_Height_10_Width_1_Waypoint_0_Walls.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -211,9 +165,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="MazeNavigation\SeedMazes\GeneratedMaze_10_Genomes_10_Height_10_Width_3_Waypoints_2_Walls.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="MazeNavigation\SeedMazes\GeneratedMaze_50_Genomes_8_Walls.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
