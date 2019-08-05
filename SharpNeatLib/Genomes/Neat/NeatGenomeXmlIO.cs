@@ -431,7 +431,7 @@ namespace SharpNeat.Genomes.Neat
             genomeFactory.InnovationIdGenerator.Reset(Math.Max(genomeFactory.InnovationIdGenerator.Peek,
                 maxInnovationId + 1));
 
-            // Retrospecitively assign the genome factory to the genomes. This is how we overcome the genome/genomeFactory
+            // Assign the genome factory to the genomes. This is how we overcome the genome/genomeFactory
             // chicken and egg problem.
             foreach (NeatGenome genome in genomeList)
             {

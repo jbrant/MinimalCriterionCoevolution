@@ -67,6 +67,11 @@ namespace SharpNeat.Phenomes.NeuralNets.AcyclicNetwork
         /// </summary>
         readonly LayerInfo[] _layerInfoArr;
 
+        /// <summary>
+        /// Array that specifies the index of each output neuron within _activationArr.
+        /// </summary>
+        private readonly int[] _outputNodeIdxArr;
+
     //=== Working data.
         /// <summary>
         /// Array of node activation signals.
@@ -109,11 +114,12 @@ namespace SharpNeat.Phenomes.NeuralNets.AcyclicNetwork
                                   int inputNodeCount,
                                   int outputNodeCount)
         {
-            // Store refs to network structrue data.
+            // Store refs to network structure data.
             _nodeActivationFnArr = nodeActivationFnArr;
             _nodeAuxArgsArr = nodeAuxArgsArr;
             _connectionArr = connectionArr;
             _layerInfoArr = layerInfoArr;
+            _outputNodeIdxArr = outputNodeIdxArr;
 
             // Create working array for node activation signals.
             _activationArr = new double[nodeCount];
@@ -127,7 +133,7 @@ namespace SharpNeat.Phenomes.NeuralNets.AcyclicNetwork
             // positions are indicated by outputNodeIdxArr, and so we package up this array with the node signal
             // array to abstract away the level of indirection described by outputNodeIdxArr.
             _outputSignalArrayWrapper = new MappingSignalArray(_activationArr, outputNodeIdxArr);
-
+            
             // Store counts for use during activation.
             _inputNodeCount = inputNodeCount;
             _inputAndBiasNodeCount = inputNodeCount+1;
@@ -220,5 +226,16 @@ namespace SharpNeat.Phenomes.NeuralNets.AcyclicNetwork
         }
 
         #endregion
+
+        /// <inheritdoc />
+        /// <summary>
+        /// Creates a copy of the acyclic network.
+        /// </summary>
+        /// <returns>A newly instantiated copy of FastAcyclicNetwork.</returns>
+        public IBlackBox Clone()
+        {
+            return new FastAcyclicNetwork(_nodeActivationFnArr, _nodeAuxArgsArr, _connectionArr, _layerInfoArr,
+                _outputNodeIdxArr, _activationArr.Length, _inputNodeCount, _outputNodeCount);
+        }
     }
 }

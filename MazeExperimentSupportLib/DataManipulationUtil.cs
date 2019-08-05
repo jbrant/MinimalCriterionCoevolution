@@ -6,7 +6,6 @@ using System.Linq;
 using MCC_Domains.Common;
 using MCC_Domains.MazeNavigation.Components;
 using SharpNeat.Core;
-using SharpNeat.Domains;
 using SharpNeat.Phenomes.Mazes;
 
 #endregion
@@ -14,14 +13,14 @@ using SharpNeat.Phenomes.Mazes;
 namespace MazeExperimentSupportLib
 {
     /// <summary>
-    ///     Contains utility methods for performaing miscellaneous data transformation and processing tasks.
+    ///     Contains utility methods for performing miscellaneous data transformation and processing tasks.
     /// </summary>
     public static class DataManipulationUtil
     {
         #region Public utility methods
 
         /// <summary>
-        ///     Extracts the specied number of evaluation unit samples from the population of evaluation units (trajectories).
+        ///     Extracts the specified number of evaluation unit samples from the population of evaluation units (trajectories).
         /// </summary>
         /// <param name="allEvaluationUnits">All evaluation during the given experiment/run/batch.</param>
         /// <param name="sampleSize">The sample size to extract from the collection of evaluation units.</param>
@@ -30,8 +29,8 @@ namespace MazeExperimentSupportLib
         public static IList<MazeNavigatorEvaluationUnit> ExtractEvaluationUnitSamplesFromPopulation(
             IList<MazeNavigatorEvaluationUnit> allEvaluationUnits, int sampleSize, bool extractEvenlyAcrossMazes)
         {
-            List<MazeNavigatorEvaluationUnit> evalUnitSamples = new List<MazeNavigatorEvaluationUnit>();
-            Random rnd = new Random();
+            var evalUnitSamples = new List<MazeNavigatorEvaluationUnit>();
+            var rnd = new Random();
 
             // If we're extract the sample size evenly across all extant/solvable mazes
             if (extractEvenlyAcrossMazes)
@@ -44,7 +43,7 @@ namespace MazeExperimentSupportLib
                     var groupSampleSize = Math.Min(sampleSize, mazeEvalGroup.Count());
 
                     // Gather sample of randomly selected evaluation units for the current maze
-                    for (int cnt = 0; cnt < groupSampleSize; cnt++)
+                    for (var cnt = 0; cnt < groupSampleSize; cnt++)
                     {
                         evalUnitSamples.Add(mazeEvalGroup[rnd.Next(groupSampleSize - 1)]);
                     }
@@ -54,7 +53,7 @@ namespace MazeExperimentSupportLib
             else
             {
                 // Gather sample of randomly selected evaluation units
-                for (int cnt = 0; cnt < Math.Min(allEvaluationUnits.Count, sampleSize); cnt++)
+                for (var cnt = 0; cnt < Math.Min(allEvaluationUnits.Count, sampleSize); cnt++)
                 {
                     evalUnitSamples.Add(allEvaluationUnits[rnd.Next(allEvaluationUnits.Count - 1)]);
                 }
@@ -75,10 +74,9 @@ namespace MazeExperimentSupportLib
         /// <param name="sampleSize">The sample size to extract from each navigator/maze species.</param>
         /// <returns>The specified number of evaluation unit samples from each navigator/maze species.</returns>
         public static IList<MazeNavigatorEvaluationUnit> ExtractEvaluationUnitSamplesFromSpecies(int experimentId,
-            int run,
-            int batch, IList<MazeNavigatorEvaluationUnit> allEvaluationUnits, int sampleSize)
+            int run, int batch, IList<MazeNavigatorEvaluationUnit> allEvaluationUnits, int sampleSize)
         {
-            List<MazeNavigatorEvaluationUnit> evalUnitSamples = new List<MazeNavigatorEvaluationUnit>();
+            var evalUnitSamples = new List<MazeNavigatorEvaluationUnit>();
 
             // Extract all maze and navigator genome IDs
             var allMazeGenomeIds = allEvaluationUnits.Select(eu => eu.MazeId).Distinct().ToList();
@@ -113,11 +111,12 @@ namespace MazeExperimentSupportLib
         /// <param name="allEvaluationUnits">All available evaluation units from which samples can be chosen.</param>
         /// <param name="evalUnitSamples">The running list of evaluation unit samples (for both mazes and navigators).</param>
         /// <param name="isMazeEvaluation">Flag indicating whether these are maze or navigator samples.</param>
-        private static void CollectEvaluationSamples(IList<int> sampleIds,
-            IList<MazeNavigatorEvaluationUnit> allEvaluationUnits, IList<MazeNavigatorEvaluationUnit> evalUnitSamples,
+        private static void CollectEvaluationSamples(IEnumerable<int> sampleIds,
+            IList<MazeNavigatorEvaluationUnit> allEvaluationUnits,
+            ICollection<MazeNavigatorEvaluationUnit> evalUnitSamples,
             bool isMazeEvaluation)
         {
-            Random rnd = new Random();
+            var rnd = new Random();
 
             foreach (var sampleId in sampleIds)
             {
@@ -166,18 +165,19 @@ namespace MazeExperimentSupportLib
         /// <param name="specieGenomesGroups">The groups of specie IDs and their constituent genome IDs.</param>
         /// <param name="sampleSize">The number of genome IDs to attempt to extract from each specie.</param>
         /// <returns>Sample of genomes from each of the given species based on the specified sample size.</returns>
-        private static IList<int> ExtractGenomeIdSample(List<SpecieGenomesGroup> specieGenomesGroups, int sampleSize)
+        private static IEnumerable<int> ExtractGenomeIdSample(IEnumerable<SpecieGenomesGroup> specieGenomesGroups,
+            int sampleSize)
         {
-            List<int> sampleGenomeIds = new List<int>();
-            Random rnd = new Random();
+            var sampleGenomeIds = new List<int>();
+            var rnd = new Random();
 
             // Extract a sample of mazes for each species
             foreach (var specieGenomeGroup in specieGenomesGroups)
             {
-                for (int idx = 0; idx < Math.Min(sampleSize, specieGenomeGroup.GenomeIds.Count()); idx++)
+                for (var idx = 0; idx < Math.Min(sampleSize, specieGenomeGroup.GenomeIds.Count()); idx++)
                 {
                     // Randomly select genome ID
-                    int mazeIdx = rnd.Next(specieGenomeGroup.GenomeIds.Count() - 1);
+                    var mazeIdx = rnd.Next(specieGenomeGroup.GenomeIds.Count() - 1);
 
                     // Add genome ID to global list
                     sampleGenomeIds.Add(specieGenomeGroup.GenomeIds[mazeIdx]);
@@ -198,10 +198,9 @@ namespace MazeExperimentSupportLib
         /// <returns>List of the experiment-specific walls.</returns>
         public static List<Wall> ExtractMazeWalls(List<MazeStructureWall> mazeStructureWalls)
         {
-            List<Wall> mazeWalls = new List<Wall>(mazeStructureWalls.Count);
+            var mazeWalls = new List<Wall>(mazeStructureWalls.Count);
 
             // Convert each of the maze structure walls to the experiment domain wall
-            // TODO: Can this also be parallelized?
             mazeWalls.AddRange(
                 mazeStructureWalls.Select(
                     mazeStructureWall =>

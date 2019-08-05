@@ -7,6 +7,9 @@ using SharpNeat.Loggers;
 
 namespace SharpNeat.Core
 {
+    /// <summary>
+    ///     Defines a contract for experiment data logger implementations.
+    /// </summary>
     public interface IDataLogger
     {
         /// <summary>

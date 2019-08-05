@@ -1,10 +1,7 @@
 ﻿#region
 
 using System.Collections.Generic;
-using System.IO;
-using System.Xml;
 using SharpNeat.Core;
-using SharpNeat.Genomes.Neat;
 
 #endregion
 
@@ -21,7 +18,7 @@ namespace SharpNeat.Utility
         where TPhenome : class
     {
         /// <summary>
-        ///     Evalutes the behavior and resulting "fitness" (behavioral novelty) of a given genome.  The phenome is decoded on
+        ///     Evaluates the behavior and resulting "fitness" (behavioral novelty) of a given genome.  The phenome is decoded on
         ///     every run instead of caching it.
         /// </summary>
         /// <param name="genome">The genome under evaluation.</param>
@@ -33,12 +30,10 @@ namespace SharpNeat.Utility
         ///     Whether a genome should be decoded to its XML string representation (generally used to
         ///     support logging).
         /// </param>
-        /// <param name="enableBridging">Determines whether bridging is enabled on genome evaluations.</param>
         public static void EvaluateBehavior_NonCaching(TGenome genome, IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
-            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, uint currentGeneration, bool enableBridging,
+            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, uint currentGeneration,
             IDataLogger evaluationLogger, bool decodeGenomeToXml)
         {
-            string genomeXml = null;
             var phenome = genomeDecoder.Decode(genome);
 
             if (null == phenome)
@@ -50,16 +45,10 @@ namespace SharpNeat.Utility
             }
             else
             {
-                // Decode the genome to its XML representation
-                if (decodeGenomeToXml)
-                {
-                    genomeXml = DecodeGenomeToXmlString(genome);
-                }
-
                 // Evaluate the behavior, update the genome's behavior characterization, calculate the distance to the domain objective,
                 // and indicate if the genome is viable based on whether the minimal criteria was satisfied
-                var behaviorInfo = phenomeEvaluator.Evaluate(phenome, currentGeneration, enableBridging,
-                    evaluationLogger, genomeXml);
+                var behaviorInfo = phenomeEvaluator.Evaluate(phenome, currentGeneration,
+                    evaluationLogger);
                 genome.EvaluationInfo.BehaviorCharacterization = behaviorInfo.Behaviors;
                 genome.EvaluationInfo.ObjectiveDistance = behaviorInfo.ObjectiveDistance;
                 genome.EvaluationInfo.IsViable = behaviorInfo.DoesBehaviorSatisfyMinimalCriteria;
@@ -68,7 +57,8 @@ namespace SharpNeat.Utility
         }
 
         /// <summary>
-        ///     Evalutes the behavior and resulting "fitness" (behavioral novelty) of a given genome.  We first try to retrieve the
+        ///     Evaluates the behavior and resulting "fitness" (behavioral novelty) of a given genome.  We first try to retrieve
+        ///     the
         ///     phenome from the genomes cache and then decode the genome if it has not yet been cached.
         /// </summary>
         /// <param name="genome">The genome under evaluation.</param>
@@ -80,12 +70,10 @@ namespace SharpNeat.Utility
         ///     Whether a genome should be decoded to its XML string representation (generally used to
         ///     support logging).
         /// </param>
-        /// <param name="enableBridging">Determines whether bridging is enabled on genome evaluations.</param>
         public static void EvaluateBehavior_Caching(TGenome genome, IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
-            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, uint currentGeneration, bool enableBridging,
+            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, uint currentGeneration,
             IDataLogger evaluationLogger, bool decodeGenomeToXml)
         {
-            string genomeXml = null;
             var phenome = (TPhenome) genome.CachedPhenome;
 
             if (null == phenome)
@@ -104,16 +92,10 @@ namespace SharpNeat.Utility
             }
             else
             {
-                // Decode the genome to its XML representation
-                if (decodeGenomeToXml)
-                {
-                    genomeXml = DecodeGenomeToXmlString(genome);
-                }
-
                 // Evaluate the behavior, update the genome's behavior characterization, calculate the distance to the domain objective,
                 // and indicate if the genome is viable based on whether the minimal criteria was satisfied
-                var behaviorInfo = phenomeEvaluator.Evaluate(phenome, currentGeneration, enableBridging,
-                    evaluationLogger, genomeXml);
+                var behaviorInfo = phenomeEvaluator.Evaluate(phenome, currentGeneration,
+                    evaluationLogger);
                 genome.EvaluationInfo.BehaviorCharacterization = behaviorInfo.Behaviors;
                 genome.EvaluationInfo.ObjectiveDistance = behaviorInfo.ObjectiveDistance;
                 genome.EvaluationInfo.IsViable = behaviorInfo.DoesBehaviorSatisfyMinimalCriteria;
@@ -133,13 +115,11 @@ namespace SharpNeat.Utility
         ///     Whether a genome should be decoded to its XML string representation (generally used to
         ///     support logging).
         /// </param>
-        /// <param name="enableBridging">Determines whether bridging is enabled on genome evaluations.</param>
         public static void EvaluateFitness_NonCaching(TGenome genome, IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
-            IPhenomeEvaluator<TPhenome, FitnessInfo> phenomeEvaluator, uint currentGeneration, bool enableBridging,
+            IPhenomeEvaluator<TPhenome, FitnessInfo> phenomeEvaluator, uint currentGeneration,
             IDataLogger evaluationLogger, bool decodeGenomeToXml)
         {
-            string genomeXml = null;
-            TPhenome phenome = genomeDecoder.Decode(genome);
+            var phenome = genomeDecoder.Decode(genome);
 
             if (null == phenome)
             {
@@ -149,15 +129,9 @@ namespace SharpNeat.Utility
             }
             else
             {
-                // Decode the genome to its XML representation
-                if (decodeGenomeToXml)
-                {
-                    genomeXml = DecodeGenomeToXmlString(genome);
-                }
-
                 // Run evaluation and set fitness/auxiliary fitness
-                FitnessInfo fitnessInfo = phenomeEvaluator.Evaluate(phenome, currentGeneration, enableBridging,
-                    evaluationLogger, genomeXml);
+                var fitnessInfo = phenomeEvaluator.Evaluate(phenome, currentGeneration,
+                    evaluationLogger);
                 genome.EvaluationInfo.SetFitness(fitnessInfo.Fitness);
                 genome.EvaluationInfo.AuxFitnessArr = fitnessInfo.AuxFitnessArr;
                 genome.EvaluationInfo.NicheId = fitnessInfo.NicheId;
@@ -178,13 +152,11 @@ namespace SharpNeat.Utility
         ///     Whether a genome should be decoded to its XML string representation (generally used to
         ///     support logging).
         /// </param>
-        /// <param name="enableBridging">Determines whether bridging is enabled on genome evaluations.</param>
         public static void EvaluateFitness_Caching(TGenome genome, IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
-            IPhenomeEvaluator<TPhenome, FitnessInfo> phenomeEvaluator, uint currentGeneration, bool enableBridging,
+            IPhenomeEvaluator<TPhenome, FitnessInfo> phenomeEvaluator, uint currentGeneration,
             IDataLogger evaluationLogger, bool decodeGenomeToXml)
         {
-            string genomeXml = null;
-            TPhenome phenome = (TPhenome) genome.CachedPhenome;
+            var phenome = (TPhenome) genome.CachedPhenome;
 
             if (null == phenome)
             {
@@ -201,14 +173,8 @@ namespace SharpNeat.Utility
             }
             else
             {
-                // Decode the genome to its XML representation
-                if (decodeGenomeToXml)
-                {
-                    genomeXml = DecodeGenomeToXmlString(genome);
-                }
-
-                FitnessInfo fitnessInfo = phenomeEvaluator.Evaluate(phenome, currentGeneration, enableBridging,
-                    evaluationLogger, genomeXml);
+                var fitnessInfo = phenomeEvaluator.Evaluate(phenome, currentGeneration,
+                    evaluationLogger);
                 genome.EvaluationInfo.SetFitness(fitnessInfo.Fitness);
                 genome.EvaluationInfo.AuxFitnessArr = fitnessInfo.AuxFitnessArr;
                 genome.EvaluationInfo.NicheId = fitnessInfo.NicheId;
@@ -217,7 +183,7 @@ namespace SharpNeat.Utility
         }
 
         /// <summary>
-        ///     Evalutes the fitness of the given genome as the its behavioral novelty as compared to the rest of the population.
+        ///     Evaluates the fitness of the given genome as the its behavioral novelty as compared to the rest of the population.
         /// </summary>
         /// <param name="genome">The genome to evaluate.</param>
         /// <param name="genomeList">The population against which the genome is being evaluated.</param>
@@ -240,7 +206,7 @@ namespace SharpNeat.Utility
             else
             {
                 // Compare the current genome's behavior to its k-nearest neighbors in behavior space
-                double fitness =
+                var fitness =
                     NoveltyUtils<TGenome>.CalculateBehavioralDistance(genome.EvaluationInfo.BehaviorCharacterization,
                         genomeList, nearestNeighbors, noveltyArchive);
                 fitnessInfo = new FitnessInfo(fitness, fitness);
@@ -253,7 +219,7 @@ namespace SharpNeat.Utility
         }
 
         /// <summary>
-        ///     Evalutes the fitness of the given genome as either the objective distance to the domain-specific target (depending
+        ///     Evaluates the fitness of the given genome as either the objective distance to the domain-specific target (depending
         ///     on the whether the given flag is set) or to a random value, so long as it satisfies the minimal criteria.
         /// </summary>
         /// <param name="genome">The genome to evaluate.</param>
@@ -277,7 +243,7 @@ namespace SharpNeat.Utility
             else
             {
                 // Create new random number generator without a seed
-                FastRandom rng = new FastRandom();
+                var rng = new FastRandom();
 
                 // If the genome is not viable, set the fitness (i.e. behavioral novelty) to zero
                 if (genome.EvaluationInfo.IsViable == false)
@@ -287,7 +253,7 @@ namespace SharpNeat.Utility
                 else
                 {
                     // Generate new random fitness value
-                    double randomFitness = rng.NextDouble();
+                    var randomFitness = rng.NextDouble();
 
                     // Set random value as fitness
                     fitnessInfo = new FitnessInfo(randomFitness, randomFitness);
@@ -305,15 +271,15 @@ namespace SharpNeat.Utility
         /// <param name="genomeList">The list of genomes to decode.</param>
         /// <param name="genomeDecoder">The decoder to use.</param>
         /// <returns>The decoded list of phenotypes.</returns>
-        public static IList<TPhenome> DecodeGenomes(IList<TGenome> genomeList,
+        public static IEnumerable<TPhenome> DecodeGenomes(IList<TGenome> genomeList,
             IGenomeDecoder<TGenome, TPhenome> genomeDecoder)
         {
             IList<TPhenome> decodedPhenomes = new List<TPhenome>(genomeList.Count);
 
-            foreach (TGenome genome in genomeList)
+            foreach (var genome in genomeList)
             {
                 // Try to get the cached (already decoded) phenome if it exists
-                TPhenome curPhenome = (TPhenome) genome.CachedPhenome;
+                var curPhenome = (TPhenome) genome.CachedPhenome;
 
                 // If there's not a decoded phenome cached, we have to decode it
                 if (null == curPhenome)
@@ -328,18 +294,6 @@ namespace SharpNeat.Utility
             }
 
             return decodedPhenomes;
-        }
-
-        private static string DecodeGenomeToXmlString(TGenome genome)
-        {
-            // Serialize the genome to XML
-            StringWriter genomeSw = new StringWriter();
-            NeatGenomeXmlIO.WriteComplete(new XmlTextWriter(genomeSw), genome as NeatGenome, false);
-
-            // TODO: Need to handle HyperNEAT case, wherein third parameter (to write node function IDs) is true
-
-            // Return the genome XML representation as a string
-            return genomeSw.ToString();
         }
     }
 }

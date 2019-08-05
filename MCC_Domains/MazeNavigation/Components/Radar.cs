@@ -6,32 +6,32 @@
     internal class Radar
     {
         /// <summary>
-        ///     Creeates a radar with the given min/max field-of-view (in degrees) and output (which will be 0 by default).
+        ///     The maximum field-of-view (in degrees).
+        /// </summary>
+        private readonly double _maxFieldOfViewAngle;
+
+        /// <summary>
+        ///     The minimum field-of-view (in degrees).
+        /// </summary>
+        private readonly double _minFieldOfViewAngle;
+
+        /// <summary>
+        ///     Creates a radar with the given min/max field-of-view (in degrees) and output (which will be 0 by default).
         /// </summary>
         /// <param name="minFieldOfViewAngle">The minimum field-of-view of the radar (in degrees).</param>
         /// <param name="maxFieldOfViewAngle">The maximum field-of-view of the radar (in degrees).</param>
         /// <param name="output">The initial output value of the radar.</param>
         internal Radar(double minFieldOfViewAngle, double maxFieldOfViewAngle, double output)
         {
-            MinFieldOfViewAngle = minFieldOfViewAngle;
-            MaxFieldOfViewAngle = maxFieldOfViewAngle;
+            _minFieldOfViewAngle = minFieldOfViewAngle;
+            _maxFieldOfViewAngle = maxFieldOfViewAngle;
             Output = output;
         }
 
         /// <summary>
-        ///     The minimum field-of-view (in degrees).
-        /// </summary>
-        internal double MinFieldOfViewAngle { get; }
-
-        /// <summary>
-        ///     The maximum field-of-view (in degrees).
-        /// </summary>
-        internal double MaxFieldOfViewAngle { get; }
-
-        /// <summary>
         ///     The output value of the radar.
         /// </summary>
-        internal double Output { get; set; }
+        internal double Output { get; private set; }
 
         /// <summary>
         ///     Updates the radar output based on whether the goal location is within its field-of-view.
@@ -46,13 +46,13 @@
 
             // If the angle falls within the field-of-view of the radar, activate the
             // radar output
-            if (goalAngle >= MinFieldOfViewAngle && goalAngle < MaxFieldOfViewAngle)
+            if (goalAngle >= _minFieldOfViewAngle && goalAngle < _maxFieldOfViewAngle)
             {
                 Output = 1;
             }
             // Otherwise, add 360 and perform the same comparison to handle negative
             // angles
-            else if (goalAngle + 360 >= MinFieldOfViewAngle && goalAngle + 360 < MaxFieldOfViewAngle)
+            else if (goalAngle + 360 >= _minFieldOfViewAngle && goalAngle + 360 < _maxFieldOfViewAngle)
             {
                 Output = 1;
             }

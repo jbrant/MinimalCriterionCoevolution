@@ -21,16 +21,16 @@
         /// <summary>
         ///     The number of clusters need to reduce intracluster variance to the specified threshold.
         /// </summary>
-        public int NumClusters { get; set; }
+        public int NumClusters { get; }
 
         /// <summary>
         ///     The silhouette width of the resultant clustering (indicates "goodness" of clustering).
         /// </summary>
-        public double SilhouetteWidth { get; set; }
+        public double SilhouetteWidth { get; }
 
         /// <summary>
         ///     The entropy (diversity) of the population based on cluster assignment proportions.
         /// </summary>
-        public double PopulationEntropy { get; set; }
+        public double PopulationEntropy { get; }
     }
 }

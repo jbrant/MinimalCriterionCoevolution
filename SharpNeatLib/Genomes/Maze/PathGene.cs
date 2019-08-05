@@ -117,7 +117,7 @@ namespace SharpNeat.Genomes.Maze
         /// <summary>
         ///     DefaultOrientation for incoming path segment.
         /// </summary>
-        public IntersectionOrientation DefaultOrientation { get; set; }
+        public IntersectionOrientation DefaultOrientation { get; }
 
         #endregion Properties
     }

@@ -12,17 +12,31 @@ using SharpNeat.Loggers;
 
 namespace SharpNeat.EvolutionAlgorithms.Statistics
 {
-    public abstract class AbstractEvolutionaryAlgorithmStats<TGenome> : IEvolutionAlgorithmStats
-        where TGenome : IGenome<TGenome>
+    /// <summary>
+    ///     Encapsulates generic, descriptive statistics about the state of an evolutionary algorithm.
+    /// </summary>
+    public abstract class AbstractEvolutionaryAlgorithmStats : IEvolutionAlgorithmStats
     {
+        /// <summary>
+        ///     AbstractEvolutionaryAlgorithmStats constructor.
+        /// </summary>
+        /// <param name="eaParams">Evolution algorithm parameters required for initialization.</param>
         protected AbstractEvolutionaryAlgorithmStats(EvolutionAlgorithmParameters eaParams)
         {
-            _bestFitnessMA = new DoubleCircularBufferWithStats(eaParams.BestFitnessMovingAverageHistoryLength);
-            _meanSpecieChampFitnessMA =
+            BestFitnessMa = new DoubleCircularBufferWithStats(eaParams.BestFitnessMovingAverageHistoryLength);
+            MeanSpecieChampFitnessMa =
                 new DoubleCircularBufferWithStats(eaParams.MeanSpecieChampFitnessMovingAverageHistoryLength);
-            _complexityMA = new DoubleCircularBufferWithStats(eaParams.ComplexityMovingAverageHistoryLength);
+            ComplexityMa = new DoubleCircularBufferWithStats(eaParams.ComplexityMovingAverageHistoryLength);
         }
 
+        /// <summary>
+        ///     Returns the fields within AbstractEvolutionAlgorithmStats that are enabled for logging.
+        /// </summary>
+        /// <param name="logFieldEnableMap">
+        ///     Dictionary of logging fields that can be enabled or disabled based on the specification
+        ///     of the calling routine.
+        /// </param>
+        /// <returns>The loggable fields within AbstractEvolutionAlgorithmStats.</returns>
         public virtual List<LoggableElement> GetLoggableElements(
             IDictionary<FieldElement, bool> logFieldEnableMap = null)
         {
@@ -30,71 +44,77 @@ namespace SharpNeat.EvolutionAlgorithms.Statistics
             {
                 (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.Generation) == true &&
                  logFieldEnableMap[EvolutionFieldElements.Generation])
-                    ? new LoggableElement(EvolutionFieldElements.Generation, _generation)
+                    ? new LoggableElement(EvolutionFieldElements.Generation, Generation)
                     : null,
                 (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.TotalEvaluations) == true &&
                  logFieldEnableMap[EvolutionFieldElements.TotalEvaluations])
-                    ? new LoggableElement(EvolutionFieldElements.TotalEvaluations, _totalEvaluationCount)
+                    ? new LoggableElement(EvolutionFieldElements.TotalEvaluations, TotalEvaluationCount)
                     : null,
                 (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.EvaluationsPerSecond) == true &&
                  logFieldEnableMap[EvolutionFieldElements.EvaluationsPerSecond])
-                    ? new LoggableElement(EvolutionFieldElements.EvaluationsPerSecond, _evaluationsPerSec)
+                    ? new LoggableElement(EvolutionFieldElements.EvaluationsPerSecond, EvaluationsPerSec)
                     : null,
                 (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MaxFitness) == true &&
                  logFieldEnableMap[EvolutionFieldElements.MaxFitness])
-                    ? new LoggableElement(EvolutionFieldElements.MaxFitness, _maxFitness)
+                    ? new LoggableElement(EvolutionFieldElements.MaxFitness, MaxFitness)
                     : null,
                 (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MeanFitness) == true &&
                  logFieldEnableMap[EvolutionFieldElements.MeanFitness])
-                    ? new LoggableElement(EvolutionFieldElements.MeanFitness, _meanFitness)
+                    ? new LoggableElement(EvolutionFieldElements.MeanFitness, MeanFitness)
                     : null,
                 (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MeanSpecieChampFitness) == true &&
                  logFieldEnableMap[EvolutionFieldElements.MeanSpecieChampFitness])
-                    ? new LoggableElement(EvolutionFieldElements.MeanSpecieChampFitness, _meanSpecieChampFitness)
+                    ? new LoggableElement(EvolutionFieldElements.MeanSpecieChampFitness, MeanSpecieChampFitness)
                     : null,
                 (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MinComplexity) == true &&
                  logFieldEnableMap[EvolutionFieldElements.MinComplexity])
-                    ? new LoggableElement(EvolutionFieldElements.MinComplexity, _minComplexity)
+                    ? new LoggableElement(EvolutionFieldElements.MinComplexity, MinComplexity)
                     : null,
                 (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MaxComplexity) == true &&
                  logFieldEnableMap[EvolutionFieldElements.MaxComplexity])
-                    ? new LoggableElement(EvolutionFieldElements.MaxComplexity, _maxComplexity)
+                    ? new LoggableElement(EvolutionFieldElements.MaxComplexity, MaxComplexity)
                     : null,
                 (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MeanComplexity) == true &&
                  logFieldEnableMap[EvolutionFieldElements.MeanComplexity])
-                    ? new LoggableElement(EvolutionFieldElements.MeanComplexity, _meanComplexity)
+                    ? new LoggableElement(EvolutionFieldElements.MeanComplexity, MeanComplexity)
                     : null,
                 (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.TotalOffspringCount) == true &&
                  logFieldEnableMap[EvolutionFieldElements.TotalOffspringCount])
-                    ? new LoggableElement(EvolutionFieldElements.TotalOffspringCount, _totalOffspringCount)
+                    ? new LoggableElement(EvolutionFieldElements.TotalOffspringCount, TotalOffspringCount)
                     : null,
                 (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.AsexualOffspringCount) == true &&
                  logFieldEnableMap[EvolutionFieldElements.AsexualOffspringCount])
-                    ? new LoggableElement(EvolutionFieldElements.AsexualOffspringCount, _asexualOffspringCount)
+                    ? new LoggableElement(EvolutionFieldElements.AsexualOffspringCount, AsexualOffspringCount)
                     : null,
                 (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.SexualOffspringCount) == true &&
                  logFieldEnableMap[EvolutionFieldElements.SexualOffspringCount])
-                    ? new LoggableElement(EvolutionFieldElements.SexualOffspringCount, _sexualOffspringCount)
+                    ? new LoggableElement(EvolutionFieldElements.SexualOffspringCount, SexualOffspringCount)
                     : null,
                 (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.InterspeciesOffspringCount) == true &&
                  logFieldEnableMap[EvolutionFieldElements.InterspeciesOffspringCount])
                     ? new LoggableElement(EvolutionFieldElements.InterspeciesOffspringCount,
-                        _interspeciesOffspringCount)
+                        InterspeciesOffspringCount)
                     : null,
                 (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MinSpecieSize) == true &&
                  logFieldEnableMap[EvolutionFieldElements.MinSpecieSize])
-                    ? new LoggableElement(EvolutionFieldElements.MinSpecieSize, _minSpecieSize)
+                    ? new LoggableElement(EvolutionFieldElements.MinSpecieSize, MinSpecieSize)
                     : null,
                 (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MaxSpecieSize) == true &&
                  logFieldEnableMap[EvolutionFieldElements.MaxSpecieSize])
-                    ? new LoggableElement(EvolutionFieldElements.MaxSpecieSize, _maxSpecieSize)
+                    ? new LoggableElement(EvolutionFieldElements.MaxSpecieSize, MaxSpecieSize)
                     : null
             };
         }
 
         #region Abstract methods
 
-        public abstract void SetAlgorithmSpecificsPopulationStats(IList<TGenome> population);
+        /// <summary>
+        ///     Computes genome implementation-specific details about the population.
+        /// </summary>
+        /// <param name="population">The population from which to compute more specific, descriptive statistics.</param>
+        /// <typeparam name="TGenome">The genome type generic.</typeparam>
+        public abstract void ComputeAlgorithmSpecificPopulationStats<TGenome>(IList<TGenome> population)
+            where TGenome : IGenome<TGenome>;
 
         #endregion
 
@@ -103,27 +123,27 @@ namespace SharpNeat.EvolutionAlgorithms.Statistics
         /// <summary>
         ///     The current generation number.
         /// </summary>
-        public uint _generation { get; set; }
+        public uint Generation { get; set; }
 
         /// <summary>
         ///     The total number of genome evaluations for the current NEAT search.
         /// </summary>
-        public ulong _totalEvaluationCount { get; set; }
+        public ulong TotalEvaluationCount { get; set; }
 
         /// <summary>
         ///     Current evaluations per second reading.
         /// </summary>
-        public int _evaluationsPerSec { get; set; }
+        public int EvaluationsPerSec { get; set; }
 
         /// <summary>
         ///     The clock time of the last update to _evaluationsPerSec.
         /// </summary>
-        public DateTime _evalsPerSecLastSampleTime { get; set; }
+        public DateTime EvalsPerSecLastSampleTime { get; set; }
 
         /// <summary>
         ///     The total evaluation count at the last update to _evaluationsPerSec.
         /// </summary>
-        public ulong _evalsCountAtLastUpdate { get; set; }
+        public ulong EvalsCountAtLastUpdate { get; set; }
 
         #endregion
 
@@ -132,17 +152,17 @@ namespace SharpNeat.EvolutionAlgorithms.Statistics
         /// <summary>
         ///     The fitness of the best genome.
         /// </summary>
-        public double _maxFitness { get; set; }
+        public double MaxFitness { get; set; }
 
         /// <summary>
         ///     The mean genome fitness.
         /// </summary>
-        public double _meanFitness { get; set; }
+        public double MeanFitness { get; set; }
 
         /// <summary>
         ///     The mean fitness of current specie champions.
         /// </summary>
-        public double _meanSpecieChampFitness { get; set; }
+        public double MeanSpecieChampFitness { get; set; }
 
         #endregion
 
@@ -151,17 +171,17 @@ namespace SharpNeat.EvolutionAlgorithms.Statistics
         /// <summary>
         ///     The complexity of the least complex genome.
         /// </summary>
-        public double _minComplexity { get; set; }
+        public double MinComplexity { get; set; }
 
         /// <summary>
         ///     The complexity of the most complex genome.
         /// </summary>
-        public double _maxComplexity { get; set; }
+        public double MaxComplexity { get; set; }
 
         /// <summary>
         ///     The mean genome complexity.
         /// </summary>
-        public double _meanComplexity { get; set; }
+        public double MeanComplexity { get; set; }
 
         #endregion
 
@@ -170,23 +190,23 @@ namespace SharpNeat.EvolutionAlgorithms.Statistics
         /// <summary>
         ///     Total number of offspring created in the lifetime of a NEAT search.
         /// </summary>
-        public ulong _totalOffspringCount { get; set; }
+        public ulong TotalOffspringCount { get; set; }
 
         /// <summary>
         ///     Total number of genomes created from asexual reproduction.
         /// </summary>
-        public ulong _asexualOffspringCount { get; set; }
+        public ulong AsexualOffspringCount { get; set; }
 
         /// <summary>
         ///     Total number of genomes created from sexual reproduction. This includes
         ///     the number of offspring created from interspecies reproduction.
         /// </summary>
-        public ulong _sexualOffspringCount { get; set; }
+        public ulong SexualOffspringCount { get; set; }
 
         /// <summary>
         ///     Total number of genomes created from interspecies sexual reproduction.
         /// </summary>
-        public ulong _interspeciesOffspringCount { get; set; }
+        public ulong InterspeciesOffspringCount { get; set; }
 
         #endregion
 
@@ -195,12 +215,12 @@ namespace SharpNeat.EvolutionAlgorithms.Statistics
         /// <summary>
         ///     The number of genomes in the smallest specie.
         /// </summary>
-        public int _minSpecieSize { get; set; }
+        public int MinSpecieSize { get; set; }
 
         /// <summary>
         ///     The number of genomes in the largest specie.
         /// </summary>
-        public int _maxSpecieSize { get; set; }
+        public int MaxSpecieSize { get; set; }
 
         #endregion
 
@@ -209,37 +229,37 @@ namespace SharpNeat.EvolutionAlgorithms.Statistics
         /// <summary>
         ///     A buffer of the N most recent best fitness values. Allows the calculation of a moving average.
         /// </summary>
-        public DoubleCircularBufferWithStats _bestFitnessMA { get; set; }
+        public DoubleCircularBufferWithStats BestFitnessMa { get; set; }
 
         /// <summary>
         ///     A buffer of the N most recent mean specie champ fitness values (the average fitness of all specie champs).
         ///     Allows the calculation of a moving average.
         /// </summary>
-        public DoubleCircularBufferWithStats _meanSpecieChampFitnessMA { get; set; }
+        public DoubleCircularBufferWithStats MeanSpecieChampFitnessMa { get; set; }
 
         /// <summary>
         ///     A buffer of the N most recent population mean complexity values.
         ///     Allows the calculation of a moving average.
         /// </summary>
-        public DoubleCircularBufferWithStats _complexityMA { get; set; }
+        public DoubleCircularBufferWithStats ComplexityMa { get; set; }
 
         /// <summary>
         ///     The previous moving average value for the 'best fitness' series. Allows testing for fitness stalling by comparing
         ///     with the current MA value.
         /// </summary>
-        public double _prevBestFitnessMA { get; set; }
+        public double PrevBestFitnessMa { get; set; }
 
         /// <summary>
         ///     The previous moving average value for the 'mean specie champ fitness' series. Allows testing for fitness stalling
         ///     by comparing with the current MA value.
         /// </summary>
-        public double _prevMeanSpecieChampFitnessMA { get; set; }
+        public double PrevMeanSpecieChampFitnessMa { get; set; }
 
         /// <summary>
         ///     The previous moving average value for the complexity series. Allows testing for stalling during the simplification
         ///     phase of complexity regulation.
         /// </summary>
-        public double _prevComplexityMA { get; set; }
+        public double PrevComplexityMa { get; set; }
 
         #endregion
     }

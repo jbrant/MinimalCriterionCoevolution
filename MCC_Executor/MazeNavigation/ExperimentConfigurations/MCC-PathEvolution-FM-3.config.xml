@@ -16,8 +16,8 @@
   </Activation>
   <GenomeConfig>
     <InitialConnectionProportion>1</InitialConnectionProportion>
-    <WeightMutationProbability>0.6</WeightMutationProbability>
-    <AddConnnectionProbability>0.01</AddConnnectionProbability>
+    <WeightMutationProbability>0.7</WeightMutationProbability>
+    <AddConnnectionProbability>0.1</AddConnnectionProbability>
     <AddNodeProbability>0.01</AddNodeProbability>
     <DeleteConnectionProbability>0.001</DeleteConnectionProbability>
     <ConnectionWeightRange>5</ConnectionWeightRange>
@@ -29,11 +29,9 @@
     <MutateDeleteWallProbability>0.005</MutateDeleteWallProbability>
     <MutatePathWaypointLocationProbability>0.05</MutatePathWaypointLocationProbability>
     <MutateAddPathWaypointProbability>0.1</MutateAddPathWaypointProbability>
-    <MutateExpandMazeProbability>0.05</MutateExpandMazeProbability>
+    <MutateExpandMazeProbability>0.1</MutateExpandMazeProbability>
     <PerturbanceMagnitude>0.1</PerturbanceMagnitude>
-    <VerticalWallBias>0.7</VerticalWallBias>
-    <GridCellNeighborhoodRadius>5</GridCellNeighborhoodRadius>
-    <SparseCellSelectionProportion>0.2</SparseCellSelectionProportion>
+    <VerticalWallBias>0.6</VerticalWallBias>
   </MazeGenomeConfig>
   <BehaviorConfig>
     <BehaviorCharacterization>End Point</BehaviorCharacterization>
@@ -42,7 +40,7 @@
   <MazeOffspringBatchSize>1</MazeOffspringBatchSize>
   <MaxEvaluations>
   </MaxEvaluations>
-  <MaxGenerations>4000</MaxGenerations>
+  <MaxGenerations>2000</MaxGenerations>
   <MaxTimesteps>600</MaxTimesteps>
   <MinSuccessDistance>5</MinSuccessDistance>
   <MazeHeight>10</MazeHeight>

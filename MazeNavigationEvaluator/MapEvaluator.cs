@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using ExperimentEntities;
 using MazeExperimentSupportLib;
+using MCC_Domains.Utils;
 using SharpNeat.Decoders;
 using SharpNeat.Decoders.Maze;
 using SharpNeat.Decoders.Neat;
@@ -87,7 +88,8 @@ namespace MazeNavigationEvaluator
             int agentOutputNeuronCount)
         {
             // Create the NEAT genome (agent) decoder - acyclic activation is always used
-            _agentDecoder = new NeatGenomeDecoder(NetworkActivationScheme.CreateAcyclicScheme());
+            _agentDecoder = new NeatGenomeDecoder(CreateActivationScheme(experimentParameters.ActivationScheme,
+                experimentParameters.ActivationIters, experimentParameters.ActivationDeltaThreshold));
 
             // Create the maze decoder
             _mazeDecoder = new MazeDecoder(experimentParameters.MazeScaleMultiplier);
@@ -95,8 +97,10 @@ namespace MazeNavigationEvaluator
             // Initialize evaluation units
             EvaluationUnits = new List<MazeNavigatorEvaluationUnit>();
 
-            // Create default maze factory (NEAT factory will be set later based on structure of first genome encountered)
-            _mazeGenomeFactory = new MazeGenomeFactory();
+            // Create maze factory with default dimensions (NEAT factory will be set later based on structure of first
+            // genome encountered)
+            _mazeGenomeFactory = new MazeGenomeFactory(experimentParameters.MazeHeight, experimentParameters.MazeWidth,
+                experimentParameters.MazeQuadrantHeight, experimentParameters.MazeQuadrantWidth);
             _neatGenomeFactory = new NeatGenomeFactory(agentInputNeuronCount, agentOutputNeuronCount);
 
             // Set experiment parameters
@@ -113,7 +117,7 @@ namespace MazeNavigationEvaluator
         /// </summary>
         /// <param name="navigationCombos">The combinations of mazes and navigators.</param>
         public void Initialize(
-            IList<Tuple<MCCExperimentMazeGenome, MCCExperimentNavigatorGenome>> navigationCombos)
+            IEnumerable<Tuple<MCCExperimentMazeGenome, MCCExperimentNavigatorGenome>> navigationCombos)
         {
             foreach (var navigationCombo in navigationCombos)
             {
@@ -121,12 +125,13 @@ namespace MazeNavigationEvaluator
                 NeatGenome navigatorGenome;
 
                 // Deserialize the maze XML into a maze genome
-                using (XmlReader xmlReader = XmlReader.Create(new StringReader(navigationCombo.Item1.GenomeXml)))
+                using (var xmlReader = XmlReader.Create(new StringReader(navigationCombo.Item1.GenomeXml)))
                 {
                     mazeGenome = MazeGenomeXmlIO.ReadSingleGenomeFromRoot(xmlReader, _mazeGenomeFactory);
                 }
+
                 // Deserialize the navigator XML into a NEAT genome
-                using (XmlReader xmlReader = XmlReader.Create(new StringReader(navigationCombo.Item2.GenomeXml)))
+                using (var xmlReader = XmlReader.Create(new StringReader(navigationCombo.Item2.GenomeXml)))
                 {
                     navigatorGenome = NeatGenomeXmlIO.ReadSingleGenomeFromRoot(xmlReader, false, _neatGenomeFactory);
                 }
@@ -144,17 +149,17 @@ namespace MazeNavigationEvaluator
         /// </summary>
         /// <param name="mazes">The mazes that were in the maze queue during the given batch.</param>
         /// <param name="navigators">The navigators that were in the navigator queue during the given batch.</param>
-        public void Initialize(IList<MCCExperimentMazeGenome> mazes,
+        public void Initialize(IEnumerable<MCCExperimentMazeGenome> mazes,
             IList<MCCExperimentNavigatorGenome> navigators)
         {
             IList<NeatGenome> cachedAgents = new List<NeatGenome>(navigators.Count);
 
-            foreach (MCCExperimentMazeGenome serializedMaze in mazes)
+            foreach (var serializedMaze in mazes)
             {
                 MazeGenome mazeGenome;
 
                 // Deserialize the maze XML into a maze genome
-                using (XmlReader xmlReader = XmlReader.Create(new StringReader(serializedMaze.GenomeXml)))
+                using (var xmlReader = XmlReader.Create(new StringReader(serializedMaze.GenomeXml)))
                 {
                     mazeGenome = MazeGenomeXmlIO.ReadSingleGenomeFromRoot(xmlReader, _mazeGenomeFactory);
                 }
@@ -164,14 +169,15 @@ namespace MazeNavigationEvaluator
                 {
                     // Go through every serialized navigator genome, deserialize it, and use it with the maze to build
                     // a new evaluation unit
-                    foreach (MCCExperimentNavigatorGenome serializedNavigator in navigators)
+                    foreach (var serializedNavigator in navigators)
                     {
                         NeatGenome agentGenome;
 
                         // Read in the current navigator agent genome
-                        using (XmlReader xmlReader = XmlReader.Create(new StringReader(serializedNavigator.GenomeXml)))
+                        using (var xmlReader = XmlReader.Create(new StringReader(serializedNavigator.GenomeXml)))
                         {
-                            agentGenome = NeatGenomeXmlIO.ReadSingleGenomeFromRoot(xmlReader, false, _neatGenomeFactory);
+                            agentGenome =
+                                NeatGenomeXmlIO.ReadSingleGenomeFromRoot(xmlReader, false, _neatGenomeFactory);
                         }
 
                         // Decode to maze and navigator phenomes and add to the evaluation units list
@@ -186,7 +192,7 @@ namespace MazeNavigationEvaluator
                 else
                 {
                     // Add each genome with the current maze to create new evaluation units
-                    foreach (NeatGenome cachedAgent in cachedAgents)
+                    foreach (var cachedAgent in cachedAgents)
                     {
                         EvaluationUnits.Add(new MazeNavigatorEvaluationUnit(_mazeDecoder.Decode(mazeGenome),
                             _agentDecoder.Decode(cachedAgent), serializedMaze.GenomeID, (int) cachedAgent.Id));
@@ -200,14 +206,14 @@ namespace MazeNavigationEvaluator
         ///     post-hoc analyses that doesn't consider navigator trajectories.
         /// </summary>
         /// <param name="mazes">The mazes that were in the maze queue during the given batch.</param>
-        public void Initialize(IList<MCCExperimentMazeGenome> mazes)
+        public void Initialize(IEnumerable<MCCExperimentMazeGenome> mazes)
         {
-            foreach (MCCExperimentMazeGenome serializedMaze in mazes)
+            foreach (var serializedMaze in mazes)
             {
                 MazeGenome mazeGenome;
 
                 // Deserialize the maze XML into a maze genome
-                using (XmlReader xmlReader = XmlReader.Create(new StringReader(serializedMaze.GenomeXml)))
+                using (var xmlReader = XmlReader.Create(new StringReader(serializedMaze.GenomeXml)))
                 {
                     mazeGenome = MazeGenomeXmlIO.ReadSingleGenomeFromRoot(xmlReader, _mazeGenomeFactory);
                 }
@@ -222,18 +228,18 @@ namespace MazeNavigationEvaluator
         ///     for each non-evaluated agent/maze combination.
         /// </summary>
         /// <param name="agents">The agents that are in the queue at the given time.</param>
-        public void Initialize(IList<MCCExperimentNavigatorGenome> agents)
+        public void Initialize(IEnumerable<MCCExperimentNavigatorGenome> agents)
         {
             // Build a separate evaluation unit for each agent/maze combination, but only consider those agents
             // who have not already been evaluated
             foreach (
                 var serializedAgent in
-                    agents.Where(agentGenome => _agentGenomeIds.Contains(agentGenome.GenomeID) == false))
+                agents.Where(agentGenome => _agentGenomeIds.Contains(agentGenome.GenomeID) == false))
             {
                 NeatGenome agentGenome;
 
                 // Read in the current navigator agent genome
-                using (XmlReader xmlReader = XmlReader.Create(new StringReader(serializedAgent.GenomeXml)))
+                using (var xmlReader = XmlReader.Create(new StringReader(serializedAgent.GenomeXml)))
                 {
                     agentGenome = NeatGenomeXmlIO.ReadSingleGenomeFromRoot(xmlReader, false, _neatGenomeFactory);
                 }
@@ -257,15 +263,11 @@ namespace MazeNavigationEvaluator
         public void RunTrajectoryEvaluations()
         {
             // Check integrtiy of evaluation units
-            foreach (
-                MazeNavigatorEvaluationUnit evaluationUnit in
-                    EvaluationUnits.Where(
-                        evaluationUnit => evaluationUnit.AgentPhenome == null || evaluationUnit.MazePhenome == null))
+            foreach (var evaluationUnit in EvaluationUnits.Where(evaluationUnit =>
+                evaluationUnit.AgentPhenome == null || evaluationUnit.MazePhenome == null))
             {
                 throw new Exception(
-                    string.Format(
-                        "Malformed evaluation unit for agent {0} and maze {1} - each evaluation unit must contain a decoded maze and agent phenome.",
-                        evaluationUnit.AgentId, evaluationUnit.MazeId));
+                    $"Malformed evaluation unit for agent {evaluationUnit.AgentId} and maze {evaluationUnit.MazeId} - each evaluation unit must contain a decoded maze and agent phenome.");
             }
 
             // Execute all maze/navigator simulations in parallel
@@ -273,7 +275,52 @@ namespace MazeNavigationEvaluator
                 delegate(MazeNavigatorEvaluationUnit evaluationUnit)
                 {
                     EvaluationHandler.EvaluateMazeNavigatorUnit(evaluationUnit, _experimentParameters);
-                });            
+                });
+        }
+
+        #endregion
+
+        #region Private methods
+
+        /// <summary>
+        /// Creates a cyclic or acyclic activation scheme for the network.
+        /// </summary>
+        private NetworkActivationScheme CreateActivationScheme(string activationScheme, int? activationIters,
+            double? activationDeltaThreshold)
+        {
+            switch (activationScheme)
+            {
+                case "Acyclic":
+                    return NetworkActivationScheme.CreateAcyclicScheme();
+                case "CyclicFixedIters":
+
+                    if (activationIters == null)
+                    {
+                        throw new ArgumentException(
+                            "Maximum iterations must be specified for cyclic activation scheme");
+                    }
+
+                    var iters = activationIters.Value;
+                    return NetworkActivationScheme.CreateCyclicFixedTimestepsScheme(iters);
+                case "CyclicRelax":
+
+                    if (activationIters == null)
+                    {
+                        throw new ArgumentException(
+                            "Maximum iterations must be specified for cyclic relaxation scheme");
+                    }
+
+                    if (activationDeltaThreshold == null)
+                    {
+                        throw new ArgumentException("Delta threshold must be specified for cyclic relaxation scheme");
+                    }
+
+                    var deltaThreshold = activationDeltaThreshold.Value;
+                    var maxIters = activationIters.Value;
+                    return NetworkActivationScheme.CreateCyclicRelaxingActivationScheme(deltaThreshold, maxIters);
+            }
+
+            throw new ArgumentException($"Invalid ActivationScheme setting [{activationScheme}]");
         }
 
         #endregion

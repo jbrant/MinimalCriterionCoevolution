@@ -193,24 +193,24 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </summary>
         protected void UpdateStats(bool updateSpeciesStats, bool useAuxFitness = false)
         {
-            Statistics._generation = CurrentGeneration;
-            Statistics._totalEvaluationCount = GenomeEvaluator.EvaluationCount;
+            Statistics.Generation = CurrentGeneration;
+            Statistics.TotalEvaluationCount = GenomeEvaluator.EvaluationCount;
 
             // Evaluation per second.
             var now = DateTime.Now;
-            var duration = now - Statistics._evalsPerSecLastSampleTime;
+            var duration = now - Statistics.EvalsPerSecLastSampleTime;
 
             // To smooth out the evals per sec statistic we only update if at least 1 second has elapsed 
             // since it was last updated.
             if (duration.Ticks > 9999)
             {
                 var evalsSinceLastUpdate =
-                    (long) (GenomeEvaluator.EvaluationCount - Statistics._evalsCountAtLastUpdate);
-                Statistics._evaluationsPerSec = (int) ((evalsSinceLastUpdate*1e7)/duration.Ticks);
+                    (long) (GenomeEvaluator.EvaluationCount - Statistics.EvalsCountAtLastUpdate);
+                Statistics.EvaluationsPerSec = (int) ((evalsSinceLastUpdate*1e7)/duration.Ticks);
 
                 // Reset working variables.
-                Statistics._evalsCountAtLastUpdate = GenomeEvaluator.EvaluationCount;
-                Statistics._evalsPerSecLastSampleTime = now;
+                Statistics.EvalsCountAtLastUpdate = GenomeEvaluator.EvaluationCount;
+                Statistics.EvalsPerSecLastSampleTime = now;
             }
 
             // Fitness and complexity stats.
@@ -232,14 +232,14 @@ namespace SharpNeat.EvolutionAlgorithms
                 maxComplexity = Math.Max(maxComplexity, GenomeList[i].Complexity);
             }
 
-            Statistics._maxFitness = useAuxFitness
+            Statistics.MaxFitness = useAuxFitness
                 ? CurrentChampGenome.EvaluationInfo.AuxFitnessArr[0]._value
                 : CurrentChampGenome.EvaluationInfo.Fitness;
-            Statistics._meanFitness = totalFitness/count;
+            Statistics.MeanFitness = totalFitness/count;
 
-            Statistics._minComplexity = minComplexity;
-            Statistics._maxComplexity = maxComplexity;
-            Statistics._meanComplexity = totalComplexity/count;
+            Statistics.MinComplexity = minComplexity;
+            Statistics.MaxComplexity = maxComplexity;
+            Statistics.MeanComplexity = totalComplexity/count;
 
             if (updateSpeciesStats)
             {
@@ -254,18 +254,21 @@ namespace SharpNeat.EvolutionAlgorithms
                         ? SpecieList[i].GenomeList[0].EvaluationInfo.AuxFitnessArr[0]._value
                         : SpecieList[i].GenomeList[0].EvaluationInfo.Fitness;
                 }
-                Statistics._meanSpecieChampFitness = totalSpecieChampFitness/specieCount;
+                Statistics.MeanSpecieChampFitness = totalSpecieChampFitness/specieCount;
             }
 
             // Moving averages.
-            Statistics._prevBestFitnessMA = Statistics._bestFitnessMA.Mean;
-            Statistics._bestFitnessMA.Enqueue(Statistics._maxFitness);
+            Statistics.PrevBestFitnessMa = Statistics.BestFitnessMa.Mean;
+            Statistics.BestFitnessMa.Enqueue(Statistics.MaxFitness);
 
-            Statistics._prevMeanSpecieChampFitnessMA = Statistics._meanSpecieChampFitnessMA.Mean;
-            Statistics._meanSpecieChampFitnessMA.Enqueue(Statistics._meanSpecieChampFitness);
+            Statistics.PrevMeanSpecieChampFitnessMa = Statistics.MeanSpecieChampFitnessMa.Mean;
+            Statistics.MeanSpecieChampFitnessMa.Enqueue(Statistics.MeanSpecieChampFitness);
 
-            Statistics._prevComplexityMA = Statistics._complexityMA.Mean;
-            Statistics._complexityMA.Enqueue(Statistics._meanComplexity);
+            Statistics.PrevComplexityMa = Statistics.ComplexityMa.Mean;
+            Statistics.ComplexityMa.Enqueue(Statistics.MeanComplexity);
+
+            // Compute population-specific statistics
+            Statistics.ComputeAlgorithmSpecificPopulationStats(GenomeList);
         }
 
         /// <summary>
@@ -285,8 +288,8 @@ namespace SharpNeat.EvolutionAlgorithms
             }
 
             // Update stats.
-            Statistics._minSpecieSize = minSize;
-            Statistics._maxSpecieSize = maxSize;
+            Statistics.MinSpecieSize = minSize;
+            Statistics.MaxSpecieSize = maxSize;
         }
 
         /// <summary>

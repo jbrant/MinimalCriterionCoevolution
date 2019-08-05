@@ -95,11 +95,11 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
       <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
       <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
       <Private>True</Private>
     </Reference>
@@ -144,15 +144,16 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="MazeNavigation\ExperimentConfigurations\MCC-PathEvolution-1.config.xml">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="MazeNavigation\ExperimentConfigurations\MCC-Template.config.xml" />
     <Content Include="MazeNavigation\ExperimentConfigurations\MCC-PathEvolution-Test.config.xml">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="MazeNavigation\ExperimentConfigurations\MCCExperiments\MCC Control.config.xml" />
-    <Content Include="MazeNavigation\ExperimentConfigurations\MCCExperiments\MCC Speciation.config.xml" />
-    <Content Include="MazeNavigation\ExperimentConfigurations\MCCExperiments\MCC-PathEvolution-1.config.xml">
-      <SubType>Designer</SubType>
-    </Content>
+    <Content Include="MazeNavigation\ExperimentConfigurations\OriginalConfigs\MCC Control.config.xml" />
+    <Content Include="MazeNavigation\ExperimentConfigurations\OriginalConfigs\MCC Speciation.config.xml" />
+    <Content Include="MazeNavigation\SeedAgents\SeedAgents_20_Genomes_MazeSolved_10_Size_2_Waypoints_2_Walls.xml" />
     <Content Include="MazeNavigation\SeedMazes\GeneratedMazeGenome_15_Size_0_Walls.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -215,66 +216,6 @@
     <Content Include="MazeNavigation\SeedMazes\GeneratedMaze_50_Genomes_8_Walls.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="MazeNavigation\SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run01.pop.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="MazeNavigation\SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run02.pop.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="MazeNavigation\SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run03.pop.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="MazeNavigation\SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run04.pop.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="MazeNavigation\SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run05.pop.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="MazeNavigation\SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run06.pop.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="MazeNavigation\SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run07.pop.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="MazeNavigation\SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run08.pop.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="MazeNavigation\SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run09.pop.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="MazeNavigation\SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run10.pop.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="MazeNavigation\SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run11.pop.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="MazeNavigation\SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run12.pop.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="MazeNavigation\SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run13.pop.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="MazeNavigation\SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run14.pop.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="MazeNavigation\SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run15.pop.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="MazeNavigation\SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run16.pop.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="MazeNavigation\SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run17.pop.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="MazeNavigation\SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run18.pop.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="MazeNavigation\SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run19.pop.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="MazeNavigation\SeedPopulations\20Runs_250Genomes\SeedPopulation250_Run20.pop.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">
@@ -291,7 +232,6 @@
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

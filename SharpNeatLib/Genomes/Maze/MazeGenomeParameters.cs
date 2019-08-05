@@ -95,8 +95,6 @@ namespace SharpNeat.Genomes.Maze
             MutateAddPathWaypointProbability = DefaultMutateAddPathWaypointProbability;
             PerturbanceMagnitude = DefaultPerturbanceMagnitude;
             VerticalWallBias = DefaultVerticalWallBias;
-            GridCellNeighborhoodRadius = DefaultGridCellNeighborhoodRadius;
-            SparseCellSelectionProportion = DefaultSparseCellSelectionProportion;
 
             // Create a new roulette wheel layout with the default probabilities
             RouletteWheelLayout = CreateRouletteWheelLayout();
@@ -117,8 +115,6 @@ namespace SharpNeat.Genomes.Maze
             MutateAddPathWaypointProbability = copyFrom.MutateAddPathWaypointProbability;
             PerturbanceMagnitude = copyFrom.PerturbanceMagnitude;
             VerticalWallBias = DefaultVerticalWallBias;
-            GridCellNeighborhoodRadius = DefaultGridCellNeighborhoodRadius;
-            SparseCellSelectionProportion = DefaultSparseCellSelectionProportion;
 
             RouletteWheelLayout = new RouletteWheelLayout(copyFrom.RouletteWheelLayout);
         }
@@ -139,8 +135,6 @@ namespace SharpNeat.Genomes.Maze
         // Non-mutation related defaults
         private const double DefaultPerturbanceMagnitude = 0.2;
         private const double DefaultVerticalWallBias = 0.5;
-        private const int DefaultGridCellNeighborhoodRadius = 5;
-        private const double DefaultSparseCellSelectionProportion = 0.2;
 
         #endregion
 
@@ -152,7 +146,7 @@ namespace SharpNeat.Genomes.Maze
         // Mutation probabilities
         public double MutateWallStartLocationProbability
         {
-            get { return _mutateWallStartLocationProbability; }
+            get => _mutateWallStartLocationProbability;
             set
             {
                 _mutateWallStartLocationProbability = value;
@@ -165,7 +159,7 @@ namespace SharpNeat.Genomes.Maze
         /// </summary>
         public double MutatePassageStartLocationProbability
         {
-            get { return _mutatePassageStartLocationProbability; }
+            get => _mutatePassageStartLocationProbability;
             set
             {
                 _mutatePassageStartLocationProbability = value;
@@ -178,7 +172,7 @@ namespace SharpNeat.Genomes.Maze
         /// </summary>
         public double MutateAddWallProbability
         {
-            get { return _mutateAddWallProbability; }
+            get => _mutateAddWallProbability;
             set
             {
                 _mutateAddWallProbability = value;
@@ -191,7 +185,7 @@ namespace SharpNeat.Genomes.Maze
         /// </summary>
         public double MutateDeleteWallProbability
         {
-            get { return _mutateDeleteWallProbability; }
+            get => _mutateDeleteWallProbability;
             set
             {
                 _mutateDeleteWallProbability = value;
@@ -204,7 +198,7 @@ namespace SharpNeat.Genomes.Maze
         /// </summary>
         public double MutateExpandMazeProbability
         {
-            get { return _mutateExpandMazeProbability; }
+            get => _mutateExpandMazeProbability;
             set
             {
                 _mutateExpandMazeProbability = value;
@@ -217,7 +211,7 @@ namespace SharpNeat.Genomes.Maze
         /// </summary>
         public double MutatePathWaypointLocationProbability
         {
-            get { return _mutatePathWaypointLocationProbability; }
+            get => _mutatePathWaypointLocationProbability;
             set
             {
                 _mutatePathWaypointLocationProbability = value;
@@ -230,7 +224,7 @@ namespace SharpNeat.Genomes.Maze
         /// </summary>
         public double MutateAddPathWaypointProbability
         {
-            get { return _mutateAddPathWaypointProbability; }
+            get => _mutateAddPathWaypointProbability;
             set
             {
                 _mutateAddPathWaypointProbability = value;
@@ -249,18 +243,6 @@ namespace SharpNeat.Genomes.Maze
         ///     separate vertically adjacent paths).
         /// </summary>
         public double VerticalWallBias { get; set; }
-
-        /// <summary>
-        ///     The neighborhood radius to consider when evaluating the sparsity of a grid cell based on the number of waypoints
-        ///     (i.e. path genes) within its neighborhood.
-        /// </summary>
-        public int GridCellNeighborhoodRadius { get; set; }
-
-        /// <summary>
-        ///     The proportion of "most sparse" cells to consider when determining the location of a newly added waypoint (i.e.
-        ///     path gene).
-        /// </summary>
-        public double SparseCellSelectionProportion { get; set; }
 
         #endregion
     }

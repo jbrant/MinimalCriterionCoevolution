@@ -16,7 +16,7 @@ namespace SharpNeat.Loggers
         /// </summary>
         /// <param name="fieldElement">The position and name (and possibly other metadata) of the field to be logged.</param>
         /// <param name="value">The value of the LoggableElement.</param>
-        public LoggableElement(FieldElement fieldElement, Object value)
+        public LoggableElement(FieldElement fieldElement, object value)
         {
             FieldMetadata = fieldElement;
             Value = value;
@@ -30,8 +30,9 @@ namespace SharpNeat.Loggers
         /// <summary>
         ///     The value of the LoggableElement.
         /// </summary>
-        public Object Value { get; private set; }
+        public object Value { get; }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Compares to another (presumably) LoggableElement in order to support lexicographical sorting by the header value.
         /// </summary>
@@ -39,22 +40,19 @@ namespace SharpNeat.Loggers
         /// <returns>The comparative lexicographical ordering of the two elements.</returns>
         public int CompareTo(object obj)
         {
-            // If null, then this element is lexicographically larger than
-            // that to which it is being compared
-            if (obj == null)
-                return 1;
-
-            // Cast to LoggableElement
-            LoggableElement otherElement = obj as LoggableElement;
-
-            // If the cast was valid, perform the comparison
-            if (otherElement != null)
+            switch (obj)
             {
-                return FieldMetadata.Position.CompareTo(otherElement.FieldMetadata.Position);
+                // If null, then this element is lexicographically larger than
+                // that to which it is being compared
+                case null:
+                    return 1;
+                // If the cast is valid, perform the comparison
+                case LoggableElement otherElement:
+                    return FieldMetadata.Position.CompareTo(otherElement.FieldMetadata.Position);
+                default:
+                    // Otherwise, we can't compare against a non-LoggableElement
+                    throw new ArgumentException("Object is not a LoggableElement");
             }
-
-            // Otherwise, we can't compare against a non-LoggableElement
-            throw new ArgumentException("Object is not a LoggableElement");
         }
     }
 }

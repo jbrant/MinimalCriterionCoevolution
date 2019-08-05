@@ -395,7 +395,7 @@ namespace SharpNeat.EvolutionAlgorithms
             }
 
             // Update the total number of offspring (should be fixed)
-            Statistics._totalOffspringCount = (ulong) offspringList.Count;
+            Statistics.TotalOffspringCount = (ulong) offspringList.Count;
 
             return offspringList;
         }

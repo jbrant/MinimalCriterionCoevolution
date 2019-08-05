@@ -2,10 +2,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
 using MCC_Domains.Utils;
 using SharpNeat.Core;
+using SharpNeat.Decoders;
+using SharpNeat.Decoders.Neat;
 using SharpNeat.Genomes.Maze;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Loggers;
@@ -45,17 +48,16 @@ namespace MCC_Domains.MazeNavigation.Bootstrappers
         /// <summary>
         ///     Constructs and initializes the maze navigator initialization algorithm (fitness using generational selection).
         /// </summary>
-        /// <param name="xmlConfig">The XML configuration for the initialization algorithm.</param>
-        /// <param name="inputCount">The number of input neurons.</param>
-        /// <param name="outputCount">The number of output neurons.</param>
+        /// <param name="xmlConfig">The XML configuration for the initialization algorithm.</param>        
+        /// <param name="isAcyclic">Flag indicating whether the network is acyclic (i.e. does not have recurrent connections).</param>
         /// <param name="numSuccessfulAgents">The minimum number of successful maze navigators that must be produced.</param>
         /// <param name="numUnsuccessfulAgents">The minimum number of unsuccessful maze navigators that must be produced.</param>
         /// <returns>The constructed initialization algorithm.</returns>
-        public virtual void SetAlgorithmParameters(XmlElement xmlConfig, int inputCount, int outputCount,
-            int numSuccessfulAgents, int numUnsuccessfulAgents)
+        public virtual void SetAlgorithmParameters(XmlElement xmlConfig, bool isAcyclic, int numSuccessfulAgents,
+            int numUnsuccessfulAgents)
         {
             // Set the boiler plate parameters
-            base.SetAlgorithmParameters(xmlConfig, inputCount, outputCount);
+            base.SetAlgorithmParameters(xmlConfig, isAcyclic);
 
             // Set the static population size
             PopulationSize = XmlUtils.GetValueAsInt(xmlConfig, "PopulationSize");
@@ -76,8 +78,47 @@ namespace MCC_Domains.MazeNavigation.Bootstrappers
             // (note that the max distance to the target is the diagonal of the maze environment)
             base.SetEnvironmentParameters(
                 (int)
-                    Math.Sqrt(Math.Pow(mazeStructure.ScaledMazeHeight, 2) + Math.Pow(mazeStructure.ScaledMazeWidth, 2)),
+                Math.Sqrt(Math.Pow(mazeStructure.ScaledMazeHeight, 2) + Math.Pow(mazeStructure.ScaledMazeWidth, 2)),
                 minSuccessDistance);
+        }
+
+        /// <summary>
+        ///     Evolves the requisite number of agents who satisfy the MC of the given maze.
+        /// </summary>
+        /// <param name="genomeFactory">The agent genome factory.</param>
+        /// <param name="seedAgentList">The seed population of agents.</param>
+        /// <param name="mazeStructure">The maze structure on which agents are to be evaluated.</param>
+        /// <param name="maxInitializationEvals">
+        ///     The maximum number of evaluations to run algorithm before restarting with new,
+        ///     randomly generated population.
+        /// </param>
+        /// <param name="activationScheme">The activation scheme for the NEAT agent networks (e.g. cyclic or acyclic).</param>
+        /// <param name="parallelOptions">Synchronous/Asynchronous execution settings.</param>
+        /// <returns>The list of viable agent genomes.</returns>
+        public IEnumerable<NeatGenome> EvolveViableAgents(IGenomeFactory<NeatGenome> genomeFactory,
+            List<NeatGenome> seedAgentList, MazeStructure mazeStructure, uint? maxInitializationEvals,
+            NetworkActivationScheme activationScheme, ParallelOptions parallelOptions)
+        {
+            List<NeatGenome> viableMazeAgents;
+            uint restartCount = 0;
+            ulong initializationEvaluations;
+
+            do
+            {
+                // Instantiate the internal initialization algorithm
+                InitializeAlgorithm(parallelOptions, seedAgentList.ToList(), genomeFactory,
+                    mazeStructure, new NeatGenomeDecoder(activationScheme), 0);
+
+                // Run the initialization algorithm until the requested number of viable seed genomes are found
+                viableMazeAgents = RunEvolution(out initializationEvaluations, maxInitializationEvals, restartCount);
+
+                restartCount++;
+
+                // Repeat if maximum allotted evaluations is exceeded
+            } while (maxInitializationEvals != null && viableMazeAgents == null &&
+                     initializationEvaluations > maxInitializationEvals);
+
+            return viableMazeAgents;
         }
 
         #endregion
@@ -115,7 +156,7 @@ namespace MCC_Domains.MazeNavigation.Bootstrappers
         ///     status logging purposes).
         /// </param>
         /// <returns>The list of seed genomes that meet the minimal criteria.</returns>
-        public abstract List<NeatGenome> EvolveViableGenomes(out ulong totalEvaluations, uint? maxEvaluations,
+        public abstract List<NeatGenome> RunEvolution(out ulong totalEvaluations, uint? maxEvaluations,
             uint restartCount);
 
         /// <summary>

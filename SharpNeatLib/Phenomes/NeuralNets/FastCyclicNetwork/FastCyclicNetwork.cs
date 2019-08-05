@@ -206,6 +206,17 @@ namespace SharpNeat.Phenomes.NeuralNets.FastCyclicNetwork
             }
         }
 
+        /// <inheritdoc />
+        /// <summary>
+        /// Creates a copy of the cyclic network.
+        /// </summary>
+        /// <returns>A newly instantiated copy of FastCyclicNetwork.</returns>
+        public IBlackBox Clone()
+        {
+            return new FastCyclicNetwork(_connectionArray, _neuronActivationFnArray, _neuronAuxArgsArray,
+                _preActivationArray.Length, _inputNeuronCount, _outputNeuronCount, _timestepsPerActivation);
+        }
+
         #endregion
     }
 }

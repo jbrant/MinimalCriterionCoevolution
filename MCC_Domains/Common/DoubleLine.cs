@@ -2,7 +2,6 @@
 
 using System;
 using MCC_Domains.Utils;
-using SharpNeat.Domains;
 
 #endregion
 
@@ -16,12 +15,12 @@ namespace MCC_Domains.Common
         /// <summary>
         ///     End point of the line segment.
         /// </summary>
-        public readonly DoublePoint End;
+        private readonly DoublePoint _end;
 
         /// <summary>
         ///     Start point of the line segment.
         /// </summary>
-        public readonly DoublePoint Start;
+        private readonly DoublePoint _start;
 
         #region Constructor
 
@@ -32,10 +31,11 @@ namespace MCC_Domains.Common
         /// <param name="endPoint">The end point.</param>
         public DoubleLine(DoublePoint startPoint, DoublePoint endPoint)
         {
-            Start = startPoint;
-            End = endPoint;
+            _start = startPoint;
+            _end = endPoint;
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Construct line segment with the specified start and end coordinates.
         /// </summary>
@@ -64,7 +64,7 @@ namespace MCC_Domains.Common
         {
             if (!(obj is DoubleLine)) return false;
             var line = (DoubleLine) obj;
-            return Start.Equals(line.Start) && End.Equals(line.End);
+            return _start.Equals(line._start) && _end.Equals(line._end);
         }
 
         /// <summary>
@@ -73,7 +73,7 @@ namespace MCC_Domains.Common
         /// <returns>The line segment hash code.</returns>
         public override int GetHashCode()
         {
-            return Start.GetHashCode() + End.GetHashCode();
+            return _start.GetHashCode() + _end.GetHashCode();
         }
 
         #endregion
@@ -88,7 +88,7 @@ namespace MCC_Domains.Common
         /// <returns>Whether or not the line segments are equivalent.</returns>
         public static bool operator ==(DoubleLine a, DoubleLine b)
         {
-            return ((a.Start == b.Start) && (a.End == b.End) || (a.Start == b.End) && (a.End == b.Start));
+            return ((a._start == b._start) && (a._end == b._end) || (a._start == b._end) && (a._end == b._start));
         }
 
         /// <summary>
@@ -111,7 +111,7 @@ namespace MCC_Domains.Common
         /// <returns>The line segment resulting from the arithmetic difference between the two given line segments.</returns>
         public static DoubleLine operator -(DoubleLine a, DoubleLine b)
         {
-            return new DoubleLine(a.Start - b.Start, a.End - b.End);
+            return new DoubleLine(a._start - b._start, a._end - b._end);
         }
 
         /// <summary>
@@ -123,7 +123,7 @@ namespace MCC_Domains.Common
         /// <returns>The line segment resulting from the arithmetic sum of the two given line segments.</returns>
         public static DoubleLine operator +(DoubleLine a, DoubleLine b)
         {
-            return new DoubleLine(a.Start + b.Start, a.End + b.End);
+            return new DoubleLine(a._start + b._start, a._end + b._end);
         }
 
         #endregion
@@ -140,8 +140,8 @@ namespace MCC_Domains.Common
         public static DoublePoint CalculateMidpoint(DoubleLine line)
         {
             // Half the sum of both the start and end X and Y coordinates
-            var x = (line.Start.X + line.End.X)/2;
-            var y = (line.Start.Y + line.End.Y)/2;
+            var x = (line._start.X + line._end.X) / 2;
+            var y = (line._start.Y + line._end.Y) / 2;
 
             // Return a new point based on those halved coordinates
             return new DoublePoint(x, y);
@@ -157,26 +157,29 @@ namespace MCC_Domains.Common
         public static DoublePoint CalculateLineIntersection(DoubleLine a, DoubleLine b, out bool intersectionFound)
         {
             // Calculate the determinant's denominator
-            var denominator = (a.Start.X - a.End.X)*(b.Start.Y - b.End.Y) - (a.Start.Y - a.End.Y)*(b.Start.X - b.End.X);
+            var denominator = (a._start.X - a._end.X) * (b._start.Y - b._end.Y) -
+                              (a._start.Y - a._end.Y) * (b._start.X - b._end.X);
 
             if (denominator != 0)
             {
                 // Calculate the determinants
-                var xDeterminant = ((a.Start.X*a.End.Y - a.Start.Y*a.End.X)*(b.Start.X - b.End.X) -
-                                    (a.Start.X - a.End.X)*(b.Start.X*b.End.Y - b.Start.Y*b.End.X))/denominator;
-                var yDeterminant = ((a.Start.X*a.End.Y - a.Start.Y*a.End.X)*(b.Start.Y - b.End.Y) -
-                                    (a.Start.Y - a.End.Y)*(b.Start.X*b.End.Y - b.Start.Y*b.End.X))/denominator;
+                var xDeterminant = ((a._start.X * a._end.Y - a._start.Y * a._end.X) * (b._start.X - b._end.X) -
+                                    (a._start.X - a._end.X) * (b._start.X * b._end.Y - b._start.Y * b._end.X)) /
+                                   denominator;
+                var yDeterminant = ((a._start.X * a._end.Y - a._start.Y * a._end.X) * (b._start.Y - b._end.Y) -
+                                    (a._start.Y - a._end.Y) * (b._start.X * b._end.Y - b._start.Y * b._end.X)) /
+                                   denominator;
 
                 // Ensure that the intersection point actually lies within both line segments
-                if (MathUtils.AlmostGreaterThanOrEqual(xDeterminant, Math.Min(a.Start.X, a.End.X)) &&
-                    MathUtils.AlmostLessThanOrEqual(xDeterminant, Math.Max(a.Start.X, a.End.X)) &&
-                    MathUtils.AlmostGreaterThanOrEqual(xDeterminant, Math.Min(b.Start.X, b.End.X)) &&
-                    MathUtils.AlmostLessThanOrEqual(xDeterminant, Math.Max(b.Start.X, b.End.X)) &&
-                    MathUtils.AlmostGreaterThanOrEqual(yDeterminant, Math.Min(a.Start.Y, a.End.Y)) &&
-                    MathUtils.AlmostLessThanOrEqual(yDeterminant, Math.Max(a.Start.Y, a.End.Y)) &&
-                    MathUtils.AlmostGreaterThanOrEqual(yDeterminant, Math.Min(b.Start.Y, b.End.Y)) &&
-                    MathUtils.AlmostLessThanOrEqual(yDeterminant, Math.Max(b.Start.Y, b.End.Y))
-                    )
+                if (MathUtils.AlmostGreaterThanOrEqual(xDeterminant, Math.Min(a._start.X, a._end.X)) &&
+                    MathUtils.AlmostLessThanOrEqual(xDeterminant, Math.Max(a._start.X, a._end.X)) &&
+                    MathUtils.AlmostGreaterThanOrEqual(xDeterminant, Math.Min(b._start.X, b._end.X)) &&
+                    MathUtils.AlmostLessThanOrEqual(xDeterminant, Math.Max(b._start.X, b._end.X)) &&
+                    MathUtils.AlmostGreaterThanOrEqual(yDeterminant, Math.Min(a._start.Y, a._end.Y)) &&
+                    MathUtils.AlmostLessThanOrEqual(yDeterminant, Math.Max(a._start.Y, a._end.Y)) &&
+                    MathUtils.AlmostGreaterThanOrEqual(yDeterminant, Math.Min(b._start.Y, b._end.Y)) &&
+                    MathUtils.AlmostLessThanOrEqual(yDeterminant, Math.Max(b._start.Y, b._end.Y))
+                )
                 {
                     intersectionFound = true;
                     return new DoublePoint(xDeterminant, yDeterminant);
@@ -198,14 +201,14 @@ namespace MCC_Domains.Common
         public static DoublePoint CalculateLineSegmentClosestPoint(DoubleLine line, DoublePoint point)
         {
             // Calculate the projection of the given point onto the given line
-            double numerator = (point.X - line.Start.X)*(line.End.X - line.Start.X) +
-                               (point.Y - line.Start.Y)*(line.End.Y - line.Start.Y);
-            double denominator = DoublePoint.CalculateSquaredDistance(line.Start, line.End);
-            double projection = numerator/denominator;
+            var numerator = (point.X - line._start.X) * (line._end.X - line._start.X) +
+                            (point.Y - line._start.Y) * (line._end.Y - line._start.Y);
+            var denominator = DoublePoint.CalculateSquaredDistance(line._start, line._end);
+            var projection = numerator / denominator;
 
             // Return the intersection point on the line segment
-            return new DoublePoint(line.Start.X + projection*(line.End.X - line.Start.X),
-                line.Start.Y + projection*(line.End.Y - line.Start.Y));
+            return new DoublePoint(line._start.X + projection * (line._end.X - line._start.X),
+                line._start.Y + projection * (line._end.Y - line._start.Y));
         }
 
         /// <summary>
@@ -217,25 +220,25 @@ namespace MCC_Domains.Common
         public static double CalculateSquaredDistanceFromLineToPoint(DoubleLine line, DoublePoint point)
         {
             // Calculate the projection of the given point onto the given line
-            var numerator = (point.X - line.Start.X)*(line.End.X - line.Start.X) +
-                            (point.Y - line.Start.Y)*(line.End.Y - line.Start.Y);
-            var denominator = DoublePoint.CalculateSquaredDistance(line.Start, line.End);
-            var projection = numerator/denominator;
+            var numerator = (point.X - line._start.X) * (line._end.X - line._start.X) +
+                            (point.Y - line._start.Y) * (line._end.Y - line._start.Y);
+            var denominator = DoublePoint.CalculateSquaredDistance(line._start, line._end);
+            var projection = numerator / denominator;
 
             // If the projection is beyond the segment, return the distance to 
             // either the start or end point on the line segment (whichever 
             // happens to be the shortest)
             if (projection < 0 || projection > 1)
             {
-                var distanceToStart = DoublePoint.CalculateSquaredDistance(line.Start, point);
-                var distanceToEnd = DoublePoint.CalculateSquaredDistance(line.End, point);
+                var distanceToStart = DoublePoint.CalculateSquaredDistance(line._start, point);
+                var distanceToEnd = DoublePoint.CalculateSquaredDistance(line._end, point);
                 return distanceToStart < distanceToEnd ? distanceToStart : distanceToEnd;
             }
 
 
             // Create a point on the line segment from which to measure the distance to the given point
-            var segmentPoint = new DoublePoint(line.Start.X + projection*(line.End.X - line.Start.X),
-                line.Start.Y + projection*(line.End.Y - line.Start.Y));
+            var segmentPoint = new DoublePoint(line._start.X + projection * (line._end.X - line._start.X),
+                line._start.Y + projection * (line._end.Y - line._start.Y));
 
             // Measure the distance from this point on the segment to the given point
             return DoublePoint.CalculateSquaredDistance(segmentPoint, point);
@@ -259,7 +262,7 @@ namespace MCC_Domains.Common
         /// <returns>The squared length of the line segment.</returns>
         public static double CalculateSquaredLineSegmentLength(DoubleLine line)
         {
-            return DoublePoint.CalculateSquaredDistance(line.Start, line.End);
+            return DoublePoint.CalculateSquaredDistance(line._start, line._end);
         }
 
         /// <summary>
@@ -269,7 +272,7 @@ namespace MCC_Domains.Common
         /// <returns>The length of the line segment.</returns>
         public static double CalculateLineSegmentLength(DoubleLine line)
         {
-            return DoublePoint.CalculateEuclideanDistance(line.Start, line.End);
+            return DoublePoint.CalculateEuclideanDistance(line._start, line._end);
         }
 
         #endregion

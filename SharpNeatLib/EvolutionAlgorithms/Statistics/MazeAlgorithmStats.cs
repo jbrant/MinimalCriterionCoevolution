@@ -12,11 +12,24 @@ using SharpNeat.Utility;
 
 namespace SharpNeat.EvolutionAlgorithms.Statistics
 {
-    public class MazeAlgorithmStats : AbstractEvolutionaryAlgorithmStats<MazeGenome>
+    /// <summary>
+    ///     Encapsulates descriptive statistics about the extant population of maze genomes.
+    /// </summary>
+    public class MazeAlgorithmStats : AbstractEvolutionaryAlgorithmStats
     {
+        #region Constructor
+
+        /// <summary>
+        ///     MazeAlgorithmStats constructor.
+        /// </summary>
+        /// <param name="eaParams">Evolution algorithm parameters required for initialization.</param>
         public MazeAlgorithmStats(EvolutionAlgorithmParameters eaParams) : base(eaParams)
         {
         }
+
+        #endregion
+
+        #region Properties
 
         /// <summary>
         ///     The minimum number of walls in a maze within the maze population.
@@ -108,41 +121,60 @@ namespace SharpNeat.EvolutionAlgorithms.Statistics
         /// </summary>
         public double MeanWidth { get; private set; }
 
+        #endregion
+        
+        #region Method overrides
+        
         /// <summary>
-        ///     Logs genome implementation-specific details about the population.
+        ///     Computes maze genome implementation-specific details about the population.
         /// </summary>
-        /// <param name="population">The population from which to compute more specific, descriptive statistics.</param>
-        public override void SetAlgorithmSpecificsPopulationStats(IList<MazeGenome> population)
+        /// <param name="population">The maze population from which to compute more specific, descriptive statistics.</param>
+        public override void ComputeAlgorithmSpecificPopulationStats<TGenome>(IList<TGenome> population)
         {
+            // Ensure that population list contains maze genomes, otherwise return
+            if ((population is IList<MazeGenome>) == false)
+                return;
+
+            // Cast to maze genomes
+            var mazePopulation = (IList<MazeGenome>) population;
+
             // Compute wall statistics
-            MinWalls = population.Min(g => g.WallGeneList.Count);
-            MaxWalls = population.Max(g => g.WallGeneList.Count);
-            MeanWalls = population.Average(g => g.WallGeneList.Count);
+            MinWalls = mazePopulation.Min(g => g.WallGeneList.Count);
+            MaxWalls = mazePopulation.Max(g => g.WallGeneList.Count);
+            MeanWalls = mazePopulation.Average(g => g.WallGeneList.Count);
 
             // Compute waypoint statistics
-            MinWaypoints = population.Min(g => g.PathGeneList.Count);
-            MaxWaypoints = population.Max(g => g.PathGeneList.Count);
-            MeanWaypoints = population.Average(g => g.PathGeneList.Count);
+            MinWaypoints = mazePopulation.Min(g => g.PathGeneList.Count);
+            MaxWaypoints = mazePopulation.Max(g => g.PathGeneList.Count);
+            MeanWaypoints = mazePopulation.Average(g => g.PathGeneList.Count);
 
             // Compute junctures
-            MinJunctures = population.Min(MazeUtils.GetNumJunctures);
-            MaxJunctures = population.Max(MazeUtils.GetNumJunctures);
-            MeanJunctures = population.Average(MazeUtils.GetNumJunctures);
+            MinJunctures = mazePopulation.Min(MazeUtils.GetNumJunctures);
+            MaxJunctures = mazePopulation.Max(MazeUtils.GetNumJunctures);
+            MeanJunctures = mazePopulation.Average(MazeUtils.GetNumJunctures);
 
             // Compute trajectories facing opening
-            MinTrajectoryFacingOpenings = population.Min(MazeUtils.GetNumRoomOpenings);
-            MaxTrajectoryFacingOpenings = population.Max(MazeUtils.GetNumRoomOpenings);
-            MeanTrajectoryFacingOpenings = population.Average(MazeUtils.GetNumRoomOpenings);
+            MinTrajectoryFacingOpenings = mazePopulation.Min(MazeUtils.GetNumPathFacingRoomOpenings);
+            MaxTrajectoryFacingOpenings = mazePopulation.Max(MazeUtils.GetNumPathFacingRoomOpenings);
+            MeanTrajectoryFacingOpenings = mazePopulation.Average(MazeUtils.GetNumPathFacingRoomOpenings);
 
             // Compute maze dimension statistics
-            MinHeight = population.Min(g => g.MazeBoundaryHeight);
-            MaxHeight = population.Max(g => g.MazeBoundaryHeight);
-            MeanHeight = population.Average(g => g.MazeBoundaryHeight);
-            MinWidth = population.Min(g => g.MazeBoundaryWidth);
-            MaxWidth = population.Max(g => g.MazeBoundaryWidth);
-            MeanWidth = population.Average(g => g.MazeBoundaryWidth);
+            MinHeight = mazePopulation.Min(g => g.MazeBoundaryHeight);
+            MaxHeight = mazePopulation.Max(g => g.MazeBoundaryHeight);
+            MeanHeight = mazePopulation.Average(g => g.MazeBoundaryHeight);
+            MinWidth = mazePopulation.Min(g => g.MazeBoundaryWidth);
+            MaxWidth = mazePopulation.Max(g => g.MazeBoundaryWidth);
+            MeanWidth = mazePopulation.Average(g => g.MazeBoundaryWidth);
         }
 
+        /// <summary>
+        ///     Returns the fields within MazeAlgorithmStats that are enabled for logging.
+        /// </summary>
+        /// <param name="logFieldEnableMap">
+        ///     Dictionary of logging fields that can be enabled or disabled based on the specification
+        ///     of the calling routine.
+        /// </param>
+        /// <returns>The loggable fields within MazeAlgorithmStats.</returns>
         public override List<LoggableElement> GetLoggableElements(
             IDictionary<FieldElement, bool> logFieldEnableMap = null)
         {
@@ -261,5 +293,7 @@ namespace SharpNeat.EvolutionAlgorithms.Statistics
 
             return elements;
         }
+        
+        #endregion
     }
 }

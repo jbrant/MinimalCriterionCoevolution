@@ -10,6 +10,7 @@ using SharpNeat.Utility;
 
 namespace SharpNeat.Genomes.Maze
 {
+    /// <inheritdoc />
     /// <summary>
     ///     The maze genome contains maze genes (which themselves encode the walls and their passages in the form of
     ///     real-valued numbers) and provides routines for mutating those genes and producing offspring.
@@ -18,22 +19,36 @@ namespace SharpNeat.Genomes.Maze
     {
         #region Instance Variables
 
-        private CoordinateVector _position;
-
         /// <summary>
-        ///     The maximum number of times a particular mutation can be attempted until a different mutation type is randomly
-        ///     selected.
+        ///     The position vector of the maze in maze genotype space.
         /// </summary>
-        private const int MaxMutationRetries = 10;
-
-        #endregion
-
-        #region Maze Properties
+        private CoordinateVector _position;
 
         /// <summary>
         ///     Reference to the maze genome factory (for the purposes of creating offspring).
         /// </summary>
-        public MazeGenomeFactory GenomeFactory { get; set; }
+        private readonly MazeGenomeFactory _genomeFactory;
+
+        /// <summary>
+        ///     Relative height of each maze cell in the range 0 to 1.
+        /// </summary>
+        private double _relativeCellHeight;
+
+        /// <summary>
+        ///     Relative width of each maze cell in the range 0 to 1.
+        /// </summary>
+        private double _relativeCellWidth;
+
+        /// <summary>
+        ///     The maximum complexity of the maze (at the evolved resolution).  Note that this is set when the genome is birthed,
+        ///     but can also change as a result of a mutation; however, it's stored on the genome instead of being calculated via
+        ///     the "get" call because of the computational cost involved in calculating it.
+        /// </summary>
+        private int _maxWallComplexity;
+
+        #endregion
+
+        #region Maze Properties
 
         /// <summary>
         ///     The list of wall genes composing the genome (each gene encodes the un-normalized location of a wall in the maze and
@@ -58,21 +73,14 @@ namespace SharpNeat.Genomes.Maze
         public int MazeBoundaryWidth { get; private set; }
 
         /// <summary>
-        ///     Relative height of each maze cell in the range 0 to 1.
+        ///     Maximum height of quadrants (i.e. rooms or submazes) within a maze.
         /// </summary>
-        public double RelativeCellHeight { get; private set; }
+        public int MazeQuadrantHeight => _genomeFactory.MazeQuadrantHeight;
 
         /// <summary>
-        ///     Relative width of each maze cell in the range 0 to 1.
+        ///     Maximum width of quadrants (i.e. rooms or submazes) within a maze.
         /// </summary>
-        public double RelativeCellWidth { get; private set; }
-
-        /// <summary>
-        ///     The maximum complexity of the maze (at the evolved resolution).  Note that this is set when the genome is birthed,
-        ///     but can also change as a result of a mutation; however, it's stored on the genome instead of being calculated via
-        ///     the "get" call because of the computational cost involved in calculating it.
-        /// </summary>
-        public int MaxWallComplexity { get; private set; }
+        public int MazeQuadrantWidth => _genomeFactory.MazeQuadrantWidth;
 
         #endregion
 
@@ -83,7 +91,7 @@ namespace SharpNeat.Genomes.Maze
         /// </summary>
         /// <param name="id">The unique identifier of the new maze genome.</param>
         /// <param name="birthGeneration">The birth generation.</param>
-        protected MazeGenome(uint id, uint birthGeneration)
+        private MazeGenome(uint id, uint birthGeneration)
         {
             // Set the unique genome ID and the birth generation
             Id = id;
@@ -93,6 +101,7 @@ namespace SharpNeat.Genomes.Maze
             EvaluationInfo = new EvaluationInfo(0);
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Constructor which constructs a new maze genome with the given genome factory, unique identifier and birth
         ///     generation.
@@ -106,9 +115,7 @@ namespace SharpNeat.Genomes.Maze
             if (genomeFactory == null)
             {
                 throw new SharpNeatException(
-                    string.Format(
-                        "Null genome factory passed in during construction of maze genome with id [{0}] and birth generation [{1}].  If the maze height/width are not explicitly specified, the genome factory is required for instantiating genome with boundary length defaults.",
-                        id, birthGeneration));
+                    $"Null genome factory passed in during construction of maze genome with id [{id}] and birth generation [{birthGeneration}].  If the maze height/width are not explicitly specified, the genome factory is required for instantiating genome with boundary length defaults.");
             }
 
             // Set the initial maze height and width
@@ -116,11 +123,11 @@ namespace SharpNeat.Genomes.Maze
             MazeBoundaryWidth = genomeFactory.BaseMazeWidth;
 
             // Set relative cell height and width
-            RelativeCellHeight = (double) 1 / MazeBoundaryHeight;
-            RelativeCellWidth = (double) 1 / MazeBoundaryWidth;
+            _relativeCellHeight = (double) 1 / MazeBoundaryHeight;
+            _relativeCellWidth = (double) 1 / MazeBoundaryWidth;
 
             // Set the genome factory
-            GenomeFactory = genomeFactory;
+            _genomeFactory = genomeFactory;
 
             // Instantiate new wall gene list
             WallGeneList = new List<WallGene>();
@@ -128,9 +135,9 @@ namespace SharpNeat.Genomes.Maze
             // Instantiate new path gene list (at least one waypoint is required to form an initial trajectory - placed in the middle by default)
             PathGeneList = new List<PathGene>
             {
-                new PathGene(GenomeFactory.InnovationIdGenerator.NextId,
+                new PathGene(_genomeFactory.InnovationIdGenerator.NextId,
                     new Point2DInt(MazeBoundaryWidth / 2, MazeBoundaryHeight / 2),
-                    GenomeFactory.Rng.NextBool()
+                    _genomeFactory.Rng.NextBool()
                         ? IntersectionOrientation.Horizontal
                         : IntersectionOrientation.Vertical)
             };
@@ -140,20 +147,21 @@ namespace SharpNeat.Genomes.Maze
         ///     Constructor which constructs a new maze genome with the given unique identifier, birth generation, and initial maze
         ///     height/width.
         /// </summary>
+        /// <param name="mazeGenomeFactory">Reference to the genome factory.</param>
         /// <param name="id">The unique identifier of the new maze genome.</param>
         /// <param name="birthGeneration">The birth generation.</param>
         /// <param name="height">The base/initial height of the maze genome.</param>
         /// <param name="width">The base/initial width of the maze genome.</param>
-        protected MazeGenome(uint id, uint birthGeneration, int height, int width)
-            : this(id, birthGeneration)
+        private MazeGenome(MazeGenomeFactory mazeGenomeFactory, uint id, uint birthGeneration, int height, int width)
+            : this(mazeGenomeFactory, id, birthGeneration)
         {
             // Set the initial maze height and width
             MazeBoundaryHeight = height;
             MazeBoundaryWidth = width;
 
             // Set relative cell height and width
-            RelativeCellHeight = (double) 1 / MazeBoundaryHeight;
-            RelativeCellWidth = (double) 1 / MazeBoundaryWidth;
+            _relativeCellHeight = (double) 1 / MazeBoundaryHeight;
+            _relativeCellWidth = (double) 1 / MazeBoundaryWidth;
 
             // Instantiate new wall gene list
             WallGeneList = new List<WallGene>();
@@ -176,69 +184,77 @@ namespace SharpNeat.Genomes.Maze
             BirthGeneration = birthGeneration;
 
             // Copy the other parameters off of the given genome
-            GenomeFactory = copyFrom.GenomeFactory;
+            _genomeFactory = copyFrom._genomeFactory;
             MazeBoundaryHeight = copyFrom.MazeBoundaryHeight;
             MazeBoundaryWidth = copyFrom.MazeBoundaryWidth;
-            RelativeCellHeight = copyFrom.RelativeCellHeight;
-            RelativeCellWidth = copyFrom.RelativeCellWidth;
+            _relativeCellHeight = copyFrom._relativeCellHeight;
+            _relativeCellWidth = copyFrom._relativeCellWidth;
             WallGeneList = new List<WallGene>(DeepCopyWallGeneList(copyFrom.WallGeneList));
             PathGeneList = new List<PathGene>(DeepCopyPathGeneList(copyFrom.PathGeneList));
             EvaluationInfo = new EvaluationInfo(copyFrom.EvaluationInfo.FitnessHistoryLength);
 
             // Compute max complexity based on existing genome complexity and maze dimensions
-            MaxWallComplexity = MazeUtils.DetermineMaxPartitions(this);
+            _maxWallComplexity = MazeUtils.DetermineMaxPartitions(this);
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Constructor which constructs a new maze genome with the given unique identifier, birth generation, and list of wall
         ///     genes.
         /// </summary>
+        /// <param name="mazeGenomeFactory">Reference to the genome factory.</param>
         /// <param name="id">The unique identifier of the new maze genome.</param>
         /// <param name="birthGeneration">The birth generation.</param>
         /// <param name="height">The base/initial height of the maze genome.</param>
         /// <param name="width">The base/initial width of the maze genome.</param>
         /// <param name="wallGeneList">The list of wall genes.</param>
         /// <param name="pathGeneList">The list of path genes.</param>
-        public MazeGenome(uint id, uint birthGeneration, int height, int width,
+        public MazeGenome(MazeGenomeFactory mazeGenomeFactory, uint id, uint birthGeneration, int height, int width,
             IList<WallGene> wallGeneList, IList<PathGene> pathGeneList)
-            : this(id, birthGeneration, height, width)
+            : this(mazeGenomeFactory, id, birthGeneration, height, width)
         {
             WallGeneList = wallGeneList;
             PathGeneList = pathGeneList;
 
             // Compute max complexity based on existing genome complexity and maze dimensions
-            MaxWallComplexity = MazeUtils.DetermineMaxPartitions(this);
+            _maxWallComplexity = MazeUtils.DetermineMaxPartitions(this);
         }
 
         #endregion
 
         #region Interface Properties
 
+        /// <inheritdoc />
         /// <summary>
         ///     The unique identifier of the maze genome.
         /// </summary>
         public uint Id { get; }
 
+        /// <inheritdoc />
         /// <summary>
         ///     NOT USED (required by interface).
         /// </summary>
         public int SpecieIdx { get; set; }
 
+        /// <inheritdoc />
         /// <summary>
         ///     The birth generation of the maze genome.
         /// </summary>
         public uint BirthGeneration { get; }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Evaluation statistics for the maze genome (i.e. fitness, etc.).
         /// </summary>
         public EvaluationInfo EvaluationInfo { get; }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Computes the complexity of the maze genome.
         /// </summary>
         public double Complexity => PathGeneList.Count;
 
+        /// <inheritdoc />
         /// <summary>
         ///     Gets a coordinate that represents the genome's position in the search space (also known
         ///     as the genetic encoding space). This allows speciation/clustering algorithms to operate on
@@ -248,39 +264,40 @@ namespace SharpNeat.Genomes.Maze
         {
             get
             {
-                if (null == _position)
+                // Short-circuit position calculation if already set
+                if (null != _position) return _position;
+
+                var pathWaypointCount = PathGeneList.Count;
+
+                // Create array of key/value pairs to hold innovation IDs and their corresponding 
+                // "position" in the genetic encoding space                    
+                var coordElemArray = new KeyValuePair<ulong, double>[pathWaypointCount];
+
+                for (var i = 0; i < PathGeneList.Count; i++)
                 {
-                    int pathWaypointCount = PathGeneList.Count;
+                    var xPosition = PathGeneList[i].Waypoint.X;
+                    var yPosition = PathGeneList[i].Waypoint.Y;
 
-                    // Create array of key/value pairs to hold innovation IDs and their corresponding 
-                    // "position" in the genetic encoding space                    
-                    KeyValuePair<ulong, double>[] coordElemArray = new KeyValuePair<ulong, double>[pathWaypointCount];
+                    // Calculate cantor pairing of X and Y coordinates
+                    double compositeGeneCoordinate = ((xPosition + yPosition) *
+                                                      (xPosition + yPosition + 1)) / 2 + yPosition;
 
-                    for (int i = 0; i < PathGeneList.Count; i++)
-                    {
-                        int xPosition = PathGeneList[i].Waypoint.X;
-                        int yPosition = PathGeneList[i].Waypoint.Y;
-
-                        // Calculate cantor pairing of X and Y coordinates
-                        double compositeGeneCoordinate = ((xPosition + yPosition) *
-                                                          (xPosition + yPosition + 1)) / 2 + yPosition;
-
-                        // Add gene coordinate to array
-                        coordElemArray[i] = new KeyValuePair<ulong, double>(PathGeneList[i].InnovationId,
-                            compositeGeneCoordinate);
-                    }
-
-                    // Note that walls are omitted from genome position definition because their placement
-                    // is merely induced by the trajectory, which is itself defined by the waypoints
-
-                    // Construct the genome coordinate vector
-                    _position = new CoordinateVector(coordElemArray);
+                    // Add gene coordinate to array
+                    coordElemArray[i] = new KeyValuePair<ulong, double>(PathGeneList[i].InnovationId,
+                        compositeGeneCoordinate);
                 }
+
+                // Note that walls are omitted from genome position definition because their placement
+                // is merely induced by the trajectory, which is itself defined by the waypoints
+
+                // Construct the genome coordinate vector
+                _position = new CoordinateVector(coordElemArray);
 
                 return _position;
             }
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     The decoded phenotype produced from this maze genome (i.e. the physical maze itself).  This is used to speed up the
         ///     decoding process.
@@ -291,6 +308,7 @@ namespace SharpNeat.Genomes.Maze
 
         #region Public Interface Methods
 
+        /// <inheritdoc />
         /// <summary>
         ///     Asexually reproduces a new maze genome based on copying this genome and assigning the given birth generation.
         /// </summary>
@@ -299,8 +317,8 @@ namespace SharpNeat.Genomes.Maze
         public MazeGenome CreateOffspring(uint birthGeneration)
         {
             // Make a new genome that is a copy of this one but with a new genome ID
-            MazeGenome offspring = GenomeFactory.CreateGenomeCopy(this, GenomeFactory.GenomeIdGenerator.NextId,
-                birthGeneration);
+            var offspring =
+                MazeGenomeFactory.CreateGenomeCopy(this, _genomeFactory.GenomeIdGenerator.NextId, birthGeneration);
 
             // Mutate the new genome
             offspring.Mutate();
@@ -308,6 +326,7 @@ namespace SharpNeat.Genomes.Maze
             return offspring;
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     NOT USED (required by interface) - this would perform sexual reproduction (i.e. crossover), but that's not
         ///     currently supported.
@@ -366,9 +385,9 @@ namespace SharpNeat.Genomes.Maze
                     // Get random mutation to perform 
                     // (prohibit exceeding max wall complexity and placing more waypoints than there are cells in
                     // the maze grid)
-                    outcome = RouletteWheel.SingleThrow(GenomeFactory.MazeGenomeParameters.RouletteWheelLayout,
-                        GenomeFactory.Rng);
-                } while ((WallGeneList.Count >= MaxWallComplexity && outcome == 2) ||
+                    outcome = RouletteWheel.SingleThrow(_genomeFactory.MazeGenomeParameters.RouletteWheelLayout,
+                        _genomeFactory.Rng);
+                } while ((WallGeneList.Count >= _maxWallComplexity && outcome == 2) ||
                          ((PathGeneList.Count >= MazeBoundaryHeight || PathGeneList.Count >= MazeBoundaryWidth) &&
                           (outcome == 5 || outcome == 6)));
 
@@ -408,48 +427,48 @@ namespace SharpNeat.Genomes.Maze
         /// <returns>Flag indicating whether the wall start location mutation was successful.</returns>
         private bool MutateWallStartLocations()
         {
-            bool mutationOccurred = false;
-            int mazeTreeDepth = (int) Math.Log(WallGeneList.Count, 2) + 1;
+            var mutationOccurred = false;
+            var mazeTreeDepth = (int) Math.Log(WallGeneList.Count, 2) + 1;
 
             // Don't try to mutate if the gene list is empty
             if (WallGeneList.Count <= 0)
                 return false;
 
             // Iterate through each gene (wall) and probabilistically shift its location (scaling perturbance magnitude by wall effect size)
-            for (int geneIdx = 0; geneIdx < WallGeneList.Count; geneIdx++)
+            for (var geneIdx = 0; geneIdx < WallGeneList.Count; geneIdx++)
             {
-                if (GenomeFactory.Rng.NextDouble() <
-                    GenomeFactory.MazeGenomeParameters.MutateWallStartLocationProbability)
-                {
-                    WallGeneList[geneIdx].WallLocation = BoundStartLocation(WallGeneList[geneIdx].WallLocation +
-                                                                            (((GenomeFactory.Rng.NextDouble() * 2) -
-                                                                              1) *
-                                                                             GenomeFactory.MazeGenomeParameters
-                                                                                 .PerturbanceMagnitude *
-                                                                             ((double)
-                                                                              ((int) (Math.Log(geneIdx + 1, 2)) + 1) /
-                                                                              mazeTreeDepth)));
-                    mutationOccurred = true;
-                }
+                // Skip mutation if below probability threshold
+                if (!(_genomeFactory.Rng.NextDouble() <
+                      _genomeFactory.MazeGenomeParameters.MutateWallStartLocationProbability)) continue;
+
+                // Apply wall mutation
+                WallGeneList[geneIdx].WallLocation = BoundStartLocation(WallGeneList[geneIdx].WallLocation +
+                                                                        (((_genomeFactory.Rng.NextDouble() * 2) -
+                                                                          1) *
+                                                                         _genomeFactory.MazeGenomeParameters
+                                                                             .PerturbanceMagnitude *
+                                                                         ((double)
+                                                                          ((int) (Math.Log(geneIdx + 1, 2)) + 1) /
+                                                                          mazeTreeDepth)));
+                mutationOccurred = true;
             }
 
-            // Ensure that a mutation actually occurs
-            if (mutationOccurred == false)
-            {
-                // Select a random gene to mutate
-                int mazeGeneIdx = GenomeFactory.Rng.Next(WallGeneList.Count);
+            // Exit if a mutation has already been applied above
+            if (mutationOccurred) return true;
 
-                // Perform mutation
-                WallGeneList[mazeGeneIdx].WallLocation = BoundStartLocation(WallGeneList[mazeGeneIdx].WallLocation +
-                                                                            (((GenomeFactory.Rng.NextDouble() * 2) -
-                                                                              1) *
-                                                                             GenomeFactory.MazeGenomeParameters
-                                                                                 .PerturbanceMagnitude *
-                                                                             ((double)
-                                                                              ((int) (Math.Log(mazeGeneIdx + 1, 2)) +
-                                                                               1) /
-                                                                              mazeTreeDepth)));
-            }
+            // Select a random gene to mutate
+            var mazeGeneIdx = _genomeFactory.Rng.Next(WallGeneList.Count);
+
+            // Apply wall mutation on randomly selected gene
+            WallGeneList[mazeGeneIdx].WallLocation = BoundStartLocation(WallGeneList[mazeGeneIdx].WallLocation +
+                                                                        (((_genomeFactory.Rng.NextDouble() * 2) -
+                                                                          1) *
+                                                                         _genomeFactory.MazeGenomeParameters
+                                                                             .PerturbanceMagnitude *
+                                                                         ((double)
+                                                                          ((int) (Math.Log(mazeGeneIdx + 1, 2)) +
+                                                                           1) /
+                                                                          mazeTreeDepth)));
 
             return true;
         }
@@ -461,71 +480,72 @@ namespace SharpNeat.Genomes.Maze
         /// <returns>Flag indicating whether the passage start location mutation was successful.</returns>
         private bool MutatePassageStartLocations()
         {
-            bool mutationOccurred = false;
-            int mazeTreeDepth = (int) Math.Log(WallGeneList.Count, 2) + 1;
+            var mutationOccurred = false;
+            var mazeTreeDepth = (int) Math.Log(WallGeneList.Count, 2) + 1;
 
             // Don't try to mutate if the gene list is empty
             if (WallGeneList.Count <= 0)
                 return false;
 
             // Iterate through each gene (wall) and probabilistically shift its passage location (scaling perturbance magnitude by wall effect size)
-            for (int geneIdx = 0; geneIdx < WallGeneList.Count; geneIdx++)
+            for (var geneIdx = 0; geneIdx < WallGeneList.Count; geneIdx++)
             {
-                if (GenomeFactory.Rng.NextDouble() <
-                    GenomeFactory.MazeGenomeParameters.MutatePassageStartLocationProbability)
-                {
-                    WallGeneList[geneIdx].PassageLocation = BoundStartLocation(WallGeneList[geneIdx].PassageLocation +
-                                                                               (((GenomeFactory.Rng.NextDouble() * 2) -
-                                                                                 1) *
-                                                                                GenomeFactory.MazeGenomeParameters
-                                                                                    .PerturbanceMagnitude *
-                                                                                ((double)
-                                                                                 ((int) (Math.Log(geneIdx + 1, 2)) +
-                                                                                  1) /
-                                                                                 mazeTreeDepth)));
+                // Skip mutation if below probability threshold
+                if (!(_genomeFactory.Rng.NextDouble() <
+                      _genomeFactory.MazeGenomeParameters.MutatePassageStartLocationProbability)) continue;
 
-                    mutationOccurred = true;
-                }
+                // Apply passage mutation
+                WallGeneList[geneIdx].PassageLocation = BoundStartLocation(WallGeneList[geneIdx].PassageLocation +
+                                                                           (((_genomeFactory.Rng.NextDouble() * 2) -
+                                                                             1) *
+                                                                            _genomeFactory.MazeGenomeParameters
+                                                                                .PerturbanceMagnitude *
+                                                                            ((double)
+                                                                             ((int) (Math.Log(geneIdx + 1, 2)) +
+                                                                              1) /
+                                                                             mazeTreeDepth)));
+
+                mutationOccurred = true;
             }
 
-            // Ensure that a mutation actually occurs
-            if (mutationOccurred == false)
-            {
-                // Select a random gene to mutate
-                int mazeGeneIdx = GenomeFactory.Rng.Next(WallGeneList.Count);
+            // Exit if a mutation has already been applied above
+            if (mutationOccurred) return true;
 
-                WallGeneList[mazeGeneIdx].PassageLocation = BoundStartLocation(WallGeneList[mazeGeneIdx].WallLocation +
-                                                                               (((GenomeFactory.Rng.NextDouble() * 2) -
-                                                                                 1) *
-                                                                                GenomeFactory.MazeGenomeParameters
-                                                                                    .PerturbanceMagnitude *
-                                                                                ((double)
-                                                                                 ((int)
-                                                                                  (Math.Log(mazeGeneIdx + 1, 2)) +
-                                                                                  1) /
-                                                                                 mazeTreeDepth)));
-            }
+            // Select a random gene to mutate
+            var mazeGeneIdx = _genomeFactory.Rng.Next(WallGeneList.Count);
+
+            // Apply passage mutation on randomly selected gene
+            WallGeneList[mazeGeneIdx].PassageLocation = BoundStartLocation(WallGeneList[mazeGeneIdx].WallLocation +
+                                                                           (((_genomeFactory.Rng.NextDouble() * 2) -
+                                                                             1) *
+                                                                            _genomeFactory.MazeGenomeParameters
+                                                                                .PerturbanceMagnitude *
+                                                                            ((double)
+                                                                             ((int)
+                                                                              (Math.Log(mazeGeneIdx + 1, 2)) +
+                                                                              1) /
+                                                                             mazeTreeDepth)));
 
             return true;
         }
 
         /// <summary>
-        ///     Probabalistically adds a new wall.  This is equivalent to adding a new gene to the genome
+        ///     Probabilistically adds a new wall.  This is equivalent to adding a new gene to the genome
         /// </summary>
         private void MutateAddWall()
         {
             // Generate new wall and passage start locations
-            double newWallStartLocation = GenomeFactory.Rng.NextDoubleNonZero();
-            double newPassageStartLocation = GenomeFactory.Rng.NextDoubleNonZero();
+            var newWallStartLocation = _genomeFactory.Rng.NextDoubleNonZero();
+            var newPassageStartLocation = _genomeFactory.Rng.NextDoubleNonZero();
 
             // Add new gene to the genome
-            WallGeneList.Add(new WallGene(GenomeFactory.InnovationIdGenerator.NextId, newWallStartLocation,
+            WallGeneList.Add(new WallGene(_genomeFactory.InnovationIdGenerator.NextId, newWallStartLocation,
                 newPassageStartLocation,
-                (GenomeFactory.Rng.NextDoubleNonZero() > GenomeFactory.MazeGenomeParameters.VerticalWallBias)));
+                (_genomeFactory.Rng.NextDoubleNonZero() > _genomeFactory.MazeGenomeParameters.VerticalWallBias)));
         }
 
         /// <summary>
-        ///     Probabalistically deletes a random wall.  This is equivalent to deleting a gene from the genome.
+        ///     Probabilistically deletes a random wall.  This is equivalent to deleting a gene from the genome.
         /// </summary>
         private void MutateDeleteWall()
         {
@@ -536,15 +556,14 @@ namespace SharpNeat.Genomes.Maze
             }
 
             // Select a random wall to be deleted
-            // TODO: Probably need to scale deletion mutation here based on effect size
-            int wallIdx = GenomeFactory.Rng.Next(WallGeneList.Count);
+            var wallIdx = _genomeFactory.Rng.Next(WallGeneList.Count);
 
             // Delete the wall
             WallGeneList.RemoveAt(wallIdx);
         }
 
         /// <summary>
-        ///     Probabalistically expands the maze area by one unit.
+        ///     Probabilistically expands the maze area by one unit.
         /// </summary>
         private void MutateExpandMaze()
         {
@@ -554,8 +573,8 @@ namespace SharpNeat.Genomes.Maze
             MazeBoundaryWidth += 1;
 
             // Update relative cell width/height
-            RelativeCellHeight = (double) 1 / MazeBoundaryHeight;
-            RelativeCellWidth = (double) 1 / MazeBoundaryWidth;
+            _relativeCellHeight = (double) 1 / MazeBoundaryHeight;
+            _relativeCellWidth = (double) 1 / MazeBoundaryWidth;
         }
 
         /// <summary>
@@ -565,7 +584,7 @@ namespace SharpNeat.Genomes.Maze
         private bool MutatePathWaypointLocation()
         {
             int geneIdx;
-            bool validMutationsFound = false;
+            var validMutationsFound = false;
 
             // Don't try to mutate if the gene list is empty
             if (PathGeneList.Count <= 0)
@@ -583,7 +602,7 @@ namespace SharpNeat.Genomes.Maze
             do
             {
                 // Select a random path gene to mutate
-                geneIdx = GenomeFactory.Rng.Next(candidatePathGenes.Count);
+                geneIdx = _genomeFactory.Rng.Next(candidatePathGenes.Count);
 
                 // Determine valid waypoint mutations
                 foreach (var pointShift in Enum.GetValues(typeof(PointShift)).Cast<PointShift>())
@@ -617,7 +636,7 @@ namespace SharpNeat.Genomes.Maze
             // Randomly select from list of valid perturbations for the current waypoint
             if (validMutationsFound)
             {
-                PathGeneList[geneIdx].Waypoint = validMutations[GenomeFactory.Rng.Next(validMutations.Count)];
+                PathGeneList[geneIdx].Waypoint = validMutations[_genomeFactory.Rng.Next(validMutations.Count)];
             }
 
             return validMutationsFound;
@@ -655,12 +674,12 @@ namespace SharpNeat.Genomes.Maze
             do
             {
                 // Randomly select an orientation
-                IntersectionOrientation newPointOrientation = GenomeFactory.Rng.NextBool()
+                var newPointOrientation = _genomeFactory.Rng.NextBool()
                     ? IntersectionOrientation.Horizontal
                     : IntersectionOrientation.Vertical;
 
                 // Select random new point
-                var newPoint = candidatePoints[GenomeFactory.Rng.Next(candidatePoints.Count)];
+                var newPoint = candidatePoints[_genomeFactory.Rng.Next(candidatePoints.Count)];
 
                 // Determine whether new waypoint is valid
                 isWaypointValid =
@@ -669,7 +688,7 @@ namespace SharpNeat.Genomes.Maze
                 // Add the new path gene to the genome
                 if (isWaypointValid)
                 {
-                    PathGeneList.Add(new PathGene(GenomeFactory.InnovationIdGenerator.NextId, newPoint,
+                    PathGeneList.Add(new PathGene(_genomeFactory.InnovationIdGenerator.NextId, newPoint,
                         newPointOrientation));
                 }
             } while (isWaypointValid == false && candidatePoints.Count > 0);
@@ -686,7 +705,7 @@ namespace SharpNeat.Genomes.Maze
         /// </summary>
         /// <param name="proposedLocation">The location proposed by the mutation.</param>
         /// <returns>The bounded location.</returns>
-        private double BoundStartLocation(double proposedLocation)
+        private static double BoundStartLocation(double proposedLocation)
         {
             if (proposedLocation < 0)
                 return 0;
@@ -700,9 +719,9 @@ namespace SharpNeat.Genomes.Maze
         /// </summary>
         /// <param name="copyFrom">The source wall gene list to duplicate.</param>
         /// <returns>A newly constructed wall gene list.</returns>
-        private IList<WallGene> DeepCopyWallGeneList(IList<WallGene> copyFrom)
+        private static IEnumerable<WallGene> DeepCopyWallGeneList(ICollection<WallGene> copyFrom)
         {
-            List<WallGene> copiedGeneList = new List<WallGene>(copyFrom.Count);
+            var copiedGeneList = new List<WallGene>(copyFrom.Count);
 
             // Duplicate all maze genes
             copiedGeneList.AddRange(copyFrom.Select(mazeGene => mazeGene.CreateCopy()));
@@ -715,9 +734,9 @@ namespace SharpNeat.Genomes.Maze
         /// </summary>
         /// <param name="copyFrom">The source path gene list to duplicate.</param>
         /// <returns>A newly constructed path gene list.</returns>
-        private IList<PathGene> DeepCopyPathGeneList(IList<PathGene> copyFrom)
+        private static IEnumerable<PathGene> DeepCopyPathGeneList(ICollection<PathGene> copyFrom)
         {
-            List<PathGene> copiedGeneList = new List<PathGene>(copyFrom.Count);
+            var copiedGeneList = new List<PathGene>(copyFrom.Count);
 
             // Duplicate all path genes
             copiedGeneList.AddRange(copyFrom.Select(pathGene => pathGene.CreateCopy()));
@@ -732,12 +751,13 @@ namespace SharpNeat.Genomes.Maze
         private void RemoveNonCodingWallGenes()
         {
             // Recompute max complexity in the event that mutation changed wall/passage placement in a way that reduces the complexity cap
-            MaxWallComplexity = MazeUtils.DetermineMaxPartitions(this);
+            _maxWallComplexity = MazeUtils.DetermineMaxPartitions(this);
 
             // If the max complexity is now lower, remove the non-coding genes
-            if (MaxWallComplexity < WallGeneList.Count)
+            if (_maxWallComplexity < WallGeneList.Count)
             {
-                ((List<WallGene>) WallGeneList).RemoveRange(MaxWallComplexity, WallGeneList.Count - MaxWallComplexity);
+                ((List<WallGene>) WallGeneList).RemoveRange(_maxWallComplexity,
+                    WallGeneList.Count - _maxWallComplexity);
             }
         }
 

@@ -9,6 +9,7 @@ using SharpNeat.Utility;
 
 namespace SharpNeat.Genomes.Maze
 {
+    /// <inheritdoc />
     /// <summary>
     ///     The maze genome factory handles the construction of new genomes during algorithm initialization and reproduction.
     /// </summary>
@@ -16,39 +17,39 @@ namespace SharpNeat.Genomes.Maze
     {
         #region Constructors
 
+        /// <inheritdoc />
         /// <summary>
         ///     Maze Genome Factory default constructor.
         /// </summary>
         public MazeGenomeFactory()
-            : this(new MazeGenomeParameters())
+            : this(new MazeGenomeParameters(), 10, 10, 5, 5)
         {
         }
 
-        /// <summary>
-        ///     Maze Genome Factory constructor which takes custom maze genome parameters.
-        /// </summary>
-        /// <param name="mazeGenomeParameters">The maze genome parameters.</param>
-        public MazeGenomeFactory(MazeGenomeParameters mazeGenomeParameters) : this(mazeGenomeParameters, 0, 0)
-        {
-        }
-
+        /// <inheritdoc />
         /// <summary>
         ///     Maze Genome Factory constructor which takes only maze boundary lengths.
         /// </summary>
         /// <param name="mazeHeight">The height of the maze.</param>
         /// <param name="mazeWidth">The width of the maze.</param>
-        public MazeGenomeFactory(int mazeHeight, int mazeWidth)
-            : this(new MazeGenomeParameters(), mazeHeight, mazeWidth)
+        /// <param name="mazeQuadrantHeight">Maximum height of quadrants (i.e. rooms or submazes) within a maze.</param>
+        /// <param name="mazeQuadrantWidth">Maximum width of quadrants (i.e. rooms or submazes) within a maze.</param>
+        public MazeGenomeFactory(int mazeHeight, int mazeWidth, int mazeQuadrantHeight, int mazeQuadrantWidth)
+            : this(new MazeGenomeParameters(), mazeHeight, mazeWidth, mazeQuadrantHeight, mazeQuadrantWidth)
         {
         }
 
         /// <summary>
-        ///     Maze Genome Factory constructor which takes custom maze genome parameters and initial maze height and width.
+        ///     Maze Genome Factory constructor which takes custom maze genome parameters, initial maze height and width and
+        ///     maximum height and width of maze quadrants (subdivisions within the maze).
         /// </summary>
         /// <param name="mazeGenomeParameters">The maze genome parameters.</param>
         /// <param name="mazeHeight">The height of the maze.</param>
         /// <param name="mazeWidth">The width of the maze.</param>
-        public MazeGenomeFactory(MazeGenomeParameters mazeGenomeParameters, int mazeHeight, int mazeWidth)
+        /// <param name="quadrantHeight">Maximum height of quadrants (i.e. rooms or submazes) within a maze.</param>
+        /// <param name="quadrantWidth">Maximum width of quadrants (i.e. rooms or submazes) within a maze.</param>
+        public MazeGenomeFactory(MazeGenomeParameters mazeGenomeParameters, int mazeHeight, int mazeWidth,
+            int quadrantHeight, int quadrantWidth)
         {
             MazeGenomeParameters = mazeGenomeParameters;
             GenomeIdGenerator = new UInt32IdGenerator();
@@ -57,6 +58,10 @@ namespace SharpNeat.Genomes.Maze
             // Set the initial maze height and width
             BaseMazeHeight = mazeHeight;
             BaseMazeWidth = mazeWidth;
+
+            // Set quadrant height and width
+            MazeQuadrantHeight = quadrantHeight;
+            MazeQuadrantWidth = quadrantWidth;
         }
 
         #endregion
@@ -69,7 +74,7 @@ namespace SharpNeat.Genomes.Maze
         /// <param name="id">The unqiue genome ID.</param>
         /// <param name="birthGeneration">The birth generation.</param>
         /// <returns>The newly constructed maze genome.</returns>
-        public MazeGenome CreateGenome(uint id, uint birthGeneration)
+        private MazeGenome CreateGenome(uint id, uint birthGeneration)
         {
             return new MazeGenome(this, id, birthGeneration);
         }
@@ -82,7 +87,7 @@ namespace SharpNeat.Genomes.Maze
         /// <param name="id">The unique genome ID.</param>
         /// <param name="birthGeneration">The birth generation.</param>
         /// <returns>The newly constructed (mostly identical) genome.</returns>
-        public MazeGenome CreateGenomeCopy(MazeGenome copyFrom, uint id, uint birthGeneration)
+        public static MazeGenome CreateGenomeCopy(MazeGenome copyFrom, uint id, uint birthGeneration)
         {
             return new MazeGenome(copyFrom, id, birthGeneration);
         }
@@ -91,6 +96,7 @@ namespace SharpNeat.Genomes.Maze
 
         #region Interface Properties
 
+        /// <inheritdoc />
         /// <summary>
         ///     Unique ID generator for maze genomes.
         /// </summary>
@@ -101,13 +107,14 @@ namespace SharpNeat.Genomes.Maze
         /// </summary>
         public UInt32IdGenerator InnovationIdGenerator { get; }
 
+        /// <inheritdoc />
         /// <summary>
         ///     NOT USED (but required by interface).
         /// </summary>
         public int SearchMode
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         #endregion
@@ -127,17 +134,28 @@ namespace SharpNeat.Genomes.Maze
         /// <summary>
         ///     The height of the initial (base) maze genome (at the evolved resolution).
         /// </summary>
-        public int BaseMazeHeight { get; set; }
+        public int BaseMazeHeight { get; }
 
         /// <summary>
         ///     The width of the initial (base) maze genome (at the evolved resolution).
         /// </summary>
-        public int BaseMazeWidth { get; set; }
+        public int BaseMazeWidth { get; }
+
+        /// <summary>
+        ///     Maximum height of quadrants (i.e. rooms or submazes) within a maze.
+        /// </summary>
+        public int MazeQuadrantHeight { get; }
+
+        /// <summary>
+        ///     Maximum width of quadrants (i.e. rooms or submazes) within a maze.
+        /// </summary>
+        public int MazeQuadrantWidth { get; }
 
         #endregion
 
         #region Interface Methods
 
+        /// <inheritdoc />
         /// <summary>
         ///     Creates a list of new maze genomes, the cardinality of which is specified by the length parameter.  All of the new
         ///     genomes will be assigned the given birth generation.
@@ -147,9 +165,9 @@ namespace SharpNeat.Genomes.Maze
         /// <returns>The newly created genomes.</returns>
         public List<MazeGenome> CreateGenomeList(int length, uint birthGeneration)
         {
-            List<MazeGenome> genomeList = new List<MazeGenome>(length);
+            var genomeList = new List<MazeGenome>(length);
 
-            for (int i = 0; i < length; i++)
+            for (var i = 0; i < length; i++)
             {
                 InnovationIdGenerator.Reset();
                 genomeList.Add(CreateGenome(birthGeneration));
@@ -158,6 +176,7 @@ namespace SharpNeat.Genomes.Maze
             return genomeList;
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Creates a list of new maze genomes, the cardinality of which is specified by the length parameter.  All of the new
         ///     genomes will be assigned the given birth generation.  A seed genome will also be used as a template for the new
@@ -169,20 +188,22 @@ namespace SharpNeat.Genomes.Maze
         /// <returns>The newly created genomes.</returns>
         public List<MazeGenome> CreateGenomeList(int length, uint birthGeneration, MazeGenome seedGenome)
         {
-            List<MazeGenome> genomeList = new List<MazeGenome>(length);
+            var genomeList = new List<MazeGenome>(length);
 
             // Add an exact copy of the seed to the list.
-            MazeGenome newGenome = CreateGenomeCopy(seedGenome, GenomeIdGenerator.NextId, birthGeneration);
+            var newGenome = CreateGenomeCopy(seedGenome, GenomeIdGenerator.NextId, birthGeneration);
             genomeList.Add(newGenome);
 
             // For the remainder we create mutated offspring from the seed.
-            for (int i = 1; i < length; i++)
+            for (var i = 1; i < length; i++)
             {
                 genomeList.Add(seedGenome.CreateOffspring(birthGeneration));
             }
+
             return genomeList;
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Creates a list of new maze genomes, the cardinality of which is specified by the length parameter.  All of the new
         ///     genomes will be assigned the given birth generation.  The list of seed genomes will be used as templates for all of
@@ -204,28 +225,29 @@ namespace SharpNeat.Genomes.Maze
             Utilities.Shuffle(seedGenomeList, Rng);
 
             // Make exact copies of seed genomes and insert them into our new genome list.
-            List<MazeGenome> genomeList = new List<MazeGenome>(length);
-            int idx = 0;
-            int seedCount = seedGenomeList.Count;
-            for (int seedIdx = 0; idx < length && seedIdx < seedCount; idx++, seedIdx++)
+            var genomeList = new List<MazeGenome>(length);
+            var idx = 0;
+            var seedCount = seedGenomeList.Count;
+            for (var seedIdx = 0; idx < length && seedIdx < seedCount; idx++, seedIdx++)
             {
                 // Add an exact copy of the seed to the list.
-                MazeGenome newGenome = CreateGenomeCopy(seedGenomeList[seedIdx], GenomeIdGenerator.NextId,
-                    birthGeneration);
+                var newGenome = CreateGenomeCopy(seedGenomeList[seedIdx], GenomeIdGenerator.NextId, birthGeneration);
                 genomeList.Add(newGenome);
             }
 
             // Keep spawning offspring from seed genomes until we have the required number of genomes.
             for (; idx < length;)
             {
-                for (int seedIdx = 0; idx < length && seedIdx < seedCount; idx++, seedIdx++)
+                for (var seedIdx = 0; idx < length && seedIdx < seedCount; idx++, seedIdx++)
                 {
                     genomeList.Add(seedGenomeList[seedIdx].CreateOffspring(birthGeneration));
                 }
             }
+
             return genomeList;
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Creates a new genome with the given birth generation.
         /// </summary>
@@ -236,6 +258,7 @@ namespace SharpNeat.Genomes.Maze
             return CreateGenome(GenomeIdGenerator.NextId, birthGeneration);
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     NOT IMPLEMENTED (but required by the interface).
         /// </summary>

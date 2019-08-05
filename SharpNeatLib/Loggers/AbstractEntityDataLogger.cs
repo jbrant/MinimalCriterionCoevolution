@@ -40,8 +40,8 @@ namespace SharpNeat.Loggers
         protected LoggableElement[] ExtractLoggableElementArray(int fieldArrayLength,
             params List<LoggableElement>[] loggableElements)
         {
-            List<LoggableElement> combinedElements = new List<LoggableElement>();
-            LoggableElement[] loggableElementArray = new LoggableElement[fieldArrayLength];
+            var combinedElements = new List<LoggableElement>();
+            var loggableElementArray = new LoggableElement[fieldArrayLength];
 
             // Combine everything into a single list
             foreach (var loggableElementList in loggableElements)
@@ -91,6 +91,7 @@ namespace SharpNeat.Loggers
 
         #region Logging Control Methods
 
+        /// <inheritdoc />
         /// <summary>
         ///     Instantiates a new database context (opens the connection) and gets the experiment configuration key.
         /// </summary>
@@ -101,9 +102,11 @@ namespace SharpNeat.Loggers
 
             // Query for the experiment configuration entity
             ExperimentConfiguration =
-                DbContext.ExperimentDictionaries.Single(expName => expName.ExperimentName == ExperimentConfigurationName);
+                DbContext.ExperimentDictionaries.Single(
+                    expName => expName.ExperimentName == ExperimentConfigurationName);
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Updates the run phase and sets the corresponding foreign key.
         /// </summary>
@@ -115,6 +118,7 @@ namespace SharpNeat.Loggers
                     x => x.RunPhaseName == runPhase.ToString()).RunPhaseID;
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     This doesn't do anything for database logging, but is defined for conformance with the interface.
         /// </summary>
@@ -123,6 +127,7 @@ namespace SharpNeat.Loggers
         {
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Logs the given loggable element data.  This method is abstract because the entity mapping will vary based on the
         ///     table, so the mapping will have to be implemented via a child mapping directly tied to that entity.
@@ -130,6 +135,7 @@ namespace SharpNeat.Loggers
         /// <param name="loggableElements"></param>
         public abstract void LogRow(params List<LoggableElement>[] loggableElements);
 
+        /// <inheritdoc />
         /// <summary>
         ///     Wipes out any existing log entries.
         /// </summary>
@@ -139,6 +145,7 @@ namespace SharpNeat.Loggers
             throw new SharpNeatException("Reset log not implemented for entity logging.");
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Closes the database connection (not needed since we're creating/disposing the context on every transaction).
         /// </summary>

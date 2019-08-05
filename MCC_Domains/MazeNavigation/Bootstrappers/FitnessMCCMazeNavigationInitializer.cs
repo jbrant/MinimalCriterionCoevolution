@@ -86,7 +86,7 @@ namespace MCC_Domains.MazeNavigation.Bootstrappers
         ///     status logging purposes).
         /// </param>
         /// <returns>The list of seed genomes that meet the minimal criteria.</returns>
-        public override List<NeatGenome> EvolveViableGenomes(out ulong totalEvaluations, uint? maxEvaluations,
+        public override List<NeatGenome> RunEvolution(out ulong totalEvaluations, uint? maxEvaluations,
             uint restartCount)
         {
             // The minimum fitness for an agent who has solved the maze
@@ -107,8 +107,8 @@ namespace MCC_Domains.MazeNavigation.Bootstrappers
                        RunState.Paused != InitializationEa.RunState)
                 {
                     Console.WriteLine(@"Current Evaluations: {0}  Mean Complexity: {1}  Closest Genome Distance: {2}",
-                        InitializationEa.CurrentEvaluations, InitializationEa.Statistics._meanComplexity,
-                        MaxDistanceToTarget - InitializationEa.Statistics._maxFitness);
+                        InitializationEa.CurrentEvaluations, InitializationEa.Statistics.MeanComplexity,
+                        MaxDistanceToTarget - InitializationEa.Statistics.MaxFitness);
 
                     if (InitializationEa.CurrentEvaluations >= maxEvaluations)
                     {

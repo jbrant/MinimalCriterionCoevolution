@@ -21,7 +21,7 @@ namespace MCC_Executor
                 // Execute maze navigation experiment
                 case "maze_navigation":
                     Console.WriteLine(@"Executing the maze navigation experiment");
-                    MazeNavigationExperimentExecutor.execute(args.Skip(1).ToArray());
+                    MazeNavigationExperimentExecutor.Execute(args.Skip(1).ToArray());
                     break;
                 default:
                     Console.WriteLine(@"Invalid experiment specified");

@@ -32,8 +32,6 @@
     <MutateExpandMazeProbability>0.05</MutateExpandMazeProbability>
     <PerturbanceMagnitude>0.1</PerturbanceMagnitude>
     <VerticalWallBias>0.7</VerticalWallBias>
-    <GridCellNeighborhoodRadius>5</GridCellNeighborhoodRadius>
-    <SparseCellSelectionProportion>0.2</SparseCellSelectionProportion>
   </MazeGenomeConfig>
   <BehaviorConfig>
     <BehaviorCharacterization>End Point</BehaviorCharacterization>
@@ -47,6 +45,8 @@
   <MinSuccessDistance>5</MinSuccessDistance>
   <MazeHeight>10</MazeHeight>
   <MazeWidth>10</MazeWidth>
+  <MazeQuadrantHeight>5</MazeQuadrantHeight>
+  <MazeQuadrantWidth>5</MazeQuadrantWidth>
   <MazeScaleMultiplier>32</MazeScaleMultiplier>
   <NumMazesSolvedCriteria>1</NumMazesSolvedCriteria>
   <NumAgentsSolvedCriteria>1</NumAgentsSolvedCriteria>

@@ -77,8 +77,12 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
       <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="log4net, Version=1.2.15.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
@@ -115,13 +119,11 @@
     <Compile Include="Core\RunPhase.cs" />
     <Compile Include="Decoders\Maze\MazeDecoder.cs" />
     <Compile Include="EvolutionAlgorithms\MCCAlgorithmContainer.cs" />
-    <Compile Include="EvolutionAlgorithms\MultiQueueEvolutionAlgorithm.cs" />
-    <Compile Include="EvolutionAlgorithms\QueueingEvolutionAlgorithm.cs" />
+    <Compile Include="EvolutionAlgorithms\QueueEvolutionAlgorithm.cs" />
     <Compile Include="EvolutionAlgorithms\Statistics\AbstractEvolutionAlgorithmStats.cs" />
     <Compile Include="EvolutionAlgorithms\Statistics\IEvolutionAlgorithmStats.cs" />
     <Compile Include="EvolutionAlgorithms\Statistics\MazeAlgorithmStats.cs" />
     <Compile Include="EvolutionAlgorithms\Statistics\NeatAlgorithmStats.cs" />
-    <Compile Include="Genomes\Maze\BaseMazeGene.cs" />
     <Compile Include="Genomes\Maze\WallGene.cs" />
     <Compile Include="Genomes\Maze\MazeGenome.cs" />
     <Compile Include="Genomes\Maze\MazeGenomeFactory.cs" />
@@ -130,10 +132,6 @@
     <Compile Include="Genomes\Maze\PathGene.cs" />
     <Compile Include="Loggers\AbstractEntityDataLogger.cs" />
     <Compile Include="Loggers\LoggingParameters.cs" />
-    <Compile Include="Loggers\McsExperimentEvaluationEntityDataLogger.cs" />
-    <Compile Include="Loggers\McsExperimentOrganismStateEntityDataLogger.cs" />
-    <Compile Include="Loggers\NoveltyExperimentOrganismStateEntityDataLogger.cs" />
-    <Compile Include="Loggers\NoveltyExperimentEvaluationEntityDataLogger.cs" />
     <Compile Include="Loggers\FieldElement.cs" />
     <Compile Include="MinimalCriterias\PopulationCentroidEuclideanDistanceCriteria.cs" />
     <Compile Include="MinimalCriterias\FixedPointEuclideanDistanceCriteria.cs" />
@@ -191,7 +189,6 @@
     <Compile Include="EvolutionAlgorithms\ComplexityRegulation\IComplexityRegulationStrategy.cs" />
     <Compile Include="EvolutionAlgorithms\ComplexityRegulation\NullComplexityRegulationStrategy.cs" />
     <Compile Include="Core\IComplexifyingEvolutionAlgorithm.cs" />
-    <Compile Include="EvolutionAlgorithms\NeatAlgorithmStats.cs" />
     <None Include="DeadCode\PhasedSearch\Triggers\AbsoluteMeanComplexityCeilingTrigger.cs" />
     <None Include="DeadCode\PhasedSearch\Triggers\SimplificationStallGenerationsTrigger.cs" />
     <None Include="DeadCode\PhasedSearch\Triggers\ElapsedClockTimeTrigger.cs" />
@@ -272,10 +269,8 @@
     <Compile Include="Phenomes\Mazes\MazeStructureGrid.cs" />
     <Compile Include="Phenomes\Mazes\MazeStructureGridCell.cs" />
     <Compile Include="Phenomes\Mazes\MazeStructureWall.cs" />
-    <Compile Include="Phenomes\Mazes\WallDirection.cs" />
     <Compile Include="Phenomes\Mazes\MazeStructure.cs" />
     <Compile Include="Phenomes\Mazes\MazeStructureRoom.cs" />
-    <Compile Include="Phenomes\Mazes\WallOrientation.cs" />
     <Compile Include="Phenomes\NeuralNets\AcyclicNetwork\FastAcyclicNetwork.cs" />
     <Compile Include="Phenomes\NeuralNets\AcyclicNetwork\LayerInfo.cs" />
     <Compile Include="Phenomes\NeuralNets\CyclicNetwork\Connection.cs" />

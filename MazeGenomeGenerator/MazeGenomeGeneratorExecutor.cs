@@ -77,6 +77,8 @@ namespace MazeGenomeGenerator
             // Get the evolved maze height and width
             int mazeHeight = Int32.Parse(_executionConfiguration[ExecutionParameter.MazeHeight]);
             int mazeWidth = Int32.Parse(_executionConfiguration[ExecutionParameter.MazeWidth]);
+            int mazeQuadrantHeight = Int32.Parse(_executionConfiguration[ExecutionParameter.MazeQuadrantHeight]);
+            int mazeQuadrantWidth = Int32.Parse(_executionConfiguration[ExecutionParameter.MazeQuadrantWidth]);
 
             // Get the number of interior walls and maze genome output directory
             int numWaypoints = Int32.Parse(_executionConfiguration[ExecutionParameter.NumWaypoints]);
@@ -97,7 +99,8 @@ namespace MazeGenomeGenerator
                                       Boolean.Parse(_executionConfiguration[ExecutionParameter.SingleGenomeOutputFile]);
 
             // Create a new maze genome factory
-            MazeGenomeFactory mazeGenomeFactory = new MazeGenomeFactory(mazeHeight, mazeWidth);
+            MazeGenomeFactory mazeGenomeFactory =
+                new MazeGenomeFactory(mazeHeight, mazeWidth, mazeQuadrantHeight, mazeQuadrantWidth);
 
             // Instantiate list to hold generated maze genomes 
             // (only really used when we're writing everything out to one file)

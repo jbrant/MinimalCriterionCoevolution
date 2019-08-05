@@ -38,19 +38,14 @@ namespace SharpNeat.Loggers
     }
 
     /// <summary>
-    ///     Captures the destinations to which logs can be written.
+    ///     Captures the destinations to which logs can be written. Currently, a flat file is the only destination, but others could be added (e.g. database, message queue, etc).
     /// </summary>
     public enum LoggingDestination
     {
         /// <summary>
         ///     Indicates a flat file-based log destination.
         /// </summary>
-        File,
-
-        /// <summary>
-        ///     Indicates a database logging destination.
-        /// </summary>
-        Database
+        File
     }
 
     /// <summary>
@@ -70,18 +65,21 @@ namespace SharpNeat.Loggers
             {
                 return LoggingType.Evolution;
             }
+
             // Check if this is evaluation logging
             if (LoggingType.Evaluation.ToString()
                 .Equals(strLoggingType, StringComparison.InvariantCultureIgnoreCase))
             {
                 return LoggingType.Evaluation;
             }
-            // Chec if this is population logging
+
+            // Check if this is population logging
             if (LoggingType.Population.ToString()
                 .Equals(strLoggingType, StringComparison.InvariantCultureIgnoreCase))
             {
                 return LoggingType.Population;
             }
+
             // Check if this is genome logging
             if (LoggingType.Genome.ToString()
                 .Equals(strLoggingType, StringComparison.InvariantCultureIgnoreCase))
@@ -91,24 +89,6 @@ namespace SharpNeat.Loggers
 
             // Otherwise, it's null (no logging)
             return LoggingType.None;
-        }
-
-        /// <summary>
-        ///     Converts the given string into the appropriate logging destination.
-        /// </summary>
-        /// <param name="strLoggingDestination">The string to convert.</param>
-        /// <returns>The corresponding logging destination enum.</returns>
-        public static LoggingDestination ConvertStringToLoggingDestination(string strLoggingDestination)
-        {
-            // Check if this is a database destination
-            if (LoggingDestination.Database.ToString()
-                .Equals(strLoggingDestination, StringComparison.InvariantCultureIgnoreCase))
-            {
-                return LoggingDestination.Database;
-            }
-
-            // Otherwise, default to file destination
-            return LoggingDestination.File;
         }
     }
 }

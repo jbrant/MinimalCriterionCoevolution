@@ -29,7 +29,7 @@ namespace MCC_Domains.Utils
     /// <summary>
     ///     Static helper methods for reading value from XML configuration data in DOM form.
     /// </summary>
-    public class XmlUtils
+    public static class XmlUtils
     {
         /// <summary>
         ///     Parse the inner text of element with the given name as an integer. If element is missing or parsing fails then
@@ -37,10 +37,10 @@ namespace MCC_Domains.Utils
         /// </summary>
         public static int GetValueAsInt(XmlElement xmlParent, string elemName)
         {
-            int? val = TryGetValueAsInt(xmlParent, elemName);
+            var val = TryGetValueAsInt(xmlParent, elemName);
             if (null == val)
             {
-                throw new ArgumentException(string.Format("Missing [{0}] configuration setting.", elemName));
+                throw new ArgumentException($"Missing [{elemName}] configuration setting.");
             }
             return val.Value;
         }
@@ -51,10 +51,10 @@ namespace MCC_Domains.Utils
         /// </summary>
         public static uint GetValueAsUInt(XmlElement xmlParent, string elemName)
         {
-            uint? val = TryGetValueAsUInt(xmlParent, elemName);
+            var val = TryGetValueAsUInt(xmlParent, elemName);
             if (null == val)
             {
-                throw new ArgumentException(string.Format("Missing [{0}] configuration setting.", elemName));
+                throw new ArgumentException($"Missing [{elemName}] configuration setting.");
             }
             return val.Value;
         }
@@ -65,20 +65,19 @@ namespace MCC_Domains.Utils
         /// </summary>
         public static int? TryGetValueAsInt(XmlElement xmlParent, string elemName)
         {
-            XmlElement xmlElem = xmlParent.SelectSingleNode(elemName) as XmlElement;
+            var xmlElem = xmlParent.SelectSingleNode(elemName) as XmlElement;
             if (null == xmlElem)
             {
                 return null;
             }
 
-            string valStr = xmlElem.InnerText;
+            var valStr = xmlElem.InnerText;
             if (string.IsNullOrEmpty(valStr))
             {
                 return null;
             }
 
-            int result;
-            if (int.TryParse(valStr, out result))
+            if (int.TryParse(valStr, out var result))
             {
                 return result;
             }
@@ -91,20 +90,19 @@ namespace MCC_Domains.Utils
         /// </summary>
         public static uint? TryGetValueAsUInt(XmlElement xmlParent, string elemName)
         {
-            XmlElement xmlElem = xmlParent.SelectSingleNode(elemName) as XmlElement;
+            var xmlElem = xmlParent.SelectSingleNode(elemName) as XmlElement;
             if (null == xmlElem)
             {
                 return null;
             }
 
-            string valStr = xmlElem.InnerText;
+            var valStr = xmlElem.InnerText;
             if (string.IsNullOrEmpty(valStr))
             {
                 return null;
             }
 
-            uint result;
-            if (uint.TryParse(valStr, out result))
+            if (uint.TryParse(valStr, out var result))
             {
                 return result;
             }
@@ -118,10 +116,10 @@ namespace MCC_Domains.Utils
         /// </summary>
         public static ulong GetValueAsULong(XmlElement xmlParent, string elemName)
         {
-            ulong? val = TryGetValueAsULong(xmlParent, elemName);
+            var val = TryGetValueAsULong(xmlParent, elemName);
             if (null == val)
             {
-                throw new ArgumentException(string.Format("Missing [{0}] configuration setting.", elemName));
+                throw new ArgumentException($"Missing [{elemName}] configuration setting.");
             }
             return val.Value;
         }
@@ -133,20 +131,19 @@ namespace MCC_Domains.Utils
         /// </summary>
         public static ulong? TryGetValueAsULong(XmlElement xmlParent, string elemName)
         {
-            XmlElement xmlElem = xmlParent.SelectSingleNode(elemName) as XmlElement;
+            var xmlElem = xmlParent.SelectSingleNode(elemName) as XmlElement;
             if (null == xmlElem)
             {
                 return null;
             }
 
-            string valStr = xmlElem.InnerText;
+            var valStr = xmlElem.InnerText;
             if (string.IsNullOrEmpty(valStr))
             {
                 return null;
             }
 
-            ulong result;
-            if (ulong.TryParse(valStr, out result))
+            if (ulong.TryParse(valStr, out var result))
             {
                 return result;
             }
@@ -159,10 +156,10 @@ namespace MCC_Domains.Utils
         /// </summary>
         public static double GetValueAsDouble(XmlElement xmlParent, string elemName)
         {
-            double? val = TryGetValueAsDouble(xmlParent, elemName);
+            var val = TryGetValueAsDouble(xmlParent, elemName);
             if (null == val)
             {
-                throw new ArgumentException(string.Format("Missing [{0}] configuration setting.", elemName));
+                throw new ArgumentException($"Missing [{elemName}] configuration setting.");
             }
             return val.Value;
         }
@@ -173,20 +170,19 @@ namespace MCC_Domains.Utils
         /// </summary>
         public static double? TryGetValueAsDouble(XmlElement xmlParent, string elemName)
         {
-            XmlElement xmlElem = xmlParent.SelectSingleNode(elemName) as XmlElement;
+            var xmlElem = xmlParent.SelectSingleNode(elemName) as XmlElement;
             if (null == xmlElem)
             {
                 return null;
             }
 
-            string valStr = xmlElem.InnerText;
+            var valStr = xmlElem.InnerText;
             if (string.IsNullOrEmpty(valStr))
             {
                 return null;
             }
 
-            double result;
-            if (double.TryParse(valStr, out result))
+            if (double.TryParse(valStr, out var result))
             {
                 return result;
             }
@@ -199,10 +195,10 @@ namespace MCC_Domains.Utils
         /// </summary>
         public static bool GetValueAsBool(XmlElement xmlParent, string elemName)
         {
-            bool? val = TryGetValueAsBool(xmlParent, elemName);
+            var val = TryGetValueAsBool(xmlParent, elemName);
             if (null == val)
             {
-                throw new ArgumentException(string.Format("Missing [{0}] configuration setting.", elemName));
+                throw new ArgumentException($"Missing [{elemName}] configuration setting.");
             }
             return val.Value;
         }
@@ -213,20 +209,19 @@ namespace MCC_Domains.Utils
         /// </summary>
         public static bool? TryGetValueAsBool(XmlElement xmlParent, string elemName)
         {
-            XmlElement xmlElem = xmlParent.SelectSingleNode(elemName) as XmlElement;
+            var xmlElem = xmlParent.SelectSingleNode(elemName) as XmlElement;
             if (null == xmlElem)
             {
                 return null;
             }
 
-            string valStr = xmlElem.InnerText;
+            var valStr = xmlElem.InnerText;
             if (string.IsNullOrEmpty(valStr))
             {
                 return null;
             }
 
-            bool result;
-            if (bool.TryParse(valStr, out result))
+            if (bool.TryParse(valStr, out var result))
             {
                 return result;
             }
@@ -238,10 +233,10 @@ namespace MCC_Domains.Utils
         /// </summary>
         public static string GetValueAsString(XmlElement xmlParent, string elemName)
         {
-            string val = TryGetValueAsString(xmlParent, elemName);
+            var val = TryGetValueAsString(xmlParent, elemName);
             if (null == val)
             {
-                throw new ArgumentException(string.Format("Missing [{0}] configuration setting.", elemName));
+                throw new ArgumentException($"Missing [{elemName}] configuration setting.");
             }
             return val;
         }
@@ -251,18 +246,14 @@ namespace MCC_Domains.Utils
         /// </summary>
         public static string TryGetValueAsString(XmlElement xmlParent, string elemName)
         {
-            XmlElement xmlElem = xmlParent.SelectSingleNode(elemName) as XmlElement;
-            if (null == xmlElem)
+            if (!(xmlParent.SelectSingleNode(elemName) is XmlElement xmlElem))
             {
                 return null;
             }
 
-            string valStr = xmlElem.InnerText;
-            if (string.IsNullOrEmpty(valStr))
-            {
-                return null;
-            }
-            return valStr;
+            var valStr = xmlElem.InnerText;
+            
+            return string.IsNullOrEmpty(valStr) ? null : valStr;
         }
     }
 }

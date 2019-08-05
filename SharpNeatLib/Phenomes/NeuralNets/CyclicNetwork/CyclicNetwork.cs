@@ -17,6 +17,7 @@
  * along with SharpNEAT.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System;
 using System.Collections.Generic;
 
 // Disables missing comment warnings for non-private variables.
@@ -202,6 +203,17 @@ namespace SharpNeat.Phenomes.NeuralNets.CyclicNetwork
             for(int i=0; i<count; i++) {
                 _connectionList[i].OutputValue = 0.0;
             }
+        }
+
+        /// <inheritdoc />
+        /// <summary>
+        /// Creates a copy of the cyclic network.
+        /// </summary>
+        /// <returns>A newly instantiated copy of CyclicNetwork.</returns>
+        public IBlackBox Clone()
+        {
+            return new CyclicNetwork(_neuronList, _connectionList, _inputNeuronCount, _outputNeuronCount,
+                _timestepsPerActivation);
         }
 
         #endregion

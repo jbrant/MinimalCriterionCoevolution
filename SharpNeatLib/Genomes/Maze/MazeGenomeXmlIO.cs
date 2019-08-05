@@ -24,7 +24,7 @@ namespace SharpNeat.Genomes.Maze
         /// </summary>
         /// <param name="strIntersectionOrientation">String representation of the intersection orientation.</param>
         /// <returns>Enumeration value for the given intersection orientation.</returns>
-        private static IntersectionOrientation ParseIntersectionOrientation(String strIntersectionOrientation)
+        private static IntersectionOrientation ParseIntersectionOrientation(string strIntersectionOrientation)
         {
             return "HORIZONTAL".Equals(strIntersectionOrientation.ToUpperInvariant())
                 ? IntersectionOrientation.Horizontal
@@ -35,24 +35,24 @@ namespace SharpNeat.Genomes.Maze
 
         #region Constants [XML Strings]
 
-        private const string __ElemRoot = "Root";
-        private const string __ElemMazes = "Mazes";
-        private const string __ElemMaze = "Maze";
-        private const string __ElemPaths = "Paths";
-        private const string __ElemPath = "Path";
-        private const string __ElemWalls = "Walls";
-        private const string __ElemWall = "Wall";
+        private const string ElemRoot = "Root";
+        private const string ElemMazes = "Mazes";
+        private const string ElemMaze = "Maze";
+        private const string ElemPaths = "Paths";
+        private const string ElemPath = "Path";
+        private const string ElemWalls = "Walls";
+        private const string ElemWall = "Wall";
 
-        private const string __AttrId = "id";
-        private const string __AttrBirthGeneration = "birthGen";
-        private const string __AttrHeight = "height";
-        private const string __AttrWidth = "width";
-        private const string __AttrWaypointCoordinateX = "WaypointCoordinateX";
-        private const string __AttrWaypointCoordinateY = "WaypointCoordinateY";
-        private const string __AttrOrientation = "DefaultOrientation";
-        private const string __AttrRelativeWallLocation = "RelativeWallLocation";
-        private const string __AttrRelativePassageLocation = "RelativePassageLocation";
-        private const string __AttrOrientationSeed = "OrientationSeed";
+        private const string AttrId = "id";
+        private const string AttrBirthGeneration = "birthGen";
+        private const string AttrHeight = "height";
+        private const string AttrWidth = "width";
+        private const string AttrWaypointCoordinateX = "WaypointCoordinateX";
+        private const string AttrWaypointCoordinateY = "WaypointCoordinateY";
+        private const string AttrOrientation = "DefaultOrientation";
+        private const string AttrRelativeWallLocation = "RelativeWallLocation";
+        private const string AttrRelativePassageLocation = "RelativePassageLocation";
+        private const string AttrOrientationSeed = "OrientationSeed";
 
         #endregion
 
@@ -72,13 +72,13 @@ namespace SharpNeat.Genomes.Maze
             }
 
             // <Root>
-            xw.WriteStartElement(__ElemRoot);
+            xw.WriteStartElement(ElemRoot);
 
             // <Mazes>
-            xw.WriteStartElement(__ElemMazes);
+            xw.WriteStartElement(ElemMazes);
 
             // Write genomes
-            foreach (MazeGenome genome in genomeList)
+            foreach (var genome in genomeList)
             {
                 Write(xw, genome);
             }
@@ -108,26 +108,26 @@ namespace SharpNeat.Genomes.Maze
         public static void Write(XmlWriter xw, MazeGenome genome)
         {
             // Write maze element and accompanying attributes
-            xw.WriteStartElement(__ElemMaze);
-            xw.WriteAttributeString(__AttrId, genome.Id.ToString(NumberFormatInfo.InvariantInfo));
-            xw.WriteAttributeString(__AttrBirthGeneration,
+            xw.WriteStartElement(ElemMaze);
+            xw.WriteAttributeString(AttrId, genome.Id.ToString(NumberFormatInfo.InvariantInfo));
+            xw.WriteAttributeString(AttrBirthGeneration,
                 genome.BirthGeneration.ToString(NumberFormatInfo.InvariantInfo));
-            xw.WriteAttributeString(__AttrHeight, genome.MazeBoundaryHeight.ToString(NumberFormatInfo.InvariantInfo));
-            xw.WriteAttributeString(__AttrWidth, genome.MazeBoundaryWidth.ToString(NumberFormatInfo.InvariantInfo));
+            xw.WriteAttributeString(AttrHeight, genome.MazeBoundaryHeight.ToString(NumberFormatInfo.InvariantInfo));
+            xw.WriteAttributeString(AttrWidth, genome.MazeBoundaryWidth.ToString(NumberFormatInfo.InvariantInfo));
 
             // Emit paths
-            xw.WriteStartElement(__ElemPaths);
-            foreach (PathGene pathGene in genome.PathGeneList)
+            xw.WriteStartElement(ElemPaths);
+            foreach (var pathGene in genome.PathGeneList)
             {
                 // <Path>
-                xw.WriteStartElement(__ElemPath);
+                xw.WriteStartElement(ElemPath);
 
-                xw.WriteAttributeString(__AttrId, pathGene.InnovationId.ToString(NumberFormatInfo.InvariantInfo));
-                xw.WriteAttributeString(__AttrWaypointCoordinateX,
+                xw.WriteAttributeString(AttrId, pathGene.InnovationId.ToString(NumberFormatInfo.InvariantInfo));
+                xw.WriteAttributeString(AttrWaypointCoordinateX,
                     pathGene.Waypoint.X.ToString(NumberFormatInfo.InvariantInfo));
-                xw.WriteAttributeString(__AttrWaypointCoordinateY,
+                xw.WriteAttributeString(AttrWaypointCoordinateY,
                     pathGene.Waypoint.Y.ToString(NumberFormatInfo.InvariantInfo));
-                xw.WriteAttributeString(__AttrOrientation, pathGene.DefaultOrientation.ToString());
+                xw.WriteAttributeString(AttrOrientation, pathGene.DefaultOrientation.ToString());
 
                 // </Path>
                 xw.WriteEndElement();
@@ -137,22 +137,23 @@ namespace SharpNeat.Genomes.Maze
             xw.WriteEndElement();
 
             // Emit walls
-            xw.WriteStartElement(__ElemWalls);
-            foreach (WallGene wallGene in genome.WallGeneList)
+            xw.WriteStartElement(ElemWalls);
+            foreach (var wallGene in genome.WallGeneList)
             {
                 // <Wall>
-                xw.WriteStartElement(__ElemWall);
+                xw.WriteStartElement(ElemWall);
 
-                xw.WriteAttributeString(__AttrId, wallGene.InnovationId.ToString(NumberFormatInfo.InvariantInfo));
-                xw.WriteAttributeString(__AttrRelativeWallLocation,
+                xw.WriteAttributeString(AttrId, wallGene.InnovationId.ToString(NumberFormatInfo.InvariantInfo));
+                xw.WriteAttributeString(AttrRelativeWallLocation,
                     wallGene.WallLocation.ToString(NumberFormatInfo.InvariantInfo));
-                xw.WriteAttributeString(__AttrRelativePassageLocation,
+                xw.WriteAttributeString(AttrRelativePassageLocation,
                     wallGene.PassageLocation.ToString(NumberFormatInfo.InvariantInfo));
-                xw.WriteAttributeString(__AttrOrientationSeed, wallGene.OrientationSeed.ToString());
+                xw.WriteAttributeString(AttrOrientationSeed, wallGene.OrientationSeed.ToString());
 
                 // </Wall>
                 xw.WriteEndElement();
             }
+
             // </Walls>
             xw.WriteEndElement();
 
@@ -168,12 +169,12 @@ namespace SharpNeat.Genomes.Maze
         public static string GetGenomeXml(MazeGenome mazeGenome)
         {
             // Create a new string writer into which to write the genome XML
-            StringWriter genomeStringWriter = new StringWriter();
+            var genomeStringWriter = new StringWriter();
 
             // Serialize the genome to XML, but write it into a string writer instead of outputting to a file
             if (mazeGenome != null)
             {
-                using (XmlTextWriter genomeTextWriter = new XmlTextWriter(genomeStringWriter))
+                using (var genomeTextWriter = new XmlTextWriter(genomeStringWriter))
                 {
                     WriteComplete(genomeTextWriter, mazeGenome);
                 }
@@ -196,27 +197,27 @@ namespace SharpNeat.Genomes.Maze
         public static List<MazeGenome> ReadCompleteGenomeList(XmlReader xr, MazeGenomeFactory genomeFactory)
         {
             // Find <Root>
-            XmlIoUtils.MoveToElement(xr, false, __ElemRoot);
+            XmlIoUtils.MoveToElement(xr, false, ElemRoot);
 
             // Find <Mazes>
-            XmlIoUtils.MoveToElement(xr, true, __ElemMazes);
+            XmlIoUtils.MoveToElement(xr, true, ElemMazes);
 
             // Read mazes
-            List<MazeGenome> genomeList = new List<MazeGenome>();
-            using (XmlReader xrSubtree = xr.ReadSubtree())
+            var genomeList = new List<MazeGenome>();
+            using (var xrSubtree = xr.ReadSubtree())
             {
                 // Re-scan for the root <Mazes> element
                 XmlIoUtils.MoveToElement(xrSubtree, false);
 
                 // Move to first Maze element
-                XmlIoUtils.MoveToElement(xrSubtree, true, __ElemMaze);
+                XmlIoUtils.MoveToElement(xrSubtree, true, ElemMaze);
 
                 // Read maze elements
                 do
                 {
-                    MazeGenome genome = ReadGenome(xrSubtree);
+                    var genome = ReadGenome(xrSubtree, genomeFactory);
                     genomeList.Add(genome);
-                } while (xrSubtree.ReadToNextSibling(__ElemMaze));
+                } while (xrSubtree.ReadToNextSibling(ElemMaze));
             }
 
             // Check for empty list
@@ -226,11 +227,11 @@ namespace SharpNeat.Genomes.Maze
             }
 
             // Determine the max genome ID
-            uint maxGenomeId = genomeList.Aggregate<MazeGenome, uint>(0,
+            var maxGenomeId = genomeList.Aggregate<MazeGenome, uint>(0,
                 (current, genome) => Math.Max(current, genome.Id));
 
             // Determine the max gene innovation ID
-            uint maxInnovationId = genomeList.Aggregate<MazeGenome, uint>(0,
+            var maxInnovationId = genomeList.Aggregate<MazeGenome, uint>(0,
                 (curMaxPopulationInnovationId, genome) =>
                     genome.WallGeneList.Aggregate(curMaxPopulationInnovationId,
                         (curMaxGenomeInnovationId, mazeGene) =>
@@ -240,12 +241,6 @@ namespace SharpNeat.Genomes.Maze
             genomeFactory.GenomeIdGenerator.Reset(Math.Max(genomeFactory.GenomeIdGenerator.Peek, maxGenomeId + 1));
             genomeFactory.InnovationIdGenerator.Reset(Math.Max(genomeFactory.InnovationIdGenerator.Peek,
                 maxInnovationId + 1));
-
-            // Retrospecitively assign the genome factory to the genomes
-            foreach (MazeGenome genome in genomeList)
-            {
-                genome.GenomeFactory = genomeFactory;
-            }
 
             return genomeList;
         }
@@ -267,40 +262,36 @@ namespace SharpNeat.Genomes.Maze
         /// </summary>
         /// <param name="xr">Reference to the XmlReader.</param>
         /// <returns>Instantiated maze genome.</returns>
-        public static MazeGenome ReadGenome(XmlReader xr)
+        public static MazeGenome ReadGenome(XmlReader xr, MazeGenomeFactory genomeFactory)
         {
             // Find <Maze>
-            XmlIoUtils.MoveToElement(xr, false, __ElemMaze);
-            int initialDepth = xr.Depth;
+            XmlIoUtils.MoveToElement(xr, false, ElemMaze);
+            var initialDepth = xr.Depth;
 
             // Read genome ID attribute
-            string genomeIdStr = xr.GetAttribute(__AttrId);
-            uint genomeId;
-            uint.TryParse(genomeIdStr, out genomeId);
+            var genomeIdStr = xr.GetAttribute(AttrId);
+            uint.TryParse(genomeIdStr, out var genomeId);
 
             // Read birthGeneration attribute if present. Otherwise default to zero.
-            string birthGenStr = xr.GetAttribute(__AttrBirthGeneration);
-            uint birthGen;
-            uint.TryParse(birthGenStr, out birthGen);
+            var birthGenStr = xr.GetAttribute(AttrBirthGeneration);
+            uint.TryParse(birthGenStr, out var birthGen);
 
             // Read maze height attribute
-            string heightStr = xr.GetAttribute(__AttrHeight);
-            int height;
-            int.TryParse(heightStr, out height);
+            var heightStr = xr.GetAttribute(AttrHeight);
+            int.TryParse(heightStr, out var height);
 
             // Read maze width attribute
-            string widthStr = xr.GetAttribute(__AttrWidth);
-            int width;
-            int.TryParse(widthStr, out width);
+            var widthStr = xr.GetAttribute(AttrWidth);
+            int.TryParse(widthStr, out var width);
 
             // Find <Paths>
-            XmlIoUtils.MoveToElement(xr, true, __ElemPaths);
+            XmlIoUtils.MoveToElement(xr, true, ElemPaths);
 
             // Instantiate list to hold path genes that are read from the file
             IList<PathGene> pathGenes = new List<PathGene>();
 
             // Create a reader over the <Paths> sub-tree.
-            using (XmlReader xrSubtree = xr.ReadSubtree())
+            using (var xrSubtree = xr.ReadSubtree())
             {
                 // Re-scan for the root <Paths> element
                 XmlIoUtils.MoveToElement(xrSubtree, false);
@@ -309,33 +300,32 @@ namespace SharpNeat.Genomes.Maze
                 if (xrSubtree.IsEmptyElement == false)
                 {
                     // Move to first path gene
-                    XmlIoUtils.MoveToElement(xrSubtree, true, __ElemPath);
+                    XmlIoUtils.MoveToElement(xrSubtree, true, ElemPath);
 
                     do
                     {
                         // Read the path, waypoint coordinates, and orientation information for the gene
-                        uint geneId = XmlIoUtils.ReadAttributeAsUInt(xrSubtree, __AttrId);
-                        int waypointCoordinateX = XmlIoUtils.ReadAttributeAsInt(xrSubtree, __AttrWaypointCoordinateX);
-                        int waypointCoordinateY = XmlIoUtils.ReadAttributeAsInt(xrSubtree, __AttrWaypointCoordinateY);
-                        IntersectionOrientation orientation =
-                            ParseIntersectionOrientation(XmlIoUtils.ReadAttributeAsString(xrSubtree,
-                                __AttrOrientation));
+                        var geneId = XmlIoUtils.ReadAttributeAsUInt(xrSubtree, AttrId);
+                        var waypointCoordinateX = XmlIoUtils.ReadAttributeAsInt(xrSubtree, AttrWaypointCoordinateX);
+                        var waypointCoordinateY = XmlIoUtils.ReadAttributeAsInt(xrSubtree, AttrWaypointCoordinateY);
+                        var orientation =
+                            ParseIntersectionOrientation(XmlIoUtils.ReadAttributeAsString(xrSubtree, AttrOrientation));
 
                         // Create a new path gene and add it to the list
                         pathGenes.Add(new PathGene(geneId, new Point2DInt(waypointCoordinateX, waypointCoordinateY),
                             orientation));
-                    } while (xrSubtree.ReadToNextSibling(__ElemPath));
+                    } while (xrSubtree.ReadToNextSibling(ElemPath));
                 }
             }
 
             // Find <Walls>
-            XmlIoUtils.MoveToElement(xr, true, __ElemWalls);
+            XmlIoUtils.MoveToElement(xr, true, ElemWalls);
 
             // Instantiate list to hold wall genes that are read from the file
             IList<WallGene> wallGenes = new List<WallGene>();
 
             // Create a reader over the <Walls> sub-tree.
-            using (XmlReader xrSubtree = xr.ReadSubtree())
+            using (var xrSubtree = xr.ReadSubtree())
             {
                 // Re-scan for the root <Walls> element
                 XmlIoUtils.MoveToElement(xrSubtree, false);
@@ -344,22 +334,22 @@ namespace SharpNeat.Genomes.Maze
                 if (xrSubtree.IsEmptyElement == false)
                 {
                     // Move to first wall gene
-                    XmlIoUtils.MoveToElement(xrSubtree, true, __ElemWall);
+                    XmlIoUtils.MoveToElement(xrSubtree, true, ElemWall);
 
                     do
                     {
                         // Read the wall, passage, and orientation information for the gene
-                        uint geneId = XmlIoUtils.ReadAttributeAsUInt(xrSubtree, __AttrId);
-                        double relativeWallLocation = XmlIoUtils.ReadAttributeAsDouble(xrSubtree,
-                            __AttrRelativeWallLocation);
-                        double relativePassageLocation = XmlIoUtils.ReadAttributeAsDouble(xrSubtree,
-                            __AttrRelativePassageLocation);
-                        bool orientationSeed = XmlIoUtils.ReadAttributeAsBool(xrSubtree, __AttrOrientationSeed);
+                        var geneId = XmlIoUtils.ReadAttributeAsUInt(xrSubtree, AttrId);
+                        var relativeWallLocation = XmlIoUtils.ReadAttributeAsDouble(xrSubtree,
+                            AttrRelativeWallLocation);
+                        var relativePassageLocation = XmlIoUtils.ReadAttributeAsDouble(xrSubtree,
+                            AttrRelativePassageLocation);
+                        var orientationSeed = XmlIoUtils.ReadAttributeAsBool(xrSubtree, AttrOrientationSeed);
 
                         // Create a new maze gene and add it to the list
                         wallGenes.Add(new WallGene(geneId, relativeWallLocation, relativePassageLocation,
                             orientationSeed));
-                    } while (xrSubtree.ReadToNextSibling(__ElemWall));
+                    } while (xrSubtree.ReadToNextSibling(ElemWall));
                 }
             }
 
@@ -373,7 +363,7 @@ namespace SharpNeat.Genomes.Maze
             } while (xr.Read());
 
             // Construct and return loaded MazeGenome
-            return new MazeGenome(genomeId, birthGen, height, width, wallGenes, pathGenes);
+            return new MazeGenome(genomeFactory, genomeId, birthGen, height, width, wallGenes, pathGenes);
         }
 
         #endregion

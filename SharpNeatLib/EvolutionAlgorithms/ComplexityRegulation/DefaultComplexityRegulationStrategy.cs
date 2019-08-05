@@ -108,13 +108,13 @@ namespace SharpNeat.EvolutionAlgorithms.ComplexityRegulation
             {
                 if(-1.0 == _complexityCeilingCurrent)
                 {   // First call to DetermineMode(). Continue complexifying and set threshold relative current complexity.
-                    _complexityCeilingCurrent = stats._meanComplexity + _complexityCeiling;
+                    _complexityCeilingCurrent = stats.MeanComplexity + _complexityCeiling;
                 } 
                 // Currently complexifying. Test if the complexity ceiling has been reached.
-                else if(stats._meanComplexity > _complexityCeilingCurrent)
+                else if(stats.MeanComplexity > _complexityCeilingCurrent)
                 {   // Switch to simplifying mode.
                     _currentMode = ComplexityRegulationMode.Simplifying;
-                    _lastTransitionGeneration = stats._generation;
+                    _lastTransitionGeneration = stats.Generation;
                 }
             }
             else
@@ -122,16 +122,16 @@ namespace SharpNeat.EvolutionAlgorithms.ComplexityRegulation
                 // We allow simplification to progress for a few generations before testing of it has stalled, this allows
                 // a lead in time for the effects of simplification to occur.
                 // In addition we do not switch to complexifying if complexity is above the currently defined ceiling.
-                if(((stats._generation - _lastTransitionGeneration) > MinSimplifcationGenerations) 
-                 && (stats._meanComplexity < _complexityCeilingCurrent)
-                 && ((stats._complexityMA.Mean - stats._prevComplexityMA) >= 0.0))
+                if(((stats.Generation - _lastTransitionGeneration) > MinSimplifcationGenerations) 
+                 && (stats.MeanComplexity < _complexityCeilingCurrent)
+                 && ((stats.ComplexityMa.Mean - stats.PrevComplexityMa) >= 0.0))
                 {   // Simplification has stalled. Switch back to complexification.
                     _currentMode = ComplexityRegulationMode.Complexifying;
-                    _lastTransitionGeneration = stats._generation;
+                    _lastTransitionGeneration = stats.Generation;
 
                     // Redefine the complexity ceiling (for relative ceiling only).
                     if(ComplexityCeilingType.Relative == _ceilingType) {
-                        _complexityCeilingCurrent = stats._meanComplexity + _complexityCeiling;
+                        _complexityCeilingCurrent = stats.MeanComplexity + _complexityCeiling;
                     }
                 }
             }

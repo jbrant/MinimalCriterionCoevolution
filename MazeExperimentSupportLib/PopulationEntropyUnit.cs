@@ -17,6 +17,6 @@
         /// <summary>
         ///     The entropy (diversity) of the population based on cluster assignment proportions.
         /// </summary>
-        public double PopulationEntropy { get; set; }
+        public double PopulationEntropy { get; }
     }
 }
