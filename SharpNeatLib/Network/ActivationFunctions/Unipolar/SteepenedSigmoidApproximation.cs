@@ -17,7 +17,7 @@
  * along with SharpNEAT.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Redzen.Numerics;
+using Redzen.Random;
 
 namespace SharpNeat.Network.ActivationFunctions.Unipolar
 {
@@ -116,7 +116,7 @@ namespace SharpNeat.Network.ActivationFunctions.Unipolar
         /// For activation functions that accept auxiliary arguments; generates random initial values for aux arguments for newly
         /// added nodes (from an 'add neuron' mutation).
         /// </summary>
-        public double[] GetRandomAuxArgs(XorShiftRandom rng, double connectionWeightRange)
+        public double[] GetRandomAuxArgs(Xoshiro256StarStarRandom rng, double connectionWeightRange)
         {
             throw new SharpNeatException("GetRandomAuxArgs() called on activation function that does not use auxiliary arguments.");
         }
@@ -124,7 +124,7 @@ namespace SharpNeat.Network.ActivationFunctions.Unipolar
         /// <summary>
         /// Genetic mutation for auxiliary argument data.
         /// </summary>
-        public void MutateAuxArgs(double[] auxArgs, XorShiftRandom rng, ZigguratGaussianSampler gaussianSampler, double connectionWeightRange)
+        public void MutateAuxArgs(double[] auxArgs, Xoshiro256StarStarRandom rng, double connectionWeightRange)
         {
             throw new SharpNeatException("MutateAuxArgs() called on activation function that does not use auxiliary arguments.");
         }

@@ -19,6 +19,7 @@
 
 using System.Collections.Generic;
 using Redzen.Numerics;
+using Redzen.Random;
 using SharpNeat.Network.ActivationFunctions;
 using SharpNeat.Utility;
 
@@ -37,7 +38,7 @@ namespace SharpNeat.Network
         /// <summary>
         /// Randomly select a function based on each function's selection probability.
         /// </summary>
-        ActivationFunctionInfo GetRandomFunction(XorShiftRandom rng);
+        ActivationFunctionInfo GetRandomFunction(Xoshiro256StarStarRandom rng);
 
         /// <summary>
         /// Gets a list of all functions in the library.

@@ -19,6 +19,8 @@
 
 using System.Collections.Generic;
 using Redzen.Numerics;
+using Redzen.Numerics.Distributions;
+using Redzen.Random;
 using SharpNeat.Network.ActivationFunctions;
 using SharpNeat.Network.ActivationFunctions.Bipolar;
 using SharpNeat.Network.ActivationFunctions.RadialBasis;
@@ -72,9 +74,9 @@ namespace SharpNeat.Network
         /// <summary>
         /// Randomly select a function based on each function's selection probability.
         /// </summary>
-        public ActivationFunctionInfo GetRandomFunction(XorShiftRandom rng)
+        public ActivationFunctionInfo GetRandomFunction(Xoshiro256StarStarRandom rng)
         {
-            return _functionList[DiscreteDistributionUtils.Sample(_rwl, rng)];
+            return _functionList[DiscreteDistribution.Sample(rng, _rwl)];
         }
 
         /// <summary>
