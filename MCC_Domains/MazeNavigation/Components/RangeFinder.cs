@@ -51,7 +51,7 @@ namespace MCC_Domains.MazeNavigation.Components
         /// <param name="walls">The list of walls in the environment.</param>
         /// <param name="heading">The heading of the navigator (in degrees).</param>
         /// <param name="location">The location of the navigator in the environment.</param>
-        internal void Update(IEnumerable<Wall> walls, double heading, DoublePoint location)
+        internal void Update(IList<Wall> walls, double heading, DoublePoint location)
         {
             // Convert rangefinder angle to radians
             var radianAngle = MathUtils.ToRadians(_angle);

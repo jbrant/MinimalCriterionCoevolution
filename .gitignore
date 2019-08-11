@@ -219,3 +219,4 @@ ModelManifest.xml
 
 # Rider files
 **/contentModel.xml
+/ExperimentEntities/publish/

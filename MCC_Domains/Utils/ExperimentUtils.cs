@@ -25,7 +25,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using System.Xml;
-using ExperimentEntities;
+using ExperimentEntities.entities;
 using MCC_Domains.MazeNavigation.Bootstrappers;
 using SharpNeat.Core;
 using SharpNeat.Decoders;

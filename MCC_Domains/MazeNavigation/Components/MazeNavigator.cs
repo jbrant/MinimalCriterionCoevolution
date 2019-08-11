@@ -178,7 +178,7 @@ namespace MCC_Domains.MazeNavigation.Components
         /// <param name="walls">The list of walls in the environment.</param>
         /// <param name="collidingWall">Output parameter recording the wall at which the collision would occur.</param>
         /// <returns>Whether or not the proposed move will result in a collision.</returns>
-        private static bool IsCollision(DoublePoint newLocation, IEnumerable<Wall> walls, out Wall collidingWall)
+        private static bool IsCollision(DoublePoint newLocation, IList<Wall> walls, out Wall collidingWall)
         {
             var doesCollide = false;
             collidingWall = null;

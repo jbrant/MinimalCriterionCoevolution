@@ -109,7 +109,8 @@ namespace MCC_Executor.MazeNavigation
         public static void Execute(string[] args)
         {
             // Initialise log4net (log to console and file).
-            XmlConfigurator.Configure(new FileInfo("log4net.properties"));
+            XmlConfigurator.Configure(LogManager.GetRepository(Assembly.GetEntryAssembly()),
+                new FileInfo("log4net.config"));
 
             // Instantiate the execution logger
             _executionLogger = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
