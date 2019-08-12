@@ -313,8 +313,6 @@ namespace SharpNeat.EvolutionAlgorithms
             // Cleanup genome evaluator
             GenomeEvaluator.Cleanup();
 
-            _algorithmThread.Abort();
-
             // Null out the internal thread
             _algorithmThread = null;
         }

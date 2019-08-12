@@ -1,5 +1,6 @@
 ﻿#region
 
+using Redzen.Numerics.Distributions;
 using SharpNeat.Utility;
 
 #endregion
@@ -15,10 +16,10 @@ namespace SharpNeat.Genomes.Maze
         #region Private Methods
 
         /// <summary>
-        ///     Creates a new roulette whell layout based on the different mutation types and their associated probabilities.
+        ///     Creates a new roulette wheel layout based on the different mutation types and their associated probabilities.
         /// </summary>
         /// <returns>The initialized roulette wheel layout.</returns>
-        private RouletteWheelLayout CreateRouletteWheelLayout()
+        private DiscreteDistribution CreateRouletteWheelLayout()
         {
             double[] probabilities =
             {
@@ -30,7 +31,7 @@ namespace SharpNeat.Genomes.Maze
                 MutatePathWaypointLocationProbability,
                 MutateAddPathWaypointProbability
             };
-            return new RouletteWheelLayout(probabilities);
+            return new DiscreteDistribution(probabilities);
         }
 
         #endregion
@@ -40,7 +41,7 @@ namespace SharpNeat.Genomes.Maze
         /// <summary>
         ///     The roulette wheel layout enables probablistic selection of different mutation types.
         /// </summary>
-        public RouletteWheelLayout RouletteWheelLayout;
+        public DiscreteDistribution RouletteWheelLayout;
 
         /// <summary>
         ///     Backing field for wall start location mutation probability.
@@ -116,7 +117,8 @@ namespace SharpNeat.Genomes.Maze
             PerturbanceMagnitude = copyFrom.PerturbanceMagnitude;
             VerticalWallBias = DefaultVerticalWallBias;
 
-            RouletteWheelLayout = new RouletteWheelLayout(copyFrom.RouletteWheelLayout);
+            RouletteWheelLayout =
+                new DiscreteDistribution((double[]) copyFrom.RouletteWheelLayout.Probabilities.Clone());
         }
 
         #endregion

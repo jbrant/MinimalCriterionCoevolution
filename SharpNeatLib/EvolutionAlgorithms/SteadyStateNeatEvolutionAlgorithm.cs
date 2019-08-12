@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Redzen.Numerics.Distributions;
 using SharpNeat.Core;
 using SharpNeat.DistanceMetrics;
 using SharpNeat.EvolutionAlgorithms.ComplexityRegulation;
@@ -290,8 +291,8 @@ namespace SharpNeat.EvolutionAlgorithms
         }
 
         /// <summary>
-        ///     Creates the specified number of offspring using roulette wheel species and genomes selection (which is based on the
-        ///     fitness stats of the species in the given stats array).
+        ///     Creates the specified number of offspring using discrete distribution species and genomes selection
+        ///     (which is based on the fitness stats of the species in the given stats array).
         /// </summary>
         /// <param name="specieStatsArr">
         ///     The specie stats array, which is used to support specie reproduction selection based on
@@ -304,11 +305,11 @@ namespace SharpNeat.EvolutionAlgorithms
             List<TGenome> offspringList = new List<TGenome>(offspringCount);
             int specieCount = SpecieList.Count;
 
-            // Probabilities for species roulette wheel selector
+            // Probabilities for species discrete distribution sampler
             double[] specieProbabilities = new double[specieCount];
 
-            // Roulette wheel layout for genomes within species
-            RouletteWheelLayout[] genomeRwlArr = new RouletteWheelLayout[specieCount];
+            // Discrete distribution array for genomes within species
+            DiscreteDistribution[] genomeDistArr = new DiscreteDistribution[specieCount];
 
             // Build array of probabilities based on specie mean fitness
             for (int curSpecie = 0; curSpecie < specieCount; curSpecie++)
@@ -318,7 +319,7 @@ namespace SharpNeat.EvolutionAlgorithms
 
                 int genomeCount = SpecieList[curSpecie].GenomeList.Count;
 
-                // Decare array for specie genome probabilities
+                // Declare array for specie genome probabilities
                 double[] genomeProbabilities = new double[genomeCount];
 
                 // Build probability array for genome selection within species
@@ -328,17 +329,17 @@ namespace SharpNeat.EvolutionAlgorithms
                     genomeProbabilities[curGenome] = SpecieList[curSpecie].GenomeList[curGenome].EvaluationInfo.Fitness;
                 }
 
-                // Create the genome roulette wheel layout for the current species
-                genomeRwlArr[curSpecie] = new RouletteWheelLayout(genomeProbabilities);
+                // Create the genome discrete distribution for the current species
+                genomeDistArr[curSpecie] = new DiscreteDistribution(genomeProbabilities);
             }
 
-            // Create the specie roulette wheel layout
-            RouletteWheelLayout specieRwl = new RouletteWheelLayout(specieProbabilities);
+            // Complete construction of DiscreteDistribution for specie selection.
+            DiscreteDistribution specieDist = new DiscreteDistribution(specieProbabilities);
 
             for (int curOffspring = 0; curOffspring < offspringCount; curOffspring++)
             {
                 // Select specie from which to generate the next offspring
-                int specieIdx = RouletteWheel.SingleThrow(specieRwl, RandomNumGenerator);
+                int specieIdx = DiscreteDistribution.Sample(RandomNumGenerator, specieDist);
 
                 // If random number is equal to or less than specified asexual offspring proportion or
                 // if there is only one genome in the species, then use asexual reproduction
@@ -346,7 +347,7 @@ namespace SharpNeat.EvolutionAlgorithms
                     IsSpecieViableForSexualReproduction(SpecieList[specieIdx]) == false)
                 {
                     // Throw ball to select genome from species (essentially intra-specie fitness proportionate selection)
-                    int genomeIdx = RouletteWheel.SingleThrow(genomeRwlArr[specieIdx], RandomNumGenerator);
+                    int genomeIdx = DiscreteDistribution.Sample(RandomNumGenerator, genomeDistArr[specieIdx]);
 
                     // Create offspring asexually (from the above-selected parent)
                     TGenome offspring = SpecieList[specieIdx].GenomeList[genomeIdx].CreateOffspring(CurrentGeneration);
@@ -364,11 +365,13 @@ namespace SharpNeat.EvolutionAlgorithms
                     if (RandomNumGenerator.NextDouble() <= EaParams.InterspeciesMatingProportion)
                     {
                         // Throw ball again to get a second species
-                        int specie2Idx = RouletteWheel.SingleThrow(specieRwl, RandomNumGenerator);
+                        int specie2Idx = DiscreteDistribution.Sample(RandomNumGenerator, specieDist);
 
                         // Throw ball twice to select the two parent genomes (one from each species)
-                        int parent1GenomeIdx = RouletteWheel.SingleThrow(genomeRwlArr[specieIdx], RandomNumGenerator);
-                        int parent2GenomeIdx = RouletteWheel.SingleThrow(genomeRwlArr[specie2Idx], RandomNumGenerator);
+                        int parent1GenomeIdx =
+                            DiscreteDistribution.Sample(RandomNumGenerator, genomeDistArr[specieIdx]);
+                        int parent2GenomeIdx =
+                            DiscreteDistribution.Sample(RandomNumGenerator, genomeDistArr[specie2Idx]);
 
                         // Get the two parents out of the two species genome list
                         parent1 = SpecieList[specieIdx].GenomeList[parent1GenomeIdx];
@@ -378,10 +381,10 @@ namespace SharpNeat.EvolutionAlgorithms
                     else
                     {
                         // Throw ball twice to select the two parent genomes
-                        int parent1GenomeIdx = RouletteWheel.SingleThrow(genomeRwlArr[specieIdx], RandomNumGenerator);
-                        int parent2GenomeIdx =
-                            RouletteWheel.SingleThrow(genomeRwlArr[specieIdx].RemoveOutcome(parent1GenomeIdx),
-                                RandomNumGenerator);
+                        int parent1GenomeIdx =
+                            DiscreteDistribution.Sample(RandomNumGenerator, genomeDistArr[specieIdx]);
+                        int parent2GenomeIdx = DiscreteDistribution.Sample(RandomNumGenerator,
+                            genomeDistArr[specieIdx].RemoveOutcome(parent1GenomeIdx));
 
                         // Get the two parents out of the species genome list
                         parent1 = SpecieList[specieIdx].GenomeList[parent1GenomeIdx];
