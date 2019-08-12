@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using ExperimentEntities;
+using ExperimentEntities.entities;
 using SharpNeat.Core;
 using RunPhase = SharpNeat.Core.RunPhase;
 
@@ -65,7 +66,7 @@ namespace SharpNeat.Loggers
         /// <summary>
         ///     The database context class for persistence control.
         /// </summary>
-        protected ExperimentDataEntities DbContext;
+        protected ExperimentDataContext DbContext;
 
         /// <summary>
         ///     The unique name of the experiment configuration (used for looking up the ID/primary key).
@@ -98,11 +99,11 @@ namespace SharpNeat.Loggers
         public virtual void Open()
         {
             // Open the database connection
-            DbContext = new ExperimentDataEntities();
+            DbContext = new ExperimentDataContext();
 
             // Query for the experiment configuration entity
             ExperimentConfiguration =
-                DbContext.ExperimentDictionaries.Single(
+                DbContext.ExperimentDictionary.Single(
                     expName => expName.ExperimentName == ExperimentConfigurationName);
         }
 
@@ -114,8 +115,8 @@ namespace SharpNeat.Loggers
         public void UpdateRunPhase(RunPhase runPhase)
         {
             RunPhaseKey =
-                DbContext.RunPhases.First(
-                    x => x.RunPhaseName == runPhase.ToString()).RunPhaseID;
+                DbContext.RunPhase.First(
+                    x => x.RunPhaseName == runPhase.ToString()).RunPhaseId;
         }
 
         /// <inheritdoc />

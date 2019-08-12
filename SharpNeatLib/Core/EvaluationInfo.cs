@@ -20,6 +20,7 @@
 #region
 
 using System;
+using Redzen.Structures;
 using SharpNeat.Utility;
 
 #endregion

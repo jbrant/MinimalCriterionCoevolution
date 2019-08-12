@@ -1,6 +1,7 @@
 ﻿#region
 
 using System.Collections.Generic;
+using Redzen.Random;
 using SharpNeat.Core;
 
 #endregion
@@ -243,7 +244,7 @@ namespace SharpNeat.Utility
             else
             {
                 // Create new random number generator without a seed
-                var rng = new FastRandom();
+                var rng = RandomDefaults.CreateRandomSource();
 
                 // If the genome is not viable, set the fitness (i.e. behavioral novelty) to zero
                 if (genome.EvaluationInfo.IsViable == false)

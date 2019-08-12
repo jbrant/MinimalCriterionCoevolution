@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Redzen.Numerics.Distributions;
 using SharpNeat.Core;
 using SharpNeat.Utility;
 
@@ -385,8 +386,8 @@ namespace SharpNeat.Genomes.Maze
                     // Get random mutation to perform 
                     // (prohibit exceeding max wall complexity and placing more waypoints than there are cells in
                     // the maze grid)
-                    outcome = RouletteWheel.SingleThrow(_genomeFactory.MazeGenomeParameters.RouletteWheelLayout,
-                        _genomeFactory.Rng);
+                    outcome = DiscreteDistribution.Sample(_genomeFactory.Rng,
+                        _genomeFactory.MazeGenomeParameters.RouletteWheelLayout);
                 } while ((WallGeneList.Count >= _maxWallComplexity && outcome == 2) ||
                          ((PathGeneList.Count >= MazeBoundaryHeight || PathGeneList.Count >= MazeBoundaryWidth) &&
                           (outcome == 5 || outcome == 6)));

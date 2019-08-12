@@ -21,7 +21,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Redzen.Numerics;
+using Redzen.Numerics.Distributions.Double;
+using Redzen.Random;
 using Redzen.Sorting;
+using Redzen.Structures;
 using SharpNeat.Core;
 using SharpNeat.Network;
 using SharpNeat.Utility;
@@ -56,7 +59,7 @@ namespace SharpNeat.Genomes.Neat
                 = new KeyedCircularBuffer<uint,AddedNeuronGeneStruct>(__INNOVATION_HISTORY_BUFFER_SIZE);
 
         /// <summary>Random number generator associated with this factory.</summary>
-        protected readonly XorShiftRandom _rng = new XorShiftRandom();
+        protected readonly IRandomSource _rng = RandomDefaults.CreateRandomSource();
         readonly ZigguratGaussianSampler _gaussianSampler = new ZigguratGaussianSampler();
 
         /// <summary>Activation function library associated with this factory.</summary>
@@ -504,7 +507,7 @@ namespace SharpNeat.Genomes.Neat
         /// Note. The provided RNG is not thread safe, if concurrent use is required then sync locks
         /// are necessary or some other RNG mechanism.
         /// </summary>
-        public XorShiftRandom Rng
+        public IRandomSource Rng
         {
             get { return _rng; }
         }
@@ -561,7 +564,7 @@ namespace SharpNeat.Genomes.Neat
         /// </summary>
         public double SampleGaussianDistribution(double mu, double sigma)
         {
-            return _gaussianSampler.NextSample(mu, sigma);
+            return ZigguratGaussian.Sample(_rng, mu, sigma);
         }
 
         /// <summary>

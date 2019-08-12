@@ -25,8 +25,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using System.Xml;
-using ExperimentEntities;
+using ExperimentEntities.entities;
 using MCC_Domains.MazeNavigation.Bootstrappers;
+using Redzen.Random;
 using SharpNeat.Core;
 using SharpNeat.Decoders;
 using SharpNeat.EvolutionAlgorithms;
@@ -766,7 +767,7 @@ namespace MCC_Domains.Utils
             MazeGenomeFactory mazeGenomeFactory)
         {
             var mazeGenomes = new List<MazeGenome>(numMazeGenomes);
-            var rand = new Random();
+            var rand = RandomDefaults.CreateRandomSource();
 
             for (var curMazeCnt = 0; curMazeCnt < numMazeGenomes; curMazeCnt++)
             {

@@ -18,6 +18,7 @@
  */
 
 using Redzen.Numerics;
+using Redzen.Numerics.Distributions;
 using SharpNeat.Network;
 using SharpNeat.Network.ActivationFunctions.Unipolar;
 
@@ -121,8 +122,10 @@ namespace SharpNeat.Genomes.Neat
             _nodeAuxStateMutationProbability            = copyFrom._nodeAuxStateMutationProbability;
             _deleteConnectionMutationProbability        = copyFrom._deleteConnectionMutationProbability;
 
-            _rouletteWheelLayout = new DiscreteDistribution(copyFrom._rouletteWheelLayout);
-            _rouletteWheelLayoutNonDestructive = new DiscreteDistribution(copyFrom._rouletteWheelLayoutNonDestructive);
+            _rouletteWheelLayout =
+                new DiscreteDistribution((double[]) copyFrom._rouletteWheelLayout.Probabilities.Clone());
+            _rouletteWheelLayoutNonDestructive =
+                new DiscreteDistribution((double[]) copyFrom._rouletteWheelLayoutNonDestructive.Probabilities.Clone());
             
             _connectionMutationInfoList = new ConnectionMutationInfoList(copyFrom._connectionMutationInfoList);
             _connectionMutationInfoList.Initialize();

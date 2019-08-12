@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
 using ExperimentEntities;
+using ExperimentEntities.entities;
 using MazeExperimentSupportLib;
 using MCC_Domains.Utils;
 using SharpNeat.Decoders;
@@ -117,7 +118,7 @@ namespace MazeNavigationEvaluator
         /// </summary>
         /// <param name="navigationCombos">The combinations of mazes and navigators.</param>
         public void Initialize(
-            IEnumerable<Tuple<MCCExperimentMazeGenome, MCCExperimentNavigatorGenome>> navigationCombos)
+            IEnumerable<Tuple<MccexperimentMazeGenome, MccexperimentNavigatorGenome>> navigationCombos)
         {
             foreach (var navigationCombo in navigationCombos)
             {
@@ -138,8 +139,8 @@ namespace MazeNavigationEvaluator
 
                 // Decode to maze and navigator phenomes and add to the evaluation units list
                 EvaluationUnits.Add(new MazeNavigatorEvaluationUnit(_mazeDecoder.Decode(mazeGenome),
-                    _agentDecoder.Decode(navigatorGenome), navigationCombo.Item1.GenomeID,
-                    navigationCombo.Item2.GenomeID));
+                    _agentDecoder.Decode(navigatorGenome), navigationCombo.Item1.GenomeId,
+                    navigationCombo.Item2.GenomeId));
             }
         }
 
@@ -149,8 +150,8 @@ namespace MazeNavigationEvaluator
         /// </summary>
         /// <param name="mazes">The mazes that were in the maze queue during the given batch.</param>
         /// <param name="navigators">The navigators that were in the navigator queue during the given batch.</param>
-        public void Initialize(IEnumerable<MCCExperimentMazeGenome> mazes,
-            IList<MCCExperimentNavigatorGenome> navigators)
+        public void Initialize(IEnumerable<MccexperimentMazeGenome> mazes,
+            IList<MccexperimentNavigatorGenome> navigators)
         {
             IList<NeatGenome> cachedAgents = new List<NeatGenome>(navigators.Count);
 
@@ -182,7 +183,7 @@ namespace MazeNavigationEvaluator
 
                         // Decode to maze and navigator phenomes and add to the evaluation units list
                         EvaluationUnits.Add(new MazeNavigatorEvaluationUnit(_mazeDecoder.Decode(mazeGenome),
-                            _agentDecoder.Decode(agentGenome), serializedMaze.GenomeID, serializedNavigator.GenomeID));
+                            _agentDecoder.Decode(agentGenome), serializedMaze.GenomeId, serializedNavigator.GenomeId));
 
                         // Also add to the list of cached genomes
                         cachedAgents.Add(agentGenome);
@@ -195,7 +196,7 @@ namespace MazeNavigationEvaluator
                     foreach (var cachedAgent in cachedAgents)
                     {
                         EvaluationUnits.Add(new MazeNavigatorEvaluationUnit(_mazeDecoder.Decode(mazeGenome),
-                            _agentDecoder.Decode(cachedAgent), serializedMaze.GenomeID, (int) cachedAgent.Id));
+                            _agentDecoder.Decode(cachedAgent), serializedMaze.GenomeId, (int) cachedAgent.Id));
                     }
                 }
             }
@@ -206,7 +207,7 @@ namespace MazeNavigationEvaluator
         ///     post-hoc analyses that doesn't consider navigator trajectories.
         /// </summary>
         /// <param name="mazes">The mazes that were in the maze queue during the given batch.</param>
-        public void Initialize(IEnumerable<MCCExperimentMazeGenome> mazes)
+        public void Initialize(IEnumerable<MccexperimentMazeGenome> mazes)
         {
             foreach (var serializedMaze in mazes)
             {
@@ -219,7 +220,7 @@ namespace MazeNavigationEvaluator
                 }
 
                 // Decode to maze phenome and add to the maze/id map
-                _mazeIdStructureMap.Add(serializedMaze.GenomeID, _mazeDecoder.Decode(mazeGenome));
+                _mazeIdStructureMap.Add(serializedMaze.GenomeId, _mazeDecoder.Decode(mazeGenome));
             }
         }
 
@@ -228,13 +229,13 @@ namespace MazeNavigationEvaluator
         ///     for each non-evaluated agent/maze combination.
         /// </summary>
         /// <param name="agents">The agents that are in the queue at the given time.</param>
-        public void Initialize(IEnumerable<MCCExperimentNavigatorGenome> agents)
+        public void Initialize(IEnumerable<MccexperimentNavigatorGenome> agents)
         {
             // Build a separate evaluation unit for each agent/maze combination, but only consider those agents
             // who have not already been evaluated
             foreach (
                 var serializedAgent in
-                agents.Where(agentGenome => _agentGenomeIds.Contains(agentGenome.GenomeID) == false))
+                agents.Where(agentGenome => _agentGenomeIds.Contains(agentGenome.GenomeId) == false))
             {
                 NeatGenome agentGenome;
 
@@ -249,11 +250,11 @@ namespace MazeNavigationEvaluator
                 {
                     // Only need to decode the agent genome as the mazes have already been decoded
                     EvaluationUnits.Add(new MazeNavigatorEvaluationUnit(maze.Value, _agentDecoder.Decode(agentGenome),
-                        maze.Key, serializedAgent.GenomeID));
+                        maze.Key, serializedAgent.GenomeId));
                 }
 
                 // Add the agent genome ID to the list of agents that have been evaluated
-                _agentGenomeIds.Add(serializedAgent.GenomeID);
+                _agentGenomeIds.Add(serializedAgent.GenomeId);
             }
         }
 

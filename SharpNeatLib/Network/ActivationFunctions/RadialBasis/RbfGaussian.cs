@@ -19,6 +19,8 @@
 
 using System;
 using Redzen.Numerics;
+using Redzen.Numerics.Distributions.Double;
+using Redzen.Random;
 
 namespace SharpNeat.Network.ActivationFunctions.RadialBasis
 {
@@ -112,7 +114,7 @@ namespace SharpNeat.Network.ActivationFunctions.RadialBasis
         /// For activation functions that accept auxiliary arguments; generates random initial values for aux arguments for newly
         /// added nodes (from an 'add neuron' mutation).
         /// </summary>
-        public double[] GetRandomAuxArgs(XorShiftRandom rng, double connectionWeightRange)
+        public double[] GetRandomAuxArgs(IRandomSource rng, double connectionWeightRange)
         {
             double[] auxArgs = new double[2];
             auxArgs[0] = (rng.NextDouble()-0.5) * 2.0;
@@ -123,11 +125,11 @@ namespace SharpNeat.Network.ActivationFunctions.RadialBasis
         /// <summary>
         /// Genetic mutation for auxiliary argument data.
         /// </summary>
-        public void MutateAuxArgs(double[] auxArgs, XorShiftRandom rng, ZigguratGaussianSampler gaussianSampler, double connectionWeightRange)
+        public void MutateAuxArgs(double[] auxArgs, IRandomSource rng, double connectionWeightRange)
         {
             // Mutate center.            
             // Add gaussian ditribution sample and clamp result to +-connectionWeightRange.
-            double tmp = auxArgs[0] + gaussianSampler.NextSample(0, _auxArgsMutationSigmaCenter);
+            double tmp = auxArgs[0] + ZigguratGaussian.Sample(rng, 0, _auxArgsMutationSigmaCenter);
             if(tmp < -connectionWeightRange) {
                 auxArgs[0] = -connectionWeightRange;
             }
@@ -140,7 +142,7 @@ namespace SharpNeat.Network.ActivationFunctions.RadialBasis
 
             // Mutate radius.
             // Add gaussian ditribution sample and clamp result to [0,1]
-            tmp = auxArgs[1] + gaussianSampler.NextSample(0, _auxArgsMutationSigmaRadius);
+            tmp = auxArgs[1] + ZigguratGaussian.Sample(rng, 0, _auxArgsMutationSigmaRadius);
             if(tmp < 0.0) {
                 auxArgs[1] = 0.0;
             }

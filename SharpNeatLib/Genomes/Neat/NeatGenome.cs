@@ -25,6 +25,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Xml;
 using Redzen.Numerics;
+using Redzen.Numerics.Distributions;
 using SharpNeat.Core;
 using SharpNeat.Loggers;
 using SharpNeat.Network;
@@ -776,8 +777,8 @@ namespace SharpNeat.Genomes.Neat
                 if (CorrelationItemType.Match == correlItem.CorrelationItemType)
                 {
                     // For matches pick a parent genome at random (they both have the same connection gene, 
-                    // but with a different connection weight)   
-                    selectionSwitch = DiscreteDistributionUtils.SampleBinaryDistribution(0.5, _genomeFactory.Rng) ? 1 : 2;
+                    // but with a different connection weight) 
+                    selectionSwitch = DiscreteDistribution.SampleBernoulli(_genomeFactory.Rng, 0.5) ? 1 : 2;
                 }
                 else if (1 == fitSwitch && null != correlItem.ConnectionGene1)
                 {
@@ -949,7 +950,7 @@ namespace SharpNeat.Genomes.Neat
             bool structureChange = false;
             for (;;)
             {
-                int outcome = DiscreteDistributionUtils.Sample(rwlCurrent, _genomeFactory.Rng);
+                int outcome = DiscreteDistribution.Sample(_genomeFactory.Rng, rwlCurrent);
                 switch(outcome)
                 {
                     case 0:
@@ -1365,7 +1366,7 @@ namespace SharpNeat.Genomes.Neat
             // ENHANCEMENT: Target for performance improvement.
             // Select neuron to mutate. Depending on the genome type it may be the case that not all genomes have mutable state, hence
             // we may have to scan for mutable neurons.
-            int auxStateNodeIdx = DiscreteDistributionUtils.SampleUniformDistribution(_auxStateNeuronCount, _genomeFactory.Rng) + 1;
+            int auxStateNodeIdx = _genomeFactory.Rng.Next(_auxStateNeuronCount) + 1;
 
             IActivationFunctionLibrary fnLib = _genomeFactory.ActivationFnLibrary;
             NeuronGene gene;
@@ -1391,7 +1392,7 @@ namespace SharpNeat.Genomes.Neat
 
             // Invoke mutation method (specific to each activation function).
             fnLib.GetFunction(gene.ActivationFnId)
-                .MutateAuxArgs(gene.AuxState, _genomeFactory.Rng, _genomeFactory.GaussianSampler,
+                .MutateAuxArgs(gene.AuxState, _genomeFactory.Rng,
                     _genomeFactory.NeatGenomeParameters.ConnectionWeightRange);
             // Indicate success.
             return true;

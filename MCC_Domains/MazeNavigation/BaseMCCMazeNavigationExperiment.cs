@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using MCC_Domains.MazeNavigation.Bootstrappers;
 using MCC_Domains.Utils;
+using Redzen.Random;
 using SharpNeat.Core;
 using SharpNeat.Decoders;
 using SharpNeat.Decoders.Maze;
@@ -370,7 +371,7 @@ namespace MCC_Domains.MazeNavigation
             // iteratively pick a random maze and evolve agents on that maze until we reach the requisite number
             while (seedAgentPopulation.ToList().Count < numAgents)
             {
-                var rndMazePicker = new FastRandom();
+                var rndMazePicker = RandomDefaults.CreateRandomSource();
 
                 // Pick a random maze on which to evolve agent(s)
                 var mazeGenome = mazePopulation[rndMazePicker.Next(mazePopulation.Count - 1)];

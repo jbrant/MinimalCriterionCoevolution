@@ -2,6 +2,8 @@
 
 using System;
 using System.Collections.Generic;
+using Redzen.Random;
+using Redzen.Sorting;
 using SharpNeat.Core;
 using SharpNeat.Utility;
 
@@ -124,7 +126,7 @@ namespace SharpNeat.Genomes.Maze
         /// <summary>
         ///     Random number generator.
         /// </summary>
-        public readonly FastRandom Rng = new FastRandom();
+        public readonly IRandomSource Rng = RandomDefaults.CreateRandomSource();
 
         /// <summary>
         ///     Parameters which control maze genome evolution.
@@ -222,7 +224,7 @@ namespace SharpNeat.Genomes.Maze
 
             // Create a copy of the list so that we can shuffle the items without modifying the original list.
             seedGenomeList = new List<MazeGenome>(seedGenomeList);
-            Utilities.Shuffle(seedGenomeList, Rng);
+            SortUtils.Shuffle(seedGenomeList, Rng);
 
             // Make exact copies of seed genomes and insert them into our new genome list.
             var genomeList = new List<MazeGenome>(length);

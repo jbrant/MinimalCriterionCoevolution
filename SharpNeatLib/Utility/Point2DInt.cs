@@ -41,5 +41,10 @@ namespace SharpNeat.Utility
 
             return point2DInt.X == X && point2DInt.Y == Y;
         }
+        
+        public override int GetHashCode()
+        {
+            return (X + (17*Y));
+        }
     }
 }

@@ -42,7 +42,6 @@ namespace SharpNeat.Core
     {
         private readonly IGenomeEvaluator<TGenome> _innerFitnessEvaluator;
         private readonly Predicate<TGenome> _selectionPredicate;
-        private uint _currentGeneration;
 
         #region Constructor
 

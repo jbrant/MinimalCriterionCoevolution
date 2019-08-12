@@ -21,7 +21,7 @@
 
 using System.Collections.Generic;
 using System.Xml;
-using ExperimentEntities;
+using ExperimentEntities.entities;
 using SharpNeat.Core;
 using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.Genomes.Neat;

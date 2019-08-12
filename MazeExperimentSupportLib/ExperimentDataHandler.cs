@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using ExperimentEntities;
+using ExperimentEntities.entities;
 using RunPhase = SharpNeat.Core.RunPhase;
 
 #endregion
@@ -281,10 +282,10 @@ namespace MazeExperimentSupportLib
                 try
                 {
                     // Query for the experiment configuration given the name (which is guaranteed to be unique)
-                    using (var context = new ExperimentDataEntities())
+                    using (var context = new ExperimentDataContext())
                     {
                         experimentConfiguration =
-                            context.ExperimentDictionaries.Single(expName => expName.ExperimentName == experimentName);
+                            context.ExperimentDictionary.Single(expName => expName.ExperimentName == experimentName);
                     }
 
                     if (retryCnt > 0)
@@ -319,10 +320,10 @@ namespace MazeExperimentSupportLib
                 try
                 {
                     // Query for the number of runs for the given experiment
-                    using (var context = new ExperimentDataEntities())
+                    using (var context = new ExperimentDataContext())
                     {
-                        numRuns = context.MCCExperimentMazeEvaluationDatas.Where(
-                                expData => expData.ExperimentDictionaryID == experimentId)
+                        numRuns = context.MccexperimentMazeEvaluationData.Where(
+                                expData => expData.ExperimentDictionaryId == experimentId)
                             .Select(row => row.Run)
                             .Distinct()
                             .Count();
@@ -363,18 +364,19 @@ namespace MazeExperimentSupportLib
                 try
                 {
                     // Query for the number of batches in the current run of the given experiment
-                    using (var context = new ExperimentDataEntities())
+                    using (var context = new ExperimentDataContext())
                     {
                         // Only attempt to get max if batches if records exist for experiment, run, and run phase
                         if (
-                            context.MCCExperimentNavigatorEvaluationDatas.Any(
-                                expData => expData.ExperimentDictionaryID == experimentId && expData.Run == run &&
-                                           expData.RunPhase.RunPhaseName == runPhase.ToString()))
+                            context.MccexperimentNavigatorEvaluationData.Any(
+                                expData => expData.ExperimentDictionaryId == experimentId && expData.Run == run &&
+                                           expData.RunPhaseFkNavigation.RunPhaseName == runPhase.ToString()))
                         {
-                            numBatches = context.MCCExperimentNavigatorEvaluationDatas.Where(
-                                expData =>
-                                    expData.ExperimentDictionaryID == experimentId && expData.Run == run &&
-                                    expData.RunPhase.RunPhaseName == runPhase.ToString()).Max(row => row.Generation);
+                            numBatches = context.MccexperimentNavigatorEvaluationData.Where(
+                                    expData =>
+                                        expData.ExperimentDictionaryId == experimentId && expData.Run == run &&
+                                        expData.RunPhaseFkNavigation.RunPhaseName == runPhase.ToString())
+                                .Max(row => row.Generation);
                         }
                     }
 
@@ -411,12 +413,12 @@ namespace MazeExperimentSupportLib
                 try
                 {
                     // Query for the distinct maze genome IDs logged during the run
-                    using (var context = new ExperimentDataEntities())
+                    using (var context = new ExperimentDataContext())
                     {
                         mazeGenomeIds =
-                            context.MCCExperimentMazeGenomes.Where(
-                                    expData => expData.ExperimentDictionaryID == experimentId && expData.Run == run)
-                                .Select(m => m.GenomeID)
+                            context.MccexperimentMazeGenomes.Where(
+                                    expData => expData.ExperimentDictionaryId == experimentId && expData.Run == run)
+                                .Select(m => m.GenomeId)
                                 .ToList();
                     }
 
@@ -458,18 +460,18 @@ namespace MazeExperimentSupportLib
         /// <param name="mazeGenomeIdsInclusive">The maze genome IDs by which to filter the query result set (optional).</param>
         /// <param name="mazeGenomeIdsExclusive">The maze genome IDs to exclude from the query result set (optional).</param>
         /// <returns>The distinct maze genomes between the start and end batch.</returns>
-        public static IList<MCCExperimentMazeGenome> GetMazeGenomeData(int experimentId, int run, int startBatch,
+        public static IList<MccexperimentMazeGenome> GetMazeGenomeData(int experimentId, int run, int startBatch,
             int endBatch, IList<int> mazeGenomeIdsInclusive = null, IList<int> mazeGenomeIdsExclusive = null)
         {
-            var mazeGenomes = new List<MCCExperimentMazeGenome>();
+            var mazeGenomes = new List<MccexperimentMazeGenome>();
 
             // Get all maze genome objects between the start and end batch
             for (var curBatch = startBatch; curBatch <= endBatch; curBatch++)
             {
                 mazeGenomes.AddRange(GetMazeGenomeData(experimentId, run, curBatch, mazeGenomeIdsInclusive,
                     mazeGenomes.Count != 0
-                        ? mazeGenomeIdsExclusive?.Concat(mazeGenomes.Select(g => g.GenomeID)).ToList() ??
-                          mazeGenomes.Select(g => g.GenomeID).ToList()
+                        ? mazeGenomeIdsExclusive?.Concat(mazeGenomes.Select(g => g.GenomeId)).ToList() ??
+                          mazeGenomes.Select(g => g.GenomeId).ToList()
                         : mazeGenomeIdsExclusive));
             }
 
@@ -482,9 +484,9 @@ namespace MazeExperimentSupportLib
         /// <param name="experimentId">The experiment that was executed.</param>
         /// <param name="run">The run number of the given experiment.</param>
         /// <returns>The maze genome data.</returns>
-        public static IList<MCCExperimentMazeGenome> GetMazeGenomeData(int experimentId, int run)
+        public static IList<MccexperimentMazeGenome> GetMazeGenomeData(int experimentId, int run)
         {
-            IList<MCCExperimentMazeGenome> mazeGenomes = null;
+            IList<MccexperimentMazeGenome> mazeGenomes = null;
             var querySuccess = false;
             var retryCnt = 0;
 
@@ -493,11 +495,11 @@ namespace MazeExperimentSupportLib
                 try
                 {
                     // Query for the distinct maze genomes logged during the run
-                    using (var context = new ExperimentDataEntities())
+                    using (var context = new ExperimentDataContext())
                     {
                         mazeGenomes =
-                            context.MCCExperimentMazeGenomes.Where(
-                                    expData => expData.ExperimentDictionaryID == experimentId && expData.Run == run)
+                            context.MccexperimentMazeGenomes.Where(
+                                    expData => expData.ExperimentDictionaryId == experimentId && expData.Run == run)
                                 .ToList();
                     }
 
@@ -525,10 +527,10 @@ namespace MazeExperimentSupportLib
         /// <param name="run">The run number of the given experiment.</param>
         /// <param name="mazeGenomeIds">The maze genome IDs by which to constrain.</param>
         /// <returns>The maze genome data.</returns>
-        public static IList<MCCExperimentMazeGenome> GetMazeGenomeData(int experimentId, int run,
+        public static IList<MccexperimentMazeGenome> GetMazeGenomeData(int experimentId, int run,
             IList<int> mazeGenomeIds)
         {
-            IList<MCCExperimentMazeGenome> mazeGenomes = null;
+            IList<MccexperimentMazeGenome> mazeGenomes = null;
             var querySuccess = false;
             var retryCnt = 0;
 
@@ -537,13 +539,13 @@ namespace MazeExperimentSupportLib
                 try
                 {
                     // Query for the maze genomes corresponding to the specified genome IDs
-                    using (var context = new ExperimentDataEntities())
+                    using (var context = new ExperimentDataContext())
                     {
                         mazeGenomes =
-                            context.MCCExperimentMazeGenomes.Where(
+                            context.MccexperimentMazeGenomes.Where(
                                     expData =>
-                                        expData.ExperimentDictionaryID == experimentId && expData.Run == run &&
-                                        mazeGenomeIds.Contains(expData.GenomeID))
+                                        expData.ExperimentDictionaryId == experimentId && expData.Run == run &&
+                                        mazeGenomeIds.Contains(expData.GenomeId))
                                 .ToList();
                     }
 
@@ -573,10 +575,10 @@ namespace MazeExperimentSupportLib
         /// <param name="mazeGenomeIdsInclusive">The maze genome IDs by which to filter the query result set (optional).</param>
         /// <param name="mazeGenomeIdsExclusive">The maze genome IDs to exclude from the query result set (optional).</param>
         /// <returns>The maze genome data.</returns>
-        public static IList<MCCExperimentMazeGenome> GetMazeGenomeData(int experimentId, int run, int batch,
+        public static IList<MccexperimentMazeGenome> GetMazeGenomeData(int experimentId, int run, int batch,
             IList<int> mazeGenomeIdsInclusive = null, IList<int> mazeGenomeIdsExclusive = null)
         {
-            IList<MCCExperimentMazeGenome> mazeGenomes = null;
+            IList<MccexperimentMazeGenome> mazeGenomes = null;
             var querySuccess = false;
             var retryCnt = 0;
 
@@ -584,21 +586,21 @@ namespace MazeExperimentSupportLib
             {
                 try
                 {
-                    using (var context = new ExperimentDataEntities())
+                    using (var context = new ExperimentDataContext())
                     {
                         // Query for maze genomes logged during the current batch with the specified genome IDs included and filtered out respectively
                         if (mazeGenomeIdsInclusive != null && mazeGenomeIdsExclusive != null)
                         {
                             mazeGenomes =
-                                context.MCCExperimentExtantMazePopulations.Where(
+                                context.MccexperimentExtantMazePopulation.Where(
                                         popData =>
-                                            mazeGenomeIdsInclusive.Contains(popData.GenomeID) &&
-                                            mazeGenomeIdsExclusive.Contains(popData.GenomeID) == false &&
-                                            popData.ExperimentDictionaryID == experimentId && popData.Run == run &&
+                                            mazeGenomeIdsInclusive.Contains(popData.GenomeId) &&
+                                            mazeGenomeIdsExclusive.Contains(popData.GenomeId) == false &&
+                                            popData.ExperimentDictionaryId == experimentId && popData.Run == run &&
                                             popData.Generation == batch)
-                                    .Join(context.MCCExperimentMazeGenomes,
-                                        popData => new {popData.ExperimentDictionaryID, popData.Run, popData.GenomeID},
-                                        expData => new {expData.ExperimentDictionaryID, expData.Run, expData.GenomeID},
+                                    .Join(context.MccexperimentMazeGenomes,
+                                        popData => new {popData.ExperimentDictionaryId, popData.Run, popData.GenomeId},
+                                        expData => new {expData.ExperimentDictionaryId, expData.Run, expData.GenomeId},
                                         (popData, expData) => new {popData, expData})
                                     .Select(data => data.expData)
                                     .ToList();
@@ -608,14 +610,14 @@ namespace MazeExperimentSupportLib
                         else if (mazeGenomeIdsInclusive != null)
                         {
                             mazeGenomes =
-                                context.MCCExperimentExtantMazePopulations.Where(
+                                context.MccexperimentExtantMazePopulation.Where(
                                         popData =>
-                                            mazeGenomeIdsInclusive.Contains(popData.GenomeID) &&
-                                            popData.ExperimentDictionaryID == experimentId && popData.Run == run &&
+                                            mazeGenomeIdsInclusive.Contains(popData.GenomeId) &&
+                                            popData.ExperimentDictionaryId == experimentId && popData.Run == run &&
                                             popData.Generation == batch)
-                                    .Join(context.MCCExperimentMazeGenomes,
-                                        popData => new {popData.ExperimentDictionaryID, popData.Run, popData.GenomeID},
-                                        expData => new {expData.ExperimentDictionaryID, expData.Run, expData.GenomeID},
+                                    .Join(context.MccexperimentMazeGenomes,
+                                        popData => new {popData.ExperimentDictionaryId, popData.Run, popData.GenomeId},
+                                        expData => new {expData.ExperimentDictionaryId, expData.Run, expData.GenomeId},
                                         (popData, expData) => new {popData, expData})
                                     .Select(data => data.expData)
                                     .ToList();
@@ -625,14 +627,14 @@ namespace MazeExperimentSupportLib
                         else if (mazeGenomeIdsExclusive != null)
                         {
                             mazeGenomes =
-                                context.MCCExperimentExtantMazePopulations.Where(
+                                context.MccexperimentExtantMazePopulation.Where(
                                         popData =>
-                                            mazeGenomeIdsExclusive.Contains(popData.GenomeID) == false &&
-                                            popData.ExperimentDictionaryID == experimentId && popData.Run == run &&
+                                            mazeGenomeIdsExclusive.Contains(popData.GenomeId) == false &&
+                                            popData.ExperimentDictionaryId == experimentId && popData.Run == run &&
                                             popData.Generation == batch)
-                                    .Join(context.MCCExperimentMazeGenomes,
-                                        popData => new {popData.ExperimentDictionaryID, popData.Run, popData.GenomeID},
-                                        expData => new {expData.ExperimentDictionaryID, expData.Run, expData.GenomeID},
+                                    .Join(context.MccexperimentMazeGenomes,
+                                        popData => new {popData.ExperimentDictionaryId, popData.Run, popData.GenomeId},
+                                        expData => new {expData.ExperimentDictionaryId, expData.Run, expData.GenomeId},
                                         (popData, expData) => new {popData, expData})
                                     .Select(data => data.expData)
                                     .ToList();
@@ -642,13 +644,13 @@ namespace MazeExperimentSupportLib
                         else
                         {
                             mazeGenomes =
-                                context.MCCExperimentExtantMazePopulations.Where(
+                                context.MccexperimentExtantMazePopulation.Where(
                                         popData =>
-                                            popData.ExperimentDictionaryID == experimentId && popData.Run == run &&
+                                            popData.ExperimentDictionaryId == experimentId && popData.Run == run &&
                                             popData.Generation == batch)
-                                    .Join(context.MCCExperimentMazeGenomes,
-                                        popData => new {popData.ExperimentDictionaryID, popData.Run, popData.GenomeID},
-                                        expData => new {expData.ExperimentDictionaryID, expData.Run, expData.GenomeID},
+                                    .Join(context.MccexperimentMazeGenomes,
+                                        popData => new {popData.ExperimentDictionaryId, popData.Run, popData.GenomeId},
+                                        expData => new {expData.ExperimentDictionaryId, expData.Run, expData.GenomeId},
                                         (popData, expData) => new {popData, expData})
                                     .Select(data => data.expData)
                                     .ToList();
@@ -684,11 +686,11 @@ namespace MazeExperimentSupportLib
         /// <param name="navigatorGenomeIdsInclusive">The navigator genome IDs by which to filter the query result set (optional).</param>
         /// <param name="navigatorGenomeIdsExclusive">The navigator genome IDs to exclude from the query result set (optional).</param>
         /// <returns>The distinct navigator genomes between the start and end batch.</returns>
-        public static IList<MCCExperimentNavigatorGenome> GetNavigatorGenomeData(int experimentId, int run,
+        public static IList<MccexperimentNavigatorGenome> GetNavigatorGenomeData(int experimentId, int run,
             int startBatch, int endBatch, RunPhase runPhase, IList<int> navigatorGenomeIdsInclusive = null,
             IList<int> navigatorGenomeIdsExclusive = null)
         {
-            var navigatorGenomes = new List<MCCExperimentNavigatorGenome>();
+            var navigatorGenomes = new List<MccexperimentNavigatorGenome>();
 
             // Get all navigator genome objects between the start and end batch
             for (var curBatch = startBatch; curBatch <= endBatch; curBatch++)
@@ -696,8 +698,8 @@ namespace MazeExperimentSupportLib
                 navigatorGenomes.AddRange(GetNavigatorGenomeData(experimentId, run, curBatch, runPhase,
                     navigatorGenomeIdsInclusive,
                     navigatorGenomes.Count != 0
-                        ? navigatorGenomeIdsExclusive?.Concat(navigatorGenomes.Select(g => g.GenomeID)).ToList() ??
-                          navigatorGenomes.Select(g => g.GenomeID).ToList()
+                        ? navigatorGenomeIdsExclusive?.Concat(navigatorGenomes.Select(g => g.GenomeId)).ToList() ??
+                          navigatorGenomes.Select(g => g.GenomeId).ToList()
                         : navigatorGenomeIdsExclusive));
             }
 
@@ -714,10 +716,10 @@ namespace MazeExperimentSupportLib
         ///     Indicates whether this is part of the initialization or primary experiment phase.
         /// </param>
         /// <returns>The navigator genome data.</returns>
-        public static IList<MCCExperimentNavigatorGenome> GetNavigatorGenomeData(int experimentId, int run,
+        public static IList<MccexperimentNavigatorGenome> GetNavigatorGenomeData(int experimentId, int run,
             RunPhase runPhase)
         {
-            IList<MCCExperimentNavigatorGenome> navigatorGenomes = null;
+            IList<MccexperimentNavigatorGenome> navigatorGenomes = null;
             var querySuccess = false;
             var retryCnt = 0;
 
@@ -726,13 +728,13 @@ namespace MazeExperimentSupportLib
                 try
                 {
                     // Query for the distinct navigator genomes logged during the run
-                    using (var context = new ExperimentDataEntities())
+                    using (var context = new ExperimentDataContext())
                     {
                         navigatorGenomes =
-                            context.MCCExperimentNavigatorGenomes.Where(
+                            context.MccexperimentNavigatorGenomes.Where(
                                 expData =>
-                                    expData.ExperimentDictionaryID == experimentId && expData.Run == run &&
-                                    expData.RunPhase.RunPhaseName == runPhase.ToString()).ToList();
+                                    expData.ExperimentDictionaryId == experimentId && expData.Run == run &&
+                                    expData.RunPhaseFkNavigation.RunPhaseName == runPhase.ToString()).ToList();
                     }
 
                     if (retryCnt > 0)
@@ -762,10 +764,10 @@ namespace MazeExperimentSupportLib
         /// </param>
         /// <param name="navigatorGenomeIds">The navigator genome IDs by which to constrain.</param>
         /// <returns>The navigator genome data.</returns>
-        public static IList<MCCExperimentNavigatorGenome> GetNavigatorGenomeData(int experimentId, int run,
+        public static IList<MccexperimentNavigatorGenome> GetNavigatorGenomeData(int experimentId, int run,
             RunPhase runPhase, IList<int> navigatorGenomeIds)
         {
-            IList<MCCExperimentNavigatorGenome> navigatorGenomes = null;
+            IList<MccexperimentNavigatorGenome> navigatorGenomes = null;
             var querySuccess = false;
             var retryCnt = 0;
 
@@ -774,14 +776,14 @@ namespace MazeExperimentSupportLib
                 try
                 {
                     // Query for the navigator genomes corresponding to the specified genome IDs
-                    using (var context = new ExperimentDataEntities())
+                    using (var context = new ExperimentDataContext())
                     {
                         navigatorGenomes =
-                            context.MCCExperimentNavigatorGenomes.Where(
+                            context.MccexperimentNavigatorGenomes.Where(
                                 expData =>
-                                    expData.ExperimentDictionaryID == experimentId && expData.Run == run &&
-                                    expData.RunPhase.RunPhaseName == runPhase.ToString() &&
-                                    navigatorGenomeIds.Contains(expData.GenomeID)).ToList();
+                                    expData.ExperimentDictionaryId == experimentId && expData.Run == run &&
+                                    expData.RunPhaseFkNavigation.RunPhaseName == runPhase.ToString() &&
+                                    navigatorGenomeIds.Contains(expData.GenomeId)).ToList();
                     }
 
                     if (retryCnt > 0)
@@ -813,11 +815,11 @@ namespace MazeExperimentSupportLib
         /// <param name="navigatorGenomeIdsInclusive">The navigator genome IDs by which to filter the query result set (optional).</param>
         /// <param name="navigatorGenomeIdsExclusive">The navigator genome IDs to exclude from the query result set (optional).</param>
         /// <returns>The navigator genome data.</returns>
-        public static IList<MCCExperimentNavigatorGenome> GetNavigatorGenomeData(int experimentId, int run,
+        public static IList<MccexperimentNavigatorGenome> GetNavigatorGenomeData(int experimentId, int run,
             int batch, RunPhase runPhase, IList<int> navigatorGenomeIdsInclusive = null,
             IList<int> navigatorGenomeIdsExclusive = null)
         {
-            IList<MCCExperimentNavigatorGenome> navigatorGenomes = null;
+            IList<MccexperimentNavigatorGenome> navigatorGenomes = null;
             var querySuccess = false;
             var retryCnt = 0;
 
@@ -825,21 +827,21 @@ namespace MazeExperimentSupportLib
             {
                 try
                 {
-                    using (var context = new ExperimentDataEntities())
+                    using (var context = new ExperimentDataContext())
                     {
                         // Query for navigator genomes logged during the current batch with the specified genome IDs included and filtered out respectively
                         if (navigatorGenomeIdsInclusive != null && navigatorGenomeIdsExclusive != null)
                         {
                             navigatorGenomes =
-                                context.MCCExperimentExtantNavigatorPopulations.Where(
+                                context.MccexperimentExtantNavigatorPopulation.Where(
                                         popData =>
-                                            navigatorGenomeIdsInclusive.Contains(popData.GenomeID) &&
-                                            navigatorGenomeIdsExclusive.Contains(popData.GenomeID) == false &&
-                                            popData.ExperimentDictionaryID == experimentId && popData.Run == run &&
+                                            navigatorGenomeIdsInclusive.Contains(popData.GenomeId) &&
+                                            navigatorGenomeIdsExclusive.Contains(popData.GenomeId) == false &&
+                                            popData.ExperimentDictionaryId == experimentId && popData.Run == run &&
                                             popData.Generation == batch)
-                                    .Join(context.MCCExperimentNavigatorGenomes,
-                                        popData => new {popData.ExperimentDictionaryID, popData.Run, popData.GenomeID},
-                                        expData => new {expData.ExperimentDictionaryID, expData.Run, expData.GenomeID},
+                                    .Join(context.MccexperimentNavigatorGenomes,
+                                        popData => new {popData.ExperimentDictionaryId, popData.Run, popData.GenomeId},
+                                        expData => new {expData.ExperimentDictionaryId, expData.Run, expData.GenomeId},
                                         (popData, expData) => new {popData, expData})
                                     .Select(data => data.expData)
                                     .ToList();
@@ -849,14 +851,14 @@ namespace MazeExperimentSupportLib
                         else if (navigatorGenomeIdsInclusive != null)
                         {
                             navigatorGenomes =
-                                context.MCCExperimentExtantNavigatorPopulations.Where(
+                                context.MccexperimentExtantNavigatorPopulation.Where(
                                         popData =>
-                                            navigatorGenomeIdsInclusive.Contains(popData.GenomeID) &&
-                                            popData.ExperimentDictionaryID == experimentId && popData.Run == run &&
+                                            navigatorGenomeIdsInclusive.Contains(popData.GenomeId) &&
+                                            popData.ExperimentDictionaryId == experimentId && popData.Run == run &&
                                             popData.Generation == batch)
-                                    .Join(context.MCCExperimentNavigatorGenomes,
-                                        popData => new {popData.ExperimentDictionaryID, popData.Run, popData.GenomeID},
-                                        expData => new {expData.ExperimentDictionaryID, expData.Run, expData.GenomeID},
+                                    .Join(context.MccexperimentNavigatorGenomes,
+                                        popData => new {popData.ExperimentDictionaryId, popData.Run, popData.GenomeId},
+                                        expData => new {expData.ExperimentDictionaryId, expData.Run, expData.GenomeId},
                                         (popData, expData) => new {popData, expData})
                                     .Select(data => data.expData)
                                     .ToList();
@@ -866,14 +868,14 @@ namespace MazeExperimentSupportLib
                         else if (navigatorGenomeIdsExclusive != null)
                         {
                             navigatorGenomes =
-                                context.MCCExperimentExtantNavigatorPopulations.Where(
+                                context.MccexperimentExtantNavigatorPopulation.Where(
                                         popData =>
-                                            navigatorGenomeIdsExclusive.Contains(popData.GenomeID) == false &&
-                                            popData.ExperimentDictionaryID == experimentId && popData.Run == run &&
+                                            navigatorGenomeIdsExclusive.Contains(popData.GenomeId) == false &&
+                                            popData.ExperimentDictionaryId == experimentId && popData.Run == run &&
                                             popData.Generation == batch)
-                                    .Join(context.MCCExperimentNavigatorGenomes,
-                                        popData => new {popData.ExperimentDictionaryID, popData.Run, popData.GenomeID},
-                                        expData => new {expData.ExperimentDictionaryID, expData.Run, expData.GenomeID},
+                                    .Join(context.MccexperimentNavigatorGenomes,
+                                        popData => new {popData.ExperimentDictionaryId, popData.Run, popData.GenomeId},
+                                        expData => new {expData.ExperimentDictionaryId, expData.Run, expData.GenomeId},
                                         (popData, expData) => new {popData, expData})
                                     .Select(data => data.expData)
                                     .ToList();
@@ -883,13 +885,13 @@ namespace MazeExperimentSupportLib
                         else
                         {
                             navigatorGenomes =
-                                context.MCCExperimentExtantNavigatorPopulations.Where(
+                                context.MccexperimentExtantNavigatorPopulation.Where(
                                         popData =>
-                                            popData.ExperimentDictionaryID == experimentId && popData.Run == run &&
+                                            popData.ExperimentDictionaryId == experimentId && popData.Run == run &&
                                             popData.Generation == batch)
-                                    .Join(context.MCCExperimentNavigatorGenomes,
-                                        popData => new {popData.ExperimentDictionaryID, popData.Run, popData.GenomeID},
-                                        expData => new {expData.ExperimentDictionaryID, expData.Run, expData.GenomeID},
+                                    .Join(context.MccexperimentNavigatorGenomes,
+                                        popData => new {popData.ExperimentDictionaryId, popData.Run, popData.GenomeId},
+                                        expData => new {expData.ExperimentDictionaryId, expData.Run, expData.GenomeId},
                                         (popData, expData) => new {popData, expData})
                                     .Select(data => data.expData)
                                     .ToList();
@@ -929,14 +931,14 @@ namespace MazeExperimentSupportLib
                 try
                 {
                     // Query for the maximum initialization evaluations
-                    using (var context = new ExperimentDataEntities())
+                    using (var context = new ExperimentDataContext())
                     {
                         initEvaluations =
-                            context.MCCExperimentNavigatorEvaluationDatas.Where(
+                            context.MccexperimentNavigatorEvaluationData.Where(
                                     navigatorData =>
-                                        navigatorData.ExperimentDictionaryID == experimentId &&
+                                        navigatorData.ExperimentDictionaryId == experimentId &&
                                         navigatorData.Run == run &&
-                                        navigatorData.RunPhase.RunPhaseName == RunPhase.Initialization.ToString())
+                                        navigatorData.RunPhaseFkNavigation.RunPhaseName == RunPhase.Initialization.ToString())
                                 .Max(navigatorData => navigatorData.TotalEvaluations);
                     }
 
@@ -974,23 +976,23 @@ namespace MazeExperimentSupportLib
             {
                 try
                 {
-                    using (var context = new ExperimentDataEntities())
+                    using (var context = new ExperimentDataContext())
                     {
                         // Get the total maze evaluations at the given batch
                         mazeEvaluations =
-                            context.MCCExperimentMazeEvaluationDatas.Where(
+                            context.MccexperimentMazeEvaluationData.Where(
                                 mazeData =>
-                                    mazeData.ExperimentDictionaryID == experimentId && mazeData.Run == run &&
+                                    mazeData.ExperimentDictionaryId == experimentId && mazeData.Run == run &&
                                     mazeData.Generation == batch).Select(mazeData => mazeData.TotalEvaluations).First();
 
                         // Get the total navigator evaluations at the given batch
                         navigatorEvaluations =
-                            context.MCCExperimentNavigatorEvaluationDatas.Where(
+                            context.MccexperimentNavigatorEvaluationData.Where(
                                     navigatorData =>
-                                        navigatorData.ExperimentDictionaryID == experimentId &&
+                                        navigatorData.ExperimentDictionaryId == experimentId &&
                                         navigatorData.Run == run &&
                                         navigatorData.Generation == batch &&
-                                        navigatorData.RunPhase.RunPhaseName == RunPhase.Primary.ToString())
+                                        navigatorData.RunPhaseFkNavigation.RunPhaseName == RunPhase.Primary.ToString())
                                 .Select(navigatorData => navigatorData.TotalEvaluations)
                                 .Single();
                     }
@@ -1018,10 +1020,10 @@ namespace MazeExperimentSupportLib
         /// <param name="run">The run number of the given experiment.</param>
         /// <param name="batch">The batch number of the given run.</param>
         /// <returns>The list of maze/navigator combinations that were successful for the given experiment, run, and batch.</returns>
-        public static IList<MCCMazeNavigatorResult> GetSuccessfulNavigations(int experimentId, int run,
+        public static IList<MccmazeNavigatorResult> GetSuccessfulNavigations(int experimentId, int run,
             int batch)
         {
-            IList<MCCMazeNavigatorResult> navigationResults = null;
+            IList<MccmazeNavigatorResult> navigationResults = null;
             var querySuccess = false;
             var retryCnt = 0;
 
@@ -1029,14 +1031,14 @@ namespace MazeExperimentSupportLib
             {
                 try
                 {
-                    using (var context = new ExperimentDataEntities())
+                    using (var context = new ExperimentDataContext())
                     {
                         // Get only the combination of navigators and mazes that resulted in a successful navigation
-                        navigationResults = context.MCCMazeNavigatorResults.Where(
+                        navigationResults = context.MccmazeNavigatorResults.Where(
                                 nav =>
-                                    experimentId == nav.ExperimentDictionaryID && run == nav.Run &&
+                                    experimentId == nav.ExperimentDictionaryId && run == nav.Run &&
                                     batch == nav.Generation &&
-                                    RunPhase.Primary.ToString().Equals(nav.RunPhase.RunPhaseName) && nav.IsMazeSolved)
+                                    RunPhase.Primary.ToString().Equals(nav.RunPhaseFkNavigation.RunPhaseName) && nav.IsMazeSolved)
                             .ToList();
                     }
 
@@ -1063,10 +1065,10 @@ namespace MazeExperimentSupportLib
         /// <param name="run">The run number of the given experiment.</param>
         /// <param name="mazeGenomeIds">The list of maze genome IDs by which to filter the navigation results.</param>
         /// <returns>The list of distinct maze/navigator combinations that were successful for the given experiment and run.</returns>
-        public static IList<MCCMazeNavigatorResult> GetSuccessfulNavigationPerMaze(int experimentId, int run,
+        public static IList<MccmazeNavigatorResult> GetSuccessfulNavigationPerMaze(int experimentId, int run,
             IList<int> mazeGenomeIds)
         {
-            IList<MCCMazeNavigatorResult> navigationResults = null;
+            IList<MccmazeNavigatorResult> navigationResults = null;
             var querySuccess = false;
             var retryCnt = 0;
 
@@ -1074,16 +1076,16 @@ namespace MazeExperimentSupportLib
             {
                 try
                 {
-                    using (var context = new ExperimentDataEntities())
+                    using (var context = new ExperimentDataContext())
                     {
                         // Get single navigation result for each of the specified maze IDs over the entirety of the run
-                        navigationResults = context.MCCMazeNavigatorResults.Where(
+                        navigationResults = context.MccmazeNavigatorResults.Where(
                                 nav =>
-                                    experimentId == nav.ExperimentDictionaryID && run == nav.Run &&
-                                    RunPhase.Primary.ToString().Equals(nav.RunPhase.RunPhaseName) &&
-                                    nav.IsMazeSolved && mazeGenomeIds.Contains(nav.MazeGenomeID))
-                            .GroupBy(nav => nav.MazeGenomeID)
-                            .Select(m => m.OrderBy(x => x.MazeGenomeID).FirstOrDefault())
+                                    experimentId == nav.ExperimentDictionaryId && run == nav.Run &&
+                                    RunPhase.Primary.ToString().Equals(nav.RunPhaseFkNavigation.RunPhaseName) &&
+                                    nav.IsMazeSolved && mazeGenomeIds.Contains(nav.MazeGenomeId))
+                            .GroupBy(nav => nav.MazeGenomeId)
+                            .Select(m => m.OrderBy(x => x.MazeGenomeId).FirstOrDefault())
                             .ToList();
                     }
 
@@ -1123,16 +1125,16 @@ namespace MazeExperimentSupportLib
             {
                 try
                 {
-                    using (var context = new ExperimentDataEntities())
+                    using (var context = new ExperimentDataContext())
                     {
                         // Get the species to which the mazes are assigned and group by species
                         var specieGroupedMazes =
-                            context.MCCExperimentExtantMazePopulations.Where(
+                            context.MccexperimentExtantMazePopulation.Where(
                                     maze =>
-                                        experimentId == maze.ExperimentDictionaryID && run == maze.Run &&
-                                        batch == maze.Generation && mazeGenomeIds.Contains(maze.GenomeID))
-                                .Select(maze => new {maze.SpecieID, maze.GenomeID})
-                                .GroupBy(maze => maze.SpecieID)
+                                        experimentId == maze.ExperimentDictionaryId && run == maze.Run &&
+                                        batch == maze.Generation && mazeGenomeIds.Contains(maze.GenomeId))
+                                .Select(maze => new {maze.SpecieId, maze.GenomeId})
+                                .GroupBy(maze => maze.SpecieId)
                                 .ToList();
 
                         // Build list of maze specie genome groups
@@ -1141,7 +1143,7 @@ namespace MazeExperimentSupportLib
                                 specieGenomesGroup =>
                                     specieGenomesGroup.Key != null
                                         ? new SpecieGenomesGroup((int) specieGenomesGroup.Key,
-                                            specieGenomesGroup.Select(gg => gg.GenomeID).ToList())
+                                            specieGenomesGroup.Select(gg => gg.GenomeId).ToList())
                                         : new SpecieGenomesGroup()));
                     }
 
@@ -1182,18 +1184,18 @@ namespace MazeExperimentSupportLib
             {
                 try
                 {
-                    using (var context = new ExperimentDataEntities())
+                    using (var context = new ExperimentDataContext())
                     {
                         // Get the species to which the navigators are assigned and group by species
                         var specieGroupedNavigators =
-                            context.MCCExperimentExtantNavigatorPopulations.Where(
+                            context.MccexperimentExtantNavigatorPopulation.Where(
                                     nav =>
-                                        experimentId == nav.ExperimentDictionaryID && run == nav.Run &&
+                                        experimentId == nav.ExperimentDictionaryId && run == nav.Run &&
                                         batch == nav.Generation &&
-                                        runPhase.ToString().Equals(nav.RunPhase.RunPhaseName) &&
-                                        navigatorGenomeIds.Contains(nav.GenomeID))
-                                .Select(nav => new {nav.SpecieID, nav.GenomeID})
-                                .GroupBy(nav => nav.SpecieID)
+                                        runPhase.ToString().Equals(nav.RunPhaseFkNavigation.RunPhaseName) &&
+                                        navigatorGenomeIds.Contains(nav.GenomeId))
+                                .Select(nav => new {nav.SpecieId, nav.GenomeId})
+                                .GroupBy(nav => nav.SpecieId)
                                 .ToList();
 
                         // Build list of navigator specie genome groups
@@ -1202,7 +1204,7 @@ namespace MazeExperimentSupportLib
                                 specieGenomesGroup =>
                                     specieGenomesGroup.Key != null
                                         ? new SpecieGenomesGroup((int) specieGenomesGroup.Key,
-                                            specieGenomesGroup.Select(gg => gg.GenomeID).ToList())
+                                            specieGenomesGroup.Select(gg => gg.GenomeId).ToList())
                                         : new SpecieGenomesGroup()));
                     }
 
@@ -1335,11 +1337,11 @@ namespace MazeExperimentSupportLib
                 try
                 {
                     // Query for the run phase key
-                    using (var context = new ExperimentDataEntities())
+                    using (var context = new ExperimentDataContext())
                     {
                         runPhaseKey =
-                            context.RunPhases.First(runPhaseData => runPhaseData.RunPhaseName == runPhase.ToString())
-                                .RunPhaseID;
+                            context.RunPhase.First(runPhaseData => runPhaseData.RunPhaseName == runPhase.ToString())
+                                .RunPhaseId;
                     }
 
                     if (retryCnt > 0)
@@ -1375,8 +1377,8 @@ namespace MazeExperimentSupportLib
             // Page through the result set, committing each in the specified batch size
             for (var curPage = 0; curPage <= evaluationUnits.Count / commitPageSize; curPage++)
             {
-                IList<MCCMazeNavigatorResult> serializedResults =
-                    new List<MCCMazeNavigatorResult>(commitPageSize);
+                IList<MccmazeNavigatorResult> serializedResults =
+                    new List<MccmazeNavigatorResult>(commitPageSize);
 
                 // Go ahead and lookup the run phase key for all of the records
                 // (instead of hitting the database on every iteration of the below loop)
@@ -1385,27 +1387,26 @@ namespace MazeExperimentSupportLib
                 // Build a list of serialized results
                 foreach (var evaluationUnit in evaluationUnits.Skip(curPage * commitPageSize).Take(commitPageSize))
                 {
-                    serializedResults.Add(new MCCMazeNavigatorResult
+                    serializedResults.Add(new MccmazeNavigatorResult
                     {
-                        ExperimentDictionaryID = experimentId,
+                        ExperimentDictionaryId = experimentId,
                         Run = run,
                         Generation = batch,
-                        RunPhase_FK = runPhaseKey,
-                        MazeGenomeID = evaluationUnit.MazeId,
-                        NavigatorGenomeID = evaluationUnit.AgentId,
+                        RunPhaseFk = runPhaseKey,
+                        MazeGenomeId = evaluationUnit.MazeId,
+                        NavigatorGenomeId = evaluationUnit.AgentId,
                         IsMazeSolved = evaluationUnit.IsMazeSolved,
                         NumTimesteps = evaluationUnit.NumTimesteps
                     });
                 }
 
                 // Create a new context and persist the batch
-                using (var context = new ExperimentDataEntities())
+                using (var context = new ExperimentDataContext())
                 {
                     // Auto-detect changes and save validation are switched off to speed things up
-                    context.Configuration.AutoDetectChangesEnabled = false;
-                    context.Configuration.ValidateOnSaveEnabled = false;
+                    context.ChangeTracker.AutoDetectChangesEnabled = false;
 
-                    context.MCCMazeNavigatorResults.AddRange(serializedResults);
+                    context.MccmazeNavigatorResults.AddRange(serializedResults);
                     context.SaveChanges();
                 }
             }
@@ -1504,36 +1505,35 @@ namespace MazeExperimentSupportLib
             // Page through the result set, committing each in the specified batch size
             for (var curPage = 0; curPage <= evaluationUnits.Count / commitPageSize; curPage++)
             {
-                IList<MCCFullTrajectory> serializedResults =
-                    new List<MCCFullTrajectory>(commitPageSize);
+                IList<MccfullTrajectory> serializedResults =
+                    new List<MccfullTrajectory>(commitPageSize);
 
                 // Build a list of serialized results
                 foreach (var evaluationUnit in evaluationUnits.Skip(curPage * commitPageSize).Take(commitPageSize))
                 {
                     for (var idx = 0; idx < evaluationUnit.AgentTrajectory.Count(); idx += 2)
                     {
-                        serializedResults.Add(new MCCFullTrajectory
+                        serializedResults.Add(new MccfullTrajectory
                         {
-                            ExperimentDictionaryID = experimentId,
+                            ExperimentDictionaryId = experimentId,
                             Run = run,
                             Generation = batch,
                             Timestep = ((idx / 2) + 1), // this is the timestep
-                            MazeGenomeID = evaluationUnit.MazeId,
-                            NavigatorGenomeID = evaluationUnit.AgentId,
-                            XPosition = Convert.ToDecimal(evaluationUnit.AgentTrajectory[idx]),
-                            YPosition = Convert.ToDecimal(evaluationUnit.AgentTrajectory[idx + 1])
+                            MazeGenomeId = evaluationUnit.MazeId,
+                            NavigatorGenomeId = evaluationUnit.AgentId,
+                            Xposition = Convert.ToDecimal(evaluationUnit.AgentTrajectory[idx]),
+                            Yposition = Convert.ToDecimal(evaluationUnit.AgentTrajectory[idx + 1])
                         });
                     }
                 }
 
                 // Create a new context and persist the batch
-                using (var context = new ExperimentDataEntities())
+                using (var context = new ExperimentDataContext())
                 {
                     // Auto-detect changes and save validation are switched off to speed things up
-                    context.Configuration.AutoDetectChangesEnabled = false;
-                    context.Configuration.ValidateOnSaveEnabled = false;
+                    context.ChangeTracker.AutoDetectChangesEnabled = false;
 
-                    context.MCCFullTrajectories.AddRange(serializedResults);
+                    context.MccfullTrajectories.AddRange(serializedResults);
                     context.SaveChanges();
                 }
             }
