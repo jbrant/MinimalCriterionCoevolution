@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Redzen.Numerics;
 using SharpNeat.Core;
 using SharpNeat.DistanceMetrics;
 using SharpNeat.EvolutionAlgorithms.ComplexityRegulation;
@@ -289,7 +290,7 @@ namespace SharpNeat.EvolutionAlgorithms
 
                     // Stochastic rounding will result in equal allocation if targetSizeReal is a whole
                     // number, otherwise it will help to distribute allocations evenly.
-                    inst.TargetSizeInt = (int) Utilities.ProbabilisticRound(targetSizeReal, RandomNumGenerator);
+                    inst.TargetSizeInt = (int) NumericsUtils.ProbabilisticRound(targetSizeReal, RandomNumGenerator);
 
                     // Total up discretized target sizes.
                     totalTargetSizeInt += inst.TargetSizeInt;
@@ -304,7 +305,8 @@ namespace SharpNeat.EvolutionAlgorithms
                     inst.TargetSizeReal = (inst.MeanFitness / totalMeanFitness) * PopulationSize;
 
                     // Discretize targetSize (stochastic rounding).
-                    inst.TargetSizeInt = (int) Utilities.ProbabilisticRound(inst.TargetSizeReal, RandomNumGenerator);
+                    inst.TargetSizeInt =
+                        (int) NumericsUtils.ProbabilisticRound(inst.TargetSizeReal, RandomNumGenerator);
 
                     // Total up discretized target sizes.
                     totalTargetSizeInt += inst.TargetSizeInt;
@@ -465,7 +467,7 @@ namespace SharpNeat.EvolutionAlgorithms
 
                 // Discretize the real size with a probabilistic handling of the fractional part.
                 double eliteSizeReal = SpecieList[i].GenomeList.Count * EaParams.ElitismProportion;
-                int eliteSizeInt = (int) Utilities.ProbabilisticRound(eliteSizeReal, RandomNumGenerator);
+                int eliteSizeInt = (int) NumericsUtils.ProbabilisticRound(eliteSizeReal, RandomNumGenerator);
 
                 // Ensure eliteSizeInt is no larger than the current target size (remember it was calculated 
                 // against the current size of the specie not its new target size).
@@ -489,14 +491,14 @@ namespace SharpNeat.EvolutionAlgorithms
                 // some probabilistic logic to compensate for any rounding bias.
                 double offspringAsexualCountReal = inst.OffspringCount * EaParams.OffspringAsexualProportion;
                 inst.OffspringAsexualCount =
-                    (int) Utilities.ProbabilisticRound(offspringAsexualCountReal, RandomNumGenerator);
+                    (int) NumericsUtils.ProbabilisticRound(offspringAsexualCountReal, RandomNumGenerator);
                 inst.OffspringSexualCount = inst.OffspringCount - inst.OffspringAsexualCount;
 
                 // Also while we're here we calculate the selectionSize. The number of the specie's fittest genomes
                 // that are selected from to create offspring. This should always be at least 1.
                 double selectionSizeReal = SpecieList[i].GenomeList.Count * EaParams.SelectionProportion;
                 inst.SelectionSize = Math.Max(1,
-                    (int) Utilities.ProbabilisticRound(selectionSizeReal, RandomNumGenerator));
+                    (int) NumericsUtils.ProbabilisticRound(selectionSizeReal, RandomNumGenerator));
             }
 
             return specieStatsArr;
@@ -571,7 +573,7 @@ namespace SharpNeat.EvolutionAlgorithms
                 // for 0 the  species all get an even chance of selection, and for >1 we can just select species normally.
                 int crossSpecieMatings = nonZeroSpecieCount == 1
                     ? 0
-                    : (int) Utilities.ProbabilisticRound(EaParams.InterspeciesMatingProportion
+                    : (int) NumericsUtils.ProbabilisticRound(EaParams.InterspeciesMatingProportion
                                                          * inst.OffspringSexualCount, RandomNumGenerator);
                 Statistics.SexualOffspringCount += (ulong) (inst.OffspringSexualCount - crossSpecieMatings);
                 Statistics.InterspeciesOffspringCount += (ulong) crossSpecieMatings;

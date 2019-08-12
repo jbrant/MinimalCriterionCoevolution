@@ -114,7 +114,7 @@ namespace SharpNeat.Network.ActivationFunctions.RadialBasis
         /// For activation functions that accept auxiliary arguments; generates random initial values for aux arguments for newly
         /// added nodes (from an 'add neuron' mutation).
         /// </summary>
-        public double[] GetRandomAuxArgs(Xoshiro256StarStarRandom rng, double connectionWeightRange)
+        public double[] GetRandomAuxArgs(IRandomSource rng, double connectionWeightRange)
         {
             double[] auxArgs = new double[2];
             auxArgs[0] = (rng.NextDouble()-0.5) * 2.0;
@@ -125,7 +125,7 @@ namespace SharpNeat.Network.ActivationFunctions.RadialBasis
         /// <summary>
         /// Genetic mutation for auxiliary argument data.
         /// </summary>
-        public void MutateAuxArgs(double[] auxArgs, Xoshiro256StarStarRandom rng, double connectionWeightRange)
+        public void MutateAuxArgs(double[] auxArgs, IRandomSource rng, double connectionWeightRange)
         {
             // Mutate center.            
             // Add gaussian ditribution sample and clamp result to +-connectionWeightRange.

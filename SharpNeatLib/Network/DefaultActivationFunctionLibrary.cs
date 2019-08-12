@@ -74,7 +74,7 @@ namespace SharpNeat.Network
         /// <summary>
         /// Randomly select a function based on each function's selection probability.
         /// </summary>
-        public ActivationFunctionInfo GetRandomFunction(Xoshiro256StarStarRandom rng)
+        public ActivationFunctionInfo GetRandomFunction(IRandomSource rng)
         {
             return _functionList[DiscreteDistribution.Sample(rng, _rwl)];
         }

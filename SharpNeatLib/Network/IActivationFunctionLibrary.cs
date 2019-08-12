@@ -38,7 +38,7 @@ namespace SharpNeat.Network
         /// <summary>
         /// Randomly select a function based on each function's selection probability.
         /// </summary>
-        ActivationFunctionInfo GetRandomFunction(Xoshiro256StarStarRandom rng);
+        ActivationFunctionInfo GetRandomFunction(IRandomSource rng);
 
         /// <summary>
         /// Gets a list of all functions in the library.

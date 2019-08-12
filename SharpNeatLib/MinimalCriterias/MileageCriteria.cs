@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Redzen.Random;
 using SharpNeat.Core;
 using SharpNeat.Loggers;
 
@@ -28,7 +29,7 @@ namespace SharpNeat.MinimalCriterias
         /// <summary>
         ///     The random number generator which generates new MCs when the current one gets stuck.
         /// </summary>
-        private readonly Random _randomNumGenerator = new Random();
+        private readonly IRandomSource _randomNumGenerator = RandomDefaults.CreateRandomSource();
 
         /// <summary>
         ///     The x-component of the starting position.

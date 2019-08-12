@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Xml;
+using Redzen.Random;
 using SharpNeat.Decoders.Maze;
 using SharpNeat.Genomes.Maze;
 using SharpNeat.Phenomes.Mazes;
@@ -72,7 +73,7 @@ namespace MazeGenomeGenerator
         /// </summary>
         private static void HandleMazeGeneration()
         {
-            Random rand = new Random();
+            IRandomSource rand = RandomDefaults.CreateRandomSource();
 
             // Get the evolved maze height and width
             int mazeHeight = Int32.Parse(_executionConfiguration[ExecutionParameter.MazeHeight]);

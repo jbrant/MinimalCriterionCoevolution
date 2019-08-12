@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using log4net;
+using Redzen.Random;
 using SharpNeat.Core;
 using SharpNeat.EvolutionAlgorithms.ComplexityRegulation;
 using SharpNeat.EvolutionAlgorithms.Statistics;
@@ -372,7 +373,7 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <summary>
         ///     Random number generator.
         /// </summary>
-        protected readonly FastRandom RandomNumGenerator = new FastRandom();
+        protected readonly IRandomSource RandomNumGenerator = RandomDefaults.CreateRandomSource();
 
         /// <summary>
         ///     Optional map of logging fields and their respective "enabled status" to dynamically control what is logged.

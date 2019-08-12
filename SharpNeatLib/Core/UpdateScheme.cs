@@ -28,7 +28,6 @@ namespace SharpNeat.Core
     {
         private readonly UpdateMode _updateMode;
         private readonly uint _generations;
-        private readonly uint _evaluations;
         private readonly TimeSpan _timespan;
 
         #region Constructors
@@ -69,14 +68,6 @@ namespace SharpNeat.Core
         public uint Generations
         {
             get { return _generations; }
-        }
-
-        /// <summary>
-        /// Gets the number of evaluations between updates; Applies only to the steady state update scheme.
-        /// </summary>
-        public uint Evaluations
-        {
-            get { return _evaluations; }
         }
 
         /// <summary>

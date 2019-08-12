@@ -41,7 +41,7 @@ namespace SharpNeat.SpeciationStrategies
     public class RandomClusteringStrategy<TGenome> : ISpeciationStrategy<TGenome>
         where TGenome : class, IGenome<TGenome>
     {
-        private readonly Xoshiro256StarStarRandom _rng = new Xoshiro256StarStarRandom();
+        private readonly IRandomSource _rng = RandomDefaults.CreateRandomSource();
 
         /// <summary>x
         ///     Speciates the genomes in genomeList into the number of species specified by specieCount

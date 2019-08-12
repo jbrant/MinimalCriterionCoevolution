@@ -83,7 +83,7 @@ namespace SharpNeat.Genomes.Neat
         /// Gets one of the ConnectionMutationInfo items at random based upon the ActivationProbability 
         /// of the contained items.
         /// </summary>
-        public ConnectionMutationInfo GetRandomItem(Xoshiro256StarStarRandom rng)
+        public ConnectionMutationInfo GetRandomItem(IRandomSource rng)
         {
             return this[DiscreteDistribution.Sample(rng, _rouletteWheelLayout)];
         }

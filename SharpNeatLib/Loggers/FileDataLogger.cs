@@ -105,7 +105,7 @@ namespace SharpNeat.Loggers
                 // Immediatley flush to the log file
                 _writer.Flush();
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 Debug.WriteLine($"Exception occurred while writing header to log file [{_logFileName}]");
             }

@@ -17,6 +17,8 @@
  * along with SharpNEAT.  If not, see <http://www.gnu.org/licenses/>.
  */
 using System.Collections.Generic;
+using Redzen.Random;
+
 namespace SharpNeat.Utility
 {
     /// <summary>
@@ -29,7 +31,7 @@ namespace SharpNeat.Utility
         /// </summary>
         /// <param name="probability">A probability between 0..1 that the throw will result in a true result.</param>
         /// <param name="rng">Random number generator.</param>
-        public static bool SingleThrow(double probability, FastRandom rng)
+        public static bool SingleThrow(double probability, IRandomSource rng)
         {
             return rng.NextDouble() < probability;
         }
@@ -40,7 +42,7 @@ namespace SharpNeat.Utility
         /// <param name="numberOfOutcomes">The number of possible outcomes.</param>
         /// <param name="rng">Random number generator.</param>
         /// <returns>An integer between 0..numberOfOutcomes-1. In effect this routine selects one of the possible outcomes.</returns>
-        public static int SingleThrowEven(int numberOfOutcomes, FastRandom rng)
+        public static int SingleThrowEven(int numberOfOutcomes, IRandomSource rng)
         {
             return (int)(rng.NextDouble() * numberOfOutcomes);
         }
@@ -53,7 +55,7 @@ namespace SharpNeat.Utility
         /// </summary>
         /// <param name="layout">The roulette wheel layout.</param>
         /// <param name="rng">Random number generator.</param>
-        public static int SingleThrow(RouletteWheelLayout layout, FastRandom rng)
+        public static int SingleThrow(RouletteWheelLayout layout, IRandomSource rng)
         {
             // Throw the ball and return an integer indicating the outcome.
             double throwValue = layout.ProbabilitiesTotal * rng.NextDouble();
