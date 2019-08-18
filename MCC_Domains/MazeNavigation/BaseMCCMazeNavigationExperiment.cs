@@ -13,7 +13,6 @@ using SharpNeat.Decoders;
 using SharpNeat.Decoders.Maze;
 using SharpNeat.Genomes.Maze;
 using SharpNeat.Genomes.Neat;
-using SharpNeat.Utility;
 
 #endregion
 
@@ -25,6 +24,90 @@ namespace MCC_Domains.MazeNavigation
     /// </summary>
     public abstract class BaseMCCMazeNavigationExperiment : IMCCExperiment
     {
+        #region Private Methods
+
+        /// <summary>
+        ///     Checks ranges and other experiment settings to ensure that the configuration is valid.
+        /// </summary>
+        /// <param name="message">
+        ///     Error message denoting specific configuration violation (only set if an invalid configuration was
+        ///     identified).
+        /// </param>
+        /// <returns>Boolean flag indicating whether the experiment configuration is valid.</returns>
+        private bool ValidateConfigParameters(out string message)
+        {
+            // Set error message to null by default
+            message = null;
+
+            // Check population range constraints
+            if (AgentDefaultPopulationSize <= 0)
+                message = $"Agent population size [{AgentDefaultPopulationSize}] must be a non-zero integer";
+            else if (MazeDefaultPopulationSize <= 0)
+                message = $"Maze population size [{MazeDefaultPopulationSize}] must be a non-zero integer";
+            // Check seed range constraints
+            else if (AgentSeedGenomeCount <= 0)
+                message = $"Agent seed genome count [{AgentSeedGenomeCount}] must be a non-zero integer";
+            else if (MazeSeedGenomeCount <= 0)
+                message = $"Maze seed genome count [{MazeSeedGenomeCount}] must be a non-zero integer";
+            else if (AgentSeedGenomeCount > AgentDefaultPopulationSize)
+                message =
+                    $"Agent seed genome count [{AgentSeedGenomeCount}] must be no greater than the agent population size [{AgentDefaultPopulationSize}]";
+            else if (MazeSeedGenomeCount > MazeDefaultPopulationSize)
+                message =
+                    $"Maze seed genome count [{MazeSeedGenomeCount}] must be no greater than the maze population size [{MazeDefaultPopulationSize}]";
+            // Check species range constraints
+            else if (AgentNumSpecies < 0)
+                message = $"Agent species count [{AgentNumSpecies}], if specified, must be a zero or positive integer";
+            else if (MazeNumSpecies < 0)
+                message = $"Maze species count [{MazeNumSpecies}], if specified, must be a zero or positive integer";
+            else if (AgentNumSpecies > AgentSeedGenomeCount)
+                message =
+                    $"Agent species count [{AgentNumSpecies}] must be no greater than the agent seed genome count [{AgentSeedGenomeCount}] (otherwise there will be empty species)";
+            else if (MazeNumSpecies > MazeSeedGenomeCount)
+                message =
+                    $"Maze species count [{MazeNumSpecies}] must be no greater than the maze seed genome count [{MazeSeedGenomeCount}] (otherwise there will be empty species)";
+            // Ensure that batch size evenly divisible by number of species
+            else if (NavigatorBatchSize % AgentNumSpecies != 0)
+                message =
+                    $"Agent batch size [{NavigatorBatchSize}] must be evenly divisible by the number of species [{AgentNumSpecies}]";
+            else if (MazeBatchSize % MazeNumSpecies != 0)
+                message =
+                    $"Maze batch size [{MazeBatchSize}] must be evenly divisible by the number of species [{MazeNumSpecies}]";
+            // Check evaluation time range constraints
+            else if (MaxGenerations <= 0)
+                message = $"Max generations [{MaxGenerations}] must be an integer greater than 0";
+            else if (MaxEvaluations <= 0)
+                message = $"Max evaluations [{MaxEvaluations}] must be an integer greater than 0";
+            // Check maze structural constraints
+            else if (MazeHeight <= 1)
+                message = $"Maze height [{MazeHeight}] must be greater than 1";
+            else if (MazeWidth <= 1)
+                message = $"Maze width [{MazeWidth}] must be greater than 1";
+            else if (MazeQuadrantHeight <= 1)
+                message = $"Maze quadrant height [{MazeQuadrantHeight}] must be greater than 1";
+            else if (MazeQuadrantWidth <= 1)
+                message = $"Maze quadrant width [{MazeQuadrantWidth}] must be greater than 1";
+            else if (MazeQuadrantHeight >= MazeHeight)
+                message = $"Maze quadrant height [{MazeQuadrantHeight}] must be less than maze height [{MazeHeight}]";
+            else if (MazeQuadrantWidth >= MazeWidth)
+                message = $"Maze quadrant width [{MazeQuadrantWidth}] must be less than maze height [{MazeWidth}]";
+            // Check minimal criterion constraints
+            else if (NumMazeSuccessCriteria > MazeDefaultPopulationSize)
+                message =
+                    $"Mazes solved minimal criterion [{NumMazeSuccessCriteria}] must be no greater than the maze population size";
+            else if (NumAgentSuccessCriteria > AgentDefaultPopulationSize)
+                message =
+                    $"Agents solved minimal criterion [{NumAgentSuccessCriteria}] must be no greater than the agent population size";
+            else if (NumAgentFailedCriteria > AgentDefaultPopulationSize)
+                message =
+                    $"Agents failed minimal criterion [{NumAgentSuccessCriteria}] must be no greater than the agent population size";
+
+            // Return configuration validity status based on whether an error message was set
+            return message != null;
+        }
+
+        #endregion
+
         #region Public Properties
 
         /// <inheritdoc />
@@ -299,6 +382,9 @@ namespace MCC_Domains.MazeNavigation
             NumAgentSuccessCriteria = XmlUtils.GetValueAsInt(xmlConfig, "NumAgentsSolvedCriteria");
             NumAgentFailedCriteria = XmlUtils.GetValueAsInt(xmlConfig, "NumAgentsFailedCriteria");
 
+            // Validate experiment configuration parameters
+            if (ValidateConfigParameters(out var errorMessage)) throw new ConfigurationException(errorMessage);
+
             // Read in the maximum number of initialization evaluations
             _maxInitializationEvaluations = XmlUtils.GetValueAsUInt(xmlConfig, "MaxInitializationEvaluations");
 
@@ -362,9 +448,7 @@ namespace MCC_Domains.MazeNavigation
                     viableMazeAgents.Where(
                         viableMazeAgent =>
                             seedAgentPopulation.Select(sap => sap.Id).Contains(viableMazeAgent.Id) == false))
-                {
                     seedAgentPopulation.Add(viableMazeAgent);
-                }
             }
 
             // If we still lack the genomes to fill out seed agent gnome count while still satisfying the maze MC,
@@ -388,20 +472,14 @@ namespace MCC_Domains.MazeNavigation
                 // Iterate through each viable agent and remove them if they've already solved a maze or add them to the list
                 // of viable agents if they have not
                 foreach (var viableMazeAgent in viableMazeAgents)
-                {
                     // If they agent has already solved maze and is in the list of viable agents, remove that agent
                     // from the pool of seed genomes (this is done because here, we're interested in getting unique
                     // agents and want to avoid an endless loop wherein the same viable agents are returned)
                     if (seedAgentPopulation.Select(sap => sap.Id).Contains(viableMazeAgent.Id))
-                    {
                         agentPopulation.Remove(viableMazeAgent);
-                    }
                     // Otherwise, add that agent to the list of viable agents
                     else
-                    {
                         seedAgentPopulation.Add(viableMazeAgent);
-                    }
-                }
             }
 
             return seedAgentPopulation;

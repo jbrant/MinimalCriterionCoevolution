@@ -290,7 +290,7 @@ namespace SharpNeat.EvolutionAlgorithms
 
             if (EaParams.SpecieCount > 0)
             {
-                childGenomes = new List<TGenome>(_batchSize * SpecieList.Count);
+                childGenomes = new List<TGenome>(_batchSize);
 
                 // Iterate through each species and asexually reproduce offspring
                 foreach (var specie in SpecieList)
