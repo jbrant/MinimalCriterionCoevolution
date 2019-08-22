@@ -58,7 +58,6 @@ namespace SharpNeat.Core
         private readonly IGenomeDecoder<TGenome, TPhenome> _genomeDecoder;
         private readonly IPhenomeEvaluator<TPhenome, FitnessInfo> _phenomeEvaluator;
         private readonly bool _enablePhenomeCaching;
-        private readonly IDataLogger _evaluationLogger;
 
         #endregion
 
@@ -75,7 +74,6 @@ namespace SharpNeat.Core
             _phenomeEvaluator = phenomeEvaluator;
             _enablePhenomeCaching = true;
             _evaluationMethod = Evaluate_Caching;
-            _evaluationLogger = evaluationLogger;
         }
 
         /// <summary>
@@ -88,7 +86,6 @@ namespace SharpNeat.Core
             _genomeDecoder = genomeDecoder;
             _phenomeEvaluator = phenomeEvaluator;
             _enablePhenomeCaching = enablePhenomeCaching;
-            _evaluationLogger = evaluationLogger;
 
             if (_enablePhenomeCaching)
             {
@@ -107,49 +104,29 @@ namespace SharpNeat.Core
         /// <summary>
         ///     Gets the total number of individual genome evaluations that have been performed by this evaluator.
         /// </summary>
-        public ulong EvaluationCount
-        {
-            get { return _phenomeEvaluator.EvaluationCount; }
-        }
+        public ulong EvaluationCount => _phenomeEvaluator.EvaluationCount;
 
         /// <summary>
         ///     Gets a value indicating whether some goal fitness has been achieved and that
         ///     the the evolutionary algorithm/search should stop. This property's value can remain false
         ///     to allow the algorithm to run indefinitely.
         /// </summary>
-        public bool StopConditionSatisfied
-        {
-            get { return _phenomeEvaluator.StopConditionSatisfied; }
-        }
+        public bool StopConditionSatisfied => _phenomeEvaluator.StopConditionSatisfied;
 
         /// <summary>
-        ///     Initializes state variables in the genome evalutor (primarily the logger).
+        ///     Initializes state variables in the genome evaluator.
         /// </summary>
         public void Initialize()
         {
-            // Open the logger
-            _evaluationLogger?.Open();
-
-            // Defer to phenome initialization
-            _phenomeEvaluator.Initialize(_evaluationLogger);
+            _phenomeEvaluator.Initialize();
         }
 
         /// <summary>
-        ///     Cleans up evaluator state after end of execution or upon execution interruption.  In particular, this closes out
-        ///     any existing evaluation logger instance.
+        ///     Calls child classes to clean up or dispose of variable states or close out loggers.
         /// </summary>
         public void Cleanup()
         {
-            _evaluationLogger?.Close();
-        }
-
-        /// <summary>
-        ///     Update the genome evaluator based on some characteristic of the given population.
-        /// </summary>
-        /// <param name="population">The current population.</param>
-        public void Update(List<TGenome> population)
-        {
-            _phenomeEvaluator.Update(population);
+            _phenomeEvaluator.Cleanup();
         }
 
         /// <summary>
@@ -157,9 +134,10 @@ namespace SharpNeat.Core
         ///     is typically used in a coevoluationary context.
         /// </summary>
         /// <param name="comparisonPhenomes">The phenomes against which the evaluation is being carried out.</param>
-        public void UpdateEvaluationBaseline(IEnumerable<object> comparisonPhenomes)
+        /// <param name="lastGeneration">The generation that was just executed.</param>
+        public void UpdateEvaluationBaseline(IEnumerable<object> comparisonPhenomes, uint lastGeneration)
         {
-            _phenomeEvaluator.UpdateEvaluatorPhenotypes(comparisonPhenomes);
+            _phenomeEvaluator.UpdateEvaluatorPhenotypes(comparisonPhenomes, lastGeneration);
         }
 
         /// <summary>
@@ -232,9 +210,9 @@ namespace SharpNeat.Core
         private void Evaluate_NonCaching(IList<TGenome> genomeList, uint currentGeneration)
         {
             // Decode and evaluate each genome in turn.
-            foreach (TGenome genome in genomeList)
+            foreach (var genome in genomeList)
             {
-                TPhenome phenome = _genomeDecoder.Decode(genome);
+                var phenome = _genomeDecoder.Decode(genome);
                 if (null == phenome)
                 {
                     // Non-viable genome.
@@ -243,8 +221,7 @@ namespace SharpNeat.Core
                 }
                 else
                 {
-                    FitnessInfo fitnessInfo = _phenomeEvaluator.Evaluate(phenome, currentGeneration,
-                        _evaluationLogger);
+                    var fitnessInfo = _phenomeEvaluator.Evaluate(phenome, currentGeneration);
                     genome.EvaluationInfo.SetFitness(fitnessInfo.Fitness);
                     genome.EvaluationInfo.AuxFitnessArr = fitnessInfo.AuxFitnessArr;
                 }
@@ -254,9 +231,9 @@ namespace SharpNeat.Core
         private void Evaluate_Caching(IList<TGenome> genomeList, uint currentGeneration)
         {
             // Decode and evaluate each genome in turn.
-            foreach (TGenome genome in genomeList)
+            foreach (var genome in genomeList)
             {
-                TPhenome phenome = (TPhenome) genome.CachedPhenome;
+                var phenome = (TPhenome) genome.CachedPhenome;
                 if (null == phenome)
                 {
                     // Decode the phenome and store a ref against the genome.
@@ -272,8 +249,7 @@ namespace SharpNeat.Core
                 }
                 else
                 {
-                    FitnessInfo fitnessInfo = _phenomeEvaluator.Evaluate(phenome, currentGeneration,
-                        _evaluationLogger);
+                    var fitnessInfo = _phenomeEvaluator.Evaluate(phenome, currentGeneration);
                     genome.EvaluationInfo.SetFitness(fitnessInfo.Fitness);
                     genome.EvaluationInfo.AuxFitnessArr = fitnessInfo.AuxFitnessArr;
                 }

@@ -17,7 +17,6 @@ using SharpNeat;
 using SharpNeat.Core;
 using SharpNeat.Genomes.Maze;
 using SharpNeat.Genomes.Neat;
-using SharpNeat.Loggers;
 
 #endregion
 
@@ -299,8 +298,8 @@ namespace MCC_Executor.MazeNavigation
             }
 
             // If the per-parameter configuration is valid but not a full list of parameters were specified, makes sure the necessary ones are present
-            if (isConfigurationValid && (ExecutionConfiguration.Count ==
-                                         Enum.GetNames(typeof(ExecutionParameter)).Length) == false)
+            if (isConfigurationValid && ExecutionConfiguration.Count ==
+                Enum.GetNames(typeof(ExecutionParameter)).Length == false)
             {
                 // Check for existence of experiment source
                 if (ExecutionConfiguration.ContainsKey(ExecutionParameter.ExperimentSource) == false)
@@ -418,26 +417,10 @@ namespace MCC_Executor.MazeNavigation
             var experiment = DetermineMCCMazeNavigationExperiment(xmlConfig.DocumentElement);
 
             // Execute the experiment for the specified number of runs
-            for (int runIdx = startFromRun; runIdx <= numRuns; runIdx++)
+            for (var runIdx = startFromRun; runIdx <= numRuns; runIdx++)
             {
-                // Initialize the data loggers for the given run
-                IDataLogger navigatorDataLogger =
-                    new FileDataLogger($"{logFileDirectory}\\{experimentName} - Run{runIdx} - NavigatorEvolution.csv");
-                IDataLogger navigatorPopulationLogger =
-                    new FileDataLogger($"{logFileDirectory}\\{experimentName} - Run{runIdx} - NavigatorPopulation.csv");
-                IDataLogger navigatorGenomesLogger =
-                    new FileDataLogger($"{logFileDirectory}\\{experimentName} - Run{runIdx} - NavigatorGenomes.csv");
-                IDataLogger mazeDataLogger =
-                    new FileDataLogger($"{logFileDirectory}\\{experimentName} - Run{runIdx} - MazeEvolution.csv");
-                IDataLogger mazePopulationLogger =
-                    new FileDataLogger($"{logFileDirectory}\\{experimentName} - Run{runIdx} - MazePopulation.csv");
-                IDataLogger mazeGenomesLogger =
-                    new FileDataLogger($"{logFileDirectory}\\{experimentName} - Run{runIdx} - MazeGenomes.csv");
-
                 // Initialize new experiment
-                experiment.Initialize(experimentName, xmlConfig.DocumentElement, navigatorDataLogger,
-                    navigatorPopulationLogger, navigatorGenomesLogger, mazeDataLogger, mazePopulationLogger,
-                    mazeGenomesLogger);
+                experiment.Initialize(experimentName, xmlConfig.DocumentElement, logFileDirectory, runIdx);
 
                 _executionLogger.Info($"Initialized experiment {experiment.GetType()}.");
 
@@ -472,14 +455,6 @@ namespace MCC_Executor.MazeNavigation
                 // Kick off the experiment run
                 RunExperiment(agentGenomeFactory, mazeGenomeFactory, agentGenomeList, mazeGenomeList,
                     seedAgentPath != null, experimentName, experiment, numRuns, runIdx);
-
-                // Close the data loggers
-                navigatorDataLogger.Close();
-                navigatorPopulationLogger.Close();
-                navigatorGenomesLogger.Close();
-                mazeDataLogger.Close();
-                mazePopulationLogger.Close();
-                mazeGenomesLogger.Close();
             }
         }
 
@@ -537,55 +512,53 @@ namespace MCC_Executor.MazeNavigation
         /// <param name="e">Event arguments</param>
         private static void MccContainerUpdateEvent(object sender, EventArgs e)
         {
-            if (_mccEaContainer.Population1CurrentChampGenome != null &&
-                _mccEaContainer.Population2CurrentChampGenome != null)
+            if (_mccEaContainer.AgentChampGenome != null &&
+                _mccEaContainer.EnvironmentChampGenome != null)
             {
                 _executionLogger.Info(
-                    $"Generation={_mccEaContainer.CurrentGeneration:N0} Evaluations={_mccEaContainer.CurrentEvaluations:N0} Population1BestFitness={_mccEaContainer.Population1CurrentChampGenome.EvaluationInfo.Fitness:N2} Population1MaxComplexity={_mccEaContainer.Population1Statistics.MaxComplexity:N2} Population2BestFitness={_mccEaContainer.Population2CurrentChampGenome.EvaluationInfo.Fitness:N2}, Population2MaxComplexity={_mccEaContainer.Population2Statistics.MaxComplexity:N2}");
+                    $"Generation={_mccEaContainer.CurrentGeneration:N0} Evaluations={_mccEaContainer.CurrentEvaluations:N0} Population1BestFitness={_mccEaContainer.AgentChampGenome.EvaluationInfo.Fitness:N2} Population1MaxComplexity={_mccEaContainer.AgentPopulationStats.MaxComplexity:N2} Population2BestFitness={_mccEaContainer.EnvironmentChampGenome.EvaluationInfo.Fitness:N2}, Population2MaxComplexity={_mccEaContainer.EnvironmentPopulationStats.MaxComplexity:N2}");
             }
         }
 
         /// <summary>
-        ///     Determine the MCC maze navigation experiment to run based on the search and selection algorithms specified
-        ///     in the configuration file.
+        ///     Determine the MCC maze navigation experiment to run based on the experiment class specified in the configuration
+        ///     file.
         /// </summary>
         /// <param name="xmlConfig">The reference to the root node of the XML configuration file.</param>
         /// <returns>The appropriate maze navigation experiment class.</returns>
         private static BaseMCCMazeNavigationExperiment DetermineMCCMazeNavigationExperiment(XmlElement xmlConfig)
         {
-            // Get the search and selection algorithm types
-            var searchAlgorithm = XmlUtils.TryGetValueAsString(xmlConfig, "SearchAlgorithm");
-            var selectionAlgorithm = XmlUtils.TryGetValueAsString(xmlConfig, "SelectionAlgorithm");
+            // Get the experiment class
+            var experimentClass = XmlUtils.TryGetValueAsString(xmlConfig, "ExperimentClass");
 
-            // Make sure both the search algorithm and selection algorithm have been set in the configuration file
-            if (searchAlgorithm == null || selectionAlgorithm == null)
+            // Make sure the experiment class is set
+            if (experimentClass == null)
             {
                 _executionLogger.Error(
-                    "Both the search algorithm and selection algorithm must be specified in the XML configuration file.");
+                    "The experiment class must be specified in the XML configuration file to initialize and execute the appropriate experiment.");
                 Environment.Exit(0);
             }
 
             // Get the appropriate experiment class
-            return DetermineMCCMazeNavigationExperiment(searchAlgorithm, selectionAlgorithm);
+            return DetermineMCCMazeNavigationExperiment(experimentClass);
         }
 
         /// <summary>
-        ///     Determines the MCC maze navigation experiment to run based on the given search and selection algorithm.
+        ///     Determines the MCC maze navigation experiment to run based on the given experiment class.
         /// </summary>
-        /// <param name="searchAlgorithmName">The search algorithm to run.</param>
-        /// <param name="selectionAlgorithmName">The selection algorithm to run.</param>
+        /// <param name="experimentClass">The experiment class to match on (e.g. control, speciation, etc.).</param>
         /// <returns>The applicable MCC maze navigation experiment.</returns>
         private static BaseMCCMazeNavigationExperiment DetermineMCCMazeNavigationExperiment(
-            string searchAlgorithmName, string selectionAlgorithmName)
+            string experimentClass)
         {
-            // Extract the corresponding search and selection algorithm domain types
-            var searchType = AlgorithmTypeUtil.ConvertStringToSearchType(searchAlgorithmName);
-            var selectionType = AlgorithmTypeUtil.ConvertStringToSelectionType(selectionAlgorithmName);
-
-            // Queueing MCC experiment with separate (currently per-species) queues
-            if (SelectionType.MultipleQueueing.Equals(selectionType))
+            if (experimentClass.Equals("Speciation", StringComparison.InvariantCultureIgnoreCase))
             {
                 return new MCCSpeciationExperiment();
+            }
+
+            if (experimentClass.Equals("LimitedResources", StringComparison.InvariantCultureIgnoreCase))
+            {
+                return new MCCLimitedResourcesExperiment();
             }
 
             // Otherwise, go with the single maze, single queue MCC experiment

@@ -7,6 +7,7 @@ using SharpNeat;
 using SharpNeat.Core;
 using SharpNeat.Decoders.Maze;
 using SharpNeat.Decoders.Neat;
+using SharpNeat.DistanceMetrics;
 using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.EvolutionAlgorithms.Statistics;
 using SharpNeat.Genomes.Maze;
@@ -14,17 +15,109 @@ using SharpNeat.Genomes.Neat;
 using SharpNeat.Loggers;
 using SharpNeat.Phenomes;
 using SharpNeat.Phenomes.Mazes;
+using SharpNeat.SpeciationStrategies;
 
 #endregion
 
 namespace MCC_Domains.MazeNavigation.MCCExperiment
 {
     /// <summary>
-    ///     Initial MCC experiment with two, unspeciated population queues (one queue for agents, and the other for mazes).
+    ///     MCC experiment with speciated population queues. Selection and removal occurs from each of the species rather than
+    ///     from the "global" queues (although, species are logical partitions - individuals are still physically stored in two
+    ///     queues).
     /// </summary>
-    public class MCCControlExperiment : BaseMCCMazeNavigationExperiment
+    public class MCCLimitedResourcesExperiment : BaseMCCMazeNavigationExperiment
     {
-        #region Public Methods
+        #region Private members
+
+        /// <summary>
+        ///     The resource limit for mazes (i.e. the maximum number of times that it can be used by an agent for satisfying the
+        ///     agent's MC).
+        /// </summary>
+        private int _resourceLimit;
+
+        /// <summary>
+        ///     Logs statistics about the navigator populations for every batch.
+        /// </summary>
+        private IDataLogger _navigatorEvolutionDataLogger;
+
+        /// <summary>
+        ///     Logs the IDs of the extant navigator population at every interval.
+        /// </summary>
+        private IDataLogger _navigatorPopulationDataLogger;
+
+        /// <summary>
+        ///     Logs the definitions of the navigator population over the course of a run.
+        /// </summary>
+        private IDataLogger _navigatorGenomeDataLogger;
+
+        /// <summary>
+        ///     Logs statistics about the maze populations for every batch.
+        /// </summary>
+        private IDataLogger _mazeEvolutionDataLogger;
+
+        /// <summary>
+        ///     Logs the IDs of the extant maze population at every interval.
+        /// </summary>
+        private IDataLogger _mazePopulationDataLogger;
+
+        /// <summary>
+        ///     Logs the definitions of the maze population over the course of a run.
+        /// </summary>
+        private IDataLogger _mazeGenomeDataLogger;
+
+        /// <summary>
+        ///     Logs the maze resource usage over the course of a run.
+        /// </summary>
+        private IDataLogger _mazeResourceUsageLogger;
+
+        /// <summary>
+        ///     Dictionary which indicates logger fields to be enabled/disabled for navigator genomes.
+        /// </summary>
+        private IDictionary<FieldElement, bool> _navigatorLogFieldEnableMap;
+
+        /// <summary>
+        ///     Dictionary which indicates logger fields to be enabled/disabled for maze genomes.
+        /// </summary>
+        private IDictionary<FieldElement, bool> _mazeLogFieldEnableMap;
+
+        /// <summary>
+        ///     Controls the number of batches between population definitions (i.e. genome XML) being logged.
+        /// </summary>
+        private int? _populationLoggingBatchInterval;
+
+        #endregion
+
+        #region Private methods
+
+        /// <summary>
+        ///     Checks ranges and other experiment settings to ensure that the configuration is valid.
+        /// </summary>
+        /// <param name="message">
+        ///     Error message denoting specific configuration violation (only set if an invalid configuration was
+        ///     identified).
+        /// </param>
+        /// <returns>Boolean flag indicating whether the experiment configuration is valid.</returns>
+        protected override bool ValidateConfigParameters(out string message)
+        {
+            // Set error message to null by default
+            message = null;
+
+            // Check resource constraint setting
+            if (_resourceLimit < 1)
+                message =
+                    $"Resource limit [{_resourceLimit}] must be greater than 1, otherwise maze cannot be used to satisfy the MC of any agent";
+            // Check base class parameters
+            else if (base.ValidateConfigParameters(out var errorMessage))
+                message = errorMessage;
+
+            // Return configuration validity status based on whether an error message was set
+            return message != null;
+        }
+
+        #endregion
+
+        #region Overridden methods
 
         /// <inheritdoc />
         /// <summary>
@@ -40,6 +133,9 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             // Initialize boiler plate parameters
             base.Initialize(name, xmlConfig);
 
+            // Read resource limit parameter
+            _resourceLimit = XmlUtils.GetValueAsInt(xmlConfig, "ResourceLimit");
+
             // Initialize the data loggers for the given experiment/run
             _navigatorEvolutionDataLogger =
                 new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - NavigatorEvolution.csv");
@@ -52,6 +148,8 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             _mazePopulationDataLogger =
                 new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - MazePopulation.csv");
             _mazeGenomeDataLogger = new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - MazeGenomes.csv");
+            _mazeResourceUsageLogger =
+                new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - ResourceUsage.csv");
 
             // Create new evolution field elements map with all fields enabled
             _navigatorLogFieldEnableMap = EvolutionFieldElements.PopulateEvolutionFieldElementsEnableMap();
@@ -198,8 +296,9 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         /// </param>
         /// <returns>The instantiated MCC algorithm container.</returns>
         public override IMCCAlgorithmContainer<NeatGenome, MazeGenome> CreateMCCAlgorithmContainer(
-            IGenomeFactory<NeatGenome> genomeFactory1, IGenomeFactory<MazeGenome> genomeFactory2,
-            List<NeatGenome> genomeList1, List<MazeGenome> genomeList2, bool isAgentListPreevolved)
+            IGenomeFactory<NeatGenome> genomeFactory1,
+            IGenomeFactory<MazeGenome> genomeFactory2, List<NeatGenome> genomeList1, List<MazeGenome> genomeList2,
+            bool isAgentListPreevolved)
         {
             // Either use pre-evolved agents or evolve the seed agents that meet the MC
             var seedAgentPopulation = isAgentListPreevolved
@@ -212,14 +311,17 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
                 mazeGenome.EvaluationInfo.SetFitness(0);
             }
 
-            // Create the NEAT evolution algorithm parameters (no agent queue speciation)
+            // Reset primary NEAT genome parameters on agent genome factory
+            ((NeatGenomeFactory) genomeFactory1).ResetNeatGenomeParameters(NeatGenomeParameters);
+
+            // Create the NEAT evolution algorithm parameters 
             var neatEaParams = new EvolutionAlgorithmParameters
             {
                 SpecieCount = 0,
                 MaxSpecieSize = AgentDefaultPopulationSize
             };
 
-            // Create the maze evolution algorithm parameters (no maze queue speciation)
+            // Create the maze evolution algorithm parameters
             var mazeEaParams = new EvolutionAlgorithmParameters
             {
                 SpecieCount = 0,
@@ -228,25 +330,29 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
 
             // Create the NEAT (i.e. navigator) queueing evolution algorithm
             AbstractEvolutionAlgorithm<NeatGenome> neatEvolutionAlgorithm = new QueueEvolutionAlgorithm<NeatGenome>(
-                neatEaParams, new NeatAlgorithmStats(neatEaParams), null, NavigatorBatchSize, RunPhase.Primary,
-                _navigatorEvolutionDataLogger, _navigatorLogFieldEnableMap, _navigatorPopulationDataLogger,
-                _navigatorGenomeDataLogger, _populationLoggingBatchInterval);
+                neatEaParams, new NeatAlgorithmStats(neatEaParams),
+                new ParallelKMeansClusteringStrategy<NeatGenome>(new ManhattanDistanceMetric(1.0, 0.0, 10.0),
+                    ParallelOptions), null, NavigatorBatchSize, RunPhase.Primary, _navigatorEvolutionDataLogger,
+                _navigatorLogFieldEnableMap, _navigatorPopulationDataLogger, _navigatorGenomeDataLogger,
+                _populationLoggingBatchInterval);
 
             // Create the maze queueing evolution algorithm
             AbstractEvolutionAlgorithm<MazeGenome> mazeEvolutionAlgorithm = new QueueEvolutionAlgorithm<MazeGenome>(
-                mazeEaParams, new MazeAlgorithmStats(mazeEaParams), null, MazeBatchSize, RunPhase.Primary,
-                _mazeEvolutionDataLogger, _mazeLogFieldEnableMap, _mazePopulationDataLogger, _mazeGenomeDataLogger,
+                mazeEaParams, new MazeAlgorithmStats(mazeEaParams),
+                new ParallelKMeansClusteringStrategy<MazeGenome>(new ManhattanDistanceMetric(1.0, 0.0, 10.0),
+                    ParallelOptions), null, MazeBatchSize, RunPhase.Primary, _mazeEvolutionDataLogger,
+                _mazeLogFieldEnableMap, _mazePopulationDataLogger, _mazeGenomeDataLogger,
                 _populationLoggingBatchInterval);
 
             // Create the maze phenome evaluator
             IPhenomeEvaluator<MazeStructure, BehaviorInfo> mazeEvaluator =
                 new MazeEnvironmentMCCEvaluator(MinSuccessDistance, BehaviorCharacterizationFactory,
-                    NumAgentSuccessCriteria, NumAgentFailedCriteria);
+                    NumAgentSuccessCriteria, 0);
 
             // Create navigator phenome evaluator
             IPhenomeEvaluator<IBlackBox, BehaviorInfo> navigatorEvaluator =
                 new MazeNavigatorMCCEvaluator(MinSuccessDistance, BehaviorCharacterizationFactory,
-                    NumMazeSuccessCriteria);
+                    NumMazeSuccessCriteria, _resourceLimit, resourceUsageLogger: _mazeResourceUsageLogger);
 
             // Create maze genome decoder
             IGenomeDecoder<MazeGenome, MazeStructure> mazeGenomeDecoder = new MazeDecoder(MazeScaleMultiplier);
@@ -285,55 +391,6 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
 
             return mccAlgorithmContainer;
         }
-
-        #endregion
-
-        #region Instance Variables
-
-        /// <summary>
-        ///     Logs statistics about the navigator populations for every batch.
-        /// </summary>
-        private IDataLogger _navigatorEvolutionDataLogger;
-
-        /// <summary>
-        ///     Logs the IDs of the extant navigator population at every interval.
-        /// </summary>
-        private IDataLogger _navigatorPopulationDataLogger;
-
-        /// <summary>
-        ///     Logs the definitions of the navigator population over the course of a run.
-        /// </summary>
-        private IDataLogger _navigatorGenomeDataLogger;
-
-        /// <summary>
-        ///     Logs statistics about the maze populations for every batch.
-        /// </summary>
-        private IDataLogger _mazeEvolutionDataLogger;
-
-        /// <summary>
-        ///     Logs the IDs of the extant maze population at every interval.
-        /// </summary>
-        private IDataLogger _mazePopulationDataLogger;
-
-        /// <summary>
-        ///     Logs the definitions of the maze population over the course of a run.
-        /// </summary>
-        private IDataLogger _mazeGenomeDataLogger;
-
-        /// <summary>
-        ///     Dictionary which indicates logger fields to be enabled/disabled for navigator genomes.
-        /// </summary>
-        private IDictionary<FieldElement, bool> _navigatorLogFieldEnableMap;
-
-        /// <summary>
-        ///     Dictionary which indicates logger fields to be enabled/disabled for maze genomes.
-        /// </summary>
-        private IDictionary<FieldElement, bool> _mazeLogFieldEnableMap;
-
-        /// <summary>
-        ///     Controls the number of batches between population definitions (i.e. genome XML) being logged.
-        /// </summary>
-        private int? _populationLoggingBatchInterval;
 
         #endregion
     }

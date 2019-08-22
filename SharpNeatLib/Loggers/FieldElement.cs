@@ -499,6 +499,46 @@ namespace SharpNeat.Loggers
     }
 
     /// <summary>
+    ///     Fields capturing the resource usage of mazes throughout the course of a run.
+    /// </summary>
+    public static class ResourceUsageFieldElements
+    {
+        /// <summary>
+        ///     The number of elements in this log file/table.
+        /// </summary>
+        public static readonly int NumFieldElements = 3;
+
+        /// <summary>
+        ///     The generation at which the resource usage was recorded.
+        /// </summary>
+        public static readonly FieldElement Generation = new FieldElement(0, "Generation");
+
+        /// <summary>
+        ///     The ID of the genome whose usage is being logged.
+        /// </summary>
+        public static readonly FieldElement GenomeId = new FieldElement(1, "Genome ID");
+
+        /// <summary>
+        ///     The resource usage count of the given genome.
+        /// </summary>
+        public static readonly FieldElement UsageCount = new FieldElement(2, "Usage Count");
+
+        /// <summary>
+        ///     Pre-constructs a resource usage log field enable map with all of the fields enabled by default.
+        /// </summary>
+        /// <returns>Resource usage log field enable map with all fields enabled.</returns>
+        public static Dictionary<FieldElement, bool> PopulateResourceUsageFieldElementsEnableMap()
+        {
+            return new Dictionary<FieldElement, bool>
+            {
+                {Generation, true},
+                {GenomeId, true},
+                {UsageCount, true}
+            };
+        }
+    }
+
+    /// <summary>
     ///     Encapsulates the position and name of a field within an experiment data log.
     /// </summary>
     public class FieldElement

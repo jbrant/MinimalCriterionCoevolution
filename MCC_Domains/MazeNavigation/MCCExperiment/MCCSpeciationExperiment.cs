@@ -28,7 +28,60 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
     /// </summary>
     public class MCCSpeciationExperiment : BaseMCCMazeNavigationExperiment
     {
+        #region Private methods
+
+        /// <summary>
+        ///     Checks ranges and other experiment settings to ensure that the configuration is valid.
+        /// </summary>
+        /// <param name="message">
+        ///     Error message denoting specific configuration violation (only set if an invalid configuration was
+        ///     identified).
+        /// </param>
+        /// <returns>Boolean flag indicating whether the experiment configuration is valid.</returns>
+        protected override bool ValidateConfigParameters(out string message)
+        {
+            // Set error message to null by default
+            message = null;
+
+            // Check species range constraints
+            if (_agentNumSpecies < 0)
+                message = $"Agent species count [{_agentNumSpecies}], if specified, must be a zero or positive integer";
+            else if (_mazeNumSpecies < 0)
+                message = $"Maze species count [{_mazeNumSpecies}], if specified, must be a zero or positive integer";
+            else if (_agentNumSpecies > AgentSeedGenomeCount)
+                message =
+                    $"Agent species count [{_agentNumSpecies}] must be no greater than the agent seed genome count [{AgentSeedGenomeCount}] (otherwise there will be empty species)";
+            else if (_mazeNumSpecies > MazeSeedGenomeCount)
+                message =
+                    $"Maze species count [{_mazeNumSpecies}] must be no greater than the maze seed genome count [{MazeSeedGenomeCount}] (otherwise there will be empty species)";
+            // Ensure that batch size evenly divisible by number of species
+            else if (NavigatorBatchSize % _agentNumSpecies != 0)
+                message =
+                    $"Agent batch size [{NavigatorBatchSize}] must be evenly divisible by the number of species [{_agentNumSpecies}]";
+            else if (MazeBatchSize % _mazeNumSpecies != 0)
+                message =
+                    $"Maze batch size [{MazeBatchSize}] must be evenly divisible by the number of species [{_mazeNumSpecies}]";
+            // Check base class parameters
+            else if (base.ValidateConfigParameters(out var errorMessage))
+                message = errorMessage;
+
+            // Return configuration validity status based on whether an error message was set
+            return message != null;
+        }
+
+        #endregion
+
         #region Private members
+
+        /// <summary>
+        ///     The number of species in the agent queue.
+        /// </summary>
+        private int _agentNumSpecies;
+
+        /// <summary>
+        ///     The number of species in the maze queue.
+        /// </summary>
+        private int _mazeNumSpecies;
 
         /// <summary>
         ///     Logs statistics about the navigator populations for every batch.
@@ -86,38 +139,29 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         /// </summary>
         /// <param name="name">The name of the experiment.</param>
         /// <param name="xmlConfig">The reference to the XML configuration file.</param>
-        /// <param name="navigatorEvolutionLogger">The navigator evolution data logger.</param>
-        /// <param name="navigatorPopulationLogger">The navigator population logger.</param>
-        /// <param name="navigatorGenomeLogger">The navigator genome logger.</param>
-        /// <param name="mazeEvolutionLogger">The maze evolution data logger.</param>
-        /// <param name="mazePopulationLogger">The maze population logger.</param>
-        /// <param name="mazeGenomeLogger">The maze genome logger.</param>
-        public override void Initialize(string name, XmlElement xmlConfig, IDataLogger navigatorEvolutionLogger = null,
-            IDataLogger navigatorPopulationLogger = null, IDataLogger navigatorGenomeLogger = null,
-            IDataLogger mazeEvolutionLogger = null, IDataLogger mazePopulationLogger = null,
-            IDataLogger mazeGenomeLogger = null)
+        /// <param name="logFileDirectory">The directory into which to write the evolution/evaluation log files.</param>
+        /// <param name="runIdx">The numerical ID of the current run.</param>
+        public override void Initialize(string name, XmlElement xmlConfig, string logFileDirectory, int runIdx)
         {
-            base.Initialize(name, xmlConfig, navigatorEvolutionLogger, navigatorGenomeLogger, mazeEvolutionLogger,
-                mazeGenomeLogger);
+            // Initialize boiler plate parameters
+            base.Initialize(name, xmlConfig);
 
-            // Read in log file path/name
-            _navigatorEvolutionDataLogger = navigatorEvolutionLogger ??
-                                            ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Evolution,
-                                                "NavigatorLoggingConfig");
-            _navigatorPopulationDataLogger = navigatorPopulationLogger ?? ExperimentUtils.ReadDataLogger(xmlConfig,
-                                                 LoggingType.Population, "NavigatorLoggingConfig");
-            _navigatorGenomeDataLogger = navigatorGenomeLogger ??
-                                         ExperimentUtils.ReadDataLogger(xmlConfig,
-                                             LoggingType.Genome, "NavigatorLoggingConfig");
-            _mazeEvolutionDataLogger = mazeEvolutionLogger ??
-                                       ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Evolution,
-                                           "MazeLoggingConfig");
-            _mazePopulationDataLogger = mazePopulationLogger ??
-                                        ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Population,
-                                            "MazeLoggingConfig");
-            _mazeGenomeDataLogger = mazeGenomeLogger ??
-                                    ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Genome,
-                                        "MazeLoggingConfig");
+            // Read the number of agent and maze species
+            _agentNumSpecies = XmlUtils.GetValueAsInt(xmlConfig, "AgentNumSpecies");
+            _mazeNumSpecies = XmlUtils.GetValueAsInt(xmlConfig, "MazeNumSpecies");
+
+            // Initialize the data loggers for the given experiment/run
+            _navigatorEvolutionDataLogger =
+                new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - NavigatorEvolution.csv");
+            _navigatorPopulationDataLogger =
+                new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - NavigatorPopulation.csv");
+            _navigatorGenomeDataLogger =
+                new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - NavigatorGenomes.csv");
+            _mazeEvolutionDataLogger =
+                new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - MazeEvolution.csv");
+            _mazePopulationDataLogger =
+                new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - MazePopulation.csv");
+            _mazeGenomeDataLogger = new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - MazeGenomes.csv");
 
             // Create new evolution field elements map with all fields enabled
             _navigatorLogFieldEnableMap = EvolutionFieldElements.PopulateEvolutionFieldElementsEnableMap();
@@ -204,6 +248,9 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
 
             // Read in the number of batches between population logging
             _populationLoggingBatchInterval = XmlUtils.TryGetValueAsInt(xmlConfig, "PopulationLoggingBatchInterval");
+
+            // Validate experiment configuration parameters
+            if (ValidateConfigParameters(out var errorMessage)) throw new ConfigurationException(errorMessage);
         }
 
         /// <inheritdoc />
@@ -282,15 +329,15 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             // Create the NEAT evolution algorithm parameters 
             var neatEaParams = new EvolutionAlgorithmParameters
             {
-                SpecieCount = AgentNumSpecies,
-                MaxSpecieSize = AgentDefaultPopulationSize / AgentNumSpecies
+                SpecieCount = _agentNumSpecies,
+                MaxSpecieSize = AgentDefaultPopulationSize / _agentNumSpecies
             };
 
             // Create the maze evolution algorithm parameters
             var mazeEaParams = new EvolutionAlgorithmParameters
             {
-                SpecieCount = MazeNumSpecies,
-                MaxSpecieSize = MazeDefaultPopulationSize / MazeNumSpecies
+                SpecieCount = _mazeNumSpecies,
+                MaxSpecieSize = MazeDefaultPopulationSize / _mazeNumSpecies
             };
 
             // Create the NEAT (i.e. navigator) queueing evolution algorithm

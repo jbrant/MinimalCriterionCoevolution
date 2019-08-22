@@ -31,9 +31,7 @@ namespace SharpNeat.Core
         private readonly IGenomeDecoder<TGenome, TPhenome> _genomeDecoder;
         private readonly int _nearestNeighbors;
         private readonly IPhenomeEvaluator<TPhenome, BehaviorInfo> _phenomeEvaluator;
-        private readonly IDataLogger _evaluationLogger;
         private readonly SearchType _searchType;
-        private readonly bool _decodeGenomeToXml;
 
         #endregion
 
@@ -77,15 +75,10 @@ namespace SharpNeat.Core
         /// <param name="genomeDecoder">The genome decoder to use.</param>
         /// <param name="phenomeEvaluator">The phenome evaluator.</param>
         /// <param name="searchType">The search algorithm type.</param>
-        /// <param name="evaluationLogger">A reference to the evaluation data logger (optional).</param>
-        /// <param name="decodeGenomeToXml">
-        ///     Whether a genome should be decoded to its XML string representation (generally used to
-        ///     support logging).
-        /// </param>
         public SerialGenomeBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
             IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, SearchType searchType,
-            IDataLogger evaluationLogger = null, bool decodeGenomeToXml = false) : this(genomeDecoder, phenomeEvaluator,
-            searchType, true, 0, null, evaluationLogger, decodeGenomeToXml)
+            bool decodeGenomeToXml = false) : this(genomeDecoder, phenomeEvaluator,
+            searchType, true, 0)
         {
         }
 
@@ -100,16 +93,11 @@ namespace SharpNeat.Core
         /// <param name="searchType">The search algorithm type.</param>
         /// <param name="nearestNeighbors">The number of nearest neighbors to use in behavior distance calculations.</param>
         /// <param name="archive">A reference to the elite archive (optional).</param>
-        /// <param name="evaluationLogger">A reference to the evaluation data logger (optional).</param>
-        /// <param name="decodeGenomeToXml">
-        ///     Whether a genome should be decoded to its XML string representation (generally used to
-        ///     support logging).
-        /// </param>
         public SerialGenomeBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
             IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, SearchType searchType, int nearestNeighbors,
-            AbstractNoveltyArchive<TGenome> archive = null, IDataLogger evaluationLogger = null,
-            bool decodeGenomeToXml = false) : this(genomeDecoder, phenomeEvaluator, searchType, true, nearestNeighbors,
-            archive, evaluationLogger, decodeGenomeToXml)
+            AbstractNoveltyArchive<TGenome> archive = null) : this(genomeDecoder, phenomeEvaluator, searchType, true,
+            nearestNeighbors,
+            archive)
         {
         }
 
@@ -124,23 +112,15 @@ namespace SharpNeat.Core
         /// <param name="enablePhenomeCaching">Whether or not to enable phenome caching.</param>
         /// <param name="nearestNeighbors">The number of nearest neighbors to use in behavior distance calculations.</param>
         /// <param name="archive">A reference to the elite archive (optional).</param>
-        /// <param name="evaluationLogger">A reference to the evaluation data logger (optional).</param>
-        /// <param name="decodeGenomeToXml">
-        ///     Whether a genome should be decoded to its XML string representation (generally used to
-        ///     support logging).
-        /// </param>
         public SerialGenomeBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
             IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, SearchType searchType,
-            bool enablePhenomeCaching, int nearestNeighbors, AbstractNoveltyArchive<TGenome> archive = null,
-            IDataLogger evaluationLogger = null, bool decodeGenomeToXml = false)
+            bool enablePhenomeCaching, int nearestNeighbors, AbstractNoveltyArchive<TGenome> archive = null)
         {
             _genomeDecoder = genomeDecoder;
             _phenomeEvaluator = phenomeEvaluator;
             _searchType = searchType;
             _nearestNeighbors = nearestNeighbors;
             _noveltyArchive = archive;
-            _evaluationLogger = evaluationLogger;
-            _decodeGenomeToXml = decodeGenomeToXml;
 
             if (enablePhenomeCaching)
             {
@@ -178,35 +158,20 @@ namespace SharpNeat.Core
 
         /// <inheritdoc />
         /// <summary>
-        ///     Initializes state variables in the genome evalutor (primarily the logger).
+        ///     Initializes state variables in the genome evaluator.
         /// </summary>
         public void Initialize()
         {
-            // Open the logger
-            _evaluationLogger?.Open();
-
-            // Defer to phenome initialization
-            _phenomeEvaluator.Initialize(_evaluationLogger);
+            _phenomeEvaluator.Initialize();
         }
 
         /// <inheritdoc />
         /// <summary>
-        ///     Cleans up evaluator state after end of execution or upon execution interruption.  In particular, this closes out
-        ///     any existing evaluation logger instance.
+        ///     Calls child classes to clean up or dispose of variable states or close out loggers.
         /// </summary>
         public void Cleanup()
         {
-            _evaluationLogger?.Close();
-        }
-
-        /// <inheritdoc />
-        /// <summary>
-        ///     Update the genome evaluator based on some characteristic of the given population.
-        /// </summary>
-        /// <param name="population">The current population.</param>
-        public void Update(List<TGenome> population)
-        {
-            _phenomeEvaluator.Update(population);
+            _phenomeEvaluator.Cleanup();
         }
 
         /// <inheritdoc />
@@ -215,9 +180,10 @@ namespace SharpNeat.Core
         ///     is typically used in a coevoluationary context.
         /// </summary>
         /// <param name="comparisonPhenomes">The phenomes against which the evaluation is being carried out.</param>
-        public void UpdateEvaluationBaseline(IEnumerable<object> comparisonPhenomes)
+        /// <param name="lastGeneration">The generation that was just executed.</param>
+        public void UpdateEvaluationBaseline(IEnumerable<object> comparisonPhenomes, uint lastGeneration)
         {
-            _phenomeEvaluator.UpdateEvaluatorPhenotypes(comparisonPhenomes);
+            _phenomeEvaluator.UpdateEvaluatorPhenotypes(comparisonPhenomes, lastGeneration);
         }
 
         /// <inheritdoc />
@@ -312,7 +278,7 @@ namespace SharpNeat.Core
                 foreach (var genome in genomeList)
                 {
                     EvaluationUtils<TGenome, TPhenome>.EvaluateBehavior_NonCaching(genome, _genomeDecoder,
-                        _phenomeEvaluator, currentGeneration, _evaluationLogger, _decodeGenomeToXml);
+                        _phenomeEvaluator, currentGeneration);
                 }
             }
 
@@ -374,7 +340,7 @@ namespace SharpNeat.Core
                 foreach (var genome in genomesToEvaluate)
                 {
                     EvaluationUtils<TGenome, TPhenome>.EvaluateBehavior_NonCaching(genome, _genomeDecoder,
-                        _phenomeEvaluator, currentGeneration, _evaluationLogger, _decodeGenomeToXml);
+                        _phenomeEvaluator, currentGeneration);
                 }
             }
 
@@ -434,7 +400,7 @@ namespace SharpNeat.Core
                 foreach (var genome in genomeList)
                 {
                     EvaluationUtils<TGenome, TPhenome>.EvaluateBehavior_Caching(genome, _genomeDecoder,
-                        _phenomeEvaluator, currentGeneration, _evaluationLogger, _decodeGenomeToXml);
+                        _phenomeEvaluator, currentGeneration);
                 }
             }
 
@@ -497,7 +463,7 @@ namespace SharpNeat.Core
                 foreach (var genome in genomesToEvaluate)
                 {
                     EvaluationUtils<TGenome, TPhenome>.EvaluateBehavior_Caching(genome, _genomeDecoder,
-                        _phenomeEvaluator, currentGeneration, _evaluationLogger, _decodeGenomeToXml);
+                        _phenomeEvaluator, currentGeneration);
                 }
             }
 

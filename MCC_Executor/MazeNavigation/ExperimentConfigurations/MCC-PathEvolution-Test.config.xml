@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Config>
+  <ExperimentClass>Speciation</ExperimentClass>
   <SearchAlgorithm>Minimal Criteria Search</SearchAlgorithm>
   <SelectionAlgorithm>Multiple Queueing</SelectionAlgorithm>
   <MaxInitializationEvaluations>100000</MaxInitializationEvaluations>

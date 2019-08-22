@@ -34,7 +34,7 @@ namespace MCC_Domains.MazeNavigation
         ///     identified).
         /// </param>
         /// <returns>Boolean flag indicating whether the experiment configuration is valid.</returns>
-        private bool ValidateConfigParameters(out string message)
+        protected virtual bool ValidateConfigParameters(out string message)
         {
             // Set error message to null by default
             message = null;
@@ -55,24 +55,6 @@ namespace MCC_Domains.MazeNavigation
             else if (MazeSeedGenomeCount > MazeDefaultPopulationSize)
                 message =
                     $"Maze seed genome count [{MazeSeedGenomeCount}] must be no greater than the maze population size [{MazeDefaultPopulationSize}]";
-            // Check species range constraints
-            else if (AgentNumSpecies < 0)
-                message = $"Agent species count [{AgentNumSpecies}], if specified, must be a zero or positive integer";
-            else if (MazeNumSpecies < 0)
-                message = $"Maze species count [{MazeNumSpecies}], if specified, must be a zero or positive integer";
-            else if (AgentNumSpecies > AgentSeedGenomeCount)
-                message =
-                    $"Agent species count [{AgentNumSpecies}] must be no greater than the agent seed genome count [{AgentSeedGenomeCount}] (otherwise there will be empty species)";
-            else if (MazeNumSpecies > MazeSeedGenomeCount)
-                message =
-                    $"Maze species count [{MazeNumSpecies}] must be no greater than the maze seed genome count [{MazeSeedGenomeCount}] (otherwise there will be empty species)";
-            // Ensure that batch size evenly divisible by number of species
-            else if (NavigatorBatchSize % AgentNumSpecies != 0)
-                message =
-                    $"Agent batch size [{NavigatorBatchSize}] must be evenly divisible by the number of species [{AgentNumSpecies}]";
-            else if (MazeBatchSize % MazeNumSpecies != 0)
-                message =
-                    $"Maze batch size [{MazeBatchSize}] must be evenly divisible by the number of species [{MazeNumSpecies}]";
             // Check evaluation time range constraints
             else if (MaxGenerations <= 0)
                 message = $"Max generations [{MaxGenerations}] must be an integer greater than 0";
@@ -174,16 +156,6 @@ namespace MCC_Domains.MazeNavigation
         ///     The number of neural network outputs.
         /// </summary>
         protected const int AnnOutputCount = 2;
-
-        /// <summary>
-        ///     The number of species in the agent queue.
-        /// </summary>
-        protected int AgentNumSpecies = 1;
-
-        /// <summary>
-        ///     The number of species in the maze queue.
-        /// </summary>
-        protected int MazeNumSpecies = 1;
 
         /// <summary>
         ///     The activation scheme (i.e. cyclic or acyclic).
@@ -324,23 +296,23 @@ namespace MCC_Domains.MazeNavigation
             MazeGenomeXmlIO.WriteComplete(xw, mazeGenomeList);
         }
 
-        /// <inheritdoc />
         /// <summary>
         ///     Initializes the MCC maze navigation experiment by reading in all of the configuration parameters and
         ///     setting up the bootstrapping/initialization algorithm.
         /// </summary>
         /// <param name="name">The name of the experiment.</param>
         /// <param name="xmlConfig">The reference to the XML configuration file.</param>
-        /// <param name="population1EvolutionLogger">The navigator evolution data logger.</param>
-        /// <param name="population1PopulationLogger">The navigator population logger.</param>
-        /// <param name="population1GenomeLogger">The navigator genome logger.</param>
-        /// <param name="population2EvolutionLogger">The maze evolution data logger.</param>
-        /// <param name="population2PopulationLogger">The maze population logger.</param>
-        /// <param name="population2GenomeLogger">The maze genome logger.</param>
-        public virtual void Initialize(string name, XmlElement xmlConfig,
-            IDataLogger population1EvolutionLogger = null, IDataLogger population1PopulationLogger = null,
-            IDataLogger population1GenomeLogger = null, IDataLogger population2EvolutionLogger = null,
-            IDataLogger population2PopulationLogger = null, IDataLogger population2GenomeLogger = null)
+        /// <param name="logFileDirectory">The directory into which to write the evolution/evaluation log files.</param>
+        /// <param name="runIdx">The numerical ID of the current run.</param>
+        public abstract void Initialize(string name, XmlElement xmlConfig, string logFileDirectory, int runIdx);
+
+        /// <summary>
+        ///     Initializes the MCC maze navigation experiment by reading in all of the configuration parameters and
+        ///     setting up the bootstrapping/initialization algorithm.
+        /// </summary>
+        /// <param name="name">The name of the experiment.</param>
+        /// <param name="xmlConfig">The reference to the XML configuration file.</param>
+        protected void Initialize(string name, XmlElement xmlConfig)
         {
             // Set boiler plate properties
             Name = name;
@@ -358,8 +330,6 @@ namespace MCC_Domains.MazeNavigation
             MazeDefaultPopulationSize = XmlUtils.GetValueAsInt(xmlConfig, "MazePopulationSize");
             AgentSeedGenomeCount = XmlUtils.GetValueAsInt(xmlConfig, "AgentSeedGenomeCount");
             MazeSeedGenomeCount = XmlUtils.GetValueAsInt(xmlConfig, "MazeSeedGenomeCount");
-            AgentNumSpecies = XmlUtils.GetValueAsInt(xmlConfig, "AgentNumSpecies");
-            MazeNumSpecies = XmlUtils.GetValueAsInt(xmlConfig, "MazeNumSpecies");
             BehaviorCharacterizationFactory = ExperimentUtils.ReadBehaviorCharacterizationFactory(xmlConfig,
                 "BehaviorConfig");
             NavigatorBatchSize = XmlUtils.GetValueAsInt(xmlConfig, "NavigatorOffspringBatchSize");
@@ -381,9 +351,6 @@ namespace MCC_Domains.MazeNavigation
             NumMazeSuccessCriteria = XmlUtils.GetValueAsInt(xmlConfig, "NumMazesSolvedCriteria");
             NumAgentSuccessCriteria = XmlUtils.GetValueAsInt(xmlConfig, "NumAgentsSolvedCriteria");
             NumAgentFailedCriteria = XmlUtils.GetValueAsInt(xmlConfig, "NumAgentsFailedCriteria");
-
-            // Validate experiment configuration parameters
-            if (ValidateConfigParameters(out var errorMessage)) throw new ConfigurationException(errorMessage);
 
             // Read in the maximum number of initialization evaluations
             _maxInitializationEvaluations = XmlUtils.GetValueAsUInt(xmlConfig, "MaxInitializationEvaluations");
@@ -502,8 +469,8 @@ namespace MCC_Domains.MazeNavigation
             IGenomeEvaluator<MazeGenome> mazeEvaluator)
         {
             // Update agent and maze evaluators such that seed agents will be evaluated against mazes and vice versa
-            agentEvaluator.UpdateEvaluationBaseline(mazeEvaluator.DecodeGenomes(mazePopulation));
-            mazeEvaluator.UpdateEvaluationBaseline(agentEvaluator.DecodeGenomes(agentPopulation));
+            agentEvaluator.UpdateEvaluationBaseline(mazeEvaluator.DecodeGenomes(mazePopulation), 0);
+            mazeEvaluator.UpdateEvaluationBaseline(agentEvaluator.DecodeGenomes(agentPopulation), 0);
 
             // Run MC evaluation for both populations
             agentEvaluator.Evaluate(agentPopulation, 0);

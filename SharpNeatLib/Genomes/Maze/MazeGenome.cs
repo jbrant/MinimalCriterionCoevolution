@@ -64,6 +64,12 @@ namespace SharpNeat.Genomes.Maze
         public IList<PathGene> PathGeneList { get; }
 
         /// <summary>
+        ///     The number of times an agent has used the maze for satisfying their MC (which is required to be considered viable
+        ///     for persistence and reproduction).
+        /// </summary>
+        public int ViabilityUsageCount { get; }
+
+        /// <summary>
         ///     Height of the evolved maze genome (before being scaled to phenotype).
         /// </summary>
         public int MazeBoundaryHeight { get; private set; }
@@ -280,8 +286,8 @@ namespace SharpNeat.Genomes.Maze
                     var yPosition = PathGeneList[i].Waypoint.Y;
 
                     // Calculate cantor pairing of X and Y coordinates
-                    double compositeGeneCoordinate = ((xPosition + yPosition) *
-                                                      (xPosition + yPosition + 1)) / 2 + yPosition;
+                    double compositeGeneCoordinate = (xPosition + yPosition) *
+                                                     (xPosition + yPosition + 1) / 2 + yPosition;
 
                     // Add gene coordinate to array
                     coordElemArray[i] = new KeyValuePair<ulong, double>(PathGeneList[i].InnovationId,
@@ -388,9 +394,9 @@ namespace SharpNeat.Genomes.Maze
                     // the maze grid)
                     outcome = DiscreteDistribution.Sample(_genomeFactory.Rng,
                         _genomeFactory.MazeGenomeParameters.RouletteWheelLayout);
-                } while ((WallGeneList.Count >= _maxWallComplexity && outcome == 2) ||
-                         ((PathGeneList.Count >= MazeBoundaryHeight || PathGeneList.Count >= MazeBoundaryWidth) &&
-                          (outcome == 5 || outcome == 6)));
+                } while (WallGeneList.Count >= _maxWallComplexity && outcome == 2 ||
+                         (PathGeneList.Count >= MazeBoundaryHeight || PathGeneList.Count >= MazeBoundaryWidth) &&
+                         (outcome == 5 || outcome == 6));
 
                 switch (outcome)
                 {
@@ -444,13 +450,13 @@ namespace SharpNeat.Genomes.Maze
 
                 // Apply wall mutation
                 WallGeneList[geneIdx].WallLocation = BoundStartLocation(WallGeneList[geneIdx].WallLocation +
-                                                                        (((_genomeFactory.Rng.NextDouble() * 2) -
-                                                                          1) *
-                                                                         _genomeFactory.MazeGenomeParameters
-                                                                             .PerturbanceMagnitude *
-                                                                         ((double)
-                                                                          ((int) (Math.Log(geneIdx + 1, 2)) + 1) /
-                                                                          mazeTreeDepth)));
+                                                                        (_genomeFactory.Rng.NextDouble() * 2 -
+                                                                         1) *
+                                                                        _genomeFactory.MazeGenomeParameters
+                                                                            .PerturbanceMagnitude *
+                                                                        ((double)
+                                                                         ((int) Math.Log(geneIdx + 1, 2) + 1) /
+                                                                         mazeTreeDepth));
                 mutationOccurred = true;
             }
 
@@ -462,14 +468,14 @@ namespace SharpNeat.Genomes.Maze
 
             // Apply wall mutation on randomly selected gene
             WallGeneList[mazeGeneIdx].WallLocation = BoundStartLocation(WallGeneList[mazeGeneIdx].WallLocation +
-                                                                        (((_genomeFactory.Rng.NextDouble() * 2) -
-                                                                          1) *
-                                                                         _genomeFactory.MazeGenomeParameters
-                                                                             .PerturbanceMagnitude *
-                                                                         ((double)
-                                                                          ((int) (Math.Log(mazeGeneIdx + 1, 2)) +
-                                                                           1) /
-                                                                          mazeTreeDepth)));
+                                                                        (_genomeFactory.Rng.NextDouble() * 2 -
+                                                                         1) *
+                                                                        _genomeFactory.MazeGenomeParameters
+                                                                            .PerturbanceMagnitude *
+                                                                        ((double)
+                                                                         ((int) Math.Log(mazeGeneIdx + 1, 2) +
+                                                                          1) /
+                                                                         mazeTreeDepth));
 
             return true;
         }
@@ -497,14 +503,14 @@ namespace SharpNeat.Genomes.Maze
 
                 // Apply passage mutation
                 WallGeneList[geneIdx].PassageLocation = BoundStartLocation(WallGeneList[geneIdx].PassageLocation +
-                                                                           (((_genomeFactory.Rng.NextDouble() * 2) -
-                                                                             1) *
-                                                                            _genomeFactory.MazeGenomeParameters
-                                                                                .PerturbanceMagnitude *
-                                                                            ((double)
-                                                                             ((int) (Math.Log(geneIdx + 1, 2)) +
-                                                                              1) /
-                                                                             mazeTreeDepth)));
+                                                                           (_genomeFactory.Rng.NextDouble() * 2 -
+                                                                            1) *
+                                                                           _genomeFactory.MazeGenomeParameters
+                                                                               .PerturbanceMagnitude *
+                                                                           ((double)
+                                                                            ((int) Math.Log(geneIdx + 1, 2) +
+                                                                             1) /
+                                                                            mazeTreeDepth));
 
                 mutationOccurred = true;
             }
@@ -517,15 +523,15 @@ namespace SharpNeat.Genomes.Maze
 
             // Apply passage mutation on randomly selected gene
             WallGeneList[mazeGeneIdx].PassageLocation = BoundStartLocation(WallGeneList[mazeGeneIdx].WallLocation +
-                                                                           (((_genomeFactory.Rng.NextDouble() * 2) -
-                                                                             1) *
-                                                                            _genomeFactory.MazeGenomeParameters
-                                                                                .PerturbanceMagnitude *
-                                                                            ((double)
-                                                                             ((int)
-                                                                              (Math.Log(mazeGeneIdx + 1, 2)) +
-                                                                              1) /
-                                                                             mazeTreeDepth)));
+                                                                           (_genomeFactory.Rng.NextDouble() * 2 -
+                                                                            1) *
+                                                                           _genomeFactory.MazeGenomeParameters
+                                                                               .PerturbanceMagnitude *
+                                                                           ((double)
+                                                                            ((int)
+                                                                             Math.Log(mazeGeneIdx + 1, 2) +
+                                                                             1) /
+                                                                            mazeTreeDepth));
 
             return true;
         }
@@ -542,7 +548,7 @@ namespace SharpNeat.Genomes.Maze
             // Add new gene to the genome
             WallGeneList.Add(new WallGene(_genomeFactory.InnovationIdGenerator.NextId, newWallStartLocation,
                 newPassageStartLocation,
-                (_genomeFactory.Rng.NextDoubleNonZero() > _genomeFactory.MazeGenomeParameters.VerticalWallBias)));
+                _genomeFactory.Rng.NextDoubleNonZero() > _genomeFactory.MazeGenomeParameters.VerticalWallBias));
         }
 
         /// <summary>
@@ -684,7 +690,7 @@ namespace SharpNeat.Genomes.Maze
 
                 // Determine whether new waypoint is valid
                 isWaypointValid =
-                    MazeUtils.IsValidWaypointLocation(this, newPoint, UInt32.MaxValue, newPointOrientation);
+                    MazeUtils.IsValidWaypointLocation(this, newPoint, uint.MaxValue, newPointOrientation);
 
                 // Add the new path gene to the genome
                 if (isWaypointValid)

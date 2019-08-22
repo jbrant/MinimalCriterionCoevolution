@@ -32,13 +32,15 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         ///     The number of failed attempts at maze navigation in order to satisfy the minimal
         ///     criterion.
         /// </param>
+        /// <param name="evaluationLogger">Per-evaluation data logger (optional).</param>
         public MazeEnvironmentMCCEvaluator(int minSuccessDistance,
             IBehaviorCharacterizationFactory behaviorCharacterizationFactory, int numAgentsSolvedCriteria,
-            int numAgentsFailedCriteria)
+            int numAgentsFailedCriteria, IDataLogger evaluationLogger = null)
         {
             _behaviorCharacterizationFactory = behaviorCharacterizationFactory;
             _numAgentsSolvedCriteria = numAgentsSolvedCriteria;
             _numAgentsFailedCriteria = numAgentsFailedCriteria;
+            _evaluationLogger = evaluationLogger;
 
             // Create factory for maze world generation
             _multiMazeWorldFactory = new MultiMazeNavigationWorldFactory<BehaviorInfo>(minSuccessDistance);
@@ -78,6 +80,11 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         /// </summary>
         private readonly int _numAgentsFailedCriteria;
 
+        /// <summary>
+        ///     Per-evaluation data logger (generates one row per maze trial).
+        /// </summary>
+        private readonly IDataLogger _evaluationLogger;
+
         #endregion
 
         #region Public Properties
@@ -108,10 +115,8 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         ///     and the start/goal locations).
         /// </param>
         /// <param name="currentGeneration">The current generation or evaluation batch.</param>
-        /// <param name="evaluationLogger">Reference to the evaluation logger.</param>
         /// <returns>A behavior info (which is a type of behavior-based trial information).</returns>
-        public BehaviorInfo Evaluate(MazeStructure mazeStructure, uint currentGeneration,
-            IDataLogger evaluationLogger)
+        public BehaviorInfo Evaluate(MazeStructure mazeStructure, uint currentGeneration)
         {
             var curSuccesses = 0;
             var curFailures = 0;
@@ -145,7 +150,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
                 trialInfo.ObjectiveDistance = world.GetDistanceToTarget();
 
                 // Log trial information
-                evaluationLogger?.LogRow(new List<LoggableElement>
+                _evaluationLogger?.LogRow(new List<LoggableElement>
                     {
                         new LoggableElement(EvaluationFieldElements.Generation, currentGeneration),
                         new LoggableElement(EvaluationFieldElements.EvaluationCount, threadLocalEvaluationCount),
@@ -178,14 +183,13 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         /// <summary>
         ///     Initializes the logger and writes header.
         /// </summary>
-        /// <param name="evaluationLogger">The evaluation logger.</param>
-        public void Initialize(IDataLogger evaluationLogger)
+        public void Initialize()
         {
             // Set the run phase
-            evaluationLogger?.UpdateRunPhase(RunPhase.Primary);
+            _evaluationLogger?.UpdateRunPhase(RunPhase.Primary);
 
             // Log the header
-            evaluationLogger?.LogHeader(new List<LoggableElement>
+            _evaluationLogger?.LogHeader(new List<LoggableElement>
             {
                 new LoggableElement(EvaluationFieldElements.Generation, 0),
                 new LoggableElement(EvaluationFieldElements.EvaluationCount, EvaluationCount),
@@ -197,23 +201,22 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
 
         /// <inheritdoc />
         /// <summary>
-        ///     Update the evaluator based on some characteristic of the given population.
-        /// </summary>
-        /// <typeparam name="TGenome">The genome type parameter.</typeparam>
-        /// <param name="population">The current population.</param>
-        public void Update<TGenome>(List<TGenome> population) where TGenome : class, IGenome<TGenome>
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <inheritdoc />
-        /// <summary>
         ///     Updates the collection of maze navigators to use for future evaluations.
         /// </summary>
         /// <param name="evaluatorPhenomes">The complete collection of available maze navigators.</param>
-        public void UpdateEvaluatorPhenotypes(IEnumerable<object> evaluatorPhenomes)
+        /// <param name="lastGeneration">The generation that was just executed.</param>
+        public void UpdateEvaluatorPhenotypes(IEnumerable<object> evaluatorPhenomes, uint lastGeneration)
         {
             _agentControllers = (IList<IBlackBox>) evaluatorPhenomes;
+        }
+
+        /// <summary>
+        ///     Cleans up evaluator state after end of execution or upon execution interruption.  In particular, this
+        ///     closes out any existing evaluation logger instance.
+        /// </summary>
+        public void Cleanup()
+        {
+            _evaluationLogger?.Close();
         }
 
         /// <inheritdoc />

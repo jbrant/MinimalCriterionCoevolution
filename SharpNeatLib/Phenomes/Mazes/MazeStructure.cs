@@ -23,8 +23,10 @@ namespace SharpNeat.Phenomes.Mazes
         /// <param name="mazeWidth">The width of the maze.</param>
         /// <param name="mazeHeight">The height of the maze.</param>
         /// <param name="scaleMultiplier">The multiplier dictating the increase (or decrease) in maze size.</param>
-        public MazeStructure(int mazeWidth, int mazeHeight, int scaleMultiplier)
+        /// <param name="genomeId">The unique identifier of the genome from which the phenotype was generated (optional).</param>
+        public MazeStructure(int mazeWidth, int mazeHeight, int scaleMultiplier, uint genomeId = uint.MaxValue)
         {
+            GenomeId = genomeId;
             Walls = new List<MazeStructureWall>();
             _mazeWidth = mazeWidth;
             _mazeHeight = mazeHeight;
@@ -69,6 +71,11 @@ namespace SharpNeat.Phenomes.Mazes
         #region Properties
 
         /// <summary>
+        ///     The unique identifier of the genome from which the phenotype was generated.
+        /// </summary>
+        public uint GenomeId { get; }
+
+        /// <summary>
         ///     The list of walls in the maze.
         /// </summary>
         public List<MazeStructureWall> Walls { get; }
@@ -109,10 +116,10 @@ namespace SharpNeat.Phenomes.Mazes
         public int MaxTimesteps { get; private set; }
 
         /// <summary>
-        ///     The number of partitions bisecting maze sub-spaces. A partition could be either one or two walls (depending on
-        ///     whether the passage is adjacent to a maze bounding wall.
+        ///     The number of times an agent has used the maze for satisfying their MC (which is required to be considered viable
+        ///     for persistence and reproduction). This is persisted on and carried through from the maze genotype.
         /// </summary>
-        public int NumPartitions { get; set; }
+        public int ViabilityUsageCount { get; set; }
 
         #endregion
 
@@ -146,8 +153,8 @@ namespace SharpNeat.Phenomes.Mazes
             StartLocation = new MazeStructurePoint(ScaleMultiplier / 2, ScaleMultiplier / 2);
 
             // Set the target location to be in the bottom right corner of the maze
-            TargetLocation = new MazeStructurePoint(ScaledMazeWidth - (ScaleMultiplier / 2),
-                ScaledMazeHeight - (ScaleMultiplier / 2));
+            TargetLocation = new MazeStructurePoint(ScaledMazeWidth - ScaleMultiplier / 2,
+                ScaledMazeHeight - ScaleMultiplier / 2);
         }
 
         /// <summary>
@@ -162,7 +169,7 @@ namespace SharpNeat.Phenomes.Mazes
             // Compute the maximum time steps by distributing the unscaled distance evenly across both dimensions 
             // (i.e. halving it) and multiplying by the scale multiplier for both dimensions
             // TODO: Need to experiment with polynomial timestep increase here
-            MaxTimesteps = 2 * (ScaleMultiplier * (unscaledDistance / 2));
+            MaxTimesteps = 2 * ScaleMultiplier * (unscaledDistance / 2);
         }
 
         /// <summary>

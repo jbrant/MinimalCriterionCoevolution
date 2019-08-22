@@ -20,8 +20,8 @@ namespace SharpNeat.EvolutionAlgorithms
     ///     similar evaluation criteria.  This configuration is intended two allow the MCC of radically different
     ///     constructs, such as coevolving agents with their environment.
     /// </summary>
-    /// <typeparam name="TGenome1">The genome type for the first population.</typeparam>
-    /// <typeparam name="TGenome2">The genome type for the second population.</typeparam>
+    /// <typeparam name="TGenome1">The genome type for the agent population.</typeparam>
+    /// <typeparam name="TGenome2">The genome type for the environment population.</typeparam>
     public class MCCAlgorithmContainer<TGenome1, TGenome2> : IMCCAlgorithmContainer<TGenome1, TGenome2>
         where TGenome1 : class, IGenome<TGenome1>
         where TGenome2 : class, IGenome<TGenome2>
@@ -36,14 +36,14 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <summary>
         ///     Constructor for the MCC algorithm container, recording the two component evolutionary algorithms.
         /// </summary>
-        /// <param name="algorithm1">The evolutionary algorithm for the first population.</param>
-        /// <param name="algorithm2">The evolutionary algorithm for the second population.</param>
+        /// <param name="agentEa">The evolutionary algorithm for the agent population.</param>
+        /// <param name="environmentEa">The evolutionary algorithm for the environment population.</param>
         /// <param name="logFieldEnabledMap">Allows enabling/disabling of certain fields.</param>
-        public MCCAlgorithmContainer(IEvolutionAlgorithm<TGenome1> algorithm1,
-            IEvolutionAlgorithm<TGenome2> algorithm2, IDictionary<FieldElement, bool> logFieldEnabledMap = null)
+        public MCCAlgorithmContainer(IEvolutionAlgorithm<TGenome1> agentEa,
+            IEvolutionAlgorithm<TGenome2> environmentEa, IDictionary<FieldElement, bool> logFieldEnabledMap = null)
         {
-            _evolutionAlgorithm1 = algorithm1;
-            _evolutionAlgorithm2 = algorithm2;
+            _agentEa = agentEa;
+            _environmentEa = environmentEa;
             _logFieldEnabledMap = logFieldEnabledMap;
         }
 
@@ -72,14 +72,14 @@ namespace SharpNeat.EvolutionAlgorithms
         private readonly AutoResetEvent _awaitRestartEvent = new AutoResetEvent(false);
 
         /// <summary>
-        ///     The evolutionary algorithm for the first population.
+        ///     The evolutionary algorithm for the agent population.
         /// </summary>
-        private readonly IEvolutionAlgorithm<TGenome1> _evolutionAlgorithm1;
+        private readonly IEvolutionAlgorithm<TGenome1> _agentEa;
 
         /// <summary>
-        ///     The evolutionary algorithm for the second population.
+        ///     The evolutionary algorithm for the environment population.
         /// </summary>
-        private readonly IEvolutionAlgorithm<TGenome2> _evolutionAlgorithm2;
+        private readonly IEvolutionAlgorithm<TGenome2> _environmentEa;
 
         /// <summary>
         ///     The last generation during which the display/logging was updated.
@@ -98,7 +98,7 @@ namespace SharpNeat.EvolutionAlgorithms
         private int? _maxGenerations;
 
         /// <summary>
-        ///     Defines the maximum number of network evaluations that the algorithm can run before it is forefully stopped
+        ///     Defines the maximum number of network evaluations that the algorithm can run before it is forcefully stopped
         ///     (whether the solution has been found or not).
         /// </summary>
         private ulong? _maxEvaluations;
@@ -109,14 +109,14 @@ namespace SharpNeat.EvolutionAlgorithms
         private readonly IDictionary<FieldElement, bool> _logFieldEnabledMap;
 
         /// <summary>
-        ///     The genome evaluation scheme for the first evolution algorithm.
+        ///     The genome evaluation scheme for the agent evolution algorithm.
         /// </summary>
-        protected IGenomeEvaluator<TGenome1> GenomeEvaluator1;
+        protected IGenomeEvaluator<TGenome1> AgentEvaluator;
 
         /// <summary>
-        ///     The genome evaluation scheme for the second evolution algorithm.
+        ///     The genome evaluation scheme for the environment evolution algorithm.
         /// </summary>
-        protected IGenomeEvaluator<TGenome2> GenomeEvaluator2;
+        protected IGenomeEvaluator<TGenome2> EnvironmentEvaluator;
 
         #endregion
 
@@ -148,26 +148,26 @@ namespace SharpNeat.EvolutionAlgorithms
         public bool StopConditionSatisfied { get; protected set; }
 
         /// <summary>
-        ///     The current champion genome from the first population.
+        ///     The current champion genome from the agent population.
         /// </summary>
-        public TGenome1 Population1CurrentChampGenome => _evolutionAlgorithm1.CurrentChampGenome;
+        public TGenome1 AgentChampGenome => _agentEa.CurrentChampGenome;
 
         /// <summary>
-        ///     The current champion genome from the second population.
+        ///     The current champion genome from the environment population.
         /// </summary>
-        public TGenome2 Population2CurrentChampGenome => _evolutionAlgorithm2.CurrentChampGenome;
+        public TGenome2 EnvironmentChampGenome => _environmentEa.CurrentChampGenome;
 
         /// <summary>
-        ///     Descriptive statistics for the first population.
+        ///     Descriptive statistics for the agent population.
         /// </summary>
-        public IEvolutionAlgorithmStats Population1Statistics
-            => ((AbstractComplexifyingEvolutionAlgorithm<TGenome1>) _evolutionAlgorithm1).Statistics;
+        public IEvolutionAlgorithmStats AgentPopulationStats
+            => ((AbstractComplexifyingEvolutionAlgorithm<TGenome1>) _agentEa).Statistics;
 
         /// <summary>
-        ///     Descriptive statistics for the second population.
+        ///     Descriptive statistics for the environment population.
         /// </summary>
-        public IEvolutionAlgorithmStats Population2Statistics
-            => ((AbstractComplexifyingEvolutionAlgorithm<TGenome2>) _evolutionAlgorithm2).Statistics;
+        public IEvolutionAlgorithmStats EnvironmentPopulationStats
+            => ((AbstractComplexifyingEvolutionAlgorithm<TGenome2>) _environmentEa).Statistics;
 
         #endregion
 
@@ -188,30 +188,30 @@ namespace SharpNeat.EvolutionAlgorithms
         #region Public Methods
 
         /// <summary>
-        ///     Initializes the evolutionary algorithms for the two populations as well as state variables within the container.
-        ///     Note that this initializer expects a preconstructed list of genomes.
+        ///     Initializes the evolutionary algorithms for the agent and environment populations as well as state
+        ///     variables within the container. Note that this initializer expects a preconstructed list of genomes.
         /// </summary>
-        /// <param name="genomeFitnessEvaluator1">The genome evaluator for the first population.</param>
-        /// <param name="genomeFactory1">The genome factory for the first population.</param>
-        /// <param name="genomeList1">The initial members of the first population.</param>
-        /// <param name="genomeFitnessEvaluator2">The genome evaluator for the second population.</param>
-        /// <param name="genomeFactory2">The genome factory for the second population.</param>
-        /// <param name="genomeList2">The initial members of the second population.</param>
+        /// <param name="agentFitnessEvaluator">The genome evaluator for the agent population.</param>
+        /// <param name="agentFactory">The genome factory for the agent population.</param>
+        /// <param name="agentList">The initial members of the agent population.</param>
+        /// <param name="environmentFitnessEvaluator">The genome evaluator for the environment population.</param>
+        /// <param name="environmentFactory">The genome factory for the environment population.</param>
+        /// <param name="environmentList">The initial members of the environment population.</param>
         /// <param name="maxGenerations">The maximum number of generations.</param>
         /// <param name="maxEvaluations">The maximum number of evaluations.</param>
-        public void Initialize(IGenomeEvaluator<TGenome1> genomeFitnessEvaluator1,
-            IGenomeFactory<TGenome1> genomeFactory1, List<TGenome1> genomeList1,
-            IGenomeEvaluator<TGenome2> genomeFitnessEvaluator2, IGenomeFactory<TGenome2> genomeFactory2,
-            List<TGenome2> genomeList2, int? maxGenerations, ulong? maxEvaluations)
+        public void Initialize(IGenomeEvaluator<TGenome1> agentFitnessEvaluator,
+            IGenomeFactory<TGenome1> agentFactory, List<TGenome1> agentList,
+            IGenomeEvaluator<TGenome2> environmentFitnessEvaluator, IGenomeFactory<TGenome2> environmentFactory,
+            List<TGenome2> environmentList, int? maxGenerations, ulong? maxEvaluations)
         {
             // Initialize both evolutionary algorithms
-            _evolutionAlgorithm1.Initialize(genomeFitnessEvaluator1, genomeFactory1, genomeList1, maxGenerations,
+            _agentEa.Initialize(agentFitnessEvaluator, agentFactory, agentList, maxGenerations,
                 maxEvaluations, null);
-            _evolutionAlgorithm2.Initialize(genomeFitnessEvaluator2, genomeFactory2, genomeList2, maxGenerations,
+            _environmentEa.Initialize(environmentFitnessEvaluator, environmentFactory, environmentList, maxGenerations,
                 maxEvaluations, null);
 
             // Set the required local references to the genome evaluators
-            InitializeContainer(genomeFitnessEvaluator1, genomeFitnessEvaluator2, maxGenerations, maxEvaluations);
+            InitializeContainer(agentFitnessEvaluator, environmentFitnessEvaluator, maxGenerations, maxEvaluations);
 
             // Set update scheme and run state to ready
             UpdateScheme = new UpdateScheme(new TimeSpan(0, 0, 1));
@@ -219,34 +219,36 @@ namespace SharpNeat.EvolutionAlgorithms
         }
 
         /// <summary>
-        ///     Initializes the evolutionary algorithms for the two populations as well as state variables within the container.
-        ///     Note that this initializer expects a preconstructed list of genomes.  Additionally, a maximum population size is
-        ///     specified, which bounds the growth of populations whose size is variable.
+        ///     Initializes the evolutionary algorithms for the agent and environment populations as well as state
+        ///     variables within the container. Note that this initializer expects a preconstructed list of genomes.
+        ///     Additionally, a maximum population size is specified, which bounds the growth of populations whose size is
+        ///     variable.
         /// </summary>
-        /// <param name="genomeFitnessEvaluator1">The genome evaluator for the first population.</param>
-        /// <param name="genomeFactory1">The genome factory for the first population.</param>
-        /// <param name="genomeList1">The initial members of the first population.</param>
-        /// <param name="maxPopulationsize1">The upper bound on the first population size.</param>
-        /// <param name="genomeFitnessEvaluator2">The genome evaluator for the second population.</param>
-        /// <param name="genomeFactory2">The genome factory for the second population.</param>
-        /// <param name="genomeList2">The initial members of the second population.</param>
-        /// <param name="maxPopulationSize2">The upper bound on the second population size.</param>
+        /// <param name="agentFitnessEvaluator">The genome evaluator for the agent population.</param>
+        /// <param name="agentFactory">The genome factory for the agent population.</param>
+        /// <param name="agentList">The initial members of the agent population.</param>
+        /// <param name="maxAgentPopulationSize">The upper bound on the agent population size.</param>
+        /// <param name="environmentFitnessEvaluator">The genome evaluator for the environment population.</param>
+        /// <param name="environmentFactory">The genome factory for the environment population.</param>
+        /// <param name="environmentList">The initial members of the environment population.</param>
+        /// <param name="maxEnvironmentPopulationSize">The upper bound on the environment population size.</param>
         /// <param name="maxGenerations">The maximum number of generations.</param>
         /// <param name="maxEvaluations">The maximum number of evaluations.</param>
-        public void Initialize(IGenomeEvaluator<TGenome1> genomeFitnessEvaluator1,
-            IGenomeFactory<TGenome1> genomeFactory1, List<TGenome1> genomeList1, int maxPopulationsize1,
-            IGenomeEvaluator<TGenome2> genomeFitnessEvaluator2, IGenomeFactory<TGenome2> genomeFactory2,
-            List<TGenome2> genomeList2, int maxPopulationSize2, int? maxGenerations,
+        public void Initialize(IGenomeEvaluator<TGenome1> agentFitnessEvaluator,
+            IGenomeFactory<TGenome1> agentFactory, List<TGenome1> agentList, int maxAgentPopulationSize,
+            IGenomeEvaluator<TGenome2> environmentFitnessEvaluator, IGenomeFactory<TGenome2> environmentFactory,
+            List<TGenome2> environmentList, int maxEnvironmentPopulationSize, int? maxGenerations,
             ulong? maxEvaluations)
         {
             // Initialize both evolutionary algorithms
-            _evolutionAlgorithm1.Initialize(genomeFitnessEvaluator1, genomeFactory1, genomeList1, maxPopulationsize1,
+            _agentEa.Initialize(agentFitnessEvaluator, agentFactory, agentList, maxAgentPopulationSize,
                 maxGenerations, maxEvaluations, null);
-            _evolutionAlgorithm2.Initialize(genomeFitnessEvaluator2, genomeFactory2, genomeList2, maxPopulationSize2,
+            _environmentEa.Initialize(environmentFitnessEvaluator, environmentFactory, environmentList,
+                maxEnvironmentPopulationSize,
                 maxGenerations, maxEvaluations, null);
 
             // Set the required local references to the genome evaluators
-            InitializeContainer(genomeFitnessEvaluator1, genomeFitnessEvaluator2, maxGenerations, maxEvaluations);
+            InitializeContainer(agentFitnessEvaluator, environmentFitnessEvaluator, maxGenerations, maxEvaluations);
 
             // Set update scheme and run state to ready
             UpdateScheme = new UpdateScheme(new TimeSpan(0, 0, 1));
@@ -254,32 +256,33 @@ namespace SharpNeat.EvolutionAlgorithms
         }
 
         /// <summary>
-        ///     Initializes the evolutionary algorithms for the two populations as well as state variables within the container.
-        ///     This initializer expects the size of both populations to be specified (not the population itself given) so it can
-        ///     hand off population generation to the individual EA initializers.
+        ///     Initializes the evolutionary algorithms for the agent and environment populations as well as state
+        ///     variables within the container. This initializer expects the size of both populations to be specified
+        ///     (not the population itself given) so it can hand off population generation to the individual EA initializers.
         /// </summary>
-        /// <param name="genomeFitnessEvaluator1">The genome evaluator for the first population.</param>
-        /// <param name="genomeFactory1">The genome factory for the first population.</param>
-        /// <param name="populationSize1">The size of the first population.</param>
-        /// <param name="genomeFitnessEvaluator2">The genome evaluator for the second population.</param>
-        /// <param name="genomeFactory2">The genome factory for the second population.</param>
-        /// <param name="populationSize2">The size of the second population.</param>
+        /// <param name="agentFitnessEvaluator">The genome evaluator for the agent population.</param>
+        /// <param name="agentFactory">The genome factory for the agent population.</param>
+        /// <param name="agentPopulationSize">The size of the agent population.</param>
+        /// <param name="environmentFitnessEvaluator">The genome evaluator for the environment population.</param>
+        /// <param name="environmentFactory">The genome factory for the environment population.</param>
+        /// <param name="environmentPopulationSize">The size of the environment population.</param>
         /// <param name="maxGenerations">The maximum number of generations.</param>
         /// <param name="maxEvaluations">The maximum number of evaluations.</param>
-        public void Initialize(IGenomeEvaluator<TGenome1> genomeFitnessEvaluator1,
-            IGenomeFactory<TGenome1> genomeFactory1, int populationSize1,
-            IGenomeEvaluator<TGenome2> genomeFitnessEvaluator2, IGenomeFactory<TGenome2> genomeFactory2,
-            int populationSize2, int? maxGenerations,
+        public void Initialize(IGenomeEvaluator<TGenome1> agentFitnessEvaluator,
+            IGenomeFactory<TGenome1> agentFactory, int agentPopulationSize,
+            IGenomeEvaluator<TGenome2> environmentFitnessEvaluator, IGenomeFactory<TGenome2> environmentFactory,
+            int environmentPopulationSize, int? maxGenerations,
             ulong? maxEvaluations)
         {
             // Initialize both evolutionary algorithms
-            _evolutionAlgorithm1.Initialize(genomeFitnessEvaluator1, genomeFactory1, populationSize1, maxGenerations,
+            _agentEa.Initialize(agentFitnessEvaluator, agentFactory, agentPopulationSize, maxGenerations,
                 maxEvaluations, null);
-            _evolutionAlgorithm2.Initialize(genomeFitnessEvaluator2, genomeFactory2, populationSize2, maxGenerations,
+            _environmentEa.Initialize(environmentFitnessEvaluator, environmentFactory, environmentPopulationSize,
+                maxGenerations,
                 maxEvaluations, null);
 
             // Set the required local references to the genome evaluators
-            InitializeContainer(genomeFitnessEvaluator1, genomeFitnessEvaluator2, maxGenerations, maxEvaluations);
+            InitializeContainer(agentFitnessEvaluator, environmentFitnessEvaluator, maxGenerations, maxEvaluations);
 
             // Set update scheme and run state to ready
             UpdateScheme = new UpdateScheme(new TimeSpan(0, 0, 1));
@@ -332,14 +335,14 @@ namespace SharpNeat.EvolutionAlgorithms
             RunState = RunState.Terminated;
 
             // Close the individual algorithm evolution loggers
-            _evolutionAlgorithm1.CleanupLoggers();
-            _evolutionAlgorithm2.CleanupLoggers();
+            _agentEa.CleanupLoggers();
+            _environmentEa.CleanupLoggers();
 
-            // Cleanup genome evaluator 1
-            GenomeEvaluator1.Cleanup();
+            // Cleanup agent evaluator
+            AgentEvaluator.Cleanup();
 
-            // Cleanup genome evaluator 2
-            GenomeEvaluator2.Cleanup();
+            // Cleanup environment evaluator
+            EnvironmentEvaluator.Cleanup();
 
             // Null out the internal thread
             _algorithmThread = null;
@@ -391,21 +394,23 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <summary>
         ///     Sets state values needed by this container during the initialization process.
         /// </summary>
-        /// <param name="genomeEvaluator1">Reference to the genome evaluator for the first population.</param>
-        /// <param name="genomeEvaluator2">Reference to the genome evaluator for the second population.</param>
+        /// <param name="agentEvaluator">Reference to the genome evaluator for the agent population.</param>
+        /// <param name="environmentEvaluator">Reference to the genome evaluator for the environment population.</param>
         /// <param name="maxGenerations">The maximum number of generations.</param>
         /// <param name="maxEvaluations">The maximum number of evaluations.</param>
-        private void InitializeContainer(IGenomeEvaluator<TGenome1> genomeEvaluator1,
-            IGenomeEvaluator<TGenome2> genomeEvaluator2, int? maxGenerations, ulong? maxEvaluations)
+        private void InitializeContainer(IGenomeEvaluator<TGenome1> agentEvaluator,
+            IGenomeEvaluator<TGenome2> environmentEvaluator, int? maxGenerations, ulong? maxEvaluations)
         {
-            GenomeEvaluator1 = genomeEvaluator1;
-            GenomeEvaluator2 = genomeEvaluator2;
+            AgentEvaluator = agentEvaluator;
+            EnvironmentEvaluator = environmentEvaluator;
             _maxGenerations = maxGenerations;
             _maxEvaluations = maxEvaluations;
 
             // Update each evaluator with the phenotypes of the other population
-            genomeEvaluator1.UpdateEvaluationBaseline(genomeEvaluator2.DecodeGenomes(_evolutionAlgorithm2.GenomeList));
-            genomeEvaluator2.UpdateEvaluationBaseline(genomeEvaluator1.DecodeGenomes(_evolutionAlgorithm1.GenomeList));
+            agentEvaluator.UpdateEvaluationBaseline(environmentEvaluator.DecodeGenomes(_environmentEa.GenomeList),
+                _agentEa.CurrentGeneration);
+            environmentEvaluator.UpdateEvaluationBaseline(agentEvaluator.DecodeGenomes(_agentEa.GenomeList),
+                _environmentEa.CurrentGeneration);
         }
 
         /// <summary>
@@ -425,20 +430,20 @@ namespace SharpNeat.EvolutionAlgorithms
                 {
                     // Increment the centralized current generation as well as the individual EA ones
                     CurrentGeneration++;
-                    _evolutionAlgorithm1.CurrentGeneration++;
-                    _evolutionAlgorithm2.CurrentGeneration++;
+                    _agentEa.CurrentGeneration++;
+                    _environmentEa.CurrentGeneration++;
 
-                    // Execute the first algorithm for one evaluation cycle
-                    _evolutionAlgorithm1.PerformOneGeneration();
+                    // Execute the agent algorithm for one evaluation cycle
+                    _agentEa.PerformOneGeneration();
 
-                    // Execute the second algorithm for one evaluation cycle
-                    _evolutionAlgorithm2.PerformOneGeneration();
+                    // Execute the environment algorithm for one evaluation cycle
+                    _environmentEa.PerformOneGeneration();
 
-                    // TODO: We probably need to udpate the cached phenotypes on both algorithms here
-                    GenomeEvaluator1.UpdateEvaluationBaseline(
-                        GenomeEvaluator2.DecodeGenomes(_evolutionAlgorithm2.GenomeList));
-                    GenomeEvaluator2.UpdateEvaluationBaseline(
-                        GenomeEvaluator1.DecodeGenomes(_evolutionAlgorithm1.GenomeList));
+                    // TODO: We probably need to update the cached phenotypes on both algorithms here
+                    AgentEvaluator.UpdateEvaluationBaseline(
+                        EnvironmentEvaluator.DecodeGenomes(_environmentEa.GenomeList), _agentEa.CurrentGeneration);
+                    EnvironmentEvaluator.UpdateEvaluationBaseline(AgentEvaluator.DecodeGenomes(_agentEa.GenomeList),
+                        _environmentEa.CurrentGeneration);
 
                     // Send update to the calling routine if time
                     if (UpdateTest())
@@ -451,18 +456,18 @@ namespace SharpNeat.EvolutionAlgorithms
                     // Set the current number of evaluations 
                     // (this after the algorithm has run so we have the correct number for this iteration)
                     // TODO: We may want to end up splitting this out to be a separate count per EA
-                    CurrentEvaluations = GenomeEvaluator1.EvaluationCount + GenomeEvaluator2.EvaluationCount;
+                    CurrentEvaluations = AgentEvaluator.EvaluationCount + EnvironmentEvaluator.EvaluationCount;
 
                     // Set genome evaluator stop condition satisfied if either evaluator indicates such
-                    StopConditionSatisfied = GenomeEvaluator1.StopConditionSatisfied ||
-                                             GenomeEvaluator2.StopConditionSatisfied;
+                    StopConditionSatisfied = AgentEvaluator.StopConditionSatisfied ||
+                                             EnvironmentEvaluator.StopConditionSatisfied;
 
                     // Check if a pause has been requested. 
                     // Access to the flag is not thread synchronized, but it doesn't really matter if
                     // we miss it being set and perform one other generation before pausing.
                     if (_pauseRequestFlag || StopConditionSatisfied ||
-                        CurrentGeneration >= _maxGenerations || GenomeEvaluator1.EvaluationCount >= _maxEvaluations ||
-                        GenomeEvaluator2.EvaluationCount >= _maxEvaluations)
+                        CurrentGeneration >= _maxGenerations || AgentEvaluator.EvaluationCount >= _maxEvaluations ||
+                        EnvironmentEvaluator.EvaluationCount >= _maxEvaluations)
                     {
                         // Signal to any waiting thread that we are pausing
                         _awaitPauseEvent.Set();
@@ -491,10 +496,10 @@ namespace SharpNeat.EvolutionAlgorithms
         {
             if (UpdateMode.Generational == UpdateScheme.UpdateMode)
             {
-                return (CurrentGeneration - _prevUpdateGeneration) >= UpdateScheme.Generations;
+                return CurrentGeneration - _prevUpdateGeneration >= UpdateScheme.Generations;
             }
 
-            return (DateTime.Now.Ticks - _prevUpdateTimeTick) >= UpdateScheme.TimeSpan.Ticks;
+            return DateTime.Now.Ticks - _prevUpdateTimeTick >= UpdateScheme.TimeSpan.Ticks;
         }
 
         /// <summary>
@@ -529,14 +534,14 @@ namespace SharpNeat.EvolutionAlgorithms
                     PausedEvent(this, EventArgs.Empty);
 
                     // Close the individual algorithm evolution loggers
-                    _evolutionAlgorithm1.CleanupLoggers();
-                    _evolutionAlgorithm2.CleanupLoggers();
+                    _agentEa.CleanupLoggers();
+                    _environmentEa.CleanupLoggers();
 
-                    // Cleanup genome evaluator 1
-                    GenomeEvaluator1.Cleanup();
+                    // Cleanup agent evaluator
+                    AgentEvaluator.Cleanup();
 
-                    // Cleanup genome evaluator 2
-                    GenomeEvaluator2.Cleanup();
+                    // Cleanup environment evaluator
+                    EnvironmentEvaluator.Cleanup();
                 }
                 catch (Exception ex)
                 {

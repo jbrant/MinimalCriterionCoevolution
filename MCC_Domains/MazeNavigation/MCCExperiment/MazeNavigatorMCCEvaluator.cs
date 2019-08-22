@@ -1,8 +1,9 @@
 ﻿#region
 
-using System;
 using System.Collections.Generic;
+using System.Net;
 using SharpNeat.Core;
+using SharpNeat.Genomes.Maze;
 using SharpNeat.Loggers;
 using SharpNeat.Phenomes;
 using SharpNeat.Phenomes.Mazes;
@@ -28,12 +29,28 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         ///     The number of mazes that must be solved successfully in order to satisfy the
         ///     minimal criterion.
         /// </param>
+        /// <param name="resourceLimit">
+        ///     The number of times a maze can be used for successful navigations that contribute to
+        ///     meeting an agent's MC.
+        /// </param>
+        /// <param name="evaluationLogger">Per-evaluation data logger (optional).</param>
+        /// <param name="resourceUsageLogger">
+        ///     Resource usage logger that records number of times maze has been used to satisfy
+        ///     agent MC (optional).
+        /// </param>
         public MazeNavigatorMCCEvaluator(int minSuccessDistance,
-            IBehaviorCharacterizationFactory behaviorCharacterizationFactory, int agentNumSuccessesCriteria)
+            IBehaviorCharacterizationFactory behaviorCharacterizationFactory, int agentNumSuccessesCriteria,
+            int resourceLimit = 0, IDataLogger evaluationLogger = null, IDataLogger resourceUsageLogger = null)
         {
             _behaviorCharacterizationFactory = behaviorCharacterizationFactory;
             _agentNumSuccessesCriteria = agentNumSuccessesCriteria;
+            _resourceUsageLogger = resourceUsageLogger;
+            _resourceLimit = resourceLimit;
+            _evaluationLogger = evaluationLogger;
             EvaluationCount = 0;
+
+            // Set resource limited flag based on value of resource limit
+            _isResourceLimited = resourceLimit > 0;
 
             // Create factory for generating multiple mazes
             _multiMazeWorldFactory = new MultiMazeNavigationWorldFactory<BehaviorInfo>(minSuccessDistance);
@@ -63,6 +80,27 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         /// </summary>
         private readonly int _agentNumSuccessesCriteria;
 
+        /// <summary>
+        ///     Per-evaluation data logger (generates one row per maze trial).
+        /// </summary>
+        private readonly IDataLogger _evaluationLogger;
+
+        /// <summary>
+        ///     Resource usage logger that records number of times maze has been used to satisfy agent MC.
+        /// </summary>
+        private readonly IDataLogger _resourceUsageLogger;
+
+        /// <summary>
+        ///     The number of times a maze can be used for successful navigations that contribute to meeting an agent's MC.
+        /// </summary>
+        private readonly int _resourceLimit;
+
+        /// <summary>
+        ///     Flag indicating whether mazes have an upper limit regarding the number of times they can be used for satisfying an
+        ///     agent MC (i.e. limited resources).
+        /// </summary>
+        private readonly bool _isResourceLimited;
+
         #endregion
 
         #region Public Properties
@@ -90,10 +128,8 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         /// </summary>
         /// <param name="agent">The maze navigator brain (ANN).</param>
         /// <param name="currentGeneration">The current generation or evaluation batch.</param>
-        /// <param name="evaluationLogger">Reference to the evaluation logger.</param>
         /// <returns>A behavior info (which is a type of behavior-based trial information).</returns>
-        public BehaviorInfo Evaluate(IBlackBox agent, uint currentGeneration,
-            IDataLogger evaluationLogger)
+        public BehaviorInfo Evaluate(IBlackBox agent, uint currentGeneration)
         {
             var curSuccesses = 0;
 
@@ -122,7 +158,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
                 trialInfo.ObjectiveDistance = world.GetDistanceToTarget();
 
                 // Log trial information
-                evaluationLogger?.LogRow(new List<LoggableElement>
+                _evaluationLogger?.LogRow(new List<LoggableElement>
                     {
                         new LoggableElement(EvaluationFieldElements.Generation, currentGeneration),
                         new LoggableElement(EvaluationFieldElements.EvaluationCount, threadLocalEvaluationCount),
@@ -135,7 +171,26 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
 
                 // If the navigator reached the goal, update the running count of successes
                 if (goalReached)
-                    curSuccesses++;
+                {
+                    // If resource limitations are imposed, we also need to increment the number of times the current
+                    // maze has been used to satisfy an agent MC
+                    if (_isResourceLimited)
+                    {
+                        lock (_evaluationLock)
+                        {
+                            // Successful navigation is discounted if maze is at or above resource limit
+                            if (!_multiMazeWorldFactory.IsMazeUnderResourceLimit(cnt, _resourceLimit)) continue;
+
+                            // Only increment successes if solved maze is below resource limit
+                            _multiMazeWorldFactory.IncrementSuccessfulMazeNavigationCount(cnt);
+                            curSuccesses++;
+                        }
+                    }
+                    else
+                    {
+                        curSuccesses++;
+                    }
+                }
             }
 
             // If the number of successful maze navigations was equivalent to the minimum required,
@@ -152,14 +207,17 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         /// <summary>
         ///     Initializes the logger and writes header.
         /// </summary>
-        /// <param name="evaluationLogger">The evaluation logger.</param>
-        public void Initialize(IDataLogger evaluationLogger)
+        public void Initialize()
         {
-            // Set the run phase
-            evaluationLogger?.UpdateRunPhase(RunPhase.Primary);
+            // Open loggers
+            _evaluationLogger?.Open();
+            _resourceUsageLogger?.Open();
+            
+            // Set the run phase on evaluation logger
+            _evaluationLogger?.UpdateRunPhase(RunPhase.Primary);
 
-            // Log the header
-            evaluationLogger?.LogHeader(new List<LoggableElement>
+            // Log the evaluation logger header
+            _evaluationLogger?.LogHeader(new List<LoggableElement>
             {
                 new LoggableElement(EvaluationFieldElements.Generation, 0),
                 new LoggableElement(EvaluationFieldElements.EvaluationCount, EvaluationCount),
@@ -167,17 +225,14 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
                 new LoggableElement(EvaluationFieldElements.RunPhase, RunPhase.Initialization),
                 new LoggableElement(EvaluationFieldElements.IsViable, false)
             }, _multiMazeWorldFactory.CreateMazeNavigationWorld(new MazeStructure(0, 0, 1), null).GetLoggableElements());
-        }
 
-        /// <inheritdoc />
-        /// <summary>
-        ///     Update the evaluator based on some characteristic of the given population.
-        /// </summary>
-        /// <typeparam name="TGenome">The genome type parameter.</typeparam>
-        /// <param name="population">The current population.</param>
-        public void Update<TGenome>(List<TGenome> population) where TGenome : class, IGenome<TGenome>
-        {
-            throw new NotImplementedException();
+            // Log the usage logger header
+            _resourceUsageLogger?.LogHeader(new List<LoggableElement>
+            {
+                new LoggableElement(ResourceUsageFieldElements.Generation, 0),
+                new LoggableElement(ResourceUsageFieldElements.GenomeId, null),
+                new LoggableElement(ResourceUsageFieldElements.UsageCount, 0)
+            });
         }
 
         /// <inheritdoc />
@@ -185,9 +240,45 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         ///     Updates the collection of mazes to use for future evaluations.
         /// </summary>
         /// <param name="evaluatorPhenomes">The complete collection of available mazes.</param>
-        public void UpdateEvaluatorPhenotypes(IEnumerable<object> evaluatorPhenomes)
+        /// <param name="lastGeneration">The generation that was just executed.</param>
+        public void UpdateEvaluatorPhenotypes(IEnumerable<object> evaluatorPhenomes, uint lastGeneration)
         {
-            _multiMazeWorldFactory.SetMazeConfigurations((IList<MazeStructure>) evaluatorPhenomes);
+            // Cast to maze genomes/phenomes
+            var mazePhenomes = (IList<MazeStructure>) evaluatorPhenomes;
+
+            _multiMazeWorldFactory.SetMazeConfigurations(mazePhenomes);
+
+            // Update resource usage if enabled
+            if (_isResourceLimited)
+            {
+                // Increment resource usage count as appropriate
+                _multiMazeWorldFactory.UpdateMazePhenomeUsage(mazePhenomes);
+
+                // Don't attempt to log if the file stream is closed
+                if (!(_resourceUsageLogger?.IsStreamOpen() ?? false)) return;
+                
+                // Log resource usages per genome ID
+                foreach (var mazePhenome in mazePhenomes)
+                {
+                    _resourceUsageLogger?.LogRow(new List<LoggableElement>
+                    {
+                        new LoggableElement(ResourceUsageFieldElements.Generation, lastGeneration),
+                        new LoggableElement(ResourceUsageFieldElements.GenomeId, mazePhenome.GenomeId),
+                        new LoggableElement(ResourceUsageFieldElements.UsageCount,
+                            mazePhenome.ViabilityUsageCount)
+                    });
+                }
+            }
+        }
+
+        /// <summary>
+        ///     Cleans up evaluator state after end of execution or upon execution interruption.  In particular, this
+        ///     closes out any existing evaluation logger and resource usage logger instance.
+        /// </summary>
+        public void Cleanup()
+        {
+            _evaluationLogger?.Close();
+            _resourceUsageLogger?.Close();
         }
 
         /// <inheritdoc />

@@ -70,6 +70,15 @@ namespace SharpNeat.Loggers
             _writer = new StreamWriter(_logFileName) {AutoFlush = true};
         }
 
+        /// <summary>
+        ///     Return whether the file stream has been opened.
+        /// </summary>
+        /// <returns>Boolean flag indicating whether the file stream has been opened.</returns>
+        public bool IsStreamOpen()
+        {
+            return _writer != null;
+        }
+
         /// <inheritdoc />
         /// <summary>
         ///     Logs the run phase (initialization or primary).
