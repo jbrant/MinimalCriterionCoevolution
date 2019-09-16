@@ -43,23 +43,22 @@ namespace MazeExperimentSupportLib
             IBehaviorCharacterization behaviorCharacterization = new TrajectoryBehaviorCharacterization();
 
             // Create the maze navigation world
-            var world = new MazeNavigationWorld<BehaviorInfo>(mazeConfiguration.Walls,
+            var world = new MazeNavigationWorld(mazeConfiguration.Walls,
                 mazeConfiguration.NavigatorLocation, mazeConfiguration.GoalLocation,
                 experimentParameters.MinSuccessDistance, mazeConfiguration.MaxSimulationTimesteps,
                 behaviorCharacterization);
 
             // Run a single trial
-            var trialInfo = world.RunTrial(evaluationUnit.AgentPhenome, SearchType.MinimalCriteriaSearch,
-                out var isGoalReached);
+            var trialBehavior = world.RunBehaviorTrial(evaluationUnit.AgentPhenome, out var isGoalReached);
 
             // Set maze solved status
             evaluationUnit.IsMazeSolved = isGoalReached;
 
             // The number of time steps is effectively the number of 2-dimensional points in the behaviors array
-            evaluationUnit.NumTimesteps = trialInfo.Behaviors.Count() / 2;
+            evaluationUnit.NumTimesteps = world.GetSimulationTimesteps();
 
             // Set the trajectory of the agent
-            evaluationUnit.AgentTrajectory = trialInfo.Behaviors;
+            evaluationUnit.AgentTrajectory = trialBehavior;
         }
 
         /// <summary>
@@ -72,7 +71,7 @@ namespace MazeExperimentSupportLib
         {
             IList<TrajectoryDiversityUnit> trajectoryDiversityUnits = new List<TrajectoryDiversityUnit>();
 
-            foreach (MazeNavigatorEvaluationUnit evaluationUnit in evaluationUnits.Where(u => u.IsMazeSolved))
+            foreach (var evaluationUnit in evaluationUnits.Where(u => u.IsMazeSolved))
             {
                 double intraMazeTotalTrajectoryDifference = 0;
                 double interMazeTotalTrajectoryDifference = 0;
@@ -623,33 +622,33 @@ namespace MazeExperimentSupportLib
                 {
                     trajectoryDistance += Math.Sqrt(
                         Math.Pow(
-                            (trajectory2[idx] - trajectory1[trajectory1.Count - 2]),
+                            trajectory2[idx] - trajectory1[trajectory1.Count - 2],
                             2) +
                         Math.Pow(
-                            (trajectory2[idx + 1] -
-                             trajectory1[trajectory1.Count - 1]), 2));
+                            trajectory2[idx + 1] -
+                            trajectory1[trajectory1.Count - 1], 2));
                 }
                 // Handle the case where the second trajectory has ended
                 else if (idx >= trajectory2.Count)
                 {
                     trajectoryDistance += Math.Sqrt(
                         Math.Pow(
-                            (trajectory2[trajectory2.Count - 2] - trajectory1[idx]),
+                            trajectory2[trajectory2.Count - 2] - trajectory1[idx],
                             2) +
                         Math.Pow(
-                            (trajectory2[trajectory2.Count - 1] -
-                             trajectory1[idx + 1]), 2));
+                            trajectory2[trajectory2.Count - 1] -
+                            trajectory1[idx + 1], 2));
                 }
                 // Otherwise, we're still in the simulation time frame for both trajectories
                 else
                 {
                     trajectoryDistance += Math.Sqrt(
                         Math.Pow(
-                            (trajectory2[idx] - trajectory1[idx]),
+                            trajectory2[idx] - trajectory1[idx],
                             2) +
                         Math.Pow(
-                            (trajectory2[idx + 1] -
-                             trajectory1[idx + 1]), 2));
+                            trajectory2[idx + 1] -
+                            trajectory1[idx + 1], 2));
                 }
             }
 

@@ -34,6 +34,11 @@ namespace SharpNeat.Decoders.HyperNeat
     public class Substrate
     {
         /// <summary>
+        ///     The unique identifier of the genome from which the phenotype was generated.
+        /// </summary>
+        uint Id { get; }
+        
+        /// <summary>
         /// The maximum number of substrate conenctions that we cache when using _nodeSetMappingList. If the number of 
         /// connections is less then this then we cache the susbstrate connections to avoid having to invoke the mapping 
         /// functions when creating/growing a network fromt the substrate.
@@ -321,7 +326,8 @@ namespace SharpNeat.Decoders.HyperNeat
 
             // Construct and return a network definition.
             NetworkDefinition networkDef = new NetworkDefinition(_inputNodeCount, _outputNodeCount,
-                                                                 _activationFnLibrary, _netNodeList, networkConnList);
+                                                                 _activationFnLibrary, _netNodeList, networkConnList, 
+                                                                 blackbox.GenomeId);
 
             // Check that the definition is valid and return it.
             Debug.Assert(networkDef.PerformIntegrityCheck());

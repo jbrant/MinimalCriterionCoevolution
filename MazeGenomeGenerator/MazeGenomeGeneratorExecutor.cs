@@ -2,13 +2,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Xml;
+using ImageMagick;
 using Redzen.Random;
 using SharpNeat.Decoders.Maze;
 using SharpNeat.Genomes.Maze;
-using SharpNeat.Phenomes.Mazes;
 using SharpNeat.Utility;
 
 #endregion
@@ -17,7 +16,7 @@ namespace MazeGenomeGenerator
 {
     internal class MazeGenomeGeneratorExecutor
     {
-        private static readonly Dictionary<ExecutionParameter, String> _executionConfiguration =
+        private static readonly Dictionary<ExecutionParameter, string> _executionConfiguration =
             new Dictionary<ExecutionParameter, string>();
 
         private static bool _generateMazes;
@@ -48,24 +47,24 @@ namespace MazeGenomeGenerator
             MazeGenome mazeGenome = null;
 
             // Get the maze genome file path and image output path
-            string mazeGenomeFile = _executionConfiguration[ExecutionParameter.MazeGenomeFile];
-            string imageOutputPath = _executionConfiguration[ExecutionParameter.BitmapOutputBaseDirectory];
+            var mazeGenomeFile = _executionConfiguration[ExecutionParameter.MazeGenomeFile];
+            var imageOutputPath = _executionConfiguration[ExecutionParameter.BitmapOutputBaseDirectory];
 
             // Create a new (mostly dummy) maze genome factory
-            MazeGenomeFactory mazeGenomeFactory = new MazeGenomeFactory();
+            var mazeGenomeFactory = new MazeGenomeFactory();
 
             // Read in the genome
-            using (XmlReader xr = XmlReader.Create(mazeGenomeFile))
+            using (var xr = XmlReader.Create(mazeGenomeFile))
             {
                 mazeGenome = MazeGenomeXmlIO.ReadSingleGenomeFromRoot(xr, mazeGenomeFactory);
             }
 
             // Get the maze genome ID
-            uint mazeGenomeId = mazeGenome.Id;
+            var mazeGenomeId = mazeGenome.Id;
 
             // Render the maze phenotype (i.e. the graphical structure0 and print to a bitmap file
             PrintMazeToFile(mazeGenome,
-                Path.Combine(imageOutputPath, string.Format("EvolvedMaze_ID_{0}.bmp", mazeGenomeId)));
+                Path.Combine(imageOutputPath, string.Format("EvolvedMaze_ID_{0}.png", mazeGenomeId)));
         }
 
         /// <summary>
@@ -73,46 +72,46 @@ namespace MazeGenomeGenerator
         /// </summary>
         private static void HandleMazeGeneration()
         {
-            IRandomSource rand = RandomDefaults.CreateRandomSource();
+            var rand = RandomDefaults.CreateRandomSource();
 
             // Get the evolved maze height and width
-            int mazeHeight = Int32.Parse(_executionConfiguration[ExecutionParameter.MazeHeight]);
-            int mazeWidth = Int32.Parse(_executionConfiguration[ExecutionParameter.MazeWidth]);
-            int mazeQuadrantHeight = Int32.Parse(_executionConfiguration[ExecutionParameter.MazeQuadrantHeight]);
-            int mazeQuadrantWidth = Int32.Parse(_executionConfiguration[ExecutionParameter.MazeQuadrantWidth]);
+            var mazeHeight = int.Parse(_executionConfiguration[ExecutionParameter.MazeHeight]);
+            var mazeWidth = int.Parse(_executionConfiguration[ExecutionParameter.MazeWidth]);
+            var mazeQuadrantHeight = int.Parse(_executionConfiguration[ExecutionParameter.MazeQuadrantHeight]);
+            var mazeQuadrantWidth = int.Parse(_executionConfiguration[ExecutionParameter.MazeQuadrantWidth]);
 
             // Get the number of interior walls and maze genome output directory
-            int numWaypoints = Int32.Parse(_executionConfiguration[ExecutionParameter.NumWaypoints]);
-            int numInteriorWalls = Int32.Parse(_executionConfiguration[ExecutionParameter.NumWalls]);
-            string mazeGenomeOutputDirectory = _executionConfiguration[ExecutionParameter.MazeGenomeOutputBaseDirectory];
+            var numWaypoints = int.Parse(_executionConfiguration[ExecutionParameter.NumWaypoints]);
+            var numInteriorWalls = int.Parse(_executionConfiguration[ExecutionParameter.NumWalls]);
+            var mazeGenomeOutputDirectory = _executionConfiguration[ExecutionParameter.MazeGenomeOutputBaseDirectory];
 
             // Get the number of sample mazes to generate (or just 1 maze if not specified)
-            int numMazes = _executionConfiguration.ContainsKey(ExecutionParameter.NumMazes)
-                ? Int32.Parse(_executionConfiguration[ExecutionParameter.NumMazes])
+            var numMazes = _executionConfiguration.ContainsKey(ExecutionParameter.NumMazes)
+                ? int.Parse(_executionConfiguration[ExecutionParameter.NumMazes])
                 : 1;
 
             // Get whether images are being generated for the sample mazes
-            bool generateMazeImages = _executionConfiguration.ContainsKey(ExecutionParameter.OutputMazeBitmap) &&
-                                      Boolean.Parse(_executionConfiguration[ExecutionParameter.OutputMazeBitmap]);
+            var generateMazeImages = _executionConfiguration.ContainsKey(ExecutionParameter.OutputMazeBitmap) &&
+                                     bool.Parse(_executionConfiguration[ExecutionParameter.OutputMazeBitmap]);
 
             // Get whether maze genomes are being serialized to the same file (defaults to false)
-            bool isSingleOutputFile = _executionConfiguration.ContainsKey(ExecutionParameter.SingleGenomeOutputFile) &&
-                                      Boolean.Parse(_executionConfiguration[ExecutionParameter.SingleGenomeOutputFile]);
+            var isSingleOutputFile = _executionConfiguration.ContainsKey(ExecutionParameter.SingleGenomeOutputFile) &&
+                                     bool.Parse(_executionConfiguration[ExecutionParameter.SingleGenomeOutputFile]);
 
             // Create a new maze genome factory
-            MazeGenomeFactory mazeGenomeFactory =
+            var mazeGenomeFactory =
                 new MazeGenomeFactory(mazeHeight, mazeWidth, mazeQuadrantHeight, mazeQuadrantWidth);
 
             // Instantiate list to hold generated maze genomes 
             // (only really used when we're writing everything out to one file)
-            List<MazeGenome> mazeGenomeList = new List<MazeGenome>(numMazes);
+            var mazeGenomeList = new List<MazeGenome>(numMazes);
 
-            for (int curMazeCnt = 0; curMazeCnt < numMazes; curMazeCnt++)
+            for (var curMazeCnt = 0; curMazeCnt < numMazes; curMazeCnt++)
             {
                 MazeGenome mazeGenome;
 
                 // Lay out the base file name
-                string fileBaseName =
+                var fileBaseName =
                     string.Format("GeneratedMazeGenome_{0}_Height_{1}_Width_{2}_Waypoints_{3}_Walls_{4}", mazeHeight,
                         mazeWidth, numWaypoints, numInteriorWalls, curMazeCnt);
 
@@ -134,12 +133,12 @@ namespace MazeGenomeGenerator
                 }
 
                 // Add the specified number of waypoints (less one because center waypoint is created on maze initialization)
-                for (int cnt = 0; cnt < numWaypoints - 1; cnt++)
+                for (var cnt = 0; cnt < numWaypoints - 1; cnt++)
                 {
                     Point2DInt waypoint;
 
                     // Randomly select an orientation
-                    IntersectionOrientation newPointOrientation = mazeGenomeFactory.Rng.NextBool()
+                    var newPointOrientation = mazeGenomeFactory.Rng.NextBool()
                         ? IntersectionOrientation.Horizontal
                         : IntersectionOrientation.Vertical;
 
@@ -149,7 +148,7 @@ namespace MazeGenomeGenerator
                         waypoint = new Point2DInt(mazeGenomeFactory.Rng.Next(mazeGenome.MazeBoundaryWidth - 1),
                             mazeGenomeFactory.Rng.Next(mazeGenome.MazeBoundaryHeight - 1));
                     } while (
-                        MazeUtils.IsValidWaypointLocation(mazeGenome, waypoint, UInt32.MaxValue, newPointOrientation) ==
+                        MazeUtils.IsValidWaypointLocation(mazeGenome, waypoint, uint.MaxValue, newPointOrientation) ==
                         false);
 
                     mazeGenome.PathGeneList.Add(new PathGene(mazeGenomeFactory.InnovationIdGenerator.NextId, waypoint,
@@ -157,7 +156,7 @@ namespace MazeGenomeGenerator
                 }
 
                 // Create the specified number of interior walls (i.e. maze genes)
-                for (int cnt = 0; cnt < numInteriorWalls; cnt++)
+                for (var cnt = 0; cnt < numInteriorWalls; cnt++)
                 {
                     // Create new maze gene and add to genome
                     mazeGenome.WallGeneList.Add(new WallGene(mazeGenomeFactory.InnovationIdGenerator.NextId,
@@ -169,7 +168,7 @@ namespace MazeGenomeGenerator
                 {
                     // Serialize the genome to XML            
                     using (
-                        XmlWriter xmlWriter =
+                        var xmlWriter =
                             XmlWriter.Create(
                                 Path.Combine(mazeGenomeOutputDirectory, string.Format("{0}.xml", fileBaseName)),
                                 new XmlWriterSettings {Indent = true}))
@@ -187,7 +186,7 @@ namespace MazeGenomeGenerator
                 // Print the maze to a bitmap file if that option has been specified
                 if (generateMazeImages)
                 {
-                    PrintMazeToFile(mazeGenome, string.Format("{0}_Structure.bmp", fileBaseName));
+                    PrintMazeToFile(mazeGenome, string.Format("{0}_Structure.png", fileBaseName));
                 }
             }
 
@@ -196,7 +195,7 @@ namespace MazeGenomeGenerator
             {
                 // Serialize all genomes to XML
                 using (
-                    XmlWriter xmlWriter =
+                    var xmlWriter =
                         XmlWriter.Create(Path.Combine(mazeGenomeOutputDirectory,
                             string.Format("GeneratedMaze_{0}_Genomes_{1}_Height_{2}_Width_{3}_Waypoints_{4}_Walls.xml",
                                 numMazes,
@@ -215,44 +214,42 @@ namespace MazeGenomeGenerator
         private static void PrintMazeToFile(MazeGenome mazeGenome, string mazeImageName)
         {
             // Read in the maze decode parameters
-            int mazeScaleFactor = Int32.Parse(_executionConfiguration[ExecutionParameter.MazeScaleFactor]);
-            string mazeBitmapOutputDirectory = _executionConfiguration[ExecutionParameter.BitmapOutputBaseDirectory];
+            var mazeScaleFactor = int.Parse(_executionConfiguration[ExecutionParameter.MazeScaleFactor]);
+            var mazeBitmapOutputDirectory = _executionConfiguration[ExecutionParameter.BitmapOutputBaseDirectory];
 
             // Instantiate the maze genome decoder
-            MazeDecoder mazeDecoder = new MazeDecoder(mazeScaleFactor);
+            var mazeDecoder = new MazeDecoder(mazeScaleFactor);
 
             // Decode the maze to get a maze structure
-            MazeStructure mazeStructure = mazeDecoder.Decode(mazeGenome);
+            var mazeStructure = mazeDecoder.Decode(mazeGenome);
 
-            // Create pen and initialize bitmap canvas
-            Pen blackPen = new Pen(Color.Black, 0.0001f);
-            Bitmap mazeBitmap = new Bitmap(mazeStructure.ScaledMazeWidth + 1, mazeStructure.ScaledMazeHeight + 1);
-
-            using (Graphics graphics = Graphics.FromImage(mazeBitmap))
+            using (var image = new MagickImage(MagickColors.White,
+                mazeStructure.ScaledMazeWidth + 1, mazeStructure.ScaledMazeHeight + 1))
             {
-                // Fill with white
-                Rectangle imageSize = new Rectangle(0, 0, mazeStructure.ScaledMazeWidth + 1,
-                    mazeStructure.ScaledMazeHeight + 1);
-                graphics.FillRectangle(Brushes.White, imageSize);
+                var strokeColor = new DrawableStrokeColor(MagickColors.Black);
+                var strokeWidth = new DrawableStrokeWidth(0.0001f);
+
+                // Draw border around maze
+                image.Draw(strokeColor, strokeWidth, new DrawableFillColor(MagickColors.Transparent),
+                    new DrawableRectangle(0, 0, mazeStructure.ScaledMazeWidth + 1, mazeStructure.ScaledMazeHeight + 1));
 
                 // Draw start and end points
-                graphics.FillEllipse(Brushes.Green, mazeStructure.StartLocation.X, mazeStructure.StartLocation.Y, 5, 5);
-                graphics.FillEllipse(Brushes.Red, mazeStructure.TargetLocation.X, mazeStructure.TargetLocation.Y, 5, 5);
+                image.Draw(strokeColor, strokeWidth, new DrawableFillColor(MagickColors.Green),
+                    new DrawableEllipse(mazeStructure.StartLocation.X, mazeStructure.StartLocation.Y, 2.5, 2.5, 0, 360));
+                image.Draw(strokeColor, strokeWidth, new DrawableFillColor(MagickColors.Red),
+                    new DrawableEllipse(mazeStructure.TargetLocation.X, mazeStructure.TargetLocation.Y, 2.5, 2.5, 0, 360));
 
-                // Draw all of the walls
-                foreach (MazeStructureWall wall in mazeStructure.Walls)
+                // Draw walls
+                foreach (var wall in mazeStructure.Walls)
                 {
-                    // Convert line start/end points to Point objects from drawing namespace
-                    Point startPoint = new Point(wall.StartMazeStructurePoint.X, wall.StartMazeStructurePoint.Y);
-                    Point endPoint = new Point(wall.EndMazeStructurePoint.X, wall.EndMazeStructurePoint.Y);
-
-                    // Draw wall
-                    graphics.DrawLine(blackPen, startPoint, endPoint);
+                    image.Draw(strokeColor, strokeWidth,
+                        new DrawableLine(wall.StartMazeStructurePoint.X, wall.StartMazeStructurePoint.Y,
+                            wall.EndMazeStructurePoint.X, wall.EndMazeStructurePoint.Y));
                 }
-            }
 
-            // Save the bitmap image
-            mazeBitmap.Save(Path.Combine(mazeBitmapOutputDirectory, mazeImageName));
+                // Save the PNG image
+                image.Write(Path.Combine(mazeBitmapOutputDirectory, mazeImageName));
+            }
         }
 
         /// <summary>
@@ -263,17 +260,17 @@ namespace MazeGenomeGenerator
         private static bool ParseAndValidateConfiguration(string[] executionArguments)
         {
             _generateMazes = true;
-            bool isConfigurationValid = executionArguments != null;
+            var isConfigurationValid = executionArguments != null;
 
             // Only continue if there are execution arguments
             if (executionArguments != null && executionArguments.Length > 0)
             {
-                foreach (string executionArgument in executionArguments)
+                foreach (var executionArgument in executionArguments)
                 {
                     ExecutionParameter curParameter;
 
                     // Get the key/value pair
-                    string[] parameterValuePair = executionArgument.Split('=');
+                    var parameterValuePair = executionArgument.Split('=');
 
                     // Attempt to parse the current parameter
                     isConfigurationValid = Enum.TryParse(parameterValuePair[0], true, out curParameter);
@@ -304,13 +301,14 @@ namespace MazeGenomeGenerator
                         case ExecutionParameter.MazeWidth:
                         case ExecutionParameter.MazeScaleFactor:
                             int testInt;
-                            if (Int32.TryParse(parameterValuePair[1], out testInt) == false)
+                            if (int.TryParse(parameterValuePair[1], out testInt) == false)
                             {
                                 Console.Error.WriteLine(
                                     "The value for parameter [{0}] must be an integer.",
                                     curParameter);
                                 isConfigurationValid = false;
                             }
+
                             break;
 
                         // Ensure that valid boolean values were given
@@ -318,12 +316,13 @@ namespace MazeGenomeGenerator
                         case ExecutionParameter.GenerateMazes:
                         case ExecutionParameter.SingleGenomeOutputFile:
                             bool testBool;
-                            if (Boolean.TryParse(parameterValuePair[1], out testBool) == false)
+                            if (bool.TryParse(parameterValuePair[1], out testBool) == false)
                             {
                                 Console.Error.WriteLine("The value for parameter [{0}] must be a boolean.",
                                     curParameter);
                                 isConfigurationValid = false;
                             }
+
                             break;
                     }
 
@@ -340,13 +339,13 @@ namespace MazeGenomeGenerator
             // If the generate mazes option was specified, then set it - otherwise defualt to true
             if (_executionConfiguration.ContainsKey(ExecutionParameter.GenerateMazes))
             {
-                _generateMazes = Boolean.Parse(_executionConfiguration[ExecutionParameter.GenerateMazes]);
+                _generateMazes = bool.Parse(_executionConfiguration[ExecutionParameter.GenerateMazes]);
             }
 
 
             // If the per-parameter configuration is valid but not a full list of parameters were specified, makes sure the necessary ones are present
-            if (isConfigurationValid && (_executionConfiguration.Count ==
-                                         Enum.GetNames(typeof (ExecutionParameter)).Length) == false)
+            if (isConfigurationValid && _executionConfiguration.Count ==
+                Enum.GetNames(typeof(ExecutionParameter)).Length == false)
             {
                 // Check for existence of desired number of interior walls to generate
                 if (_generateMazes && _executionConfiguration.ContainsKey(ExecutionParameter.NumWalls) == false)
@@ -378,11 +377,13 @@ namespace MazeGenomeGenerator
                     Convert.ToBoolean(_executionConfiguration[ExecutionParameter.OutputMazeBitmap]) &&
                     (_executionConfiguration.ContainsKey(ExecutionParameter.MazeHeight) == false ||
                      _executionConfiguration.ContainsKey(ExecutionParameter.MazeWidth) == false ||
+                     _executionConfiguration.ContainsKey(ExecutionParameter.MazeQuadrantHeight) == false ||
+                     _executionConfiguration.ContainsKey(ExecutionParameter.MazeQuadrantWidth) == false ||
                      _executionConfiguration.ContainsKey(ExecutionParameter.MazeScaleFactor) == false ||
                      _executionConfiguration.ContainsKey(ExecutionParameter.BitmapOutputBaseDirectory) == false))
                 {
                     Console.Error.WriteLine(
-                        "The maze height, width, scale factor, and output directory must be specified when outputting bitmap images of the generated maze.");
+                        "The maze height/width, quadrant width/height, scale factor, and output directory must be specified when outputting bitmap images of the generated maze.");
                     isConfigurationValid = false;
                 }
             }

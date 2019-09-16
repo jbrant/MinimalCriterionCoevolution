@@ -241,20 +241,6 @@ namespace SharpNeat.Core
             _phenomeEvaluator.Reset();
         }
 
-        /// <inheritdoc />
-        /// <summary>
-        ///     Returns SerialGenomeBehaviorEvaluator loggable elements.
-        /// </summary>
-        /// <param name="logFieldEnableMap">
-        ///     Dictionary of logging fields that can be enabled or disabled based on the specification
-        ///     of the calling routine.
-        /// </param>
-        /// <returns>The loggable elements for SerialGenomeBehaviorEvaluator.</returns>
-        public List<LoggableElement> GetLoggableElements(IDictionary<FieldElement, bool> logFieldEnableMap = null)
-        {
-            return _phenomeEvaluator.GetLoggableElements(logFieldEnableMap);
-        }
-
         #endregion
 
         #region Private Evaluation Wrapper methods

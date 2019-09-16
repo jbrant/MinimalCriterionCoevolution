@@ -48,7 +48,8 @@ namespace SharpNeat.Network
         /// </summary>
         public NetworkDefinition(int inputNodeCount, int outputNodeCount,
                                  IActivationFunctionLibrary activationFnLib,
-                                 NodeList nodeList, ConnectionList connectionList)
+                                 NodeList nodeList, ConnectionList connectionList, 
+                                 uint genomeId)
         {
             _inputNodeCount = inputNodeCount;
             _outputNodeCount = outputNodeCount;
@@ -56,6 +57,7 @@ namespace SharpNeat.Network
             _nodeList = nodeList;
             _connectionList = connectionList;
             _isAcyclic = !CyclicNetworkTest.IsNetworkCyclic(this);
+            Id = genomeId;
         }
 
         /// <summary>
@@ -65,7 +67,7 @@ namespace SharpNeat.Network
         public NetworkDefinition(int inputNodeCount, int outputNodeCount,
                                  IActivationFunctionLibrary activationFnLib,
                                  NodeList nodeList, ConnectionList connectionList,
-                                 bool isAcyclic)
+                                 bool isAcyclic, uint genomeId)
         {
             _inputNodeCount = inputNodeCount;
             _outputNodeCount = outputNodeCount;
@@ -73,6 +75,7 @@ namespace SharpNeat.Network
             _nodeList = nodeList;
             _connectionList = connectionList;
             _isAcyclic = isAcyclic;
+            Id = genomeId;
 
             Debug.Assert(isAcyclic == !CyclicNetworkTest.IsNetworkCyclic(this));
         }
@@ -81,6 +84,11 @@ namespace SharpNeat.Network
 
         #region Properties
 
+        /// <summary>
+        ///     The unique identifier of the genome from which the phenotype was generated.
+        /// </summary>
+        public uint Id { get; }
+        
         /// <summary>
         /// Gets the number of input nodes. This does not include the bias node which is always present.
         /// </summary>

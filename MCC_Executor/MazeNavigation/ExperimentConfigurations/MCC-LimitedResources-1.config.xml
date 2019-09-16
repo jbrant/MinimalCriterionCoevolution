@@ -61,7 +61,6 @@
     <SelectionProportion>0.2</SelectionProportion>
     <OffspringAsexualProbability>0.5</OffspringAsexualProbability>
     <OffspringSexualProbability>0.5</OffspringSexualProbability>
-    <InterspeciesMatingProbability>0.001</InterspeciesMatingProbability>
     <GenomeConfig>
       <InitialConnectionProportion>1</InitialConnectionProportion>
       <WeightMutationProbability>0.9</WeightMutationProbability>

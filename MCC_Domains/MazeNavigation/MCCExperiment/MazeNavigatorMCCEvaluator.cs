@@ -1,9 +1,7 @@
 ﻿#region
 
 using System.Collections.Generic;
-using System.Net;
 using SharpNeat.Core;
-using SharpNeat.Genomes.Maze;
 using SharpNeat.Loggers;
 using SharpNeat.Phenomes;
 using SharpNeat.Phenomes.Mazes;
@@ -53,7 +51,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             _isResourceLimited = resourceLimit > 0;
 
             // Create factory for generating multiple mazes
-            _multiMazeWorldFactory = new MultiMazeNavigationWorldFactory<BehaviorInfo>(minSuccessDistance);
+            _multiMazeWorldFactory = new MultiMazeNavigationWorldFactory(minSuccessDistance);
         }
 
         #endregion
@@ -73,7 +71,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         /// <summary>
         ///     The multi maze navigation world factory.
         /// </summary>
-        private readonly MultiMazeNavigationWorldFactory<BehaviorInfo> _multiMazeWorldFactory;
+        private readonly MultiMazeNavigationWorldFactory _multiMazeWorldFactory;
 
         /// <summary>
         ///     The number of mazes that the agent must navigate in order to meet the minimal criteria.
@@ -132,13 +130,13 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         public BehaviorInfo Evaluate(IBlackBox agent, uint currentGeneration)
         {
             var curSuccesses = 0;
-
-            // TODO: Note that this will get overwritten until the last successful attempt (may need a better way of handling this for logging purposes)
-            var trialInfo = BehaviorInfo.NoBehavior;
+            var behaviorInfo = new BehaviorInfo();
 
             for (var cnt = 0; cnt < _multiMazeWorldFactory.NumMazes && curSuccesses < _agentNumSuccessesCriteria; cnt++)
             {
+                var isSuccessful = false;
                 ulong threadLocalEvaluationCount;
+
                 lock (_evaluationLock)
                 {
                     // Increment evaluation count
@@ -152,10 +150,10 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
                 var world = _multiMazeWorldFactory.CreateMazeNavigationWorld(cnt, behaviorCharacterization);
 
                 // Run a single trial
-                trialInfo = world.RunTrial(agent, SearchType.MinimalCriteriaSearch, out var goalReached);
+                var trialBehavior = world.RunBehaviorTrial(agent, out var goalReached);
 
-                // Set the objective distance
-                trialInfo.ObjectiveDistance = world.GetDistanceToTarget();
+                // Record the objective distance
+                var objectiveDistance = world.GetDistanceToTarget();
 
                 // Log trial information
                 _evaluationLogger?.LogRow(new List<LoggableElement>
@@ -165,7 +163,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
                         new LoggableElement(EvaluationFieldElements.StopConditionSatisfied, StopConditionSatisfied),
                         new LoggableElement(EvaluationFieldElements.RunPhase, RunPhase.Primary),
                         new LoggableElement(EvaluationFieldElements.IsViable,
-                            trialInfo.DoesBehaviorSatisfyMinimalCriteria)
+                            goalReached)
                     },
                     world.GetLoggableElements());
 
@@ -184,23 +182,34 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
                             // Only increment successes if solved maze is below resource limit
                             _multiMazeWorldFactory.IncrementSuccessfulMazeNavigationCount(cnt);
                             curSuccesses++;
+
+                            // Set success flag
+                            isSuccessful = true;
                         }
                     }
                     else
                     {
+                        // Increment successes
                         curSuccesses++;
+
+                        // Set success flag
+                        isSuccessful = true;
                     }
                 }
+
+                // Add simulation trial info
+                behaviorInfo.TrialData.Add(new TrialInfo(isSuccessful, objectiveDistance,
+                    world.GetSimulationTimesteps(), _multiMazeWorldFactory.GetMazeGenomeId(cnt), trialBehavior));
             }
 
             // If the number of successful maze navigations was equivalent to the minimum required,
             // then the minimal criteria has been satisfied
             if (curSuccesses >= _agentNumSuccessesCriteria)
             {
-                trialInfo.DoesBehaviorSatisfyMinimalCriteria = true;
+                behaviorInfo.DoesBehaviorSatisfyMinimalCriteria = true;
             }
 
-            return trialInfo;
+            return behaviorInfo;
         }
 
         /// <inheritdoc />
@@ -212,7 +221,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             // Open loggers
             _evaluationLogger?.Open();
             _resourceUsageLogger?.Open();
-            
+
             // Set the run phase on evaluation logger
             _evaluationLogger?.UpdateRunPhase(RunPhase.Primary);
 
@@ -256,7 +265,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
 
                 // Don't attempt to log if the file stream is closed
                 if (!(_resourceUsageLogger?.IsStreamOpen() ?? false)) return;
-                
+
                 // Log resource usages per genome ID
                 foreach (var mazePhenome in mazePhenomes)
                 {
@@ -287,20 +296,6 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         /// </summary>
         public void Reset()
         {
-        }
-
-        /// <inheritdoc />
-        /// <summary>
-        ///     Returns MazeNavigatorMCSEvaluator loggable elements.
-        /// </summary>
-        /// <param name="logFieldEnableMap">
-        ///     Dictionary of logging fields that can be enabled or disabled based on the specification
-        ///     of the calling routine.
-        /// </param>
-        /// <returns>The loggable elements for MazeNavigatorMCSEvaluator.</returns>
-        public List<LoggableElement> GetLoggableElements(IDictionary<FieldElement, bool> logFieldEnableMap = null)
-        {
-            return _behaviorCharacterizationFactory.GetLoggableElements(logFieldEnableMap);
         }
 
         #endregion

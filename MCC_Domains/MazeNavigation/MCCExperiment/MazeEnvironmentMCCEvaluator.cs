@@ -1,6 +1,5 @@
 ﻿#region
 
-using System;
 using System.Collections.Generic;
 using SharpNeat.Core;
 using SharpNeat.Loggers;
@@ -43,7 +42,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             _evaluationLogger = evaluationLogger;
 
             // Create factory for maze world generation
-            _multiMazeWorldFactory = new MultiMazeNavigationWorldFactory<BehaviorInfo>(minSuccessDistance);
+            _multiMazeWorldFactory = new MultiMazeNavigationWorldFactory(minSuccessDistance);
         }
 
         #endregion
@@ -63,7 +62,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         /// <summary>
         ///     The multi maze navigation world factory.
         /// </summary>
-        private readonly MultiMazeNavigationWorldFactory<BehaviorInfo> _multiMazeWorldFactory;
+        private readonly MultiMazeNavigationWorldFactory _multiMazeWorldFactory;
 
         /// <summary>
         ///     The list of of maze navigator controllers against which to evaluate the given maze configurations.
@@ -120,16 +119,16 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         {
             var curSuccesses = 0;
             var curFailures = 0;
-
-            // TODO: Note that this will get overwritten until the last successful attempt (may need a better way of handling this for logging purposes)
-            var trialInfo = BehaviorInfo.NoBehavior;
+            var behaviorInfo = new BehaviorInfo();
 
             for (var cnt = 0;
                 cnt < _agentControllers.Count &&
                 (curSuccesses < _numAgentsSolvedCriteria || curFailures < _numAgentsFailedCriteria);
                 cnt++)
             {
+                var isSuccessful = false;
                 ulong threadLocalEvaluationCount;
+
                 lock (_evaluationLock)
                 {
                     // Increment evaluation count
@@ -143,11 +142,10 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
                 var world = _multiMazeWorldFactory.CreateMazeNavigationWorld(mazeStructure, behaviorCharacterization);
 
                 // Run a single trial
-                trialInfo = world.RunTrial(_agentControllers[cnt].Clone(), SearchType.MinimalCriteriaSearch,
-                    out var goalReached);
+                var trialBehavior = world.RunBehaviorTrial(_agentControllers[cnt].Clone(), out var goalReached);
 
                 // Set the objective distance
-                trialInfo.ObjectiveDistance = world.GetDistanceToTarget();
+                var objectiveDistance = world.GetDistanceToTarget();
 
                 // Log trial information
                 _evaluationLogger?.LogRow(new List<LoggableElement>
@@ -155,28 +153,33 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
                         new LoggableElement(EvaluationFieldElements.Generation, currentGeneration),
                         new LoggableElement(EvaluationFieldElements.EvaluationCount, threadLocalEvaluationCount),
                         new LoggableElement(EvaluationFieldElements.StopConditionSatisfied, StopConditionSatisfied),
-                        new LoggableElement(EvaluationFieldElements.RunPhase, RunPhase.Primary),
-                        new LoggableElement(EvaluationFieldElements.IsViable,
-                            trialInfo.DoesBehaviorSatisfyMinimalCriteria)
+                        new LoggableElement(EvaluationFieldElements.RunPhase, RunPhase.Primary)
                     },
                     world.GetLoggableElements());
 
                 // If the navigator reached the goal, increment the running count of successes
                 if (goalReached)
+                {
                     curSuccesses++;
+                    isSuccessful = true;
+                }
                 // Otherwise, increment the number of failures
                 else
                     curFailures++;
+
+                // Add simulation trial info
+                behaviorInfo.TrialData.Add(new TrialInfo(isSuccessful, objectiveDistance,
+                    world.GetSimulationTimesteps(), _agentControllers[cnt].GenomeId, trialBehavior));
             }
 
             // If the number of successful maze navigations and failed maze navigations were both equivalent to their
             // respective minimums, then the minimal criteria has been satisfied
             if (curSuccesses >= _numAgentsSolvedCriteria && curFailures >= _numAgentsFailedCriteria)
             {
-                trialInfo.DoesBehaviorSatisfyMinimalCriteria = true;
+                behaviorInfo.DoesBehaviorSatisfyMinimalCriteria = true;
             }
 
-            return trialInfo;
+            return behaviorInfo;
         }
 
         /// <inheritdoc />
@@ -225,20 +228,6 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         /// </summary>
         public void Reset()
         {
-        }
-
-        /// <inheritdoc />
-        /// <summary>
-        ///     Returns MazeEnvironmentMCSEvaluator loggable elements.
-        /// </summary>
-        /// <param name="logFieldEnableMap">
-        ///     Dictionary of logging fields that can be enabled or disabled based on the specification
-        ///     of the calling routine.
-        /// </param>
-        /// <returns>The loggable elements for MazeEnvironmentMCSEvaluator.</returns>
-        public List<LoggableElement> GetLoggableElements(IDictionary<FieldElement, bool> logFieldEnableMap = null)
-        {
-            return _behaviorCharacterizationFactory.GetLoggableElements(logFieldEnableMap);
         }
 
         #endregion

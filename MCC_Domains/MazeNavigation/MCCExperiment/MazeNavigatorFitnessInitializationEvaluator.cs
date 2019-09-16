@@ -33,7 +33,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             _evaluationLogger = evaluationLogger;
 
             // Create factory for generating mazes
-            _multiMazeWorldFactory = new MultiMazeNavigationWorldFactory<FitnessInfo>(minSuccessDistance,
+            _multiMazeWorldFactory = new MultiMazeNavigationWorldFactory(minSuccessDistance,
                 maxDistanceToTarget);
         }
 
@@ -65,7 +65,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         /// <summary>
         ///     The multi maze navigation world factory.
         /// </summary>
-        private readonly MultiMazeNavigationWorldFactory<FitnessInfo> _multiMazeWorldFactory;
+        private readonly MultiMazeNavigationWorldFactory _multiMazeWorldFactory;
 
         /// <summary>
         ///     Per-evaluation data logger (generates one row per maze trial).
@@ -117,16 +117,13 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             var world = _multiMazeWorldFactory.CreateMazeNavigationWorld();
 
             // Run a single trial
-            var trialInfo = world.RunTrial(agent, SearchType.Fitness, out var goalReached);
-
-            // Set the objective distance
-            trialInfo.ObjectiveDistance = world.GetDistanceToTarget();
+            var trialFitness = world.RunFitnessTrial(agent, out var goalReached);
 
             // Set the stop condition to the outcome
             if (goalReached)
                 StopConditionSatisfied = true;
 
-            // Log trial information (only log for non-bridging evaluations)
+            // Log trial information
             _evaluationLogger?.LogRow(new List<LoggableElement>
                 {
                     new LoggableElement(EvaluationFieldElements.Generation, currentGeneration),
@@ -136,7 +133,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
                 },
                 world.GetLoggableElements());
 
-            return trialInfo;
+            return new FitnessInfo(trialFitness, trialFitness);
         }
 
         /// <inheritdoc />
@@ -186,20 +183,6 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         /// </summary>
         public void Reset()
         {
-        }
-
-        /// <inheritdoc />
-        /// <summary>
-        ///     Returns MazeNavigationMCSInitializationEvaluator loggable elements.
-        /// </summary>
-        /// <param name="logFieldEnableMap">
-        ///     Dictionary of logging fields that can be enabled or disabled based on the specification
-        ///     of the calling routine.
-        /// </param>
-        /// <returns>The loggable elements for MazeNavigationMCSInitializationEvaluator.</returns>
-        public List<LoggableElement> GetLoggableElements(IDictionary<FieldElement, bool> logFieldEnableMap = null)
-        {
-            return null;
         }
 
         #endregion

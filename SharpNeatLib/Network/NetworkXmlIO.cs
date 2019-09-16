@@ -357,6 +357,9 @@ namespace SharpNeat.Network
             XmlIoUtils.MoveToElement(xr, false, __ElemNetwork);
             int initialDepth = xr.Depth;
 
+            // Read genome ID attribute
+            var genomeId = XmlIoUtils.ReadAttributeAsUInt(xr, __AttrId);
+            
             // Find <Nodes>.
             XmlIoUtils.MoveToElement(xr, true, __ElemNodes);
             
@@ -442,7 +445,7 @@ namespace SharpNeat.Network
             while(xr.Read());
 
             // Construct and return loaded network definition.
-            return new NetworkDefinition(inputNodeCount, outputNodeCount, activationFnLib, nodeList, connList);
+            return new NetworkDefinition(inputNodeCount, outputNodeCount, activationFnLib, nodeList, connList, genomeId);
         }
 
         /// <summary>

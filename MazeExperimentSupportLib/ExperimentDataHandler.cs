@@ -1065,7 +1065,7 @@ namespace MazeExperimentSupportLib
         /// <param name="run">The run number of the given experiment.</param>
         /// <param name="mazeGenomeIds">The list of maze genome IDs by which to filter the navigation results.</param>
         /// <returns>The list of distinct maze/navigator combinations that were successful for the given experiment and run.</returns>
-        public static IList<MccmazeNavigatorResult> GetSuccessfulNavigationPerMaze(int experimentId, int run,
+        public static IList<MccmazeNavigatorResult> GetSuccessfulNavigationResultPerMaze(int experimentId, int run,
             IList<int> mazeGenomeIds)
         {
             IList<MccmazeNavigatorResult> navigationResults = null;
@@ -1103,6 +1103,91 @@ namespace MazeExperimentSupportLib
             }
 
             return navigationResults;
+        }
+
+        /// <summary>
+        ///     For each maze, retrieves the first navigator that solved within the given experiment and run.
+        /// </summary>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <param name="mazeGenomeIds">The list of maze genome IDs by which to filter the navigation results.</param>
+        /// <returns>The list of distinct maze navigation trials that were successful for the given experiment and run.</returns>
+        public static IList<MccexperimentMazeTrials> GetSuccessfulNavigationTrialPerMaze(int experimentId, int run,
+            IList<int> mazeGenomeIds)
+        {
+            IList<MccexperimentMazeTrials> navigationTrials = null;
+            var querySuccess = false;
+            var retryCnt = 0;
+
+            while (querySuccess == false && retryCnt <= MaxQueryRetryCnt)
+            {
+                try
+                {
+                    using (var context = new ExperimentDataContext())
+                    {
+                        // Get single maze trial for each of the specified maze IDs over the entirety of the run
+                        navigationTrials = context.MccexperimentMazeTrials.Where(
+                                nav =>
+                                    experimentId == nav.ExperimentDictionaryId && run == nav.Run &&
+                                    nav.IsMazeSolved && mazeGenomeIds.Contains(nav.MazeGenomeId))
+                            .GroupBy(nav => nav.MazeGenomeId)
+                            .Select(m => m.OrderBy(x => x.MazeGenomeId).FirstOrDefault())
+                            .ToList();
+                    }
+
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
+                    }
+
+                    querySuccess = true;
+                }
+                catch (Exception e)
+                {
+                    HandleQueryException(MethodBase.GetCurrentMethod().ToString(), retryCnt++, e);
+                }
+            }
+
+            return navigationTrials;
+        }
+
+        /// <summary>
+        ///     Determines whether maze trial data exists for the given experiment and run.
+        /// </summary>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <returns>Flag indicating whether maze trial data exists for the given experiment and run.</returns>
+        public static bool IsMazeTrialDataAvailable(int experimentId, int run)
+        {
+            var isTrialDataAvailable = false;
+            var querySuccess = false;
+            var retryCnt = 0;
+
+            while (querySuccess == false && retryCnt <= MaxQueryRetryCnt)
+            {
+                try
+                {
+                    using (var context = new ExperimentDataContext())
+                    {
+                        // Determine whether maze trial data exists for the given experiment and run
+                        isTrialDataAvailable = context.MccexperimentMazeTrials.Any(trial =>
+                            experimentId == trial.ExperimentDictionaryId && run == trial.Run);
+                    }
+
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
+                    }
+
+                    querySuccess = true;
+                }
+                catch (Exception e)
+                {
+                    HandleQueryException(MethodBase.GetCurrentMethod().ToString(), retryCnt++, e);
+                }
+            }
+
+            return isTrialDataAvailable;
         }
 
         /// <summary>

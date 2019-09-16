@@ -13,6 +13,7 @@ namespace ExperimentEntities.entities
         public int MaxTimesteps { get; set; }
         public int MinSuccessDistance { get; set; }
         public int? MaxDistanceToTarget { get; set; }
+        public int? ResourceLimit { get; set; }
         public string ExperimentDomainName { get; set; }
         public int? Initialization_OffspringBatchSize { get; set; }
         public int? Initialization_PopulationEvaluationFrequency { get; set; }
@@ -128,7 +129,7 @@ namespace ExperimentEntities.entities
         public int? MaxGenerations { get; set; }
         public int Primary_Maze_NumSpecies { get; set; }
         public short? Primary_Maze_MinimumWalls { get; set; }
-        public bool Primary_SpecieSizeFixed { get; set; }
+        public bool? Primary_SpecieSizeFixed { get; set; }
         public bool? Primary_Maze_SpecieSizeFixed { get; set; }
         public int NumSeedAgentGenomes { get; set; }
         public int? NumSeedMazeGenomes { get; set; }

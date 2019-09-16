@@ -18,13 +18,6 @@ namespace SharpNeat.Core
         void UpdateBehaviors(List<double> newBehaviors);
 
         /// <summary>
-        ///     Determine whether the given behavior instance meets the minimal criteria for this behavior.
-        /// </summary>
-        /// <param name="behaviorInfo">The post-evaluation behavior of the individual.</param>
-        /// <returns></returns>
-        bool IsMinimalCriteriaSatisfied(BehaviorInfo behaviorInfo);
-
-        /// <summary>
         ///     Converts behavior characterization to an array of doubles.
         /// </summary>
         /// <returns>Behavior characterization as an array of doubles.</returns>

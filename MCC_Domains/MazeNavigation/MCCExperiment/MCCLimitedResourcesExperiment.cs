@@ -28,66 +28,6 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
     /// </summary>
     public class MCCLimitedResourcesExperiment : BaseMCCMazeNavigationExperiment
     {
-        #region Private members
-
-        /// <summary>
-        ///     The resource limit for mazes (i.e. the maximum number of times that it can be used by an agent for satisfying the
-        ///     agent's MC).
-        /// </summary>
-        private int _resourceLimit;
-
-        /// <summary>
-        ///     Logs statistics about the navigator populations for every batch.
-        /// </summary>
-        private IDataLogger _navigatorEvolutionDataLogger;
-
-        /// <summary>
-        ///     Logs the IDs of the extant navigator population at every interval.
-        /// </summary>
-        private IDataLogger _navigatorPopulationDataLogger;
-
-        /// <summary>
-        ///     Logs the definitions of the navigator population over the course of a run.
-        /// </summary>
-        private IDataLogger _navigatorGenomeDataLogger;
-
-        /// <summary>
-        ///     Logs statistics about the maze populations for every batch.
-        /// </summary>
-        private IDataLogger _mazeEvolutionDataLogger;
-
-        /// <summary>
-        ///     Logs the IDs of the extant maze population at every interval.
-        /// </summary>
-        private IDataLogger _mazePopulationDataLogger;
-
-        /// <summary>
-        ///     Logs the definitions of the maze population over the course of a run.
-        /// </summary>
-        private IDataLogger _mazeGenomeDataLogger;
-
-        /// <summary>
-        ///     Logs the maze resource usage over the course of a run.
-        /// </summary>
-        private IDataLogger _mazeResourceUsageLogger;
-
-        /// <summary>
-        ///     Dictionary which indicates logger fields to be enabled/disabled for navigator genomes.
-        /// </summary>
-        private IDictionary<FieldElement, bool> _navigatorLogFieldEnableMap;
-
-        /// <summary>
-        ///     Dictionary which indicates logger fields to be enabled/disabled for maze genomes.
-        /// </summary>
-        private IDictionary<FieldElement, bool> _mazeLogFieldEnableMap;
-
-        /// <summary>
-        ///     Controls the number of batches between population definitions (i.e. genome XML) being logged.
-        /// </summary>
-        private int? _populationLoggingBatchInterval;
-
-        #endregion
-
         #region Private methods
 
         /// <summary>
@@ -117,6 +57,76 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
 
         #endregion
 
+        #region Private members
+
+        /// <summary>
+        ///     The resource limit for mazes (i.e. the maximum number of times that it can be used by an agent for satisfying the
+        ///     agent's MC).
+        /// </summary>
+        private int _resourceLimit;
+
+        /// <summary>
+        ///     Logs statistics about the navigator populations for every batch.
+        /// </summary>
+        private IDataLogger _navigatorEvolutionDataLogger;
+
+        /// <summary>
+        ///     Logs the IDs of the extant navigator population at every interval.
+        /// </summary>
+        private IDataLogger _navigatorPopulationDataLogger;
+
+        /// <summary>
+        ///     Logs the definitions of the navigator population over the course of a run.
+        /// </summary>
+        private IDataLogger _navigatorGenomeDataLogger;
+
+        /// <summary>
+        ///     Logs the details and results of trials within a navigator evaluation.
+        /// </summary>
+        private IDataLogger _navigatorSimulationTrialDataLogger;
+
+        /// <summary>
+        ///     Logs statistics about the maze populations for every batch.
+        /// </summary>
+        private IDataLogger _mazeEvolutionDataLogger;
+
+        /// <summary>
+        ///     Logs the IDs of the extant maze population at every interval.
+        /// </summary>
+        private IDataLogger _mazePopulationDataLogger;
+
+        /// <summary>
+        ///     Logs the definitions of the maze population over the course of a run.
+        /// </summary>
+        private IDataLogger _mazeGenomeDataLogger;
+
+        /// <summary>
+        ///     Logs the maze resource usage over the course of a run.
+        /// </summary>
+        private IDataLogger _mazeResourceUsageLogger;
+
+        /// <summary>
+        ///     Logs the details and results of trials within a maze evaluation.
+        /// </summary>
+        private IDataLogger _mazeSimulationTrialDataLogger;
+
+        /// <summary>
+        ///     Dictionary which indicates logger fields to be enabled/disabled for navigator genomes.
+        /// </summary>
+        private IDictionary<FieldElement, bool> _navigatorLogFieldEnableMap;
+
+        /// <summary>
+        ///     Dictionary which indicates logger fields to be enabled/disabled for maze genomes.
+        /// </summary>
+        private IDictionary<FieldElement, bool> _mazeLogFieldEnableMap;
+
+        /// <summary>
+        ///     Controls the number of batches between population definitions (i.e. genome XML) being logged.
+        /// </summary>
+        private int? _populationLoggingBatchInterval;
+
+        #endregion
+
         #region Overridden methods
 
         /// <inheritdoc />
@@ -143,11 +153,15 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
                 new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - NavigatorPopulation.csv");
             _navigatorGenomeDataLogger =
                 new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - NavigatorGenomes.csv");
+            _navigatorSimulationTrialDataLogger =
+                new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - NavigatorTrials.csv");
             _mazeEvolutionDataLogger =
                 new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - MazeEvolution.csv");
             _mazePopulationDataLogger =
                 new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - MazePopulation.csv");
             _mazeGenomeDataLogger = new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - MazeGenomes.csv");
+            _mazeSimulationTrialDataLogger =
+                new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - MazeTrials.csv");
             _mazeResourceUsageLogger =
                 new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - ResourceUsage.csv");
 
@@ -164,6 +178,12 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             foreach (var genomeLoggingPair in GenomeFieldElements.PopulateGenomeFieldElementsEnableMap())
             {
                 _navigatorLogFieldEnableMap.Add(genomeLoggingPair.Key, genomeLoggingPair.Value);
+            }
+            
+            // Add default trial logging configuration
+            foreach (var trialLoggingPair in SimulationTrialFieldElements.PopulateSimulationTrialFieldElementsEnableMap())
+            {
+                _navigatorLogFieldEnableMap.Add(trialLoggingPair.Key, trialLoggingPair.Value);
             }
 
             // Disable logging fields not relevant to agent evolution in MCC experiment
@@ -186,9 +206,6 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeNeuronGeneCount] = false;
             _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeTotalGeneCount] = false;
             _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeEvaluationCount] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeBehaviorX] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeBehaviorY] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeDistanceToTarget] = false;
             _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeXml] = false;
             _navigatorLogFieldEnableMap[EvolutionFieldElements.MinWalls] = false;
             _navigatorLogFieldEnableMap[EvolutionFieldElements.MaxWalls] = false;
@@ -236,7 +253,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
 
             // Read in the number of batches between population logging
             _populationLoggingBatchInterval = XmlUtils.TryGetValueAsInt(xmlConfig, "PopulationLoggingBatchInterval");
-            
+
             // Validate experiment configuration parameters
             if (ValidateConfigParameters(out var errorMessage)) throw new ConfigurationException(errorMessage);
         }
@@ -334,7 +351,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
                 new ParallelKMeansClusteringStrategy<NeatGenome>(new ManhattanDistanceMetric(1.0, 0.0, 10.0),
                     ParallelOptions), null, NavigatorBatchSize, RunPhase.Primary, _navigatorEvolutionDataLogger,
                 _navigatorLogFieldEnableMap, _navigatorPopulationDataLogger, _navigatorGenomeDataLogger,
-                _populationLoggingBatchInterval);
+                _navigatorSimulationTrialDataLogger, _populationLoggingBatchInterval);
 
             // Create the maze queueing evolution algorithm
             AbstractEvolutionAlgorithm<MazeGenome> mazeEvolutionAlgorithm = new QueueEvolutionAlgorithm<MazeGenome>(
@@ -342,7 +359,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
                 new ParallelKMeansClusteringStrategy<MazeGenome>(new ManhattanDistanceMetric(1.0, 0.0, 10.0),
                     ParallelOptions), null, MazeBatchSize, RunPhase.Primary, _mazeEvolutionDataLogger,
                 _mazeLogFieldEnableMap, _mazePopulationDataLogger, _mazeGenomeDataLogger,
-                _populationLoggingBatchInterval);
+                _mazeSimulationTrialDataLogger, _populationLoggingBatchInterval);
 
             // Create the maze phenome evaluator
             IPhenomeEvaluator<MazeStructure, BehaviorInfo> mazeEvaluator =

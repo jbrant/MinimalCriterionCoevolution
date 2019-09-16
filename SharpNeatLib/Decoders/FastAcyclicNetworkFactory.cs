@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using SharpNeat.Core;
 using SharpNeat.Network;
 using SharpNeat.Phenomes.NeuralNets;
 using SharpNeat.Phenomes.NeuralNets.AcyclicNetwork;
@@ -166,7 +167,7 @@ namespace SharpNeat.Decoders
             }
 
             return new FastAcyclicNetwork(nodeActivationFnArr, nodeAuxArgsArray, fastConnectionArray, layerInfoArr, outputNeuronIdxArr,
-                                          nodeCount, networkDef.InputNodeCount, networkDef.OutputNodeCount);
+                                          nodeCount, networkDef.InputNodeCount, networkDef.OutputNodeCount, networkDef.Id);
         }
 
         #endregion

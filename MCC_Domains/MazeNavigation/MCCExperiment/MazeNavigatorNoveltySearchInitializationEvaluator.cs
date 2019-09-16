@@ -36,7 +36,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             _evaluationLogger = evaluationLogger;
 
             // Create factory for generating mazes
-            _multiMazeWorldFactory = new MultiMazeNavigationWorldFactory<BehaviorInfo>(minSuccessDistance,
+            _multiMazeWorldFactory = new MultiMazeNavigationWorldFactory(minSuccessDistance,
                 maxDistanceToTarget);
         }
 
@@ -72,7 +72,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         /// <summary>
         ///     The multi maze navigation world factory.
         /// </summary>
-        private readonly MultiMazeNavigationWorldFactory<BehaviorInfo> _multiMazeWorldFactory;
+        private readonly MultiMazeNavigationWorldFactory _multiMazeWorldFactory;
 
         /// <summary>
         ///     The behavior characterization factory.
@@ -118,6 +118,9 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         /// <returns>A fitness info (which is a function of the euclidean distance to the target).</returns>
         public BehaviorInfo Evaluate(IBlackBox agent, uint currentGeneration)
         {
+            var behaviorInfo = new BehaviorInfo();
+            var isSuccessful = false;
+
             lock (_evaluationLock)
             {
                 // Increment evaluation count
@@ -131,16 +134,23 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             var world = _multiMazeWorldFactory.CreateMazeNavigationWorld(behaviorCharacterization);
 
             // Run a single trial
-            var trialInfo = world.RunTrial(agent, SearchType.NoveltySearch, out var goalReached);
+            var trialBehavior = world.RunBehaviorTrial(agent, out var goalReached);
 
             // Set the objective distance
-            trialInfo.ObjectiveDistance = world.GetDistanceToTarget();
+            var objectiveDistance = world.GetDistanceToTarget();
 
             // Set the stop condition to the outcome
             if (goalReached)
+            {
                 StopConditionSatisfied = true;
+                isSuccessful = true;
+            }
 
-            // Log trial information (only log for non-bridging evaluations)
+            // Record simulation trial info
+            behaviorInfo.TrialData.Add(new TrialInfo(isSuccessful, objectiveDistance, world.GetSimulationTimesteps(),
+                _multiMazeWorldFactory.GetMazeGenomeId(0), trialBehavior));
+
+            // Log trial information
             _evaluationLogger?.LogRow(new List<LoggableElement>
                 {
                     new LoggableElement(EvaluationFieldElements.Generation, currentGeneration),
@@ -150,7 +160,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
                 },
                 world.GetLoggableElements());
 
-            return trialInfo;
+            return behaviorInfo;
         }
 
         /// <inheritdoc />
@@ -200,20 +210,6 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         /// </summary>
         public void Reset()
         {
-        }
-
-        /// <inheritdoc />
-        /// <summary>
-        ///     Returns MazeNavigationMCSInitializationEvaluator loggable elements.
-        /// </summary>
-        /// <param name="logFieldEnableMap">
-        ///     Dictionary of logging fields that can be enabled or disabled based on the specification
-        ///     of the calling routine.
-        /// </param>
-        /// <returns>The loggable elements for MazeNavigationMCSInitializationEvaluator.</returns>
-        public List<LoggableElement> GetLoggableElements(IDictionary<FieldElement, bool> logFieldEnableMap = null)
-        {
-            return null;
         }
 
         #endregion

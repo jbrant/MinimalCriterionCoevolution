@@ -14,7 +14,7 @@ namespace SharpNeat.Loggers
         /// <summary>
         ///     The number of elements in this log file/table.
         /// </summary>
-        public static readonly int NumFieldElements = 50;
+        public static readonly int NumFieldElements = 47;
 
         /// <summary>
         ///     The generation of the observation.
@@ -166,118 +166,102 @@ namespace SharpNeat.Loggers
             "Champ Genome Evaluation Count");
 
         /// <summary>
-        ///     The X position of the global best performing genome in euclidean space.
-        /// </summary>
-        public static readonly FieldElement ChampGenomeBehaviorX = new FieldElement(28, "Champ Genome Behavior X");
-
-        /// <summary>
-        ///     The Y position of the global best performing genome in euclidean space.
-        /// </summary>
-        public static readonly FieldElement ChampGenomeBehaviorY = new FieldElement(29, "Champ Genome Behavior Y");
-
-        /// <summary>
-        ///     The distance to the objective of the global best performing genome.
-        /// </summary>
-        public static readonly FieldElement ChampGenomeDistanceToTarget = new FieldElement(30,
-            "Champ Genome Distance to Target");
-
-        /// <summary>
         ///     The genome XML definition for the global best performing genome.
         /// </summary>
-        public static readonly FieldElement ChampGenomeXml = new FieldElement(31, "Champ Genome XML");
+        public static readonly FieldElement ChampGenomeXml = new FieldElement(28, "Champ Genome XML");
 
         /// <summary>
         ///     The minimum number of walls in a maze within the maze population.
         /// </summary>
-        public static readonly FieldElement MinWalls = new FieldElement(32, "Min Walls");
+        public static readonly FieldElement MinWalls = new FieldElement(29, "Min Walls");
 
         /// <summary>
         ///     The maximum number of walls in a maze within the maze population.
         /// </summary>
-        public static readonly FieldElement MaxWalls = new FieldElement(33, "Max Walls");
+        public static readonly FieldElement MaxWalls = new FieldElement(30, "Max Walls");
 
         /// <summary>
         ///     The mean number of walls among mazes within the maze population.
         /// </summary>
-        public static readonly FieldElement MeanWalls = new FieldElement(34, "Mean Walls");
+        public static readonly FieldElement MeanWalls = new FieldElement(31, "Mean Walls");
 
         /// <summary>
         ///     The minimum number of waypoints in a maze within the maze population.
         /// </summary>
-        public static readonly FieldElement MinWaypoints = new FieldElement(35, "Min Waypoints");
+        public static readonly FieldElement MinWaypoints = new FieldElement(32, "Min Waypoints");
 
         /// <summary>
         ///     The maximum number of waypoints in a maze within the maze population.
         /// </summary>
-        public static readonly FieldElement MaxWaypoints = new FieldElement(36, "Max Waypoints");
+        public static readonly FieldElement MaxWaypoints = new FieldElement(33, "Max Waypoints");
 
         /// <summary>
         ///     The mean number of waypoints among mazes within the maze population.
         /// </summary>
-        public static readonly FieldElement MeanWaypoints = new FieldElement(37, "Mean Waypoints");
+        public static readonly FieldElement MeanWaypoints = new FieldElement(34, "Mean Waypoints");
 
         /// <summary>
         ///     The minimum number of junctures in a maze within the maze population.
         /// </summary>
-        public static readonly FieldElement MinJunctures = new FieldElement(38, "Min Junctures");
+        public static readonly FieldElement MinJunctures = new FieldElement(35, "Min Junctures");
 
         /// <summary>
         ///     The maximum number of junctures in a maze within the maze population.
         /// </summary>
-        public static readonly FieldElement MaxJunctures = new FieldElement(39, "Max Junctures");
+        public static readonly FieldElement MaxJunctures = new FieldElement(36, "Max Junctures");
 
         /// <summary>
         ///     The mean number of junctures among mazes within the maze population.
         /// </summary>
-        public static readonly FieldElement MeanJunctures = new FieldElement(40, "Mean Junctures");
+        public static readonly FieldElement MeanJunctures = new FieldElement(37, "Mean Junctures");
 
         /// <summary>
         ///     The minimum number of openings facing the trajectory in a maze within the maze population.
         /// </summary>
         public static readonly FieldElement MinTrajectoryFacingOpenings =
-            new FieldElement(41, "Min Trajectory Facing Openings");
+            new FieldElement(38, "Min Trajectory Facing Openings");
 
         /// <summary>
         ///     The maximum number of openings facing the trajectory in a maze within the maze population.
         /// </summary>
         public static readonly FieldElement MaxTrajectoryFacingOpenings =
-            new FieldElement(42, "Max Trajectory Facing Openings");
+            new FieldElement(39, "Max Trajectory Facing Openings");
 
         /// <summary>
         ///     The mean number of openings facing the trajectory among mazes within the maze population.
         /// </summary>
         public static readonly FieldElement MeanTrajectoryFacingOpenings =
-            new FieldElement(43, "Mean Trajectory Facing Openings");
+            new FieldElement(40, "Mean Trajectory Facing Openings");
 
         /// <summary>
         ///     The minimum height of a maze within the maze population.
         /// </summary>
-        public static readonly FieldElement MinHeight = new FieldElement(44, "Min Height");
+        public static readonly FieldElement MinHeight = new FieldElement(41, "Min Height");
 
         /// <summary>
         ///     The maximum height of a maze within the maze population.
         /// </summary>
-        public static readonly FieldElement MaxHeight = new FieldElement(45, "Max Height");
+        public static readonly FieldElement MaxHeight = new FieldElement(42, "Max Height");
 
         /// <summary>
         ///     The mean height among mazes within the maze population.
         /// </summary>
-        public static readonly FieldElement MeanHeight = new FieldElement(46, "Mean Height");
+        public static readonly FieldElement MeanHeight = new FieldElement(43, "Mean Height");
 
         /// <summary>
         ///     The minimum width of a maze within the maze population.
         /// </summary>
-        public static readonly FieldElement MinWidth = new FieldElement(47, "Min Width");
+        public static readonly FieldElement MinWidth = new FieldElement(44, "Min Width");
 
         /// <summary>
         ///     The maximum width of a maze within the maze population.
         /// </summary>
-        public static readonly FieldElement MaxWidth = new FieldElement(48, "Max Width");
+        public static readonly FieldElement MaxWidth = new FieldElement(45, "Max Width");
 
         /// <summary>
         ///     The mean width among mazes within the maze population.
         /// </summary>
-        public static readonly FieldElement MeanWidth = new FieldElement(49, "Mean Width");
+        public static readonly FieldElement MeanWidth = new FieldElement(46, "Mean Width");
 
         /// <summary>
         ///     Pre-constructs an evolution log field enable map with all of the fields enabled by default.
@@ -315,9 +299,6 @@ namespace SharpNeat.Loggers
                 {ChampGenomeNeuronGeneCount, true},
                 {ChampGenomeTotalGeneCount, true},
                 {ChampGenomeEvaluationCount, true},
-                {ChampGenomeBehaviorX, true},
-                {ChampGenomeBehaviorY, true},
-                {ChampGenomeDistanceToTarget, true},
                 {ChampGenomeXml, true},
                 {MinWalls, true},
                 {MaxWalls, true},
@@ -349,7 +330,7 @@ namespace SharpNeat.Loggers
         /// <summary>
         ///     The number of elements in this log file/table.
         /// </summary>
-        public static readonly int NumFieldElements = 9;
+        public static readonly int NumFieldElements = 8;
 
         /// <summary>
         ///     The generation of the observation.
@@ -364,32 +345,32 @@ namespace SharpNeat.Loggers
         /// <summary>
         ///     The run phase (initialization or primary) at the time of the observation.
         /// </summary>
-        public static readonly FieldElement RunPhase = new FieldElement(3, "Run Phase");
+        public static readonly FieldElement RunPhase = new FieldElement(2, "Run Phase");
 
         /// <summary>
         ///     Whether or not the organism was considered viable (i.e. satisfied some objective/non-objective criterion).
         /// </summary>
-        public static readonly FieldElement IsViable = new FieldElement(4, "Is Viable");
+        public static readonly FieldElement IsViable = new FieldElement(3, "Is Viable");
 
         /// <summary>
         ///     Whether or not the experiment stop condition was satisfied.
         /// </summary>
-        public static readonly FieldElement StopConditionSatisfied = new FieldElement(5, "Stop Condition Satisfied");
+        public static readonly FieldElement StopConditionSatisfied = new FieldElement(4, "Stop Condition Satisfied");
 
         /// <summary>
         ///     The distance to the objective location.
         /// </summary>
-        public static readonly FieldElement DistanceToTarget = new FieldElement(6, "Distance to Target");
+        public static readonly FieldElement DistanceToTarget = new FieldElement(5, "Distance to Target");
 
         /// <summary>
         ///     The X position of the organism in euclidean space.
         /// </summary>
-        public static readonly FieldElement AgentXLocation = new FieldElement(7, "Agent X Location");
+        public static readonly FieldElement AgentXLocation = new FieldElement(6, "Agent X Location");
 
         /// <summary>
         ///     The Y position of the organism in euclidean space.
         /// </summary>
-        public static readonly FieldElement AgentYLocation = new FieldElement(8, "Agent Y Location");
+        public static readonly FieldElement AgentYLocation = new FieldElement(7, "Agent Y Location");
 
         /// <summary>
         ///     Pre-constructs an evaluation log field enable map with all of the fields enabled by default.
@@ -443,9 +424,9 @@ namespace SharpNeat.Loggers
         public static readonly FieldElement SpecieId = new FieldElement(3, "Specie ID");
 
         /// <summary>
-        ///     Pre-constructs an evaluation log field enable map with all of the fields enabled by default.
+        ///     Pre-constructs a population log field enable map with all of the fields enabled by default.
         /// </summary>
-        /// <returns>Evaluation log field enable map with all fields enabled.</returns>
+        /// <returns>Population log field enable map with all fields enabled.</returns>
         public static Dictionary<FieldElement, bool> PopulatePopulationFieldElementsEnableMap()
         {
             return new Dictionary<FieldElement, bool>
@@ -454,6 +435,64 @@ namespace SharpNeat.Loggers
                 {Generation, true},
                 {GenomeId, true},
                 {SpecieId, true}
+            };
+        }
+    }
+
+    /// <summary>
+    ///     Fields capturing the outcome and details of a simulated evaluation trial.
+    /// </summary>
+    public static class SimulationTrialFieldElements
+    {
+        /// <summary>
+        ///     The number of elements in this log file/table.
+        /// </summary>
+        public static readonly int NumFieldElements = 6;
+
+        /// <summary>
+        ///     The generation in which the given genome is extant.
+        /// </summary>
+        public static readonly FieldElement Generation = new FieldElement(0, "Generation");
+
+        /// <summary>
+        ///     The ID of the genome definition being logged.
+        /// </summary>
+        public static readonly FieldElement GenomeId = new FieldElement(1, "Genome ID");
+
+        /// <summary>
+        ///     The ID of the genome with which the current genome was paired for evaluation.
+        /// </summary>
+        public static readonly FieldElement PairedGenomeId = new FieldElement(2, "Paired Genome ID");
+
+        /// <summary>
+        ///     Boolean indicator of whether the given trial was successful.
+        /// </summary>
+        public static readonly FieldElement IsSuccessful = new FieldElement(3, "Is Successful");
+
+        /// <summary>
+        ///     The distance between the ending point of the simulation and the target location.
+        /// </summary>
+        public static readonly FieldElement ObjectiveDistance = new FieldElement(4, "Objective Distance");
+
+        /// <summary>
+        ///     The number of simulated timesteps in the trial.
+        /// </summary>
+        public static readonly FieldElement NumTimesteps = new FieldElement(5, "Num Timesteps");
+
+        /// <summary>
+        ///     Pre-constructs a simulation trial log field enable map with all of the fields enabled by default.
+        /// </summary>
+        /// <returns>Simulation trial log field enable map with all fields enabled.</returns>
+        public static Dictionary<FieldElement, bool> PopulateSimulationTrialFieldElementsEnableMap()
+        {
+            return new Dictionary<FieldElement, bool>
+            {
+                {Generation, true},
+                {GenomeId, true},
+                {PairedGenomeId, true},
+                {IsSuccessful, true},
+                {ObjectiveDistance, true},
+                {NumTimesteps, true}
             };
         }
     }

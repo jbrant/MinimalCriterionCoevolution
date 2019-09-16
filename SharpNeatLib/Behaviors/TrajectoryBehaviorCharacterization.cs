@@ -20,26 +20,11 @@ namespace SharpNeat.Behaviors
         private readonly List<double> _behaviors;
 
         /// <summary>
-        ///     The minimal criteria which the behavior must meet in order to be considered viable.
-        /// </summary>
-        private readonly IMinimalCriteria _minimalCriteria;
-
-        /// <summary>
         ///     Default trajectory-behavior characterization constructor.
         /// </summary>
         public TrajectoryBehaviorCharacterization()
         {
             _behaviors = new List<double>();
-        }
-
-        /// <summary>
-        ///     Trajectory behavior characterization constructor accepting a minimal criteria definition and a flag indicating
-        ///     whether minimal criteria reversal should be allowed.
-        /// </summary>
-        /// <param name="minimalCriteria"></param>
-        public TrajectoryBehaviorCharacterization(IMinimalCriteria minimalCriteria) : this()
-        {
-            _minimalCriteria = minimalCriteria;
         }
 
         /// <summary>
@@ -50,21 +35,6 @@ namespace SharpNeat.Behaviors
         public void UpdateBehaviors(List<double> newBehaviors)
         {
             _behaviors.AddRange(newBehaviors);
-        }
-
-        /// <summary>
-        ///     Evaluates whether the given behavior info meets the minimal criteria for this behavior characterization.
-        /// </summary>
-        /// <param name="behaviorInfo">The behavior info to evaluate.</param>
-        /// <returns>
-        ///     Boolean value indicating whether the given behavior info meets the minimal criteria for this behavior
-        ///     characterization.
-        /// </returns>
-        public bool IsMinimalCriteriaSatisfied(BehaviorInfo behaviorInfo)
-        {
-            // If there is no minimal criteria, then by definition it has been met
-            return _minimalCriteria?.DoesCharacterizationSatisfyMinimalCriteria(behaviorInfo) ??
-                   true;
         }
 
         /// <summary>

@@ -99,6 +99,11 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         private IDataLogger _navigatorGenomeDataLogger;
 
         /// <summary>
+        ///     Logs the details and results of trials within a navigator evaluation.
+        /// </summary>
+        private IDataLogger _navigatorSimulationTrialDataLogger;
+
+        /// <summary>
         ///     Logs statistics about the maze populations for every batch.
         /// </summary>
         private IDataLogger _mazeEvolutionDataLogger;
@@ -112,6 +117,11 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         ///     Logs the definitions of the maze population over the course of a run.
         /// </summary>
         private IDataLogger _mazeGenomeDataLogger;
+
+        /// <summary>
+        ///     Logs the details and results of trials within a maze evaluation.
+        /// </summary>
+        private IDataLogger _mazeSimulationTrialDataLogger;
 
         /// <summary>
         ///     Dictionary which indicates logger fields to be enabled/disabled for navigator genomes.
@@ -157,11 +167,15 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
                 new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - NavigatorPopulation.csv");
             _navigatorGenomeDataLogger =
                 new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - NavigatorGenomes.csv");
+            _navigatorSimulationTrialDataLogger =
+                new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - NavigatorTrials.csv");
             _mazeEvolutionDataLogger =
                 new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - MazeEvolution.csv");
             _mazePopulationDataLogger =
                 new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - MazePopulation.csv");
             _mazeGenomeDataLogger = new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - MazeGenomes.csv");
+            _mazeSimulationTrialDataLogger =
+                new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - MazeTrials.csv");
 
             // Create new evolution field elements map with all fields enabled
             _navigatorLogFieldEnableMap = EvolutionFieldElements.PopulateEvolutionFieldElementsEnableMap();
@@ -198,9 +212,6 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeNeuronGeneCount] = false;
             _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeTotalGeneCount] = false;
             _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeEvaluationCount] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeBehaviorX] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeBehaviorY] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeDistanceToTarget] = false;
             _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeXml] = false;
             _navigatorLogFieldEnableMap[EvolutionFieldElements.MinWalls] = false;
             _navigatorLogFieldEnableMap[EvolutionFieldElements.MaxWalls] = false;
@@ -346,7 +357,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
                 new ParallelKMeansClusteringStrategy<NeatGenome>(new ManhattanDistanceMetric(1.0, 0.0, 10.0),
                     ParallelOptions), null, NavigatorBatchSize, RunPhase.Primary, _navigatorEvolutionDataLogger,
                 _navigatorLogFieldEnableMap, _navigatorPopulationDataLogger, _navigatorGenomeDataLogger,
-                _populationLoggingBatchInterval);
+                _navigatorSimulationTrialDataLogger, _populationLoggingBatchInterval);
 
             // Create the maze queueing evolution algorithm
             AbstractEvolutionAlgorithm<MazeGenome> mazeEvolutionAlgorithm = new QueueEvolutionAlgorithm<MazeGenome>(
@@ -354,7 +365,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
                 new ParallelKMeansClusteringStrategy<MazeGenome>(new ManhattanDistanceMetric(1.0, 0.0, 10.0),
                     ParallelOptions), null, MazeBatchSize, RunPhase.Primary, _mazeEvolutionDataLogger,
                 _mazeLogFieldEnableMap, _mazePopulationDataLogger, _mazeGenomeDataLogger,
-                _populationLoggingBatchInterval);
+                _mazeSimulationTrialDataLogger, _populationLoggingBatchInterval);
 
             // Create the maze phenome evaluator
             IPhenomeEvaluator<MazeStructure, BehaviorInfo> mazeEvaluator =

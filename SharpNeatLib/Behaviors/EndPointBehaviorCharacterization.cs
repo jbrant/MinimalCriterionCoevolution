@@ -14,32 +14,10 @@ namespace SharpNeat.Behaviors
     public class EndPointBehaviorCharacterization : IBehaviorCharacterization
     {
         /// <summary>
-        ///     The minimal criteria which the behavior must meet in order to be considered viable.
-        /// </summary>
-        private readonly IMinimalCriteria _minimalCriteria;
-
-        /// <summary>
         ///     The double array of behaviors.  Since this is an end-point characterization, it should only contain the number of
         ///     elements equivalent to the dimensionality of the state space.
         /// </summary>
         private List<double> _behaviors;
-
-        /// <summary>
-        ///     Default end-point behavior characterization constructor.
-        /// </summary>
-        public EndPointBehaviorCharacterization()
-        {
-        }
-
-        /// <summary>
-        ///     End-point behavior characterization constructor accepting a minimal criteria definition and a flag indicating
-        ///     whether minimal criteria reversal should be allowed.
-        /// </summary>
-        /// <param name="minimalCriteria"></param>
-        public EndPointBehaviorCharacterization(IMinimalCriteria minimalCriteria, bool allowReverseCriteria)
-        {
-            _minimalCriteria = minimalCriteria;
-        }
 
         /// <summary>
         ///     Updates the behavior array.  This equates to simply replacing the behavior array with the coordinates of the new
@@ -50,21 +28,6 @@ namespace SharpNeat.Behaviors
         {
             // Overwrite the existing behavior array with the current location
             _behaviors = newBehaviors;
-        }
-
-        /// <summary>
-        ///     Evaluates whether the given behavior info meets the minimal criteria for this behavior characterization.
-        /// </summary>
-        /// <param name="behaviorInfo">The behavior info to evaluate.</param>
-        /// <returns>
-        ///     Boolean value indicating whether the given behavior info meets the minimal criteria for this behavior
-        ///     characterization.
-        /// </returns>
-        public bool IsMinimalCriteriaSatisfied(BehaviorInfo behaviorInfo)
-        {
-            // If there is no minimal criteria, then by definition it has been met
-            return _minimalCriteria?.DoesCharacterizationSatisfyMinimalCriteria(behaviorInfo) ??
-                   true;
         }
 
         /// <summary>

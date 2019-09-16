@@ -67,7 +67,8 @@ namespace SharpNeat.Phenomes.NeuralNets.CyclicNetwork
                                 List<Connection> connectionList,
                                 int inputNeuronCount,
                                 int outputNeuronCount,
-                                int timestepsPerActivation)
+                                int timestepsPerActivation,
+                                uint genomeId)
         {
             _neuronList = neuronList;
             _connectionList = connectionList;
@@ -81,12 +82,19 @@ namespace SharpNeat.Phenomes.NeuralNets.CyclicNetwork
 
             _inputSignalArrayWrapper = new SignalArray(_inputSignalArray, 0, _inputNeuronCount);
             _outputSignalArrayWrapper = new SignalArray(_outputSignalArray, 0, outputNeuronCount);
+
+            GenomeId = genomeId;
         }
 
         #endregion
 
         #region IBlackBox Members
 
+        /// <summary>
+        ///     The unique identifier of the genome from which the phenotype was generated.
+        /// </summary>
+        public uint GenomeId { get; }
+        
         /// <summary>
         /// Gets the number of inputs.
         /// </summary>
@@ -213,7 +221,7 @@ namespace SharpNeat.Phenomes.NeuralNets.CyclicNetwork
         public IBlackBox Clone()
         {
             return new CyclicNetwork(_neuronList, _connectionList, _inputNeuronCount, _outputNeuronCount,
-                _timestepsPerActivation);
+                _timestepsPerActivation, GenomeId);
         }
 
         #endregion

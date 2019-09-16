@@ -1,10 +1,10 @@
 ﻿#region
 
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using ImageMagick;
 using SharpNeat.Core;
 using SharpNeat.Phenomes.Mazes;
 
@@ -30,7 +30,7 @@ namespace MazeExperimentSupportLib
         /// <param name="trajectoryPointSize">The size of a point on the agent's trajectory (optional).</param>
         public static void GenerateBitmapsForSuccessfulTrials(string baseDirectory, string experimentName,
             int experimentId, int run, IList<MazeNavigatorEvaluationUnit> evaluationUnits, RunPhase runPhase,
-            int startEndPointSize = 10, int trajectoryPointSize = 3)
+            int startEndPointSize = 10, double trajectoryPointSize = 2.5)
         {
             GenerateBitmapsForSuccessfulTrials(baseDirectory, experimentName, experimentId, run, 0, evaluationUnits,
                 runPhase, startEndPointSize, trajectoryPointSize);
@@ -50,10 +50,10 @@ namespace MazeExperimentSupportLib
         /// <param name="trajectoryPointSize">The size of a point on the agent's trajectory (optional).</param>
         public static void GenerateBitmapsForSuccessfulTrials(string baseDirectory, string experimentName,
             int experimentId, int run, int batch, IList<MazeNavigatorEvaluationUnit> evaluationUnits, RunPhase runPhase,
-            int startEndPointSize = 10, int trajectoryPointSize = 3)
+            int startEndPointSize = 10, double trajectoryPointSize = 2.5)
         {
             // Construct the output directory path
-            string outputDirectory = Path.Combine(baseDirectory, experimentName,
+            var outputDirectory = Path.Combine(baseDirectory, experimentName,
                 string.Format("Run {0}", run), "Trajectories", runPhase.ToString(),
                 batch != 0 ? string.Format("Batch {0}", batch) : "");
 
@@ -75,10 +75,10 @@ namespace MazeExperimentSupportLib
                     GenerateSingleMazeTrajectoryImage(
                         Path.Combine(outputDirectory,
                             batch != 0
-                                ? string.Format("{0}_ExperimentID_{1}_Run_{2}_Batch_{3}_MazeID_{4}_NavigatorID_{5}.bmp",
+                                ? string.Format("{0}_ExperimentID_{1}_Run_{2}_Batch_{3}_MazeID_{4}_NavigatorID_{5}.png",
                                     experimentName, experimentId, run, batch, evaluationUnit.MazeId,
                                     evaluationUnit.AgentId)
-                                : string.Format("{0}_ExperimentID_{1}_Run_{2}_MazeID_{3}_NavigatorID_{4}.bmp",
+                                : string.Format("{0}_ExperimentID_{1}_Run_{2}_MazeID_{3}_NavigatorID_{4}.png",
                                     experimentName, experimentId, run, evaluationUnit.MazeId, evaluationUnit.AgentId)),
                         evaluationUnit.MazePhenome, evaluationUnit.AgentTrajectory, startEndPointSize,
                         trajectoryPointSize);
@@ -112,7 +112,7 @@ namespace MazeExperimentSupportLib
             int batch, IList<MazeNavigatorEvaluationUnit> evaluationUnits)
         {
             // Construct the output directory path
-            string outputDirectory = Path.Combine(baseDirectory, experimentName,
+            var outputDirectory = Path.Combine(baseDirectory, experimentName,
                 string.Format("Run {0}", run), "Mazes", batch != 0 ? string.Format("Batch {0}", batch) : "");
 
             // Create the output directory if it doesn't yet exist
@@ -122,7 +122,7 @@ namespace MazeExperimentSupportLib
             }
 
             // Get the distinct list of maze IDs
-            List<int> mazeIds = evaluationUnits.Select(unit => unit.MazeId).Distinct().ToList();
+            var mazeIds = evaluationUnits.Select(unit => unit.MazeId).Distinct().ToList();
 
             // Generate bitmap image for each distinct maze
             Parallel.ForEach(mazeIds, delegate(int mazeId)
@@ -130,16 +130,17 @@ namespace MazeExperimentSupportLib
                 GenerateMazeStructureImage(
                     Path.Combine(outputDirectory,
                         batch != 0
-                            ? string.Format("{0}_ExperimentID_{1}_Run_{2}_Batch_{3}_MazeID_{4}.bmp", experimentName,
+                            ? string.Format("{0}_ExperimentID_{1}_Run_{2}_Batch_{3}_MazeID_{4}.png", experimentName,
                                 experimentId, run, batch, mazeId)
-                            : string.Format("{0}_ExperimentID_{1}_Run_{2}_MazeID_{3}.bmp", experimentName, experimentId,
+                            : string.Format("{0}_ExperimentID_{1}_Run_{2}_MazeID_{3}.png", experimentName, experimentId,
                                 run, mazeId)),
-                    evaluationUnits.Where(unit => unit.MazeId == mazeId).Select(unit => unit.MazePhenome).First(), false);
+                    evaluationUnits.Where(unit => unit.MazeId == mazeId).Select(unit => unit.MazePhenome).First(),
+                    false);
             });
         }
 
         /// <summary>
-        ///     Generates a single bitmap image of the trajectory of an agent through the given maze.
+        ///     Generates a single image of the trajectory of an agent through the given maze.
         /// </summary>
         /// <param name="imagePathName">Image path and filename.</param>
         /// <param name="mazeStructure">The structure of the maze on which the trial was run.</param>
@@ -147,51 +148,52 @@ namespace MazeExperimentSupportLib
         /// <param name="startEndPointSize">The size of the start and end location points.</param>
         /// <param name="trajectoryPointSize">The size of a point on the agent's trajectory.</param>
         private static void GenerateSingleMazeTrajectoryImage(string imagePathName, MazeStructure mazeStructure,
-            double[] agentTrajectory, int startEndPointSize, int trajectoryPointSize)
+            double[] agentTrajectory, int startEndPointSize, double trajectoryPointSize)
         {
-            // Create pen and initialize bitmap canvas
-            Pen blackPen = new Pen(Color.Black, 0.0001f);
-            Bitmap mazeBitmap = new Bitmap(mazeStructure.ScaledMazeWidth + 1, mazeStructure.ScaledMazeHeight + 1);
+            // Compute radius from start/end point size
+            var startEndPointRadius = startEndPointSize / 2;
 
-            using (Graphics graphics = Graphics.FromImage(mazeBitmap))
+            using (var image = new MagickImage(MagickColors.White,
+                mazeStructure.ScaledMazeWidth + 1, mazeStructure.ScaledMazeHeight + 1))
             {
-                // Fill with white
-                Rectangle imageSize = new Rectangle(0, 0, mazeStructure.ScaledMazeWidth + 1,
-                    mazeStructure.ScaledMazeHeight + 1);
-                graphics.FillRectangle(Brushes.White, imageSize);
+                // Draw border around maze
+                image.Draw(new DrawableFillColor(MagickColors.Transparent),
+                    new DrawableRectangle(0, 0, mazeStructure.ScaledMazeWidth + 1, mazeStructure.ScaledMazeHeight + 1));
 
                 // Draw start and end points
-                graphics.FillEllipse(Brushes.Green, mazeStructure.StartLocation.X, mazeStructure.StartLocation.Y,
-                    startEndPointSize, startEndPointSize);
-                graphics.FillEllipse(Brushes.Red, mazeStructure.TargetLocation.X, mazeStructure.TargetLocation.Y,
-                    startEndPointSize, startEndPointSize);
+                image.Draw(new DrawableFillColor(MagickColors.Green),
+                    new DrawableEllipse(mazeStructure.StartLocation.X, mazeStructure.StartLocation.Y,
+                        startEndPointRadius, startEndPointRadius, 0, 360));
+                image.Draw(new DrawableFillColor(MagickColors.Red),
+                    new DrawableEllipse(mazeStructure.TargetLocation.X, mazeStructure.TargetLocation.Y,
+                        startEndPointRadius, startEndPointRadius, 0, 360));
 
-                // Draw all of the walls
-                foreach (MazeStructureWall wall in mazeStructure.Walls)
+                // Draw walls
+                foreach (var wall in mazeStructure.Walls)
                 {
-                    // Convert line start/end points to Point objects from drawing namespace
-                    Point startPoint = new Point(wall.StartMazeStructurePoint.X, wall.StartMazeStructurePoint.Y);
-                    Point endPoint = new Point(wall.EndMazeStructurePoint.X, wall.EndMazeStructurePoint.Y);
-
-                    // Draw wall
-                    graphics.DrawLine(blackPen, startPoint, endPoint);
+                    image.Draw(new DrawableLine(wall.StartMazeStructurePoint.X, wall.StartMazeStructurePoint.Y,
+                        wall.EndMazeStructurePoint.X, wall.EndMazeStructurePoint.Y));
                 }
 
                 // Plot the navigator trajectory
-                for (int i = 0; i < agentTrajectory.Length; i = i + 2)
+                for (var i = 0; i < agentTrajectory.Length; i = i + 2)
                 {
-                    // Draw trajectory point
-                    graphics.FillRectangle(Brushes.Gray, (float) agentTrajectory[i], (float) agentTrajectory[i + 1],
-                        trajectoryPointSize, trajectoryPointSize);
-                }
-            }
+                    var topX = agentTrajectory[i] - trajectoryPointSize / 2;
+                    var topY = agentTrajectory[i + 1] - trajectoryPointSize / 2;
+                    var bottomX = agentTrajectory[i] + trajectoryPointSize / 2;
+                    var bottomY = agentTrajectory[i + 1] + trajectoryPointSize / 2;
 
-            // Save the bitmap image
-            mazeBitmap.Save(imagePathName);
+                    image.Draw(new DrawableFillColor(MagickColors.Gray),
+                        new DrawableRectangle(topX, topY, bottomX, bottomY));
+                }
+
+                // Save the image
+                image.Write(imagePathName);
+            }
         }
 
         /// <summary>
-        ///     Generates a bitmap image of the given maze structure (no agent trajectory).
+        ///     Generates an image of the given maze structure (no agent trajectory).
         /// </summary>
         /// <param name="imagePathName">Image path and filename.</param>
         /// <param name="mazeStructure">The structure of the maze.</param>
@@ -199,53 +201,60 @@ namespace MazeExperimentSupportLib
         public static void GenerateMazeStructureImage(string imagePathName, MazeStructure mazeStructure,
             bool drawSolutionPath)
         {
-            // Create pen and initialize bitmap canvas
-            Pen blackPen = new Pen(Color.Black, 0.0001f);
-            Bitmap mazeBitmap = new Bitmap(mazeStructure.ScaledMazeWidth + 1, mazeStructure.ScaledMazeHeight + 1);
+            var defaultStartEndPointRadius = 5;
+            var defaultTrajectoryPointSize = 2.5;
 
-            using (Graphics graphics = Graphics.FromImage(mazeBitmap))
+            using (var image = new MagickImage(MagickColors.White,
+                mazeStructure.ScaledMazeWidth + 1, mazeStructure.ScaledMazeHeight + 1))
             {
-                // Fill with white
-                Rectangle imageSize = new Rectangle(0, 0, mazeStructure.ScaledMazeWidth + 1,
-                    mazeStructure.ScaledMazeHeight + 1);
-                graphics.FillRectangle(Brushes.White, imageSize);
+                // Draw border around maze
+                image.Draw(new DrawableFillColor(MagickColors.Transparent),
+                    new DrawableRectangle(0, 0, mazeStructure.ScaledMazeWidth + 1, mazeStructure.ScaledMazeHeight + 1));
 
                 // Draw start and end points
-                graphics.FillEllipse(Brushes.Green, mazeStructure.StartLocation.X, mazeStructure.StartLocation.Y, 5, 5);
-                graphics.FillEllipse(Brushes.Red, mazeStructure.TargetLocation.X, mazeStructure.TargetLocation.Y, 5, 5);
+                image.Draw(new DrawableFillColor(MagickColors.Green),
+                    new DrawableEllipse(mazeStructure.StartLocation.X, mazeStructure.StartLocation.Y,
+                        defaultStartEndPointRadius, defaultStartEndPointRadius, 0, 360));
+                image.Draw(new DrawableFillColor(MagickColors.Red),
+                    new DrawableEllipse(mazeStructure.TargetLocation.X, mazeStructure.TargetLocation.Y,
+                        defaultStartEndPointRadius, defaultStartEndPointRadius, 0, 360));
 
-                // Draw all of the walls
-                foreach (MazeStructureWall wall in mazeStructure.Walls)
+                // Draw walls
+                foreach (var wall in mazeStructure.Walls)
                 {
-                    // Convert line start/end points to Point objects from drawing namespace
-                    Point startPoint = new Point(wall.StartMazeStructurePoint.X, wall.StartMazeStructurePoint.Y);
-                    Point endPoint = new Point(wall.EndMazeStructurePoint.X, wall.EndMazeStructurePoint.Y);
-
-                    // Draw wall
-                    graphics.DrawLine(blackPen, startPoint, endPoint);
+                    image.Draw(new DrawableLine(wall.StartMazeStructurePoint.X, wall.StartMazeStructurePoint.Y,
+                        wall.EndMazeStructurePoint.X, wall.EndMazeStructurePoint.Y));
                 }
 
                 // Add solution path to image if enabled
                 if (drawSolutionPath)
                 {
                     // Draw the solution trajectory/path
-                    for (int y = 0; y < mazeStructure.MazeGrid.Grid.GetLength(0); y++)
+                    for (var y = 0; y < mazeStructure.MazeGrid.Grid.GetLength(0); y++)
                     {
-                        for (int x = 0; x < mazeStructure.MazeGrid.Grid.GetLength(1); x++)
+                        for (var x = 0; x < mazeStructure.MazeGrid.Grid.GetLength(1); x++)
                         {
                             if (PathDirection.None != mazeStructure.MazeGrid.Grid[y, x].PathDirection)
                             {
-                                graphics.FillEllipse(Brushes.DarkViolet,
-                                    (x*mazeStructure.ScaleMultiplier) + (mazeStructure.ScaleMultiplier/2),
-                                    (y*mazeStructure.ScaleMultiplier) + (mazeStructure.ScaleMultiplier/2), 5, 5);
+                                var topX = x * mazeStructure.ScaleMultiplier + mazeStructure.ScaleMultiplier / 2 -
+                                           defaultTrajectoryPointSize / 2;
+                                var topY = y * mazeStructure.ScaleMultiplier + mazeStructure.ScaleMultiplier / 2 -
+                                           defaultTrajectoryPointSize / 2;
+                                var bottomX = x * mazeStructure.ScaleMultiplier + mazeStructure.ScaleMultiplier / 2 +
+                                              defaultTrajectoryPointSize / 2;
+                                var bottomY = y * mazeStructure.ScaleMultiplier + mazeStructure.ScaleMultiplier / 2 +
+                                              defaultTrajectoryPointSize / 2;
+
+                                image.Draw(new DrawableFillColor(MagickColors.DarkViolet),
+                                    new DrawableRectangle(topX, topY, bottomX, bottomY));
                             }
                         }
                     }
                 }
-            }
 
-            // Save the bitmap image
-            mazeBitmap.Save(imagePathName);
+                // Save the image
+                image.Write(imagePathName);
+            }
         }
     }
 }

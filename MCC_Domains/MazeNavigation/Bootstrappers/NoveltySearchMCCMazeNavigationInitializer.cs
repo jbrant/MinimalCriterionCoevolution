@@ -184,7 +184,7 @@ namespace MCC_Domains.MazeNavigation.Bootstrappers
                     InitializationEa.GenomeList.Where(
                             genome =>
                                 genome.EvaluationInfo != null &&
-                                genome.EvaluationInfo.ObjectiveDistance < MinSuccessDistance)
+                                genome.EvaluationInfo.TrialData[0].ObjectiveDistance < MinSuccessDistance)
                         .Take(MinSuccessfulAgentCount));
 
                 Console.Out.WriteLine("Extracted [{0}] of [{1}] viable genomes in [{2}] evaluations",
@@ -197,11 +197,12 @@ namespace MCC_Domains.MazeNavigation.Bootstrappers
                 InitializationEa.GenomeList.Where(
                         genome =>
                             genome.EvaluationInfo != null &&
-                            genome.EvaluationInfo.ObjectiveDistance > MinSuccessDistance)
+                            genome.EvaluationInfo.TrialData[0].ObjectiveDistance > MinSuccessDistance)
                     .Take(MinUnsuccessfulAgentCount));
 
             // Ensure that the above statement was able to get the required number of unsuccessful agent genomes
-            if (viableGenomes.Count(genome => genome.EvaluationInfo.ObjectiveDistance > MinSuccessDistance) <
+            if (viableGenomes.Count(genome =>
+                    genome.EvaluationInfo.TrialData[0].ObjectiveDistance > MinSuccessDistance) <
                 MinUnsuccessfulAgentCount)
             {
                 throw new SharpNeatException(

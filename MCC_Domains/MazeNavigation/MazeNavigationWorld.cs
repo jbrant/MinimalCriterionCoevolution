@@ -15,8 +15,7 @@ namespace MCC_Domains.MazeNavigation
     /// <summary>
     ///     Sets up and runs the maze navigation simulation.
     /// </summary>
-    /// <typeparam name="TTrialInfo">Information about a trial through the maze.</typeparam>
-    public class MazeNavigationWorld<TTrialInfo> : ILoggable
+    public class MazeNavigationWorld : ILoggable
     {
         #region Private methods
 
@@ -27,12 +26,7 @@ namespace MCC_Domains.MazeNavigation
         ///     The black box (neural network) that takes in the navigator sensors controls the navigator by
         ///     outputting the angular velocity and speed differentials based on those inputs.
         /// </param>
-        /// <param name="isBridgingTimestep">Indicates whether bridging should be applied in the current timestep.</param>
-        /// <param name="curBridgingApplications">
-        ///     The current number of times bridging has been applied.  This value
-        ///     will be incremented and the updated value used by the calling routine.
-        /// </param>
-        private void RunTimestep(IBlackBox agent, bool isBridgingTimestep, ref int curBridgingApplications)
+        private void RunTimestep(IBlackBox agent)
         {
             // Reset the ANN input array
             agent.InputSignalArray.Reset();
@@ -53,7 +47,7 @@ namespace MCC_Domains.MazeNavigation
             _navigator.TranslateAndApplyAnnOutputs(agent.OutputSignalArray[0], agent.OutputSignalArray[1]);
 
             // Move the navigator to the new position (i.e. execute a single timestep)
-            _navigator.Move(_walls, _goalLocation, isBridgingTimestep, ref curBridgingApplications);
+            _navigator.Move(_walls, _goalLocation);
         }
 
         #endregion
@@ -69,13 +63,11 @@ namespace MCC_Domains.MazeNavigation
         /// <param name="minSuccessDistance">The minimum distance from the target for the trial to be considered a success.</param>
         /// <param name="maxDistanceToTarget">The maximum distance from the target possible.</param>
         /// <param name="maxTimeSteps">The maximum number of time steps to run a given trial.</param>
-        /// <param name="numBridgingApplications">The number of times to apply bridging during a given trial.</param>
         /// <param name="behaviorCharacterization">The behavior characterization for a navigator.</param>
-        private MazeNavigationWorld(List<Wall> walls, DoublePoint navigatorLocation,
+        public MazeNavigationWorld(List<Wall> walls, DoublePoint navigatorLocation,
             DoublePoint goalLocation,
             int minSuccessDistance,
             int maxDistanceToTarget, int maxTimeSteps,
-            int numBridgingApplications,
             IBehaviorCharacterization behaviorCharacterization = null)
         {
             _walls = walls;
@@ -84,7 +76,6 @@ namespace MCC_Domains.MazeNavigation
             _maxDistanceToTarget = maxDistanceToTarget;
             _maxTimesteps = maxTimeSteps;
             _behaviorCharacterization = behaviorCharacterization;
-            _numBridgingApplications = numBridgingApplications;
 
             // Instantiate the navigator
             _navigator = new MazeNavigator(navigatorLocation);
@@ -92,28 +83,8 @@ namespace MCC_Domains.MazeNavigation
 
         /// <inheritdoc />
         /// <summary>
-        ///     Creates the maze navigation world, omitting the maze niche grid and number of bridging applications.
-        /// </summary>
-        /// <param name="walls">The walls in the maze environemnt.</param>
-        /// <param name="navigatorLocation">The starting location of the maze navigator.</param>
-        /// <param name="goalLocation">The location of the goal (target).</param>
-        /// <param name="minSuccessDistance">The minimum distance from the target for the trial to be considered a success.</param>
-        /// <param name="maxDistanceToTarget">The maximum distance from the target possible.</param>
-        /// <param name="maxTimeSteps">The maximum number of time steps to run a given trial.</param>
-        /// <param name="behaviorCharacterization">The behavior characterization for a navigator.</param>
-        public MazeNavigationWorld(List<Wall> walls, DoublePoint navigatorLocation, DoublePoint goalLocation,
-            int minSuccessDistance, int maxDistanceToTarget, int maxTimeSteps,
-            IBehaviorCharacterization behaviorCharacterization)
-            : this(
-                walls, navigatorLocation, goalLocation, minSuccessDistance, maxDistanceToTarget,
-                maxTimeSteps, 0, behaviorCharacterization)
-        {
-        }
-
-        /// <inheritdoc />
-        /// <summary>
-        ///     Creates the maze navigation world, omitting the maze niche grid, maximum distance to the target (required for
-        ///     fitness-based evaluations), and number of bridging applications.
+        ///     Creates the maze navigation world, omitting the maximum distance to the target (required for
+        ///     fitness-based evaluations).
         /// </summary>
         /// <param name="walls">The walls in the maze environemnt.</param>
         /// <param name="navigatorLocation">The starting location of the maze navigator.</param>
@@ -124,8 +95,7 @@ namespace MCC_Domains.MazeNavigation
         public MazeNavigationWorld(List<Wall> walls, DoublePoint navigatorLocation, DoublePoint goalLocation,
             int minSuccessDistance, int maxTimeSteps, IBehaviorCharacterization behaviorCharacterization)
             : this(
-                walls, navigatorLocation, goalLocation, minSuccessDistance, 0, maxTimeSteps, 0,
-                behaviorCharacterization)
+                walls, navigatorLocation, goalLocation, minSuccessDistance, 0, maxTimeSteps, behaviorCharacterization)
         {
         }
 
@@ -164,14 +134,14 @@ namespace MCC_Domains.MazeNavigation
         private readonly MazeNavigator _navigator;
 
         /// <summary>
-        ///     The number of times within a given trial to apply bridging "help".
-        /// </summary>
-        private readonly int _numBridgingApplications;
-
-        /// <summary>
         ///     List of walls in the environment.
         /// </summary>
         private readonly List<Wall> _walls;
+
+        /// <summary>
+        ///     Number of timesteps executed by trial.
+        /// </summary>
+        private int _timestep;
 
         #endregion
 
@@ -190,16 +160,16 @@ namespace MCC_Domains.MazeNavigation
         {
             return new List<LoggableElement>
             {
-                (logFieldEnableMap?.ContainsKey(EvaluationFieldElements.DistanceToTarget) == true &&
-                 logFieldEnableMap[EvaluationFieldElements.DistanceToTarget])
+                logFieldEnableMap?.ContainsKey(EvaluationFieldElements.DistanceToTarget) == true &&
+                logFieldEnableMap[EvaluationFieldElements.DistanceToTarget]
                     ? new LoggableElement(EvaluationFieldElements.DistanceToTarget, GetDistanceToTarget())
                     : null,
-                (logFieldEnableMap?.ContainsKey(EvaluationFieldElements.AgentXLocation) == true &&
-                 logFieldEnableMap[EvaluationFieldElements.AgentXLocation])
+                logFieldEnableMap?.ContainsKey(EvaluationFieldElements.AgentXLocation) == true &&
+                logFieldEnableMap[EvaluationFieldElements.AgentXLocation]
                     ? new LoggableElement(EvaluationFieldElements.AgentXLocation, _navigator.Location.X)
                     : null,
-                (logFieldEnableMap?.ContainsKey(EvaluationFieldElements.AgentYLocation) == true &&
-                 logFieldEnableMap[EvaluationFieldElements.AgentYLocation])
+                logFieldEnableMap?.ContainsKey(EvaluationFieldElements.AgentYLocation) == true &&
+                logFieldEnableMap[EvaluationFieldElements.AgentYLocation]
                     ? new LoggableElement(EvaluationFieldElements.AgentYLocation, _navigator.Location.Y)
                     : null
             };
@@ -208,79 +178,80 @@ namespace MCC_Domains.MazeNavigation
         /// <summary>
         ///     Runs a maze navigation trial.  This involves, for every timestep, activating the network with the radar/sensor
         ///     inputs, updating the navigator with the network output (i.e. changing the angular velocity and speed), moving the
-        ///     navigator to the next position based on those updates, and finally returning the trial information, whether that be
-        ///     fitness-based or behavior-based.
+        ///     navigator to the next position based on those updates, and finally returning the trial information, which for a
+        ///     fitness-based trial, is the final distance to the target.
         /// </summary>
-        /// <param name="agent">
-        ///     The black box (neural network) that takes in the navigator sensors controls the navigator by
-        ///     outputting the angular velocity and speed differentials based on those inputs.
-        /// </param>
-        /// <param name="searchType">The type of evaluation to perform (i.e. fitness, novelty, etc.).</param>
-        /// <param name="goalReached">Indicates whether the goal has been reached.</param>
-        /// <returns>The trial results (which will either be a fitness value or a behavior).</returns>
-        public TTrialInfo RunTrial(IBlackBox agent, SearchType searchType, out bool goalReached)
+        /// <param name="agent"></param>
+        /// <param name="goalReached"></param>
+        /// <returns>The final distance to the target (which is interpreted as the fitness).</returns>
+        public double RunFitnessTrial(IBlackBox agent, out bool goalReached)
         {
-            ITrialInfo trialInfo;
-
-            // Initialize the starting number of bridging applications
-            var curBridgingApplications = 0;
-
             // Default the goal reached parameter to false
             goalReached = false;
 
             // Reset neural network
             agent.ResetState();
 
-            // If this is a fitness evaluation, return the fitness score as the 
-            // difference between the maximum target distance and the ending distance 
-            // to the target
-            if (searchType.Equals(SearchType.Fitness))
+            // Run for the given number of timesteps or until the goal is reached
+            for (_timestep = 0; _timestep < _maxTimesteps; _timestep++)
             {
-                // Run for the given number of timesteps or until the goal is reached
-                for (var curTimestep = 0; curTimestep < _maxTimesteps; curTimestep++)
+                RunTimestep(agent);
+
+                // If the goal has been reached, break out of the loop
+                if (GetDistanceToTarget() < _minSuccessDistance)
                 {
-                    RunTimestep(agent, false, ref curBridgingApplications);
-
-                    // If the goal has been reached, break out of the loop
-                    if (GetDistanceToTarget() < _minSuccessDistance)
-                    {
-                        goalReached = true;
-                        break;
-                    }
+                    goalReached = true;
+                    break;
                 }
-
-                var fitness = _maxDistanceToTarget - GetDistanceToTarget();
-                trialInfo = new FitnessInfo(fitness, fitness);
-            }
-            // Otherwise, this is a behavioral evaluation, so return the ending 
-            // location of the navigator
-            else
-            {
-                // Run for the given number of timesteps or until the goal is reached
-                for (var curTimestep = 0; curTimestep < _maxTimesteps; curTimestep++)
-                {
-                    RunTimestep(agent, (curBridgingApplications < _numBridgingApplications),
-                        ref curBridgingApplications);
-
-                    _behaviorCharacterization.UpdateBehaviors(new List<double>
-                    {
-                        _navigator.Location.X,
-                        _navigator.Location.Y
-                    });
-
-                    // If the goal has been reached, break out of the loop
-                    if (GetDistanceToTarget() < _minSuccessDistance)
-                    {
-                        goalReached = true;
-                        break;
-                    }
-                }
-
-                // Extract the behavior info object
-                trialInfo = new BehaviorInfo(_behaviorCharacterization.GetBehaviorCharacterizationAsArray());
             }
 
-            return (TTrialInfo) trialInfo;
+            // Compute fitness as final distance from target location
+            var fitness = _maxDistanceToTarget - GetDistanceToTarget();
+
+            return fitness;
+        }
+
+        /// <summary>
+        ///     Runs a maze navigation trial.  This involves, for every timestep, activating the network with the radar/sensor
+        ///     inputs, updating the navigator with the network output (i.e. changing the angular velocity and speed), moving the
+        ///     navigator to the next position based on those updates, and finally returning the trial information, which for a
+        ///     behavior-based trial is given by the specific attributes captured by the selected behavior characterization (e.g.
+        ///     the position at every time step, the final position, the position sampled at a subset of the time steps, etc.).
+        /// </summary>
+        /// <param name="agent"></param>
+        /// <param name="goalReached"></param>
+        /// <returns>The final distance to the target (which is interpreted as the fitness).</returns>
+        public double[] RunBehaviorTrial(IBlackBox agent, out bool goalReached)
+        {
+            // Default the goal reached parameter to false
+            goalReached = false;
+
+            // Reset neural network
+            agent.ResetState();
+
+            // Run for the given number of timesteps or until the goal is reached
+            for (_timestep = 0; _timestep < _maxTimesteps; _timestep++)
+            {
+                RunTimestep(agent);
+
+                _behaviorCharacterization.UpdateBehaviors(new List<double>
+                {
+                    _navigator.Location.X,
+                    _navigator.Location.Y
+                });
+
+                // If the goal has been reached, break out of the loop
+                if (GetDistanceToTarget() < _minSuccessDistance)
+                {
+                    goalReached = true;
+                    break;
+                }
+            }
+
+            // Extract the behavior info object
+            var behavior = _behaviorCharacterization.GetBehaviorCharacterizationAsArray();
+
+            return behavior;
         }
 
         /// <summary>
@@ -291,6 +262,15 @@ namespace MCC_Domains.MazeNavigation
         {
             // Get the distance to the target based on the navigator's current location
             return DoublePoint.CalculateEuclideanDistance(_navigator.Location, _goalLocation);
+        }
+
+        /// <summary>
+        ///     Gets the number of timesteps for which the maze simulation executed.
+        /// </summary>
+        /// <returns>The number of timesteps for which the maze simulation executed.</returns>
+        public int GetSimulationTimesteps()
+        {
+            return _timestep;
         }
 
         #endregion

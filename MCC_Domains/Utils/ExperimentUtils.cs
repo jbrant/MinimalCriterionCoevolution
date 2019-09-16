@@ -35,7 +35,6 @@ using SharpNeat.EvolutionAlgorithms.ComplexityRegulation;
 using SharpNeat.Genomes.Maze;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Loggers;
-using SharpNeat.MinimalCriterias;
 
 #endregion
 
@@ -487,91 +486,11 @@ namespace MCC_Domains.Utils
             }
 
             var xmlBehaviorConfig = behaviorNodeList[0] as XmlElement;
-            IMinimalCriteria minimalCriteria = null;
-
-            // Try to get the child minimal criteria configuration
-            var minimalCriteriaNodeList = xmlBehaviorConfig.GetElementsByTagName("MinimalCriteriaConfig", "");
-
-            // If a minimal criteria is specified, read in its configuration and add it to the behavior characterization
-            if (minimalCriteriaNodeList.Count == 1)
-            {
-                var xmlMinimalCriteriaConfig = minimalCriteriaNodeList[0] as XmlElement;
-
-                // Extract the minimal criteria constraint name
-                var minimalCriteriaConstraint = XmlUtils.TryGetValueAsString(xmlMinimalCriteriaConfig,
-                    "MinimalCriteriaConstraint");
-
-                // Get the appropriate minimal criteria type
-                var mcType = BehaviorCharacterizationUtil.ConvertStringToMinimalCriteria(minimalCriteriaConstraint);
-
-                // Starting location used in most criterias
-                double xStart, yStart;
-
-                switch (mcType)
-                {
-                    case MinimalCriteriaType.EuclideanLocation:
-
-                        // Read in the min/max location bounds
-                        var xMin = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "XMin");
-                        var xMax = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "XMax");
-                        var yMin = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "YMin");
-                        var yMax = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "YMax");
-
-                        // Set the euclidean location minimal criteria on the behavior characterization
-                        minimalCriteria = new EuclideanLocationCriteria(xMin, xMax, yMin, yMax);
-
-                        break;
-
-                    case MinimalCriteriaType.FixedPointEuclideanDistance:
-
-                        // Read in the starting coordinates and the minimum required distance traveled
-                        xStart = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "XStart");
-                        yStart = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "YStart");
-                        var minimumDistanceTraveled = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig,
-                            "MinimumRequiredDistance");
-                        double? maxDistanceUpdateCyclesWithoutChange =
-                            XmlUtils.TryGetValueAsInt(xmlMinimalCriteriaConfig,
-                                "MaxUpdateCyclesWithoutChange");
-
-                        // Set the fixed point euclidean distance minimal criteria on the behavior characterization
-                        minimalCriteria = new FixedPointEuclideanDistanceCriteria(xStart, yStart,
-                            minimumDistanceTraveled, maxDistanceUpdateCyclesWithoutChange);
-
-                        break;
-
-                    case MinimalCriteriaType.PopulationCentroidEuclideanDistance:
-
-                        // Read in the starting minimum required distance (if applicable)
-                        var minimuCentroidDistance = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig,
-                            "MinimumRequiredDistance");
-
-                        // Set the population centroid euclidean distance criteria on the behavior characterization
-                        minimalCriteria = new PopulationCentroidEuclideanDistanceCriteria(minimuCentroidDistance);
-
-                        break;
-
-                    case MinimalCriteriaType.Mileage:
-
-                        // Read in the starting coordinates and minimum required total distance traveled (mileage)
-                        xStart = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "XStart");
-                        yStart = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "YStart");
-                        var minimumMileage = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "MinimumMileage");
-                        double? maxMileageUpdateCyclesWithoutChange = XmlUtils.TryGetValueAsInt(
-                            xmlMinimalCriteriaConfig,
-                            "MaxUpdateCyclesWithoutChange");
-
-                        // Set the mileage minimal criteria on the behavior characterization
-                        minimalCriteria = new MileageCriteria(xStart, yStart, minimumMileage,
-                            maxMileageUpdateCyclesWithoutChange);
-
-                        break;
-                }
-            }
-
+            
             // Parse and generate the appropriate behavior characterization factory
             var behaviorCharacterizationFactory =
                 BehaviorCharacterizationUtil.GenerateBehaviorCharacterizationFactory(
-                    XmlUtils.TryGetValueAsString(xmlBehaviorConfig, "BehaviorCharacterization"), minimalCriteria);
+                    XmlUtils.TryGetValueAsString(xmlBehaviorConfig, "BehaviorCharacterization"));
 
             return behaviorCharacterizationFactory;
         }
@@ -600,66 +519,9 @@ namespace MCC_Domains.Utils
                 throw new ArgumentException("Missing or invalid BehaviorConfig settings.");
             }
 
-            IMinimalCriteria minimalCriteria = null;
-
-            // Get the appropriate minimal criteria type
-            var mcType = BehaviorCharacterizationUtil.ConvertStringToMinimalCriteria(isPrimary
-                ? experiment.Primary_MCS_MinimalCriteriaName
-                : experiment.Initialization_MCS_MinimalCriteriaName);
-
-            // Starting location used in most criterias
-            double xStart, yStart;
-
-            switch (mcType)
-            {
-                case MinimalCriteriaType.EuclideanLocation:
-
-                    // TODO: Not implemented at the database layer yet
-
-                    break;
-
-                case MinimalCriteriaType.FixedPointEuclideanDistance:
-
-                    // Read in the starting coordinates and the minimum required distance traveled
-                    xStart = isPrimary
-                        ? experiment.Primary_MCS_MinimalCriteriaStartX ?? default(double)
-                        : experiment.Initialization_MCS_MinimalCriteriaStartX ?? default(double);
-                    yStart = isPrimary
-                        ? experiment.Primary_MCS_MinimalCriteriaStartY ?? default(double)
-                        : experiment.Initialization_MCS_MinimalCriteriaStartY ?? default(double);
-                    var minimumDistanceTraveled = isPrimary
-                        ? experiment.Primary_MCS_MinimalCriteriaThreshold ?? default(double)
-                        : experiment.Initialization_MCS_MinimalCriteriaThreshold ?? default(double);
-
-                    // Set the euclidean distance minimal criteria on the behavior characterization
-                    minimalCriteria = new FixedPointEuclideanDistanceCriteria(xStart, yStart,
-                        minimumDistanceTraveled);
-
-                    break;
-
-                case MinimalCriteriaType.Mileage:
-
-                    // Read in the starting coordinates and minimum required total distance traveled (mileage)
-                    xStart = isPrimary
-                        ? experiment.Primary_MCS_MinimalCriteriaStartX ?? default(double)
-                        : experiment.Initialization_MCS_MinimalCriteriaStartX ?? default(double);
-                    yStart = isPrimary
-                        ? experiment.Primary_MCS_MinimalCriteriaStartY ?? default(double)
-                        : experiment.Initialization_MCS_MinimalCriteriaStartY ?? default(double);
-                    var minimumMileage = isPrimary
-                        ? experiment.Primary_MCS_MinimalCriteriaThreshold ?? default(double)
-                        : experiment.Initialization_MCS_MinimalCriteriaThreshold ?? default(double);
-
-                    // Set the mileage minimal criteria on the behavior characterization
-                    minimalCriteria = new MileageCriteria(xStart, yStart, minimumMileage);
-
-                    break;
-            }
-
             // Parse and generate the appropriate behavior characterization factory
             var behaviorCharacterizationFactory =
-                BehaviorCharacterizationUtil.GenerateBehaviorCharacterizationFactory(behaviorCharacterizationName,
-                    minimalCriteria);
+                BehaviorCharacterizationUtil.GenerateBehaviorCharacterizationFactory(behaviorCharacterizationName);
 
             return behaviorCharacterizationFactory;
         }

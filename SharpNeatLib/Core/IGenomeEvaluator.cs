@@ -12,7 +12,7 @@ namespace SharpNeat.Core
     ///     perhaps across several execution threads, or in some collective evaluation scheme such as an artificial
     ///     life/world scenario.
     /// </summary>
-    public interface IGenomeEvaluator<TGenome> : ILoggable
+    public interface IGenomeEvaluator<TGenome>
         where TGenome : class, IGenome<TGenome>
     {
         /// <summary>

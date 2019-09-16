@@ -46,8 +46,9 @@ namespace SharpNeat.Phenomes.NeuralNets.CyclicNetwork
                                      int inputNeuronCount,
                                      int outputNeuronCount,
                                      int maxTimesteps,
-                                     double signalDeltaThreshold)
-            : base(neuronList, connectionList, inputNeuronCount, outputNeuronCount, maxTimesteps)
+                                     double signalDeltaThreshold,
+                                     uint genomeId)
+            : base(neuronList, connectionList, inputNeuronCount, outputNeuronCount, maxTimesteps, genomeId)
         {
             _signalDeltaThreshold = signalDeltaThreshold;
         }

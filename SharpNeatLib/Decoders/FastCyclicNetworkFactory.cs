@@ -55,7 +55,8 @@ namespace SharpNeat.Decoders
                                                      networkDef.InputNodeCount,
                                                      networkDef.OutputNodeCount,
                                                      activationScheme.MaxTimesteps,
-                                                     activationScheme.SignalDeltaThreshold);
+                                                     activationScheme.SignalDeltaThreshold,
+                                                     networkDef.Id);
             }
 
             return new FastCyclicNetwork(fastConnectionArray,
@@ -64,7 +65,8 @@ namespace SharpNeat.Decoders
                                          networkDef.NodeList.Count,
                                          networkDef.InputNodeCount,
                                          networkDef.OutputNodeCount,
-                                         activationScheme.TimestepsPerActivation);
+                                         activationScheme.TimestepsPerActivation,
+                                         networkDef.Id);
         }
 
         #endregion

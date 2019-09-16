@@ -1,7 +1,6 @@
 ﻿#region
 
 using System.Collections.Generic;
-using System.Linq;
 using Redzen.Random;
 using SharpNeat.Core;
 
@@ -37,17 +36,15 @@ namespace SharpNeat.Utility
                 // Non-viable genome.
                 genome.EvaluationInfo.SetFitness(0.0);
                 genome.EvaluationInfo.AuxFitnessArr = null;
-                genome.EvaluationInfo.BehaviorCharacterization = new double[0];
+                genome.EvaluationInfo.TrialData = null;
             }
             else
             {
                 // Evaluate the behavior, update the genome's behavior characterization, calculate the distance to the domain objective,
                 // and indicate if the genome is viable based on whether the minimal criteria was satisfied
                 var behaviorInfo = phenomeEvaluator.Evaluate(phenome, currentGeneration);
-                genome.EvaluationInfo.BehaviorCharacterization = behaviorInfo.Behaviors;
-                genome.EvaluationInfo.ObjectiveDistance = behaviorInfo.ObjectiveDistance;
+                genome.EvaluationInfo.TrialData = behaviorInfo.TrialData;
                 genome.EvaluationInfo.IsViable = behaviorInfo.DoesBehaviorSatisfyMinimalCriteria;
-                genome.EvaluationInfo.NicheId = behaviorInfo.NicheId;
             }
         }
 
@@ -77,17 +74,15 @@ namespace SharpNeat.Utility
                 // Non-viable genome.
                 genome.EvaluationInfo.SetFitness(0.0);
                 genome.EvaluationInfo.AuxFitnessArr = null;
-                genome.EvaluationInfo.BehaviorCharacterization = new double[0];
+                genome.EvaluationInfo.TrialData = null;
             }
             else
             {
                 // Evaluate the behavior, update the genome's behavior characterization, calculate the distance to the domain objective,
                 // and indicate if the genome is viable based on whether the minimal criteria was satisfied
                 var behaviorInfo = phenomeEvaluator.Evaluate(phenome, currentGeneration);
-                genome.EvaluationInfo.BehaviorCharacterization = behaviorInfo.Behaviors;
-                genome.EvaluationInfo.ObjectiveDistance = behaviorInfo.ObjectiveDistance;
+                genome.EvaluationInfo.TrialData = behaviorInfo.TrialData;
                 genome.EvaluationInfo.IsViable = behaviorInfo.DoesBehaviorSatisfyMinimalCriteria;
-                genome.EvaluationInfo.NicheId = behaviorInfo.NicheId;
             }
         }
 
@@ -115,8 +110,6 @@ namespace SharpNeat.Utility
                 var fitnessInfo = phenomeEvaluator.Evaluate(phenome, currentGeneration);
                 genome.EvaluationInfo.SetFitness(fitnessInfo.Fitness);
                 genome.EvaluationInfo.AuxFitnessArr = fitnessInfo.AuxFitnessArr;
-                genome.EvaluationInfo.NicheId = fitnessInfo.NicheId;
-                genome.EvaluationInfo.ObjectiveDistance = fitnessInfo.ObjectiveDistance;
             }
         }
 
@@ -151,8 +144,6 @@ namespace SharpNeat.Utility
                 var fitnessInfo = phenomeEvaluator.Evaluate(phenome, currentGeneration);
                 genome.EvaluationInfo.SetFitness(fitnessInfo.Fitness);
                 genome.EvaluationInfo.AuxFitnessArr = fitnessInfo.AuxFitnessArr;
-                genome.EvaluationInfo.NicheId = fitnessInfo.NicheId;
-                genome.EvaluationInfo.ObjectiveDistance = fitnessInfo.ObjectiveDistance;
             }
         }
 
@@ -181,7 +172,7 @@ namespace SharpNeat.Utility
             {
                 // Compare the current genome's behavior to its k-nearest neighbors in behavior space
                 var fitness =
-                    NoveltyUtils<TGenome>.CalculateBehavioralDistance(genome.EvaluationInfo.BehaviorCharacterization,
+                    NoveltyUtils<TGenome>.CalculateBehavioralDistance(genome.EvaluationInfo.TrialData,
                         genomeList, nearestNeighbors, noveltyArchive);
                 fitnessInfo = new FitnessInfo(fitness, fitness);
             }
@@ -189,7 +180,6 @@ namespace SharpNeat.Utility
             // Update the fitness as the behavioral novelty
             genome.EvaluationInfo.SetFitness(fitnessInfo.Fitness);
             genome.EvaluationInfo.AuxFitnessArr = fitnessInfo.AuxFitnessArr;
-            genome.EvaluationInfo.NicheId = fitnessInfo.NicheId;
         }
 
         /// <summary>
@@ -210,8 +200,9 @@ namespace SharpNeat.Utility
             // are not objectively driven.
             if (assignObjectiveDistanceAsFitness)
             {
-                fitnessInfo = new FitnessInfo(genome.EvaluationInfo.ObjectiveDistance,
-                    genome.EvaluationInfo.ObjectiveDistance);
+                fitnessInfo = new FitnessInfo(
+                    genome.EvaluationInfo.TrialData[0].ObjectiveDistance,
+                    genome.EvaluationInfo.TrialData[0].ObjectiveDistance);
             }
             // Otherwise, we're going to assign a random fitness score (since there is no other heuristic)
             else
