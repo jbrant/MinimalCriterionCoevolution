@@ -162,10 +162,10 @@ namespace MazeExperimentSupportLib
 
                 // Draw start and end points
                 image.Draw(new DrawableFillColor(MagickColors.Green),
-                    new DrawableEllipse(mazeStructure.StartLocation.X, mazeStructure.StartLocation.Y,
+                    new DrawableEllipse(mazeStructure.ScaledStartLocation.X, mazeStructure.ScaledStartLocation.Y,
                         startEndPointRadius, startEndPointRadius, 0, 360));
                 image.Draw(new DrawableFillColor(MagickColors.Red),
-                    new DrawableEllipse(mazeStructure.TargetLocation.X, mazeStructure.TargetLocation.Y,
+                    new DrawableEllipse(mazeStructure.ScaledTargetLocation.X, mazeStructure.ScaledTargetLocation.Y,
                         startEndPointRadius, startEndPointRadius, 0, 360));
 
                 // Draw walls
@@ -213,10 +213,10 @@ namespace MazeExperimentSupportLib
 
                 // Draw start and end points
                 image.Draw(new DrawableFillColor(MagickColors.Green),
-                    new DrawableEllipse(mazeStructure.StartLocation.X, mazeStructure.StartLocation.Y,
+                    new DrawableEllipse(mazeStructure.ScaledStartLocation.X, mazeStructure.ScaledStartLocation.Y,
                         defaultStartEndPointRadius, defaultStartEndPointRadius, 0, 360));
                 image.Draw(new DrawableFillColor(MagickColors.Red),
-                    new DrawableEllipse(mazeStructure.TargetLocation.X, mazeStructure.TargetLocation.Y,
+                    new DrawableEllipse(mazeStructure.ScaledTargetLocation.X, mazeStructure.ScaledTargetLocation.Y,
                         defaultStartEndPointRadius, defaultStartEndPointRadius, 0, 360));
 
                 // Draw walls

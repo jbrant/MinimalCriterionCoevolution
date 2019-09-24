@@ -26,6 +26,7 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Xml;
+using SharpNeat.Genomes.Maze;
 using SharpNeat.Network;
 using SharpNeat.Network.ActivationFunctions;
 using SharpNeat.Utility;
@@ -570,7 +571,7 @@ namespace SharpNeat.Genomes.Neat
             // Construct and return loaded NeatGenome.
             return new NeatGenome(null, genomeId, birthGen, nGeneList, cGeneList, inputNodeCount, outputNodeCount, true);
         }
-
+        
         #endregion
     }
 }

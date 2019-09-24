@@ -235,9 +235,9 @@ namespace MazeGenomeGenerator
 
                 // Draw start and end points
                 image.Draw(strokeColor, strokeWidth, new DrawableFillColor(MagickColors.Green),
-                    new DrawableEllipse(mazeStructure.StartLocation.X, mazeStructure.StartLocation.Y, 2.5, 2.5, 0, 360));
+                    new DrawableEllipse(mazeStructure.ScaledStartLocation.X, mazeStructure.ScaledStartLocation.Y, 2.5, 2.5, 0, 360));
                 image.Draw(strokeColor, strokeWidth, new DrawableFillColor(MagickColors.Red),
-                    new DrawableEllipse(mazeStructure.TargetLocation.X, mazeStructure.TargetLocation.Y, 2.5, 2.5, 0, 360));
+                    new DrawableEllipse(mazeStructure.ScaledTargetLocation.X, mazeStructure.ScaledTargetLocation.Y, 2.5, 2.5, 0, 360));
 
                 // Draw walls
                 foreach (var wall in mazeStructure.Walls)

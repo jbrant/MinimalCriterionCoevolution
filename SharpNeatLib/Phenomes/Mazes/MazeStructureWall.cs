@@ -78,6 +78,59 @@
         public int Y { get; }
 
         #endregion
+
+        #region Method overrides
+
+        /// <summary>
+        ///     Performs equality comparison based on the X/Y position of the current point.
+        /// </summary>
+        /// <param name="obj">The point against which to compare.</param>
+        /// <returns>Whether or not this point and the given point are equal.</returns>
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            return obj.GetType() == GetType() && Equals((MazeStructurePoint) obj);
+        }
+
+        /// <summary>
+        ///     Performs equality comparison based on the X/Y position of the two given points.
+        /// </summary>
+        /// <param name="point1">The first point to compare.</param>
+        /// <param name="point2">The second point to compare.</param>
+        /// <returns>Whether or not the two points are equal.</returns>
+        public static bool operator ==(MazeStructurePoint point1, MazeStructurePoint point2)
+        {
+            if (ReferenceEquals(point1, point2)) return true;
+            if (ReferenceEquals(point1, null)) return false;
+            if (ReferenceEquals(point2, null)) return false;
+            return point1.X == point2.X && point1.Y == point2.Y;
+        }
+
+        /// <summary>
+        ///     Performs inequality comparison based on the X/Y position of the two given points.
+        /// </summary>
+        /// <param name="point1">The first point to compare.</param>
+        /// <param name="point2">The second point to compare.</param>
+        /// <returns>Whether the two points are unequal.</returns>
+        public static bool operator !=(MazeStructurePoint point1, MazeStructurePoint point2)
+        {
+            return !(point1 == point2);
+        }
+
+        /// <summary>
+        ///     Computes unique hash based on the X/Y points.
+        /// </summary>
+        /// <returns>The point hash code.</returns>
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (X * 397) ^ Y;
+            }
+        }
+
+        #endregion
     }
 
     /// <summary>
@@ -105,14 +158,14 @@
         public override bool Equals(object obj)
         {
             // Attempt to coerce to appropriate type and return false if coercion fails
-            MazeStructureLinkedPoint point = obj as MazeStructureLinkedPoint;
+            var point = obj as MazeStructureLinkedPoint;
             if (point == null)
             {
                 return false;
             }
 
             // Return true if the component properties match
-            return (X == point.X && Y == point.Y && PrevPoint == point.PrevPoint);
+            return X == point.X && Y == point.Y && PrevPoint == point.PrevPoint;
         }
 
         /// <summary>
@@ -121,10 +174,10 @@
         /// <returns>The linked point hash code.</returns>
         public override int GetHashCode()
         {
-            int hash = 13;
-            hash = (hash*7) + X.GetHashCode();
-            hash = (hash*7) + Y.GetHashCode();
-            hash = (hash*7) + PrevPoint.GetHashCode();
+            var hash = 13;
+            hash = hash * 7 + X.GetHashCode();
+            hash = hash * 7 + Y.GetHashCode();
+            hash = hash * 7 + PrevPoint.GetHashCode();
             return hash;
         }
 

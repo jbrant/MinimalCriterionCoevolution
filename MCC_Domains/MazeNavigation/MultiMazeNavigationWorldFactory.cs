@@ -73,8 +73,8 @@ namespace MCC_Domains.MazeNavigation
             {
                 _mazeConfigurations.Add(mazeStructure.GenomeId,
                     new MazeConfiguration(ExtractMazeWalls(mazeStructure.Walls),
-                        ExtractStartEndPoint(mazeStructure.StartLocation),
-                        ExtractStartEndPoint(mazeStructure.TargetLocation), mazeStructure.MaxTimesteps));
+                        ExtractStartEndPoint(mazeStructure.ScaledStartLocation),
+                        ExtractStartEndPoint(mazeStructure.ScaledTargetLocation), mazeStructure.MaxTimesteps));
             }
 
             // Build the list of current maze genome IDs
@@ -177,7 +177,7 @@ namespace MCC_Domains.MazeNavigation
         {
             // Build the single maze configuration
             var mazeConfig = new MazeConfiguration(ExtractMazeWalls(mazeStructure.Walls),
-                ExtractStartEndPoint(mazeStructure.StartLocation), ExtractStartEndPoint(mazeStructure.TargetLocation),
+                ExtractStartEndPoint(mazeStructure.ScaledStartLocation), ExtractStartEndPoint(mazeStructure.ScaledTargetLocation),
                 mazeStructure.MaxTimesteps);
 
             // Create maze navigation world and return
