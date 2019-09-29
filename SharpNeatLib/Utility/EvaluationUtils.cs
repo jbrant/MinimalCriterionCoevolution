@@ -1,6 +1,7 @@
 ﻿#region
 
 using System.Collections.Generic;
+using System.Linq;
 using Redzen.Random;
 using SharpNeat.Core;
 
@@ -198,7 +199,7 @@ namespace SharpNeat.Utility
             // If the flag is set, assign the calculated objective distance as the fitness.  
             // This is mostly for display purposes because the methods that use this (i.e. MCS) 
             // are not objectively driven.
-            if (assignObjectiveDistanceAsFitness)
+            if (assignObjectiveDistanceAsFitness && genome.EvaluationInfo.TrialData.Any())
             {
                 fitnessInfo = new FitnessInfo(
                     genome.EvaluationInfo.TrialData[0].ObjectiveDistance,

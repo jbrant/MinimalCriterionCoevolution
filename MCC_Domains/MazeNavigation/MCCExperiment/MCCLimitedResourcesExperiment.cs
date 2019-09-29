@@ -47,6 +47,9 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             if (_resourceLimit < 1)
                 message =
                     $"Resource limit [{_resourceLimit}] must be greater than 1, otherwise maze cannot be used to satisfy the MC of any agent";
+            else if (_resourceLimit * MazeSeedGenomeCount < AgentSeedGenomeCount)
+                message =
+                    $"Product of resource limit [{_resourceLimit}] and maze seed genome count [{MazeSeedGenomeCount}] must be at least as large as agent seed genome count [{AgentSeedGenomeCount}], otherwise not all agent seed genomes can be evolved";
             // Check base class parameters
             else if (base.ValidateConfigParameters(out var errorMessage))
                 message = errorMessage;
@@ -179,9 +182,10 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             {
                 _navigatorLogFieldEnableMap.Add(genomeLoggingPair.Key, genomeLoggingPair.Value);
             }
-            
+
             // Add default trial logging configuration
-            foreach (var trialLoggingPair in SimulationTrialFieldElements.PopulateSimulationTrialFieldElementsEnableMap())
+            foreach (var trialLoggingPair in
+                SimulationTrialFieldElements.PopulateSimulationTrialFieldElementsEnableMap())
             {
                 _navigatorLogFieldEnableMap.Add(trialLoggingPair.Key, trialLoggingPair.Value);
             }
@@ -320,7 +324,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             // Either use pre-evolved agents or evolve the seed agents that meet the MC
             var seedAgentPopulation = isAgentListPreevolved
                 ? genomeList1
-                : EvolveSeedAgents(genomeList1, genomeList2, genomeFactory1, AgentSeedGenomeCount);
+                : EvolveSeedAgents(genomeList1, genomeList2, genomeFactory1, AgentSeedGenomeCount, _resourceLimit);
 
             // Set dummy fitness so that seed maze(s) will be marked as evaluated
             foreach (var mazeGenome in genomeList2)

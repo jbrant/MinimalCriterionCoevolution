@@ -8,7 +8,13 @@
   <MazePopulationSize>50</MazePopulationSize>
   <AgentSeedGenomeCount>20</AgentSeedGenomeCount>
   <MazeSeedGenomeCount>10</MazeSeedGenomeCount>
-  <ResourceLimit>10</ResourceLimit>
+  <AgentNumSpecies>0</AgentNumSpecies>
+  <MazeNumSpecies>0</MazeNumSpecies>
+  <AgentSpecieSizeFixed>
+  </AgentSpecieSizeFixed>
+  <MazeSpecieSizeFixed>
+  </MazeSpecieSizeFixed>
+  <ResourceLimit>5</ResourceLimit>
   <Activation>
     <Scheme>Acyclic</Scheme>
   </Activation>
@@ -34,8 +40,8 @@
   <BehaviorConfig>
     <BehaviorCharacterization>End Point</BehaviorCharacterization>
   </BehaviorConfig>
-  <NavigatorOffspringBatchSize>2</NavigatorOffspringBatchSize>
-  <MazeOffspringBatchSize>1</MazeOffspringBatchSize>
+  <NavigatorOffspringBatchSize>40</NavigatorOffspringBatchSize>
+  <MazeOffspringBatchSize>10</MazeOffspringBatchSize>
   <MaxEvaluations>
   </MaxEvaluations>
   <MaxGenerations>2000</MaxGenerations>
@@ -61,6 +67,7 @@
     <SelectionProportion>0.2</SelectionProportion>
     <OffspringAsexualProbability>0.5</OffspringAsexualProbability>
     <OffspringSexualProbability>0.5</OffspringSexualProbability>
+    <InterspeciesMatingProbability>0.001</InterspeciesMatingProbability>
     <GenomeConfig>
       <InitialConnectionProportion>1</InitialConnectionProportion>
       <WeightMutationProbability>0.9</WeightMutationProbability>
