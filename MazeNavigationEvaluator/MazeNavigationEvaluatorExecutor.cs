@@ -453,9 +453,6 @@ namespace MazeNavigationEvaluator
             string baseImageOutputDirectory, bool generateMazeBitmaps, bool generateTrajectoryBitmaps,
             int chunkSize = 10)
         {
-            // Create the maze/navigator map
-            var mapEvaluator = new MapEvaluator(experimentParameters, inputNeuronCount, outputNeuronCount);
-
             _executionLogger.Info($"Executing image generation for run [{curRun}/{numRuns}]");
 
             // Determine whether experiments were executed with trial data generation enabled
@@ -470,6 +467,9 @@ namespace MazeNavigationEvaluator
             for (var curChunk = 0; curChunk < mazeGenomeIds.Count; curChunk += chunkSize)
             {
                 List<Tuple<MccexperimentMazeGenome, MccexperimentNavigatorGenome>> successfulGenomeCombos = null;
+                
+                // Create the maze/navigator map
+                var mapEvaluator = new MapEvaluator(experimentParameters, inputNeuronCount, outputNeuronCount);
 
                 // Get maze genome IDs for the current chunk
                 var curMazeGenomeIds = mazeGenomeIds.Skip(curChunk).Take(chunkSize).ToList();
