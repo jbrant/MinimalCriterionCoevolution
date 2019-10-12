@@ -375,28 +375,22 @@ namespace SharpNeat.Genomes.Maze
                 return;
             }
 
-            // If waypoints have come within three units of one of the maze boundaries, an expand maze mutation will
-            // be forced to allow for placement of additional waypoints.
-            if (PathGeneList.Any(g => g.Waypoint.X >= MazeBoundaryWidth - 3 || g.Waypoint.Y >= MazeBoundaryHeight - 3))
-            {
-                MutateExpandMaze();
-                return;
-            }
-
             do
             {
                 // Attempt random mutation until a successful/valid mutation is applied
                 int outcome;
                 do
                 {
-                    // Get random mutation to perform 
-                    // (prohibit exceeding max wall complexity and placing more waypoints than there are cells in
-                    // the maze grid)
+                    // Get random mutation to perform
+                    // The following rules are applied to prohibit certain mutations under specific conditions:
+                    // 1. Add wall mutation prohibited if maximum supported wall genes have been reached
+                    // 2. Add waypoint prohibited if last waypoint is within 3 units of one of the maze boundaries
                     outcome = DiscreteDistribution.Sample(_genomeFactory.Rng,
                         _genomeFactory.MazeGenomeParameters.RouletteWheelLayout);
                 } while (WallGeneList.Count >= _maxWallComplexity && outcome == 2 ||
-                         (PathGeneList.Count >= MazeBoundaryHeight || PathGeneList.Count >= MazeBoundaryWidth) &&
-                         (outcome == 5 || outcome == 6));
+                         PathGeneList.Any(g =>
+                             g.Waypoint.X >= MazeBoundaryWidth - 3 || g.Waypoint.Y >= MazeBoundaryHeight - 3) &&
+                         outcome == 6);
 
                 switch (outcome)
                 {
