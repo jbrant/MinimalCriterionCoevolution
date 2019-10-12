@@ -33,41 +33,29 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         /// </summary>
         /// <param name="name">The name of the experiment.</param>
         /// <param name="xmlConfig">The reference to the XML configuration file.</param>
-        /// <param name="navigatorEvolutionLogger">The navigator evolution data logger.</param>
-        /// <param name="navigatorPopulationLogger">The navigator population logger.</param>
-        /// <param name="navigatorGenomeLogger">The navigator genome logger.</param>
-        /// <param name="mazeEvolutionLogger">The maze evolution data logger.</param>
-        /// <param name="mazePopulationLogger">The maze population logger.</param>
-        /// <param name="mazeGenomeLogger">The maze genome logger.</param>
-        public override void Initialize(string name, XmlElement xmlConfig,
-            IDataLogger navigatorEvolutionLogger = null, IDataLogger navigatorPopulationLogger = null,
-            IDataLogger navigatorGenomeLogger = null,
-            IDataLogger mazeEvolutionLogger = null, IDataLogger mazePopulationLogger = null,
-            IDataLogger mazeGenomeLogger = null)
+        /// <param name="logFileDirectory">The directory into which to write the evolution/evaluation log files.</param>
+        /// <param name="runIdx">The numerical ID of the current run.</param>
+        public override void Initialize(string name, XmlElement xmlConfig, string logFileDirectory, int runIdx)
         {
             // Initialize boiler plate parameters
-            base.Initialize(name, xmlConfig, navigatorEvolutionLogger, navigatorPopulationLogger, navigatorGenomeLogger,
-                mazeEvolutionLogger, mazePopulationLogger, mazeGenomeLogger);
+            base.Initialize(name, xmlConfig);
 
-            // Read in log file path/name
-            _navigatorEvolutionDataLogger = navigatorEvolutionLogger ??
-                                            ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Evolution,
-                                                "NavigatorLoggingConfig");
-            _navigatorPopulationDataLogger = navigatorPopulationLogger ??
-                                             ExperimentUtils.ReadDataLogger(xmlConfig,
-                                                 LoggingType.Population, "NavigatorLoggingConfig");
-            _navigatorGenomeDataLogger = navigatorGenomeLogger ??
-                                         ExperimentUtils.ReadDataLogger(xmlConfig,
-                                             LoggingType.Genome, "NavigatorLoggingConfig");
-            _mazeEvolutionDataLogger = mazeEvolutionLogger ??
-                                       ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Evolution,
-                                           "MazeLoggingConfig");
-            _mazePopulationDataLogger = mazePopulationLogger ??
-                                        ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Population,
-                                            "MazeLoggingConfig");
-            _mazeGenomeDataLogger = mazeGenomeLogger ??
-                                    ExperimentUtils.ReadDataLogger(xmlConfig, LoggingType.Genome,
-                                        "MazeLoggingConfig");
+            // Initialize the data loggers for the given experiment/run
+            _navigatorEvolutionDataLogger =
+                new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - NavigatorEvolution.csv");
+            _navigatorPopulationDataLogger =
+                new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - NavigatorPopulation.csv");
+            _navigatorGenomeDataLogger =
+                new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - NavigatorGenomes.csv");
+            _navigatorSimulationTrialDataLogger =
+                new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - NavigatorTrials.csv");
+            _mazeEvolutionDataLogger =
+                new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - MazeEvolution.csv");
+            _mazePopulationDataLogger =
+                new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - MazePopulation.csv");
+            _mazeGenomeDataLogger = new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - MazeGenomes.csv");
+            _mazeSimulationTrialDataLogger =
+                new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - MazeTrials.csv");
 
             // Create new evolution field elements map with all fields enabled
             _navigatorLogFieldEnableMap = EvolutionFieldElements.PopulateEvolutionFieldElementsEnableMap();
@@ -83,7 +71,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             {
                 _navigatorLogFieldEnableMap.Add(genomeLoggingPair.Key, genomeLoggingPair.Value);
             }
-
+            
             // Disable logging fields not relevant to agent evolution in MCC experiment
             _navigatorLogFieldEnableMap[EvolutionFieldElements.SpecieCount] = false;
             _navigatorLogFieldEnableMap[EvolutionFieldElements.AsexualOffspringCount] = false;
@@ -104,9 +92,6 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeNeuronGeneCount] = false;
             _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeTotalGeneCount] = false;
             _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeEvaluationCount] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeBehaviorX] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeBehaviorY] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeDistanceToTarget] = false;
             _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeXml] = false;
             _navigatorLogFieldEnableMap[EvolutionFieldElements.MinWalls] = false;
             _navigatorLogFieldEnableMap[EvolutionFieldElements.MaxWalls] = false;
@@ -154,6 +139,9 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
 
             // Read in the number of batches between population logging
             _populationLoggingBatchInterval = XmlUtils.TryGetValueAsInt(xmlConfig, "PopulationLoggingBatchInterval");
+
+            // Validate experiment configuration parameters
+            if (ValidateConfigParameters(out var errorMessage)) throw new ConfigurationException(errorMessage);
         }
 
         /// <inheritdoc />
@@ -225,35 +213,31 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
                 mazeGenome.EvaluationInfo.SetFitness(0);
             }
 
-            // Create the NEAT evolution algorithm parameters
+            // Create the NEAT evolution algorithm parameters (no agent queue speciation)
             var neatEaParams = new EvolutionAlgorithmParameters
             {
-                SpecieCount = AgentNumSpecies,
-                MaxSpecieSize =
-                    AgentNumSpecies > 0
-                        ? AgentDefaultPopulationSize / AgentNumSpecies
-                        : AgentDefaultPopulationSize
+                SpecieCount = 0,
+                MaxSpecieSize = AgentDefaultPopulationSize
             };
 
-            // Create the maze evolution algorithm parameters
+            // Create the maze evolution algorithm parameters (no maze queue speciation)
             var mazeEaParams = new EvolutionAlgorithmParameters
             {
-                SpecieCount = MazeNumSpecies,
-                MaxSpecieSize =
-                    MazeNumSpecies > 0 ? MazeDefaultPopulationSize / MazeNumSpecies : MazeDefaultPopulationSize
+                SpecieCount = 0,
+                MaxSpecieSize = MazeDefaultPopulationSize
             };
 
             // Create the NEAT (i.e. navigator) queueing evolution algorithm
             AbstractEvolutionAlgorithm<NeatGenome> neatEvolutionAlgorithm = new QueueEvolutionAlgorithm<NeatGenome>(
                 neatEaParams, new NeatAlgorithmStats(neatEaParams), null, NavigatorBatchSize, RunPhase.Primary,
                 _navigatorEvolutionDataLogger, _navigatorLogFieldEnableMap, _navigatorPopulationDataLogger,
-                _navigatorGenomeDataLogger, _populationLoggingBatchInterval);
+                _navigatorGenomeDataLogger, _navigatorSimulationTrialDataLogger, _populationLoggingBatchInterval);
 
             // Create the maze queueing evolution algorithm
             AbstractEvolutionAlgorithm<MazeGenome> mazeEvolutionAlgorithm = new QueueEvolutionAlgorithm<MazeGenome>(
                 mazeEaParams, new MazeAlgorithmStats(mazeEaParams), null, MazeBatchSize, RunPhase.Primary,
                 _mazeEvolutionDataLogger, _mazeLogFieldEnableMap, _mazePopulationDataLogger, _mazeGenomeDataLogger,
-                _populationLoggingBatchInterval);
+                _mazeSimulationTrialDataLogger, _populationLoggingBatchInterval);
 
             // Create the maze phenome evaluator
             IPhenomeEvaluator<MazeStructure, BehaviorInfo> mazeEvaluator =
@@ -273,11 +257,13 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
 
             // Create the maze genome evaluator
             IGenomeEvaluator<MazeGenome> mazeFitnessEvaluator =
-                new ParallelGenomeBehaviorEvaluator<MazeGenome, MazeStructure>(mazeGenomeDecoder, mazeEvaluator, SearchType.MinimalCriteriaSearch, ParallelOptions);
+                new ParallelGenomeBehaviorEvaluator<MazeGenome, MazeStructure>(mazeGenomeDecoder, mazeEvaluator,
+                    SearchType.MinimalCriteriaSearch, ParallelOptions);
 
             // Create navigator genome evaluator
             IGenomeEvaluator<NeatGenome> navigatorFitnessEvaluator =
-                new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(navigatorGenomeDecoder, navigatorEvaluator, SearchType.MinimalCriteriaSearch, ParallelOptions);
+                new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(navigatorGenomeDecoder, navigatorEvaluator,
+                    SearchType.MinimalCriteriaSearch, ParallelOptions);
 
             // Verify that the seed agent population satisfies MC constraints of both populations so that MCC starts in
             // a valid state
@@ -321,6 +307,11 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         private IDataLogger _navigatorGenomeDataLogger;
 
         /// <summary>
+        ///     Logs the details and results of trials within a navigator evaluation.
+        /// </summary>
+        private IDataLogger _navigatorSimulationTrialDataLogger;
+
+        /// <summary>
         ///     Logs statistics about the maze populations for every batch.
         /// </summary>
         private IDataLogger _mazeEvolutionDataLogger;
@@ -335,6 +326,11 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         /// </summary>
         private IDataLogger _mazeGenomeDataLogger;
 
+        /// <summary>
+        ///     Logs the details and results of trials within a maze evaluation.
+        /// </summary>
+        private IDataLogger _mazeSimulationTrialDataLogger;
+        
         /// <summary>
         ///     Dictionary which indicates logger fields to be enabled/disabled for navigator genomes.
         /// </summary>

@@ -92,29 +92,11 @@ namespace SharpNeat.Genomes.Neat
                     ? new LoggableElement(EvolutionFieldElements.ChampGenomeEvaluationCount,
                         EvaluationInfo.EvaluationCount)
                     : null,
-                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.ChampGenomeDistanceToTarget) == true &&
-                 logFieldEnableMap[EvolutionFieldElements.ChampGenomeDistanceToTarget])
-                    ? new LoggableElement(EvolutionFieldElements.ChampGenomeDistanceToTarget,
-                        EvaluationInfo.ObjectiveDistance)
-                    : null,
                 (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.ChampGenomeFitness) == true &&
                  logFieldEnableMap[EvolutionFieldElements.ChampGenomeFitness])
                     ? new LoggableElement(EvolutionFieldElements.ChampGenomeFitness, EvaluationInfo.Fitness)
                     : null
             };
-
-            // Add all behavior characteriazation elements as a separate column
-            if (EvaluationInfo.BehaviorCharacterization != null)
-            {
-                if ((logFieldEnableMap?.ContainsKey(EvolutionFieldElements.ChampGenomeBehaviorX) == true &&
-                     logFieldEnableMap[EvolutionFieldElements.ChampGenomeBehaviorX]))
-                    loggableElements.Add(new LoggableElement(EvolutionFieldElements.ChampGenomeBehaviorX,
-                        EvaluationInfo.BehaviorCharacterization[0]));
-                if ((logFieldEnableMap?.ContainsKey(EvolutionFieldElements.ChampGenomeBehaviorY) == true &&
-                     logFieldEnableMap[EvolutionFieldElements.ChampGenomeBehaviorY]))
-                    loggableElements.Add(new LoggableElement(EvolutionFieldElements.ChampGenomeBehaviorY,
-                        EvaluationInfo.BehaviorCharacterization[1]));
-            }
 
             // Only log champ genome XML if explicitly specified
             if (logFieldEnableMap != null && logFieldEnableMap.ContainsKey(EvolutionFieldElements.ChampGenomeXml) &&

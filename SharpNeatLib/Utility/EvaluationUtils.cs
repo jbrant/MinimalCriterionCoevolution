@@ -1,6 +1,7 @@
 ﻿#region
 
 using System.Collections.Generic;
+using System.Linq;
 using Redzen.Random;
 using SharpNeat.Core;
 
@@ -26,14 +27,8 @@ namespace SharpNeat.Utility
         /// <param name="genomeDecoder">The decoder for decoding the genotype to its phenotypic representation.</param>
         /// <param name="phenomeEvaluator">The phenome evaluator.</param>
         /// <param name="currentGeneration">The generation during which the given genome is being evaluated.</param>
-        /// <param name="evaluationLogger">The evaluation logger.</param>
-        /// <param name="decodeGenomeToXml">
-        ///     Whether a genome should be decoded to its XML string representation (generally used to
-        ///     support logging).
-        /// </param>
         public static void EvaluateBehavior_NonCaching(TGenome genome, IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
-            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, uint currentGeneration,
-            IDataLogger evaluationLogger, bool decodeGenomeToXml)
+            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, uint currentGeneration)
         {
             var phenome = genomeDecoder.Decode(genome);
 
@@ -42,18 +37,15 @@ namespace SharpNeat.Utility
                 // Non-viable genome.
                 genome.EvaluationInfo.SetFitness(0.0);
                 genome.EvaluationInfo.AuxFitnessArr = null;
-                genome.EvaluationInfo.BehaviorCharacterization = new double[0];
+                genome.EvaluationInfo.TrialData = null;
             }
             else
             {
                 // Evaluate the behavior, update the genome's behavior characterization, calculate the distance to the domain objective,
                 // and indicate if the genome is viable based on whether the minimal criteria was satisfied
-                var behaviorInfo = phenomeEvaluator.Evaluate(phenome, currentGeneration,
-                    evaluationLogger);
-                genome.EvaluationInfo.BehaviorCharacterization = behaviorInfo.Behaviors;
-                genome.EvaluationInfo.ObjectiveDistance = behaviorInfo.ObjectiveDistance;
+                var behaviorInfo = phenomeEvaluator.Evaluate(phenome, currentGeneration);
+                genome.EvaluationInfo.TrialData = behaviorInfo.TrialData;
                 genome.EvaluationInfo.IsViable = behaviorInfo.DoesBehaviorSatisfyMinimalCriteria;
-                genome.EvaluationInfo.NicheId = behaviorInfo.NicheId;
             }
         }
 
@@ -66,14 +58,8 @@ namespace SharpNeat.Utility
         /// <param name="genomeDecoder">The decoder for decoding the genotype to its phenotypic representation.</param>
         /// <param name="phenomeEvaluator">The phenome evaluator.</param>
         /// <param name="currentGeneration">The generation during which the given genome is being evaluated.</param>
-        /// <param name="evaluationLogger">The evaluation logger.</param>
-        /// <param name="decodeGenomeToXml">
-        ///     Whether a genome should be decoded to its XML string representation (generally used to
-        ///     support logging).
-        /// </param>
         public static void EvaluateBehavior_Caching(TGenome genome, IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
-            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, uint currentGeneration,
-            IDataLogger evaluationLogger, bool decodeGenomeToXml)
+            IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator, uint currentGeneration)
         {
             var phenome = (TPhenome) genome.CachedPhenome;
 
@@ -89,18 +75,15 @@ namespace SharpNeat.Utility
                 // Non-viable genome.
                 genome.EvaluationInfo.SetFitness(0.0);
                 genome.EvaluationInfo.AuxFitnessArr = null;
-                genome.EvaluationInfo.BehaviorCharacterization = new double[0];
+                genome.EvaluationInfo.TrialData = null;
             }
             else
             {
                 // Evaluate the behavior, update the genome's behavior characterization, calculate the distance to the domain objective,
                 // and indicate if the genome is viable based on whether the minimal criteria was satisfied
-                var behaviorInfo = phenomeEvaluator.Evaluate(phenome, currentGeneration,
-                    evaluationLogger);
-                genome.EvaluationInfo.BehaviorCharacterization = behaviorInfo.Behaviors;
-                genome.EvaluationInfo.ObjectiveDistance = behaviorInfo.ObjectiveDistance;
+                var behaviorInfo = phenomeEvaluator.Evaluate(phenome, currentGeneration);
+                genome.EvaluationInfo.TrialData = behaviorInfo.TrialData;
                 genome.EvaluationInfo.IsViable = behaviorInfo.DoesBehaviorSatisfyMinimalCriteria;
-                genome.EvaluationInfo.NicheId = behaviorInfo.NicheId;
             }
         }
 
@@ -111,14 +94,8 @@ namespace SharpNeat.Utility
         /// <param name="genomeDecoder">The decoder for decoding the genotype to its phenotypic representation.</param>
         /// <param name="phenomeEvaluator">The phenome evaluator.</param>
         /// <param name="currentGeneration">The generation during which the given genome is being evaluated.</param>
-        /// <param name="evaluationLogger">The evaluation logger.</param>
-        /// <param name="decodeGenomeToXml">
-        ///     Whether a genome should be decoded to its XML string representation (generally used to
-        ///     support logging).
-        /// </param>
         public static void EvaluateFitness_NonCaching(TGenome genome, IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
-            IPhenomeEvaluator<TPhenome, FitnessInfo> phenomeEvaluator, uint currentGeneration,
-            IDataLogger evaluationLogger, bool decodeGenomeToXml)
+            IPhenomeEvaluator<TPhenome, FitnessInfo> phenomeEvaluator, uint currentGeneration)
         {
             var phenome = genomeDecoder.Decode(genome);
 
@@ -131,12 +108,9 @@ namespace SharpNeat.Utility
             else
             {
                 // Run evaluation and set fitness/auxiliary fitness
-                var fitnessInfo = phenomeEvaluator.Evaluate(phenome, currentGeneration,
-                    evaluationLogger);
+                var fitnessInfo = phenomeEvaluator.Evaluate(phenome, currentGeneration);
                 genome.EvaluationInfo.SetFitness(fitnessInfo.Fitness);
                 genome.EvaluationInfo.AuxFitnessArr = fitnessInfo.AuxFitnessArr;
-                genome.EvaluationInfo.NicheId = fitnessInfo.NicheId;
-                genome.EvaluationInfo.ObjectiveDistance = fitnessInfo.ObjectiveDistance;
             }
         }
 
@@ -148,14 +122,8 @@ namespace SharpNeat.Utility
         /// <param name="genomeDecoder">The decoder for decoding the genotype to its phenotypic representation.</param>
         /// <param name="phenomeEvaluator">The phenome evaluator.</param>
         /// <param name="currentGeneration">The generation during which the given genome is being evaluated.</param>
-        /// <param name="evaluationLogger">The evaluation logger.</param>
-        /// <param name="decodeGenomeToXml">
-        ///     Whether a genome should be decoded to its XML string representation (generally used to
-        ///     support logging).
-        /// </param>
         public static void EvaluateFitness_Caching(TGenome genome, IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
-            IPhenomeEvaluator<TPhenome, FitnessInfo> phenomeEvaluator, uint currentGeneration,
-            IDataLogger evaluationLogger, bool decodeGenomeToXml)
+            IPhenomeEvaluator<TPhenome, FitnessInfo> phenomeEvaluator, uint currentGeneration)
         {
             var phenome = (TPhenome) genome.CachedPhenome;
 
@@ -174,12 +142,9 @@ namespace SharpNeat.Utility
             }
             else
             {
-                var fitnessInfo = phenomeEvaluator.Evaluate(phenome, currentGeneration,
-                    evaluationLogger);
+                var fitnessInfo = phenomeEvaluator.Evaluate(phenome, currentGeneration);
                 genome.EvaluationInfo.SetFitness(fitnessInfo.Fitness);
                 genome.EvaluationInfo.AuxFitnessArr = fitnessInfo.AuxFitnessArr;
-                genome.EvaluationInfo.NicheId = fitnessInfo.NicheId;
-                genome.EvaluationInfo.ObjectiveDistance = fitnessInfo.ObjectiveDistance;
             }
         }
 
@@ -208,7 +173,7 @@ namespace SharpNeat.Utility
             {
                 // Compare the current genome's behavior to its k-nearest neighbors in behavior space
                 var fitness =
-                    NoveltyUtils<TGenome>.CalculateBehavioralDistance(genome.EvaluationInfo.BehaviorCharacterization,
+                    NoveltyUtils<TGenome>.CalculateBehavioralDistance(genome.EvaluationInfo.TrialData,
                         genomeList, nearestNeighbors, noveltyArchive);
                 fitnessInfo = new FitnessInfo(fitness, fitness);
             }
@@ -216,7 +181,6 @@ namespace SharpNeat.Utility
             // Update the fitness as the behavioral novelty
             genome.EvaluationInfo.SetFitness(fitnessInfo.Fitness);
             genome.EvaluationInfo.AuxFitnessArr = fitnessInfo.AuxFitnessArr;
-            genome.EvaluationInfo.NicheId = fitnessInfo.NicheId;
         }
 
         /// <summary>
@@ -235,10 +199,11 @@ namespace SharpNeat.Utility
             // If the flag is set, assign the calculated objective distance as the fitness.  
             // This is mostly for display purposes because the methods that use this (i.e. MCS) 
             // are not objectively driven.
-            if (assignObjectiveDistanceAsFitness)
+            if (assignObjectiveDistanceAsFitness && genome.EvaluationInfo.TrialData.Any())
             {
-                fitnessInfo = new FitnessInfo(genome.EvaluationInfo.ObjectiveDistance,
-                    genome.EvaluationInfo.ObjectiveDistance);
+                fitnessInfo = new FitnessInfo(
+                    genome.EvaluationInfo.TrialData[0].ObjectiveDistance,
+                    genome.EvaluationInfo.TrialData[0].ObjectiveDistance);
             }
             // Otherwise, we're going to assign a random fitness score (since there is no other heuristic)
             else

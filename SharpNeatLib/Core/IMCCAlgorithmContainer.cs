@@ -62,22 +62,22 @@ namespace SharpNeat.Core
         /// <summary>
         ///     The current champion genome from the first population.
         /// </summary>
-        TGenome1 Population1CurrentChampGenome { get; }
+        TGenome1 AgentChampGenome { get; }
 
         /// <summary>
         ///     The current champion genome from the second population.
         /// </summary>
-        TGenome2 Population2CurrentChampGenome { get; }
+        TGenome2 EnvironmentChampGenome { get; }
 
         /// <summary>
         ///     Descriptive statistics for the first population.
         /// </summary>
-        IEvolutionAlgorithmStats Population1Statistics { get; }
+        IEvolutionAlgorithmStats AgentPopulationStats { get; }
 
         /// <summary>
         ///     Descriptive statistics for the second population.
         /// </summary>
-        IEvolutionAlgorithmStats Population2Statistics { get; }
+        IEvolutionAlgorithmStats EnvironmentPopulationStats { get; }
 
         /// <summary>
         ///     Notifies listeners that some state change has occured.
@@ -93,12 +93,12 @@ namespace SharpNeat.Core
         ///     Initializes the evolution algorithms with the provided IGenomeFitnessEvaluator, IGenomeFactory
         ///     and an initial population of genomes for both populations.
         /// </summary>
-        void Initialize(IGenomeEvaluator<TGenome1> genomeFitnessEvaluator1,
-            IGenomeFactory<TGenome1> genomeFactory1,
-            List<TGenome1> genomeList1,
-            IGenomeEvaluator<TGenome2> genomeFitnessEvaluator2,
-            IGenomeFactory<TGenome2> genomeFactory2,
-            List<TGenome2> genomeList2,
+        void Initialize(IGenomeEvaluator<TGenome1> agentFitnessEvaluator,
+            IGenomeFactory<TGenome1> agentFactory,
+            List<TGenome1> agentList,
+            IGenomeEvaluator<TGenome2> environmentFitnessEvaluator,
+            IGenomeFactory<TGenome2> environmentFactory,
+            List<TGenome2> environmentList,
             int? maxGenerations,
             ulong? maxEvaluations);
 
@@ -106,14 +106,14 @@ namespace SharpNeat.Core
         ///     Initializes the evolution algorithms with the provided IGenomeFitnessEvaluator, IGenomeFactory
         ///     and an initial population of genomes for both populations as well as the maximum population size.
         /// </summary>
-        void Initialize(IGenomeEvaluator<TGenome1> genomeFitnessEvaluator1,
-            IGenomeFactory<TGenome1> genomeFactory1,
-            List<TGenome1> genomeList1,
-            int maxPopulationSize1,
-            IGenomeEvaluator<TGenome2> genomeFitnessEvaluator2,
-            IGenomeFactory<TGenome2> genomeFactory2,
-            List<TGenome2> genomeList2,
-            int maxPopulationSize2,
+        void Initialize(IGenomeEvaluator<TGenome1> agentFitnessEvaluator,
+            IGenomeFactory<TGenome1> agentFactory,
+            List<TGenome1> agentList,
+            int maxAgentPopulationSize,
+            IGenomeEvaluator<TGenome2> environmentFitnessEvaluator,
+            IGenomeFactory<TGenome2> environmentFactory,
+            List<TGenome2> environmentList,
+            int maxEnvironmentPopulationSize,
             int? maxGenerations,
             ulong? maxEvaluations);
 
@@ -121,12 +121,12 @@ namespace SharpNeat.Core
         ///     Initializes the evolution algorithms with the provided IGenomeFitnessEvaluator
         ///     and an IGenomeFactory that can be used to create two initial populations of genomes.
         /// </summary>
-        void Initialize(IGenomeEvaluator<TGenome1> genomeFitnessEvaluator1,
-            IGenomeFactory<TGenome1> genomeFactory1,
-            int populationSize1,
-            IGenomeEvaluator<TGenome2> genomeFitnessEvaluator2,
-            IGenomeFactory<TGenome2> genomeFactory2,
-            int populationSize2,
+        void Initialize(IGenomeEvaluator<TGenome1> agentFitnessEvaluator,
+            IGenomeFactory<TGenome1> agentFactory,
+            int agentPopulationSize,
+            IGenomeEvaluator<TGenome2> environmentFitnessEvaluator,
+            IGenomeFactory<TGenome2> environmentFactory,
+            int environmentPopulationSize,
             int? maxGenerations,
             ulong? maxEvaluations);
 

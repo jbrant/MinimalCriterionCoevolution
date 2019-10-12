@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Config>
+  <ExperimentClass></ExperimentClass>
   <SearchAlgorithm></SearchAlgorithm>
   <SelectionAlgorithm></SelectionAlgorithm>
   <MaxInitializationEvaluations>100000</MaxInitializationEvaluations>
@@ -11,6 +12,7 @@
   <MazeNumSpecies></MazeNumSpecies>
   <AgentSpecieSizeFixed></AgentSpecieSizeFixed>
   <MazeSpecieSizeFixed></MazeSpecieSizeFixed>
+  <ResourceLimit></ResourceLimit>
   <Activation>
     <Scheme>Acyclic</Scheme>
   </Activation>

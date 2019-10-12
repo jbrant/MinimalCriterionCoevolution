@@ -1,7 +1,6 @@
 ﻿#region
 
 using System.Collections.Generic;
-using SharpNeat.Phenomes;
 
 #endregion
 
@@ -13,7 +12,7 @@ namespace SharpNeat.Core
     ///     perhaps across several execution threads, or in some collective evaluation scheme such as an artificial
     ///     life/world scenario.
     /// </summary>
-    public interface IGenomeEvaluator<TGenome> : ILoggable
+    public interface IGenomeEvaluator<TGenome>
         where TGenome : class, IGenome<TGenome>
     {
         /// <summary>
@@ -44,23 +43,18 @@ namespace SharpNeat.Core
         void Cleanup();
 
         /// <summary>
-        ///     Update the genome evaluator based on some characteristic of the given population.
-        /// </summary>
-        /// <param name="population">The current population.</param>
-        void Update(List<TGenome> population);
-
-        /// <summary>
         ///     Updates the environment or other evaluation criteria against which the evaluated genomes are being compared.  This
         ///     is typically used in a coevoluationary context.
         /// </summary>
         /// <param name="comparisonPhenomes">The phenomes against which the evaluation is being carried out.</param>
-        void UpdateEvaluationBaseline(IEnumerable<object> comparisonPhenomes);
+        /// <param name="lastGeneration">The generation that was just executed.</param>
+        void UpdateEvaluationBaseline(IEnumerable<object> comparisonPhenomes, uint lastGeneration);
 
         /// <summary>
         ///     Decodes a list of genomes to their corresponding phenotypes.
         /// </summary>
         /// <param name="genomeList">The list of genomes to decode.</param>
-        /// <returns></returns>
+        /// <returns>Collection of decoded phenotypes.</returns>
         IEnumerable<object> DecodeGenomes(IList<TGenome> genomeList);
 
         /// <summary>

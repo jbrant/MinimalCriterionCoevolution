@@ -145,6 +145,30 @@ namespace MazeExperimentSupportLib
         }
 
         /// <summary>
+        ///     Writes the given maze diversity results to the experiment database or to a flat file.
+        /// </summary>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <param name="mazeDiversityUnits">The maze diversity results.</param>
+        /// <param name="writeToDatabase">
+        ///     Indicates whether evaluation results should be written directly to the database or to a
+        ///     flat file.
+        /// </param>
+        public static void WriteMazeDiversityData(int experimentId, int run,
+            IEnumerable<MazeDiversityUnit> mazeDiversityUnits, bool writeToDatabase)
+        {
+            // Write results to the database if the option has been specified
+            if (writeToDatabase)
+            {
+                throw new NotImplementedException(
+                    "Direct write to database for maze diversity not yet implemented!");
+            }
+
+            // Otherwise, write to the flat file output
+            WriteMazeDiversityDataToFile(experimentId, run, mazeDiversityUnits);
+        }
+
+        /// <summary>
         ///     Writes the cluster diversity results to the experiment database or to a flat file.
         /// </summary>
         /// <param name="experimentId">The experiment that was executed.</param>
@@ -436,6 +460,17 @@ namespace MazeExperimentSupportLib
             }
 
             return mazeGenomeIds;
+        }
+
+        /// <summary>
+        ///     Retrieves the maze genome XML for a particular batch of a given run/experiment.
+        /// </summary>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <returns>The maze genome XML.</returns>
+        public static IList<string> GetMazeGenomeXml(int experimentId, int run)
+        {
+            return GetMazeGenomeData(experimentId, run).Select(mazeGenome => mazeGenome.GenomeXml).ToList();
         }
 
         /// <summary>
@@ -938,7 +973,8 @@ namespace MazeExperimentSupportLib
                                     navigatorData =>
                                         navigatorData.ExperimentDictionaryId == experimentId &&
                                         navigatorData.Run == run &&
-                                        navigatorData.RunPhaseFkNavigation.RunPhaseName == RunPhase.Initialization.ToString())
+                                        navigatorData.RunPhaseFkNavigation.RunPhaseName ==
+                                        RunPhase.Initialization.ToString())
                                 .Max(navigatorData => navigatorData.TotalEvaluations);
                     }
 
@@ -1038,7 +1074,8 @@ namespace MazeExperimentSupportLib
                                 nav =>
                                     experimentId == nav.ExperimentDictionaryId && run == nav.Run &&
                                     batch == nav.Generation &&
-                                    RunPhase.Primary.ToString().Equals(nav.RunPhaseFkNavigation.RunPhaseName) && nav.IsMazeSolved)
+                                    RunPhase.Primary.ToString().Equals(nav.RunPhaseFkNavigation.RunPhaseName) &&
+                                    nav.IsMazeSolved)
                             .ToList();
                     }
 
@@ -1065,7 +1102,7 @@ namespace MazeExperimentSupportLib
         /// <param name="run">The run number of the given experiment.</param>
         /// <param name="mazeGenomeIds">The list of maze genome IDs by which to filter the navigation results.</param>
         /// <returns>The list of distinct maze/navigator combinations that were successful for the given experiment and run.</returns>
-        public static IList<MccmazeNavigatorResult> GetSuccessfulNavigationPerMaze(int experimentId, int run,
+        public static IList<MccmazeNavigatorResult> GetSuccessfulNavigationResultPerMaze(int experimentId, int run,
             IList<int> mazeGenomeIds)
         {
             IList<MccmazeNavigatorResult> navigationResults = null;
@@ -1103,6 +1140,91 @@ namespace MazeExperimentSupportLib
             }
 
             return navigationResults;
+        }
+
+        /// <summary>
+        ///     For each maze, retrieves the first navigator that solved within the given experiment and run.
+        /// </summary>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <param name="mazeGenomeIds">The list of maze genome IDs by which to filter the navigation results.</param>
+        /// <returns>The list of distinct maze navigation trials that were successful for the given experiment and run.</returns>
+        public static IList<MccexperimentMazeTrials> GetSuccessfulNavigationTrialPerMaze(int experimentId, int run,
+            IList<int> mazeGenomeIds)
+        {
+            IList<MccexperimentMazeTrials> navigationTrials = null;
+            var querySuccess = false;
+            var retryCnt = 0;
+
+            while (querySuccess == false && retryCnt <= MaxQueryRetryCnt)
+            {
+                try
+                {
+                    using (var context = new ExperimentDataContext())
+                    {
+                        // Get single maze trial for each of the specified maze IDs over the entirety of the run
+                        navigationTrials = context.MccexperimentMazeTrials.Where(
+                                nav =>
+                                    experimentId == nav.ExperimentDictionaryId && run == nav.Run &&
+                                    nav.IsMazeSolved && mazeGenomeIds.Contains(nav.MazeGenomeId))
+                            .GroupBy(nav => nav.MazeGenomeId)
+                            .Select(m => m.OrderBy(x => x.MazeGenomeId).FirstOrDefault())
+                            .ToList();
+                    }
+
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
+                    }
+
+                    querySuccess = true;
+                }
+                catch (Exception e)
+                {
+                    HandleQueryException(MethodBase.GetCurrentMethod().ToString(), retryCnt++, e);
+                }
+            }
+
+            return navigationTrials;
+        }
+
+        /// <summary>
+        ///     Determines whether maze trial data exists for the given experiment and run.
+        /// </summary>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <returns>Flag indicating whether maze trial data exists for the given experiment and run.</returns>
+        public static bool IsMazeTrialDataAvailable(int experimentId, int run)
+        {
+            var isTrialDataAvailable = false;
+            var querySuccess = false;
+            var retryCnt = 0;
+
+            while (querySuccess == false && retryCnt <= MaxQueryRetryCnt)
+            {
+                try
+                {
+                    using (var context = new ExperimentDataContext())
+                    {
+                        // Determine whether maze trial data exists for the given experiment and run
+                        isTrialDataAvailable = context.MccexperimentMazeTrials.Any(trial =>
+                            experimentId == trial.ExperimentDictionaryId && run == trial.Run);
+                    }
+
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
+                    }
+
+                    querySuccess = true;
+                }
+                catch (Exception e)
+                {
+                    HandleQueryException(MethodBase.GetCurrentMethod().ToString(), retryCnt++, e);
+                }
+            }
+
+            return isTrialDataAvailable;
         }
 
         /// <summary>
@@ -1256,9 +1378,10 @@ namespace MazeExperimentSupportLib
                 throw new Exception($"Cannot close file writer as no file writer of type {fileType} has been created.");
             }
 
-            // Close the file writer and dispose of the stream
+            // Close the file writer, dispose of the stream and remove from the file writers dictionary
             FileWriters[fileType].Close();
             FileWriters[fileType].Dispose();
+            FileWriters.Remove(fileType);
         }
 
         /// <summary>
@@ -1481,7 +1604,7 @@ namespace MazeExperimentSupportLib
                             experimentId.ToString(),
                             run.ToString(),
                             batch.ToString(),
-                            ((idx / 2) + 1).ToString(), // this is the timestep
+                            (idx / 2 + 1).ToString(), // this is the timestep
                             evaluationUnit.MazeId.ToString(),
                             evaluationUnit.AgentId.ToString(),
                             evaluationUnit.AgentTrajectory[idx].ToString(CultureInfo.InvariantCulture),
@@ -1518,7 +1641,7 @@ namespace MazeExperimentSupportLib
                             ExperimentDictionaryId = experimentId,
                             Run = run,
                             Generation = batch,
-                            Timestep = ((idx / 2) + 1), // this is the timestep
+                            Timestep = idx / 2 + 1, // this is the timestep
                             MazeGenomeId = evaluationUnit.MazeId,
                             NavigatorGenomeId = evaluationUnit.AgentId,
                             Xposition = Convert.ToDecimal(evaluationUnit.AgentTrajectory[idx]),
@@ -1611,6 +1734,40 @@ namespace MazeExperimentSupportLib
 
             // Immediately flush to the output file
             FileWriters[OutputFileType.TrajectoryDiversityData].Flush();
+        }
+
+        /// <summary>
+        ///     Writes the given maze diversity results to a flat file.
+        /// </summary>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <param name="mazeDiversityUnits">The maze diversity data to persist.</param>
+        private static void WriteMazeDiversityDataToFile(int experimentId, int run,
+            IEnumerable<MazeDiversityUnit> mazeDiversityUnits)
+        {
+            // Make sure the file writer actually exists before attempting to write to it
+            if (FileWriters.ContainsKey(OutputFileType.MazeDiversityData) == false)
+            {
+                throw new Exception(
+                    $"Cannot write to output stream as no file writer of type {OutputFileType.MazeDiversityData} has been created.");
+            }
+
+            // Loop through the maze diversity units and write each row
+            foreach (var diversityUnit in mazeDiversityUnits)
+            {
+                FileWriters[OutputFileType.MazeDiversityData].WriteLine(string.Join(FileDelimiter,
+                    new List<string>
+                    {
+                        experimentId.ToString(),
+                        run.ToString(),
+                        diversityUnit.MazeId1.ToString(),
+                        diversityUnit.MazeId2.ToString(),
+                        diversityUnit.MazeDiversityScore.ToString(CultureInfo.InvariantCulture)
+                    }));
+            }
+
+            // Immediately flush to the output file
+            FileWriters[OutputFileType.MazeDiversityData].Flush();
         }
 
         /// <summary>

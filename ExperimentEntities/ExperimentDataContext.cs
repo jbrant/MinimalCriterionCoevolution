@@ -20,15 +20,16 @@ namespace ExperimentEntities
         public virtual DbSet<MccexperimentExtantNavigatorPopulation> MccexperimentExtantNavigatorPopulation { get; set; }
         public virtual DbSet<MccexperimentMazeEvaluationData> MccexperimentMazeEvaluationData { get; set; }
         public virtual DbSet<MccexperimentMazeGenome> MccexperimentMazeGenomes { get; set; }
+        public virtual DbSet<MccexperimentMazeResourceUsage> MccexperimentMazeResourceUsage { get; set; }
+        public virtual DbSet<MccexperimentMazeTrials> MccexperimentMazeTrials { get; set; }
         public virtual DbSet<MccexperimentNavigatorEvaluationData> MccexperimentNavigatorEvaluationData { get; set; }
         public virtual DbSet<MccexperimentNavigatorGenome> MccexperimentNavigatorGenomes { get; set; }
+        public virtual DbSet<MccexperimentNavigatorTrials> MccexperimentNavigatorTrials { get; set; }
         public virtual DbSet<MccfullTrajectory> MccfullTrajectories { get; set; }
         public virtual DbSet<MccmazeNavigatorResult> MccmazeNavigatorResults { get; set; }
         public virtual DbSet<McctrajectoryDiversity> McctrajectoryDiversity { get; set; }
         public virtual DbSet<McsexperimentEvaluationData> McsexperimentEvaluationData { get; set; }
         public virtual DbSet<McsexperimentOrganismStateData> McsexperimentOrganismStateData { get; set; }
-        public virtual DbSet<NoveltyExperimentEvaluationData> NoveltyExperimentEvaluationData { get; set; }
-        public virtual DbSet<NoveltyExperimentOrganismStateData> NoveltyExperimentOrganismStateData { get; set; }
         public virtual DbSet<RunPhase> RunPhase { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -106,6 +107,30 @@ namespace ExperimentEntities
                     .IsRequired()
                     .HasColumnType("xml");
             });
+            
+            modelBuilder.Entity<MccexperimentMazeResourceUsage>(entity =>
+            {
+                entity.HasKey(e => new { e.ExperimentDictionaryId, e.Run, e.Generation, e.GenomeId });
+
+                entity.ToTable("MCCExperimentMazeResourceUsage");
+
+                entity.Property(e => e.ExperimentDictionaryId).HasColumnName("ExperimentDictionaryID");
+
+                entity.Property(e => e.GenomeId).HasColumnName("GenomeID");
+            });
+            
+            modelBuilder.Entity<MccexperimentMazeTrials>(entity =>
+            {
+                entity.HasKey(e => new { e.ExperimentDictionaryId, e.Run, e.Generation, e.MazeGenomeId, e.PairedNavigatorGenomeId });
+
+                entity.ToTable("MCCExperimentMazeTrials");
+
+                entity.Property(e => e.ExperimentDictionaryId).HasColumnName("ExperimentDictionaryID");
+
+                entity.Property(e => e.MazeGenomeId).HasColumnName("MazeGenomeID");
+
+                entity.Property(e => e.PairedNavigatorGenomeId).HasColumnName("PairedNavigatorGenomeID");
+            });
 
             modelBuilder.Entity<MccexperimentNavigatorEvaluationData>(entity =>
             {
@@ -145,6 +170,19 @@ namespace ExperimentEntities
                     .HasForeignKey(d => d.RunPhaseFk)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_MCCExperimentNavigatorGenomes_RunPhase");
+            });
+            
+            modelBuilder.Entity<MccexperimentNavigatorTrials>(entity =>
+            {
+                entity.HasKey(e => new { e.ExperimentDictionaryId, e.Run, e.Generation, e.NavigatorGenomeId, e.PairedMazeGenomeId });
+
+                entity.ToTable("MCCExperimentNavigatorTrials");
+
+                entity.Property(e => e.ExperimentDictionaryId).HasColumnName("ExperimentDictionaryID");
+
+                entity.Property(e => e.NavigatorGenomeId).HasColumnName("NavigatorGenomeID");
+
+                entity.Property(e => e.PairedMazeGenomeId).HasColumnName("PairedMazeGenomeID");
             });
 
             modelBuilder.Entity<MccfullTrajectory>(entity =>

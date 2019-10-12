@@ -26,7 +26,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
     ///     from the "global" queues (although, species are logical partitions - individuals are still physically stored in two
     ///     queues).
     /// </summary>
-    public class MCCSpeciationExperiment : BaseMCCMazeNavigationExperiment
+    public class MCCLimitedResourcesExperiment : BaseMCCMazeNavigationExperiment
     {
         #region Private methods
 
@@ -43,24 +43,13 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             // Set error message to null by default
             message = null;
 
-            // Check species range constraints
-            if (_agentNumSpecies < 0)
-                message = $"Agent species count [{_agentNumSpecies}], if specified, must be a zero or positive integer";
-            else if (_mazeNumSpecies < 0)
-                message = $"Maze species count [{_mazeNumSpecies}], if specified, must be a zero or positive integer";
-            else if (_agentNumSpecies > AgentSeedGenomeCount)
+            // Check resource constraint setting
+            if (_resourceLimit < 1)
                 message =
-                    $"Agent species count [{_agentNumSpecies}] must be no greater than the agent seed genome count [{AgentSeedGenomeCount}] (otherwise there will be empty species)";
-            else if (_mazeNumSpecies > MazeSeedGenomeCount)
+                    $"Resource limit [{_resourceLimit}] must be greater than 1, otherwise maze cannot be used to satisfy the MC of any agent";
+            else if (_resourceLimit * MazeSeedGenomeCount < AgentSeedGenomeCount)
                 message =
-                    $"Maze species count [{_mazeNumSpecies}] must be no greater than the maze seed genome count [{MazeSeedGenomeCount}] (otherwise there will be empty species)";
-            // Ensure that batch size evenly divisible by number of species
-            else if (NavigatorBatchSize % _agentNumSpecies != 0)
-                message =
-                    $"Agent batch size [{NavigatorBatchSize}] must be evenly divisible by the number of species [{_agentNumSpecies}]";
-            else if (MazeBatchSize % _mazeNumSpecies != 0)
-                message =
-                    $"Maze batch size [{MazeBatchSize}] must be evenly divisible by the number of species [{_mazeNumSpecies}]";
+                    $"Product of resource limit [{_resourceLimit}] and maze seed genome count [{MazeSeedGenomeCount}] must be at least as large as agent seed genome count [{AgentSeedGenomeCount}], otherwise not all agent seed genomes can be evolved";
             // Check base class parameters
             else if (base.ValidateConfigParameters(out var errorMessage))
                 message = errorMessage;
@@ -74,14 +63,10 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         #region Private members
 
         /// <summary>
-        ///     The number of species in the agent queue.
+        ///     The resource limit for mazes (i.e. the maximum number of times that it can be used by an agent for satisfying the
+        ///     agent's MC).
         /// </summary>
-        private int _agentNumSpecies;
-
-        /// <summary>
-        ///     The number of species in the maze queue.
-        /// </summary>
-        private int _mazeNumSpecies;
+        private int _resourceLimit;
 
         /// <summary>
         ///     Logs statistics about the navigator populations for every batch.
@@ -117,6 +102,11 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         ///     Logs the definitions of the maze population over the course of a run.
         /// </summary>
         private IDataLogger _mazeGenomeDataLogger;
+
+        /// <summary>
+        ///     Logs the maze resource usage over the course of a run.
+        /// </summary>
+        private IDataLogger _mazeResourceUsageLogger;
 
         /// <summary>
         ///     Logs the details and results of trials within a maze evaluation.
@@ -156,9 +146,8 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             // Initialize boiler plate parameters
             base.Initialize(name, xmlConfig);
 
-            // Read the number of agent and maze species
-            _agentNumSpecies = XmlUtils.GetValueAsInt(xmlConfig, "AgentNumSpecies");
-            _mazeNumSpecies = XmlUtils.GetValueAsInt(xmlConfig, "MazeNumSpecies");
+            // Read resource limit parameter
+            _resourceLimit = XmlUtils.GetValueAsInt(xmlConfig, "ResourceLimit");
 
             // Initialize the data loggers for the given experiment/run
             _navigatorEvolutionDataLogger =
@@ -176,6 +165,8 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             _mazeGenomeDataLogger = new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - MazeGenomes.csv");
             _mazeSimulationTrialDataLogger =
                 new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - MazeTrials.csv");
+            _mazeResourceUsageLogger =
+                new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - ResourceUsage.csv");
 
             // Create new evolution field elements map with all fields enabled
             _navigatorLogFieldEnableMap = EvolutionFieldElements.PopulateEvolutionFieldElementsEnableMap();
@@ -190,6 +181,13 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             foreach (var genomeLoggingPair in GenomeFieldElements.PopulateGenomeFieldElementsEnableMap())
             {
                 _navigatorLogFieldEnableMap.Add(genomeLoggingPair.Key, genomeLoggingPair.Value);
+            }
+
+            // Add default trial logging configuration
+            foreach (var trialLoggingPair in
+                SimulationTrialFieldElements.PopulateSimulationTrialFieldElementsEnableMap())
+            {
+                _navigatorLogFieldEnableMap.Add(trialLoggingPair.Key, trialLoggingPair.Value);
             }
 
             // Disable logging fields not relevant to agent evolution in MCC experiment
@@ -326,7 +324,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             // Either use pre-evolved agents or evolve the seed agents that meet the MC
             var seedAgentPopulation = isAgentListPreevolved
                 ? genomeList1
-                : EvolveSeedAgents(genomeList1, genomeList2, genomeFactory1, AgentSeedGenomeCount);
+                : EvolveSeedAgents(genomeList1, genomeList2, genomeFactory1, AgentSeedGenomeCount, _resourceLimit);
 
             // Set dummy fitness so that seed maze(s) will be marked as evaluated
             foreach (var mazeGenome in genomeList2)
@@ -340,15 +338,15 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             // Create the NEAT evolution algorithm parameters 
             var neatEaParams = new EvolutionAlgorithmParameters
             {
-                SpecieCount = _agentNumSpecies,
-                MaxSpecieSize = AgentDefaultPopulationSize / _agentNumSpecies
+                SpecieCount = 0,
+                MaxSpecieSize = AgentDefaultPopulationSize
             };
 
             // Create the maze evolution algorithm parameters
             var mazeEaParams = new EvolutionAlgorithmParameters
             {
-                SpecieCount = _mazeNumSpecies,
-                MaxSpecieSize = MazeDefaultPopulationSize / _mazeNumSpecies
+                SpecieCount = 0,
+                MaxSpecieSize = MazeDefaultPopulationSize
             };
 
             // Create the NEAT (i.e. navigator) queueing evolution algorithm
@@ -375,7 +373,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             // Create navigator phenome evaluator
             IPhenomeEvaluator<IBlackBox, BehaviorInfo> navigatorEvaluator =
                 new MazeNavigatorMCCEvaluator(MinSuccessDistance, BehaviorCharacterizationFactory,
-                    NumMazeSuccessCriteria);
+                    NumMazeSuccessCriteria, _resourceLimit, resourceUsageLogger: _mazeResourceUsageLogger);
 
             // Create maze genome decoder
             IGenomeDecoder<MazeGenome, MazeStructure> mazeGenomeDecoder = new MazeDecoder(MazeScaleMultiplier);

@@ -366,6 +366,21 @@ namespace SharpNeat.Genomes.Maze
             return new MazeGenome(genomeFactory, genomeId, birthGen, height, width, wallGenes, pathGenes);
         }
 
+        public static IList<MazeGenome> ReadMazeGenomesFromXml(IList<string> mazeXmlCollection, MazeGenomeFactory genomeFactory)
+        {
+            var mazeGenomes = new List<MazeGenome>(mazeXmlCollection.Count);
+            
+            foreach (var mazeXml in mazeXmlCollection)
+            {
+                using (var xr = XmlReader.Create(new StringReader(mazeXml)))
+                {
+                    mazeGenomes.Add(ReadCompleteGenomeList(xr, genomeFactory)[0]);
+                }
+            }
+            
+            return mazeGenomes;
+        }
+        
         #endregion
     }
 }

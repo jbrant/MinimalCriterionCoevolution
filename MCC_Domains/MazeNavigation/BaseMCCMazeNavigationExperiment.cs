@@ -13,7 +13,6 @@ using SharpNeat.Decoders;
 using SharpNeat.Decoders.Maze;
 using SharpNeat.Genomes.Maze;
 using SharpNeat.Genomes.Neat;
-using SharpNeat.Utility;
 
 #endregion
 
@@ -25,6 +24,72 @@ namespace MCC_Domains.MazeNavigation
     /// </summary>
     public abstract class BaseMCCMazeNavigationExperiment : IMCCExperiment
     {
+        #region Private Methods
+
+        /// <summary>
+        ///     Checks ranges and other experiment settings to ensure that the configuration is valid.
+        /// </summary>
+        /// <param name="message">
+        ///     Error message denoting specific configuration violation (only set if an invalid configuration was
+        ///     identified).
+        /// </param>
+        /// <returns>Boolean flag indicating whether the experiment configuration is valid.</returns>
+        protected virtual bool ValidateConfigParameters(out string message)
+        {
+            // Set error message to null by default
+            message = null;
+
+            // Check population range constraints
+            if (AgentDefaultPopulationSize <= 0)
+                message = $"Agent population size [{AgentDefaultPopulationSize}] must be a non-zero integer";
+            else if (MazeDefaultPopulationSize <= 0)
+                message = $"Maze population size [{MazeDefaultPopulationSize}] must be a non-zero integer";
+            // Check seed range constraints
+            else if (AgentSeedGenomeCount <= 0)
+                message = $"Agent seed genome count [{AgentSeedGenomeCount}] must be a non-zero integer";
+            else if (MazeSeedGenomeCount <= 0)
+                message = $"Maze seed genome count [{MazeSeedGenomeCount}] must be a non-zero integer";
+            else if (AgentSeedGenomeCount > AgentDefaultPopulationSize)
+                message =
+                    $"Agent seed genome count [{AgentSeedGenomeCount}] must be no greater than the agent population size [{AgentDefaultPopulationSize}]";
+            else if (MazeSeedGenomeCount > MazeDefaultPopulationSize)
+                message =
+                    $"Maze seed genome count [{MazeSeedGenomeCount}] must be no greater than the maze population size [{MazeDefaultPopulationSize}]";
+            // Check evaluation time range constraints
+            else if (MaxGenerations <= 0)
+                message = $"Max generations [{MaxGenerations}] must be an integer greater than 0";
+            else if (MaxEvaluations <= 0)
+                message = $"Max evaluations [{MaxEvaluations}] must be an integer greater than 0";
+            // Check maze structural constraints
+            else if (MazeHeight <= 1)
+                message = $"Maze height [{MazeHeight}] must be greater than 1";
+            else if (MazeWidth <= 1)
+                message = $"Maze width [{MazeWidth}] must be greater than 1";
+            else if (MazeQuadrantHeight <= 1)
+                message = $"Maze quadrant height [{MazeQuadrantHeight}] must be greater than 1";
+            else if (MazeQuadrantWidth <= 1)
+                message = $"Maze quadrant width [{MazeQuadrantWidth}] must be greater than 1";
+            else if (MazeQuadrantHeight >= MazeHeight)
+                message = $"Maze quadrant height [{MazeQuadrantHeight}] must be less than maze height [{MazeHeight}]";
+            else if (MazeQuadrantWidth >= MazeWidth)
+                message = $"Maze quadrant width [{MazeQuadrantWidth}] must be less than maze height [{MazeWidth}]";
+            // Check minimal criterion constraints
+            else if (NumMazeSuccessCriteria > MazeDefaultPopulationSize)
+                message =
+                    $"Mazes solved minimal criterion [{NumMazeSuccessCriteria}] must be no greater than the maze population size";
+            else if (NumAgentSuccessCriteria > AgentDefaultPopulationSize)
+                message =
+                    $"Agents solved minimal criterion [{NumAgentSuccessCriteria}] must be no greater than the agent population size";
+            else if (NumAgentFailedCriteria > AgentDefaultPopulationSize)
+                message =
+                    $"Agents failed minimal criterion [{NumAgentSuccessCriteria}] must be no greater than the agent population size";
+
+            // Return configuration validity status based on whether an error message was set
+            return message != null;
+        }
+
+        #endregion
+
         #region Public Properties
 
         /// <inheritdoc />
@@ -91,16 +156,6 @@ namespace MCC_Domains.MazeNavigation
         ///     The number of neural network outputs.
         /// </summary>
         protected const int AnnOutputCount = 2;
-
-        /// <summary>
-        ///     The number of species in the agent queue.
-        /// </summary>
-        protected int AgentNumSpecies = 1;
-
-        /// <summary>
-        ///     The number of species in the maze queue.
-        /// </summary>
-        protected int MazeNumSpecies = 1;
 
         /// <summary>
         ///     The activation scheme (i.e. cyclic or acyclic).
@@ -241,23 +296,23 @@ namespace MCC_Domains.MazeNavigation
             MazeGenomeXmlIO.WriteComplete(xw, mazeGenomeList);
         }
 
-        /// <inheritdoc />
         /// <summary>
         ///     Initializes the MCC maze navigation experiment by reading in all of the configuration parameters and
         ///     setting up the bootstrapping/initialization algorithm.
         /// </summary>
         /// <param name="name">The name of the experiment.</param>
         /// <param name="xmlConfig">The reference to the XML configuration file.</param>
-        /// <param name="population1EvolutionLogger">The navigator evolution data logger.</param>
-        /// <param name="population1PopulationLogger">The navigator population logger.</param>
-        /// <param name="population1GenomeLogger">The navigator genome logger.</param>
-        /// <param name="population2EvolutionLogger">The maze evolution data logger.</param>
-        /// <param name="population2PopulationLogger">The maze population logger.</param>
-        /// <param name="population2GenomeLogger">The maze genome logger.</param>
-        public virtual void Initialize(string name, XmlElement xmlConfig,
-            IDataLogger population1EvolutionLogger = null, IDataLogger population1PopulationLogger = null,
-            IDataLogger population1GenomeLogger = null, IDataLogger population2EvolutionLogger = null,
-            IDataLogger population2PopulationLogger = null, IDataLogger population2GenomeLogger = null)
+        /// <param name="logFileDirectory">The directory into which to write the evolution/evaluation log files.</param>
+        /// <param name="runIdx">The numerical ID of the current run.</param>
+        public abstract void Initialize(string name, XmlElement xmlConfig, string logFileDirectory, int runIdx);
+
+        /// <summary>
+        ///     Initializes the MCC maze navigation experiment by reading in all of the configuration parameters and
+        ///     setting up the bootstrapping/initialization algorithm.
+        /// </summary>
+        /// <param name="name">The name of the experiment.</param>
+        /// <param name="xmlConfig">The reference to the XML configuration file.</param>
+        protected void Initialize(string name, XmlElement xmlConfig)
         {
             // Set boiler plate properties
             Name = name;
@@ -275,8 +330,6 @@ namespace MCC_Domains.MazeNavigation
             MazeDefaultPopulationSize = XmlUtils.GetValueAsInt(xmlConfig, "MazePopulationSize");
             AgentSeedGenomeCount = XmlUtils.GetValueAsInt(xmlConfig, "AgentSeedGenomeCount");
             MazeSeedGenomeCount = XmlUtils.GetValueAsInt(xmlConfig, "MazeSeedGenomeCount");
-            AgentNumSpecies = XmlUtils.GetValueAsInt(xmlConfig, "AgentNumSpecies");
-            MazeNumSpecies = XmlUtils.GetValueAsInt(xmlConfig, "MazeNumSpecies");
             BehaviorCharacterizationFactory = ExperimentUtils.ReadBehaviorCharacterizationFactory(xmlConfig,
                 "BehaviorConfig");
             NavigatorBatchSize = XmlUtils.GetValueAsInt(xmlConfig, "NavigatorOffspringBatchSize");
@@ -331,14 +384,16 @@ namespace MCC_Domains.MazeNavigation
         /// <param name="mazePopulation">The mazes in the initial population (either randomly generated or read from a file).</param>
         /// <param name="agentGenomeFactory">The factory class for producing agent (NEAT) genomes.</param>
         /// <param name="numAgents">The number of seed agents to evolve.</param>
+        /// <param name="resourceLimit">The resource limit for the maze population (optional).</param>
         /// <returns>
         ///     The list of viable agents, each of whom is able to solve at least one of the initial mazes and, in totality,
         ///     meet the MC for solving each of the mazes.
         /// </returns>
         protected List<NeatGenome> EvolveSeedAgents(List<NeatGenome> agentPopulation, List<MazeGenome> mazePopulation,
-            IGenomeFactory<NeatGenome> agentGenomeFactory, int numAgents)
+            IGenomeFactory<NeatGenome> agentGenomeFactory, int numAgents, int resourceLimit = int.MaxValue)
         {
             var seedAgentPopulation = new List<NeatGenome>();
+            var mazeSolutionCount = new Dictionary<uint, int>();
 
             // Create maze decoder to decode initialization mazes
             var mazeDecoder = new MazeDecoder(MazeScaleMultiplier);
@@ -346,8 +401,12 @@ namespace MCC_Domains.MazeNavigation
             // Loop through every maze and evolve the requisite number of viable genomes that solve it
             for (var idx = 0; idx < mazePopulation.Count; idx++)
             {
-                Console.WriteLine(@"Evolving viable agents for maze population index {0} and maze ID {1}", idx,
-                    mazePopulation[idx].Id);
+                var mazeId = mazePopulation[idx].Id;
+
+                // Initialize maze solution count to 0
+                mazeSolutionCount.Add(mazeId, 0);
+
+                Console.WriteLine(@"Evolving viable agents for maze population index {0} and maze ID {1}", idx, mazeId);
 
                 // Evolve the number of agents required to meet the success MC for the current maze
                 var viableMazeAgents = _mazeNavigationInitializer.EvolveViableAgents(agentGenomeFactory,
@@ -360,9 +419,14 @@ namespace MCC_Domains.MazeNavigation
                 foreach (
                     var viableMazeAgent in
                     viableMazeAgents.Where(
-                        viableMazeAgent =>
-                            seedAgentPopulation.Select(sap => sap.Id).Contains(viableMazeAgent.Id) == false))
+                            viableMazeAgent =>
+                                seedAgentPopulation.Select(sap => sap.Id).Contains(viableMazeAgent.Id) == false)
+                        .Take(resourceLimit))
                 {
+                    // Increment number of maze solutions
+                    mazeSolutionCount[mazeId] = mazeSolutionCount[mazeId]++;
+
+                    // Add viable agent to the population
                     seedAgentPopulation.Add(viableMazeAgent);
                 }
             }
@@ -373,8 +437,15 @@ namespace MCC_Domains.MazeNavigation
             {
                 var rndMazePicker = RandomDefaults.CreateRandomSource();
 
+                // Restrict to the mazes that have not yet hit their resource limit
+                var mazesUnderResourceLimit =
+                    mazePopulation.Where(x => mazeSolutionCount[x.Id] < resourceLimit).ToList();
+
                 // Pick a random maze on which to evolve agent(s)
-                var mazeGenome = mazePopulation[rndMazePicker.Next(mazePopulation.Count - 1)];
+                var mazeGenome = mazesUnderResourceLimit[rndMazePicker.Next(mazesUnderResourceLimit.Count - 1)];
+
+                // Get max number of agents that can be added for maze
+                var maxSolutions = resourceLimit - mazeSolutionCount[mazeGenome.Id];
 
                 Console.WriteLine(
                     @"Continuing viable agent evolution on maze {0}, with {1} of {2} required agents in place",
@@ -387,21 +458,21 @@ namespace MCC_Domains.MazeNavigation
 
                 // Iterate through each viable agent and remove them if they've already solved a maze or add them to the list
                 // of viable agents if they have not
-                foreach (var viableMazeAgent in viableMazeAgents)
-                {
+                foreach (var viableMazeAgent in viableMazeAgents.Take(maxSolutions))
                     // If they agent has already solved maze and is in the list of viable agents, remove that agent
                     // from the pool of seed genomes (this is done because here, we're interested in getting unique
                     // agents and want to avoid an endless loop wherein the same viable agents are returned)
                     if (seedAgentPopulation.Select(sap => sap.Id).Contains(viableMazeAgent.Id))
-                    {
                         agentPopulation.Remove(viableMazeAgent);
-                    }
                     // Otherwise, add that agent to the list of viable agents
                     else
                     {
+                        // Increment number of maze solutions
+                        mazeSolutionCount[mazeGenome.Id] = mazeSolutionCount[mazeGenome.Id]++;
+
+                        // Add viable agent to the population
                         seedAgentPopulation.Add(viableMazeAgent);
                     }
-                }
             }
 
             return seedAgentPopulation;
@@ -424,8 +495,8 @@ namespace MCC_Domains.MazeNavigation
             IGenomeEvaluator<MazeGenome> mazeEvaluator)
         {
             // Update agent and maze evaluators such that seed agents will be evaluated against mazes and vice versa
-            agentEvaluator.UpdateEvaluationBaseline(mazeEvaluator.DecodeGenomes(mazePopulation));
-            mazeEvaluator.UpdateEvaluationBaseline(agentEvaluator.DecodeGenomes(agentPopulation));
+            agentEvaluator.UpdateEvaluationBaseline(mazeEvaluator.DecodeGenomes(mazePopulation), 0);
+            mazeEvaluator.UpdateEvaluationBaseline(agentEvaluator.DecodeGenomes(agentPopulation), 0);
 
             // Run MC evaluation for both populations
             agentEvaluator.Evaluate(agentPopulation, 0);

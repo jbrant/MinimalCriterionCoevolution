@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Config>
-  <ExperimentClass>Speciation</ExperimentClass>
+  <ExperimentClass>LimitedResources</ExperimentClass>
   <SearchAlgorithm>Minimal Criteria Search</SearchAlgorithm>
   <SelectionAlgorithm>Multiple Queueing</SelectionAlgorithm>
   <MaxInitializationEvaluations>100000</MaxInitializationEvaluations>
@@ -8,10 +8,13 @@
   <MazePopulationSize>50</MazePopulationSize>
   <AgentSeedGenomeCount>20</AgentSeedGenomeCount>
   <MazeSeedGenomeCount>10</MazeSeedGenomeCount>
-  <AgentNumSpecies>20</AgentNumSpecies>
-  <MazeNumSpecies>10</MazeNumSpecies>
-  <AgentSpecieSizeFixed>True</AgentSpecieSizeFixed>
-  <MazeSpecieSizeFixed>True</MazeSpecieSizeFixed>
+  <AgentNumSpecies>0</AgentNumSpecies>
+  <MazeNumSpecies>0</MazeNumSpecies>
+  <AgentSpecieSizeFixed>
+  </AgentSpecieSizeFixed>
+  <MazeSpecieSizeFixed>
+  </MazeSpecieSizeFixed>
+  <ResourceLimit>5</ResourceLimit>
   <Activation>
     <Scheme>Acyclic</Scheme>
   </Activation>
@@ -20,7 +23,7 @@
     <WeightMutationProbability>0.6</WeightMutationProbability>
     <AddConnnectionProbability>0.1</AddConnnectionProbability>
     <AddNodeProbability>0.01</AddNodeProbability>
-    <DeleteConnectionProbability>0.05</DeleteConnectionProbability>
+    <DeleteConnectionProbability>0.005</DeleteConnectionProbability>
     <ConnectionWeightRange>5</ConnectionWeightRange>
   </GenomeConfig>
   <MazeGenomeConfig>
@@ -30,7 +33,7 @@
     <MutateDeleteWallProbability>0.005</MutateDeleteWallProbability>
     <MutatePathWaypointLocationProbability>0.05</MutatePathWaypointLocationProbability>
     <MutateAddPathWaypointProbability>0.1</MutateAddPathWaypointProbability>
-    <MutateExpandMazeProbability>0.05</MutateExpandMazeProbability>
+    <MutateExpandMazeProbability>0.1</MutateExpandMazeProbability>
     <PerturbanceMagnitude>0.1</PerturbanceMagnitude>
     <VerticalWallBias>0.6</VerticalWallBias>
   </MazeGenomeConfig>

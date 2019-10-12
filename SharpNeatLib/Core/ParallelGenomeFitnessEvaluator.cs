@@ -120,20 +120,14 @@ namespace SharpNeat.Core
         /// <summary>
         ///     Gets the total number of individual genome evaluations that have been performed by this evaluator.
         /// </summary>
-        public ulong EvaluationCount
-        {
-            get { return _phenomeEvaluator.EvaluationCount; }
-        }
+        public ulong EvaluationCount => _phenomeEvaluator.EvaluationCount;
 
         /// <summary>
         ///     Gets a value indicating whether some goal fitness has been achieved and that
         ///     the the evolutionary algorithm/search should stop. This property's value can remain false
         ///     to allow the algorithm to run indefinitely.
         /// </summary>
-        public bool StopConditionSatisfied
-        {
-            get { return _phenomeEvaluator.StopConditionSatisfied; }
-        }
+        public bool StopConditionSatisfied => _phenomeEvaluator.StopConditionSatisfied;
 
         /// <summary>
         ///     Reset the internal state of the evaluation scheme if any exists.
@@ -144,33 +138,20 @@ namespace SharpNeat.Core
         }
 
         /// <summary>
-        ///     Initializes state variables in the genome evalutor (primarily the logger).
+        ///     Initializes state variables in the genome evaluator.
         /// </summary>
         public void Initialize()
         {
-            // Open the logger
-            _evaluationLogger?.Open();
-
             // Defer to phenome initialization
-            _phenomeEvaluator.Initialize(_evaluationLogger);
+            _phenomeEvaluator.Initialize();
         }
 
         /// <summary>
-        ///     Cleans up evaluator state after end of execution or upon execution interruption.  In particular, this closes out
-        ///     any existing evaluation logger instance.
+        ///     Calls child classes to clean up or dispose of variable states or close out loggers.
         /// </summary>
         public void Cleanup()
         {
-            _evaluationLogger?.Close();
-        }
-
-        /// <summary>
-        ///     Update the genome evaluator based on some characteristic of the given population.
-        /// </summary>
-        /// <param name="population">The current population.</param>
-        public void Update(List<TGenome> population)
-        {
-            _phenomeEvaluator.Update(population);
+            _phenomeEvaluator.Cleanup();
         }
 
         /// <summary>
@@ -178,9 +159,10 @@ namespace SharpNeat.Core
         ///     is typically used in a coevoluationary context.
         /// </summary>
         /// <param name="comparisonPhenomes">The phenomes against which the evaluation is being carried out.</param>
-        public void UpdateEvaluationBaseline(IEnumerable<object> comparisonPhenomes)
+        /// <param name="lastGeneration">The generation that was just executed.</param>
+        public void UpdateEvaluationBaseline(IEnumerable<object> comparisonPhenomes, uint lastGeneration)
         {
-            _phenomeEvaluator.UpdateEvaluatorPhenotypes(comparisonPhenomes);
+            _phenomeEvaluator.UpdateEvaluatorPhenotypes(comparisonPhenomes, lastGeneration);
         }
 
         /// <summary>
@@ -224,19 +206,6 @@ namespace SharpNeat.Core
             _evalMethod(genomesToEvaluate, currentGeneration);
         }
 
-        /// <summary>
-        ///     Returns ParallelGenomeFitnessEvaluator loggable elements.
-        /// </summary>
-        /// <param name="logFieldEnableMap">
-        ///     Dictionary of logging fields that can be enabled or disabled based on the specification
-        ///     of the calling routine.
-        /// </param>
-        /// <returns>The loggable elements for ParallelGenomeFitnessEvaluator.</returns>
-        public List<LoggableElement> GetLoggableElements(IDictionary<FieldElement, bool> logFieldEnableMap = null)
-        {
-            return _phenomeEvaluator.GetLoggableElements(logFieldEnableMap);
-        }
-
         #endregion
 
         #region Private Methods
@@ -250,7 +219,7 @@ namespace SharpNeat.Core
                 delegate(TGenome genome)
                 {
                     EvaluationUtils<TGenome, TPhenome>.EvaluateFitness_NonCaching(genome, _genomeDecoder,
-                        _phenomeEvaluator, currentGeneration, _evaluationLogger, _decodeGenomeToXml);
+                        _phenomeEvaluator, currentGeneration);
                 });
         }
 
@@ -263,8 +232,9 @@ namespace SharpNeat.Core
             Parallel.ForEach(genomeList, _parallelOptions,
                 delegate(TGenome genome)
                 {
-                    EvaluationUtils<TGenome, TPhenome>.EvaluateFitness_Caching(genome, _genomeDecoder, _phenomeEvaluator,
-                        currentGeneration, _evaluationLogger, _decodeGenomeToXml);
+                    EvaluationUtils<TGenome, TPhenome>.EvaluateFitness_Caching(genome, _genomeDecoder,
+                        _phenomeEvaluator,
+                        currentGeneration);
                 });
         }
 

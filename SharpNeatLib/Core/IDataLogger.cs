@@ -18,6 +18,12 @@ namespace SharpNeat.Core
         void Open();
 
         /// <summary>
+        ///     Return whether the stream has been opened.
+        /// </summary>
+        /// <returns>Boolean flag indicating whether the stream has been opened.</returns>
+        bool IsStreamOpen();
+        
+        /// <summary>
         ///     Sets the current run phase.
         /// </summary>
         /// <param name="runPhase">The run phase (i.e. initialization or the primary algorithm).</param>

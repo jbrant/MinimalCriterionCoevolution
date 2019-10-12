@@ -1056,7 +1056,7 @@ namespace SharpNeat.Utility
 
             return isOverlap == false && !unvisitedWaypoints.Any();
         }
-
+        
         #endregion
     }
 }

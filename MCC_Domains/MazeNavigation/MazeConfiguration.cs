@@ -9,10 +9,10 @@ using MCC_Domains.MazeNavigation.Components;
 namespace MCC_Domains.MazeNavigation
 {
     /// <summary>
-    ///     The maze configuration struct encapsulates domain/experiment native representation of maze walls and the
+    ///     The maze configuration encapsulates domain/experiment native representation of maze walls and the
     ///     starting/ending locations.
     /// </summary>
-    public struct MazeConfiguration
+    public class MazeConfiguration
     {
         /// <summary>
         ///     The location of the goal.
@@ -48,6 +48,20 @@ namespace MCC_Domains.MazeNavigation
             NavigatorLocation = navigatorLocation;
             GoalLocation = goalLocation;
             MaxSimulationTimesteps = maxSimulationTimesteps;
+            SuccessfulNavigationCount = 0;
+        }
+
+        /// <summary>
+        ///     The number of times (across evaluations) that the maze configuration has been successfully navigated (solved).
+        /// </summary>
+        public int SuccessfulNavigationCount { get; private set; }
+
+        /// <summary>
+        ///     Increments the running count of times that the maze has been solved.
+        /// </summary>
+        public void IncrementSuccessfulNavigation()
+        {
+            SuccessfulNavigationCount++;
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿#region
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,6 +12,7 @@ using MCC_Domains.MazeNavigation;
 using SharpNeat.Behaviors;
 using SharpNeat.Core;
 using SharpNeat.Genomes.Maze;
+using SharpNeat.Phenomes.Mazes;
 
 #endregion
 
@@ -35,31 +37,84 @@ namespace MazeExperimentSupportLib
             // Build maze configuration
             var mazeConfiguration =
                 new MazeConfiguration(DataManipulationUtil.ExtractMazeWalls(evaluationUnit.MazePhenome.Walls),
-                    DataManipulationUtil.ExtractStartEndPoint(evaluationUnit.MazePhenome.StartLocation),
-                    DataManipulationUtil.ExtractStartEndPoint(evaluationUnit.MazePhenome.TargetLocation),
+                    DataManipulationUtil.ExtractStartEndPoint(evaluationUnit.MazePhenome.ScaledStartLocation),
+                    DataManipulationUtil.ExtractStartEndPoint(evaluationUnit.MazePhenome.ScaledTargetLocation),
                     evaluationUnit.MazePhenome.MaxTimesteps);
 
             // Create trajectory behavior characterization (in order to capture full trajectory of navigator)
             IBehaviorCharacterization behaviorCharacterization = new TrajectoryBehaviorCharacterization();
 
             // Create the maze navigation world
-            var world = new MazeNavigationWorld<BehaviorInfo>(mazeConfiguration.Walls,
+            var world = new MazeNavigationWorld(mazeConfiguration.Walls,
                 mazeConfiguration.NavigatorLocation, mazeConfiguration.GoalLocation,
                 experimentParameters.MinSuccessDistance, mazeConfiguration.MaxSimulationTimesteps,
                 behaviorCharacterization);
 
             // Run a single trial
-            var trialInfo = world.RunTrial(evaluationUnit.AgentPhenome, SearchType.MinimalCriteriaSearch,
-                out var isGoalReached);
+            var trialBehavior = world.RunBehaviorTrial(evaluationUnit.AgentPhenome, out var isGoalReached);
 
             // Set maze solved status
             evaluationUnit.IsMazeSolved = isGoalReached;
 
             // The number of time steps is effectively the number of 2-dimensional points in the behaviors array
-            evaluationUnit.NumTimesteps = trialInfo.Behaviors.Count() / 2;
+            evaluationUnit.NumTimesteps = world.GetSimulationTimesteps();
 
             // Set the trajectory of the agent
-            evaluationUnit.AgentTrajectory = trialInfo.Behaviors;
+            evaluationUnit.AgentTrajectory = trialBehavior;
+        }
+
+        /// <summary>
+        ///     Computes the maze diversity by computing the manhattan distance between points on the solution paths.
+        /// </summary>
+        /// <param name="curChunkMazes">The collection of mazes being evaluated during the current chunk.</param>
+        /// <param name="allMazes">The list of all maze structures undergoing evaluation/comparison.</param>
+        /// <returns>The collection of maze diversity units recording the solution path distances between mazes.</returns>
+        public static IEnumerable<MazeDiversityUnit> CalculateMazeDiversity(IEnumerable<MazeStructure> curChunkMazes,
+            IList<MazeStructure> allMazes)
+        {
+            var mazeDiversityUnits = new ConcurrentBag<MazeDiversityUnit>();
+
+            // Loop through each solution path and compute cell-wise, manhattan distance between each pair
+            foreach (var mazeStructure in curChunkMazes)
+            {
+                Parallel.ForEach(allMazes, cmprMazeStructure =>
+                {
+                    // Distance accumulator for the current maze
+                    var pathDistance = 0.0;
+
+                    // Don't compare the current maze to itself
+                    if (mazeStructure == cmprMazeStructure) return;
+
+                    // Initialize current cells to one location beyond the maze start location
+                    var curCell = mazeStructure.GetNextPathCell(mazeStructure.UnscaledStartLocation);
+                    var curCmprCell = cmprMazeStructure.GetNextPathCell(cmprMazeStructure.UnscaledStartLocation);
+
+                    do
+                    {
+                        // Calculate manhattan distance between cells of the two mazes
+                        pathDistance += Math.Abs(curCell.X - curCmprCell.X) + Math.Abs(curCell.Y - curCmprCell.Y);
+
+                        try
+                        {
+                            // Increment to the next cell of both mazes
+                            curCell = mazeStructure.GetNextPathCell(curCell);
+                            curCmprCell = cmprMazeStructure.GetNextPathCell(curCmprCell);
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e);
+                            throw;
+                        }
+                    } while (curCell != mazeStructure.UnscaledTargetLocation &&
+                             curCmprCell != cmprMazeStructure.UnscaledTargetLocation);
+
+                    // Record the distance between the two maze solution paths
+                    mazeDiversityUnits.Add(new MazeDiversityUnit(mazeStructure.GenomeId, cmprMazeStructure.GenomeId,
+                        pathDistance));
+                });
+            }
+
+            return mazeDiversityUnits;
         }
 
         /// <summary>
@@ -72,7 +127,7 @@ namespace MazeExperimentSupportLib
         {
             IList<TrajectoryDiversityUnit> trajectoryDiversityUnits = new List<TrajectoryDiversityUnit>();
 
-            foreach (MazeNavigatorEvaluationUnit evaluationUnit in evaluationUnits.Where(u => u.IsMazeSolved))
+            foreach (var evaluationUnit in evaluationUnits.Where(u => u.IsMazeSolved))
             {
                 double intraMazeTotalTrajectoryDifference = 0;
                 double interMazeTotalTrajectoryDifference = 0;
@@ -87,7 +142,7 @@ namespace MazeExperimentSupportLib
                     if (otherEvaluationUnit.Equals(evaluationUnitCopy))
                         return;
 
-                    // Caculate trajectory difference for same maze
+                    // Calculate trajectory difference for same maze
                     if (otherEvaluationUnit.MazeId.Equals(evaluationUnitCopy.MazeId))
                     {
                         intraMazeTotalTrajectoryDifference +=
@@ -623,33 +678,33 @@ namespace MazeExperimentSupportLib
                 {
                     trajectoryDistance += Math.Sqrt(
                         Math.Pow(
-                            (trajectory2[idx] - trajectory1[trajectory1.Count - 2]),
+                            trajectory2[idx] - trajectory1[trajectory1.Count - 2],
                             2) +
                         Math.Pow(
-                            (trajectory2[idx + 1] -
-                             trajectory1[trajectory1.Count - 1]), 2));
+                            trajectory2[idx + 1] -
+                            trajectory1[trajectory1.Count - 1], 2));
                 }
                 // Handle the case where the second trajectory has ended
                 else if (idx >= trajectory2.Count)
                 {
                     trajectoryDistance += Math.Sqrt(
                         Math.Pow(
-                            (trajectory2[trajectory2.Count - 2] - trajectory1[idx]),
+                            trajectory2[trajectory2.Count - 2] - trajectory1[idx],
                             2) +
                         Math.Pow(
-                            (trajectory2[trajectory2.Count - 1] -
-                             trajectory1[idx + 1]), 2));
+                            trajectory2[trajectory2.Count - 1] -
+                            trajectory1[idx + 1], 2));
                 }
                 // Otherwise, we're still in the simulation time frame for both trajectories
                 else
                 {
                     trajectoryDistance += Math.Sqrt(
                         Math.Pow(
-                            (trajectory2[idx] - trajectory1[idx]),
+                            trajectory2[idx] - trajectory1[idx],
                             2) +
                         Math.Pow(
-                            (trajectory2[idx + 1] -
-                             trajectory1[idx + 1]), 2));
+                            trajectory2[idx + 1] -
+                            trajectory1[idx + 1], 2));
                 }
             }
 

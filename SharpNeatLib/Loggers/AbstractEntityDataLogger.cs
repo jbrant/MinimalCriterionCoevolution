@@ -50,7 +50,7 @@ namespace SharpNeat.Loggers
                 combinedElements.AddRange(loggableElementList);
             }
 
-            foreach (LoggableElement curLoggableElement in combinedElements)
+            foreach (var curLoggableElement in combinedElements)
             {
                 // Place the loggable element in the array at the specified location
                 loggableElementArray[curLoggableElement.FieldMetadata.Position] = curLoggableElement;
@@ -105,6 +105,15 @@ namespace SharpNeat.Loggers
             ExperimentConfiguration =
                 DbContext.ExperimentDictionary.Single(
                     expName => expName.ExperimentName == ExperimentConfigurationName);
+        }
+
+        /// <summary>
+        ///     Return whether the database stream has been opened.
+        /// </summary>
+        /// <returns>Boolean flag indicating whether the database stream has been opened.</returns>
+        public bool IsStreamOpen()
+        {
+            return DbContext != null;
         }
 
         /// <inheritdoc />

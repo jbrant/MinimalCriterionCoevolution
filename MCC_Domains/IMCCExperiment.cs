@@ -73,22 +73,6 @@ namespace MCC_Domains
         void SaveMazePopulation(XmlWriter xw, IList<MazeGenome> mazeGenomeList);
 
         /// <summary>
-        ///     Initialize the experiment with some optional XML configutation data.
-        /// </summary>
-        /// <param name="name">The name of the experiment.</param>
-        /// <param name="xmlConfig">The experiment XML configuration file.</param>
-        /// <param name="population1EvolutionLogger">The population 1 evolution logger.</param>
-        /// <param name="population1PopulationLogger">The population 1 population logger.</param>
-        /// <param name="population1GenomeLogger">The population 1 genome logger.</param>
-        /// <param name="population2EvolutionLogger">The population 2 evolution logger.</param>
-        /// <param name="population2PopulationLogger">The population 2 population logger.</param>
-        /// <param name="population2GenomeLogger">The population 2 genome logger.</param>
-        void Initialize(string name, XmlElement xmlConfig,
-            IDataLogger population1EvolutionLogger = null, IDataLogger population1PopulationLogger = null,
-            IDataLogger population1GenomeLogger = null, IDataLogger population2EvolutionLogger = null,
-            IDataLogger population2PopulationLogger = null, IDataLogger population2GenomeLogger = null);
-
-        /// <summary>
         ///     Creates and returns a MCC algorithm container, which encapsulates two evolutionary algorithms.  This
         ///     initializes the algorithms with their default population sizes and automatically generates a starting population of
         ///     that size.

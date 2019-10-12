@@ -22,7 +22,7 @@ namespace SharpNeat.Core
     /// <summary>
     ///     Wrapper struct for fitness values.
     /// </summary>
-    public class FitnessInfo : ITrialInfo
+    public class FitnessInfo : IPhenomeEvaluationInfo
     {
         #region Public members
 
@@ -65,18 +65,12 @@ namespace SharpNeat.Core
         ///     Auxiliary fitness info, i.e. for evaluation metrics other than the
         ///     primary fitness metric but that nonetheless we are interested in observing.
         /// </summary>
-        public AuxFitnessInfo[] AuxFitnessArr { get; private set; }
+        public AuxFitnessInfo[] AuxFitnessArr { get; }
 
         /// <summary>
         ///     Fitness score.
         /// </summary>
-        public double Fitness { get; private set; }
-
-        /// <summary>
-        ///     The genotypic, phenotypic, or behavioral niche into which the organism under evaluation maps based on the
-        ///     evaluation.
-        /// </summary>
-        public int NicheId { get; set; }
+        public double Fitness { get; }
 
         /// <summary>
         ///     Indicates the distance (in a euclidean since or otherwise) to the objective (i.e. target).

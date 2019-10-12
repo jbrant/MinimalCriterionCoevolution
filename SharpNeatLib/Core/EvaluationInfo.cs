@@ -20,8 +20,8 @@
 #region
 
 using System;
+using System.Collections.Generic;
 using Redzen.Structures;
-using SharpNeat.Utility;
 
 #endregion
 
@@ -59,98 +59,6 @@ namespace SharpNeat.Core
 
         #endregion
 
-        #region Properties
-
-        /// <summary>
-        ///     Gets the fitness value to be used by the evolution algorithm for selection of genomes
-        ///     (for reproduction) and species fitness sharing. If a fitness buffer is in use this will be the
-        ///     average fitness for the last N fitness evaluations as held by the fitness history buffer,
-        ///     otherwise if no buffer is in use it is simply the fitness from the most recent evaluation.
-        /// </summary>
-        public double Fitness
-        {
-            get { return (null != _fitnessHistory) ? _fitnessHistory.Mean : MostRecentFitness; }
-        }
-
-        /// <summary>
-        ///     Gets the fitness from the most recent evaluation. This may be different to the Fitness property if a fitness
-        ///     history buffer is in use that averages out the reported fitness over a number of evaluations.
-        /// </summary>
-        public double MostRecentFitness { get; private set; }
-
-        /// <summary>
-        ///     Gets the arithmetic mean of the most recent fitnesses as stored in the fitness history buffer.
-        ///     Note that an exception will be thrown if the history buffer is not being used.
-        /// </summary>
-        public double MeanFitness
-        {
-            get
-            {
-                // Note. throws an exception if there is no fitness history. If you want a mean you must
-                // store fitness history.
-                return _fitnessHistory.Mean;
-            }
-        }
-
-        /// <summary>
-        ///     Gets or sets auxiliary fitness info, i.e. for evaluation metrics other than the
-        ///     primary fitness metric but that nonetheless we are interested in observing.
-        /// </summary>
-        public AuxFitnessInfo[] AuxFitnessArr { get; set; }
-
-        /// <summary>
-        ///     Gets or sets the behavior characterization for the evaluation.
-        /// </summary>
-        public double[] BehaviorCharacterization { get; set; }
-
-        /// <summary>
-        ///     Gets or sets the distance to the domain-specific objective (generally based on the behavior characterization).
-        /// </summary>
-        public double ObjectiveDistance { get; set; }
-
-        /// <summary>
-        ///     Indicates whether the genome is viable, per the evaluation results.
-        /// </summary>
-        public bool IsViable { get; set; }
-
-        /// <summary>
-        ///     Gets a value indicating whether a genome has been evaluated at least once.
-        /// </summary>
-        public bool IsEvaluated { get; private set; }
-
-        /// <summary>
-        ///     Gets the total number of times the genome has been evaluated.
-        /// </summary>
-        public uint EvaluationCount { get; private set; }
-
-        /// <summary>
-        ///     Gets or sets the total number of times the genome has skipped evaluation.
-        ///     Some evaluation schemes re-evaluate genomes that persist between generations (e.g. elite genomes)
-        ///     at each generation, whereas other schemes may chose to not re-evaulate or only re-evaluate every Nth
-        ///     generation/attempt. This counter tracks how many times the genome has been skipped to support such schemes.
-        /// </summary>
-        public uint EvaluationPassCount { get; set; }
-
-        /// <summary>
-        ///     Gets EvaluationCount + EvaluationPassCount.
-        /// </summary>
-        public uint TotalEvaluationCount
-        {
-            get { return EvaluationCount + EvaluationPassCount; }
-        }
-
-        /// <summary>
-        ///     Gets the capacity of the fitness history buffer in use. Zero if no history buffer is being used.
-        /// </summary>
-        public int FitnessHistoryLength { get; }
-
-        /// <summary>
-        ///     The behavioral niche into which the genome is mapped.
-        /// </summary>
-        public int NicheId { get; set; }
-
-        #endregion
-
         #region Public Methods
 
         /// <summary>
@@ -174,13 +82,60 @@ namespace SharpNeat.Core
             }
         }
 
+        #endregion
+
+        #region Properties
+
         /// <summary>
-        ///     Increments EvaluationPassCount.
+        ///     Gets the fitness value to be used by the evolution algorithm for selection of genomes
+        ///     (for reproduction) and species fitness sharing. If a fitness buffer is in use this will be the
+        ///     average fitness for the last N fitness evaluations as held by the fitness history buffer,
+        ///     otherwise if no buffer is in use it is simply the fitness from the most recent evaluation.
         /// </summary>
-        public void IncrEvaluationPassCount()
-        {
-            EvaluationPassCount++;
-        }
+        public double Fitness => null != _fitnessHistory ? _fitnessHistory.Mean : MostRecentFitness;
+
+        /// <summary>
+        ///     Gets the fitness from the most recent evaluation. This may be different to the Fitness property if a fitness
+        ///     history buffer is in use that averages out the reported fitness over a number of evaluations.
+        /// </summary>
+        public double MostRecentFitness { get; private set; }
+
+        /// <summary>
+        ///     Gets the arithmetic mean of the most recent fitnesses as stored in the fitness history buffer.
+        ///     Note that an exception will be thrown if the history buffer is not being used.
+        /// </summary>
+        public double MeanFitness => _fitnessHistory.Mean;
+
+        /// <summary>
+        ///     Gets or sets auxiliary fitness info, i.e. for evaluation metrics other than the
+        ///     primary fitness metric but that nonetheless we are interested in observing.
+        /// </summary>
+        public AuxFitnessInfo[] AuxFitnessArr { get; set; }
+        
+        /// <summary>
+        ///     Gets the capacity of the fitness history buffer in use. Zero if no history buffer is being used.
+        /// </summary>
+        public int FitnessHistoryLength { get; }
+
+        /// <summary>
+        ///     Information about each trial included in the evaluation.
+        /// </summary>
+        public IList<TrialInfo> TrialData { get; set; }
+
+        /// <summary>
+        ///     Indicates whether the genome is viable, per the evaluation results.
+        /// </summary>
+        public bool IsViable { get; set; }
+
+        /// <summary>
+        ///     Gets a value indicating whether a genome has been evaluated at least once.
+        /// </summary>
+        public bool IsEvaluated { get; private set; }
+
+        /// <summary>
+        ///     Gets the total number of times the genome has been evaluated.
+        /// </summary>
+        public uint EvaluationCount { get; private set; }
 
         #endregion
     }

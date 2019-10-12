@@ -26,15 +26,17 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         /// <param name="maxDistanceToTarget">The maximum distance from the target possible.</param>
         /// <param name="behaviorCharacterizationFactory">The initialized behavior characterization factory.</param>
         /// <param name="startingEvaluations">The number of evaluations from which the evaluator is starting (defaults to 0).</param>
+        /// <param name="evaluationLogger">Per-evaluation data logger (optional).</param>
         public MazeNavigatorNoveltySearchInitializationEvaluator(int minSuccessDistance,
             int maxDistanceToTarget, IBehaviorCharacterizationFactory behaviorCharacterizationFactory,
-            ulong startingEvaluations = 0)
+            ulong startingEvaluations = 0, IDataLogger evaluationLogger = null)
         {
             EvaluationCount = startingEvaluations;
             _behaviorCharacterizationFactory = behaviorCharacterizationFactory;
+            _evaluationLogger = evaluationLogger;
 
             // Create factory for generating mazes
-            _multiMazeWorldFactory = new MultiMazeNavigationWorldFactory<BehaviorInfo>(minSuccessDistance,
+            _multiMazeWorldFactory = new MultiMazeNavigationWorldFactory(minSuccessDistance,
                 maxDistanceToTarget);
         }
 
@@ -50,11 +52,14 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         /// </param>
         /// <param name="behaviorCharacterizationFactory">The initialized behavior characterization factory.</param>
         /// <param name="startingEvaluations">The number of evaluations from which the evaluator is starting (defaults to 0).</param>
+        /// <param name="evaluationLogger">Per-evaluation data logger (optional).</param>
         public MazeNavigatorNoveltySearchInitializationEvaluator(int minSuccessDistance,
             int maxDistanceToTarget, MazeStructure initialMazeStructure,
-            IBehaviorCharacterizationFactory behaviorCharacterizationFactory, ulong startingEvaluations = 0)
+            IBehaviorCharacterizationFactory behaviorCharacterizationFactory, ulong startingEvaluations = 0,
+            IDataLogger evaluationLogger = null)
             : this(
-                minSuccessDistance, maxDistanceToTarget, behaviorCharacterizationFactory, startingEvaluations)
+                minSuccessDistance, maxDistanceToTarget, behaviorCharacterizationFactory, startingEvaluations,
+                evaluationLogger)
         {
             // Add initial maze structure
             _multiMazeWorldFactory.SetMazeConfigurations(new List<MazeStructure>(1) {initialMazeStructure});
@@ -67,12 +72,17 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         /// <summary>
         ///     The multi maze navigation world factory.
         /// </summary>
-        private readonly MultiMazeNavigationWorldFactory<BehaviorInfo> _multiMazeWorldFactory;
+        private readonly MultiMazeNavigationWorldFactory _multiMazeWorldFactory;
 
         /// <summary>
         ///     The behavior characterization factory.
         /// </summary>
         private readonly IBehaviorCharacterizationFactory _behaviorCharacterizationFactory;
+
+        /// <summary>
+        ///     Per-evaluation data logger (generates one row per maze trial).
+        /// </summary>
+        private readonly IDataLogger _evaluationLogger;
 
         /// <summary>
         ///     Lock object for synchronizing evaluation counter increments.
@@ -105,11 +115,12 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         /// </summary>
         /// <param name="agent">The maze navigator brain (ANN).</param>
         /// <param name="currentGeneration">The current generation or evaluation batch.</param>
-        /// <param name="evaluationLogger">Reference to the evaluation logger.</param>
         /// <returns>A fitness info (which is a function of the euclidean distance to the target).</returns>
-        public BehaviorInfo Evaluate(IBlackBox agent, uint currentGeneration,
-            IDataLogger evaluationLogger)
+        public BehaviorInfo Evaluate(IBlackBox agent, uint currentGeneration)
         {
+            var behaviorInfo = new BehaviorInfo();
+            var isSuccessful = false;
+
             lock (_evaluationLock)
             {
                 // Increment evaluation count
@@ -123,17 +134,24 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             var world = _multiMazeWorldFactory.CreateMazeNavigationWorld(behaviorCharacterization);
 
             // Run a single trial
-            var trialInfo = world.RunTrial(agent, SearchType.NoveltySearch, out var goalReached);
+            var trialBehavior = world.RunBehaviorTrial(agent, out var goalReached);
 
             // Set the objective distance
-            trialInfo.ObjectiveDistance = world.GetDistanceToTarget();
+            var objectiveDistance = world.GetDistanceToTarget();
 
             // Set the stop condition to the outcome
             if (goalReached)
+            {
                 StopConditionSatisfied = true;
+                isSuccessful = true;
+            }
 
-            // Log trial information (only log for non-bridging evaluations)
-            evaluationLogger?.LogRow(new List<LoggableElement>
+            // Record simulation trial info
+            behaviorInfo.TrialData.Add(new TrialInfo(isSuccessful, objectiveDistance, world.GetSimulationTimesteps(),
+                _multiMazeWorldFactory.GetMazeGenomeId(0), trialBehavior));
+
+            // Log trial information
+            _evaluationLogger?.LogRow(new List<LoggableElement>
                 {
                     new LoggableElement(EvaluationFieldElements.Generation, currentGeneration),
                     new LoggableElement(EvaluationFieldElements.EvaluationCount, EvaluationCount),
@@ -142,21 +160,20 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
                 },
                 world.GetLoggableElements());
 
-            return trialInfo;
+            return behaviorInfo;
         }
 
         /// <inheritdoc />
         /// <summary>
         ///     Initializes the logger and writes header.
         /// </summary>
-        /// <param name="evaluationLogger">The evaluation logger.</param>
-        public void Initialize(IDataLogger evaluationLogger)
+        public void Initialize()
         {
             // Set the run phase
-            evaluationLogger?.UpdateRunPhase(RunPhase.Initialization);
+            _evaluationLogger?.UpdateRunPhase(RunPhase.Initialization);
 
             // Log the header
-            evaluationLogger?.LogHeader(new List<LoggableElement>
+            _evaluationLogger?.LogHeader(new List<LoggableElement>
             {
                 new LoggableElement(EvaluationFieldElements.Generation, 0),
                 new LoggableElement(EvaluationFieldElements.EvaluationCount, EvaluationCount),
@@ -168,24 +185,23 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
 
         /// <inheritdoc />
         /// <summary>
-        ///     Update the evaluator based on some characteristic of the given population.
-        /// </summary>
-        /// <typeparam name="TGenome">The genome type parameter.</typeparam>
-        /// <param name="population">The current population.</param>
-        public void Update<TGenome>(List<TGenome> population) where TGenome : class, IGenome<TGenome>
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <inheritdoc />
-        /// <summary>
         ///     Updates the environment or other evaluation criteria against which the phenomes under evaluation are being
         ///     compared.  This is typically used in a MCC context.
         /// </summary>
         /// <param name="evaluatorPhenomes">The new phenomes to compare against.</param>
-        public void UpdateEvaluatorPhenotypes(IEnumerable<object> evaluatorPhenomes)
+        /// <param name="lastGeneration">The generation that was just executed.</param>
+        public void UpdateEvaluatorPhenotypes(IEnumerable<object> evaluatorPhenomes, uint lastGeneration)
         {
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        ///     Cleans up evaluator state after end of execution or upon execution interruption.  In particular, this
+        ///     closes out any existing evaluation logger instance.
+        /// </summary>
+        public void Cleanup()
+        {
+            _evaluationLogger?.Close();
         }
 
         /// <inheritdoc />
@@ -194,20 +210,6 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         /// </summary>
         public void Reset()
         {
-        }
-
-        /// <inheritdoc />
-        /// <summary>
-        ///     Returns MazeNavigationMCSInitializationEvaluator loggable elements.
-        /// </summary>
-        /// <param name="logFieldEnableMap">
-        ///     Dictionary of logging fields that can be enabled or disabled based on the specification
-        ///     of the calling routine.
-        /// </param>
-        /// <returns>The loggable elements for MazeNavigationMCSInitializationEvaluator.</returns>
-        public List<LoggableElement> GetLoggableElements(IDictionary<FieldElement, bool> logFieldEnableMap = null)
-        {
-            return null;
         }
 
         #endregion
