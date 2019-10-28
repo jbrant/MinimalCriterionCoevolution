@@ -7,9 +7,9 @@ using System.Collections.Generic;
 namespace SharpNeat.Loggers
 {
     /// <summary>
-    ///     Fields capturing data related to population statistics per generation/batch.
+    ///     Fields capturing data related to population statistics per generation/batch for maze navigation experiments.
     /// </summary>
-    public static class EvolutionFieldElements
+    public static class MazeNavEvolutionFieldElements
     {
         /// <summary>
         ///     The number of elements in this log file/table.
@@ -264,7 +264,8 @@ namespace SharpNeat.Loggers
         public static readonly FieldElement MeanWidth = new FieldElement(46, "Mean Width");
 
         /// <summary>
-        ///     Pre-constructs an evolution log field enable map with all of the fields enabled by default.
+        ///     Pre-constructs an evolution log field enable map with all of the fields enabled by default (for maze navigation
+        ///     experiments).
         /// </summary>
         /// <returns>Evolution log field enable map with all fields enabled.</returns>
         public static Dictionary<FieldElement, bool> PopulateEvolutionFieldElementsEnableMap()
@@ -318,6 +319,150 @@ namespace SharpNeat.Loggers
                 {MinWidth, true},
                 {MaxWidth, true},
                 {MeanWidth, true}
+            };
+        }
+    }
+
+    /// <summary>
+    ///     Fields capturing data related to population statistics per generation/batch for body/brain experiments.
+    /// </summary>
+    public static class BodyBrainEvolutionFieldElements
+    {
+        /// <summary>
+        ///     The generation of the observation.
+        /// </summary>
+        public static readonly FieldElement Generation = new FieldElement(0, "Generation");
+
+        /// <summary>
+        ///     The run phase (initialization or primary) at the time of the observation.
+        /// </summary>
+        public static readonly FieldElement RunPhase = new FieldElement(1, "Run Phase");
+
+        /// <summary>
+        ///     The minimum number of voxels in a given voxel body within the body population.
+        /// </summary>
+        public static readonly FieldElement MinVoxels = new FieldElement(2, "Min Voxels");
+
+        /// <summary>
+        ///     The maximum number of voxels in a given voxel body within the body population.
+        /// </summary>
+        public static readonly FieldElement MaxVoxels = new FieldElement(3, "Max Voxels");
+
+        /// <summary>
+        ///     The mean number of voxels within the body population.
+        /// </summary>
+        public static readonly FieldElement MeanVoxels = new FieldElement(4, "Mean Voxels");
+
+        /// <summary>
+        ///     The minimum voxel proportion within the body population.
+        /// </summary>
+        public static readonly FieldElement MinFullProportion = new FieldElement(5, "Min Full Proportion");
+
+        /// <summary>
+        ///     The maximum voxel proportion within the body population.
+        /// </summary>
+        public static readonly FieldElement MaxFullProportion = new FieldElement(6, "Max Full Proportion");
+
+        /// <summary>
+        ///     The mean voxel proportion within the body population.
+        /// </summary>
+        public static readonly FieldElement MeanFullProportion = new FieldElement(7, "Mean Full Proportion");
+
+        /// <summary>
+        ///     The minimum number of active voxels in a given voxel body within the body population.
+        /// </summary>
+        public static readonly FieldElement MinActiveVoxels = new FieldElement(8, "Min Active Voxels");
+
+        /// <summary>
+        ///     The maximum number of active voxels in a given voxel body within the body population.
+        /// </summary>
+        public static readonly FieldElement MaxActiveVoxels = new FieldElement(9, "Max Active Voxels");
+
+        /// <summary>
+        ///     The mean number of active voxels within the body population.
+        /// </summary>
+        public static readonly FieldElement MeanActiveVoxels = new FieldElement(10, "Mean Active Voxels");
+
+        /// <summary>
+        ///     The minimum number of passive voxels in a given voxel body within the body population.
+        /// </summary>
+        public static readonly FieldElement MinPassiveVoxels = new FieldElement(11, "Min Passive Voxels");
+
+        /// <summary>
+        ///     The maximum number of passive voxels in a given voxel body within the body population.
+        /// </summary>
+        public static readonly FieldElement MaxPassiveVoxels = new FieldElement(12, "Max Passive Voxels");
+
+        /// <summary>
+        ///     The mean number of passive voxels within the body population.
+        /// </summary>
+        public static readonly FieldElement MeanPassiveVoxels = new FieldElement(13, "Mean Passive Voxels");
+
+        /// <summary>
+        ///     The minimum active voxel proportion within the body population.
+        /// </summary>
+        public static readonly FieldElement MinActiveVoxelProportion =
+            new FieldElement(14, "Min Active Voxel Proportion");
+
+        /// <summary>
+        ///     The maximum active voxel proportion within the body population.
+        /// </summary>
+        public static readonly FieldElement MaxActiveVoxelProportion =
+            new FieldElement(15, "Max Active Voxel Proportion");
+
+        /// <summary>
+        ///     The mean active voxel proportion within the body population.
+        /// </summary>
+        public static readonly FieldElement MeanActiveVoxelProportion =
+            new FieldElement(16, "Mean Active Voxel Proportion");
+
+        /// <summary>
+        ///     The minimum passive voxel proportion within the body population.
+        /// </summary>
+        public static readonly FieldElement MinPassiveVoxelProportion =
+            new FieldElement(17, "Min Passive Voxel Proportion");
+
+        /// <summary>
+        ///     The maximum passive voxel proportion within the body population.
+        /// </summary>
+        public static readonly FieldElement MaxPassiveVoxelProportion =
+            new FieldElement(18, "Max Passive Voxel Proportion");
+
+        /// <summary>
+        ///     The mean passive voxel proportion within the body population.
+        /// </summary>
+        public static readonly FieldElement MeanPassiveVoxelProportion =
+            new FieldElement(19, "Mean Passive Voxel Proportion");
+
+        /// <summary>
+        ///     Pre-constructs an evolution log field enable map with all of the fields enabled by default (for body/brain
+        ///     experiments).
+        /// </summary>
+        /// <returns>Evolution log field enable map with all fields enabled.</returns>
+        public static Dictionary<FieldElement, bool> PopulateEvolutionFieldElementsEnableMap()
+        {
+            return new Dictionary<FieldElement, bool>
+            {
+                {Generation, true},
+                {RunPhase, true},
+                {MinVoxels, true},
+                {MaxVoxels, true},
+                {MeanVoxels, true},
+                {MinFullProportion, true},
+                {MaxFullProportion, true},
+                {MeanFullProportion, true},
+                {MinActiveVoxels, true},
+                {MaxActiveVoxels, true},
+                {MeanActiveVoxels, true},
+                {MinPassiveVoxels, true},
+                {MaxPassiveVoxels, true},
+                {MeanPassiveVoxels, true},
+                {MinActiveVoxelProportion, true},
+                {MaxActiveVoxelProportion, true},
+                {MeanActiveVoxelProportion, true},
+                {MinPassiveVoxelProportion, true},
+                {MaxPassiveVoxelProportion, true},
+                {MeanPassiveVoxelProportion, true}
             };
         }
     }

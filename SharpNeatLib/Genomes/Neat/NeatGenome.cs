@@ -65,47 +65,47 @@ namespace SharpNeat.Genomes.Neat
             // Add all loggable elements except for behavior characterization
             List<LoggableElement> loggableElements = new List<LoggableElement>
             {
-                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.ChampGenomeGenomeId) == true &&
-                 logFieldEnableMap[EvolutionFieldElements.ChampGenomeGenomeId])
-                    ? new LoggableElement(EvolutionFieldElements.ChampGenomeGenomeId, Id)
+                (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.ChampGenomeGenomeId) == true &&
+                 logFieldEnableMap[MazeNavEvolutionFieldElements.ChampGenomeGenomeId])
+                    ? new LoggableElement(MazeNavEvolutionFieldElements.ChampGenomeGenomeId, Id)
                     : null,
-                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.ChampGenomeBirthGeneration) == true &&
-                 logFieldEnableMap[EvolutionFieldElements.ChampGenomeBirthGeneration])
-                    ? new LoggableElement(EvolutionFieldElements.ChampGenomeBirthGeneration, BirthGeneration)
+                (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.ChampGenomeBirthGeneration) == true &&
+                 logFieldEnableMap[MazeNavEvolutionFieldElements.ChampGenomeBirthGeneration])
+                    ? new LoggableElement(MazeNavEvolutionFieldElements.ChampGenomeBirthGeneration, BirthGeneration)
                     : null,
-                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.ChampGenomeNeuronGeneCount) == true &&
-                 logFieldEnableMap[EvolutionFieldElements.ChampGenomeNeuronGeneCount])
-                    ? new LoggableElement(EvolutionFieldElements.ChampGenomeNeuronGeneCount, NeuronGeneList.Count)
+                (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.ChampGenomeNeuronGeneCount) == true &&
+                 logFieldEnableMap[MazeNavEvolutionFieldElements.ChampGenomeNeuronGeneCount])
+                    ? new LoggableElement(MazeNavEvolutionFieldElements.ChampGenomeNeuronGeneCount, NeuronGeneList.Count)
                     : null,
-                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.ChampGenomeConnectionGeneCount) == true &&
-                 logFieldEnableMap[EvolutionFieldElements.ChampGenomeConnectionGeneCount])
-                    ? new LoggableElement(EvolutionFieldElements.ChampGenomeConnectionGeneCount,
+                (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.ChampGenomeConnectionGeneCount) == true &&
+                 logFieldEnableMap[MazeNavEvolutionFieldElements.ChampGenomeConnectionGeneCount])
+                    ? new LoggableElement(MazeNavEvolutionFieldElements.ChampGenomeConnectionGeneCount,
                         ConnectionGeneList.Count)
                     : null,
-                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.ChampGenomeTotalGeneCount) == true &&
-                 logFieldEnableMap[EvolutionFieldElements.ChampGenomeTotalGeneCount])
-                    ? new LoggableElement(EvolutionFieldElements.ChampGenomeTotalGeneCount,
+                (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.ChampGenomeTotalGeneCount) == true &&
+                 logFieldEnableMap[MazeNavEvolutionFieldElements.ChampGenomeTotalGeneCount])
+                    ? new LoggableElement(MazeNavEvolutionFieldElements.ChampGenomeTotalGeneCount,
                         NeuronGeneList.Count + ConnectionGeneList.Count)
                     : null,
-                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.ChampGenomeEvaluationCount) == true &&
-                 logFieldEnableMap[EvolutionFieldElements.ChampGenomeEvaluationCount])
-                    ? new LoggableElement(EvolutionFieldElements.ChampGenomeEvaluationCount,
+                (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.ChampGenomeEvaluationCount) == true &&
+                 logFieldEnableMap[MazeNavEvolutionFieldElements.ChampGenomeEvaluationCount])
+                    ? new LoggableElement(MazeNavEvolutionFieldElements.ChampGenomeEvaluationCount,
                         EvaluationInfo.EvaluationCount)
                     : null,
-                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.ChampGenomeFitness) == true &&
-                 logFieldEnableMap[EvolutionFieldElements.ChampGenomeFitness])
-                    ? new LoggableElement(EvolutionFieldElements.ChampGenomeFitness, EvaluationInfo.Fitness)
+                (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.ChampGenomeFitness) == true &&
+                 logFieldEnableMap[MazeNavEvolutionFieldElements.ChampGenomeFitness])
+                    ? new LoggableElement(MazeNavEvolutionFieldElements.ChampGenomeFitness, EvaluationInfo.Fitness)
                     : null
             };
 
             // Only log champ genome XML if explicitly specified
-            if (logFieldEnableMap != null && logFieldEnableMap.ContainsKey(EvolutionFieldElements.ChampGenomeXml) &&
-                logFieldEnableMap[EvolutionFieldElements.ChampGenomeXml])
+            if (logFieldEnableMap != null && logFieldEnableMap.ContainsKey(MazeNavEvolutionFieldElements.ChampGenomeXml) &&
+                logFieldEnableMap[MazeNavEvolutionFieldElements.ChampGenomeXml])
             {
                 // Serialize the champ genome to XML and add as a loggable element
                 StringWriter champGenomeSw = new StringWriter();
                 NeatGenomeXmlIO.WriteComplete(new XmlTextWriter(champGenomeSw), this, false);
-                loggableElements.Add(new LoggableElement(EvolutionFieldElements.ChampGenomeXml, champGenomeSw.ToString()));
+                loggableElements.Add(new LoggableElement(MazeNavEvolutionFieldElements.ChampGenomeXml, champGenomeSw.ToString()));
             }
 
             return loggableElements;

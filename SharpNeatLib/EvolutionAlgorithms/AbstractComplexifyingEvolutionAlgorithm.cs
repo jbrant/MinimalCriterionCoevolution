@@ -65,17 +65,17 @@ namespace SharpNeat.EvolutionAlgorithms
         {
             return new List<LoggableElement>
             {
-                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.SpecieCount) == true &&
-                 logFieldEnableMap[EvolutionFieldElements.SpecieCount])
-                    ? new LoggableElement(EvolutionFieldElements.SpecieCount, SpecieList?.Count)
+                (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.SpecieCount) == true &&
+                 logFieldEnableMap[MazeNavEvolutionFieldElements.SpecieCount])
+                    ? new LoggableElement(MazeNavEvolutionFieldElements.SpecieCount, SpecieList?.Count)
                     : null,
-                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.RunPhase) == true &&
-                 logFieldEnableMap[EvolutionFieldElements.RunPhase])
-                    ? new LoggableElement(EvolutionFieldElements.RunPhase, RunPhase)
+                (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.RunPhase) == true &&
+                 logFieldEnableMap[MazeNavEvolutionFieldElements.RunPhase])
+                    ? new LoggableElement(MazeNavEvolutionFieldElements.RunPhase, RunPhase)
                     : null,
-                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.PopulationSize) == true &&
-                 logFieldEnableMap[EvolutionFieldElements.PopulationSize])
-                    ? new LoggableElement(EvolutionFieldElements.PopulationSize, GenomeList.Count)
+                (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.PopulationSize) == true &&
+                 logFieldEnableMap[MazeNavEvolutionFieldElements.PopulationSize])
+                    ? new LoggableElement(MazeNavEvolutionFieldElements.PopulationSize, GenomeList.Count)
                     : null
             };
         }

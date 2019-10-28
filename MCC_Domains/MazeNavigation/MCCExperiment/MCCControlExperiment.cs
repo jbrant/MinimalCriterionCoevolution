@@ -58,7 +58,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
                 new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - MazeTrials.csv");
 
             // Create new evolution field elements map with all fields enabled
-            _navigatorLogFieldEnableMap = EvolutionFieldElements.PopulateEvolutionFieldElementsEnableMap();
+            _navigatorLogFieldEnableMap = MazeNavEvolutionFieldElements.PopulateEvolutionFieldElementsEnableMap();
 
             // Add default population logging configuration
             foreach (var populationLoggingPair in PopulationFieldElements.PopulatePopulationFieldElementsEnableMap())
@@ -73,68 +73,68 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             }
             
             // Disable logging fields not relevant to agent evolution in MCC experiment
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.SpecieCount] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.AsexualOffspringCount] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.SexualOffspringCount] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.InterspeciesOffspringCount] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MinimalCriteriaThreshold] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MinimalCriteriaPointX] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MinimalCriteriaPointY] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MaxFitness] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MeanFitness] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MeanSpecieChampFitness] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MinSpecieSize] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MaxSpecieSize] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeGenomeId] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeFitness] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeBirthGeneration] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeConnectionGeneCount] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeNeuronGeneCount] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeTotalGeneCount] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeEvaluationCount] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.ChampGenomeXml] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MinWalls] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MaxWalls] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MeanWalls] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MinWaypoints] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MaxWaypoints] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MeanWaypoints] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MinJunctures] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MaxJunctures] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MeanJunctures] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MinTrajectoryFacingOpenings] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MaxTrajectoryFacingOpenings] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MeanTrajectoryFacingOpenings] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MinHeight] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MaxHeight] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MeanHeight] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MinWidth] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MaxWidth] = false;
-            _navigatorLogFieldEnableMap[EvolutionFieldElements.MeanWidth] = false;
+            _navigatorLogFieldEnableMap[MazeNavEvolutionFieldElements.SpecieCount] = false;
+            _navigatorLogFieldEnableMap[MazeNavEvolutionFieldElements.AsexualOffspringCount] = false;
+            _navigatorLogFieldEnableMap[MazeNavEvolutionFieldElements.SexualOffspringCount] = false;
+            _navigatorLogFieldEnableMap[MazeNavEvolutionFieldElements.InterspeciesOffspringCount] = false;
+            _navigatorLogFieldEnableMap[MazeNavEvolutionFieldElements.MinimalCriteriaThreshold] = false;
+            _navigatorLogFieldEnableMap[MazeNavEvolutionFieldElements.MinimalCriteriaPointX] = false;
+            _navigatorLogFieldEnableMap[MazeNavEvolutionFieldElements.MinimalCriteriaPointY] = false;
+            _navigatorLogFieldEnableMap[MazeNavEvolutionFieldElements.MaxFitness] = false;
+            _navigatorLogFieldEnableMap[MazeNavEvolutionFieldElements.MeanFitness] = false;
+            _navigatorLogFieldEnableMap[MazeNavEvolutionFieldElements.MeanSpecieChampFitness] = false;
+            _navigatorLogFieldEnableMap[MazeNavEvolutionFieldElements.MinSpecieSize] = false;
+            _navigatorLogFieldEnableMap[MazeNavEvolutionFieldElements.MaxSpecieSize] = false;
+            _navigatorLogFieldEnableMap[MazeNavEvolutionFieldElements.ChampGenomeGenomeId] = false;
+            _navigatorLogFieldEnableMap[MazeNavEvolutionFieldElements.ChampGenomeFitness] = false;
+            _navigatorLogFieldEnableMap[MazeNavEvolutionFieldElements.ChampGenomeBirthGeneration] = false;
+            _navigatorLogFieldEnableMap[MazeNavEvolutionFieldElements.ChampGenomeConnectionGeneCount] = false;
+            _navigatorLogFieldEnableMap[MazeNavEvolutionFieldElements.ChampGenomeNeuronGeneCount] = false;
+            _navigatorLogFieldEnableMap[MazeNavEvolutionFieldElements.ChampGenomeTotalGeneCount] = false;
+            _navigatorLogFieldEnableMap[MazeNavEvolutionFieldElements.ChampGenomeEvaluationCount] = false;
+            _navigatorLogFieldEnableMap[MazeNavEvolutionFieldElements.ChampGenomeXml] = false;
+            _navigatorLogFieldEnableMap[MazeNavEvolutionFieldElements.MinWalls] = false;
+            _navigatorLogFieldEnableMap[MazeNavEvolutionFieldElements.MaxWalls] = false;
+            _navigatorLogFieldEnableMap[MazeNavEvolutionFieldElements.MeanWalls] = false;
+            _navigatorLogFieldEnableMap[MazeNavEvolutionFieldElements.MinWaypoints] = false;
+            _navigatorLogFieldEnableMap[MazeNavEvolutionFieldElements.MaxWaypoints] = false;
+            _navigatorLogFieldEnableMap[MazeNavEvolutionFieldElements.MeanWaypoints] = false;
+            _navigatorLogFieldEnableMap[MazeNavEvolutionFieldElements.MinJunctures] = false;
+            _navigatorLogFieldEnableMap[MazeNavEvolutionFieldElements.MaxJunctures] = false;
+            _navigatorLogFieldEnableMap[MazeNavEvolutionFieldElements.MeanJunctures] = false;
+            _navigatorLogFieldEnableMap[MazeNavEvolutionFieldElements.MinTrajectoryFacingOpenings] = false;
+            _navigatorLogFieldEnableMap[MazeNavEvolutionFieldElements.MaxTrajectoryFacingOpenings] = false;
+            _navigatorLogFieldEnableMap[MazeNavEvolutionFieldElements.MeanTrajectoryFacingOpenings] = false;
+            _navigatorLogFieldEnableMap[MazeNavEvolutionFieldElements.MinHeight] = false;
+            _navigatorLogFieldEnableMap[MazeNavEvolutionFieldElements.MaxHeight] = false;
+            _navigatorLogFieldEnableMap[MazeNavEvolutionFieldElements.MeanHeight] = false;
+            _navigatorLogFieldEnableMap[MazeNavEvolutionFieldElements.MinWidth] = false;
+            _navigatorLogFieldEnableMap[MazeNavEvolutionFieldElements.MaxWidth] = false;
+            _navigatorLogFieldEnableMap[MazeNavEvolutionFieldElements.MeanWidth] = false;
 
             // Create a maze logger configuration with the same configuration as the navigator one
             _mazeLogFieldEnableMap = new Dictionary<FieldElement, bool>(_navigatorLogFieldEnableMap)
             {
-                [EvolutionFieldElements.RunPhase] = false,
+                [MazeNavEvolutionFieldElements.RunPhase] = false,
                 [PopulationFieldElements.RunPhase] = false,
-                [EvolutionFieldElements.MinWalls] = true,
-                [EvolutionFieldElements.MaxWalls] = true,
-                [EvolutionFieldElements.MeanWalls] = true,
-                [EvolutionFieldElements.MinWaypoints] = true,
-                [EvolutionFieldElements.MaxWaypoints] = true,
-                [EvolutionFieldElements.MeanWaypoints] = true,
-                [EvolutionFieldElements.MinJunctures] = true,
-                [EvolutionFieldElements.MaxJunctures] = true,
-                [EvolutionFieldElements.MeanJunctures] = true,
-                [EvolutionFieldElements.MinTrajectoryFacingOpenings] = true,
-                [EvolutionFieldElements.MaxTrajectoryFacingOpenings] = true,
-                [EvolutionFieldElements.MeanTrajectoryFacingOpenings] = true,
-                [EvolutionFieldElements.MinHeight] = true,
-                [EvolutionFieldElements.MaxHeight] = true,
-                [EvolutionFieldElements.MeanHeight] = true,
-                [EvolutionFieldElements.MinWidth] = true,
-                [EvolutionFieldElements.MaxWidth] = true,
-                [EvolutionFieldElements.MeanWidth] = true
+                [MazeNavEvolutionFieldElements.MinWalls] = true,
+                [MazeNavEvolutionFieldElements.MaxWalls] = true,
+                [MazeNavEvolutionFieldElements.MeanWalls] = true,
+                [MazeNavEvolutionFieldElements.MinWaypoints] = true,
+                [MazeNavEvolutionFieldElements.MaxWaypoints] = true,
+                [MazeNavEvolutionFieldElements.MeanWaypoints] = true,
+                [MazeNavEvolutionFieldElements.MinJunctures] = true,
+                [MazeNavEvolutionFieldElements.MaxJunctures] = true,
+                [MazeNavEvolutionFieldElements.MeanJunctures] = true,
+                [MazeNavEvolutionFieldElements.MinTrajectoryFacingOpenings] = true,
+                [MazeNavEvolutionFieldElements.MaxTrajectoryFacingOpenings] = true,
+                [MazeNavEvolutionFieldElements.MeanTrajectoryFacingOpenings] = true,
+                [MazeNavEvolutionFieldElements.MinHeight] = true,
+                [MazeNavEvolutionFieldElements.MaxHeight] = true,
+                [MazeNavEvolutionFieldElements.MeanHeight] = true,
+                [MazeNavEvolutionFieldElements.MinWidth] = true,
+                [MazeNavEvolutionFieldElements.MaxWidth] = true,
+                [MazeNavEvolutionFieldElements.MeanWidth] = true
             };
 
             // Validate experiment configuration parameters

@@ -180,115 +180,115 @@ namespace SharpNeat.EvolutionAlgorithms.Statistics
         {
             var elements = base.GetLoggableElements(logFieldEnableMap);
 
-            if (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MinWalls) == true &&
-                logFieldEnableMap[EvolutionFieldElements.MinWalls])
+            if (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.MinWalls) == true &&
+                logFieldEnableMap[MazeNavEvolutionFieldElements.MinWalls])
             {
-                elements.Add(new LoggableElement(EvolutionFieldElements.MinWalls, MinWalls));
+                elements.Add(new LoggableElement(MazeNavEvolutionFieldElements.MinWalls, MinWalls));
             }
 
-            if (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MaxWalls) == true &&
-                logFieldEnableMap[EvolutionFieldElements.MaxWalls])
+            if (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.MaxWalls) == true &&
+                logFieldEnableMap[MazeNavEvolutionFieldElements.MaxWalls])
             {
-                elements.Add(new LoggableElement(EvolutionFieldElements.MaxWalls, MaxWalls));
+                elements.Add(new LoggableElement(MazeNavEvolutionFieldElements.MaxWalls, MaxWalls));
             }
 
-            if (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MeanWalls) == true &&
-                logFieldEnableMap[EvolutionFieldElements.MeanWalls])
+            if (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.MeanWalls) == true &&
+                logFieldEnableMap[MazeNavEvolutionFieldElements.MeanWalls])
             {
-                elements.Add(new LoggableElement(EvolutionFieldElements.MeanWalls, MeanWalls));
+                elements.Add(new LoggableElement(MazeNavEvolutionFieldElements.MeanWalls, MeanWalls));
             }
 
-            if (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MinWaypoints) == true &&
-                logFieldEnableMap[EvolutionFieldElements.MinWaypoints])
+            if (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.MinWaypoints) == true &&
+                logFieldEnableMap[MazeNavEvolutionFieldElements.MinWaypoints])
             {
-                elements.Add(new LoggableElement(EvolutionFieldElements.MinWaypoints, MinWaypoints));
+                elements.Add(new LoggableElement(MazeNavEvolutionFieldElements.MinWaypoints, MinWaypoints));
             }
 
-            if (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MaxWaypoints) == true &&
-                logFieldEnableMap[EvolutionFieldElements.MaxWaypoints])
+            if (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.MaxWaypoints) == true &&
+                logFieldEnableMap[MazeNavEvolutionFieldElements.MaxWaypoints])
             {
-                elements.Add(new LoggableElement(EvolutionFieldElements.MaxWaypoints, MaxWaypoints));
+                elements.Add(new LoggableElement(MazeNavEvolutionFieldElements.MaxWaypoints, MaxWaypoints));
             }
 
-            if (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MeanWaypoints) == true &&
-                logFieldEnableMap[EvolutionFieldElements.MeanWaypoints])
+            if (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.MeanWaypoints) == true &&
+                logFieldEnableMap[MazeNavEvolutionFieldElements.MeanWaypoints])
             {
-                elements.Add(new LoggableElement(EvolutionFieldElements.MeanWaypoints, MeanWaypoints));
+                elements.Add(new LoggableElement(MazeNavEvolutionFieldElements.MeanWaypoints, MeanWaypoints));
             }
 
-            if (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MinJunctures) == true &&
-                logFieldEnableMap[EvolutionFieldElements.MinJunctures])
+            if (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.MinJunctures) == true &&
+                logFieldEnableMap[MazeNavEvolutionFieldElements.MinJunctures])
             {
-                elements.Add(new LoggableElement(EvolutionFieldElements.MinJunctures, MinJunctures));
+                elements.Add(new LoggableElement(MazeNavEvolutionFieldElements.MinJunctures, MinJunctures));
             }
 
-            if (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MaxJunctures) == true &&
-                logFieldEnableMap[EvolutionFieldElements.MaxJunctures])
+            if (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.MaxJunctures) == true &&
+                logFieldEnableMap[MazeNavEvolutionFieldElements.MaxJunctures])
             {
-                elements.Add(new LoggableElement(EvolutionFieldElements.MaxJunctures, MaxJunctures));
+                elements.Add(new LoggableElement(MazeNavEvolutionFieldElements.MaxJunctures, MaxJunctures));
             }
 
-            if (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MeanJunctures) == true &&
-                logFieldEnableMap[EvolutionFieldElements.MeanJunctures])
+            if (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.MeanJunctures) == true &&
+                logFieldEnableMap[MazeNavEvolutionFieldElements.MeanJunctures])
             {
-                elements.Add(new LoggableElement(EvolutionFieldElements.MeanJunctures, MeanJunctures));
+                elements.Add(new LoggableElement(MazeNavEvolutionFieldElements.MeanJunctures, MeanJunctures));
             }
 
-            if (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MinTrajectoryFacingOpenings) == true &&
-                logFieldEnableMap[EvolutionFieldElements.MinTrajectoryFacingOpenings])
+            if (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.MinTrajectoryFacingOpenings) == true &&
+                logFieldEnableMap[MazeNavEvolutionFieldElements.MinTrajectoryFacingOpenings])
             {
-                elements.Add(new LoggableElement(EvolutionFieldElements.MinTrajectoryFacingOpenings,
+                elements.Add(new LoggableElement(MazeNavEvolutionFieldElements.MinTrajectoryFacingOpenings,
                     MinTrajectoryFacingOpenings));
             }
 
-            if (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MaxTrajectoryFacingOpenings) == true &&
-                logFieldEnableMap[EvolutionFieldElements.MaxTrajectoryFacingOpenings])
+            if (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.MaxTrajectoryFacingOpenings) == true &&
+                logFieldEnableMap[MazeNavEvolutionFieldElements.MaxTrajectoryFacingOpenings])
             {
-                elements.Add(new LoggableElement(EvolutionFieldElements.MaxTrajectoryFacingOpenings,
+                elements.Add(new LoggableElement(MazeNavEvolutionFieldElements.MaxTrajectoryFacingOpenings,
                     MaxTrajectoryFacingOpenings));
             }
 
-            if (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MeanTrajectoryFacingOpenings) == true &&
-                logFieldEnableMap[EvolutionFieldElements.MeanTrajectoryFacingOpenings])
+            if (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.MeanTrajectoryFacingOpenings) == true &&
+                logFieldEnableMap[MazeNavEvolutionFieldElements.MeanTrajectoryFacingOpenings])
             {
-                elements.Add(new LoggableElement(EvolutionFieldElements.MeanTrajectoryFacingOpenings,
+                elements.Add(new LoggableElement(MazeNavEvolutionFieldElements.MeanTrajectoryFacingOpenings,
                     MeanTrajectoryFacingOpenings));
             }
 
-            if (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MinHeight) == true &&
-                logFieldEnableMap[EvolutionFieldElements.MinHeight])
+            if (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.MinHeight) == true &&
+                logFieldEnableMap[MazeNavEvolutionFieldElements.MinHeight])
             {
-                elements.Add(new LoggableElement(EvolutionFieldElements.MinHeight, MinHeight));
+                elements.Add(new LoggableElement(MazeNavEvolutionFieldElements.MinHeight, MinHeight));
             }
 
-            if (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MaxHeight) == true &&
-                logFieldEnableMap[EvolutionFieldElements.MaxHeight])
+            if (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.MaxHeight) == true &&
+                logFieldEnableMap[MazeNavEvolutionFieldElements.MaxHeight])
             {
-                elements.Add(new LoggableElement(EvolutionFieldElements.MaxHeight, MaxHeight));
+                elements.Add(new LoggableElement(MazeNavEvolutionFieldElements.MaxHeight, MaxHeight));
             }
 
-            if (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MeanHeight) == true &&
-                logFieldEnableMap[EvolutionFieldElements.MeanHeight])
+            if (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.MeanHeight) == true &&
+                logFieldEnableMap[MazeNavEvolutionFieldElements.MeanHeight])
             {
-                elements.Add(new LoggableElement(EvolutionFieldElements.MeanHeight, MeanHeight));
+                elements.Add(new LoggableElement(MazeNavEvolutionFieldElements.MeanHeight, MeanHeight));
             }
 
-            if (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MinWidth) == true &&
-                logFieldEnableMap[EvolutionFieldElements.MinWidth])
+            if (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.MinWidth) == true &&
+                logFieldEnableMap[MazeNavEvolutionFieldElements.MinWidth])
             {
-                elements.Add(new LoggableElement(EvolutionFieldElements.MinWidth, MinWidth));
+                elements.Add(new LoggableElement(MazeNavEvolutionFieldElements.MinWidth, MinWidth));
             }
 
-            if (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MaxWidth) == true &&
-                logFieldEnableMap[EvolutionFieldElements.MaxWidth])
+            if (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.MaxWidth) == true &&
+                logFieldEnableMap[MazeNavEvolutionFieldElements.MaxWidth])
             {
-                elements.Add(new LoggableElement(EvolutionFieldElements.MaxWidth, MaxWidth));
+                elements.Add(new LoggableElement(MazeNavEvolutionFieldElements.MaxWidth, MaxWidth));
             }
 
-            if (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MeanWidth) == true &&
-                logFieldEnableMap[EvolutionFieldElements.MeanWidth])
+            if (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.MeanWidth) == true &&
+                logFieldEnableMap[MazeNavEvolutionFieldElements.MeanWidth])
             {
-                elements.Add(new LoggableElement(EvolutionFieldElements.MeanWidth, MeanWidth));
+                elements.Add(new LoggableElement(MazeNavEvolutionFieldElements.MeanWidth, MeanWidth));
             }
 
             return elements;

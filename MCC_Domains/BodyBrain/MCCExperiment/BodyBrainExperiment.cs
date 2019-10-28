@@ -78,7 +78,7 @@ namespace MCC_Domains.BodyBrain
             _bodyResourceUsageLogger = new FileDataLogger($"{logFileDirectory}\\{name} - Run{run} - ResourceUsage.csv");
             
             // Create new evolution field elements map with all fields enabled
-            _brainLogFieldEnableMap = EvolutionFieldElements.PopulateEvolutionFieldElementsEnableMap();
+            _brainLogFieldEnableMap = MazeNavEvolutionFieldElements.PopulateEvolutionFieldElementsEnableMap();
             
             // Add default population logging configuration
             foreach (var populationLoggingPair in PopulationFieldElements.PopulatePopulationFieldElementsEnableMap())
