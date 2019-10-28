@@ -22,7 +22,7 @@ namespace MCC_Domains.MazeNavigation
     /// <summary>
     ///     Base class for maze navigation MCC experiments.
     /// </summary>
-    public abstract class BaseMCCMazeNavigationExperiment : IMCCExperiment
+    public abstract class BaseMCCMazeNavigationExperiment : IMCCMazeExperiment
     {
         #region Private Methods
 
@@ -323,7 +323,7 @@ namespace MCC_Domains.MazeNavigation
             // Set the genome parameters
             NeatGenomeParameters = ExperimentUtils.ReadNeatGenomeParameters(xmlConfig);
             NeatGenomeParameters.FeedforwardOnly = ActivationScheme.AcyclicNetwork;
-            MazeGenomeParameters = ExperimentUtils.ReadMazeGenomeParameters(xmlConfig);
+            MazeGenomeParameters = MazeNavigationExperimentUtils.ReadMazeGenomeParameters(xmlConfig);
 
             // Configure evolutionary algorithm parameters
             AgentDefaultPopulationSize = XmlUtils.GetValueAsInt(xmlConfig, "AgentPopulationSize");
@@ -357,7 +357,7 @@ namespace MCC_Domains.MazeNavigation
 
             // Initialize the initialization algorithm
             _mazeNavigationInitializer =
-                ExperimentUtils.DetermineMCCInitializer(
+                MazeNavigationExperimentUtils.DetermineMazeNavigationMCCInitializer(
                     xmlConfig.GetElementsByTagName("InitializationAlgorithmConfig", "")[0] as XmlElement);
 
             // Setup initialization algorithm
@@ -395,6 +395,10 @@ namespace MCC_Domains.MazeNavigation
             var seedAgentPopulation = new List<NeatGenome>();
             var mazeSolutionCount = new Dictionary<uint, int>();
 
+            // Compute the max number of agents that should be added per maze to avoid exceeding the agent seed count
+            var perMazeAgentCount = Math.Min(resourceLimit,
+                Convert.ToInt32(Math.Floor((double) numAgents / mazePopulation.Count)));
+            
             // Create maze decoder to decode initialization mazes
             var mazeDecoder = new MazeDecoder(MazeScaleMultiplier);
 
@@ -406,7 +410,7 @@ namespace MCC_Domains.MazeNavigation
                 // Initialize maze solution count to 0
                 mazeSolutionCount.Add(mazeId, 0);
 
-                Console.WriteLine(@"Evolving viable agents for maze population index {0} and maze ID {1}", idx, mazeId);
+                Console.WriteLine($"Evolving viable agents for maze population index {idx} and maze ID {mazeId}");
 
                 // Evolve the number of agents required to meet the success MC for the current maze
                 var viableMazeAgents = _mazeNavigationInitializer.EvolveViableAgents(agentGenomeFactory,
@@ -421,10 +425,10 @@ namespace MCC_Domains.MazeNavigation
                     viableMazeAgents.Where(
                             viableMazeAgent =>
                                 seedAgentPopulation.Select(sap => sap.Id).Contains(viableMazeAgent.Id) == false)
-                        .Take(resourceLimit))
+                        .Take(perMazeAgentCount))
                 {
                     // Increment number of maze solutions
-                    mazeSolutionCount[mazeId] = mazeSolutionCount[mazeId]++;
+                    mazeSolutionCount[mazeId]++;
 
                     // Add viable agent to the population
                     seedAgentPopulation.Add(viableMazeAgent);
@@ -448,8 +452,7 @@ namespace MCC_Domains.MazeNavigation
                 var maxSolutions = resourceLimit - mazeSolutionCount[mazeGenome.Id];
 
                 Console.WriteLine(
-                    @"Continuing viable agent evolution on maze {0}, with {1} of {2} required agents in place",
-                    mazeGenome.Id, seedAgentPopulation.Count, numAgents);
+                    $"Continuing viable agent evolution on maze [{mazeGenome.Id}], with [{seedAgentPopulation.Count}] of [{numAgents}] required agents in place");
 
                 // Evolve the number of agents required to meet the success MC for the maze
                 var viableMazeAgents = _mazeNavigationInitializer.EvolveViableAgents(agentGenomeFactory,
@@ -468,7 +471,7 @@ namespace MCC_Domains.MazeNavigation
                     else
                     {
                         // Increment number of maze solutions
-                        mazeSolutionCount[mazeGenome.Id] = mazeSolutionCount[mazeGenome.Id]++;
+                        mazeSolutionCount[mazeGenome.Id]++;
 
                         // Add viable agent to the population
                         seedAgentPopulation.Add(viableMazeAgent);

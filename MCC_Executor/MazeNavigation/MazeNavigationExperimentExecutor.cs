@@ -436,7 +436,7 @@ namespace MCC_Executor.MazeNavigation
                     : agentGenomeFactory.CreateGenomeList(experiment.AgentInitializationGenomeCount, 0);
 
                 // Read in the seed maze population
-                var mazeGenomeList = ExperimentUtils
+                var mazeGenomeList = MazeNavigationExperimentUtils
                     .ReadSeedMazeGenomes(seedMazePath, (MazeGenomeFactory) mazeGenomeFactory)
                     .Take(experiment.MazeSeedGenomeCount).ToList();
 
@@ -475,7 +475,7 @@ namespace MCC_Executor.MazeNavigation
         /// <param name="runIdx">The current run being executed.</param>
         private static void RunExperiment(IGenomeFactory<NeatGenome> agentGenomeFactory,
             IGenomeFactory<MazeGenome> mazeGenomeFactory, List<NeatGenome> agentGenomeList,
-            List<MazeGenome> mazeGenomeList, bool areAgentsPreevolved, string experimentName, IMCCExperiment experiment,
+            List<MazeGenome> mazeGenomeList, bool areAgentsPreevolved, string experimentName, IMCCMazeExperiment experiment,
             int numRuns, int runIdx)
         {
             try

@@ -909,7 +909,7 @@ namespace SharpNeat.Genomes.Neat
         /// </summary>
         public int InputBiasOutputNeuronCount
         {
-            get { return InputAndBiasNeuronCount; }
+            get { return _inputBiasOutputNeuronCount; }
         }
 
         #endregion

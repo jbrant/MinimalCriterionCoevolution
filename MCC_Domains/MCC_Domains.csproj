@@ -8,4 +8,10 @@
       <ProjectReference Include="..\SharpNeatLib\SharpNeatLib.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="BodyBrain\VoxCadSimulation\VoxCadSimulationTemplate.xml">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>

@@ -2,6 +2,7 @@
 
 using System;
 using System.Linq;
+using MCC_Executor.BodyBrain;
 using MCC_Executor.MazeNavigation;
 
 #endregion
@@ -28,6 +29,10 @@ namespace MCC_Executor
                 case "maze_navigation":
                     Console.WriteLine(@"Executing the maze navigation experiment");
                     MazeNavigationExperimentExecutor.Execute(args.Skip(1).ToArray());
+                    break;
+                case "body_brain":
+                    Console.WriteLine(@"Executing the robot body-brain coevolution experiment");
+                    BodyBrainExperimentExecutor.Execute(args.Skip(1).ToArray());
                     break;
                 default:
                     Console.WriteLine(@"Invalid experiment [{0}] specified", args[0]);

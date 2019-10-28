@@ -8,13 +8,13 @@ using SharpNeat.Genomes.Neat;
 
 #endregion
 
-namespace MCC_Domains
+namespace MCC_Domains.MazeNavigation
 {
     /// <summary>
-    ///     Interface for classes implementing MCC experiments; specifically, those coevolving mazes with NEAT-based
-    ///     controllers.
+    ///     Interface for classes implementing MCC maze experiments; specifically, those coevolving mazes with
+    ///     NEAT-based controllers.
     /// </summary>
-    public interface IMCCExperiment
+    public interface IMCCMazeExperiment
     {
         /// <summary>
         ///     Gets the name of the experiment.

@@ -19,7 +19,7 @@ namespace SharpNeat.Core
         /// <summary>
         ///     The number of timesteps for which the simulation executed.
         /// </summary>
-        public int NumTimesteps { get; }
+        public double NumTimesteps { get; }
 
         /// <summary>
         ///     The ID of the genome against which the current trial was conducted.
@@ -42,7 +42,7 @@ namespace SharpNeat.Core
         /// <param name="numTimesteps">The number of timesteps for which the simulation executed.</param>
         /// <param name="pairedGenomeId">The ID of the genome against which the current trial was conducted.</param>
         /// <param name="behaviors">Array storing the trial behavior characterization.</param>
-        public TrialInfo(bool isSuccessful, double objectiveDistance, int numTimesteps, uint pairedGenomeId,
+        public TrialInfo(bool isSuccessful, double objectiveDistance, double numTimesteps, uint pairedGenomeId,
             double[] behaviors)
         {
             IsSuccessful = isSuccessful;
