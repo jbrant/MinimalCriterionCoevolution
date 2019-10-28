@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
 using MCC_Domains.BodyBrain.MCCExperiment;
+using MCC_Domains.Utils;
 using SharpNeat;
 using SharpNeat.Core;
 using SharpNeat.Decoders.Voxel;
@@ -9,6 +10,7 @@ using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.EvolutionAlgorithms.Statistics;
 using SharpNeat.Genomes.HyperNeat;
 using SharpNeat.Genomes.Neat;
+using SharpNeat.Loggers;
 using SharpNeat.Network;
 using SharpNeat.Phenomes.Voxels;
 
@@ -52,6 +54,51 @@ namespace MCC_Domains.BodyBrain
         #endregion
 
         #region Public Methods
+
+        public override void Initialize(string name, int run, string simConfigDirectory, string simResultsDirectory,
+            string simExecutableFile, XmlElement xmlConfig, string logFileDirectory)
+        {
+            // Initialize boiler-plate parameters
+            base.Initialize(name, run, simConfigDirectory, simResultsDirectory, simExecutableFile, xmlConfig);
+            
+            // Initialize the data loggers for the given experiment/run
+            _brainEvolutionDataLogger =
+                new FileDataLogger($"{logFileDirectory}\\{name} - Run{run} - BrainEvolution.csv");
+            _brainPopulationDataLogger =
+                new FileDataLogger($"{logFileDirectory}\\{name} - Run{run} - BrainPopulation.csv");
+            _brainGenomeDataLogger = new FileDataLogger($"{logFileDirectory}\\{name} - Run{run} - BrainGenomes.csv");
+            _brainSimulationTrialDataLogger =
+                new FileDataLogger($"{logFileDirectory}\\{name} - Run{run} - BrainTrials.csv");
+            _bodyEvolutionDataLogger = new FileDataLogger($"{logFileDirectory}\\{name} - Run{run} - BodyEvolution.csv");
+            _brainPopulationDataLogger =
+                new FileDataLogger($"{logFileDirectory}\\{name} - Run{run} - BodyPopulation.csv");
+            _brainGenomeDataLogger = new FileDataLogger($"{logFileDirectory}\\{name} - Run{run} - BodyGenomes.csv");
+            _brainSimulationTrialDataLogger =
+                new FileDataLogger($"{logFileDirectory}\\{name} - Run{run} - BodyTrials.csv");
+            _bodyResourceUsageLogger = new FileDataLogger($"{logFileDirectory}\\{name} - Run{run} - ResourceUsage.csv");
+            
+            // Create new evolution field elements map with all fields enabled
+            _brainLogFieldEnableMap = EvolutionFieldElements.PopulateEvolutionFieldElementsEnableMap();
+            
+            // Add default population logging configuration
+            foreach (var populationLoggingPair in PopulationFieldElements.PopulatePopulationFieldElementsEnableMap())
+            {
+                _brainLogFieldEnableMap.Add(populationLoggingPair.Key, populationLoggingPair.Value);
+            }
+            
+            // Add default genome logging configuration
+            foreach (var genomeLoggingPair in GenomeFieldElements.PopulateGenomeFieldElementsEnableMap())
+            {
+                _brainLogFieldEnableMap.Add(genomeLoggingPair.Key, genomeLoggingPair.Value);
+            }
+            
+            // Add default trial logging configuration
+            foreach (var trialLoggingPair in
+                SimulationTrialFieldElements.PopulateSimulationTrialFieldElementsEnableMap())
+            {
+                _brainLogFieldEnableMap.Add(trialLoggingPair.Key, trialLoggingPair.Value);
+            }
+        }
 
         /// <inheritdoc />
         /// <summary>
@@ -129,8 +176,8 @@ namespace MCC_Domains.BodyBrain
             // TODO: Add data loggers
             // Create the NEAT EA for bodies
             AbstractEvolutionAlgorithm<NeatGenome> bodyEvolutionAlgorithm =
-                new QueueEvolutionAlgorithm<NeatGenome>(eaParams, new NeatAlgorithmStats(eaParams), null, null,
-                    BodyBatchSize);
+                new QueueEvolutionAlgorithm<NeatGenome>(eaParams,
+                    new VoxelBodyAlgorithmStats(eaParams, bodyGenomeDecoder), null, null, BodyBatchSize);
 
             // Create the brain phenome evaluator
             IPhenomeEvaluator<VoxelBrain, BehaviorInfo> brainEvaluator = new BrainEvaluator(SimulationProperties,
@@ -192,6 +239,65 @@ namespace MCC_Domains.BodyBrain
         ///     The number of body CPPN outputs (material presence and type).
         /// </summary>
         private const int BodyCppnOutputCount = 2;
+
+        #endregion
+
+        #region Instance variables
+
+        /// <summary>
+        ///     Logs statistics about the brain populations for every batch.
+        /// </summary>
+        private IDataLogger _brainEvolutionDataLogger;
+
+        /// <summary>
+        ///     Logs the IDs of the extant brain population at every interval.
+        /// </summary>
+        private IDataLogger _brainPopulationDataLogger;
+
+        /// <summary>
+        ///     Logs the definitions of the brain population over the course of a run.
+        /// </summary>
+        private IDataLogger _brainGenomeDataLogger;
+
+        /// <summary>
+        ///     Logs the details and results of trials within a brain evaluation.
+        /// </summary>
+        private IDataLogger _brainSimulationTrialDataLogger;
+
+        /// <summary>
+        ///     Logs statistics about the body populations for every batch.
+        /// </summary>
+        private IDataLogger _bodyEvolutionDataLogger;
+
+        /// <summary>
+        ///     Logs the IDs of the extant body population at every interval.
+        /// </summary>
+        private IDataLogger _bodyPopulationDataLogger;
+
+        /// <summary>
+        ///     Logs the definitions of the body population over the course of a run.
+        /// </summary>
+        private IDataLogger _bodyGenomeDataLogger;
+
+        /// <summary>
+        ///     Logs the body resource usage over the course of a run.
+        /// </summary>
+        private IDataLogger _bodyResourceUsageLogger;
+
+        /// <summary>
+        ///     Logs the details and results of trials within a body evaluation.
+        /// </summary>
+        private IDataLogger _bodySimulationTrialDataLogger;
+
+        /// <summary>
+        ///     Dictionary which indicates logger fields to be enabled/disabled for brain genomes.
+        /// </summary>
+        private IDictionary<FieldElement, bool> _brainLogFieldEnableMap;
+
+        /// <summary>
+        ///     Dictionary which indicates logger fields to be enabled/disabled for body genomes.
+        /// </summary>
+        private IDictionary<FieldElement, bool> _bodyLogFieldEnableMap;
 
         #endregion
     }

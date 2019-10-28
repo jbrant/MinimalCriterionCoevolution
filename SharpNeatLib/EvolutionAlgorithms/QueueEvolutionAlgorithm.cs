@@ -52,13 +52,11 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <param name="populationLogger">The population data logger (optional).</param>
         /// <param name="simulationTrialLogger">The simulation trial data logger (optional).</param>
         /// <param name="genomeLogger">The genome data logger (optional).</param>
-        /// <param name="populationLoggingInterval">The interval at which the population is logged.</param>
         public QueueEvolutionAlgorithm(EvolutionAlgorithmParameters eaParams, IEvolutionAlgorithmStats stats,
             ISpeciationStrategy<TGenome> speciationStrategy, IComplexityRegulationStrategy complexityRegulationStrategy,
             int batchSize, RunPhase runPhase = RunPhase.Primary, IDataLogger evolutionLogger = null,
             IDictionary<FieldElement, bool> logFieldEnabledMap = null, IDataLogger populationLogger = null,
-            IDataLogger genomeLogger = null, IDataLogger simulationTrialLogger = null,
-            int? populationLoggingInterval = null) : base(eaParams, stats)
+            IDataLogger genomeLogger = null, IDataLogger simulationTrialLogger = null) : base(eaParams, stats)
         {
             SpeciationStrategy = speciationStrategy;
             ComplexityRegulationStrategy = complexityRegulationStrategy;
@@ -67,7 +65,6 @@ namespace SharpNeat.EvolutionAlgorithms
             PopulationLogger = populationLogger;
             GenomeLogger = genomeLogger;
             SimulationTrialLogger = simulationTrialLogger;
-            PopulationLoggingInterval = populationLoggingInterval;
             RunPhase = runPhase;
             _logFieldEnabledMap = logFieldEnabledMap;
         }
@@ -88,15 +85,13 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <param name="logFieldEnabledMap">Dictionary of logging fields that can be dynamically enabled or disabled.</param>
         /// <param name="populationLogger">The population data logger (optional).</param>
         /// <param name="genomeLogger">The genome data logger (optional).</param>
-        /// <param name="populationLoggingInterval">The interval at which the population is logged.</param>
         public QueueEvolutionAlgorithm(EvolutionAlgorithmParameters eaParams, IEvolutionAlgorithmStats stats,
             IComplexityRegulationStrategy complexityRegulationStrategy,
             int batchSize, RunPhase runPhase = RunPhase.Primary, IDataLogger evolutionLogger = null,
             IDictionary<FieldElement, bool> logFieldEnabledMap = null, IDataLogger populationLogger = null,
-            IDataLogger genomeLogger = null, IDataLogger simulationTrialLogger = null,
-            int? populationLoggingInterval = null) : this(eaParams, stats, null,
+            IDataLogger genomeLogger = null, IDataLogger simulationTrialLogger = null) : this(eaParams, stats, null,
             complexityRegulationStrategy, batchSize, runPhase, evolutionLogger, logFieldEnabledMap, populationLogger,
-            genomeLogger, simulationTrialLogger, populationLoggingInterval)
+            genomeLogger, simulationTrialLogger)
         {
         }
 

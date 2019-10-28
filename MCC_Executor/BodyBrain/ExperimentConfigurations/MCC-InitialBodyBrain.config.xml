@@ -47,6 +47,7 @@
         <VxaEnvThermalXPath>/VXA/Environment/Thermal</VxaEnvThermalXPath>
         <VxaEnvGravityXPath>/VXA/Environment/Gravity</VxaEnvGravityXPath>
         <VxaStructureXPath>/VXA/VXC/Structure</VxaStructureXPath>
+        <VxaMinimalCriterionXPath>/VXA/Environment/MinimalCriterion</VxaMinimalCriterionXPath>
     </VoxelyzeConfig>
     <InitializationAlgorithmConfig>
         <SearchAlgorithm>Novelty Search</SearchAlgorithm>

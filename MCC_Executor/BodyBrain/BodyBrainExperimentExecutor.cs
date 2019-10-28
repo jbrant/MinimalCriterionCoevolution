@@ -112,6 +112,9 @@ namespace MCC_Executor.BodyBrain
             var simResultsDirectory = ExecutionConfiguration[ExecutionParameter.SimulationResultsDirectory];
             var simExecutable = ExecutionConfiguration[ExecutionParameter.SimulatorExecutable];
             
+            // Extract directory for writing experiment output logs
+            var outputFileDirectory = ExecutionConfiguration[ExecutionParameter.OutputFileDirectory];
+            
             // Extract path to seed brain file
             var seedBrainFile = ExecutionConfiguration.ContainsKey(ExecutionParameter.SeedBrainFile)
                 ? ExecutionConfiguration[ExecutionParameter.SeedBrainFile]
@@ -140,14 +143,14 @@ namespace MCC_Executor.BodyBrain
             
             // Execute the current configuration
             ExecuteExperimentConfiguration(experimentConfigurationFiles[0], experimentName, run, seedBrainFile,
-                seedBodyFile, simConfigDirectory, simResultsDirectory, simExecutable);
+                seedBodyFile, simConfigDirectory, simResultsDirectory, simExecutable, outputFileDirectory);
 
             // TODO: Write sentinel file to indicate completion
         }
 
         private static void ExecuteExperimentConfiguration(string experimentConfiguration, string experimentName,
             int run, string seedBrainPath, string seedBodyPath, string simConfigDirectory, string simResultsDirectory,
-            string simExecutable)
+            string simExecutable, string outputFileDirectory)
         {
             // Instantiate XML reader for configuration file
             var xmlConfig = new XmlDocument();
@@ -158,7 +161,7 @@ namespace MCC_Executor.BodyBrain
             
             // Initialize new experiment
             experiment.Initialize(experimentName, run, simConfigDirectory, simResultsDirectory, simExecutable,
-                xmlConfig.DocumentElement);
+                xmlConfig.DocumentElement, outputFileDirectory);
 
             _executionLogger.Info($"Initialized experiment {experiment.GetType()}.");
             

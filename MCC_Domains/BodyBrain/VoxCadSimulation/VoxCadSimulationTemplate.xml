@@ -29,7 +29,7 @@
             </CMesh>
         </SurfMesh>
         <StopCondition>
-            <StopConditionType>2</StopConditionType>
+            <StopConditionType>4</StopConditionType>
             <StopConditionValue>2.3</StopConditionValue>
             <InitCmTime>0.3</InitCmTime>
         </StopCondition>
@@ -58,6 +58,9 @@
             <VaryTempEnabled>1</VaryTempEnabled>
             <TempPeriod>0.1</TempPeriod>
         </Thermal>
+        <MinimalCriterion>
+            <Distance></Distance>
+        </MinimalCriterion>
     </Environment>
     <VXC Version="0.93">
         <Lattice>

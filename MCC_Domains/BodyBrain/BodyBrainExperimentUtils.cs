@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.Xml;
 using MCC_Domains.BodyBrain.Bootstrappers;
 using MCC_Domains.BodyBrain.MCCExperiment;
@@ -80,7 +81,8 @@ namespace MCC_Domains.BodyBrain
                 XmlUtils.GetValueAsString(xmlSimProps, "VxaSimStopConditionXPath"),
                 XmlUtils.GetValueAsString(xmlSimProps, "VxaEnvThermalXPath"),
                 XmlUtils.GetValueAsString(xmlSimProps, "VxaEnvGravityXPath"),
-                XmlUtils.GetValueAsString(xmlSimProps, "VxaStructureXPath"));
+                XmlUtils.GetValueAsString(xmlSimProps, "VxaStructureXPath"),
+                XmlUtils.GetValueAsString(xmlSimProps, "VxaMinimalCriterionXPath"));
         }
 
         /// <summary>
@@ -125,11 +127,14 @@ namespace MCC_Domains.BodyBrain
         /// <param name="outputPath">The directory into which the generated Voxelyze simulation configuration file is written.</param>
         /// <param name="vxaSimGaXPath">The XPath location containing GA simulation parameters.</param>
         /// <param name="vxaStructureXPath">The XPath location containing voxel structure configuration properties.</param>
+        /// <param name="vxaMcXPath">The XPath location containing the minimal criterion configuration.</param>
         /// <param name="simResultsFilePath">The directory into which to write simulation results.</param>
         /// <param name="brain">The voxel brain object containing per-voxel network weights.</param>
         /// <param name="body">The voxel body object containing voxel material specifications.</param>
+        /// <param name="mcDistance">The distance traveled minimal criterion.</param>
         public static void WriteVoxelyzeSimulationFile(string vxaTemplatePath, string outputPath,
-            string vxaSimGaXPath, string vxaStructureXPath, string simResultsFilePath, VoxelBrain brain, VoxelBody body)
+            string vxaSimGaXPath, string vxaStructureXPath, string vxaMcXPath, string simResultsFilePath,
+            VoxelBrain brain, VoxelBody body, double mcDistance)
         {
             // Instantiate XML reader for VXA template file
             var simDoc = new XmlDocument();
@@ -137,6 +142,10 @@ namespace MCC_Domains.BodyBrain
 
             // Set the results output file name and path
             simDoc.SelectSingleNode(string.Join("/", vxaSimGaXPath, "FitnessFileName")).InnerText = simResultsFilePath;
+
+            // Set the distance minimal criterion
+            simDoc.SelectSingleNode(string.Join("/", vxaMcXPath, "Distance")).InnerText =
+                mcDistance.ToString(CultureInfo.InvariantCulture);
 
             // Get reference to structure definition section
             var structureElem = simDoc.SelectSingleNode(vxaStructureXPath);

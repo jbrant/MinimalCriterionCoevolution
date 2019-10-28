@@ -62,11 +62,6 @@ namespace SharpNeat.EvolutionAlgorithms
         /// Logs the results of individual simulation trials within single genome evaluations.
         /// </summary>
         protected IDataLogger SimulationTrialLogger;
-        
-        /// <summary>
-        ///     The interval for logging the contents of the extant population.
-        /// </summary>
-        protected int? PopulationLoggingInterval;
 
         /// <summary>
         ///     The last generation during which the display/logging was updated.

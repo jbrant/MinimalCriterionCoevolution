@@ -133,11 +133,6 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         /// </summary>
         private IDictionary<FieldElement, bool> _mazeLogFieldEnableMap;
 
-        /// <summary>
-        ///     Controls the number of batches between population definitions (i.e. genome XML) being logged.
-        /// </summary>
-        private int? _populationLoggingBatchInterval;
-
         #endregion
 
         #region Overridden methods
@@ -257,9 +252,6 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
                 [EvolutionFieldElements.MeanWidth] = true
             };
 
-            // Read in the number of batches between population logging
-            _populationLoggingBatchInterval = XmlUtils.TryGetValueAsInt(xmlConfig, "PopulationLoggingBatchInterval");
-
             // Validate experiment configuration parameters
             if (ValidateConfigParameters(out var errorMessage)) throw new ConfigurationException(errorMessage);
         }
@@ -357,7 +349,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
                 new ParallelKMeansClusteringStrategy<NeatGenome>(new ManhattanDistanceMetric(1.0, 0.0, 10.0),
                     ParallelOptions), null, NavigatorBatchSize, RunPhase.Primary, _navigatorEvolutionDataLogger,
                 _navigatorLogFieldEnableMap, _navigatorPopulationDataLogger, _navigatorGenomeDataLogger,
-                _navigatorSimulationTrialDataLogger, _populationLoggingBatchInterval);
+                _navigatorSimulationTrialDataLogger);
 
             // Create the maze queueing evolution algorithm
             AbstractEvolutionAlgorithm<MazeGenome> mazeEvolutionAlgorithm = new QueueEvolutionAlgorithm<MazeGenome>(
@@ -365,7 +357,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
                 new ParallelKMeansClusteringStrategy<MazeGenome>(new ManhattanDistanceMetric(1.0, 0.0, 10.0),
                     ParallelOptions), null, MazeBatchSize, RunPhase.Primary, _mazeEvolutionDataLogger,
                 _mazeLogFieldEnableMap, _mazePopulationDataLogger, _mazeGenomeDataLogger,
-                _mazeSimulationTrialDataLogger, _populationLoggingBatchInterval);
+                _mazeSimulationTrialDataLogger);
 
             // Create the maze phenome evaluator
             IPhenomeEvaluator<MazeStructure, BehaviorInfo> mazeEvaluator =

@@ -140,10 +140,11 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
                 var simResultFilePath = BodyBrainExperimentUtils.ConstructVoxelyzeFilePath("result_bodyeval",
                     _simulationProperties.SimResultsDirectory, _experimentName, _run, body.GenomeId,
                     brain.GenomeId);
-                
+
                 BodyBrainExperimentUtils.WriteVoxelyzeSimulationFile(_simulationProperties.SimConfigTemplateFile,
                     simConfigFilePath, _simulationProperties.SimOutputXPath,
-                    _simulationProperties.StructurePropertiesXPath, simResultFilePath, brain, body);
+                    _simulationProperties.StructurePropertiesXPath, _simulationProperties.MinimalCriterionXPath,
+                    simResultFilePath, brain, body, _minAmbulationDistance);
 
                 // Configure the simulation, execute and wait for completion
                 using (var process =

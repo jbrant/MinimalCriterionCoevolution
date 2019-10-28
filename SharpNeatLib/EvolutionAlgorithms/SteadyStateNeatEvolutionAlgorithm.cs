@@ -263,7 +263,6 @@ namespace SharpNeat.EvolutionAlgorithms
             EvolutionLogger = logger;
             _logFieldEnabledMap = logFieldEnabledMap;
             PopulationLogger = populationLogger;
-            PopulationLoggingInterval = populationLoggingInterval;
         }
 
         #endregion

@@ -103,6 +103,11 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
         public readonly string StructurePropertiesXPath;
 
         /// <summary>
+        ///     The XPath to the location in the simulation configuration file containing the minimal criterion properties.
+        /// </summary>
+        public readonly string MinimalCriterionXPath;
+
+        /// <summary>
         ///     SimulationProperties constructor.
         /// </summary>
         /// <param name="simConfigOutputDirectory">The output directory for generated simulation configuration files.</param>
@@ -147,13 +152,17 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
         ///     The XPath to the location in the simulation configuration file containing
         ///     structure properties.
         /// </param>
+        /// <param name="minimalCriterionXPath">
+        ///     The XPath to the location in the simulation configuration file containing the
+        ///     minimal criterion properties.
+        /// </param>
         public SimulationProperties(string simConfigOutputDirectory, string simResultsDirectory,
             string simConfigTemplateFile, string simExecutableFile, double minPercentMaterial, double minPercentActive,
             int initialXDimension, int initialYDimension, int initialZDimension, int numBrainConnections,
             double simulationSeconds,
             double initializationSeconds, int actuationsPerSecond, double floorSlope, string simOutputXPath,
             string simStopConditionXPath, string envThermalXPath, string envGravityXPath,
-            string structurePropertiesXPath)
+            string structurePropertiesXPath, string minimalCriterionXPath)
         {
             SimConfigOutputDirectory = simConfigOutputDirectory;
             SimResultsDirectory = simResultsDirectory;
@@ -174,6 +183,7 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
             EnvThermalXPath = envThermalXPath;
             EnvGravityXPath = envGravityXPath;
             StructurePropertiesXPath = structurePropertiesXPath;
+            MinimalCriterionXPath = minimalCriterionXPath;
         }
     }
 }

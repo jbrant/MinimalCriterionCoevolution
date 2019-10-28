@@ -137,6 +137,9 @@ namespace MCC_Domains.BodyBrain
 
         #region Public methods
 
+        public abstract void Initialize(string name, int run, string simConfigDirectory, string simResultsDirectory,
+            string simExecutableFile, XmlElement xmlConfig, string logFileDirectory);
+        
         /// <summary>
         ///     Initializes the MCC body/brain coevolution experiment by reading in all of the configuration parameters and setting
         ///     up the bootstrap/initialization algorithm.
@@ -147,7 +150,7 @@ namespace MCC_Domains.BodyBrain
         /// <param name="simResultsDirectory">The path to the directory for writing simulation results.</param>
         /// <param name="simExecutableFile">The path to the executable simulator.</param>
         /// <param name="xmlConfig">The reference to the XML experiment configuration file.</param>
-        public void Initialize(string name, int run, string simConfigDirectory, string simResultsDirectory,
+        protected void Initialize(string name, int run, string simConfigDirectory, string simResultsDirectory,
             string simExecutableFile, XmlElement xmlConfig)
         {
             // Set boiler plate properties
