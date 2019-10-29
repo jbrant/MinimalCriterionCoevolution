@@ -198,6 +198,12 @@ namespace SharpNeat.EvolutionAlgorithms.Statistics
             {
                 elements.Add(new LoggableElement(BodyBrainEvolutionFieldElements.MaxVoxels, _maxVoxels));
             }
+            
+            if (logFieldEnableMap?.ContainsKey(BodyBrainEvolutionFieldElements.MeanVoxels) == true &&
+                logFieldEnableMap[BodyBrainEvolutionFieldElements.MeanVoxels])
+            {
+                elements.Add(new LoggableElement(BodyBrainEvolutionFieldElements.MeanVoxels, _meanVoxels));
+            }
 
             if (logFieldEnableMap?.ContainsKey(BodyBrainEvolutionFieldElements.MinActiveVoxels) == true &&
                 logFieldEnableMap[BodyBrainEvolutionFieldElements.MinActiveVoxels])

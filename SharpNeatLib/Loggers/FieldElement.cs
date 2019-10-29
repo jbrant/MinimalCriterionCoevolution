@@ -6,16 +6,16 @@ using System.Collections.Generic;
 
 namespace SharpNeat.Loggers
 {
+    public static class EvolutionFieldElements
+    {
+        
+    }
+    
     /// <summary>
     ///     Fields capturing data related to population statistics per generation/batch for maze navigation experiments.
     /// </summary>
     public static class MazeNavEvolutionFieldElements
     {
-        /// <summary>
-        ///     The number of elements in this log file/table.
-        /// </summary>
-        public static readonly int NumFieldElements = 47;
-
         /// <summary>
         ///     The generation of the observation.
         /// </summary>
@@ -473,11 +473,6 @@ namespace SharpNeat.Loggers
     public static class EvaluationFieldElements
     {
         /// <summary>
-        ///     The number of elements in this log file/table.
-        /// </summary>
-        public static readonly int NumFieldElements = 8;
-
-        /// <summary>
         ///     The generation of the observation.
         /// </summary>
         public static readonly FieldElement Generation = new FieldElement(0, "Generation");
@@ -544,11 +539,6 @@ namespace SharpNeat.Loggers
     public static class PopulationFieldElements
     {
         /// <summary>
-        ///     The number of elements in this log file/table.
-        /// </summary>
-        public static readonly int NumFieldElements = 4;
-
-        /// <summary>
         ///     The run phase (i.e. initialization or primary) during which the given observation executed.
         /// </summary>
         public static readonly FieldElement RunPhase = new FieldElement(0, "Run Phase");
@@ -589,11 +579,6 @@ namespace SharpNeat.Loggers
     /// </summary>
     public static class SimulationTrialFieldElements
     {
-        /// <summary>
-        ///     The number of elements in this log file/table.
-        /// </summary>
-        public static readonly int NumFieldElements = 6;
-
         /// <summary>
         ///     The generation in which the given genome is extant.
         /// </summary>
@@ -648,11 +633,6 @@ namespace SharpNeat.Loggers
     public static class GenomeFieldElements
     {
         /// <summary>
-        ///     The number of elements in this log file/table.
-        /// </summary>
-        public static readonly int NumFieldElements = 3;
-
-        /// <summary>
         ///     The run phase (i.e. initialization or primary) during which the given observation executed.
         /// </summary>
         public static readonly FieldElement RunPhase = new FieldElement(0, "Run Phase");
@@ -687,11 +667,6 @@ namespace SharpNeat.Loggers
     /// </summary>
     public static class ResourceUsageFieldElements
     {
-        /// <summary>
-        ///     The number of elements in this log file/table.
-        /// </summary>
-        public static readonly int NumFieldElements = 3;
-
         /// <summary>
         ///     The generation at which the resource usage was recorded.
         /// </summary>
