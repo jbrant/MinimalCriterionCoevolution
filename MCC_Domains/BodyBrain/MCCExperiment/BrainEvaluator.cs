@@ -209,7 +209,7 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
                     body.GenomeId);
 
                 // Construct output file path
-                var simResultFilePath = BodyBrainExperimentUtils.ConstructVoxelyzeFilePath("config_braineval",
+                var simResultFilePath = BodyBrainExperimentUtils.ConstructVoxelyzeFilePath("result_braineval",
                     _simulationProperties.SimResultsDirectory, _experimentName, _run, brain.GenomeId,
                     body.GenomeId);
 
@@ -240,7 +240,13 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
                         {
                             // Successful ambulation is discounted if body is at or above resource limit
                             if (_bodyUsageMap[body.GenomeId] >= _resourceLimit)
-                                continue;
+                            {
+                                // Remove configuration and output files
+                                File.Delete(simConfigFilePath);
+                                File.Delete(simResultFilePath);
+                                
+                                continue;                                
+                            }
 
                             // Only increment successes if ambulated body is below resource limit
                             _bodyUsageMap[body.GenomeId]++;
@@ -264,6 +270,13 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
                 behaviorInfo.TrialData.Add(new TrialInfo(isSuccessful, simResults.Distance, simResults.SimulationTime,
                     brain.GenomeId, new[] {simResults.Location.X, simResults.Location.Y}));
 
+                // Remove configuration and output files
+                File.Delete(simConfigFilePath);
+                File.Delete(simResultFilePath);
+                
+                // Don't attempt to log if the file stream is closed
+                if (!(_evaluationLogger?.IsStreamOpen() ?? false)) continue;
+                
                 // Log trial information
                 _evaluationLogger?.LogRow(new List<LoggableElement>
                 {
@@ -272,10 +285,6 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
                     new LoggableElement(EvaluationFieldElements.StopConditionSatisfied, StopConditionSatisfied),
                     new LoggableElement(EvaluationFieldElements.RunPhase, RunPhase.Initialization)
                 }, simResults.GetLoggableElements());
-                
-                // Remove configuration and output files
-                File.Delete(simConfigFilePath);
-                File.Delete(simResultFilePath);
             }
 
             // If the number of successful ambulations is greater than the minimum required, then the minimal criteria

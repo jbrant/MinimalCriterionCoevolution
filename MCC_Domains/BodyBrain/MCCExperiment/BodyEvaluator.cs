@@ -172,6 +172,13 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
                 behaviorInfo.TrialData.Add(new TrialInfo(isSuccessful, simResults.Distance, simResults.SimulationTime,
                     body.GenomeId, new[] {simResults.Location.X, simResults.Location.Y}));
 
+                // Remove configuration and output files
+                File.Delete(simConfigFilePath);
+                File.Delete(simResultFilePath);
+                
+                // Don't attempt to log if the file stream is closed
+                if (!(_evaluationLogger?.IsStreamOpen() ?? false)) continue;
+                
                 // Log trial information
                 _evaluationLogger?.LogRow(new List<LoggableElement>
                 {
@@ -180,10 +187,6 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
                     new LoggableElement(EvaluationFieldElements.StopConditionSatisfied, StopConditionSatisfied),
                     new LoggableElement(EvaluationFieldElements.RunPhase, RunPhase.Initialization)
                 }, simResults.GetLoggableElements());
-                
-                // Remove configuration and output files
-                File.Delete(simConfigFilePath);
-                File.Delete(simResultFilePath);
             }
 
             // If the number of successful ambulations is greater than the minimum required, then the minimal criteria

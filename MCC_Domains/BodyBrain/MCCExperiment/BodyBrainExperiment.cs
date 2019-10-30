@@ -98,6 +98,74 @@ namespace MCC_Domains.BodyBrain
             {
                 _brainLogFieldEnableMap.Add(trialLoggingPair.Key, trialLoggingPair.Value);
             }
+            
+            // Disable logging fields not relevant to brain evolution in MCC experiment
+            _brainLogFieldEnableMap[EvolutionFieldElements.SpecieCount] = false;
+            _brainLogFieldEnableMap[EvolutionFieldElements.AsexualOffspringCount] = false;
+            _brainLogFieldEnableMap[EvolutionFieldElements.SexualOffspringCount] = false;
+            _brainLogFieldEnableMap[EvolutionFieldElements.InterspeciesOffspringCount] = false;
+            _brainLogFieldEnableMap[EvolutionFieldElements.MinimalCriteriaThreshold] = false;
+            _brainLogFieldEnableMap[EvolutionFieldElements.MinimalCriteriaPointX] = false;
+            _brainLogFieldEnableMap[EvolutionFieldElements.MinimalCriteriaPointY] = false;
+            _brainLogFieldEnableMap[EvolutionFieldElements.MaxFitness] = false;
+            _brainLogFieldEnableMap[EvolutionFieldElements.MeanFitness] = false;
+            _brainLogFieldEnableMap[EvolutionFieldElements.MeanSpecieChampFitness] = false;
+            _brainLogFieldEnableMap[EvolutionFieldElements.MinSpecieSize] = false;
+            _brainLogFieldEnableMap[EvolutionFieldElements.MaxSpecieSize] = false;
+            _brainLogFieldEnableMap[EvolutionFieldElements.ChampGenomeGenomeId] = false;
+            _brainLogFieldEnableMap[EvolutionFieldElements.ChampGenomeFitness] = false;
+            _brainLogFieldEnableMap[EvolutionFieldElements.ChampGenomeBirthGeneration] = false;
+            _brainLogFieldEnableMap[EvolutionFieldElements.ChampGenomeConnectionGeneCount] = false;
+            _brainLogFieldEnableMap[EvolutionFieldElements.ChampGenomeNeuronGeneCount] = false;
+            _brainLogFieldEnableMap[EvolutionFieldElements.ChampGenomeTotalGeneCount] = false;
+            _brainLogFieldEnableMap[EvolutionFieldElements.ChampGenomeEvaluationCount] = false;
+            _brainLogFieldEnableMap[EvolutionFieldElements.ChampGenomeXml] = false;
+            _brainLogFieldEnableMap[BodyBrainEvolutionFieldElements.MinVoxels] = false;
+            _brainLogFieldEnableMap[BodyBrainEvolutionFieldElements.MaxVoxels] = false;
+            _brainLogFieldEnableMap[BodyBrainEvolutionFieldElements.MeanVoxels] = false;
+            _brainLogFieldEnableMap[BodyBrainEvolutionFieldElements.MinFullProportion] = false;
+            _brainLogFieldEnableMap[BodyBrainEvolutionFieldElements.MaxFullProportion] = false;
+            _brainLogFieldEnableMap[BodyBrainEvolutionFieldElements.MeanFullProportion] = false;
+            _brainLogFieldEnableMap[BodyBrainEvolutionFieldElements.MinActiveVoxels] = false;
+            _brainLogFieldEnableMap[BodyBrainEvolutionFieldElements.MaxActiveVoxels] = false;
+            _brainLogFieldEnableMap[BodyBrainEvolutionFieldElements.MeanActiveVoxels] = false;
+            _brainLogFieldEnableMap[BodyBrainEvolutionFieldElements.MinPassiveVoxels] = false;
+            _brainLogFieldEnableMap[BodyBrainEvolutionFieldElements.MaxPassiveVoxels] = false;
+            _brainLogFieldEnableMap[BodyBrainEvolutionFieldElements.MeanPassiveVoxels] = false;
+            _brainLogFieldEnableMap[BodyBrainEvolutionFieldElements.MinActiveVoxelProportion] = false;
+            _brainLogFieldEnableMap[BodyBrainEvolutionFieldElements.MaxActiveVoxelProportion] = false;
+            _brainLogFieldEnableMap[BodyBrainEvolutionFieldElements.MeanActiveVoxelProportion] = false;
+            _brainLogFieldEnableMap[BodyBrainEvolutionFieldElements.MinPassiveVoxelProportion] = false;
+            _brainLogFieldEnableMap[BodyBrainEvolutionFieldElements.MaxPassiveVoxelProportion] = false;
+            _brainLogFieldEnableMap[BodyBrainEvolutionFieldElements.MeanPassiveVoxelProportion] = false;
+
+            // Create a body logger configuration, starting from the brain configuration but with pertinent fields enabled
+            _bodyLogFieldEnableMap = new Dictionary<FieldElement, bool>(_brainLogFieldEnableMap)
+            {
+                [EvolutionFieldElements.RunPhase] = false,
+                [PopulationFieldElements.RunPhase] = false,
+                [BodyBrainEvolutionFieldElements.MinVoxels] = true,
+                [BodyBrainEvolutionFieldElements.MaxVoxels] = true,
+                [BodyBrainEvolutionFieldElements.MeanVoxels] = true,
+                [BodyBrainEvolutionFieldElements.MaxVoxels] = true,
+                [BodyBrainEvolutionFieldElements.MinFullProportion] = true,
+                [BodyBrainEvolutionFieldElements.MaxFullProportion] = true,
+                [BodyBrainEvolutionFieldElements.MeanFullProportion] = true,
+                [BodyBrainEvolutionFieldElements.MinActiveVoxels] = true,
+                [BodyBrainEvolutionFieldElements.MaxActiveVoxels] = true,
+                [BodyBrainEvolutionFieldElements.MeanActiveVoxels] = true,
+                [BodyBrainEvolutionFieldElements.MinPassiveVoxels] = true,
+                [BodyBrainEvolutionFieldElements.MaxPassiveVoxels] = true,
+                [BodyBrainEvolutionFieldElements.MeanPassiveVoxels] = true,
+                [BodyBrainEvolutionFieldElements.MinActiveVoxelProportion] = true,
+                [BodyBrainEvolutionFieldElements.MaxActiveVoxelProportion] = true,
+                [BodyBrainEvolutionFieldElements.MeanActiveVoxelProportion] = true,
+                [BodyBrainEvolutionFieldElements.MinPassiveVoxelProportion] = true,
+                [BodyBrainEvolutionFieldElements.MaxPassiveVoxelProportion] = true,
+                [BodyBrainEvolutionFieldElements.MeanPassiveVoxelProportion] = true
+            };
+            
+            // TODO: Validate configuration parameter settings
         }
 
         /// <inheritdoc />
@@ -171,26 +239,32 @@ namespace MCC_Domains.BodyBrain
             // Create the NEAT EA for brains
             AbstractEvolutionAlgorithm<NeatGenome> brainEvolutionAlgorithm =
                 new QueueEvolutionAlgorithm<NeatGenome>(eaParams, new NeatAlgorithmStats(eaParams), null, null,
-                    BrainBatchSize);
+                    BrainBatchSize, RunPhase.Primary, _brainEvolutionDataLogger, _brainLogFieldEnableMap,
+                    _brainPopulationDataLogger, _brainGenomeDataLogger, _brainSimulationTrialDataLogger);
 
             // TODO: Add data loggers
             // Create the NEAT EA for bodies
             AbstractEvolutionAlgorithm<NeatGenome> bodyEvolutionAlgorithm =
                 new QueueEvolutionAlgorithm<NeatGenome>(eaParams,
-                    new VoxelBodyAlgorithmStats(eaParams, bodyGenomeDecoder), null, null, BodyBatchSize);
+                    new VoxelBodyAlgorithmStats(eaParams, bodyGenomeDecoder), null, null, BodyBatchSize,
+                    RunPhase.Primary, _bodyEvolutionDataLogger, _bodyLogFieldEnableMap, _bodyPopulationDataLogger,
+                    _bodyGenomeDataLogger, _bodySimulationTrialDataLogger);
 
             // Create the brain phenome evaluator
             IPhenomeEvaluator<VoxelBrain, BehaviorInfo> brainEvaluator = new BrainEvaluator(SimulationProperties,
-                MinAmbulationDistance, NumBodySuccessCriteria, Name, Run, ResourceLimit);
+                MinAmbulationDistance, NumBodySuccessCriteria, Name, Run, ResourceLimit, _bodyResourceUsageLogger);
 
             // Create the body phenome evaluator
             IPhenomeEvaluator<VoxelBody, BehaviorInfo> bodyEvaluator = new BodyEvaluator(SimulationProperties,
                 MinAmbulationDistance, NumBrainSuccessCriteria, Name, Run);
 
             // Create the brain genome evaluator
+//            IGenomeEvaluator<NeatGenome> brainViabilityEvaluator =
+//                new ParallelGenomeBehaviorEvaluator<NeatGenome, VoxelBrain>(brainGenomeDecoder, brainEvaluator,
+//                    SearchType.MinimalCriteriaSearch, ParallelOptions);
             IGenomeEvaluator<NeatGenome> brainViabilityEvaluator =
-                new ParallelGenomeBehaviorEvaluator<NeatGenome, VoxelBrain>(brainGenomeDecoder, brainEvaluator,
-                    SearchType.MinimalCriteriaSearch, ParallelOptions);
+                new SerialGenomeBehaviorEvaluator<NeatGenome, VoxelBrain>(brainGenomeDecoder, brainEvaluator,
+                    SearchType.MinimalCriteriaSearch);
 
             // Create the body genome evaluator
             IGenomeEvaluator<NeatGenome> bodyViabilityEvaluator =

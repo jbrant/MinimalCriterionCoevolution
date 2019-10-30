@@ -42,66 +42,66 @@ namespace SharpNeat.EvolutionAlgorithms.Statistics
         {
             return new List<LoggableElement>
             {
-                (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.Generation) == true &&
-                 logFieldEnableMap[MazeNavEvolutionFieldElements.Generation])
-                    ? new LoggableElement(MazeNavEvolutionFieldElements.Generation, Generation)
+                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.Generation) == true &&
+                 logFieldEnableMap[EvolutionFieldElements.Generation])
+                    ? new LoggableElement(EvolutionFieldElements.Generation, Generation)
                     : null,
-                (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.TotalEvaluations) == true &&
-                 logFieldEnableMap[MazeNavEvolutionFieldElements.TotalEvaluations])
-                    ? new LoggableElement(MazeNavEvolutionFieldElements.TotalEvaluations, TotalEvaluationCount)
+                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.TotalEvaluations) == true &&
+                 logFieldEnableMap[EvolutionFieldElements.TotalEvaluations])
+                    ? new LoggableElement(EvolutionFieldElements.TotalEvaluations, TotalEvaluationCount)
                     : null,
-                (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.EvaluationsPerSecond) == true &&
-                 logFieldEnableMap[MazeNavEvolutionFieldElements.EvaluationsPerSecond])
-                    ? new LoggableElement(MazeNavEvolutionFieldElements.EvaluationsPerSecond, EvaluationsPerSec)
+                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.EvaluationsPerSecond) == true &&
+                 logFieldEnableMap[EvolutionFieldElements.EvaluationsPerSecond])
+                    ? new LoggableElement(EvolutionFieldElements.EvaluationsPerSecond, EvaluationsPerSec)
                     : null,
-                (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.MaxFitness) == true &&
-                 logFieldEnableMap[MazeNavEvolutionFieldElements.MaxFitness])
-                    ? new LoggableElement(MazeNavEvolutionFieldElements.MaxFitness, MaxFitness)
+                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MaxFitness) == true &&
+                 logFieldEnableMap[EvolutionFieldElements.MaxFitness])
+                    ? new LoggableElement(EvolutionFieldElements.MaxFitness, MaxFitness)
                     : null,
-                (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.MeanFitness) == true &&
-                 logFieldEnableMap[MazeNavEvolutionFieldElements.MeanFitness])
-                    ? new LoggableElement(MazeNavEvolutionFieldElements.MeanFitness, MeanFitness)
+                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MeanFitness) == true &&
+                 logFieldEnableMap[EvolutionFieldElements.MeanFitness])
+                    ? new LoggableElement(EvolutionFieldElements.MeanFitness, MeanFitness)
                     : null,
-                (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.MeanSpecieChampFitness) == true &&
-                 logFieldEnableMap[MazeNavEvolutionFieldElements.MeanSpecieChampFitness])
-                    ? new LoggableElement(MazeNavEvolutionFieldElements.MeanSpecieChampFitness, MeanSpecieChampFitness)
+                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MeanSpecieChampFitness) == true &&
+                 logFieldEnableMap[EvolutionFieldElements.MeanSpecieChampFitness])
+                    ? new LoggableElement(EvolutionFieldElements.MeanSpecieChampFitness, MeanSpecieChampFitness)
                     : null,
-                (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.MinComplexity) == true &&
-                 logFieldEnableMap[MazeNavEvolutionFieldElements.MinComplexity])
-                    ? new LoggableElement(MazeNavEvolutionFieldElements.MinComplexity, MinComplexity)
+                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MinComplexity) == true &&
+                 logFieldEnableMap[EvolutionFieldElements.MinComplexity])
+                    ? new LoggableElement(EvolutionFieldElements.MinComplexity, MinComplexity)
                     : null,
-                (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.MaxComplexity) == true &&
-                 logFieldEnableMap[MazeNavEvolutionFieldElements.MaxComplexity])
-                    ? new LoggableElement(MazeNavEvolutionFieldElements.MaxComplexity, MaxComplexity)
+                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MaxComplexity) == true &&
+                 logFieldEnableMap[EvolutionFieldElements.MaxComplexity])
+                    ? new LoggableElement(EvolutionFieldElements.MaxComplexity, MaxComplexity)
                     : null,
-                (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.MeanComplexity) == true &&
-                 logFieldEnableMap[MazeNavEvolutionFieldElements.MeanComplexity])
-                    ? new LoggableElement(MazeNavEvolutionFieldElements.MeanComplexity, MeanComplexity)
+                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MeanComplexity) == true &&
+                 logFieldEnableMap[EvolutionFieldElements.MeanComplexity])
+                    ? new LoggableElement(EvolutionFieldElements.MeanComplexity, MeanComplexity)
                     : null,
-                (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.TotalOffspringCount) == true &&
-                 logFieldEnableMap[MazeNavEvolutionFieldElements.TotalOffspringCount])
-                    ? new LoggableElement(MazeNavEvolutionFieldElements.TotalOffspringCount, TotalOffspringCount)
+                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.TotalOffspringCount) == true &&
+                 logFieldEnableMap[EvolutionFieldElements.TotalOffspringCount])
+                    ? new LoggableElement(EvolutionFieldElements.TotalOffspringCount, TotalOffspringCount)
                     : null,
-                (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.AsexualOffspringCount) == true &&
-                 logFieldEnableMap[MazeNavEvolutionFieldElements.AsexualOffspringCount])
-                    ? new LoggableElement(MazeNavEvolutionFieldElements.AsexualOffspringCount, AsexualOffspringCount)
+                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.AsexualOffspringCount) == true &&
+                 logFieldEnableMap[EvolutionFieldElements.AsexualOffspringCount])
+                    ? new LoggableElement(EvolutionFieldElements.AsexualOffspringCount, AsexualOffspringCount)
                     : null,
-                (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.SexualOffspringCount) == true &&
-                 logFieldEnableMap[MazeNavEvolutionFieldElements.SexualOffspringCount])
-                    ? new LoggableElement(MazeNavEvolutionFieldElements.SexualOffspringCount, SexualOffspringCount)
+                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.SexualOffspringCount) == true &&
+                 logFieldEnableMap[EvolutionFieldElements.SexualOffspringCount])
+                    ? new LoggableElement(EvolutionFieldElements.SexualOffspringCount, SexualOffspringCount)
                     : null,
-                (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.InterspeciesOffspringCount) == true &&
-                 logFieldEnableMap[MazeNavEvolutionFieldElements.InterspeciesOffspringCount])
-                    ? new LoggableElement(MazeNavEvolutionFieldElements.InterspeciesOffspringCount,
+                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.InterspeciesOffspringCount) == true &&
+                 logFieldEnableMap[EvolutionFieldElements.InterspeciesOffspringCount])
+                    ? new LoggableElement(EvolutionFieldElements.InterspeciesOffspringCount,
                         InterspeciesOffspringCount)
                     : null,
-                (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.MinSpecieSize) == true &&
-                 logFieldEnableMap[MazeNavEvolutionFieldElements.MinSpecieSize])
-                    ? new LoggableElement(MazeNavEvolutionFieldElements.MinSpecieSize, MinSpecieSize)
+                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MinSpecieSize) == true &&
+                 logFieldEnableMap[EvolutionFieldElements.MinSpecieSize])
+                    ? new LoggableElement(EvolutionFieldElements.MinSpecieSize, MinSpecieSize)
                     : null,
-                (logFieldEnableMap?.ContainsKey(MazeNavEvolutionFieldElements.MaxSpecieSize) == true &&
-                 logFieldEnableMap[MazeNavEvolutionFieldElements.MaxSpecieSize])
-                    ? new LoggableElement(MazeNavEvolutionFieldElements.MaxSpecieSize, MaxSpecieSize)
+                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.MaxSpecieSize) == true &&
+                 logFieldEnableMap[EvolutionFieldElements.MaxSpecieSize])
+                    ? new LoggableElement(EvolutionFieldElements.MaxSpecieSize, MaxSpecieSize)
                     : null
             };
         }

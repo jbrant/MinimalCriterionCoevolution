@@ -15,7 +15,7 @@ namespace SharpNeat.EvolutionAlgorithms.Statistics
         ///     VoxelBodyAlgorithmStats default constructor.
         /// </summary>
         /// <param name="eaParams">Evolution algorithm parameters required for initialization.</param>
-        protected VoxelBodyAlgorithmStats(EvolutionAlgorithmParameters eaParams) : base(eaParams)
+        private VoxelBodyAlgorithmStats(EvolutionAlgorithmParameters eaParams) : base(eaParams)
         {
         }
 

@@ -8,14 +8,6 @@ namespace SharpNeat.Loggers
 {
     public static class EvolutionFieldElements
     {
-        
-    }
-    
-    /// <summary>
-    ///     Fields capturing data related to population statistics per generation/batch for maze navigation experiments.
-    /// </summary>
-    public static class MazeNavEvolutionFieldElements
-    {
         /// <summary>
         ///     The generation of the observation.
         /// </summary>
@@ -171,6 +163,52 @@ namespace SharpNeat.Loggers
         public static readonly FieldElement ChampGenomeXml = new FieldElement(28, "Champ Genome XML");
 
         /// <summary>
+        ///     Pre-constructs an evolution log field enable map with all of the fields enabled by default.
+        /// </summary>
+        /// <returns>Evolution log field enable map with all fields enabled.</returns>
+        public static Dictionary<FieldElement, bool> PopulateEvolutionFieldElementsEnableMap()
+        {
+            return new Dictionary<FieldElement, bool>
+            {
+                {Generation, true},
+                {RunPhase, true},
+                {SpecieCount, true},
+                {AsexualOffspringCount, true},
+                {SexualOffspringCount, true},
+                {InterspeciesOffspringCount, true},
+                {TotalOffspringCount, true},
+                {PopulationSize, true},
+                {MinimalCriteriaThreshold, true},
+                {MinimalCriteriaPointX, true},
+                {MinimalCriteriaPointY, true},
+                {MaxFitness, true},
+                {MeanFitness, true},
+                {MeanSpecieChampFitness, true},
+                {MinComplexity, true},
+                {MaxComplexity, true},
+                {MeanComplexity, true},
+                {MinSpecieSize, true},
+                {MaxSpecieSize, true},
+                {TotalEvaluations, true},
+                {EvaluationsPerSecond, true},
+                {ChampGenomeGenomeId, true},
+                {ChampGenomeFitness, true},
+                {ChampGenomeBirthGeneration, true},
+                {ChampGenomeConnectionGeneCount, true},
+                {ChampGenomeNeuronGeneCount, true},
+                {ChampGenomeTotalGeneCount, true},
+                {ChampGenomeEvaluationCount, true},
+                {ChampGenomeXml, true}
+            };
+        }
+    }
+
+    /// <summary>
+    ///     Fields capturing data related to population statistics per generation/batch for maze navigation experiments.
+    /// </summary>
+    public static class MazeNavEvolutionFieldElements
+    {
+        /// <summary>
         ///     The minimum number of walls in a maze within the maze population.
         /// </summary>
         public static readonly FieldElement MinWalls = new FieldElement(29, "Min Walls");
@@ -272,35 +310,6 @@ namespace SharpNeat.Loggers
         {
             return new Dictionary<FieldElement, bool>
             {
-                {Generation, true},
-                {RunPhase, true},
-                {SpecieCount, true},
-                {AsexualOffspringCount, true},
-                {SexualOffspringCount, true},
-                {InterspeciesOffspringCount, true},
-                {TotalOffspringCount, true},
-                {PopulationSize, true},
-                {MinimalCriteriaThreshold, true},
-                {MinimalCriteriaPointX, true},
-                {MinimalCriteriaPointY, true},
-                {MaxFitness, true},
-                {MeanFitness, true},
-                {MeanSpecieChampFitness, true},
-                {MinComplexity, true},
-                {MaxComplexity, true},
-                {MeanComplexity, true},
-                {MinSpecieSize, true},
-                {MaxSpecieSize, true},
-                {TotalEvaluations, true},
-                {EvaluationsPerSecond, true},
-                {ChampGenomeGenomeId, true},
-                {ChampGenomeFitness, true},
-                {ChampGenomeBirthGeneration, true},
-                {ChampGenomeConnectionGeneCount, true},
-                {ChampGenomeNeuronGeneCount, true},
-                {ChampGenomeTotalGeneCount, true},
-                {ChampGenomeEvaluationCount, true},
-                {ChampGenomeXml, true},
                 {MinWalls, true},
                 {MaxWalls, true},
                 {MeanWalls, true},
@@ -329,110 +338,100 @@ namespace SharpNeat.Loggers
     public static class BodyBrainEvolutionFieldElements
     {
         /// <summary>
-        ///     The generation of the observation.
-        /// </summary>
-        public static readonly FieldElement Generation = new FieldElement(0, "Generation");
-
-        /// <summary>
-        ///     The run phase (initialization or primary) at the time of the observation.
-        /// </summary>
-        public static readonly FieldElement RunPhase = new FieldElement(1, "Run Phase");
-
-        /// <summary>
         ///     The minimum number of voxels in a given voxel body within the body population.
         /// </summary>
-        public static readonly FieldElement MinVoxels = new FieldElement(2, "Min Voxels");
+        public static readonly FieldElement MinVoxels = new FieldElement(29, "Min Voxels");
 
         /// <summary>
         ///     The maximum number of voxels in a given voxel body within the body population.
         /// </summary>
-        public static readonly FieldElement MaxVoxels = new FieldElement(3, "Max Voxels");
+        public static readonly FieldElement MaxVoxels = new FieldElement(30, "Max Voxels");
 
         /// <summary>
         ///     The mean number of voxels within the body population.
         /// </summary>
-        public static readonly FieldElement MeanVoxels = new FieldElement(4, "Mean Voxels");
+        public static readonly FieldElement MeanVoxels = new FieldElement(31, "Mean Voxels");
 
         /// <summary>
         ///     The minimum voxel proportion within the body population.
         /// </summary>
-        public static readonly FieldElement MinFullProportion = new FieldElement(5, "Min Full Proportion");
+        public static readonly FieldElement MinFullProportion = new FieldElement(32, "Min Full Proportion");
 
         /// <summary>
         ///     The maximum voxel proportion within the body population.
         /// </summary>
-        public static readonly FieldElement MaxFullProportion = new FieldElement(6, "Max Full Proportion");
+        public static readonly FieldElement MaxFullProportion = new FieldElement(33, "Max Full Proportion");
 
         /// <summary>
         ///     The mean voxel proportion within the body population.
         /// </summary>
-        public static readonly FieldElement MeanFullProportion = new FieldElement(7, "Mean Full Proportion");
+        public static readonly FieldElement MeanFullProportion = new FieldElement(34, "Mean Full Proportion");
 
         /// <summary>
         ///     The minimum number of active voxels in a given voxel body within the body population.
         /// </summary>
-        public static readonly FieldElement MinActiveVoxels = new FieldElement(8, "Min Active Voxels");
+        public static readonly FieldElement MinActiveVoxels = new FieldElement(35, "Min Active Voxels");
 
         /// <summary>
         ///     The maximum number of active voxels in a given voxel body within the body population.
         /// </summary>
-        public static readonly FieldElement MaxActiveVoxels = new FieldElement(9, "Max Active Voxels");
+        public static readonly FieldElement MaxActiveVoxels = new FieldElement(36, "Max Active Voxels");
 
         /// <summary>
         ///     The mean number of active voxels within the body population.
         /// </summary>
-        public static readonly FieldElement MeanActiveVoxels = new FieldElement(10, "Mean Active Voxels");
+        public static readonly FieldElement MeanActiveVoxels = new FieldElement(37, "Mean Active Voxels");
 
         /// <summary>
         ///     The minimum number of passive voxels in a given voxel body within the body population.
         /// </summary>
-        public static readonly FieldElement MinPassiveVoxels = new FieldElement(11, "Min Passive Voxels");
+        public static readonly FieldElement MinPassiveVoxels = new FieldElement(38, "Min Passive Voxels");
 
         /// <summary>
         ///     The maximum number of passive voxels in a given voxel body within the body population.
         /// </summary>
-        public static readonly FieldElement MaxPassiveVoxels = new FieldElement(12, "Max Passive Voxels");
+        public static readonly FieldElement MaxPassiveVoxels = new FieldElement(39, "Max Passive Voxels");
 
         /// <summary>
         ///     The mean number of passive voxels within the body population.
         /// </summary>
-        public static readonly FieldElement MeanPassiveVoxels = new FieldElement(13, "Mean Passive Voxels");
+        public static readonly FieldElement MeanPassiveVoxels = new FieldElement(40, "Mean Passive Voxels");
 
         /// <summary>
         ///     The minimum active voxel proportion within the body population.
         /// </summary>
         public static readonly FieldElement MinActiveVoxelProportion =
-            new FieldElement(14, "Min Active Voxel Proportion");
+            new FieldElement(41, "Min Active Voxel Proportion");
 
         /// <summary>
         ///     The maximum active voxel proportion within the body population.
         /// </summary>
         public static readonly FieldElement MaxActiveVoxelProportion =
-            new FieldElement(15, "Max Active Voxel Proportion");
+            new FieldElement(42, "Max Active Voxel Proportion");
 
         /// <summary>
         ///     The mean active voxel proportion within the body population.
         /// </summary>
         public static readonly FieldElement MeanActiveVoxelProportion =
-            new FieldElement(16, "Mean Active Voxel Proportion");
+            new FieldElement(43, "Mean Active Voxel Proportion");
 
         /// <summary>
         ///     The minimum passive voxel proportion within the body population.
         /// </summary>
         public static readonly FieldElement MinPassiveVoxelProportion =
-            new FieldElement(17, "Min Passive Voxel Proportion");
+            new FieldElement(44, "Min Passive Voxel Proportion");
 
         /// <summary>
         ///     The maximum passive voxel proportion within the body population.
         /// </summary>
         public static readonly FieldElement MaxPassiveVoxelProportion =
-            new FieldElement(18, "Max Passive Voxel Proportion");
+            new FieldElement(45, "Max Passive Voxel Proportion");
 
         /// <summary>
         ///     The mean passive voxel proportion within the body population.
         /// </summary>
         public static readonly FieldElement MeanPassiveVoxelProportion =
-            new FieldElement(19, "Mean Passive Voxel Proportion");
+            new FieldElement(46, "Mean Passive Voxel Proportion");
 
         /// <summary>
         ///     Pre-constructs an evolution log field enable map with all of the fields enabled by default (for body/brain
@@ -443,8 +442,6 @@ namespace SharpNeat.Loggers
         {
             return new Dictionary<FieldElement, bool>
             {
-                {Generation, true},
-                {RunPhase, true},
                 {MinVoxels, true},
                 {MaxVoxels, true},
                 {MeanVoxels, true},
