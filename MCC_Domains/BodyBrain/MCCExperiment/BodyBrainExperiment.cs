@@ -70,16 +70,22 @@ namespace MCC_Domains.BodyBrain
             _brainSimulationTrialDataLogger =
                 new FileDataLogger($"{logFileDirectory}\\{name} - Run{run} - BrainTrials.csv");
             _bodyEvolutionDataLogger = new FileDataLogger($"{logFileDirectory}\\{name} - Run{run} - BodyEvolution.csv");
-            _brainPopulationDataLogger =
+            _bodyPopulationDataLogger =
                 new FileDataLogger($"{logFileDirectory}\\{name} - Run{run} - BodyPopulation.csv");
-            _brainGenomeDataLogger = new FileDataLogger($"{logFileDirectory}\\{name} - Run{run} - BodyGenomes.csv");
-            _brainSimulationTrialDataLogger =
+            _bodyGenomeDataLogger = new FileDataLogger($"{logFileDirectory}\\{name} - Run{run} - BodyGenomes.csv");
+            _bodySimulationTrialDataLogger =
                 new FileDataLogger($"{logFileDirectory}\\{name} - Run{run} - BodyTrials.csv");
             _bodyResourceUsageLogger = new FileDataLogger($"{logFileDirectory}\\{name} - Run{run} - ResourceUsage.csv");
             
             // Create new evolution field elements map with all fields enabled
-            _brainLogFieldEnableMap = MazeNavEvolutionFieldElements.PopulateEvolutionFieldElementsEnableMap();
+            _brainLogFieldEnableMap = EvolutionFieldElements.PopulateEvolutionFieldElementsEnableMap();
             
+            // Add default evolution logging configuration specific to body-brain experiment
+            foreach (var evolutionLoggingPair in BodyBrainEvolutionFieldElements.PopulateEvolutionFieldElementsEnableMap())
+            {
+                _brainLogFieldEnableMap.Add(evolutionLoggingPair.Key, evolutionLoggingPair.Value);
+            }
+
             // Add default population logging configuration
             foreach (var populationLoggingPair in PopulationFieldElements.PopulatePopulationFieldElementsEnableMap())
             {
@@ -165,7 +171,8 @@ namespace MCC_Domains.BodyBrain
                 [BodyBrainEvolutionFieldElements.MeanPassiveVoxelProportion] = true
             };
             
-            // TODO: Validate configuration parameter settings
+            // Validate configuration parameter settings
+            if (base.ValidateConfigParameters(out var errorMessagee)) throw new ConfigurationException(errorMessagee);
         }
 
         /// <inheritdoc />
@@ -252,7 +259,8 @@ namespace MCC_Domains.BodyBrain
 
             // Create the brain phenome evaluator
             IPhenomeEvaluator<VoxelBrain, BehaviorInfo> brainEvaluator = new BrainEvaluator(SimulationProperties,
-                MinAmbulationDistance, NumBodySuccessCriteria, Name, Run, ResourceLimit, _bodyResourceUsageLogger);
+                MinAmbulationDistance, NumBodySuccessCriteria, Name, Run, ResourceLimit,
+                resourceUsageLogger: _bodyResourceUsageLogger);
 
             // Create the body phenome evaluator
             IPhenomeEvaluator<VoxelBody, BehaviorInfo> bodyEvaluator = new BodyEvaluator(SimulationProperties,

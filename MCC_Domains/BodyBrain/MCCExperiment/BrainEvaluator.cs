@@ -337,28 +337,29 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
         /// <param name="lastGeneration">The generation that was just executed.</param>
         public void UpdateEvaluatorPhenotypes(IEnumerable<object> evaluatorPhenomes, uint lastGeneration)
         {
-            // Store off extant bodies
-            _bodies = (IList<VoxelBody>) evaluatorPhenomes;
-
             // Update resource usage if enabled
             if (_isResourceLimited)
             {
+                // Don't attempt to log if the file stream is closed
+                if (_resourceUsageLogger?.IsStreamOpen() ?? false)
+                {
+                    // Log resource usages per genome ID
+                    foreach (var body in _bodies)
+                    {
+                        _resourceUsageLogger?.LogRow(new List<LoggableElement>
+                        {
+                            new LoggableElement(ResourceUsageFieldElements.Generation, lastGeneration),
+                            new LoggableElement(ResourceUsageFieldElements.GenomeId, body.GenomeId),
+                            new LoggableElement(ResourceUsageFieldElements.UsageCount, _bodyUsageMap[body.GenomeId])
+                        });
+                    }
+                }
+
+                // Store off new/extant bodies
+                _bodies = (IList<VoxelBody>) evaluatorPhenomes;
+                
                 // Update the voxel body usage map and remove candidate bodies that have exceeded their usage limit
                 UpdateBodyUsage();
-
-                // Don't attempt to log if the file stream is closed
-                if (!(_resourceUsageLogger?.IsStreamOpen() ?? false)) return;
-
-                // Log resource usages per genome ID
-                foreach (var body in _bodies)
-                {
-                    _resourceUsageLogger?.LogRow(new List<LoggableElement>
-                    {
-                        new LoggableElement(ResourceUsageFieldElements.Generation, lastGeneration),
-                        new LoggableElement(ResourceUsageFieldElements.GenomeId, body.GenomeId),
-                        new LoggableElement(ResourceUsageFieldElements.UsageCount, _bodyUsageMap[body.GenomeId])
-                    });
-                }
             }
         }
 

@@ -264,9 +264,9 @@ namespace SharpNeat.EvolutionAlgorithms
                 _logFieldEnabledMap[SimulationTrialFieldElements.NumTimesteps]
                     ? new LoggableElement(SimulationTrialFieldElements.NumTimesteps, null)
                     : null,
-                _logFieldEnabledMap.ContainsKey(SimulationTrialFieldElements.ObjectiveDistance) &&
-                _logFieldEnabledMap[SimulationTrialFieldElements.ObjectiveDistance]
-                    ? new LoggableElement(SimulationTrialFieldElements.ObjectiveDistance, null)
+                _logFieldEnabledMap.ContainsKey(SimulationTrialFieldElements.Distance) &&
+                _logFieldEnabledMap[SimulationTrialFieldElements.Distance]
+                    ? new LoggableElement(SimulationTrialFieldElements.Distance, null)
                     : null,
                 _logFieldEnabledMap.ContainsKey(SimulationTrialFieldElements.PairedGenomeId) &&
                 _logFieldEnabledMap[SimulationTrialFieldElements.PairedGenomeId]
@@ -431,9 +431,9 @@ namespace SharpNeat.EvolutionAlgorithms
                         _logFieldEnabledMap[SimulationTrialFieldElements.NumTimesteps]
                             ? new LoggableElement(SimulationTrialFieldElements.NumTimesteps, trial.NumTimesteps)
                             : null,
-                        _logFieldEnabledMap.ContainsKey(SimulationTrialFieldElements.ObjectiveDistance) &&
-                        _logFieldEnabledMap[SimulationTrialFieldElements.ObjectiveDistance]
-                            ? new LoggableElement(SimulationTrialFieldElements.ObjectiveDistance,
+                        _logFieldEnabledMap.ContainsKey(SimulationTrialFieldElements.Distance) &&
+                        _logFieldEnabledMap[SimulationTrialFieldElements.Distance]
+                            ? new LoggableElement(SimulationTrialFieldElements.Distance,
                                 trial.ObjectiveDistance)
                             : null,
                         _logFieldEnabledMap.ContainsKey(SimulationTrialFieldElements.PairedGenomeId) &&

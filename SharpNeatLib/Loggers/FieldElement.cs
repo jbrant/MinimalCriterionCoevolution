@@ -510,6 +510,11 @@ namespace SharpNeat.Loggers
         public static readonly FieldElement AgentYLocation = new FieldElement(7, "Agent Y Location");
 
         /// <summary>
+        ///     The simulation time consumed by executing the trial.
+        /// </summary>
+        public static readonly FieldElement SimTime = new FieldElement(8, "Simulation Time");
+
+        /// <summary>
         ///     Pre-constructs an evaluation log field enable map with all of the fields enabled by default.
         /// </summary>
         /// <returns>Evaluation log field enable map with all fields enabled.</returns>
@@ -524,7 +529,8 @@ namespace SharpNeat.Loggers
                 {StopConditionSatisfied, true},
                 {DistanceToTarget, true},
                 {AgentXLocation, true},
-                {AgentYLocation, true}
+                {AgentYLocation, true},
+                {SimTime, true}
             };
         }
     }
@@ -597,9 +603,9 @@ namespace SharpNeat.Loggers
         public static readonly FieldElement IsSuccessful = new FieldElement(3, "Is Successful");
 
         /// <summary>
-        ///     The distance between the ending point of the simulation and the target location.
+        ///     The distance either between the ending point of the simulation and the target location, or the total distance traveled.
         /// </summary>
-        public static readonly FieldElement ObjectiveDistance = new FieldElement(4, "Objective Distance");
+        public static readonly FieldElement Distance = new FieldElement(4, "Distance");
 
         /// <summary>
         ///     The number of simulated timesteps in the trial.
@@ -618,7 +624,7 @@ namespace SharpNeat.Loggers
                 {GenomeId, true},
                 {PairedGenomeId, true},
                 {IsSuccessful, true},
-                {ObjectiveDistance, true},
+                {Distance, true},
                 {NumTimesteps, true}
             };
         }

@@ -202,8 +202,8 @@ namespace SharpNeat.Utility
             if (assignObjectiveDistanceAsFitness && genome.EvaluationInfo.TrialData.Any())
             {
                 fitnessInfo = new FitnessInfo(
-                    genome.EvaluationInfo.TrialData[0].ObjectiveDistance,
-                    genome.EvaluationInfo.TrialData[0].ObjectiveDistance);
+                    genome.EvaluationInfo.TrialData.Max(x => x.ObjectiveDistance),
+                    genome.EvaluationInfo.TrialData.Max(x => x.ObjectiveDistance));
             }
             // Otherwise, we're going to assign a random fitness score (since there is no other heuristic)
             else

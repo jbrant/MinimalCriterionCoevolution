@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Config>
+    <MaxInitializationEvaluations>100000</MaxInitializationEvaluations>
+    <BrainPopulationSize>250</BrainPopulationSize>
+    <BodyPopulationSize>50</BodyPopulationSize>
+    <BrainSeedGenomeCount>5</BrainSeedGenomeCount>
+    <BodySeedGenomeCount>5</BodySeedGenomeCount>
+    <ResourceLimit>5</ResourceLimit>
+    <Activation>
+        <Scheme>Acyclic</Scheme>
+    </Activation>
+    <GenomeConfig>
+        <InitialConnectionProportion>1</InitialConnectionProportion>
+        <WeightMutationProbability>0.6</WeightMutationProbability>
+        <AddConnnectionProbability>0.1</AddConnnectionProbability>
+        <AddNodeProbability>0.01</AddNodeProbability>
+        <DeleteConnectionProbability>0.005</DeleteConnectionProbability>
+        <IncreaseResolutionProbability>0.1</IncreaseResolutionProbability>
+        <DecreaseResolutionProbability>0.01</DecreaseResolutionProbability>
+        <ConnectionWeightRange>5</ConnectionWeightRange>
+    </GenomeConfig>
+    <BehaviorConfig>
+        <BehaviorCharacterization>End Point</BehaviorCharacterization>
+    </BehaviorConfig>
+    <MinAmbulationDistance>10</MinAmbulationDistance>
+    <BrainOffspringBatchSize>40</BrainOffspringBatchSize>
+    <BodyOffspringBatchSize>10</BodyOffspringBatchSize>
+    <MaxGenerations>200</MaxGenerations>
+    <NumBodiesSolvedCriteria>1</NumBodiesSolvedCriteria>
+    <NumBrainsSolvedCriteria>1</NumBrainsSolvedCriteria>
+    <VoxelyzeConfig>
+        <VxaTemplateFile>BodyBrain/VoxCadSimulation/VoxCadSimulationTemplate.xml</VxaTemplateFile>
+        <InitialXDimension>10</InitialXDimension>
+        <InitialYDimension>10</InitialYDimension>
+        <InitialZDimension>10</InitialZDimension>
+        <BrainNetworkConnections>16</BrainNetworkConnections>
+        <MinPercentMaterial>0.10</MinPercentMaterial>
+        <MinPercentActiveMaterial>0.05</MinPercentActiveMaterial>
+        <SimulatedSeconds>2</SimulatedSeconds>
+        <InitializationSeconds>0.5</InitializationSeconds>
+        <ActuationsPerSecond>10</ActuationsPerSecond>
+        <FloorSlope>0.0</FloorSlope>
+        <!--<ElasticityOffset>5</ElasticityOffset>-->
+        <VxaSimStopConditionXPath>/VXA/Simulator/StopCondition</VxaSimStopConditionXPath>
+        <VxaSimOutputXPath>/VXA/Simulator/GA</VxaSimOutputXPath>
+        <VxaEnvThermalXPath>/VXA/Environment/Thermal</VxaEnvThermalXPath>
+        <VxaEnvGravityXPath>/VXA/Environment/Gravity</VxaEnvGravityXPath>
+        <VxaStructureXPath>/VXA/VXC/Structure</VxaStructureXPath>
+        <VxaMinimalCriterionXPath>/VXA/Environment/MinimalCriterion</VxaMinimalCriterionXPath>
+    </VoxelyzeConfig>
+    <InitializationAlgorithmConfig>
+        <SearchAlgorithm>Novelty Search</SearchAlgorithm>
+        <SelectionAlgorithm>Steady State</SelectionAlgorithm>
+        <PopulationSize>250</PopulationSize>
+        <SpecieCount>15</SpecieCount>
+        <OffspringBatchSize>10</OffspringBatchSize>
+        <PopulationEvaluationFrequency>30</PopulationEvaluationFrequency>
+        <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>
+        <ComplexityThreshold>30</ComplexityThreshold>
+        <SelectionProportion>0.2</SelectionProportion>
+        <OffspringAsexualProbability>0.5</OffspringAsexualProbability>
+        <OffspringSexualProbability>0.5</OffspringSexualProbability>
+        <InterspeciesMatingProbability>0.001</InterspeciesMatingProbability>
+        <GenomeConfig>
+            <InitialConnectionProportion>1</InitialConnectionProportion>
+            <WeightMutationProbability>0.9</WeightMutationProbability>
+            <AddConnnectionProbability>0.05</AddConnnectionProbability>
+            <AddNodeProbability>0.005</AddNodeProbability>
+            <DeleteConnectionProbability>0.001</DeleteConnectionProbability>
+            <ConnectionWeightRange>5</ConnectionWeightRange>
+        </GenomeConfig>
+        <InitBehaviorConfig>
+            <BehaviorCharacterization>End Point</BehaviorCharacterization>
+        </InitBehaviorConfig>
+        <NearestNeighbors>15</NearestNeighbors>
+        <NoveltyConfig>
+            <ArchiveAdditionThreshold>6</ArchiveAdditionThreshold>
+            <ArchiveThresholdDecreaseMultiplier>0.95</ArchiveThresholdDecreaseMultiplier>
+            <ArchiveThresholdIncreaseMultiplier>1.3</ArchiveThresholdIncreaseMultiplier>
+            <MaxGenerationalArchiveAddition>5</MaxGenerationalArchiveAddition>
+            <MaxGenerationsWithoutArchiveAddition>10</MaxGenerationsWithoutArchiveAddition>
+        </NoveltyConfig>
+    </InitializationAlgorithmConfig>
+</Config>

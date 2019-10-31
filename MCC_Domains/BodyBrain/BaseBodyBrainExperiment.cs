@@ -139,7 +139,7 @@ namespace MCC_Domains.BodyBrain
 
         public abstract void Initialize(string name, int run, string simConfigDirectory, string simResultsDirectory,
             string simExecutableFile, XmlElement xmlConfig, string logFileDirectory);
-        
+
         /// <summary>
         ///     Initializes the MCC body/brain coevolution experiment by reading in all of the configuration parameters and setting
         ///     up the bootstrap/initialization algorithm.
@@ -260,6 +260,58 @@ namespace MCC_Domains.BodyBrain
         #region Protected methods
 
         /// <summary>
+        ///     Checks ranges and other experiment settings to ensure that the configuration is valid.
+        /// </summary>
+        /// <param name="message">
+        ///     Error message denoting specific configuration violation (only set if an invalid configuration was
+        ///     identified).
+        /// </param>
+        /// <returns>Boolean flag indicating whether the experiment configuration is valid.</returns>
+        protected bool ValidateConfigParameters(out string message)
+        {
+            // Set error message to null by default
+            message = null;
+
+            // Check population constraints
+            if (BrainDefaultPopulationSize <= 0)
+                message = $"Brain population size [{BrainDefaultPopulationSize}] must be a non-zero integer";
+            else if (BodyDefaultPopulationSize <= 0)
+                message = $"Body population size [{BodyDefaultPopulationSize}] must be a non-zero integer";
+            // Check seed range constraints
+            else if (BrainSeedGenomeCount <= 0)
+                message = $"Brain seed genome count [{BrainSeedGenomeCount}] must be a non-zero integer";
+            else if (BodySeedGenomeCount <= 0)
+                message = $"Body seed genome count [{BodySeedGenomeCount}] must be a non-zero integer";
+            else if (BrainSeedGenomeCount > BrainDefaultPopulationSize)
+                message =
+                    $"Brain seed genome count [{BrainSeedGenomeCount}] must be no greater than the brain population size [{BrainDefaultPopulationSize}]";
+            else if (BodySeedGenomeCount > BodyDefaultPopulationSize)
+                message =
+                    $"Body seed genome count [{BodySeedGenomeCount}] must be no greater than the body population size [{BodyDefaultPopulationSize}]";
+            // Check evaluation time range constraints
+            else if (MaxBatches <= 0)
+                message = $"Max batches [{MaxBatches}] must be an integer greater than 0";
+            // Check minimal criterion constraints
+            else if (NumBodySuccessCriteria > BodyDefaultPopulationSize)
+                message =
+                    $"Bodies solved minimal criterion [{NumBodySuccessCriteria}] must be no greater than the body population size";
+            else if (NumBrainSuccessCriteria > BrainDefaultPopulationSize)
+                message =
+                    $"Brains solved minimal criterion [{NumBrainSuccessCriteria}] must be no greater than the brain population size";
+            else if (MinAmbulationDistance <= 0)
+                message = $"Ambulation distance [{MinAmbulationDistance}] must be greater than 0";
+            // Check resource constraint setting
+            else if (ResourceLimit < 1)
+                message =
+                    $"Resource limit [{ResourceLimit}] must be greater than 1, otherwise body cannot be used to satisfy the MC of any brain";
+            else if (ResourceLimit * BodySeedGenomeCount < BrainSeedGenomeCount)
+                message =
+                    $"Product of resource limit [{ResourceLimit}] and maze seed genome count [{BodySeedGenomeCount}] must be at least as large as agent seed genome count [{BrainSeedGenomeCount}], otherwise not all agent seed genomes can be evolved";
+
+            return message != null;
+        }
+
+        /// <summary>
         ///     Evolves the requisite number of brains to the meet the MC for each body in the initial population. This is
         ///     performed using a non-MCC based algorithm (such as a fitness-based method or novelty search).
         /// </summary>
@@ -286,7 +338,7 @@ namespace MCC_Domains.BodyBrain
             // Compute the max number of brains that should be added per body to avoid exceeding the brain seed count
             var perBodyBrainCount = Math.Min(resourceLimit,
                 Convert.ToInt32(Math.Floor((double) numBrains / bodyPopulation.Count)));
-            
+
             // Create population of randomly-initialized brain CPPNs
             var brainPopulation = brainGenomeFactory.CreateGenomeList(BrainInitializationGenomeCount, 0);
 
@@ -325,7 +377,7 @@ namespace MCC_Domains.BodyBrain
             while (seedBrainPopulation.Count < numBrains)
             {
                 var rndBodyPicker = RandomDefaults.CreateRandomSource();
-                
+
                 // Compute the amount remaining to fill out the brain seed count
                 var brainsRemaining = numBrains - seedBrainPopulation.Count;
 
@@ -373,14 +425,16 @@ namespace MCC_Domains.BodyBrain
         }
 
         /// <summary>
-        ///     Ensure that the pre-evolved brain population facilitates the satisfaction of both their MC and the MC of the seed bodies.
+        ///     Ensure that the pre-evolved brain population facilitates the satisfaction of both their MC and the MC of the seed
+        ///     bodies.
         /// </summary>
         /// <param name="brainPopulation">The pre-evolved brain population.</param>
         /// <param name="bodyPopulation">The body population.</param>
         /// <param name="brainEvaluator">The brain evaluator.</param>
         /// <param name="bodyEvaluator">The body evaluator.</param>
         /// <returns>
-        ///     Boolean flag indicating whether the seed brains meet their MC and facilitate satisfaction of the body population MC.
+        ///     Boolean flag indicating whether the seed brains meet their MC and facilitate satisfaction of the body population
+        ///     MC.
         /// </returns>
         protected static bool VerifyPreevolvedSeedPopulations(List<NeatGenome> brainPopulation,
             List<NeatGenome> bodyPopulation, IGenomeEvaluator<NeatGenome> brainEvaluator,
@@ -389,11 +443,11 @@ namespace MCC_Domains.BodyBrain
             // Update brain and body evaluators such that seed brains will be evaluated against bodies and vice versa
             brainEvaluator.UpdateEvaluationBaseline(bodyEvaluator.DecodeGenomes(bodyPopulation), 0);
             bodyEvaluator.UpdateEvaluationBaseline(brainEvaluator.DecodeGenomes(brainPopulation), 0);
-            
+
             // Run MC evaluation for both populations
             brainEvaluator.Evaluate(brainPopulation, 0);
             bodyEvaluator.Evaluate(bodyPopulation, 0);
-            
+
             // In order to be a valid seed, the brains and bodies must all satisfy their MC with respect to each other
             return brainPopulation.All(g => g.EvaluationInfo.IsViable) &&
                    bodyPopulation.All(g => g.EvaluationInfo.IsViable);

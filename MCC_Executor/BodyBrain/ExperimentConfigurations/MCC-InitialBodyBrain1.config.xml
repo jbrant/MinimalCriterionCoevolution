@@ -26,7 +26,7 @@
     <MinAmbulationDistance>0.00005</MinAmbulationDistance>
     <BrainOffspringBatchSize>40</BrainOffspringBatchSize>
     <BodyOffspringBatchSize>10</BodyOffspringBatchSize>
-    <MaxGenerations>10</MaxGenerations>
+    <MaxGenerations>5</MaxGenerations>
     <NumBodiesSolvedCriteria>1</NumBodiesSolvedCriteria>
     <NumBrainsSolvedCriteria>1</NumBrainsSolvedCriteria>
     <VoxelyzeConfig>

@@ -54,7 +54,11 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
                 logFieldEnableMap?.ContainsKey(EvaluationFieldElements.AgentYLocation) == true &&
                 logFieldEnableMap[EvaluationFieldElements.AgentYLocation]
                     ? new LoggableElement(EvaluationFieldElements.AgentYLocation, Location.Y)
-                    : null
+                    : null,
+                logFieldEnableMap?.ContainsKey(EvaluationFieldElements.SimTime) == true &&
+                logFieldEnableMap[EvaluationFieldElements.SimTime]
+                    ? new LoggableElement(EvaluationFieldElements.SimTime, SimulationTime)
+                    : null,
             };
         }
     }
