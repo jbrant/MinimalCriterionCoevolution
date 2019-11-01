@@ -141,6 +141,16 @@ namespace MCC_Domains.MazeNavigation
         {
             return _currentKeys[genomeIdx];
         }
+        
+        /// <summary>
+        /// Looks up the number of successful navigations that have been executed against the maze for satisfying the MC.
+        /// </summary>
+        /// <param name="genomeIdx">The index of the genome ID.</param>
+        /// <returns>The number of successful navigations counting toward MC satisfaction.</returns>
+        public int GetViabilityUsageCount(int genomeIdx)
+        {
+            return _mazeConfigurations[_currentKeys[genomeIdx]].SuccessfulNavigationCount;
+        }
 
         /// <summary>
         ///     Constructs a new maze navigation world using the maze at the specified index and a given behavior characterization.

@@ -252,32 +252,35 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         /// <param name="lastGeneration">The generation that was just executed.</param>
         public void UpdateEvaluatorPhenotypes(IEnumerable<object> evaluatorPhenomes, uint lastGeneration)
         {
-            // Cast to maze genomes/phenomes
-            var mazePhenomes = (IList<MazeStructure>) evaluatorPhenomes;
-
-            _multiMazeWorldFactory.SetMazeConfigurations(mazePhenomes);
-
             // Update resource usage if enabled
             if (_isResourceLimited)
             {
-                // Increment resource usage count as appropriate
-                _multiMazeWorldFactory.UpdateMazePhenomeUsage(mazePhenomes);
-
                 // Don't attempt to log if the file stream is closed
-                if (!(_resourceUsageLogger?.IsStreamOpen() ?? false)) return;
-
-                // Log resource usages per genome ID
-                foreach (var mazePhenome in mazePhenomes)
+                if (_resourceUsageLogger?.IsStreamOpen() ?? false);
                 {
-                    _resourceUsageLogger?.LogRow(new List<LoggableElement>
+                    // Log resource usages per genome ID
+                    for (int cnt = 0; cnt < _multiMazeWorldFactory.NumMazes; cnt++)
                     {
-                        new LoggableElement(ResourceUsageFieldElements.Generation, lastGeneration),
-                        new LoggableElement(ResourceUsageFieldElements.GenomeId, mazePhenome.GenomeId),
-                        new LoggableElement(ResourceUsageFieldElements.UsageCount,
-                            mazePhenome.ViabilityUsageCount)
-                    });
+                        _resourceUsageLogger?.LogRow(new List<LoggableElement>
+                        {
+                            new LoggableElement(ResourceUsageFieldElements.Generation, lastGeneration),
+                            new LoggableElement(ResourceUsageFieldElements.GenomeId,
+                                _multiMazeWorldFactory.GetMazeGenomeId(cnt)),
+                            new LoggableElement(ResourceUsageFieldElements.UsageCount,
+                                _multiMazeWorldFactory.GetViabilityUsageCount(cnt))
+                        });
+                    }
                 }
             }
+            
+            // Cast to maze genomes/phenomes
+            var mazePhenomes = (IList<MazeStructure>) evaluatorPhenomes;
+
+            // Set the new maze configurations on the factory
+            _multiMazeWorldFactory.SetMazeConfigurations(mazePhenomes);
+            
+            // Increment resource usage count as appropriate
+            _multiMazeWorldFactory.UpdateMazePhenomeUsage(mazePhenomes);
         }
 
         /// <summary>

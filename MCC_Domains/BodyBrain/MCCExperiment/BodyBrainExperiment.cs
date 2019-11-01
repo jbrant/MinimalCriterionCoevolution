@@ -267,12 +267,12 @@ namespace MCC_Domains.BodyBrain
                 MinAmbulationDistance, NumBrainSuccessCriteria, Name, Run);
 
             // Create the brain genome evaluator
-//            IGenomeEvaluator<NeatGenome> brainViabilityEvaluator =
-//                new ParallelGenomeBehaviorEvaluator<NeatGenome, VoxelBrain>(brainGenomeDecoder, brainEvaluator,
-//                    SearchType.MinimalCriteriaSearch, ParallelOptions);
             IGenomeEvaluator<NeatGenome> brainViabilityEvaluator =
-                new SerialGenomeBehaviorEvaluator<NeatGenome, VoxelBrain>(brainGenomeDecoder, brainEvaluator,
-                    SearchType.MinimalCriteriaSearch);
+                new ParallelGenomeBehaviorEvaluator<NeatGenome, VoxelBrain>(brainGenomeDecoder, brainEvaluator,
+                    SearchType.MinimalCriteriaSearch, ParallelOptions);
+//            IGenomeEvaluator<NeatGenome> brainViabilityEvaluator =
+//                new SerialGenomeBehaviorEvaluator<NeatGenome, VoxelBrain>(brainGenomeDecoder, brainEvaluator,
+//                    SearchType.MinimalCriteriaSearch);
 
             // Create the body genome evaluator
             IGenomeEvaluator<NeatGenome> bodyViabilityEvaluator =
