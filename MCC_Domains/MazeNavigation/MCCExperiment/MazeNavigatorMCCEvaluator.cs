@@ -256,10 +256,10 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             if (_isResourceLimited)
             {
                 // Don't attempt to log if the file stream is closed
-                if (_resourceUsageLogger?.IsStreamOpen() ?? false);
+                if (_resourceUsageLogger?.IsStreamOpen() ?? false)
                 {
                     // Log resource usages per genome ID
-                    for (int cnt = 0; cnt < _multiMazeWorldFactory.NumMazes; cnt++)
+                    for (var cnt = 0; cnt < _multiMazeWorldFactory.NumMazes; cnt++)
                     {
                         _resourceUsageLogger?.LogRow(new List<LoggableElement>
                         {

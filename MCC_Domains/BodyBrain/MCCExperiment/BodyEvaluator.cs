@@ -132,14 +132,13 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
                 }
 
                 // Construct configuration file path
-                var simConfigFilePath = BodyBrainExperimentUtils.ConstructVoxelyzeFilePath("config_bodyeval",
+                var simConfigFilePath = BodyBrainExperimentUtils.ConstructVoxelyzeFilePath("config_bodyeval", "vxa",
                     _simulationProperties.SimConfigOutputDirectory, _experimentName, _run, body.GenomeId,
                     brain.GenomeId);
 
                 // Construct output file path
-                var simResultFilePath = BodyBrainExperimentUtils.ConstructVoxelyzeFilePath("result_bodyeval",
-                    _simulationProperties.SimResultsDirectory, _experimentName, _run, body.GenomeId,
-                    brain.GenomeId);
+                var simResultFilePath = BodyBrainExperimentUtils.ConstructVoxelyzeFilePath("result_bodyeval", "xml",
+                    _simulationProperties.SimResultsDirectory, _experimentName, _run, body.GenomeId, brain.GenomeId);
 
                 BodyBrainExperimentUtils.WriteVoxelyzeSimulationFile(_simulationProperties.SimConfigTemplateFile,
                     simConfigFilePath, _simulationProperties.SimOutputXPath,

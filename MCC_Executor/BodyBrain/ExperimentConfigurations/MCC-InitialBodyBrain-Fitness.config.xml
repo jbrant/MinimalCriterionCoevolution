@@ -34,8 +34,8 @@
         <InitialYDimension>10</InitialYDimension>
         <InitialZDimension>10</InitialZDimension>
         <BrainNetworkConnections>16</BrainNetworkConnections>
-        <MinPercentMaterial>0.10</MinPercentMaterial>
-        <MinPercentActiveMaterial>0.05</MinPercentActiveMaterial>
+        <MinPercentMaterial>0.90</MinPercentMaterial>
+        <MinPercentActiveMaterial>0.25</MinPercentActiveMaterial>
         <SimulatedSeconds>2</SimulatedSeconds>
         <InitializationSeconds>0.5</InitializationSeconds>
         <ActuationsPerSecond>10</ActuationsPerSecond>
@@ -49,8 +49,7 @@
         <VxaMinimalCriterionXPath>/VXA/Environment/MinimalCriterion</VxaMinimalCriterionXPath>
     </VoxelyzeConfig>
     <InitializationAlgorithmConfig>
-        <SearchAlgorithm>Novelty Search</SearchAlgorithm>
-        <SelectionAlgorithm>Steady State</SelectionAlgorithm>
+        <SearchAlgorithm>Fitness</SearchAlgorithm>
         <PopulationSize>150</PopulationSize>
         <SpecieCount>15</SpecieCount>
         <OffspringBatchSize>10</OffspringBatchSize>
@@ -69,16 +68,5 @@
             <DeleteConnectionProbability>0.001</DeleteConnectionProbability>
             <ConnectionWeightRange>5</ConnectionWeightRange>
         </GenomeConfig>
-        <InitBehaviorConfig>
-            <BehaviorCharacterization>End Point</BehaviorCharacterization>
-        </InitBehaviorConfig>
-        <NearestNeighbors>15</NearestNeighbors>
-        <NoveltyConfig>
-            <ArchiveAdditionThreshold>6</ArchiveAdditionThreshold>
-            <ArchiveThresholdDecreaseMultiplier>0.95</ArchiveThresholdDecreaseMultiplier>
-            <ArchiveThresholdIncreaseMultiplier>1.3</ArchiveThresholdIncreaseMultiplier>
-            <MaxGenerationalArchiveAddition>5</MaxGenerationalArchiveAddition>
-            <MaxGenerationsWithoutArchiveAddition>10</MaxGenerationsWithoutArchiveAddition>
-        </NoveltyConfig>
     </InitializationAlgorithmConfig>
 </Config>

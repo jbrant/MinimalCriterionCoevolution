@@ -5,68 +5,25 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml;
 using log4net;
 using log4net.Config;
 using MCC_Domains.BodyBrain.MCCExperiment;
 using MCC_Domains.Utils;
+using Microsoft.EntityFrameworkCore;
 using SharpNeat.Core;
 using SharpNeat.DistanceMetrics;
 using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.EvolutionAlgorithms.ComplexityRegulation;
 using SharpNeat.Genomes.HyperNeat;
 using SharpNeat.Genomes.Neat;
-using SharpNeat.NoveltyArchives;
 using SharpNeat.Phenomes.Voxels;
 using SharpNeat.SpeciationStrategies;
 
 namespace MCC_Domains.BodyBrain.Bootstrappers
 {
-    public class BodyBrainNoveltySearchInitializer : BodyBrainInitializer
+    public class BodyBrainFitnessInitializer : BodyBrainInitializer
     {
         #region Instance variables
-
-        /// <summary>
-        ///     The novelty threshold for incorporation into the novelty archive.
-        /// </summary>
-        private double _archiveAdditionThreshold;
-
-        /// <summary>
-        ///     The proportion by which the bar for entrance to the novelty archive should be lowered.
-        /// </summary>
-        private double _archiveThresholdDecreaseMultiplier;
-
-        /// <summary>
-        ///     The proportion by which the bar for entrance to the novelty archive should be increased.
-        /// </summary>
-        private double _archiveThresholdIncreaseMultiplier;
-
-        /// <summary>
-        ///     The maximum number of generations that are allowed to pass with archive addition before increasing the archive
-        ///     novelty threshold.
-        /// </summary>
-        private int _maxGenerationArchiveAddition;
-
-        /// <summary>
-        ///     The maximum number of generations that are allowed to pass without archive addition before decreasing the archive
-        ///     novelty threshold.
-        /// </summary>
-        private int _maxGenerationsWithoutArchiveAddition;
-
-        /// <summary>
-        ///     The number of neighbors within behavior space against which to assess behavioral novelty.
-        /// </summary>
-        private int _nearestNeighbors;
-
-        /// <summary>
-        ///     The number of individuals to evaluate within a single batch.
-        /// </summary>
-        private int _batchSize;
-
-        /// <summary>
-        ///     The number of batches that are evaluated between evaluating the entire population.
-        /// </summary>
-        private int _populationEvaluationFrequency;
 
         /// <summary>
         ///     The speciation strategy used by the EA.
@@ -84,36 +41,8 @@ namespace MCC_Domains.BodyBrain.Bootstrappers
         private static ILog _executionLogger;
 
         #endregion
-
-        #region Public methods
-
-        /// <summary>
-        ///     Constructs and initializes the body/brain initialization algorithm (which uses steady-state novelty search). In
-        ///     particular, this sets additional novelty search specific configuration parameters.
-        /// </summary>
-        /// <param name="xmlConfig">The XML configuration for the initialization algorithm.</param>
-        /// <param name="experimentName">The name of the experiment being executed.</param>
-        /// <param name="run">The run number of the experiment being executed.</param>
-        /// <param name="isAcyclic">Flag indicating whether the network is acyclic (i.e. does not have recurrent connections).</param>
-        /// <param name="numSuccessfulBrains">The minimum number of brains that must successfully ambulate the body.</param>
-        public override void SetAlgorithmParameters(XmlElement xmlConfig, string experimentName, int run,
-            bool isAcyclic, int numSuccessfulBrains)
-        {
-            // Set the boiler plate MCC parameters and minimal criterions
-            base.SetAlgorithmParameters(xmlConfig, experimentName, run, isAcyclic, numSuccessfulBrains);
-
-            // Read in the novelty archive parameters
-            ExperimentUtils.ReadNoveltyParameters(xmlConfig, out _archiveAdditionThreshold,
-                out _archiveThresholdDecreaseMultiplier, out _archiveThresholdIncreaseMultiplier,
-                out _maxGenerationArchiveAddition, out _maxGenerationsWithoutArchiveAddition);
-
-            // Read in nearest neighbors for behavior distance calculations
-            _nearestNeighbors = XmlUtils.GetValueAsInt(xmlConfig, "NearestNeighbors");
-
-            // Read in steady-state specific parameters
-            _batchSize = XmlUtils.GetValueAsInt(xmlConfig, "OffspringBatchSize");
-            _populationEvaluationFrequency = XmlUtils.GetValueAsInt(xmlConfig, "PopulationEvaluationFrequency");
-        }
+        
+        #region Method overrides
 
         /// <summary>
         ///     Configures and instantiates the initialization algorithm.
@@ -127,9 +56,8 @@ namespace MCC_Domains.BodyBrain.Bootstrappers
         ///     The number of evaluations that preceeded this from which this process will pick up
         ///     (this is used in the case where we're restarting a run because it failed to find a solution in the allotted time).
         /// </param>
-        protected override void InitializeAlgorithm(ParallelOptions parallelOptions, List<NeatGenome> brainGenomeList,
-            IGenomeFactory<NeatGenome> brainGenomeFactory, IGenomeDecoder<NeatGenome, VoxelBrain> brainGenomeDecoder,
-            VoxelBody body, ulong startingEvaluations)
+        protected override void InitializeAlgorithm(ParallelOptions parallelOptions, List<NeatGenome> brainGenomeList, IGenomeFactory<NeatGenome> brainGenomeFactory,
+            IGenomeDecoder<NeatGenome, VoxelBrain> brainGenomeDecoder, VoxelBody body, ulong startingEvaluations)
         {
             // Initialise log4net (log to console and file).
             XmlConfigurator.Configure(LogManager.GetRepository(Assembly.GetEntryAssembly()),
@@ -147,38 +75,31 @@ namespace MCC_Domains.BodyBrain.Bootstrappers
             _complexityRegulationStrategy =
                 ExperimentUtils.CreateComplexityRegulationStrategy(ComplexityRegulationStrategyDefinition,
                     ComplexityThreshold);
-
+            
             // Create the initialization evolution algorithm.
-            InitializationEa = new SteadyStateComplexifyingEvolutionAlgorithm<NeatGenome>(EvolutionAlgorithmParameters,
-                _speciationStrategy, _complexityRegulationStrategy, _batchSize, _populationEvaluationFrequency,
-                RunPhase.Initialization);
+            InitializationEa = new GenerationalComplexifyingEvolutionAlgorithm<NeatGenome>(_speciationStrategy,
+                _complexityRegulationStrategy, RunPhase.Initialization);
             
             // Register initialization EA update event
             InitializationEa.UpdateEvent += UpdateEvent;
 
-            // Create the brain novelty search initialization evaluator
-            var brainEvaluator = new BodyBrainNoveltySearchInitializationEvaluator(body, SimulationProperties,
+            // Create the brain fitness initialization evaluator
+            var brainEvaluator = new BodyBrainFitnessInitializationEvaluator(body, SimulationProperties,
                 MinAmbulationDistance, ExperimentName, Run, startingEvaluations);
-
-            // Create a novelty archive
-            AbstractNoveltyArchive<NeatGenome> archive =
-                new BehavioralNoveltyArchive<NeatGenome>(_archiveAdditionThreshold,
-                    _archiveThresholdDecreaseMultiplier, _archiveThresholdIncreaseMultiplier,
-                    _maxGenerationArchiveAddition, _maxGenerationsWithoutArchiveAddition);
-
+            
             // Create the brain genome evaluator
-            IGenomeEvaluator<NeatGenome> behaviorEvaluator =
-                new ParallelGenomeBehaviorEvaluator<NeatGenome, VoxelBrain>(brainGenomeDecoder, brainEvaluator,
-                    SearchType.NoveltySearch, _nearestNeighbors);
-
+            IGenomeEvaluator<NeatGenome> fitnessEvaluator =
+                new ParallelGenomeFitnessEvaluator<NeatGenome, VoxelBrain>(brainGenomeDecoder, brainEvaluator,
+                    parallelOptions);
+            
             // Only pull the number of genomes from the list equivalent to the initialization algorithm population size
             brainGenomeList = brainGenomeList.Take(PopulationSize).ToList();
-
+            
             // Replace genome factory primary NEAT parameters with initialization parameters
             ((CppnGenomeFactory) brainGenomeFactory).ResetNeatGenomeParameters(NeatGenomeParameters);
-
+            
             // Initialize the evolution algorithm
-            InitializationEa.Initialize(behaviorEvaluator, brainGenomeFactory, brainGenomeList, null, null, archive);
+            InitializationEa.Initialize(fitnessEvaluator, brainGenomeFactory, brainGenomeList, null, null);
         }
 
         /// <summary>
@@ -196,8 +117,7 @@ namespace MCC_Domains.BodyBrain.Bootstrappers
         ///     status logging purposes).
         /// </param>
         /// <returns>The list of seed genomes that meet the minimal criteria.</returns>
-        public override List<NeatGenome> RunEvolution(out ulong totalEvaluations, uint? maxEvaluations,
-            uint restartCount)
+        public override List<NeatGenome> RunEvolution(out ulong totalEvaluations, uint? maxEvaluations, uint restartCount)
         {
             // Create list of viable genomes
             var viableGenomes = new List<NeatGenome>(MinSuccessfulBrainCount);
@@ -253,7 +173,7 @@ namespace MCC_Domains.BodyBrain.Bootstrappers
 
             return viableGenomes;
         }
-
+        
         #endregion
 
         #region Private methods
@@ -266,7 +186,7 @@ namespace MCC_Domains.BodyBrain.Bootstrappers
         private void UpdateEvent(object sender, EventArgs e)
         {
             _executionLogger.Info(
-                $"(Init) Batch={InitializationEa.CurrentGeneration:N0} Evaluations={InitializationEa.CurrentEvaluations:N0} BestDistance={InitializationEa.CurrentChampGenome.EvaluationInfo.Fitness}");
+                $"(Init) Generation={InitializationEa.CurrentGeneration:N0} Evaluations={InitializationEa.CurrentEvaluations:N0} BestDistance={InitializationEa.CurrentChampGenome.EvaluationInfo.Fitness}");
         }
 
         #endregion

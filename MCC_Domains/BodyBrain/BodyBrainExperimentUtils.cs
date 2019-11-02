@@ -36,7 +36,7 @@ namespace MCC_Domains.BodyBrain
             {
                 // TODO: Implement fitness initializer
                 case SearchType.Fitness:
-                    return null;
+                    return new BodyBrainFitnessInitializer();
                 default:
                     return new BodyBrainNoveltySearchInitializer();
             }
@@ -187,11 +187,11 @@ namespace MCC_Domains.BodyBrain
         /// <param name="bodyGenomeId">The unique ID of the body genome being simulated.</param>
         /// <param name="brainGenomeId">The unique ID of the brain genome being simulated.</param>
         /// <returns></returns>
-        public static string ConstructVoxelyzeFilePath(string fileType, string outputDirectory, string experimentName,
+        public static string ConstructVoxelyzeFilePath(string fileType, string extension, string outputDirectory, string experimentName,
             int run, uint bodyGenomeId, uint brainGenomeId)
         {
             return string.Join("/", outputDirectory,
-                $"voxelyze_sim_{fileType}_exp_{experimentName.Replace(" ", "_")}_run_{run}_body_{bodyGenomeId}_brain_{brainGenomeId}.xml");
+                $"voxelyze_sim_{fileType}_exp_{experimentName.Replace(" ", "_")}_run_{run}_body_{bodyGenomeId}_brain_{brainGenomeId}.{extension}");
         }
 
         /// <summary>
