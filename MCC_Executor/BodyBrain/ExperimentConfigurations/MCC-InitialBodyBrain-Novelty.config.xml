@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Config>
-    <MaxInitializationEvaluations>100000</MaxInitializationEvaluations>
+    <MaxBodyInitializationRestarts>2</MaxBodyInitializationRestarts>
+    <MaxBrainInitializationEvaluations>50</MaxBrainInitializationEvaluations>
     <BrainPopulationSize>250</BrainPopulationSize>
     <BodyPopulationSize>50</BodyPopulationSize>
     <BrainSeedGenomeCount>5</BrainSeedGenomeCount>
-    <BodySeedGenomeCount>5</BodySeedGenomeCount>
+    <BodySeedGenomeCount>2</BodySeedGenomeCount>
     <ResourceLimit>5</ResourceLimit>
     <Activation>
         <Scheme>Acyclic</Scheme>
@@ -22,7 +23,7 @@
     <BehaviorConfig>
         <BehaviorCharacterization>End Point</BehaviorCharacterization>
     </BehaviorConfig>
-    <MinAmbulationDistance>10</MinAmbulationDistance>
+    <MinAmbulationDistance>1</MinAmbulationDistance>
     <BrainOffspringBatchSize>40</BrainOffspringBatchSize>
     <BodyOffspringBatchSize>10</BodyOffspringBatchSize>
     <MaxGenerations>200</MaxGenerations>
@@ -34,8 +35,8 @@
         <InitialYDimension>10</InitialYDimension>
         <InitialZDimension>10</InitialZDimension>
         <BrainNetworkConnections>16</BrainNetworkConnections>
-        <MinPercentMaterial>0.10</MinPercentMaterial>
-        <MinPercentActiveMaterial>0.05</MinPercentActiveMaterial>
+        <MinPercentMaterial>0.90</MinPercentMaterial>
+        <MinPercentActiveMaterial>0.25</MinPercentActiveMaterial>
         <SimulatedSeconds>2</SimulatedSeconds>
         <InitializationSeconds>0.5</InitializationSeconds>
         <ActuationsPerSecond>10</ActuationsPerSecond>
@@ -51,9 +52,9 @@
     <InitializationAlgorithmConfig>
         <SearchAlgorithm>Novelty Search</SearchAlgorithm>
         <SelectionAlgorithm>Steady State</SelectionAlgorithm>
-        <PopulationSize>150</PopulationSize>
-        <SpecieCount>15</SpecieCount>
-        <OffspringBatchSize>10</OffspringBatchSize>
+        <PopulationSize>20</PopulationSize>
+        <SpecieCount>5</SpecieCount>
+        <OffspringBatchSize>5</OffspringBatchSize>
         <PopulationEvaluationFrequency>30</PopulationEvaluationFrequency>
         <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>
         <ComplexityThreshold>30</ComplexityThreshold>

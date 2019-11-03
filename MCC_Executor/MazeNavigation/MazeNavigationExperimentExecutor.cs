@@ -192,7 +192,7 @@ namespace MCC_Executor.MazeNavigation
         ///     Populates the execution configuration and checks for any errors in said configuration.
         /// </summary>
         /// <param name="executionArguments">The arguments with which the experiment executor is being invoked.</param>
-        /// <returns>Boolean status indicating whether parsing the configuration suceeded.</returns>
+        /// <returns>Boolean status indicating whether parsing the configuration succeeded.</returns>
         private static bool ParseAndValidateConfiguration(string[] executionArguments)
         {
             var isConfigurationValid = executionArguments != null;
@@ -368,7 +368,7 @@ namespace MCC_Executor.MazeNavigation
             _executionLogger.Error("The experiment executor invocation must take the following form:");
             _executionLogger.Error(
                 string.Format(
-                    "SharpNeatConsole.exe {0}=[{10}] {1}=[{12}] {2}=[{13}] {3}=[{14}] {4}=[{14}] {5}=[{11}] {6}=[{15}] {7}=[{16}] {8}=[{11}] {9}=[{17}]",
+                    "MCC_Executor maze_navigation {0}=[{10}] {1}=[{12}] {2}=[{13}] {3}=[{14}] {4}=[{14}] {5}=[{11}] {6}=[{15}] {7}=[{16}] {8}=[{11}] {9}=[{17}]",
                     ExecutionParameter.ExperimentSource, ExecutionParameter.NumRuns, ExecutionParameter.StartFromRun,
                     ExecutionParameter.ExperimentConfigDirectory, ExecutionParameter.OutputFileDirectory,
                     ExecutionParameter.LogOrganismStateData, ExecutionParameter.SeedAgentFile,

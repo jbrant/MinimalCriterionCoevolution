@@ -1,8 +1,6 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Xml;
 using MCC_Domains.BodyBrain.MCCExperiment;
-using MCC_Domains.Utils;
 using SharpNeat;
 using SharpNeat.Core;
 using SharpNeat.Decoders.Voxel;
@@ -18,41 +16,6 @@ namespace MCC_Domains.BodyBrain
 {
     public class BodyBrainExperiment : BaseBodyBrainExperiment
     {
-        #region Private methods
-
-        /// <summary>
-        ///     Randomly creates new voxel bodies on which to train initial controllers (brains).
-        /// </summary>
-        /// <param name="bodyGenomeFactory">The body genome factory.</param>
-        /// <param name="bodyDecoder">The body decoder to convert genome representation into voxel structure.</param>
-        /// <returns>List of voxel body genomes.</returns>
-        private List<NeatGenome> GenerateBodies(IGenomeFactory<NeatGenome> bodyGenomeFactory,
-            IGenomeDecoder<NeatGenome, VoxelBody> bodyDecoder)
-        {
-            var bodyGenomes = new List<NeatGenome>(BodySeedGenomeCount);
-
-            // Continue generating new body genomes until there are enough to meet the seed count
-            do
-            {
-                // Generate new body genome
-                var bodyGenome = bodyGenomeFactory.CreateGenomeList(1, 0)[0];
-
-                // Decode to voxel body
-                var body = bodyDecoder.Decode(bodyGenome);
-
-                // If body voxel contains the minimum amount of material and muscle voxels, add to the list
-                if (body.ActiveTissueProportion >= SimulationProperties.MinPercentActive &&
-                    body.FullProportion >= SimulationProperties.MinPercentMaterial)
-                {
-                    bodyGenomes.Add(bodyGenome);
-                }
-            } while (bodyGenomes.Count < BodySeedGenomeCount);
-
-            return bodyGenomes;
-        }
-
-        #endregion
-
         #region Public Methods
 
         public override void Initialize(string name, int run, string simConfigDirectory, string simResultsDirectory,
@@ -60,7 +23,7 @@ namespace MCC_Domains.BodyBrain
         {
             // Initialize boiler-plate parameters
             base.Initialize(name, run, simConfigDirectory, simResultsDirectory, simExecutableFile, xmlConfig);
-            
+
             // Initialize the data loggers for the given experiment/run
             _brainEvolutionDataLogger =
                 new FileDataLogger($"{logFileDirectory}\\{name} - Run{run} - BrainEvolution.csv");
@@ -76,12 +39,13 @@ namespace MCC_Domains.BodyBrain
             _bodySimulationTrialDataLogger =
                 new FileDataLogger($"{logFileDirectory}\\{name} - Run{run} - BodyTrials.csv");
             _bodyResourceUsageLogger = new FileDataLogger($"{logFileDirectory}\\{name} - Run{run} - ResourceUsage.csv");
-            
+
             // Create new evolution field elements map with all fields enabled
             _brainLogFieldEnableMap = EvolutionFieldElements.PopulateEvolutionFieldElementsEnableMap();
-            
+
             // Add default evolution logging configuration specific to body-brain experiment
-            foreach (var evolutionLoggingPair in BodyBrainEvolutionFieldElements.PopulateEvolutionFieldElementsEnableMap())
+            foreach (var evolutionLoggingPair in
+                BodyBrainEvolutionFieldElements.PopulateEvolutionFieldElementsEnableMap())
             {
                 _brainLogFieldEnableMap.Add(evolutionLoggingPair.Key, evolutionLoggingPair.Value);
             }
@@ -91,20 +55,20 @@ namespace MCC_Domains.BodyBrain
             {
                 _brainLogFieldEnableMap.Add(populationLoggingPair.Key, populationLoggingPair.Value);
             }
-            
+
             // Add default genome logging configuration
             foreach (var genomeLoggingPair in GenomeFieldElements.PopulateGenomeFieldElementsEnableMap())
             {
                 _brainLogFieldEnableMap.Add(genomeLoggingPair.Key, genomeLoggingPair.Value);
             }
-            
+
             // Add default trial logging configuration
             foreach (var trialLoggingPair in
                 SimulationTrialFieldElements.PopulateSimulationTrialFieldElementsEnableMap())
             {
                 _brainLogFieldEnableMap.Add(trialLoggingPair.Key, trialLoggingPair.Value);
             }
-            
+
             // Disable logging fields not relevant to brain evolution in MCC experiment
             _brainLogFieldEnableMap[EvolutionFieldElements.SpecieCount] = false;
             _brainLogFieldEnableMap[EvolutionFieldElements.AsexualOffspringCount] = false;
@@ -170,9 +134,9 @@ namespace MCC_Domains.BodyBrain
                 [BodyBrainEvolutionFieldElements.MaxPassiveVoxelProportion] = true,
                 [BodyBrainEvolutionFieldElements.MeanPassiveVoxelProportion] = true
             };
-            
+
             // Validate configuration parameter settings
-            if (base.ValidateConfigParameters(out var errorMessagee)) throw new ConfigurationException(errorMessagee);
+            if (ValidateConfigParameters(out var errorMessagee)) throw new ConfigurationException(errorMessagee);
         }
 
         /// <inheritdoc />
@@ -209,6 +173,9 @@ namespace MCC_Domains.BodyBrain
             IGenomeFactory<NeatGenome> brainGenomeFactory, IGenomeFactory<NeatGenome> bodyGenomeFactory,
             List<NeatGenome> brainGenomes, List<NeatGenome> bodyGenomes)
         {
+            List<NeatGenome> seedBodyPopulation;
+            List<NeatGenome> seedBrainPopulation;
+
             // Create the brain genome decoder
             IGenomeDecoder<NeatGenome, VoxelBrain> brainGenomeDecoder = new VoxelBrainDecoder(ActivationScheme,
                 SimulationProperties.InitialXDimension, SimulationProperties.InitialYDimension,
@@ -219,16 +186,21 @@ namespace MCC_Domains.BodyBrain
                 SimulationProperties.InitialXDimension, SimulationProperties.InitialYDimension,
                 SimulationProperties.InitialZDimension);
 
-            // If there are no body genomes, generate them
-            var seedBodyPopulation = bodyGenomes != null && bodyGenomes.Any()
-                ? bodyGenomes
-                : GenerateBodies(bodyGenomeFactory, bodyGenomeDecoder);
-
-            // If there are no brain genomes, pre-evolve them
-            var seedBrainPopulation = brainGenomes != null && brainGenomes.Any()
-                ? brainGenomes
-                : EvolveSeedBrains(seedBodyPopulation, brainGenomeFactory, brainGenomeDecoder, bodyGenomeDecoder,
-                    BrainSeedGenomeCount, ResourceLimit);
+            // If both an initial body and brain population are specified, use them as the seed
+            if (bodyGenomes != null && bodyGenomes.Count >= BodySeedGenomeCount && brainGenomes != null &&
+                brainGenomes.Count >= BrainSeedGenomeCount)
+            {
+                seedBrainPopulation = brainGenomes;
+                seedBodyPopulation = bodyGenomes;
+            }
+            // Otherwise, bodies will need to be generated and brains evolved to solve them
+            else
+            {
+                var bodyBrainTuple = EvolveSeedBodyBrains(bodyGenomeFactory, bodyGenomeDecoder, brainGenomeFactory,
+                    brainGenomeDecoder);
+                seedBodyPopulation = bodyBrainTuple.Item1;
+                seedBrainPopulation = bodyBrainTuple.Item2;
+            }
 
             // Set dummy fitness so that seed bodies will be marked as evaluated
             foreach (var bodyGenome in seedBodyPopulation)
@@ -242,14 +214,12 @@ namespace MCC_Domains.BodyBrain
                 SpecieCount = 0
             };
 
-            // TODO: Add data loggers
             // Create the NEAT EA for brains
             AbstractEvolutionAlgorithm<NeatGenome> brainEvolutionAlgorithm =
                 new QueueEvolutionAlgorithm<NeatGenome>(eaParams, new NeatAlgorithmStats(eaParams), null, null,
                     BrainBatchSize, RunPhase.Primary, _brainEvolutionDataLogger, _brainLogFieldEnableMap,
                     _brainPopulationDataLogger, _brainGenomeDataLogger, _brainSimulationTrialDataLogger);
 
-            // TODO: Add data loggers
             // Create the NEAT EA for bodies
             AbstractEvolutionAlgorithm<NeatGenome> bodyEvolutionAlgorithm =
                 new QueueEvolutionAlgorithm<NeatGenome>(eaParams,
@@ -270,9 +240,6 @@ namespace MCC_Domains.BodyBrain
             IGenomeEvaluator<NeatGenome> brainViabilityEvaluator =
                 new ParallelGenomeBehaviorEvaluator<NeatGenome, VoxelBrain>(brainGenomeDecoder, brainEvaluator,
                     SearchType.MinimalCriteriaSearch, ParallelOptions);
-//            IGenomeEvaluator<NeatGenome> brainViabilityEvaluator =
-//                new SerialGenomeBehaviorEvaluator<NeatGenome, VoxelBrain>(brainGenomeDecoder, brainEvaluator,
-//                    SearchType.MinimalCriteriaSearch);
 
             // Create the body genome evaluator
             IGenomeEvaluator<NeatGenome> bodyViabilityEvaluator =

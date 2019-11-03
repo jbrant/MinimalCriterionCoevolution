@@ -4,7 +4,7 @@
     <BrainPopulationSize>250</BrainPopulationSize>
     <BodyPopulationSize>50</BodyPopulationSize>
     <BrainSeedGenomeCount>5</BrainSeedGenomeCount>
-    <BodySeedGenomeCount>5</BodySeedGenomeCount>
+    <BodySeedGenomeCount>2</BodySeedGenomeCount>
     <ResourceLimit>5</ResourceLimit>
     <Activation>
         <Scheme>Acyclic</Scheme>
@@ -50,7 +50,8 @@
     </VoxelyzeConfig>
     <InitializationAlgorithmConfig>
         <SearchAlgorithm>Fitness</SearchAlgorithm>
-        <PopulationSize>150</PopulationSize>
+        <SelectionAlgorithm>Steady State</SelectionAlgorithm>
+        <PopulationSize>30</PopulationSize>
         <SpecieCount>15</SpecieCount>
         <OffspringBatchSize>10</OffspringBatchSize>
         <PopulationEvaluationFrequency>30</PopulationEvaluationFrequency>

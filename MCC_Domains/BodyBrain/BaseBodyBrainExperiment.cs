@@ -15,6 +15,36 @@ namespace MCC_Domains.BodyBrain
 {
     public abstract class BaseBodyBrainExperiment : IBodyBrainExperiment
     {
+        #region Private methods
+
+        /// <summary>
+        ///     Randomly creates a new voxel body that meets specified tissue constraints.
+        /// </summary>
+        /// <param name="bodyGenomeFactory">The body genome factory.</param>
+        /// <param name="bodyDecoder">The body decoder to convert genome representation into voxel structure.</param>
+        /// <returns>New voxel body that meets specified tissue constraints.</returns>
+        private NeatGenome GenerateBody(IGenomeFactory<NeatGenome> bodyGenomeFactory,
+            IGenomeDecoder<NeatGenome, VoxelBody> bodyDecoder)
+        {
+            do
+            {
+                // Generate new body genome
+                var bodyGenome = bodyGenomeFactory.CreateGenomeList(1, 0)[0];
+
+                // Decode to voxel body
+                var body = bodyDecoder.Decode(bodyGenome);
+
+                // If body voxel contains the minimum amount of material and muscle voxels, add to the list
+                if (body.ActiveTissueProportion >= SimulationProperties.MinPercentActive &&
+                    body.FullProportion >= SimulationProperties.MinPercentMaterial)
+                {
+                    return bodyGenome;
+                }
+            } while (true);
+        }
+
+        #endregion
+
         #region Public properties
 
         /// <inheritdoc />
@@ -119,9 +149,16 @@ namespace MCC_Domains.BodyBrain
         #region Instance variables
 
         /// <summary>
-        ///     The maximum number of evaluations allowed during the initialization phase before it is restarted.
+        ///     The maximum number of brain evolution restarts on a particular, randomly-generated body before it is discarded and
+        ///     another generated.
         /// </summary>
-        private uint? _maxInitializationEvaluations;
+        private int _maxBodyInitializationRestarts;
+
+        /// <summary>
+        ///     The maximum number of initialization evaluations allowed for a population of randomly-generated brains before they
+        ///     are discarded and evolution is restarted.
+        /// </summary>
+        private ulong _maxBrainInitializationEvaluations;
 
         /// <summary>
         ///     Initialization algorithm for producing an initial population with the requisite number of viable genomes.
@@ -186,8 +223,10 @@ namespace MCC_Domains.BodyBrain
             SimulationProperties = BodyBrainExperimentUtils.ReadSimulationProperties(xmlConfig, simConfigDirectory,
                 simResultsDirectory, simExecutableFile);
 
-            // Set the maximum number of initialization evaluations
-            _maxInitializationEvaluations = XmlUtils.GetValueAsUInt(xmlConfig, "MaxInitializationEvaluations");
+            // Set the maximum number of initialization iterations/evaluations
+            _maxBodyInitializationRestarts = XmlUtils.GetValueAsInt(xmlConfig, "MaxBodyInitializationRestarts");
+            _maxBrainInitializationEvaluations =
+                XmlUtils.GetValueAsULong(xmlConfig, "MaxBrainInitializationEvaluations");
 
             // Initialize the initialization algorithm
             _bodyBrainInitializer =
@@ -312,116 +351,130 @@ namespace MCC_Domains.BodyBrain
         }
 
         /// <summary>
-        ///     Evolves the requisite number of brains to the meet the MC for each body in the initial population. This is
-        ///     performed using a non-MCC based algorithm (such as a fitness-based method or novelty search).
+        ///     Randomly generates bodies and evolves brains that can effectively ambulate each body to meet the MC. This is
+        ///     repeated until the requisite number of seed bodies and seed brains is evolved (with one or more brains being able
+        ///     to ambulate each of the bodies). A non-MCC based algorithm (such as fitness or novelty search) is used for this
+        ///     bootstrap process.
         /// </summary>
-        /// <param name="bodyPopulation">
-        ///     The voxel bodies in the initial population (either provided at runtime or randomly
-        ///     generated).
-        /// </param>
+        /// <param name="bodyGenomeFactory">The factory object for producing new CPPNs for the body population.</param>
+        /// <param name="bodyDecoder">The decoder used for converting CPPNs to voxel bodies.</param>
         /// <param name="brainGenomeFactory">The factory object for producing new CPPNs for the brain population.</param>
         /// <param name="brainDecoder">The decoder used for converting CPPNs to brains.</param>
-        /// <param name="bodyDecoder">The decoder used for converting CPPNs to voxel bodies.</param>
-        /// <param name="numBrains">The number of seed brains to evolve.</param>
-        /// <param name="resourceLimit">The resource limit for the body population (optional).</param>
         /// <returns>
-        ///     The list of viable brains, each of whom is able to ambulate at least one of the initial bodies and, in
-        ///     totality, meet the body MC for being ambulated by a given number of brains.
+        ///     A tuple containing a list of bodies (in the first position) and a list of brains (in the second position), with
+        ///     each body being ambulated (such that it and the brain meet the MC) by one or more brains.
         /// </returns>
-        protected List<NeatGenome> EvolveSeedBrains(List<NeatGenome> bodyPopulation,
-            IGenomeFactory<NeatGenome> brainGenomeFactory, IGenomeDecoder<NeatGenome, VoxelBrain> brainDecoder,
-            IGenomeDecoder<NeatGenome, VoxelBody> bodyDecoder, int numBrains, int resourceLimit = int.MaxValue)
+        protected Tuple<List<NeatGenome>, List<NeatGenome>> EvolveSeedBodyBrains(
+            IGenomeFactory<NeatGenome> bodyGenomeFactory, IGenomeDecoder<NeatGenome, VoxelBody> bodyDecoder,
+            IGenomeFactory<NeatGenome> brainGenomeFactory, IGenomeDecoder<NeatGenome, VoxelBrain> brainDecoder)
         {
+            var seedBodyPopulation = new List<NeatGenome>(BodySeedGenomeCount);
             var seedBrainPopulation = new List<NeatGenome>(BrainSeedGenomeCount);
             var bodySolutionCount = new Dictionary<uint, int>();
 
             // Compute the max number of brains that should be added per body to avoid exceeding the brain seed count
-            var perBodyBrainCount = Math.Min(resourceLimit,
-                Convert.ToInt32(Math.Floor((double) numBrains / bodyPopulation.Count)));
+            var perBodyBrainCount = Math.Min(ResourceLimit,
+                Convert.ToInt32(Math.Floor((double) BrainSeedGenomeCount / BodySeedGenomeCount)));
 
-            // Create population of randomly-initialized brain CPPNs
-            var brainPopulation = brainGenomeFactory.CreateGenomeList(BrainInitializationGenomeCount, 0);
-
-            // Loop through every body and evolve the requisite number of viable brains that control it
-            for (var idx = 0; idx < bodyPopulation.Count; idx++)
+            for (var idx = 0; idx < BodySeedGenomeCount; idx++)
             {
-                var bodyId = bodyPopulation[idx].Id;
+                var viableBrainsEvolved = false;
+                var numBodyRestarts = 0;
 
-                // Initialize body solution count to 0
-                bodySolutionCount.Add(bodyId, 0);
-
-                Console.WriteLine($"Evolving viable brains for body population index {idx} with ID {bodyId}");
-
-                // Evolve the number of brains required to meet the success MC for the current body
-                var viableBrains = _bodyBrainInitializer.EvolveViableBrains(brainGenomeFactory,
-                    brainPopulation.ToList(), brainDecoder, bodyDecoder.Decode(bodyPopulation[idx]),
-                    _maxInitializationEvaluations, ActivationScheme, ParallelOptions);
-
-                // Add the viable brain genomes who solve the current body (but avoid adding duplicates,
-                // as identified by the genome ID). It is acceptable for the same brain to control multiple bodies,
-                // so those brains that solve the current body are left in the pool of seed genomes
-                foreach (var viableBrain in viableBrains
-                    .Where(x => seedBrainPopulation.Select(sbp => sbp.Id).Contains(x.Id) == false)
-                    .Take(perBodyBrainCount))
+                do
                 {
-                    // Increment the number of body solutions
-                    bodySolutionCount[bodyId]++;
+                    // Generate new body
+                    var body = GenerateBody(bodyGenomeFactory, bodyDecoder);
+
+                    // Extract the body ID
+                    var bodyId = body.Id;
+
+                    // Create population of randomly-initialized brain CPPNs
+                    var brainPopulation = brainGenomeFactory.CreateGenomeList(BrainInitializationGenomeCount, 0);
+
+                    Console.WriteLine($"Evolving viable brains for body population index {idx} with ID {bodyId}");
+
+                    // Evolve the number of brains required to meet the success MC for the current body
+                    var viableBrains = _bodyBrainInitializer.EvolveViableBrains(brainGenomeFactory,
+                        brainPopulation.ToList(), brainDecoder, bodyDecoder.Decode(body),
+                        _maxBrainInitializationEvaluations, ParallelOptions, _maxBodyInitializationRestarts);
+
+                    // Proceed to the next iteration if no solutions were evolved
+                    if (viableBrains == null)
+                    {
+                        // Increment restarts
+                        numBodyRestarts++;
+
+                        Console.WriteLine(
+                            $"Restarting evolution [{numBodyRestarts}] times for body index [{idx}]");
+
+                        continue;
+                    }
+
+                    viableBrainsEvolved = true;
+
+                    // Add body genome to the seed body population
+                    seedBodyPopulation.Add(body);
+
+                    // Add body to dictionary of bodies with solutions and initialize solution count to 0
+                    bodySolutionCount.Add(bodyId, 0);
+
+                    // Add the viable brain genomes who solve the current body (but avoid adding duplicates,
+                    // as identified by the genome ID). It is acceptable for the same brain to control multiple bodies,
+                    // so those brains that solve the current body are left in the pool of seed genomes
+                    foreach (var viableBrain in viableBrains
+                        .Where(x => seedBrainPopulation.Select(sbp => sbp.Id).Contains(x.Id) == false)
+                        .Take(perBodyBrainCount))
+                    {
+                        // Increment the number of body solutions
+                        bodySolutionCount[bodyId]++;
+
+                        // Add viable brain to the population
+                        seedBrainPopulation.Add(viableBrain);
+                    }
+                } while (!viableBrainsEvolved);
+            }
+
+            // If we still lack the genomes to fill out seed brain genome count while still satisfying the body MC,
+            // iteratively pick a random body and evolve brains on that body until the requisite number is reached
+            while (seedBrainPopulation.Count < BrainSeedGenomeCount)
+            {
+                var rndBodyPicker = RandomDefaults.CreateRandomSource();
+
+                // Compute the amount remaining to fill out the brain seed count
+                var brainsRemaining = BrainSeedGenomeCount - seedBrainPopulation.Count;
+
+                // Restrict to bodies that are still under their resource limit
+                var bodiesUnderResourceLimit =
+                    seedBodyPopulation.Where(x => bodySolutionCount[x.Id] < ResourceLimit).ToList();
+
+                // Pick a random body on which to evolve brains
+                var bodyGenome = bodiesUnderResourceLimit[rndBodyPicker.Next(bodiesUnderResourceLimit.Count - 1)];
+
+                // Get max number of brains that can be added for body (we don't want to exceed the brain seed size)
+                var maxSolutions = Math.Min(ResourceLimit - bodySolutionCount[bodyGenome.Id], brainsRemaining);
+
+                Console.WriteLine(
+                    $"Continuing viable brain evolution on body {bodyGenome.Id}, with {seedBrainPopulation.Count} of {BrainSeedGenomeCount} required brains in place");
+
+                // Evolve the number of brains required to meet the success MC for the body
+                var viableBodyBrains = _bodyBrainInitializer.EvolveViableBrains(brainGenomeFactory,
+                    brainGenomeFactory.CreateGenomeList(BrainInitializationGenomeCount, 0), brainDecoder,
+                    bodyDecoder.Decode(bodyGenome), _maxBrainInitializationEvaluations, ParallelOptions);
+
+                // Iterate through each viable brain and remove them if they've already solved a body
+                // or add them to the list of viable brains if they have not
+                foreach (var viableBrain in viableBodyBrains.Take(maxSolutions))
+                {
+                    // Increment number of body solutions
+                    bodySolutionCount[bodyGenome.Id]++;
 
                     // Add viable brain to the population
                     seedBrainPopulation.Add(viableBrain);
                 }
             }
 
-            // If we still lack the genomes to fill out seed brain genome count while still satisfying the body MC,
-            // iteratively pick a random body and evolve brains on that body until the requisite number is reached
-            while (seedBrainPopulation.Count < numBrains)
-            {
-                var rndBodyPicker = RandomDefaults.CreateRandomSource();
-
-                // Compute the amount remaining to fill out the brain seed count
-                var brainsRemaining = numBrains - seedBrainPopulation.Count;
-
-                // Restrict to bodies that are still under their resource limit
-                var bodiesUnderResourceLimit =
-                    bodyPopulation.Where(x => bodySolutionCount[x.Id] < resourceLimit).ToList();
-
-                // Pick a random body on which to evolve brains
-                var bodyGenome = bodiesUnderResourceLimit[rndBodyPicker.Next(bodiesUnderResourceLimit.Count - 1)];
-
-                // Get max number of brains that can be added for body (we don't want to exceed the brain seed size)
-                var maxSolutions = Math.Min(resourceLimit - bodySolutionCount[bodyGenome.Id], brainsRemaining);
-
-                Console.WriteLine(
-                    $"Continuing viable brain evolution on body {bodyGenome.Id}, with {seedBrainPopulation.Count} of {numBrains} required brains in place");
-
-                // Evolve the number of brains required to meet the success MC for the body
-                var viableBodyBrains = _bodyBrainInitializer.EvolveViableBrains(brainGenomeFactory,
-                    brainPopulation.ToList(), brainDecoder, bodyDecoder.Decode(bodyGenome),
-                    _maxInitializationEvaluations, ActivationScheme, ParallelOptions);
-
-                // Iterate through each viable brain and remove them if they've already solved a body
-                // or add them to the list of viable brains if they have not
-                foreach (var viableBrain in viableBodyBrains.Take(maxSolutions))
-                {
-                    // If the brain has already solved the body maze and is in the list of viable brains,
-                    // remove that brain from the pool of seed genomes (this is done because here, we're interested
-                    // in getting unique brains and want to avoid an endless loop wherein the same viable brains
-                    // are returned)
-                    if (seedBrainPopulation.Select(x => x.Id).Contains(viableBrain.Id))
-                        brainPopulation.Remove(viableBrain);
-                    // Otherwise, add that brain to the list of viable brains
-                    else
-                    {
-                        // Increment number of body solutions
-                        bodySolutionCount[bodyGenome.Id]++;
-
-                        // Add viable brain to the population
-                        seedBrainPopulation.Add(viableBrain);
-                    }
-                }
-            }
-
-            return seedBrainPopulation;
+            return new Tuple<List<NeatGenome>, List<NeatGenome>>(seedBodyPopulation, seedBrainPopulation);
         }
 
         /// <summary>

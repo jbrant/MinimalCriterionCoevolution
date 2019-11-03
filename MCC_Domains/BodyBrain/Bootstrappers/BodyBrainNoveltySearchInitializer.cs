@@ -59,16 +59,6 @@ namespace MCC_Domains.BodyBrain.Bootstrappers
         private int _nearestNeighbors;
 
         /// <summary>
-        ///     The number of individuals to evaluate within a single batch.
-        /// </summary>
-        private int _batchSize;
-
-        /// <summary>
-        ///     The number of batches that are evaluated between evaluating the entire population.
-        /// </summary>
-        private int _populationEvaluationFrequency;
-
-        /// <summary>
         ///     The speciation strategy used by the EA.
         /// </summary>
         private ISpeciationStrategy<NeatGenome> _speciationStrategy;
@@ -109,10 +99,6 @@ namespace MCC_Domains.BodyBrain.Bootstrappers
 
             // Read in nearest neighbors for behavior distance calculations
             _nearestNeighbors = XmlUtils.GetValueAsInt(xmlConfig, "NearestNeighbors");
-
-            // Read in steady-state specific parameters
-            _batchSize = XmlUtils.GetValueAsInt(xmlConfig, "OffspringBatchSize");
-            _populationEvaluationFrequency = XmlUtils.GetValueAsInt(xmlConfig, "PopulationEvaluationFrequency");
         }
 
         /// <summary>
@@ -148,11 +134,18 @@ namespace MCC_Domains.BodyBrain.Bootstrappers
                 ExperimentUtils.CreateComplexityRegulationStrategy(ComplexityRegulationStrategyDefinition,
                     ComplexityThreshold);
 
-            // Create the initialization evolution algorithm.
-            InitializationEa = new SteadyStateComplexifyingEvolutionAlgorithm<NeatGenome>(EvolutionAlgorithmParameters,
-                _speciationStrategy, _complexityRegulationStrategy, _batchSize, _populationEvaluationFrequency,
-                RunPhase.Initialization);
-            
+            // Create the initialization evolution algorithm
+            if (IsGenerational)
+            {
+                InitializationEa = new GenerationalComplexifyingEvolutionAlgorithm<NeatGenome>(_speciationStrategy,
+                    _complexityRegulationStrategy, RunPhase.Initialization);
+            }
+            else
+            {
+                InitializationEa = new SteadyStateComplexifyingEvolutionAlgorithm<NeatGenome>(_speciationStrategy,
+                    _complexityRegulationStrategy, BatchSize, PopulationEvaluationFrequency, RunPhase.Initialization);
+            }
+
             // Register initialization EA update event
             InitializationEa.UpdateEvent += UpdateEvent;
 
@@ -186,7 +179,6 @@ namespace MCC_Domains.BodyBrain.Bootstrappers
         ///     minimal criteria) are evolved, and returns those genomes along with the total number of evaluations that were
         ///     executed to discover them.
         /// </summary>
-        /// <param name="totalEvaluations">The total number of evaluations required to evolve the seed genomes.</param>
         /// <param name="maxEvaluations">
         ///     The maximum number of evaluations that can be executed before the initialization process
         ///     is restarted.  This prevents getting stuck for a long time and/or ending up with unnecessarily complex networks.
@@ -196,8 +188,7 @@ namespace MCC_Domains.BodyBrain.Bootstrappers
         ///     status logging purposes).
         /// </param>
         /// <returns>The list of seed genomes that meet the minimal criteria.</returns>
-        public override List<NeatGenome> RunEvolution(out ulong totalEvaluations, uint? maxEvaluations,
-            uint restartCount)
+        public override List<NeatGenome> RunEvolution(ulong maxEvaluations, int restartCount)
         {
             // Create list of viable genomes
             var viableGenomes = new List<NeatGenome>(MinSuccessfulBrainCount);
@@ -217,9 +208,6 @@ namespace MCC_Domains.BodyBrain.Bootstrappers
                 {
                     if (InitializationEa.CurrentEvaluations >= maxEvaluations)
                     {
-                        // Record the total number of evaluations
-                        totalEvaluations = InitializationEa.CurrentEvaluations;
-
                         // Halt the EA worker thread
                         InitializationEa.RequestPauseAndWait();
 
@@ -248,9 +236,6 @@ namespace MCC_Domains.BodyBrain.Bootstrappers
                     $"Extracted [{viableGenomes.Count}] of [{MinSuccessfulBrainCount}] required viable genomes in [{InitializationEa.CurrentEvaluations}] evaluations");
             } while (viableGenomes.Count < MinSuccessfulBrainCount);
 
-            // Set the total number of evaluations that were executed as part of the initialization process
-            totalEvaluations = InitializationEa.CurrentEvaluations;
-
             return viableGenomes;
         }
 
@@ -266,7 +251,7 @@ namespace MCC_Domains.BodyBrain.Bootstrappers
         private void UpdateEvent(object sender, EventArgs e)
         {
             _executionLogger.Info(
-                $"(Init) Batch={InitializationEa.CurrentGeneration:N0} Evaluations={InitializationEa.CurrentEvaluations:N0} BestDistance={InitializationEa.CurrentChampGenome.EvaluationInfo.Fitness}");
+                $"(Init) Batch={InitializationEa.CurrentGeneration:N0} Evaluations={InitializationEa.CurrentEvaluations:N0} BestBehavioralDistance={InitializationEa.CurrentChampGenome.EvaluationInfo.Fitness:N6} BestDistanceTraveled={InitializationEa.GenomeList.Max(x => x.EvaluationInfo.TrialData[0].ObjectiveDistance):N6}");
         }
 
         #endregion
