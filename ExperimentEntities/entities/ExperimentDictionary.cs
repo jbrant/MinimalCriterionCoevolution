@@ -132,7 +132,7 @@ namespace ExperimentEntities.entities
         public bool? Primary_SpecieSizeFixed { get; set; }
         public bool? Primary_Maze_SpecieSizeFixed { get; set; }
         public int NumSeedAgentGenomes { get; set; }
-        public int? NumSeedMazeGenomes { get; set; }
+        public int? NumSeedEnvironmentGenomes { get; set; }
         public double? Primary_Maze_MutateDeleteWallProbability { get; set; }
         public double? Primary_Maze_MutatePathWaypointLocationProbability { get; set; }
         public double? Primary_Maze_MutateAddPathWaypointProbability { get; set; }
