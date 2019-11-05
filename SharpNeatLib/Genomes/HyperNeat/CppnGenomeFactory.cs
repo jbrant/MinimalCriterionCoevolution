@@ -17,6 +17,7 @@
  * along with SharpNEAT.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using SharpNeat.Core;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Network;
 using SharpNeat.Utility;
@@ -31,42 +32,46 @@ namespace SharpNeat.Genomes.HyperNeat
         #region Constructors
 
         /// <summary>
-        /// Constructs with default NeatGenomeParameters, ID generators initialized to zero and a
-        /// default IActivationFunctionLibrary.
+        /// Constructs with default NeatGenomeParameters, ID generators initialized to zero, a default
+        /// IActivationFunctionLibrary and genome validator.
         /// </summary>
-        public CppnGenomeFactory(int inputNeuronCount, int outputNeuronCount)
-            : base(inputNeuronCount, outputNeuronCount, DefaultActivationFunctionLibrary.CreateLibraryCppn())
+        public CppnGenomeFactory(int inputNeuronCount, int outputNeuronCount,
+            IGenomeValidator<NeatGenome> genomeValidator = null)
+            : base(inputNeuronCount, outputNeuronCount, DefaultActivationFunctionLibrary.CreateLibraryCppn(),
+                genomeValidator)
         {
         }
 
         /// <summary>
-        /// Constructs with default NeatGenomeParameters, ID generators initialized to zero and the
-        /// provided IActivationFunctionLibrary.
+        /// Constructs with default NeatGenomeParameters, ID generators initialized to zero, the provided
+        /// IActivationFunctionLibrary and the genome validator.
         /// </summary>
         public CppnGenomeFactory(int inputNeuronCount, int outputNeuronCount,
-                                 IActivationFunctionLibrary activationFnLibrary)
-            : base(inputNeuronCount, outputNeuronCount, activationFnLibrary)
+            IActivationFunctionLibrary activationFnLibrary, IGenomeValidator<NeatGenome> genomeValidator = null) 
+            : base(inputNeuronCount, outputNeuronCount, activationFnLibrary, genomeValidator)
         {
         }
 
         /// <summary>
-        /// Constructs with the provided IActivationFunctionLibrary and NeatGenomeParameters.
+        /// Constructs with the provided IActivationFunctionLibrary, NeatGenomeParameters and genome validator.
         /// </summary>
         public CppnGenomeFactory(int inputNeuronCount, int outputNeuronCount,
-                                 IActivationFunctionLibrary activationFnLibrary,
-                                 NeatGenomeParameters neatGenomeParams)
-            : base(inputNeuronCount,outputNeuronCount, activationFnLibrary, neatGenomeParams)
+            IActivationFunctionLibrary activationFnLibrary, NeatGenomeParameters neatGenomeParams,
+            IGenomeValidator<NeatGenome> genomeValidator = null)
+            : base(inputNeuronCount, outputNeuronCount, activationFnLibrary, neatGenomeParams, genomeValidator)
         {
         }
 
         /// <summary>
-        /// Constructs with the provided IActivationFunctionLibrary, NeatGenomeParameters and ID generators.
+        /// Constructs with the provided IActivationFunctionLibrary, NeatGenomeParameters, ID generators
+        /// and genome validator.
         /// </summary>
         public CppnGenomeFactory(int inputNeuronCount, int outputNeuronCount,
-                                 IActivationFunctionLibrary activationFnLibrary,
-                                 NeatGenomeParameters neatGenomeParams,
-                                 UInt32IdGenerator genomeIdGenerator, UInt32IdGenerator innovationIdGenerator)
-            : base(inputNeuronCount, outputNeuronCount, activationFnLibrary, neatGenomeParams, genomeIdGenerator, innovationIdGenerator)
+            IActivationFunctionLibrary activationFnLibrary, NeatGenomeParameters neatGenomeParams,
+            UInt32IdGenerator genomeIdGenerator, UInt32IdGenerator innovationIdGenerator,
+            IGenomeValidator<NeatGenome> genomeValidator = null)
+            : base(inputNeuronCount, outputNeuronCount, activationFnLibrary, neatGenomeParams, genomeIdGenerator,
+                innovationIdGenerator, genomeValidator)
         {
         }
 

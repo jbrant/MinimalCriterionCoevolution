@@ -65,42 +65,25 @@ namespace SharpNeat.Genomes.Neat
         /// <summary>Activation function library associated with this factory.</summary>
         protected readonly IActivationFunctionLibrary _activationFnLibrary;
 
+        private readonly IGenomeValidator<NeatGenome> _genomeValidator;
+        
         #region Constructors [NEAT]
 
         /// <summary>
         /// Constructs with default NeatGenomeParameters and ID generators initialized to zero.
         /// </summary>
-        public NeatGenomeFactory(int inputNeuronCount, int outputNeuronCount)
+        public NeatGenomeFactory(int inputNeuronCount, int outputNeuronCount) : this(inputNeuronCount,
+            outputNeuronCount, new NeatGenomeParameters())
         {
-            _inputNeuronCount = inputNeuronCount;
-            _outputNeuronCount = outputNeuronCount;
-
-            _neatGenomeParamsCurrent = new NeatGenomeParameters();
-            _neatGenomeParamsComplexifying = _neatGenomeParamsCurrent;
-            _neatGenomeParamsSimplifying = NeatGenomeParameters.CreateSimplifyingParameters(_neatGenomeParamsComplexifying);
-
-            _genomeIdGenerator = new UInt32IdGenerator();
-            _innovationIdGenerator = new UInt32IdGenerator();
-
-            _activationFnLibrary = DefaultActivationFunctionLibrary.CreateLibraryNeat(_neatGenomeParamsCurrent.ActivationFn);
         }
 
         /// <summary>
         /// Constructs a NeatGenomeFactory with the provided NeatGenomeParameters and ID generators initialized to zero.
         /// </summary>
         public NeatGenomeFactory(int inputNeuronCount, int outputNeuronCount,
-                                 NeatGenomeParameters neatGenomeParams)
+            NeatGenomeParameters neatGenomeParams) : this(inputNeuronCount, outputNeuronCount, neatGenomeParams,
+            new UInt32IdGenerator(), new UInt32IdGenerator())
         {
-            _inputNeuronCount = inputNeuronCount;
-            _outputNeuronCount = outputNeuronCount;
-            _activationFnLibrary = DefaultActivationFunctionLibrary.CreateLibraryNeat(neatGenomeParams.ActivationFn);
-
-            _neatGenomeParamsCurrent = neatGenomeParams;
-            _neatGenomeParamsComplexifying = _neatGenomeParamsCurrent;
-            _neatGenomeParamsSimplifying = NeatGenomeParameters.CreateSimplifyingParameters(_neatGenomeParamsComplexifying);
-
-            _genomeIdGenerator = new UInt32IdGenerator();
-            _innovationIdGenerator = new UInt32IdGenerator();
         }
 
         /// <summary>
@@ -133,18 +116,9 @@ namespace SharpNeat.Genomes.Neat
         /// This overload required for CPPN support.
         /// </summary>
         public NeatGenomeFactory(int inputNeuronCount, int outputNeuronCount,
-                                 IActivationFunctionLibrary activationFnLibrary)
+            IActivationFunctionLibrary activationFnLibrary, IGenomeValidator<NeatGenome> genomeValidator = null) : this(
+            inputNeuronCount, outputNeuronCount, activationFnLibrary, new NeatGenomeParameters(), genomeValidator)
         {
-            _inputNeuronCount = inputNeuronCount;
-            _outputNeuronCount = outputNeuronCount;
-            _activationFnLibrary = activationFnLibrary;
-
-            _neatGenomeParamsCurrent = new NeatGenomeParameters();
-            _neatGenomeParamsComplexifying = _neatGenomeParamsCurrent;
-            _neatGenomeParamsSimplifying = NeatGenomeParameters.CreateSimplifyingParameters(_neatGenomeParamsComplexifying);
-
-            _genomeIdGenerator = new UInt32IdGenerator();
-            _innovationIdGenerator = new UInt32IdGenerator();
         }
 
         /// <summary>
@@ -152,20 +126,12 @@ namespace SharpNeat.Genomes.Neat
         /// IActivationFunctionLibrary and NeatGenomeParameters.
         /// This overload required for CPPN support.
         /// </summary>
-        public NeatGenomeFactory(int inputNeuronCount, int outputNeuronCount, 
-                                 IActivationFunctionLibrary activationFnLibrary,
-                                 NeatGenomeParameters neatGenomeParams)
+        public NeatGenomeFactory(int inputNeuronCount, int outputNeuronCount,
+            IActivationFunctionLibrary activationFnLibrary,
+            NeatGenomeParameters neatGenomeParams, IGenomeValidator<NeatGenome> genomeValidator = null) : this(
+            inputNeuronCount, outputNeuronCount, activationFnLibrary, neatGenomeParams, new UInt32IdGenerator(),
+            new UInt32IdGenerator(), genomeValidator)
         {
-            _inputNeuronCount = inputNeuronCount;
-            _outputNeuronCount = outputNeuronCount;
-            _activationFnLibrary = activationFnLibrary;
-
-            _neatGenomeParamsCurrent = neatGenomeParams;
-            _neatGenomeParamsComplexifying = _neatGenomeParamsCurrent;
-            _neatGenomeParamsSimplifying = NeatGenomeParameters.CreateSimplifyingParameters(_neatGenomeParamsComplexifying);
-
-            _genomeIdGenerator = new UInt32IdGenerator();
-            _innovationIdGenerator = new UInt32IdGenerator();
         }
 
         /// <summary>
@@ -177,7 +143,8 @@ namespace SharpNeat.Genomes.Neat
                                  IActivationFunctionLibrary activationFnLibrary,
                                  NeatGenomeParameters neatGenomeParams,
                                  UInt32IdGenerator genomeIdGenerator,
-                                 UInt32IdGenerator innovationIdGenerator)
+                                 UInt32IdGenerator innovationIdGenerator, 
+                                 IGenomeValidator<NeatGenome> genomeValidator = null)
         {
             _inputNeuronCount = inputNeuronCount;
             _outputNeuronCount = outputNeuronCount;
@@ -189,6 +156,7 @@ namespace SharpNeat.Genomes.Neat
 
             _genomeIdGenerator = genomeIdGenerator;
             _innovationIdGenerator = innovationIdGenerator;
+            _genomeValidator = genomeValidator;
         }
 
         #endregion
@@ -247,12 +215,22 @@ namespace SharpNeat.Genomes.Neat
         {   
             List<NeatGenome> genomeList = new List<NeatGenome>(length);
             for(int i=0; i<length; i++)
-            {   // We reset the innovation ID to zero so that all created genomes use the same 
-                // innovation IDs for matching neurons and connections. This isn't a strict requirement but
-                // throughout the SharpNeat code we attempt to use the same innovation ID for like structures
-                // to improve the effectiveness of sexual reproduction.
-                _innovationIdGenerator.Reset();
-                genomeList.Add(CreateGenome(birthGeneration));
+            {
+                NeatGenome genome;
+                
+                // Create new random random genome until the generated phenome is valid
+                do
+                {
+                    // We reset the innovation ID to zero so that all created genomes use the same 
+                    // innovation IDs for matching neurons and connections. This isn't a strict requirement but
+                    // throughout the SharpNeat code we attempt to use the same innovation ID for like structures
+                    // to improve the effectiveness of sexual reproduction.
+                    _innovationIdGenerator.Reset();
+                    genome = CreateGenome(birthGeneration);
+                    
+                } while (IsGeneratedPhenomeValid(genome) == false);
+                
+                genomeList.Add(genome);
             }
             return genomeList;
         }
@@ -340,7 +318,7 @@ namespace SharpNeat.Genomes.Neat
         /// </summary>
         /// <param name="birthGeneration">The current evolution algorithm generation. 
         /// Assigned to the new genome as its birth generation.</param>
-        public NeatGenome CreateGenome(uint birthGeneration)
+        private NeatGenome CreateGenome(uint birthGeneration)
         {   
             NeuronGeneList neuronGeneList = new NeuronGeneList(_inputNeuronCount + _outputNeuronCount);
             NeuronGeneList inputNeuronGeneList = new NeuronGeneList(_inputNeuronCount); // includes single bias neuron.
@@ -613,6 +591,16 @@ namespace SharpNeat.Genomes.Neat
             _neatGenomeParamsComplexifying = _neatGenomeParamsCurrent;
             _neatGenomeParamsSimplifying =
                 NeatGenomeParameters.CreateSimplifyingParameters(_neatGenomeParamsComplexifying);
+        }
+
+        /// <summary>
+        /// Accepts a genome and calls the underlying genome validator method to determine if the phenome generated from the given genome is valid.
+        /// </summary>
+        /// <param name="genome">The genome to validate.</param>
+        /// <returns>Boolean indicator of whether the phenome created from the given genome is valid.</returns>
+        public bool IsGeneratedPhenomeValid(NeatGenome genome)
+        {
+            return _genomeValidator == null || _genomeValidator.IsGenomeValid(genome);
         }
 
         #endregion

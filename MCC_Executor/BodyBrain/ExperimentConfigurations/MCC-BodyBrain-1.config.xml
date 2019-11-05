@@ -25,7 +25,7 @@
     </BehaviorConfig>
     <MinAmbulationDistance>5</MinAmbulationDistance>
     <BrainOffspringBatchSize>30</BrainOffspringBatchSize>
-    <BodyOffspringBatchSize>10</BodyOffspringBatchSize>
+    <BodyOffspringBatchSize>6</BodyOffspringBatchSize>
     <MaxGenerations>2000</MaxGenerations>
     <NumBodiesSolvedCriteria>1</NumBodiesSolvedCriteria>
     <NumBrainsSolvedCriteria>1</NumBrainsSolvedCriteria>
@@ -35,8 +35,8 @@
         <InitialYDimension>10</InitialYDimension>
         <InitialZDimension>10</InitialZDimension>
         <BrainNetworkConnections>16</BrainNetworkConnections>
-        <MinPercentMaterial>0.90</MinPercentMaterial>
-        <MinPercentActiveMaterial>0.25</MinPercentActiveMaterial>
+        <MinPercentMaterial>0.10</MinPercentMaterial>
+        <MinPercentActiveMaterial>0.05</MinPercentActiveMaterial>
         <SimulatedSeconds>2</SimulatedSeconds>
         <InitializationSeconds>0.5</InitializationSeconds>
         <ActuationsPerSecond>10</ActuationsPerSecond>

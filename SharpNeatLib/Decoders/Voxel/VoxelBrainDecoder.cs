@@ -5,18 +5,35 @@ using SharpNeat.Phenomes.Voxels;
 
 namespace SharpNeat.Decoders.Voxel
 {
+    /// <summary>
+    ///     The voxel brain decoder decodes a given CPPN genome into a CPPN graph structure, which queries each position on the
+    ///     voxel substrate and produces voxel-specific neurocontrollers.
+    /// </summary>
     public class VoxelBrainDecoder : VoxelDecoder, IGenomeDecoder<NeatGenome, VoxelBrain>
     {
         #region Instance variables
 
+        /// <summary>
+        ///     The number of connections in the CPPN controller network.
+        /// </summary>
         private readonly int _numConnections;
 
         #endregion
-        
+
         #region Constructors
 
-        public VoxelBrainDecoder(NetworkActivationScheme activationScheme, int x, int y, int z, int numConnections) : base(activationScheme,
-            x, y, z)
+        /// <summary>
+        ///     Constructor which accepts the chosen network activation scheme, along with the voxel body dimensions and number of
+        ///     voxel controller connections.
+        /// </summary>
+        /// <param name="activationScheme">The CPPN activation scheme.</param>
+        /// <param name="x">The length of the X-axis on the voxel lattice.</param>
+        /// <param name="y">The length of the Y-axis on the voxel lattice.</param>
+        /// <param name="z">The length of the Z-axis on the voxel lattice.</param>
+        /// <param name="numConnections">The number of connections in the voxel-specific neurocontrollers.</param>
+        public VoxelBrainDecoder(NetworkActivationScheme activationScheme, int x, int y, int z, int numConnections) :
+            base(activationScheme,
+                x, y, z)
         {
             _numConnections = numConnections;
         }
@@ -25,6 +42,13 @@ namespace SharpNeat.Decoders.Voxel
 
         #region IGenomeDecoder members
 
+        /// <summary>
+        ///     Decodes a given CPPN genome into the corresponding graph representation, then queries each position on the voxel
+        ///     substrate to produce a separate neural network controller for each voxel, along with its respective connection
+        ///     weights.
+        /// </summary>
+        /// <param name="genome">The CPPN genome to decode and query the voxel substrate.</param>
+        /// <returns>The per-voxel neural networks produced by querying the substrate with the decoded CPPN genome.</returns>
         public VoxelBrain Decode(NeatGenome genome)
         {
             IList<IList<double>> layerwiseBrainWeights = new List<IList<double>>(Z);
@@ -51,7 +75,7 @@ namespace SharpNeat.Decoders.Voxel
                         inputSignalArr[0] = k; // X coordinate
                         inputSignalArr[1] = j; // Y coordinate
                         inputSignalArr[2] = i; // Z coordinate
-                        inputSignalArr[3] = _distanceMatrix[k, j, i]; // distance
+                        inputSignalArr[3] = DistanceMatrix[k, j, i]; // distance
 
                         // Reset from prior network activations
                         cppn.ResetState();
@@ -62,7 +86,7 @@ namespace SharpNeat.Decoders.Voxel
                         // Add synapse weights to the list of weights for the layer
                         // _numConnections is multiplied by 2 because for each connection, we have a flag indicating
                         // whether it is expressed in the phenotype, along with its weight
-                        for (var idx = 0; idx < _numConnections*2; idx += 2)
+                        for (var idx = 0; idx < _numConnections * 2; idx += 2)
                         {
                             // If connection is enabled, set weight to either -1 or 1 depending on polarization;
                             // otherwise, connection is disabled so set weight to 0

@@ -3,10 +3,24 @@ using System.Linq;
 
 namespace SharpNeat.Utility
 {
+    /// <summary>
+    ///     Utility class that encapsulates voxel-specific computations, transformations and manipulations.
+    /// </summary>
     public static class VoxelUtils
     {
         #region Helper methods
 
+        /// <summary>
+        ///     Computes a rank 3 tensor consisting of each voxel's distance to the voxel structure center-of-mass (geometric
+        ///     centroid).
+        /// </summary>
+        /// <param name="x">The length of the X-axis on the voxel lattice.</param>
+        /// <param name="y">The length of the Y-axis on the voxel lattice.</param>
+        /// <param name="z">The length of the Z-axis on the voxel lattice.</param>
+        /// <returns>
+        ///     The rank 3 tensor consisting of each voxel's distance to the voxel structure center-of-mass (geometric
+        ///     centroid).
+        /// </returns>
         public static double[,,] ComputeVoxelDistanceMatrix(int lengthX, int lengthY, int lengthZ)
         {
             var xMatrix = new double[lengthX, lengthY, lengthZ];
@@ -57,6 +71,11 @@ namespace SharpNeat.Utility
 
         #region Internal helper methods
 
+        /// <summary>
+        ///     Normalizes the voxel distance matrix by scaling each distance value by the min/max distance boundaries.
+        /// </summary>
+        /// <param name="matrix">The voxel distance matrix to normalize.</param>
+        /// <returns>The normalized (i.e. scaled by min/max boundaries) voxel distance matrix.</returns>
         private static double[,,] NormalizeMatrix(double[,,] matrix)
         {
             // Instantiate new normalized matrix of equivalent dimensionality

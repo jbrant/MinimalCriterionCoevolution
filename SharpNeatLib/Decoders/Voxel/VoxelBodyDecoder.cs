@@ -5,10 +5,23 @@ using SharpNeat.Phenomes.Voxels;
 
 namespace SharpNeat.Decoders.Voxel
 {
+    /// <summary>
+    ///     The voxel body decoder decodes a given CPPN genome into a CPPN graph structure, which queries each position on the
+    ///     voxel substrate and produces voxel existence and material properties (i.e. passive or active) for each position in
+    ///     the voxel lattice.
+    /// </summary>
     public class VoxelBodyDecoder : VoxelDecoder, IGenomeDecoder<NeatGenome, VoxelBody>
     {
         #region Constructors
 
+        /// <summary>
+        ///     Constructor which accepts the chosen network activation scheme, along with the voxel body dimensions, and passes
+        ///     them to the parent decoder.
+        /// </summary>
+        /// <param name="activationScheme">The CPPN activation scheme.</param>
+        /// <param name="x">The length of the X-axis on the voxel lattice.</param>
+        /// <param name="y">The length of the Y-axis on the voxel lattice.</param>
+        /// <param name="z">The length of the Z-axis on the voxel lattice.</param>
         public VoxelBodyDecoder(NetworkActivationScheme activationScheme, int x, int y, int z) : base(activationScheme,
             x, y, z)
         {
@@ -16,6 +29,12 @@ namespace SharpNeat.Decoders.Voxel
 
         #endregion
 
+        /// <summary>
+        ///     Decodes a given CPPN genome into the corresponding graph representation, then queries each position on the voxel
+        ///     substrate to produce body voxels and their respective material types.
+        /// </summary>
+        /// <param name="genome">The CPPN genome to decode and query the voxel substrate.</param>
+        /// <returns>The voxel structure given by querying the substrate with the decoded CPPN genome.</returns>
         public VoxelBody Decode(NeatGenome genome)
         {
             IList<IList<VoxelMaterial>> layerwiseVoxelMaterial = new List<IList<VoxelMaterial>>(Z);
@@ -40,7 +59,7 @@ namespace SharpNeat.Decoders.Voxel
                         inputSignalArr[0] = k; // X coordinate
                         inputSignalArr[1] = j; // Y coordinate
                         inputSignalArr[2] = i; // Z coordinate
-                        inputSignalArr[3] = _distanceMatrix[k, j, i]; // distance
+                        inputSignalArr[3] = DistanceMatrix[k, j, i]; // distance
 
                         // Reset from prior network activations
                         cppn.ResetState();

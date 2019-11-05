@@ -8,6 +8,7 @@ using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.EvolutionAlgorithms.Statistics;
 using SharpNeat.Genomes.HyperNeat;
 using SharpNeat.Genomes.Neat;
+using SharpNeat.Genomes.Voxel;
 using SharpNeat.Loggers;
 using SharpNeat.Network;
 using SharpNeat.Phenomes.Voxels;
@@ -158,7 +159,9 @@ namespace MCC_Domains.BodyBrain
         public override IGenomeFactory<NeatGenome> CreateBodyGenomeFactory()
         {
             return new CppnGenomeFactory(BodyCppnInputCount, BodyCppnOutputCount,
-                DefaultActivationFunctionLibrary.CreateLibraryCppn(), NeatGenomeParameters);
+                DefaultActivationFunctionLibrary.CreateLibraryCppn(), NeatGenomeParameters,
+                new VoxelBodyGenomeValidator(BodyDecoder, SimulationProperties.MinPercentMaterial,
+                    SimulationProperties.MinPercentActive));
         }
 
         /// <summary>
@@ -176,16 +179,6 @@ namespace MCC_Domains.BodyBrain
             List<NeatGenome> seedBodyPopulation;
             List<NeatGenome> seedBrainPopulation;
 
-            // Create the brain genome decoder
-            IGenomeDecoder<NeatGenome, VoxelBrain> brainGenomeDecoder = new VoxelBrainDecoder(ActivationScheme,
-                SimulationProperties.InitialXDimension, SimulationProperties.InitialYDimension,
-                SimulationProperties.InitialZDimension, SimulationProperties.NumBrainConnections);
-
-            // Create the body genome decoder
-            IGenomeDecoder<NeatGenome, VoxelBody> bodyGenomeDecoder = new VoxelBodyDecoder(ActivationScheme,
-                SimulationProperties.InitialXDimension, SimulationProperties.InitialYDimension,
-                SimulationProperties.InitialZDimension);
-
             // If both an initial body and brain population are specified, use them as the seed
             if (bodyGenomes != null && bodyGenomes.Count >= BodySeedGenomeCount && brainGenomes != null &&
                 brainGenomes.Count >= BrainSeedGenomeCount)
@@ -196,8 +189,7 @@ namespace MCC_Domains.BodyBrain
             // Otherwise, bodies will need to be generated and brains evolved to solve them
             else
             {
-                var bodyBrainTuple = EvolveSeedBodyBrains(bodyGenomeFactory, bodyGenomeDecoder, brainGenomeFactory,
-                    brainGenomeDecoder);
+                var bodyBrainTuple = EvolveSeedBodyBrains(bodyGenomeFactory, brainGenomeFactory);
                 seedBodyPopulation = bodyBrainTuple.Item1;
                 seedBrainPopulation = bodyBrainTuple.Item2;
             }
@@ -223,7 +215,7 @@ namespace MCC_Domains.BodyBrain
             // Create the NEAT EA for bodies
             AbstractEvolutionAlgorithm<NeatGenome> bodyEvolutionAlgorithm =
                 new QueueEvolutionAlgorithm<NeatGenome>(eaParams,
-                    new VoxelBodyAlgorithmStats(eaParams, bodyGenomeDecoder), null, null, BodyBatchSize,
+                    new VoxelBodyAlgorithmStats(eaParams, BodyDecoder), null, null, BodyBatchSize,
                     RunPhase.Primary, _bodyEvolutionDataLogger, _bodyLogFieldEnableMap, _bodyPopulationDataLogger,
                     _bodyGenomeDataLogger, _bodySimulationTrialDataLogger);
 
@@ -238,12 +230,12 @@ namespace MCC_Domains.BodyBrain
 
             // Create the brain genome evaluator
             IGenomeEvaluator<NeatGenome> brainViabilityEvaluator =
-                new ParallelGenomeBehaviorEvaluator<NeatGenome, VoxelBrain>(brainGenomeDecoder, brainEvaluator,
+                new ParallelGenomeBehaviorEvaluator<NeatGenome, VoxelBrain>(BrainDecoder, brainEvaluator,
                     SearchType.MinimalCriteriaSearch, ParallelOptions);
 
             // Create the body genome evaluator
             IGenomeEvaluator<NeatGenome> bodyViabilityEvaluator =
-                new ParallelGenomeBehaviorEvaluator<NeatGenome, VoxelBody>(bodyGenomeDecoder, bodyEvaluator,
+                new ParallelGenomeBehaviorEvaluator<NeatGenome, VoxelBody>(BodyDecoder, bodyEvaluator,
                     SearchType.MinimalCriteriaSearch, ParallelOptions);
 
             // Verify that both populations satisfy their MC so that MCC starts in a valid state

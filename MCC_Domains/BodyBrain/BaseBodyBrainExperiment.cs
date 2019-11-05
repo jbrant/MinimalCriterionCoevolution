@@ -8,6 +8,7 @@ using MCC_Domains.Utils;
 using Redzen.Random;
 using SharpNeat.Core;
 using SharpNeat.Decoders;
+using SharpNeat.Decoders.Voxel;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Phenomes.Voxels;
 
@@ -15,36 +16,6 @@ namespace MCC_Domains.BodyBrain
 {
     public abstract class BaseBodyBrainExperiment : IBodyBrainExperiment
     {
-        #region Private methods
-
-        /// <summary>
-        ///     Randomly creates a new voxel body that meets specified tissue constraints.
-        /// </summary>
-        /// <param name="bodyGenomeFactory">The body genome factory.</param>
-        /// <param name="bodyDecoder">The body decoder to convert genome representation into voxel structure.</param>
-        /// <returns>New voxel body that meets specified tissue constraints.</returns>
-        private NeatGenome GenerateBody(IGenomeFactory<NeatGenome> bodyGenomeFactory,
-            IGenomeDecoder<NeatGenome, VoxelBody> bodyDecoder)
-        {
-            do
-            {
-                // Generate new body genome
-                var bodyGenome = bodyGenomeFactory.CreateGenomeList(1, 0)[0];
-
-                // Decode to voxel body
-                var body = bodyDecoder.Decode(bodyGenome);
-
-                // If body voxel contains the minimum amount of material and muscle voxels, add to the list
-                if (body.ActiveTissueProportion >= SimulationProperties.MinPercentActive &&
-                    body.FullProportion >= SimulationProperties.MinPercentMaterial)
-                {
-                    return bodyGenome;
-                }
-            } while (true);
-        }
-
-        #endregion
-
         #region Public properties
 
         /// <inheritdoc />
@@ -87,11 +58,6 @@ namespace MCC_Domains.BodyBrain
         protected int Run { get; private set; }
 
         /// <summary>
-        ///     The activation scheme (i.e. cyclic or acyclic).
-        /// </summary>
-        protected NetworkActivationScheme ActivationScheme;
-
-        /// <summary>
         ///     Switches between synchronous and asynchronous execution (with user-defined number of threads).
         /// </summary>
         protected ParallelOptions ParallelOptions;
@@ -100,6 +66,16 @@ namespace MCC_Domains.BodyBrain
         ///     The NEAT genome parameters to use for the experiment.
         /// </summary>
         protected NeatGenomeParameters NeatGenomeParameters;
+
+        /// <summary>
+        /// The body decoder converting CPPN genomes to voxel bodies.
+        /// </summary>
+        protected IGenomeDecoder<NeatGenome, VoxelBody> BodyDecoder;
+        
+        /// <summary>
+        /// The brain decoder converting CPPN genomes to voxel controllers.
+        /// </summary>
+        protected IGenomeDecoder<NeatGenome, VoxelBrain> BrainDecoder;
 
         /// <summary>
         ///     The resource limit for bodies (i.e. the maximum number of times that a body can be used by a brain for satisfying
@@ -168,7 +144,12 @@ namespace MCC_Domains.BodyBrain
         /// <summary>
         ///     The number of brains needed for the initialization algorithm.
         /// </summary>
-        private int BrainInitializationGenomeCount { get; set; }
+        private int _brainInitializationGenomeCount;
+        
+        /// <summary>
+        ///     The activation scheme (i.e. cyclic or acyclic).
+        /// </summary>
+        private NetworkActivationScheme _activationScheme;
 
         #endregion
 
@@ -193,12 +174,12 @@ namespace MCC_Domains.BodyBrain
             // Set boiler plate properties
             Name = name;
             Run = run;
-            ActivationScheme = ExperimentUtils.CreateActivationScheme(xmlConfig, "Activation");
+            _activationScheme = ExperimentUtils.CreateActivationScheme(xmlConfig, "Activation");
             ParallelOptions = ExperimentUtils.ReadParallelOptions(xmlConfig);
 
             // Set the genome parameters
             NeatGenomeParameters = ExperimentUtils.ReadNeatGenomeParameters(xmlConfig);
-            NeatGenomeParameters.FeedforwardOnly = ActivationScheme.AcyclicNetwork;
+            NeatGenomeParameters.FeedforwardOnly = _activationScheme.AcyclicNetwork;
 
             // Set resource limit parameter
             ResourceLimit = XmlUtils.GetValueAsInt(xmlConfig, "ResourceLimit");
@@ -236,13 +217,20 @@ namespace MCC_Domains.BodyBrain
             // Setup initialization algorithm
             _bodyBrainInitializer.SetAlgorithmParameters(
                 xmlConfig.GetElementsByTagName("InitializationAlgorithmConfig", "")[0] as XmlElement,
-                Name, run, ActivationScheme.AcyclicNetwork, NumBrainSuccessCriteria);
+                Name, run, _activationScheme.AcyclicNetwork, NumBrainSuccessCriteria);
 
             // Configure simulation
             _bodyBrainInitializer.SetSimulationParameters(MinAmbulationDistance, SimulationProperties);
 
             // The size of the randomly generated agent genome pool from which to evolve agent bootstraps
-            BrainInitializationGenomeCount = _bodyBrainInitializer.PopulationSize;
+            _brainInitializationGenomeCount = _bodyBrainInitializer.PopulationSize;
+            
+            // Create body and brain genome decoders
+            BrainDecoder = new VoxelBrainDecoder(_activationScheme, SimulationProperties.InitialXDimension,
+                SimulationProperties.InitialYDimension, SimulationProperties.InitialZDimension,
+                SimulationProperties.NumBrainConnections);
+            BodyDecoder = new VoxelBodyDecoder(_activationScheme, SimulationProperties.InitialXDimension,
+                SimulationProperties.InitialYDimension, SimulationProperties.InitialZDimension);
         }
 
         /// <inheritdoc />
@@ -357,16 +345,13 @@ namespace MCC_Domains.BodyBrain
         ///     bootstrap process.
         /// </summary>
         /// <param name="bodyGenomeFactory">The factory object for producing new CPPNs for the body population.</param>
-        /// <param name="bodyDecoder">The decoder used for converting CPPNs to voxel bodies.</param>
         /// <param name="brainGenomeFactory">The factory object for producing new CPPNs for the brain population.</param>
-        /// <param name="brainDecoder">The decoder used for converting CPPNs to brains.</param>
         /// <returns>
         ///     A tuple containing a list of bodies (in the first position) and a list of brains (in the second position), with
         ///     each body being ambulated (such that it and the brain meet the MC) by one or more brains.
         /// </returns>
         protected Tuple<List<NeatGenome>, List<NeatGenome>> EvolveSeedBodyBrains(
-            IGenomeFactory<NeatGenome> bodyGenomeFactory, IGenomeDecoder<NeatGenome, VoxelBody> bodyDecoder,
-            IGenomeFactory<NeatGenome> brainGenomeFactory, IGenomeDecoder<NeatGenome, VoxelBrain> brainDecoder)
+            IGenomeFactory<NeatGenome> bodyGenomeFactory, IGenomeFactory<NeatGenome> brainGenomeFactory)
         {
             var seedBodyPopulation = new List<NeatGenome>(BodySeedGenomeCount);
             var seedBrainPopulation = new List<NeatGenome>(BrainSeedGenomeCount);
@@ -384,19 +369,19 @@ namespace MCC_Domains.BodyBrain
                 do
                 {
                     // Generate new body
-                    var body = GenerateBody(bodyGenomeFactory, bodyDecoder);
+                    var body = bodyGenomeFactory.CreateGenomeList(1, 0)[0];
 
                     // Extract the body ID
                     var bodyId = body.Id;
 
                     // Create population of randomly-initialized brain CPPNs
-                    var brainPopulation = brainGenomeFactory.CreateGenomeList(BrainInitializationGenomeCount, 0);
+                    var brainPopulation = brainGenomeFactory.CreateGenomeList(_brainInitializationGenomeCount, 0);
 
                     Console.WriteLine($"Evolving viable brains for body population index {idx} with ID {bodyId}");
 
                     // Evolve the number of brains required to meet the success MC for the current body
                     var viableBrains = _bodyBrainInitializer.EvolveViableBrains(brainGenomeFactory,
-                        brainPopulation.ToList(), brainDecoder, bodyDecoder.Decode(body),
+                        brainPopulation.ToList(), BrainDecoder, BodyDecoder.Decode(body),
                         _maxBrainInitializationEvaluations, ParallelOptions, _maxBodyInitializationRestarts);
 
                     // Proceed to the next iteration if no solutions were evolved
@@ -459,8 +444,8 @@ namespace MCC_Domains.BodyBrain
 
                 // Evolve the number of brains required to meet the success MC for the body
                 var viableBodyBrains = _bodyBrainInitializer.EvolveViableBrains(brainGenomeFactory,
-                    brainGenomeFactory.CreateGenomeList(BrainInitializationGenomeCount, 0), brainDecoder,
-                    bodyDecoder.Decode(bodyGenome), _maxBrainInitializationEvaluations, ParallelOptions);
+                    brainGenomeFactory.CreateGenomeList(_brainInitializationGenomeCount, 0), BrainDecoder,
+                    BodyDecoder.Decode(bodyGenome), _maxBrainInitializationEvaluations, ParallelOptions);
 
                 // Iterate through each viable brain and remove them if they've already solved a body
                 // or add them to the list of viable brains if they have not
