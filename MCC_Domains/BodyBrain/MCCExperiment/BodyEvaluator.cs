@@ -169,7 +169,7 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
 
                 // Record simulation trial info
                 behaviorInfo.TrialData.Add(new TrialInfo(isSuccessful, simResults.Distance, simResults.SimulationTime,
-                    body.GenomeId, new[] {simResults.Location.X, simResults.Location.Y}));
+                    brain.GenomeId, new[] {simResults.Location.X, simResults.Location.Y}));
 
                 // Remove configuration and output files
                 File.Delete(simConfigFilePath);
