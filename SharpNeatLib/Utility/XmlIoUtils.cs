@@ -53,7 +53,8 @@ namespace SharpNeat.Utility
             {
                 using (XmlTextWriter genomeTextWriter = new XmlTextWriter(genomeStringWriter))
                 {
-                    NeatGenomeXmlIO.WriteComplete(genomeTextWriter, neatGenome, false);
+                    NeatGenomeXmlIO.WriteComplete(genomeTextWriter, neatGenome,
+                        neatGenome.ActivationFnLibrary.GetFunctionList().Count > 1);
                 }
             }
             // Otherwise, treat this as a maze genome and serialize into the string writer

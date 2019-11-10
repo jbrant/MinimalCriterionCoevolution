@@ -16,6 +16,7 @@ namespace ExperimentEntities
         }
         
         public virtual DbSet<ExperimentDictionary> ExperimentDictionary { get; set; }
+        public virtual DbSet<ExperimentDictionaryBodyBrain> ExperimentDictionaryBodyBrain { get; set; }
         public virtual DbSet<MccexperimentExtantMazePopulation> MccexperimentExtantMazePopulation { get; set; }
         public virtual DbSet<MccexperimentExtantNavigatorPopulation> MccexperimentExtantNavigatorPopulation { get; set; }
         public virtual DbSet<MccexperimentMazeEvaluationData> MccexperimentMazeEvaluationData { get; set; }
@@ -31,6 +32,16 @@ namespace ExperimentEntities
         public virtual DbSet<McsexperimentEvaluationData> McsexperimentEvaluationData { get; set; }
         public virtual DbSet<McsexperimentOrganismStateData> McsexperimentOrganismStateData { get; set; }
         public virtual DbSet<RunPhase> RunPhase { get; set; }
+        
+        public virtual DbSet<MccexperimentExtantVoxelBodyPopulation> MccexperimentExtantVoxelBodyPopulation { get; set; }
+        public virtual DbSet<MccexperimentExtantVoxelBrainPopulation> MccexperimentExtantVoxelBrainPopulation { get; set; }
+        public virtual DbSet<MccexperimentVoxelBodyEvaluationData> MccexperimentVoxelBodyEvaluationData { get; set; }
+        public virtual DbSet<MccexperimentVoxelBodyGenome> MccexperimentVoxelBodyGenomes { get; set; }
+        public virtual DbSet<MccexperimentVoxelBodyResourceUsage> MccexperimentVoxelBodyResourceUsage { get; set; }
+        public virtual DbSet<MccexperimentVoxelBodyTrials> MccexperimentVoxelBodyTrials { get; set; }
+        public virtual DbSet<MccexperimentVoxelBrainEvaluationData> MccexperimentVoxelBrainEvaluationData { get; set; }
+        public virtual DbSet<MccexperimentVoxelBrainGenome> MccexperimentVoxelBrainGenomes { get; set; }
+        public virtual DbSet<MccexperimentVoxelBrainTrials> MccexperimentVoxelBrainTrials { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -339,6 +350,134 @@ namespace ExperimentEntities
 
                 entity.Property(e => e.AgentYlocation).HasColumnName("AgentYLocation");
             });
+            
+            modelBuilder.Entity<ExperimentDictionaryBodyBrain>(entity =>
+            {
+                entity.HasKey(e => e.ExperimentDictionaryId);
+
+                entity.HasIndex(e => e.ExperimentName)
+                    .HasName("UIX_ExperimentDictionaryBodyBrain")
+                    .IsUnique();
+
+                entity.Property(e => e.ExperimentDictionaryId).HasColumnName("ExperimentDictionaryID");
+
+                entity.Property(e => e.ActivationScheme)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ExperimentName)
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.InitializationBehaviorCharacterization)
+                    .HasColumnName("Initialization_BehaviorCharacterization")
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.InitializationComplexityRegulationStrategy)
+                    .IsRequired()
+                    .HasColumnName("Initialization_ComplexityRegulationStrategy")
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.InitializationComplexityThreshold).HasColumnName("Initialization_ComplexityThreshold");
+
+                entity.Property(e => e.InitializationGenomeConfigAddConnnectionProbability).HasColumnName("Initialization_GenomeConfig_AddConnnectionProbability");
+
+                entity.Property(e => e.InitializationGenomeConfigAddNodeProbability).HasColumnName("Initialization_GenomeConfig_AddNodeProbability");
+
+                entity.Property(e => e.InitializationGenomeConfigConnectionWeightRange).HasColumnName("Initialization_GenomeConfig_ConnectionWeightRange");
+
+                entity.Property(e => e.InitializationGenomeConfigDeleteConnectionProbability).HasColumnName("Initialization_GenomeConfig_DeleteConnectionProbability");
+
+                entity.Property(e => e.InitializationGenomeConfigInitialConnectionProportion).HasColumnName("Initialization_GenomeConfig_InitialConnectionProportion");
+
+                entity.Property(e => e.InitializationGenomeConfigWeightMutationProbability).HasColumnName("Initialization_GenomeConfig_WeightMutationProbability");
+
+                entity.Property(e => e.InitializationInterspeciesMatingProbability).HasColumnName("Initialization_InterspeciesMatingProbability");
+
+                entity.Property(e => e.InitializationNearestNeighbors).HasColumnName("Initialization_NearestNeighbors");
+
+                entity.Property(e => e.InitializationNoveltyConfigArchiveAdditionThreshold).HasColumnName("Initialization_NoveltyConfig_ArchiveAdditionThreshold");
+
+                entity.Property(e => e.InitializationNoveltyConfigArchiveThresholdDecreaseMultiplier).HasColumnName("Initialization_NoveltyConfig_ArchiveThresholdDecreaseMultiplier");
+
+                entity.Property(e => e.InitializationNoveltyConfigArchiveThresholdIncreaseMultiplier).HasColumnName("Initialization_NoveltyConfig_ArchiveThresholdIncreaseMultiplier");
+
+                entity.Property(e => e.InitializationNoveltyConfigMaxGenerationalArchiveAddition).HasColumnName("Initialization_NoveltyConfig_MaxGenerationalArchiveAddition");
+
+                entity.Property(e => e.InitializationNoveltyConfigMaxGenerationsWithoutArchiveAddition).HasColumnName("Initialization_NoveltyConfig_MaxGenerationsWithoutArchiveAddition");
+
+                entity.Property(e => e.InitializationOffspringAsexualProbability).HasColumnName("Initialization_OffspringAsexualProbability");
+
+                entity.Property(e => e.InitializationOffspringBatchSize).HasColumnName("Initialization_OffspringBatchSize");
+
+                entity.Property(e => e.InitializationOffspringSexualProbability).HasColumnName("Initialization_OffspringSexualProbability");
+
+                entity.Property(e => e.InitializationPopulationEvaluationFrequency).HasColumnName("Initialization_PopulationEvaluationFrequency");
+
+                entity.Property(e => e.InitializationPopulationSize).HasColumnName("Initialization_PopulationSize");
+
+                entity.Property(e => e.InitializationSearchAlgorithm)
+                    .IsRequired()
+                    .HasColumnName("Initialization_SearchAlgorithm")
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.InitializationSelectionAlgorithm)
+                    .IsRequired()
+                    .HasColumnName("Initialization_SelectionAlgorithm")
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.InitializationSelectionProportion).HasColumnName("Initialization_SelectionProportion");
+
+                entity.Property(e => e.InitializationSpecieCount).HasColumnName("Initialization_SpecieCount");
+
+                entity.Property(e => e.PrimaryBehaviorCharacterization)
+                    .IsRequired()
+                    .HasColumnName("Primary_BehaviorCharacterization")
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.PrimaryGenomeConfigAddConnnectionProbability).HasColumnName("Primary_GenomeConfig_AddConnnectionProbability");
+
+                entity.Property(e => e.PrimaryGenomeConfigAddNodeProbability).HasColumnName("Primary_GenomeConfig_AddNodeProbability");
+
+                entity.Property(e => e.PrimaryGenomeConfigConnectionWeightRange).HasColumnName("Primary_GenomeConfig_ConnectionWeightRange");
+
+                entity.Property(e => e.PrimaryGenomeConfigDecreaseResolutionProbability).HasColumnName("Primary_GenomeConfig_DecreaseResolutionProbability");
+
+                entity.Property(e => e.PrimaryGenomeConfigDeleteConnectionProbability).HasColumnName("Primary_GenomeConfig_DeleteConnectionProbability");
+
+                entity.Property(e => e.PrimaryGenomeConfigIncreaseResolutionProbability).HasColumnName("Primary_GenomeConfig_IncreaseResolutionProbability");
+
+                entity.Property(e => e.PrimaryGenomeConfigInitialConnectionProportion).HasColumnName("Primary_GenomeConfig_InitialConnectionProportion");
+
+                entity.Property(e => e.PrimaryGenomeConfigWeightMutationProbability).HasColumnName("Primary_GenomeConfig_WeightMutationProbability");
+
+                entity.Property(e => e.VoxelyzeConfigActuationsPerSecond).HasColumnName("VoxelyzeConfig_ActuationsPerSecond");
+
+                entity.Property(e => e.VoxelyzeConfigBrainNetworkConnections).HasColumnName("VoxelyzeConfig_BrainNetworkConnections");
+
+                entity.Property(e => e.VoxelyzeConfigFloorSlope).HasColumnName("VoxelyzeConfig_FloorSlope");
+
+                entity.Property(e => e.VoxelyzeConfigInitialXdimension).HasColumnName("VoxelyzeConfig_InitialXDimension");
+
+                entity.Property(e => e.VoxelyzeConfigInitialYdimension).HasColumnName("VoxelyzeConfig_InitialYDimension");
+
+                entity.Property(e => e.VoxelyzeConfigInitialZdimension).HasColumnName("VoxelyzeConfig_InitialZDimension");
+
+                entity.Property(e => e.VoxelyzeConfigInitializationSeconds).HasColumnName("VoxelyzeConfig_InitializationSeconds");
+
+                entity.Property(e => e.VoxelyzeConfigMinPercentActiveMaterial).HasColumnName("VoxelyzeConfig_MinPercentActiveMaterial");
+
+                entity.Property(e => e.VoxelyzeConfigMinPercentMaterial).HasColumnName("VoxelyzeConfig_MinPercentMaterial");
+
+                entity.Property(e => e.VoxelyzeConfigSimulatedSeconds).HasColumnName("VoxelyzeConfig_SimulatedSeconds");
+            });
 
             modelBuilder.Entity<RunPhase>(entity =>
             {
@@ -348,6 +487,123 @@ namespace ExperimentEntities
                     .IsRequired()
                     .HasMaxLength(100)
                     .IsUnicode(false);
+            });
+            
+            modelBuilder.Entity<MccexperimentExtantVoxelBodyPopulation>(entity =>
+            {
+                entity.HasKey(e => new { e.ExperimentDictionaryId, e.Run, e.Generation, e.GenomeId });
+
+                entity.ToTable("MCCExperimentExtantVoxelBodyPopulation");
+
+                entity.Property(e => e.ExperimentDictionaryId).HasColumnName("ExperimentDictionaryID");
+
+                entity.Property(e => e.GenomeId).HasColumnName("GenomeID");
+            });
+
+            modelBuilder.Entity<MccexperimentExtantVoxelBrainPopulation>(entity =>
+            {
+                entity.HasKey(e => new { e.ExperimentDictionaryId, e.Run, e.Generation, e.GenomeId, e.RunPhaseFk });
+
+                entity.ToTable("MCCExperimentExtantVoxelBrainPopulation");
+
+                entity.Property(e => e.ExperimentDictionaryId).HasColumnName("ExperimentDictionaryID");
+
+                entity.Property(e => e.GenomeId).HasColumnName("GenomeID");
+
+                entity.Property(e => e.RunPhaseFk).HasColumnName("RunPhase_FK");
+            });
+
+            modelBuilder.Entity<MccexperimentVoxelBodyEvaluationData>(entity =>
+            {
+                entity.HasKey(e => new { e.ExperimentDictionaryId, e.Run, e.Generation });
+
+                entity.ToTable("MCCExperimentVoxelBodyEvaluationData");
+
+                entity.Property(e => e.ExperimentDictionaryId).HasColumnName("ExperimentDictionaryID");
+            });
+
+            modelBuilder.Entity<MccexperimentVoxelBodyGenome>(entity =>
+            {
+                entity.HasKey(e => new { e.ExperimentDictionaryId, e.Run, e.GenomeId });
+
+                entity.ToTable("MCCExperimentVoxelBodyGenomes");
+
+                entity.Property(e => e.ExperimentDictionaryId).HasColumnName("ExperimentDictionaryID");
+
+                entity.Property(e => e.GenomeId).HasColumnName("GenomeID");
+
+                entity.Property(e => e.GenomeXml)
+                    .IsRequired()
+                    .HasColumnType("xml");
+            });
+
+            modelBuilder.Entity<MccexperimentVoxelBodyResourceUsage>(entity =>
+            {
+                entity.HasKey(e => new { e.ExperimentDictionaryId, e.Run, e.Generation, e.GenomeId });
+
+                entity.ToTable("MCCExperimentVoxelBodyResourceUsage");
+
+                entity.Property(e => e.ExperimentDictionaryId).HasColumnName("ExperimentDictionaryID");
+
+                entity.Property(e => e.GenomeId).HasColumnName("GenomeID");
+            });
+
+            modelBuilder.Entity<MccexperimentVoxelBodyTrials>(entity =>
+            {
+                entity.HasKey(e => new { e.ExperimentDictionaryId, e.Run, e.Generation, e.BodyGenomeId, e.PairedBrainGenomeId });
+
+                entity.ToTable("MCCExperimentVoxelBodyTrials");
+
+                entity.Property(e => e.ExperimentDictionaryId).HasColumnName("ExperimentDictionaryID");
+
+                entity.Property(e => e.BodyGenomeId).HasColumnName("BodyGenomeID");
+
+                entity.Property(e => e.PairedBrainGenomeId).HasColumnName("PairedBrainGenomeID");
+            });
+
+            modelBuilder.Entity<MccexperimentVoxelBrainEvaluationData>(entity =>
+            {
+                entity.HasKey(e => new { e.ExperimentDictionaryId, e.Run, e.Generation });
+
+                entity.ToTable("MCCExperimentVoxelBrainEvaluationData");
+
+                entity.Property(e => e.ExperimentDictionaryId).HasColumnName("ExperimentDictionaryID");
+            });
+
+            modelBuilder.Entity<MccexperimentVoxelBrainGenome>(entity =>
+            {
+                entity.HasKey(e => new { e.ExperimentDictionaryId, e.Run, e.GenomeId, e.RunPhaseFk });
+
+                entity.ToTable("MCCExperimentVoxelBrainGenomes");
+
+                entity.Property(e => e.ExperimentDictionaryId).HasColumnName("ExperimentDictionaryID");
+
+                entity.Property(e => e.GenomeId).HasColumnName("GenomeID");
+
+                entity.Property(e => e.RunPhaseFk).HasColumnName("RunPhase_FK");
+
+                entity.Property(e => e.GenomeXml)
+                    .IsRequired()
+                    .HasColumnType("xml");
+                
+                entity.HasOne(d => d.RunPhaseFkNavigation)
+                    .WithMany(p => p.MccexperimentVoxelBrainGenomes)
+                    .HasForeignKey(d => d.RunPhaseFk)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_MCCExperimentVoxelBrainGenomes_RunPhase");
+            });
+
+            modelBuilder.Entity<MccexperimentVoxelBrainTrials>(entity =>
+            {
+                entity.HasKey(e => new { e.ExperimentDictionaryId, e.Run, e.Generation, e.BrainGenomeId, e.PairedBodyGenomeId });
+
+                entity.ToTable("MCCExperimentVoxelBrainTrials");
+
+                entity.Property(e => e.ExperimentDictionaryId).HasColumnName("ExperimentDictionaryID");
+
+                entity.Property(e => e.BrainGenomeId).HasColumnName("BrainGenomeID");
+
+                entity.Property(e => e.PairedBodyGenomeId).HasColumnName("PairedBodyGenomeID");
             });
         }
     }

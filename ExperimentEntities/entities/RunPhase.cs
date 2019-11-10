@@ -12,6 +12,7 @@ namespace ExperimentEntities.entities
             MccmazeNavigatorResults = new HashSet<MccmazeNavigatorResult>();
             McsexperimentEvaluationData = new HashSet<McsexperimentEvaluationData>();
             McsexperimentOrganismStateData = new HashSet<McsexperimentOrganismStateData>();
+            MccexperimentVoxelBrainGenomes = new HashSet<MccexperimentVoxelBrainGenome>();
         }
 
         public int RunPhaseId { get; set; }
@@ -23,5 +24,6 @@ namespace ExperimentEntities.entities
         public virtual ICollection<MccmazeNavigatorResult> MccmazeNavigatorResults { get; set; }
         public virtual ICollection<McsexperimentEvaluationData> McsexperimentEvaluationData { get; set; }
         public virtual ICollection<McsexperimentOrganismStateData> McsexperimentOrganismStateData { get; set; }
+        public virtual ICollection<MccexperimentVoxelBrainGenome> MccexperimentVoxelBrainGenomes { get; set; }
     }
 }

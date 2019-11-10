@@ -134,9 +134,9 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
 
             // Write configuration file
             BodyBrainExperimentUtils.WriteVoxelyzeSimulationFile(_simulationProperties.SimConfigTemplateFile,
-                simConfigFilePath, _simulationProperties.SimOutputXPath, _simulationProperties.StructurePropertiesXPath,
-                _simulationProperties.MinimalCriterionXPath, simResultFilePath, brain, _voxelBody,
-                _minAmbulationDistance);
+                simConfigFilePath, simResultFilePath, brain, _voxelBody, _minAmbulationDistance,
+                _simulationProperties.SimOutputXPath, _simulationProperties.StructurePropertiesXPath,
+                _simulationProperties.MinimalCriterionXPath);
 
             // Configure the simulation, execute and wait for completion
             using (var process =

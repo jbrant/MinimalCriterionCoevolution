@@ -125,16 +125,17 @@ namespace MCC_Domains.BodyBrain
         ///     defaults.
         /// </param>
         /// <param name="outputPath">The directory into which the generated Voxelyze simulation configuration file is written.</param>
-        /// <param name="vxaSimGaXPath">The XPath location containing GA simulation parameters.</param>
-        /// <param name="vxaStructureXPath">The XPath location containing voxel structure configuration properties.</param>
-        /// <param name="vxaMcXPath">The XPath location containing the minimal criterion configuration.</param>
         /// <param name="simResultsFilePath">The directory into which to write simulation results.</param>
         /// <param name="brain">The voxel brain object containing per-voxel network weights.</param>
         /// <param name="body">The voxel body object containing voxel material specifications.</param>
         /// <param name="mcDistance">The distance traveled minimal criterion.</param>
+        /// <param name="vxaSimGaXPath">The XPath location containing GA simulation parameters (optional).</param>
+        /// <param name="vxaStructureXPath">The XPath location containing voxel structure configuration properties (optional).</param>
+        /// <param name="vxaMcXPath">The XPath location containing the minimal criterion configuration (optional).</param>
         public static void WriteVoxelyzeSimulationFile(string vxaTemplatePath, string outputPath,
-            string vxaSimGaXPath, string vxaStructureXPath, string vxaMcXPath, string simResultsFilePath,
-            VoxelBrain brain, VoxelBody body, double mcDistance)
+            string simResultsFilePath, VoxelBrain brain, VoxelBody body, double mcDistance,
+            string vxaSimGaXPath = "/VXA/Simulator/GA", string vxaStructureXPath = "/VXA/VXC/Structure",
+            string vxaMcXPath = "/VXA/Environment/MinimalCriterion")
         {
             // Instantiate XML reader for VXA template file
             var simDoc = new XmlDocument();
