@@ -161,12 +161,13 @@ namespace MCC_Domains.BodyBrain.Bootstrappers
 
                 Console.Out.WriteLine("Attempting to extract viable genome from list...");
 
-                // Add all of the genomes that have solved the maze
+                // Add all of the genomes that have successfully ambulated the body the minimum distance
+                // (fitness, in this case, is set to distance)
                 viableGenomes.AddRange(
                     InitializationEa.GenomeList.Where(
                             genome =>
                                 genome.EvaluationInfo != null &&
-                                genome.EvaluationInfo.TrialData[0].ObjectiveDistance >= MinAmbulationDistance));
+                                genome.EvaluationInfo.Fitness >= MinAmbulationDistance));
 
                 Console.Out.WriteLine(
                     $"Extracted [{viableGenomes.Count}] of [{MinSuccessfulBrainCount}] required viable genomes in [{InitializationEa.CurrentEvaluations}] evaluations");
