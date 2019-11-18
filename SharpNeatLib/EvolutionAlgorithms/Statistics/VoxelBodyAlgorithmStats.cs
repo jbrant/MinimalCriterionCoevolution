@@ -55,6 +55,21 @@ namespace SharpNeat.EvolutionAlgorithms.Statistics
         private double _meanVoxels;
 
         /// <summary>
+        ///     The minimum number of non-empty voxels in a given voxel body within the body population.
+        /// </summary>
+        private int _minMaterialVoxels;
+
+        /// <summary>
+        ///     The maximum number of non-empty voxels in a given voxel body within the body population.
+        /// </summary>
+        private int _maxMaterialVoxels;
+
+        /// <summary>
+        ///     The mean number of non-empty voxels in a given voxel body within the body population.
+        /// </summary>
+        private double _meanMaterialVoxels;
+
+        /// <summary>
         ///     The minimum number of active voxels in a given voxel body within the body population.
         /// </summary>
         private int _minActiveVoxels;
@@ -153,6 +168,9 @@ namespace SharpNeat.EvolutionAlgorithms.Statistics
             _minVoxels = voxelBodies.Min(x => x.NumVoxels);
             _maxVoxels = voxelBodies.Max(x => x.NumVoxels);
             _meanVoxels = voxelBodies.Average(x => x.NumVoxels);
+            _minMaterialVoxels = voxelBodies.Min(x => x.NumMaterialVoxels);
+            _maxMaterialVoxels = voxelBodies.Max(x => x.NumMaterialVoxels);
+            _meanMaterialVoxels = voxelBodies.Average(x => x.NumMaterialVoxels);
             _minFullProportion = voxelBodies.Min(x => x.FullProportion);
             _maxFullProportion = voxelBodies.Max(x => x.FullProportion);
             _meanFullProportion = voxelBodies.Average(x => x.FullProportion);
@@ -198,11 +216,32 @@ namespace SharpNeat.EvolutionAlgorithms.Statistics
             {
                 elements.Add(new LoggableElement(BodyBrainEvolutionFieldElements.MaxVoxels, _maxVoxels));
             }
-            
+
             if (logFieldEnableMap?.ContainsKey(BodyBrainEvolutionFieldElements.MeanVoxels) == true &&
                 logFieldEnableMap[BodyBrainEvolutionFieldElements.MeanVoxels])
             {
                 elements.Add(new LoggableElement(BodyBrainEvolutionFieldElements.MeanVoxels, _meanVoxels));
+            }
+
+            if (logFieldEnableMap?.ContainsKey(BodyBrainEvolutionFieldElements.MinMaterialVoxels) == true &&
+                logFieldEnableMap[BodyBrainEvolutionFieldElements.MinMaterialVoxels])
+            {
+                elements.Add(new LoggableElement(BodyBrainEvolutionFieldElements.MinMaterialVoxels,
+                    _minMaterialVoxels));
+            }
+
+            if (logFieldEnableMap?.ContainsKey(BodyBrainEvolutionFieldElements.MaxMaterialVoxels) == true &&
+                logFieldEnableMap[BodyBrainEvolutionFieldElements.MaxMaterialVoxels])
+            {
+                elements.Add(new LoggableElement(BodyBrainEvolutionFieldElements.MaxMaterialVoxels,
+                    _maxMaterialVoxels));
+            }
+
+            if (logFieldEnableMap?.ContainsKey(BodyBrainEvolutionFieldElements.MeanMaterialVoxels) == true &&
+                logFieldEnableMap[BodyBrainEvolutionFieldElements.MeanMaterialVoxels])
+            {
+                elements.Add(new LoggableElement(BodyBrainEvolutionFieldElements.MeanMaterialVoxels,
+                    _meanMaterialVoxels));
             }
 
             if (logFieldEnableMap?.ContainsKey(BodyBrainEvolutionFieldElements.MinActiveVoxels) == true &&

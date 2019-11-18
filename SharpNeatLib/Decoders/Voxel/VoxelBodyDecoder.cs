@@ -43,23 +43,23 @@ namespace SharpNeat.Decoders.Voxel
             var cppn = DecodeCppnMethod(genome);
 
             // Activate the CPPN for each voxel in the substrate
-            for (var i = 0; i < Z; i++)
+            for (var z = 0; z < Z; z++)
             {
                 IList<VoxelMaterial> voxelMaterials = new List<VoxelMaterial>(X * Y);
 
-                for (var j = 0; j < Y; j++)
+                for (var y = 0; y < Y; y++)
                 {
-                    for (var k = 0; k < X; k++)
+                    for (var x = 0; x < X; x++)
                     {
                         // Get references to CPPN input and output
                         var inputSignalArr = cppn.InputSignalArray;
                         var outputSignalArr = cppn.OutputSignalArray;
 
                         // Set the input values at the current voxel
-                        inputSignalArr[0] = k; // X coordinate
-                        inputSignalArr[1] = j; // Y coordinate
-                        inputSignalArr[2] = i; // Z coordinate
-                        inputSignalArr[3] = DistanceMatrix[k, j, i]; // distance
+                        inputSignalArr[0] = x; // X coordinate
+                        inputSignalArr[1] = y; // Y coordinate
+                        inputSignalArr[2] = z; // Z coordinate
+                        inputSignalArr[3] = DistanceMatrix[x, y, z]; // distance
 
                         // Reset from prior network activations
                         cppn.ResetState();

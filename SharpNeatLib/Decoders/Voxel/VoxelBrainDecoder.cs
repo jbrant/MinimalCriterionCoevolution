@@ -11,15 +11,6 @@ namespace SharpNeat.Decoders.Voxel
     /// </summary>
     public class VoxelBrainDecoder : VoxelDecoder, IGenomeDecoder<NeatGenome, VoxelBrain>
     {
-        #region Instance variables
-
-        /// <summary>
-        ///     The number of connections in the CPPN controller network.
-        /// </summary>
-        private readonly int _numConnections;
-
-        #endregion
-
         #region Constructors
 
         /// <summary>
@@ -59,23 +50,23 @@ namespace SharpNeat.Decoders.Voxel
             // Activate the CPPN for each voxel in the substrate
             // (the z dimension is first because this defines the layers of the voxel structure -
             // x/y are reversed for consistency, though order doesn't matter here)
-            for (var i = 0; i < Z; i++)
+            for (var z = 0; z < Z; z++)
             {
                 IList<double> layerWeights = new List<double>(X * Y);
 
-                for (var j = 0; j < Y; j++)
+                for (var y = 0; y < Y; y++)
                 {
-                    for (var k = 0; k < X; k++)
+                    for (var x = 0; x < X; x++)
                     {
                         // Get references to CPPN input and output
                         var inputSignalArr = cppn.InputSignalArray;
                         var outputSignalArr = cppn.OutputSignalArray;
 
                         // Set the input values at the current voxel
-                        inputSignalArr[0] = k; // X coordinate
-                        inputSignalArr[1] = j; // Y coordinate
-                        inputSignalArr[2] = i; // Z coordinate
-                        inputSignalArr[3] = DistanceMatrix[k, j, i]; // distance
+                        inputSignalArr[0] = x; // X coordinate
+                        inputSignalArr[1] = y; // Y coordinate
+                        inputSignalArr[2] = z; // Z coordinate
+                        inputSignalArr[3] = DistanceMatrix[x, y, z]; // distance
 
                         // Reset from prior network activations
                         cppn.ResetState();
@@ -88,9 +79,19 @@ namespace SharpNeat.Decoders.Voxel
                         // whether it is expressed in the phenotype, along with its weight
                         for (var idx = 0; idx < _numConnections * 2; idx += 2)
                         {
-                            // If connection is enabled, set weight to either -1 or 1 depending on polarization;
-                            // otherwise, connection is disabled so set weight to 0
-                            layerWeights.Add(outputSignalArr[idx] > 0 ? outputSignalArr[idx + 1] < 0 ? -1.0 : 1.0 : 0);
+                            // if this is the last two connections to the ANN output node, they are always enabled
+                            if (idx / 2 >= _numConnections - NumOutputNodeConnections)
+                            {
+                                layerWeights.Add(outputSignalArr[idx] < 0 ? -1.0 : 1.0);
+                            }
+                            else
+                            {
+                                // If connection is enabled, set weight to either -1 or 1 depending on polarization;
+                                // otherwise, connection is disabled so set weight to 0
+                                layerWeights.Add(outputSignalArr[idx] > 0
+                                    ? outputSignalArr[idx + 1] < 0 ? -1.0 : 1.0
+                                    : 0);
+                            }
                         }
                     }
                 }
@@ -102,6 +103,20 @@ namespace SharpNeat.Decoders.Voxel
             // Construct and return voxel brain
             return new VoxelBrain(layerwiseBrainWeights, _numConnections, genome.Id);
         }
+
+        #endregion
+
+        #region Instance variables
+
+        /// <summary>
+        ///     The number of connections in the CPPN controller network.
+        /// </summary>
+        private readonly int _numConnections;
+
+        /// <summary>
+        ///     The number of connections inbound to the output node.
+        /// </summary>
+        private const int NumOutputNodeConnections = 2;
 
         #endregion
     }

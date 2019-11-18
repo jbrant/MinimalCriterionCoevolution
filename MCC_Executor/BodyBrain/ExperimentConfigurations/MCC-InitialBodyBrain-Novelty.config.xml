@@ -23,7 +23,7 @@
     <BehaviorConfig>
         <BehaviorCharacterization>End Point</BehaviorCharacterization>
     </BehaviorConfig>
-    <MinAmbulationDistance>1</MinAmbulationDistance>
+    <MinAmbulationDistance>15</MinAmbulationDistance>
     <BrainOffspringBatchSize>40</BrainOffspringBatchSize>
     <BodyOffspringBatchSize>10</BodyOffspringBatchSize>
     <MaxGenerations>200</MaxGenerations>

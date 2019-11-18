@@ -56,12 +56,13 @@ namespace SharpNeat.Phenomes.Voxels
             // Calculate the number of active and passive voxels and total voxels
             NumActiveVoxels = voxels.SelectMany(x => x).Count(x => x == VoxelMaterial.ActiveTissue);
             NumPassiveVoxels = voxels.SelectMany(x => x).Count(x => x == VoxelMaterial.PassiveTissue);
+            NumMaterialVoxels = NumActiveVoxels + NumPassiveVoxels;
             NumVoxels = xlength * ylength * zlength;
 
             // Compute the proportion of the body that is composed of active/passive voxels and that is non-empty
-            ActiveTissueProportion = (double) NumActiveVoxels / NumVoxels;
-            PassiveTissueProportion = (double) NumPassiveVoxels / NumVoxels;
-            FullProportion = (double) (NumActiveVoxels + NumPassiveVoxels) / NumVoxels;
+            ActiveTissueProportion = (double) NumActiveVoxels / NumMaterialVoxels;
+            PassiveTissueProportion = (double) NumPassiveVoxels / NumMaterialVoxels;
+            FullProportion = (double) NumMaterialVoxels / NumVoxels;
 
             // Carry through the genome ID from the generate genome
             GenomeId = genomeId;
@@ -71,11 +72,16 @@ namespace SharpNeat.Phenomes.Voxels
         ///     The unique identifier of the genome from which the phenotype was generated.
         /// </summary>
         public uint GenomeId { get; }
-
+        
         /// <summary>
         ///     The number of voxels contained in the voxel structure.
         /// </summary>
         public int NumVoxels { get; }
+        
+        /// <summary>
+        /// The number of non-empty voxels (i.e. voxels containing passive or active material) in the voxel structure.
+        /// </summary>
+        public int NumMaterialVoxels { get; }
 
         /// <summary>
         ///     The number of active voxels contained in the voxel structure.

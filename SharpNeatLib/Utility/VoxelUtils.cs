@@ -14,9 +14,9 @@ namespace SharpNeat.Utility
         ///     Computes a rank 3 tensor consisting of each voxel's distance to the voxel structure center-of-mass (geometric
         ///     centroid).
         /// </summary>
-        /// <param name="x">The length of the X-axis on the voxel lattice.</param>
-        /// <param name="y">The length of the Y-axis on the voxel lattice.</param>
-        /// <param name="z">The length of the Z-axis on the voxel lattice.</param>
+        /// <param name="lengthX">The length of the X-axis on the voxel lattice.</param>
+        /// <param name="lengthY">The length of the Y-axis on the voxel lattice.</param>
+        /// <param name="lengthZ">The length of the Z-axis on the voxel lattice.</param>
         /// <returns>
         ///     The rank 3 tensor consisting of each voxel's distance to the voxel structure center-of-mass (geometric
         ///     centroid).

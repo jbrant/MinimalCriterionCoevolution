@@ -58,7 +58,14 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
                 new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - MazeTrials.csv");
 
             // Create new evolution field elements map with all fields enabled
-            _navigatorLogFieldEnableMap = MazeNavEvolutionFieldElements.PopulateEvolutionFieldElementsEnableMap();
+            _navigatorLogFieldEnableMap = EvolutionFieldElements.PopulateEvolutionFieldElementsEnableMap();
+            
+            // Add default evolution logging configuration specific to maze navigation experiment
+            foreach (var evolutionLoggingPair in
+                MazeNavEvolutionFieldElements.PopulateEvolutionFieldElementsEnableMap())
+            {
+                _navigatorLogFieldEnableMap.Add(evolutionLoggingPair.Key, evolutionLoggingPair.Value);
+            }
 
             // Add default population logging configuration
             foreach (var populationLoggingPair in PopulationFieldElements.PopulatePopulationFieldElementsEnableMap())

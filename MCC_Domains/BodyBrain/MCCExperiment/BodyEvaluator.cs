@@ -174,8 +174,8 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
                 // Remove configuration and output files
                 File.Delete(simConfigFilePath);
                 File.Delete(simResultFilePath);
-                
-                // Don't attempt to log if the file stream is closed
+
+                    // Don't attempt to log if the file stream is closed
                 if (!(_evaluationLogger?.IsStreamOpen() ?? false)) continue;
                 
                 // Log trial information

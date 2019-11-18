@@ -182,6 +182,7 @@ namespace MCC_Domains.BodyBrain
         ///     Builds the file path for a particular Voxelyze configuration or output file.
         /// </summary>
         /// <param name="fileType">The type of file being written (e.g. configuration, results).</param>
+        /// <param name="extension">The file extension (typically vxa).</param>
         /// <param name="outputDirectory">The directory into which the file will be written or is located.</param>
         /// <param name="experimentName">The name of the experiment to which the file corresponds.</param>
         /// <param name="run">The run number of the experiment to which the file corresponds.</param>

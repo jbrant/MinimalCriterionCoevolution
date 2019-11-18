@@ -12,7 +12,7 @@ namespace BodyBrainConfigGenerator
         /// <summary>
         ///     Encapsulates configuration parameters specified at runtime.
         /// </summary>
-        private static readonly Dictionary<ExecutionParameter, string> _executionConfiguration =
+        private static readonly Dictionary<ExecutionParameter, string> ExecutionConfiguration =
             new Dictionary<ExecutionParameter, string>();
 
         /// <summary>
@@ -36,10 +36,10 @@ namespace BodyBrainConfigGenerator
             _executionLogger.Info("Invocation parameters validated - continuing with configuration file generation.");
 
             // Extract the parameters
-            var experimentName = _executionConfiguration[ExecutionParameter.ExperimentName];
-            var run = int.Parse(_executionConfiguration[ExecutionParameter.Run]);
-            var configTemplateFile = _executionConfiguration[ExecutionParameter.ConfigTemplateFilePath];
-            var outputDirectory = _executionConfiguration[ExecutionParameter.ConfigOutputDirectory];
+            var experimentName = ExecutionConfiguration[ExecutionParameter.ExperimentName];
+            var run = int.Parse(ExecutionConfiguration[ExecutionParameter.Run]);
+            var configTemplateFile = ExecutionConfiguration[ExecutionParameter.ConfigTemplateFilePath];
+            var outputDirectory = ExecutionConfiguration[ExecutionParameter.ConfigOutputDirectory];
 
             // Lookup the current experiment configuration
             var curExperimentConfiguration = ConfigGenerator.LookupExperimentConfiguration(experimentName);
@@ -92,7 +92,7 @@ namespace BodyBrainConfigGenerator
                     }
 
                     // If the parameter is valid but it already exists in the map, break out of the loop and return
-                    if (_executionConfiguration.ContainsKey(curParameter))
+                    if (ExecutionConfiguration.ContainsKey(curParameter))
                     {
                         _executionLogger.Error(
                             $"Ambiguous configuration - parameter [{curParameter}] has been specified more than once.");
@@ -113,7 +113,7 @@ namespace BodyBrainConfigGenerator
                     }
                     
                     // If all else checks out, add the parameter to the map
-                    _executionConfiguration.Add(curParameter, parameterValuePair[1]);
+                    ExecutionConfiguration.Add(curParameter, parameterValuePair[1]);
                 }
             }
             // If there are no execution arguments, the configuration is invalid
@@ -123,25 +123,25 @@ namespace BodyBrainConfigGenerator
             }
 
             // If the per-parameter configuration is valid but not a full list of parameters were specified, makes sure the necessary ones are present
-            if (isConfigurationValid && _executionConfiguration.Count ==
+            if (isConfigurationValid && ExecutionConfiguration.Count ==
                 Enum.GetNames(typeof(ExecutionParameter)).Length == false)
             {
                 // Check for existence of experiment names to execute
-                if (_executionConfiguration.ContainsKey(ExecutionParameter.ExperimentName) == false)
+                if (ExecutionConfiguration.ContainsKey(ExecutionParameter.ExperimentName) == false)
                 {
                     _executionLogger.Error($"Parameter [{ExecutionParameter.ExperimentName}] must be specified.");
                     isConfigurationValid = false;
                 }
 
                 // Check for existence of run number to execute
-                if (_executionConfiguration.ContainsKey(ExecutionParameter.Run) == false)
+                if (ExecutionConfiguration.ContainsKey(ExecutionParameter.Run) == false)
                 {
                     _executionLogger.Error($"Parameter [{ExecutionParameter.Run}] must be specified.");
                     isConfigurationValid = false;
                 }
 
                 // Check for existence of configuration template parameter
-                if (_executionConfiguration.ContainsKey(ExecutionParameter.ConfigTemplateFilePath) == false)
+                if (ExecutionConfiguration.ContainsKey(ExecutionParameter.ConfigTemplateFilePath) == false)
                 {
                     _executionLogger.Error(
                         $"Parameter [{ExecutionParameter.ConfigTemplateFilePath}] must be specified.");
@@ -149,7 +149,7 @@ namespace BodyBrainConfigGenerator
                 }
 
                 // Check for existence of configuration file output directory
-                if (_executionConfiguration.ContainsKey(ExecutionParameter.ConfigOutputDirectory) == false)
+                if (ExecutionConfiguration.ContainsKey(ExecutionParameter.ConfigOutputDirectory) == false)
                 {
                     _executionLogger.Error(
                         $"Parameter [{ExecutionParameter.ConfigOutputDirectory}] must be specified.");

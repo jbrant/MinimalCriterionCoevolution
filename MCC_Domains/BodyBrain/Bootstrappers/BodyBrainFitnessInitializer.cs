@@ -98,7 +98,7 @@ namespace MCC_Domains.BodyBrain.Bootstrappers
             
             // Create the brain genome evaluator
             IGenomeEvaluator<NeatGenome> fitnessEvaluator =
-                new SerialGenomeFitnessEvaluator<NeatGenome, VoxelBrain>(brainGenomeDecoder, brainEvaluator);
+                new ParallelGenomeFitnessEvaluator<NeatGenome, VoxelBrain>(brainGenomeDecoder, brainEvaluator);
             
             // Only pull the number of genomes from the list equivalent to the initialization algorithm population size
             brainGenomeList = brainGenomeList.Take(PopulationSize).ToList();
