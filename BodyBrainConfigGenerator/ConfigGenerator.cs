@@ -47,7 +47,7 @@ namespace BodyBrainConfigGenerator
         /// <summary>
         ///     The body genome decoder.
         /// </summary>
-        private readonly VoxelBodyDecoder _bodyDecoder;
+        private readonly CppnSubstrateDecoder _bodyDecoder;
 
         /// <summary>
         ///     The body genome factory.
@@ -135,7 +135,7 @@ namespace BodyBrainConfigGenerator
             _brainDecoder = new VoxelBrainDecoder(activationScheme, experimentConfig.VoxelyzeConfigInitialXdimension,
                 experimentConfig.VoxelyzeConfigInitialYdimension, experimentConfig.VoxelyzeConfigInitialZdimension,
                 experimentConfig.VoxelyzeConfigBrainNetworkConnections);
-            _bodyDecoder = new VoxelBodyDecoder(activationScheme, experimentConfig.VoxelyzeConfigInitialXdimension,
+            _bodyDecoder = new CppnSubstrateDecoder(activationScheme, experimentConfig.VoxelyzeConfigInitialXdimension,
                 experimentConfig.VoxelyzeConfigInitialYdimension, experimentConfig.VoxelyzeConfigInitialZdimension);
         }
 

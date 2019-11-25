@@ -1,42 +1,51 @@
-using SharpNeat.Genomes.Neat;
+using SharpNeat.Core;
+using SharpNeat.Genomes.Substrate;
 using SharpNeat.Phenomes;
+using SharpNeat.Phenomes.CPPNs;
 using SharpNeat.Phenomes.NeuralNets.AcyclicNetwork;
 using SharpNeat.Phenomes.NeuralNets.CyclicNetwork;
 using SharpNeat.Phenomes.NeuralNets.FastCyclicNetwork;
-using SharpNeat.Utility;
 
-namespace SharpNeat.Decoders.Voxel
+namespace SharpNeat.Decoders.Substrate
 {
     /// <summary>
-    ///     The voxel decoder translates a given CPPN genome into its phenotypic representation - either a 3D voxel lattice
-    ///     composed of multiple voxels with varying material, or a voxel controller, either for each cell individually or for
-    ///     the structure as a whole.
+    ///     The NEAT substrate genome decoder decodes a given NEAT substrate genome into a graph structure and embeds it along
+    ///     with the given substrate resolution that it is to query.
     /// </summary>
-    public class VoxelDecoder
+    public class NeatSubstrateGenomeDecoder : IGenomeDecoder<NeatSubstrateGenome, IBlackBoxSubstrate>
     {
-        #region Constructors
+        #region Constructor
 
         /// <summary>
-        ///     The VoxelDecoder constructor.
+        ///     Constructor which accepts the chosen network activation scheme and passes to the parent decoder.
         /// </summary>
-        /// <param name="activationScheme">The CPPN activation scheme.</param>
-        /// <param name="x">The length of the X-axis on the voxel lattice.</param>
-        /// <param name="y">The length of the Y-axis on the voxel lattice.</param>
-        /// <param name="z">The length of the Z-axis on the voxel lattice.</param>
-        protected VoxelDecoder(NetworkActivationScheme activationScheme, int x, int y, int z)
+        /// <param name="activationScheme">The activation scheme.</param>
+        public NeatSubstrateGenomeDecoder(NetworkActivationScheme activationScheme)
         {
             _activationScheme = activationScheme;
 
             // Pre-determine which decode routine to use based on the activation scheme.
-            DecodeCppnMethod = GetDecodeMethod(activationScheme);
+            _decodeMethod = GetDecodeMethod(activationScheme);
+        }
 
-            // Set dimensions of voxel structure
-            X = x;
-            Y = y;
-            Z = z;
+        #endregion
 
-            // Compute per-voxel distance matrix
-            DistanceMatrix = VoxelUtils.ComputeVoxelDistanceMatrix(x, y, z);
+        #region IGenomeDecoder methods
+
+        /// <summary>
+        ///     Decodes a given NEAT substrate genome into the corresponding graph representation and packages with the assigned
+        ///     substrate resolution.
+        /// </summary>
+        /// <param name="genome">The NEAT substrate genome to decode and convert into a graph representation.</param>
+        /// <returns>The graph representation packaged with a specification of the target substrate resolution.</returns>
+        public IBlackBoxSubstrate Decode(NeatSubstrateGenome genome)
+        {
+            // Decode to CPPN
+            var cppn = _decodeMethod(genome);
+
+            // Construct and return CPPN with the corresponding substrate resolution
+            return new CppnSubstrate(cppn,
+                new SubstrateResolution(genome.SubstrateX, genome.SubstrateY, genome.SubstrateZ));
         }
 
         #endregion
@@ -52,33 +61,12 @@ namespace SharpNeat.Decoders.Voxel
         ///     The method for decoding a CPPN genome into its component graph representation.
         /// </summary>
         /// <param name="genome">The CPPN genome to decode.</param>
-        protected delegate IBlackBox DecodeGenome(NeatGenome genome);
+        private delegate IBlackBox DecodeGenome(NeatSubstrateGenome genome);
 
         /// <summary>
         ///     Reference to the method for decoding a CPPN genome into its component graph representation.
         /// </summary>
-        protected readonly DecodeGenome DecodeCppnMethod;
-
-        /// <summary>
-        ///     The length of the X-axis on the voxel lattice.
-        /// </summary>
-        protected readonly int X;
-
-        /// <summary>
-        ///     The length of the Y-axis on the voxel lattice.
-        /// </summary>
-        protected readonly int Y;
-
-        /// <summary>
-        ///     The length of the Z-axis on the voxel lattice.
-        /// </summary>
-        protected readonly int Z;
-
-        /// <summary>
-        ///     The distance between each voxel and the center-of-mass of the voxel structure (which is equivalent to the geometric
-        ///     centroid of the structure given that we assume consistent, per-voxel mass regardless of voxel material).
-        /// </summary>
-        protected readonly double[,,] DistanceMatrix;
+        private readonly DecodeGenome _decodeMethod;
 
         #endregion
 
@@ -107,9 +95,9 @@ namespace SharpNeat.Decoders.Voxel
         /// <summary>
         ///     Interprets the genome as an acyclic network and decodes to the corresponding graph.
         /// </summary>
-        /// <param name="genome">The CPPN genome to decode.</param>
+        /// <param name="genome">The NEAT substrate genome to decode.</param>
         /// <returns>The decoded, acyclic graph structure.</returns>
-        private FastAcyclicNetwork DecodeToFastAcyclicNetwork(NeatGenome genome)
+        private FastAcyclicNetwork DecodeToFastAcyclicNetwork(NeatSubstrateGenome genome)
         {
             return FastAcyclicNetworkFactory.CreateFastAcyclicNetwork(genome);
         }
@@ -117,9 +105,9 @@ namespace SharpNeat.Decoders.Voxel
         /// <summary>
         ///     Interprets the genome as a cyclic network and decodes to the corresponding graph.
         /// </summary>
-        /// <param name="genome">The CPPN genome to decode.</param>
+        /// <param name="genome">The NEAT substrate genome to decode.</param>
         /// <returns>The decoded, recurrent graph structure.</returns>
-        private CyclicNetwork DecodeToCyclicNetwork(NeatGenome genome)
+        private CyclicNetwork DecodeToCyclicNetwork(NeatSubstrateGenome genome)
         {
             return CyclicNetworkFactory.CreateCyclicNetwork(genome, _activationScheme);
         }
@@ -128,9 +116,9 @@ namespace SharpNeat.Decoders.Voxel
         ///     Interprets the genome as a cyclic network and decodes to the corresponding graph using heuristics intended to
         ///     accelerate inference.
         /// </summary>
-        /// <param name="genome">The CPPN genome to decode.</param>
+        /// <param name="genome">The NEAT substrate genome to decode.</param>
         /// <returns>The decoded, recurrent graph structure.</returns>
-        private FastCyclicNetwork DecodeToFastCyclicNetwork(NeatGenome genome)
+        private FastCyclicNetwork DecodeToFastCyclicNetwork(NeatSubstrateGenome genome)
         {
             return FastCyclicNetworkFactory.CreateFastCyclicNetwork(genome, _activationScheme);
         }

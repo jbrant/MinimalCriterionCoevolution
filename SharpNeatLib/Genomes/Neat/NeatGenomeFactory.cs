@@ -228,7 +228,7 @@ namespace SharpNeat.Genomes.Neat
                     _innovationIdGenerator.Reset();
                     genome = CreateGenome(birthGeneration);
                     
-                } while (IsGeneratedPhenomeValid(genome) == false);
+                } while (!IsGeneratedPhenomeValid(genome));
                 
                 genomeList.Add(genome);
             }
@@ -318,7 +318,7 @@ namespace SharpNeat.Genomes.Neat
         /// </summary>
         /// <param name="birthGeneration">The current evolution algorithm generation. 
         /// Assigned to the new genome as its birth generation.</param>
-        private NeatGenome CreateGenome(uint birthGeneration)
+        public NeatGenome CreateGenome(uint birthGeneration)
         {   
             NeuronGeneList neuronGeneList = new NeuronGeneList(_inputNeuronCount + _outputNeuronCount);
             NeuronGeneList inputNeuronGeneList = new NeuronGeneList(_inputNeuronCount); // includes single bias neuron.

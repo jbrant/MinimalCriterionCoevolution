@@ -17,6 +17,7 @@ using SharpNeat.EvolutionAlgorithms.ComplexityRegulation;
 using SharpNeat.Genomes.HyperNeat;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.NoveltyArchives;
+using SharpNeat.Phenomes;
 using SharpNeat.Phenomes.Voxels;
 using SharpNeat.SpeciationStrategies;
 
@@ -107,14 +108,14 @@ namespace MCC_Domains.BodyBrain.Bootstrappers
         /// <param name="parallelOptions">Synchronous/Asynchronous execution settings.</param>
         /// <param name="brainGenomeList">The initial population of brain genomes.</param>
         /// <param name="brainGenomeFactory">The brain genome factory initialized by the main evolution thread.</param>
-        /// <param name="brainGenomeDecoder">The decoder that translates brains into neurocontrollers.</param>
+        /// <param name="brainGenomeDecoder">The decoder that translates brain genomes into CPPNs.</param>
         /// <param name="body">The body morphology on which the brains are evaluated.</param>
         /// <param name="startingEvaluations">
         ///     The number of evaluations that preceeded this from which this process will pick up
         ///     (this is used in the case where we're restarting a run because it failed to find a solution in the allotted time).
         /// </param>
         protected override void InitializeAlgorithm(ParallelOptions parallelOptions, List<NeatGenome> brainGenomeList,
-            IGenomeFactory<NeatGenome> brainGenomeFactory, IGenomeDecoder<NeatGenome, VoxelBrain> brainGenomeDecoder,
+            IGenomeFactory<NeatGenome> brainGenomeFactory, IGenomeDecoder<NeatGenome, IBlackBox> brainGenomeDecoder,
             VoxelBody body, ulong startingEvaluations)
         {
             // Initialise log4net (log to console and file).
@@ -161,7 +162,7 @@ namespace MCC_Domains.BodyBrain.Bootstrappers
 
             // Create the brain genome evaluator
             IGenomeEvaluator<NeatGenome> behaviorEvaluator =
-                new ParallelGenomeBehaviorEvaluator<NeatGenome, VoxelBrain>(brainGenomeDecoder, brainEvaluator,
+                new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(brainGenomeDecoder, brainEvaluator,
                     SearchType.NoveltySearch, _nearestNeighbors);
 
             // Only pull the number of genomes from the list equivalent to the initialization algorithm population size

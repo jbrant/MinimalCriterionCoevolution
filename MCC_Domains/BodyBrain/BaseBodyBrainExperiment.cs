@@ -8,8 +8,11 @@ using MCC_Domains.Utils;
 using Redzen.Random;
 using SharpNeat.Core;
 using SharpNeat.Decoders;
-using SharpNeat.Decoders.Voxel;
+using SharpNeat.Decoders.Substrate;
+using SharpNeat.Decoders.Neat;
+using SharpNeat.Genomes.Substrate;
 using SharpNeat.Genomes.Neat;
+using SharpNeat.Phenomes;
 using SharpNeat.Phenomes.Voxels;
 
 namespace MCC_Domains.BodyBrain
@@ -68,14 +71,19 @@ namespace MCC_Domains.BodyBrain
         protected NeatGenomeParameters NeatGenomeParameters;
 
         /// <summary>
+        /// The rate at which the body (substrate) will be expanded (analogous to an increase in substrate resolution).
+        /// </summary>
+        protected double ExpandBodyMutationRate;
+        
+        /// <summary>
         /// The body decoder converting CPPN genomes to voxel bodies.
         /// </summary>
-        protected IGenomeDecoder<NeatGenome, VoxelBody> BodyDecoder;
+        protected IGenomeDecoder<NeatSubstrateGenome, IBlackBoxSubstrate> BodyDecoder;
         
         /// <summary>
         /// The brain decoder converting CPPN genomes to voxel controllers.
         /// </summary>
-        protected IGenomeDecoder<NeatGenome, VoxelBrain> BrainDecoder;
+        protected IGenomeDecoder<NeatGenome, IBlackBox> BrainDecoder;
 
         /// <summary>
         ///     The resource limit for bodies (i.e. the maximum number of times that a body can be used by a brain for satisfying
@@ -180,6 +188,9 @@ namespace MCC_Domains.BodyBrain
             // Set the genome parameters
             NeatGenomeParameters = ExperimentUtils.ReadNeatGenomeParameters(xmlConfig);
             NeatGenomeParameters.FeedforwardOnly = _activationScheme.AcyclicNetwork;
+            
+            // Set body expand mutation parameter
+            ExpandBodyMutationRate = XmlUtils.GetValueAsDouble(xmlConfig, "ExpandBodyMutationRate");
 
             // Set resource limit parameter
             ResourceLimit = XmlUtils.GetValueAsInt(xmlConfig, "ResourceLimit");
@@ -226,11 +237,8 @@ namespace MCC_Domains.BodyBrain
             _brainInitializationGenomeCount = _bodyBrainInitializer.PopulationSize;
             
             // Create body and brain genome decoders
-            BrainDecoder = new VoxelBrainDecoder(_activationScheme, SimulationProperties.InitialXDimension,
-                SimulationProperties.InitialYDimension, SimulationProperties.InitialZDimension,
-                SimulationProperties.NumBrainConnections);
-            BodyDecoder = new VoxelBodyDecoder(_activationScheme, SimulationProperties.InitialXDimension,
-                SimulationProperties.InitialYDimension, SimulationProperties.InitialZDimension);
+            BrainDecoder = new NeatGenomeDecoder(_activationScheme);
+            BodyDecoder = new NeatSubstrateGenomeDecoder(_activationScheme);
         }
 
         /// <inheritdoc />
@@ -245,7 +253,7 @@ namespace MCC_Domains.BodyBrain
         ///     Creates a new CPPN genome factory for bodies.
         /// </summary>
         /// <returns>The constructed body genome factory.</returns>
-        public abstract IGenomeFactory<NeatGenome> CreateBodyGenomeFactory();
+        public abstract IGenomeFactory<NeatSubstrateGenome> CreateBodyGenomeFactory();
 
         /// <inheritdoc />
         /// <summary>
@@ -264,9 +272,9 @@ namespace MCC_Domains.BodyBrain
         /// </summary>
         /// <param name="xw">Reference to the XML writer.</param>
         /// <param name="bodyGenomeList">The list of body genomes to write.</param>
-        public void SaveBodyPopulation(XmlWriter xw, IList<NeatGenome> bodyGenomeList)
+        public void SaveBodyPopulation(XmlWriter xw, IList<NeatSubstrateGenome> bodyGenomeList)
         {
-            NeatGenomeXmlIO.WriteComplete(xw, bodyGenomeList, true);
+            NeatSubstrateGenomeXmlIO.WriteComplete(xw, bodyGenomeList, true);
         }
 
         /// <inheritdoc />
@@ -278,9 +286,9 @@ namespace MCC_Domains.BodyBrain
         /// <param name="brainGenomes">The brain genome list.</param>
         /// <param name="bodyGenomes">The body genome list.</param>
         /// <returns>The instantiated MCC algorithm container.</returns>
-        public abstract IMCCAlgorithmContainer<NeatGenome, NeatGenome> CreateMCCAlgorithmContainer(
-            IGenomeFactory<NeatGenome> brainGenomeFactory, IGenomeFactory<NeatGenome> bodyGenomeFactory,
-            List<NeatGenome> brainGenomes, List<NeatGenome> bodyGenomes);
+        public abstract IMCCAlgorithmContainer<NeatGenome, NeatSubstrateGenome> CreateMCCAlgorithmContainer(
+            IGenomeFactory<NeatGenome> brainGenomeFactory, IGenomeFactory<NeatSubstrateGenome> bodyGenomeFactory,
+            List<NeatGenome> brainGenomes, List<NeatSubstrateGenome> bodyGenomes);
 
         #endregion
 
@@ -350,10 +358,10 @@ namespace MCC_Domains.BodyBrain
         ///     A tuple containing a list of bodies (in the first position) and a list of brains (in the second position), with
         ///     each body being ambulated (such that it and the brain meet the MC) by one or more brains.
         /// </returns>
-        protected Tuple<List<NeatGenome>, List<NeatGenome>> EvolveSeedBodyBrains(
-            IGenomeFactory<NeatGenome> bodyGenomeFactory, IGenomeFactory<NeatGenome> brainGenomeFactory)
+        protected Tuple<List<NeatSubstrateGenome>, List<NeatGenome>> EvolveSeedBodyBrains(
+            IGenomeFactory<NeatSubstrateGenome> bodyGenomeFactory, IGenomeFactory<NeatGenome> brainGenomeFactory)
         {
-            var seedBodyPopulation = new List<NeatGenome>(BodySeedGenomeCount);
+            var seedBodyPopulation = new List<NeatSubstrateGenome>(BodySeedGenomeCount);
             var seedBrainPopulation = new List<NeatGenome>(BrainSeedGenomeCount);
             var bodySolutionCount = new Dictionary<uint, int>();
 
@@ -381,7 +389,7 @@ namespace MCC_Domains.BodyBrain
 
                     // Evolve the number of brains required to meet the success MC for the current body
                     var viableBrains = _bodyBrainInitializer.EvolveViableBrains(brainGenomeFactory,
-                        brainPopulation.ToList(), BrainDecoder, BodyDecoder.Decode(body),
+                        brainPopulation.ToList(), BrainDecoder, new VoxelBody(BodyDecoder.Decode(body)),
                         _maxBrainInitializationEvaluations, ParallelOptions, _maxBodyInitializationRestarts);
 
                     // Proceed to the next iteration if no solutions were evolved
@@ -445,7 +453,7 @@ namespace MCC_Domains.BodyBrain
                 // Evolve the number of brains required to meet the success MC for the body
                 var viableBodyBrains = _bodyBrainInitializer.EvolveViableBrains(brainGenomeFactory,
                     brainGenomeFactory.CreateGenomeList(_brainInitializationGenomeCount, 0), BrainDecoder,
-                    BodyDecoder.Decode(bodyGenome), _maxBrainInitializationEvaluations, ParallelOptions);
+                    new VoxelBody(BodyDecoder.Decode(bodyGenome)), _maxBrainInitializationEvaluations, ParallelOptions);
 
                 // Iterate through each viable brain and remove them if they've already solved a body
                 // or add them to the list of viable brains if they have not
@@ -459,7 +467,7 @@ namespace MCC_Domains.BodyBrain
                 }
             }
 
-            return new Tuple<List<NeatGenome>, List<NeatGenome>>(seedBodyPopulation, seedBrainPopulation);
+            return new Tuple<List<NeatSubstrateGenome>, List<NeatGenome>>(seedBodyPopulation, seedBrainPopulation);
         }
 
         /// <summary>
@@ -475,8 +483,8 @@ namespace MCC_Domains.BodyBrain
         ///     MC.
         /// </returns>
         protected static bool VerifyPreevolvedSeedPopulations(List<NeatGenome> brainPopulation,
-            List<NeatGenome> bodyPopulation, IGenomeEvaluator<NeatGenome> brainEvaluator,
-            IGenomeEvaluator<NeatGenome> bodyEvaluator)
+            List<NeatSubstrateGenome> bodyPopulation, IGenomeEvaluator<NeatGenome> brainEvaluator,
+            IGenomeEvaluator<NeatSubstrateGenome> bodyEvaluator)
         {
             // Update brain and body evaluators such that seed brains will be evaluated against bodies and vice versa
             brainEvaluator.UpdateEvaluationBaseline(bodyEvaluator.DecodeGenomes(bodyPopulation), 0);

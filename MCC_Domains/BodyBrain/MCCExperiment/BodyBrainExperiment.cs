@@ -3,15 +3,14 @@ using System.Xml;
 using MCC_Domains.BodyBrain.MCCExperiment;
 using SharpNeat;
 using SharpNeat.Core;
-using SharpNeat.Decoders.Voxel;
 using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.EvolutionAlgorithms.Statistics;
+using SharpNeat.Genomes.Substrate;
 using SharpNeat.Genomes.HyperNeat;
 using SharpNeat.Genomes.Neat;
-using SharpNeat.Genomes.Voxel;
 using SharpNeat.Loggers;
 using SharpNeat.Network;
-using SharpNeat.Phenomes.Voxels;
+using SharpNeat.Phenomes;
 
 namespace MCC_Domains.BodyBrain
 {
@@ -156,10 +155,12 @@ namespace MCC_Domains.BodyBrain
         ///     Creates a new CPPN genome factory for bodies.
         /// </summary>
         /// <returns>The constructed body genome factory.</returns>
-        public override IGenomeFactory<NeatGenome> CreateBodyGenomeFactory()
+        public override IGenomeFactory<NeatSubstrateGenome> CreateBodyGenomeFactory()
         {
-            return new CppnGenomeFactory(BodyCppnInputCount, BodyCppnOutputCount,
-                DefaultActivationFunctionLibrary.CreateLibraryCppn(), NeatGenomeParameters,
+            return new NeatSubstrateGenomeFactory(BodyCppnInputCount, BodyCppnOutputCount,
+                DefaultActivationFunctionLibrary.CreateLibraryCppn(), NeatGenomeParameters, ExpandBodyMutationRate,
+                SimulationProperties.InitialXDimension, SimulationProperties.InitialYDimension,
+                SimulationProperties.InitialZDimension,
                 new VoxelBodyGenomeValidator(BodyDecoder, SimulationProperties.MinPercentMaterial,
                     SimulationProperties.MinPercentActive));
         }
@@ -172,11 +173,11 @@ namespace MCC_Domains.BodyBrain
         /// <param name="brainGenomes">The brain genome list.</param>
         /// <param name="bodyGenomes">The body genome list.</param>
         /// <returns>The instantiated MCC algorithm container.</returns>
-        public override IMCCAlgorithmContainer<NeatGenome, NeatGenome> CreateMCCAlgorithmContainer(
-            IGenomeFactory<NeatGenome> brainGenomeFactory, IGenomeFactory<NeatGenome> bodyGenomeFactory,
-            List<NeatGenome> brainGenomes, List<NeatGenome> bodyGenomes)
+        public override IMCCAlgorithmContainer<NeatGenome, NeatSubstrateGenome> CreateMCCAlgorithmContainer(
+            IGenomeFactory<NeatGenome> brainGenomeFactory, IGenomeFactory<NeatSubstrateGenome> bodyGenomeFactory,
+            List<NeatGenome> brainGenomes, List<NeatSubstrateGenome> bodyGenomes)
         {
-            List<NeatGenome> seedBodyPopulation;
+            List<NeatSubstrateGenome> seedBodyPopulation;
             List<NeatGenome> seedBrainPopulation;
 
             // If both an initial body and brain population are specified, use them as the seed
@@ -207,8 +208,8 @@ namespace MCC_Domains.BodyBrain
             };
 
             // Create the NEAT EA for brains
-            AbstractEvolutionAlgorithm<NeatGenome> brainEvolutionAlgorithm =
-                new QueueEvolutionAlgorithm<NeatGenome>(eaParams, new NeatAlgorithmStats(eaParams), null, null,
+            AbstractEvolutionAlgorithm<NeatSubstrateGenome> brainEvolutionAlgorithm =
+                new QueueEvolutionAlgorithm<NeatSubstrateGenome>(eaParams, new NeatAlgorithmStats(eaParams), null, null,
                     BrainBatchSize, RunPhase.Primary, _brainEvolutionDataLogger, _brainLogFieldEnableMap,
                     _brainPopulationDataLogger, _brainGenomeDataLogger, _brainSimulationTrialDataLogger);
 
@@ -219,23 +220,24 @@ namespace MCC_Domains.BodyBrain
                     RunPhase.Primary, _bodyEvolutionDataLogger, _bodyLogFieldEnableMap, _bodyPopulationDataLogger,
                     _bodyGenomeDataLogger, _bodySimulationTrialDataLogger);
 
+
             // Create the brain phenome evaluator
-            IPhenomeEvaluator<VoxelBrain, BehaviorInfo> brainEvaluator = new BrainEvaluator(SimulationProperties,
+            IPhenomeEvaluator<IBlackBox, BehaviorInfo> brainEvaluator = new BrainEvaluator(SimulationProperties,
                 MinAmbulationDistance, NumBodySuccessCriteria, Name, Run, ResourceLimit,
                 resourceUsageLogger: _bodyResourceUsageLogger);
 
             // Create the body phenome evaluator
-            IPhenomeEvaluator<VoxelBody, BehaviorInfo> bodyEvaluator = new BodyEvaluator(SimulationProperties,
+            IPhenomeEvaluator<IBlackBoxSubstrate, BehaviorInfo> bodyEvaluator = new BodyEvaluator(SimulationProperties,
                 MinAmbulationDistance, NumBrainSuccessCriteria, Name, Run);
 
             // Create the brain genome evaluator
             IGenomeEvaluator<NeatGenome> brainViabilityEvaluator =
-                new ParallelGenomeBehaviorEvaluator<NeatGenome, VoxelBrain>(BrainDecoder, brainEvaluator,
+                new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(BrainDecoder, brainEvaluator,
                     SearchType.MinimalCriteriaSearch, ParallelOptions);
 
             // Create the body genome evaluator
-            IGenomeEvaluator<NeatGenome> bodyViabilityEvaluator =
-                new ParallelGenomeBehaviorEvaluator<NeatGenome, VoxelBody>(BodyDecoder, bodyEvaluator,
+            IGenomeEvaluator<NeatSubstrateGenome> bodyViabilityEvaluator =
+                new ParallelGenomeBehaviorEvaluator<NeatSubstrateGenome, IBlackBoxSubstrate>(BodyDecoder, bodyEvaluator,
                     SearchType.MinimalCriteriaSearch, ParallelOptions);
 
             // Verify that both populations satisfy their MC so that MCC starts in a valid state
@@ -246,8 +248,8 @@ namespace MCC_Domains.BodyBrain
             }
 
             // Create the MCC container
-            IMCCAlgorithmContainer<NeatGenome, NeatGenome> mccAlgorithmContainer =
-                new MCCAlgorithmContainer<NeatGenome, NeatGenome>(brainEvolutionAlgorithm, bodyEvolutionAlgorithm);
+            IMCCAlgorithmContainer<NeatGenome, NeatSubstrateGenome> mccAlgorithmContainer =
+                new MCCAlgorithmContainer<NeatGenome, NeatSubstrateGenome>(bodyEvolutionAlgorithm, brainEvolutionAlgorithm);
 
             // Initialize the container and component algorithms
             mccAlgorithmContainer.Initialize(brainViabilityEvaluator, brainGenomeFactory, seedBrainPopulation,

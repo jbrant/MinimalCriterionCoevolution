@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using SharpNeat.Core;
 using SharpNeat.Loggers;
+using SharpNeat.Phenomes;
 using SharpNeat.Phenomes.Voxels;
 
 namespace MCC_Domains.BodyBrain.MCCExperiment
@@ -11,7 +11,7 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
     /// <summary>
     ///     Defines evaluation routine for brains within an MCC framework.
     /// </summary>
-    public class BrainEvaluator : IPhenomeEvaluator<VoxelBrain, BehaviorInfo>
+    public class BrainEvaluator : IPhenomeEvaluator<IBlackBox, BehaviorInfo>
     {
         #region Constructor
 
@@ -23,12 +23,12 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
         ///     directories, configuration files and config file parsing information.
         /// </param>
         /// <param name="minAmbulationDistance">The minimum distance that the robot must traverse to meet the MC.</param>
-        /// <param name="experimentName">The human-readable name of the experiment configuration being executed.</param>
-        /// <param name="run">The current run number of the experiment being executed.</param>
         /// <param name="numBodiesSolvedCriteria">
         ///     The number of bodies that must be successfully ambulated to meet the minimal
         ///     criteria.
         /// </param>
+        /// <param name="experimentName">The human-readable name of the experiment configuration being executed.</param>
+        /// <param name="run">The current run number of the experiment being executed.</param>
         /// <param name="resourceLimit">
         ///     The number of times a body can be used for successful ambulation that contribute to meeting
         ///     a brain's MC.
@@ -39,56 +39,23 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
         ///     brain MC (optional).
         /// </param>
         public BrainEvaluator(SimulationProperties simulationProperties, double minAmbulationDistance,
-            int numBodiesSolvedCriteria, string experimentName, int run, int resourceLimit = 0,
-            IDataLogger evaluationLogger = null, IDataLogger resourceUsageLogger = null)
+            int numBodiesSolvedCriteria,
+            string experimentName, int run, int resourceLimit = 0, IDataLogger evaluationLogger = null,
+            IDataLogger resourceUsageLogger = null)
         {
             _simulationProperties = simulationProperties;
             _minAmbulationDistance = minAmbulationDistance;
             _experimentName = experimentName;
             _run = run;
             _numBodiesSolvedCriteria = numBodiesSolvedCriteria;
-            _resourceLimit = resourceLimit;
             _resourceUsageLogger = resourceUsageLogger;
             _evaluationLogger = evaluationLogger;
 
             // Set resource limited flag based on value of resource limit
             _isResourceLimited = resourceLimit > 0;
 
-            // Instantiate the body-usage map to track brain usage if resource limitation is enabled
-            if (_isResourceLimited)
-            {
-                _bodyUsageMap = new Dictionary<uint, int>();
-            }
-        }
-
-        #endregion
-
-        #region Private methods
-
-        /// <summary>
-        ///     Adds new voxel bodies to the resource usage map, removes those that are over their resource limit and removes voxel
-        ///     bodies from the usage map that have gone extinct (i.e. been removed from the population).
-        /// </summary>
-        private void UpdateBodyUsage()
-        {
-            // Add new voxel bodies to the usage map
-            foreach (var newBody in _bodies.Where(x => _bodyUsageMap.Keys.Any(y => y == x.GenomeId) == false))
-            {
-                _bodyUsageMap.Add(newBody.GenomeId, 0);
-            }
-
-            // Remove bodies that are at or over their resource limit as evaluation candidatess
-            foreach (var overLimitBody in _bodies.Where(x => _bodyUsageMap[x.GenomeId] >= _resourceLimit).ToList())
-            {
-                _bodies.Remove(overLimitBody);
-            }
-
-            // Remove bodies that are no longer extant from body usage map
-            foreach (var extinctBody in _bodyUsageMap.Keys.Where(x => _bodies.Any(y => y.GenomeId == x) == false)
-                .ToList())
-            {
-                _bodyUsageMap.Remove(extinctBody);
-            }
+            // Create new factory for voxel body generation
+            _voxelBodyFactory = new VoxelBodyFactory(resourceLimit);
         }
 
         #endregion
@@ -96,9 +63,9 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
         #region Instance variables
 
         /// <summary>
-        ///     The list of voxel body configurations to evaluate against the given brains.
+        ///     The voxel body factory, which maintains voxel body evaluation environments.
         /// </summary>
-        private IList<VoxelBody> _bodies;
+        private readonly VoxelBodyFactory _voxelBodyFactory;
 
         /// <summary>
         ///     The number of bodies that must be successfully ambulated to meet the minimal criteria.
@@ -137,20 +104,10 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
         private readonly IDataLogger _resourceUsageLogger;
 
         /// <summary>
-        ///     The number of times a body can be used for successful ambulation that contribute to meeting a brain's MC.
-        /// </summary>
-        private readonly int _resourceLimit;
-
-        /// <summary>
         ///     Flag indicating whether bodies have an upper limit regarding the number of times they can be used for satisfying a
         ///     brain MC (i.e. limited resources).
         /// </summary>
         private readonly bool _isResourceLimited;
-
-        /// <summary>
-        ///     Dictionary that contains mapping between body genome IDs and a count of their usage for satisfying brain MC.
-        /// </summary>
-        private readonly IDictionary<uint, int> _bodyUsageMap;
 
         /// <summary>
         ///     Lock object for synchronizing evaluation counter increments.
@@ -181,21 +138,25 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
         /// <summary>
         ///     Attempts ambulation of one or more bodies using the given brain.
         /// </summary>
-        /// <param name="brain">The brain responsible for ambulating one or more bodies.</param>
+        /// <param name="brainCppn">The CPPN encoding the per-voxel brain responsible for ambulating one or more bodies.</param>
         /// <param name="currentGeneration">The current generation or evaluation batch.</param>
         /// <returns>A BehaviorInfo, which encapsulates the final location of the robot at the end of a trial.</returns>
-        public BehaviorInfo Evaluate(VoxelBrain brain, uint currentGeneration)
+        public BehaviorInfo Evaluate(IBlackBox brainCppn, uint currentGeneration)
         {
             var curSuccesses = 0;
             var behaviorInfo = new BehaviorInfo();
 
-            for (var cnt = 0; cnt < _bodies.Count && curSuccesses < _numBodiesSolvedCriteria; cnt++)
+            for (var cnt = 0; cnt < _voxelBodyFactory.NumBodies && curSuccesses < _numBodiesSolvedCriteria; cnt++)
             {
                 var isSuccessful = false;
                 ulong threadLocalEvaluationCount;
 
                 // Get the current body under evaluation
-                var body = _bodies[cnt];
+                var body = _voxelBodyFactory.GetVoxelBody(cnt);
+
+                // Create new voxel brain based on the dimensions of the current voxel body
+                var brain = new VoxelBrain(brainCppn, body.LengthX, body.LengthY, body.LengthZ,
+                    _simulationProperties.NumBrainConnections);
 
                 lock (_evaluationLock)
                 {
@@ -205,12 +166,12 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
 
                 // Construct configuration file path
                 var simConfigFilePath = BodyBrainExperimentUtils.ConstructVoxelyzeFilePath("config_braineval", "vxa",
-                    _simulationProperties.SimConfigOutputDirectory, _experimentName, _run, brain.GenomeId,
+                    _simulationProperties.SimConfigOutputDirectory, _experimentName, _run, brainCppn.GenomeId,
                     body.GenomeId);
 
                 // Construct output file path
                 var simResultFilePath = BodyBrainExperimentUtils.ConstructVoxelyzeFilePath("result_braineval", "xml",
-                    _simulationProperties.SimResultsDirectory, _experimentName, _run, brain.GenomeId,
+                    _simulationProperties.SimResultsDirectory, _experimentName, _run, brainCppn.GenomeId,
                     body.GenomeId);
 
                 // Write configuration file
@@ -218,7 +179,7 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
                     simConfigFilePath, simResultFilePath, brain, body, _minAmbulationDistance,
                     _simulationProperties.SimOutputXPath, _simulationProperties.StructurePropertiesXPath,
                     _simulationProperties.MinimalCriterionXPath);
-                
+
                 // Configure the simulation, execute and wait for completion
                 using (var process =
                     Process.Start(
@@ -239,17 +200,17 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
                         lock (_evaluationLock)
                         {
                             // Successful ambulation is discounted if body is at or above resource limit
-                            if (_bodyUsageMap[body.GenomeId] >= _resourceLimit)
+                            if (!_voxelBodyFactory.IsBodyUnderResourceLimit(cnt))
                             {
                                 // Remove configuration and output files
                                 File.Delete(simConfigFilePath);
                                 File.Delete(simResultFilePath);
-                                
-                                continue;                                
+
+                                continue;
                             }
 
                             // Only increment successes if ambulated body is below resource limit
-                            _bodyUsageMap[body.GenomeId]++;
+                            _voxelBodyFactory.IncrementBodyUsageCount(cnt);
                             curSuccesses++;
 
                             // Set success flag
@@ -273,10 +234,10 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
                 // Remove configuration and output files
                 File.Delete(simConfigFilePath);
                 File.Delete(simResultFilePath);
-                
+
                 // Don't attempt to log if the file stream is closed
                 if (!(_evaluationLogger?.IsStreamOpen() ?? false)) continue;
-                
+
                 // Log trial information
                 _evaluationLogger?.LogRow(new List<LoggableElement>
                 {
@@ -344,22 +305,21 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
                 if (_resourceUsageLogger?.IsStreamOpen() ?? false)
                 {
                     // Log resource usages per genome ID
-                    foreach (var body in _bodies)
+                    for (var idx = 0; idx < _voxelBodyFactory.NumBodies; idx++)
                     {
                         _resourceUsageLogger?.LogRow(new List<LoggableElement>
                         {
                             new LoggableElement(ResourceUsageFieldElements.Generation, lastGeneration),
-                            new LoggableElement(ResourceUsageFieldElements.GenomeId, body.GenomeId),
-                            new LoggableElement(ResourceUsageFieldElements.UsageCount, _bodyUsageMap[body.GenomeId])
+                            new LoggableElement(ResourceUsageFieldElements.GenomeId,
+                                _voxelBodyFactory.GetBodyGenomeId(idx)),
+                            new LoggableElement(ResourceUsageFieldElements.UsageCount,
+                                _voxelBodyFactory.GetBodyUsageCount(idx))
                         });
                     }
                 }
 
-                // Store off new/extant bodies
-                _bodies = (IList<VoxelBody>) evaluatorPhenomes;
-                
-                // Update the voxel body usage map and remove candidate bodies that have exceeded their usage limit
-                UpdateBodyUsage();
+                // Store off new bodies and remove bodies that have aged out or exceed their usage limit
+                _voxelBodyFactory.SetVoxelBodies((IList<IBlackBoxSubstrate>) evaluatorPhenomes);
             }
         }
 

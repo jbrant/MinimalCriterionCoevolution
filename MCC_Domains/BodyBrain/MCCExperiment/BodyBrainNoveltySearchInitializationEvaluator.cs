@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using SharpNeat.Core;
 using SharpNeat.Loggers;
+using SharpNeat.Phenomes;
 using SharpNeat.Phenomes.Voxels;
 
 namespace MCC_Domains.BodyBrain.MCCExperiment
@@ -12,7 +13,7 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
     ///     Defines evaluation rules and process for MCC initialization in body/brain experiments using the novelty search
     ///     algorithm.
     /// </summary>
-    public class BodyBrainNoveltySearchInitializationEvaluator : IPhenomeEvaluator<VoxelBrain, BehaviorInfo>
+    public class BodyBrainNoveltySearchInitializationEvaluator : IPhenomeEvaluator<IBlackBox, BehaviorInfo>
     {
         #region Constructor
 
@@ -112,7 +113,7 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
         /// <param name="brain">The neural network controller for each voxel cell.</param>
         /// <param name="currentGeneration">The current generation or evaluation batch.</param>
         /// <returns>A BehaviorInfo, which encapsulates the distance that the robot traveled.</returns>
-        public BehaviorInfo Evaluate(VoxelBrain brain, uint currentGeneration)
+        public BehaviorInfo Evaluate(IBlackBox brainCppn, uint currentGeneration)
         {
             var behaviorInfo = new BehaviorInfo();
             var isSuccessful = false;
@@ -122,6 +123,11 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
                 // Increment evaluation count
                 EvaluationCount++;
             }
+            
+            // Create new voxel brain given the initial substrate dimensions
+            var brain = new VoxelBrain(brainCppn, _simulationProperties.InitialXDimension,
+                _simulationProperties.InitialYDimension, _simulationProperties.InitialZDimension,
+                _simulationProperties.NumBrainConnections);
 
             // Construct configuration file path
             var simConfigFilePath = BodyBrainExperimentUtils.ConstructVoxelyzeFilePath("config_init", "vxa",

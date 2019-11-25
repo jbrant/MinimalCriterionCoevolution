@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using SharpNeat.Core;
 using SharpNeat.Loggers;
+using SharpNeat.Phenomes;
 using SharpNeat.Phenomes.Voxels;
 
 namespace MCC_Domains.BodyBrain.MCCExperiment
@@ -10,7 +11,7 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
     /// <summary>
     ///     Defines evaluation routine for bodies within an MCC framework.
     /// </summary>
-    public class BodyEvaluator : IPhenomeEvaluator<VoxelBody, BehaviorInfo>
+    public class BodyEvaluator : IPhenomeEvaluator<IBlackBoxSubstrate, BehaviorInfo>
     {
         #region Constructor
 
@@ -22,15 +23,16 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
         ///     directories, configuration files and config file parsing information.
         /// </param>
         /// <param name="minAmbulationDistance">The minimum distance that the robot must traverse to meet the MC.</param>
-        /// <param name="experimentName">The human-readable name of the experiment configuration being executed.</param>
-        /// <param name="run">The current run number of the experiment being executed.</param>
         /// <param name="numBrainsSolvedCriteria">
         ///     The number of brains that must successfully ambulate the body to meet the minimal
         ///     criteria.
         /// </param>
+        /// <param name="experimentName">The human-readable name of the experiment configuration being executed.</param>
+        /// <param name="run">The current run number of the experiment being executed.</param>
         /// <param name="evaluationLogger">Per-evaluation data logger (optional).</param>
         public BodyEvaluator(SimulationProperties simulationProperties, double minAmbulationDistance,
-            int numBrainsSolvedCriteria, string experimentName, int run, IDataLogger evaluationLogger = null)
+            int numBrainsSolvedCriteria, string experimentName, int run,
+            IDataLogger evaluationLogger = null)
         {
             _simulationProperties = simulationProperties;
             _minAmbulationDistance = minAmbulationDistance;
@@ -38,6 +40,9 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
             _run = run;
             _numBrainsSolvedCriteria = numBrainsSolvedCriteria;
             _evaluationLogger = evaluationLogger;
+
+            // Create new factory for voxel brain generation
+            _voxelBrainFactory = new VoxelBrainFactory(simulationProperties.NumBrainConnections);
         }
 
         #endregion
@@ -45,9 +50,9 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
         #region Instance variables
 
         /// <summary>
-        ///     The list of brains to evaluate against the given voxel body configurations.
+        ///     The voxel brain factory, which maintains voxel body controllers.
         /// </summary>
-        private IList<VoxelBrain> _brains;
+        private readonly VoxelBrainFactory _voxelBrainFactory;
 
         /// <summary>
         ///     The number of brains that must successfully ambulate the body to meet the minimal criteria.
@@ -107,24 +112,27 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
         #region Public methods
 
         /// <summary>
-        /// Attempts ambulation of a body using one or more brains.
+        ///     Attempts ambulation of a body using one or more brains.
         /// </summary>
-        /// <param name="body">The voxel body to be ambulated.</param>
+        /// <param name="bodyCppn">The CPPN which will produce the voxel body to be ambulated.</param>
         /// <param name="currentGeneration">The current generation or evaluation batch.</param>
         /// <returns>A BehaviorInfo, which encapsulates the final location of the robot at the end of a trial.</returns>
-        public BehaviorInfo Evaluate(VoxelBody body, uint currentGeneration)
+        public BehaviorInfo Evaluate(IBlackBoxSubstrate bodyCppn, uint currentGeneration)
         {
             var curSuccesses = 0;
             var behaviorInfo = new BehaviorInfo();
 
-            for (var cnt = 0; cnt < _brains.Count && curSuccesses < _numBrainsSolvedCriteria; cnt++)
+            for (var cnt = 0; cnt < _voxelBrainFactory.NumBrains && curSuccesses < _numBrainsSolvedCriteria; cnt++)
             {
                 var isSuccessful = false;
                 ulong threadLocalEvaluationCount;
 
-                // Get the current brain under evaluation
-                var brain = _brains[cnt];
-                
+                // Create new voxel body
+                var body = new VoxelBody(bodyCppn);
+
+                // Get the current brain under evaluation and scale to the voxel body size
+                var brain = _voxelBrainFactory.GetVoxelBrain(cnt, body.LengthX, body.LengthY, body.LengthZ);
+
                 lock (_evaluationLock)
                 {
                     // Increment evaluation count
@@ -133,12 +141,13 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
 
                 // Construct configuration file path
                 var simConfigFilePath = BodyBrainExperimentUtils.ConstructVoxelyzeFilePath("config_bodyeval", "vxa",
-                    _simulationProperties.SimConfigOutputDirectory, _experimentName, _run, body.GenomeId,
+                    _simulationProperties.SimConfigOutputDirectory, _experimentName, _run, bodyCppn.GenomeId,
                     brain.GenomeId);
 
                 // Construct output file path
                 var simResultFilePath = BodyBrainExperimentUtils.ConstructVoxelyzeFilePath("result_bodyeval", "xml",
-                    _simulationProperties.SimResultsDirectory, _experimentName, _run, body.GenomeId, brain.GenomeId);
+                    _simulationProperties.SimResultsDirectory, _experimentName, _run, bodyCppn.GenomeId,
+                    brain.GenomeId);
 
                 BodyBrainExperimentUtils.WriteVoxelyzeSimulationFile(_simulationProperties.SimConfigTemplateFile,
                     simConfigFilePath, simResultFilePath, brain, body, _minAmbulationDistance,
@@ -162,7 +171,7 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
                 {
                     // Increment successes
                     curSuccesses++;
-                    
+
                     // Set success flag
                     isSuccessful = true;
                 }
@@ -175,9 +184,9 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
                 File.Delete(simConfigFilePath);
                 File.Delete(simResultFilePath);
 
-                    // Don't attempt to log if the file stream is closed
+                // Don't attempt to log if the file stream is closed
                 if (!(_evaluationLogger?.IsStreamOpen() ?? false)) continue;
-                
+
                 // Log trial information
                 _evaluationLogger?.LogRow(new List<LoggableElement>
                 {
@@ -206,7 +215,7 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
         {
             // Open logger
             _evaluationLogger?.Open();
-            
+
             // Set the run phase
             _evaluationLogger?.UpdateRunPhase(RunPhase.Primary);
 
@@ -229,7 +238,7 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
         /// <param name="lastGeneration">The generation that was just executed.</param>
         public void UpdateEvaluatorPhenotypes(IEnumerable<object> evaluatorPhenomes, uint lastGeneration)
         {
-            _brains = (IList<VoxelBrain>) evaluatorPhenomes;
+            _voxelBrainFactory.SetVoxelBrains((IList<IBlackBox>) evaluatorPhenomes);
         }
 
         /// <inheritdoc />

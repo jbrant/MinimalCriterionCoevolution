@@ -25,6 +25,7 @@
         <BehaviorCharacterization></BehaviorCharacterization>
     </BehaviorConfig>
     <MinAmbulationDistance></MinAmbulationDistance>
+    <ExpandBodyMutationRate></ExpandBodyMutationRate>
     <BrainOffspringBatchSize></BrainOffspringBatchSize>
     <BodyOffspringBatchSize></BodyOffspringBatchSize>
     <MaxGenerations></MaxGenerations>

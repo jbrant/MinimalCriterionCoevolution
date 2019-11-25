@@ -1,8 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using SharpNeat.Core;
-using SharpNeat.Genomes.Neat;
+using SharpNeat.Genomes.Substrate;
 using SharpNeat.Loggers;
+using SharpNeat.Phenomes;
 using SharpNeat.Phenomes.Voxels;
 
 namespace SharpNeat.EvolutionAlgorithms.Statistics
@@ -25,7 +26,7 @@ namespace SharpNeat.EvolutionAlgorithms.Statistics
         /// <param name="eaParams">Evolution algorithm parameters required for initialization.</param>
         /// <param name="bodyDecoder">The voxel body decoder.</param>
         public VoxelBodyAlgorithmStats(EvolutionAlgorithmParameters eaParams,
-            IGenomeDecoder<NeatGenome, VoxelBody> bodyDecoder) : this(eaParams)
+            IGenomeDecoder<NeatSubstrateGenome, IBlackBoxSubstrate> bodyDecoder) : this(eaParams)
         {
             _bodyDecoder = bodyDecoder;
         }
@@ -37,7 +38,7 @@ namespace SharpNeat.EvolutionAlgorithms.Statistics
         /// <summary>
         ///     The voxel body genome decoder.
         /// </summary>
-        private readonly IGenomeDecoder<NeatGenome, VoxelBody> _bodyDecoder;
+        private readonly IGenomeDecoder<NeatSubstrateGenome, IBlackBoxSubstrate> _bodyDecoder;
 
         /// <summary>
         ///     The minimum number of voxels in a given voxel body within the body population.
@@ -155,14 +156,14 @@ namespace SharpNeat.EvolutionAlgorithms.Statistics
         public override void ComputeAlgorithmSpecificPopulationStats<TGenome>(IList<TGenome> population)
         {
             // Ensure that population list contains neat genomes, otherwise return
-            if (population is IList<NeatGenome> == false)
+            if (population is IList<NeatSubstrateGenome> == false)
                 return;
 
             // Cast to neat genome
-            var bodyPopulation = (IList<NeatGenome>) population;
+            var bodyPopulation = (IList<NeatSubstrateGenome>) population;
 
             // Decode all of the bodies in the population
-            var voxelBodies = bodyPopulation.Select(x => _bodyDecoder.Decode(x)).ToList();
+            var voxelBodies = bodyPopulation.Select(x => new VoxelBody(_bodyDecoder.Decode(x))).ToList();
 
             // Compute overall voxel statistics
             _minVoxels = voxelBodies.Min(x => x.NumVoxels);

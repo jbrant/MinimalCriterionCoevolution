@@ -152,15 +152,15 @@ namespace MCC_Domains.BodyBrain
             var structureElem = simDoc.SelectSingleNode(vxaStructureXPath);
 
             // Set voxel structure dimensions
-            structureElem.SelectSingleNode("X_Voxels").InnerText = body.Xlength.ToString();
-            structureElem.SelectSingleNode("Y_Voxels").InnerText = body.Ylength.ToString();
-            structureElem.SelectSingleNode("Z_Voxels").InnerText = body.Zlength.ToString();
+            structureElem.SelectSingleNode("X_Voxels").InnerText = body.LengthX.ToString();
+            structureElem.SelectSingleNode("Y_Voxels").InnerText = body.LengthY.ToString();
+            structureElem.SelectSingleNode("Z_Voxels").InnerText = body.LengthZ.ToString();
 
             // Set number of brain connections
             structureElem.SelectSingleNode("numSynapses").InnerText = brain.NumConnections.ToString();
 
             // Set layer-wise material and connection weights
-            for (var layerIdx = 0; layerIdx < body.Zlength; layerIdx++)
+            for (var layerIdx = 0; layerIdx < body.LengthZ; layerIdx++)
             {
                 // Create a new layer XML element for body materials and connections
                 var bodyLayerElem = simDoc.CreateElement("Layer");

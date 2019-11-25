@@ -26,13 +26,11 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Xml;
 using ExperimentEntities.entities;
-using MCC_Domains.MazeNavigation.Bootstrappers;
-using Redzen.Random;
 using SharpNeat.Core;
 using SharpNeat.Decoders;
 using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.EvolutionAlgorithms.ComplexityRegulation;
-using SharpNeat.Genomes.Maze;
+using SharpNeat.Genomes.Substrate;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Loggers;
 
@@ -173,33 +171,33 @@ namespace MCC_Domains.Utils
                 // Set each if it's specified in the configuration (otherwise, accept the default)
                 if (initialConnectionProportion != null)
                 {
-                    genomeParameters.InitialInterconnectionsProportion = initialConnectionProportion ?? default(double);
+                    genomeParameters.InitialInterconnectionsProportion = initialConnectionProportion ?? default;
                 }
 
                 if (weightMutationProbability != null)
                 {
-                    genomeParameters.ConnectionWeightMutationProbability = weightMutationProbability ?? default(double);
+                    genomeParameters.ConnectionWeightMutationProbability = weightMutationProbability ?? default;
                 }
 
                 if (addConnectionProbability != null)
                 {
-                    genomeParameters.AddConnectionMutationProbability = addConnectionProbability ?? default(double);
+                    genomeParameters.AddConnectionMutationProbability = addConnectionProbability ?? default;
                 }
 
                 if (addNodeProbability != null)
                 {
-                    genomeParameters.AddNodeMutationProbability = addNodeProbability ?? default(double);
+                    genomeParameters.AddNodeMutationProbability = addNodeProbability ?? default;
                 }
 
                 if (deleteConnectionProbability != null)
                 {
                     genomeParameters.DeleteConnectionMutationProbability = deleteConnectionProbability ??
-                                                                           default(double);
+                                                                           default;
                 }
 
                 if (connectionWeightRange != null)
                 {
-                    genomeParameters.ConnectionWeightRange = connectionWeightRange ?? default(double);
+                    genomeParameters.ConnectionWeightRange = connectionWeightRange ?? default;
                 }
             }
 
@@ -215,7 +213,7 @@ namespace MCC_Domains.Utils
         public static NeatGenomeParameters ReadNeatGenomeParameters(ExperimentDictionary experimentDictionary,
             bool isPrimary)
         {
-            return (isPrimary
+            return isPrimary
                 ? new NeatGenomeParameters
                 {
                     InitialInterconnectionsProportion = experimentDictionary.Primary_ConnectionProportion,
@@ -230,17 +228,17 @@ namespace MCC_Domains.Utils
                 : new NeatGenomeParameters
                 {
                     InitialInterconnectionsProportion =
-                        experimentDictionary.Initialization_ConnectionProportion ?? default(double),
+                        experimentDictionary.Initialization_ConnectionProportion ?? default,
                     ConnectionWeightMutationProbability =
-                        experimentDictionary.Initialization_MutateConnectionWeightsProbability ?? default(double),
+                        experimentDictionary.Initialization_MutateConnectionWeightsProbability ?? default,
                     AddConnectionMutationProbability =
-                        experimentDictionary.Initialization_MutateAddConnectionProbability ?? default(double),
+                        experimentDictionary.Initialization_MutateAddConnectionProbability ?? default,
                     AddNodeMutationProbability =
-                        experimentDictionary.Initialization_MutateAddNeuronProbability ?? default(double),
+                        experimentDictionary.Initialization_MutateAddNeuronProbability ?? default,
                     DeleteConnectionMutationProbability =
-                        experimentDictionary.Initialization_MutateDeleteConnectionProbability ?? default(double),
+                        experimentDictionary.Initialization_MutateDeleteConnectionProbability ?? default,
                     ConnectionWeightRange = experimentDictionary.Initialization_ConnectionWeightRange ?? default(double)
-                });
+                };
         }
 
         /// <summary>
@@ -253,15 +251,15 @@ namespace MCC_Domains.Utils
             // Create new NEAT EA parameters with default values
             return new EvolutionAlgorithmParameters
             {
-                SpecieCount = XmlUtils.TryGetValueAsInt(xmlConfig, "SpecieCount") ?? default(int),
-                ElitismProportion = XmlUtils.TryGetValueAsDouble(xmlConfig, "ElitismProportion") ?? default(double),
-                SelectionProportion = XmlUtils.TryGetValueAsDouble(xmlConfig, "SelectionProportion") ?? default(double),
+                SpecieCount = XmlUtils.TryGetValueAsInt(xmlConfig, "SpecieCount") ?? default,
+                ElitismProportion = XmlUtils.TryGetValueAsDouble(xmlConfig, "ElitismProportion") ?? default,
+                SelectionProportion = XmlUtils.TryGetValueAsDouble(xmlConfig, "SelectionProportion") ?? default,
                 OffspringAsexualProportion =
-                    XmlUtils.TryGetValueAsDouble(xmlConfig, "OffspringAsexualProbability") ?? default(double),
+                    XmlUtils.TryGetValueAsDouble(xmlConfig, "OffspringAsexualProbability") ?? default,
                 OffspringSexualProportion =
-                    XmlUtils.TryGetValueAsDouble(xmlConfig, "OffspringSexualProbability") ?? default(double),
+                    XmlUtils.TryGetValueAsDouble(xmlConfig, "OffspringSexualProbability") ?? default,
                 InterspeciesMatingProportion =
-                    XmlUtils.TryGetValueAsDouble(xmlConfig, "InterspeciesMatingProbability") ?? default(double)
+                    XmlUtils.TryGetValueAsDouble(xmlConfig, "InterspeciesMatingProbability") ?? default
             };
         }
 
@@ -275,7 +273,7 @@ namespace MCC_Domains.Utils
             ExperimentDictionary experimentDictionary,
             bool isPrimary)
         {
-            return (isPrimary
+            return isPrimary
                 ? new EvolutionAlgorithmParameters
                 {
                     SpecieCount = experimentDictionary.Primary_NumSpecies,
@@ -287,16 +285,16 @@ namespace MCC_Domains.Utils
                 }
                 : new EvolutionAlgorithmParameters
                 {
-                    SpecieCount = experimentDictionary.Initialization_NumSpecies ?? default(int),
+                    SpecieCount = experimentDictionary.Initialization_NumSpecies ?? default,
                     InterspeciesMatingProportion =
-                        experimentDictionary.Initialization_InterspeciesMatingProbability ?? default(double),
-                    ElitismProportion = experimentDictionary.Initialization_ElitismProportion ?? default(double),
-                    SelectionProportion = experimentDictionary.Initialization_SelectionProportion ?? default(double),
+                        experimentDictionary.Initialization_InterspeciesMatingProbability ?? default,
+                    ElitismProportion = experimentDictionary.Initialization_ElitismProportion ?? default,
+                    SelectionProportion = experimentDictionary.Initialization_SelectionProportion ?? default,
                     OffspringAsexualProportion =
-                        experimentDictionary.Initialization_AsexualProbability ?? default(double),
+                        experimentDictionary.Initialization_AsexualProbability ?? default,
                     OffspringSexualProportion =
-                        experimentDictionary.Initialization_CrossoverProbability ?? default(double)
-                });
+                        experimentDictionary.Initialization_CrossoverProbability ?? default
+                };
         }
 
         /// <summary>
@@ -396,7 +394,7 @@ namespace MCC_Domains.Utils
             }
 
             var xmlBehaviorConfig = behaviorNodeList[0] as XmlElement;
-            
+
             // Parse and generate the appropriate behavior characterization factory
             var behaviorCharacterizationFactory =
                 BehaviorCharacterizationUtil.GenerateBehaviorCharacterizationFactory(
@@ -493,6 +491,37 @@ namespace MCC_Domains.Utils
             }
 
             return neatGenomes;
+        }
+
+        /// <summary>
+        ///     Reads in seed CPPN genomes used to bootstrap MCC experiments.
+        /// </summary>
+        /// <param name="seedPath">
+        ///     The path of the single genome or a directory containing multiple XML genome definitions.
+        /// </param>
+        /// <param name="genomeFactory">The genome factory to assign to each genome.</param>
+        /// <returns>The list of seed CPPN genomes.</returns>
+        public static List<NeatSubstrateGenome> ReadSeedCppnGenomes(string seedPath, NeatSubstrateGenomeFactory genomeFactory)
+        {
+            var genomes = new List<NeatSubstrateGenome>();
+
+            // Get the genome files in the given path
+            var genomeFiles = GetGenomeFiles(seedPath);
+
+            // Read in all genomes and add them to the list
+            foreach (var genomeFile in genomeFiles)
+            {
+                using (var xr = XmlReader.Create(genomeFile))
+                {
+                    // Read in the genomes
+                    var curGenomes = NeatSubstrateGenomeXmlIO.ReadCompleteGenomeList(xr, false, genomeFactory);
+
+                    // Add the genomes to the overall genome list
+                    genomes.AddRange(curGenomes);
+                }
+            }
+
+            return genomes;
         }
     }
 }

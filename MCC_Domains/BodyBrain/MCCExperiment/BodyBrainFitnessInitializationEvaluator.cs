@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using SharpNeat.Core;
 using SharpNeat.Loggers;
+using SharpNeat.Phenomes;
 using SharpNeat.Phenomes.Voxels;
 
 namespace MCC_Domains.BodyBrain.MCCExperiment
@@ -10,7 +11,7 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
     /// <summary>
     ///     Defines evaluation rules and process for MCC initialization in body/brain experiments using a fitness-based EA.
     /// </summary>
-    public class BodyBrainFitnessInitializationEvaluator : IPhenomeEvaluator<VoxelBrain, FitnessInfo>
+    public class BodyBrainFitnessInitializationEvaluator : IPhenomeEvaluator<IBlackBox, FitnessInfo>
     {
         #region Public properties
         
@@ -107,16 +108,21 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
         /// <summary>
         ///     Runs a brain (neural network controller) through a single body ambulation trial.
         /// </summary>
-        /// <param name="brain">The neural network controller for each voxel cell.</param>
+        /// <param name="brainCppn">The CPPN encoding the per-voxel brain responsible for ambulating one or more bodies.</param>
         /// <param name="currentGeneration">The current generation or evaluation batch.</param>
         /// <returns>A FitnessInfo, which encapsulates the distance that the robot traveled.</returns>
-        public FitnessInfo Evaluate(VoxelBrain brain, uint currentGeneration)
+        public FitnessInfo Evaluate(IBlackBox brainCppn, uint currentGeneration)
         {
             lock (_evaluationLock)
             {
                 // Increment evaluation count
                 EvaluationCount++;
             }
+            
+            // Create new voxel brain given the initial substrate dimensions
+            var brain = new VoxelBrain(brainCppn, _simulationProperties.InitialXDimension,
+                _simulationProperties.InitialYDimension, _simulationProperties.InitialZDimension,
+                _simulationProperties.NumBrainConnections);
             
             // Construct configuration file path
             var simConfigFilePath = BodyBrainExperimentUtils.ConstructVoxelyzeFilePath("config_init", "vxa",

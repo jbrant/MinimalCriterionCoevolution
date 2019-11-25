@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Xml;
 using SharpNeat.Core;
+using SharpNeat.Genomes.Substrate;
 using SharpNeat.Genomes.Neat;
 
 namespace MCC_Domains.BodyBrain
@@ -46,7 +47,7 @@ namespace MCC_Domains.BodyBrain
         ///     Creates a new CPPN genome factory for bodies.
         /// </summary>
         /// <returns>The constructed body genome factory.</returns>
-        IGenomeFactory<NeatGenome> CreateBodyGenomeFactory();
+        IGenomeFactory<NeatSubstrateGenome> CreateBodyGenomeFactory();
 
         /// <summary>
         ///     Save a population of brain genomes to an XmlWriter.
@@ -60,7 +61,7 @@ namespace MCC_Domains.BodyBrain
         /// </summary>
         /// <param name="xw">Reference to the XML writer.</param>
         /// <param name="bodyGenomeList">The list of body genomes to write.</param>
-        void SaveBodyPopulation(XmlWriter xw, IList<NeatGenome> bodyGenomeList);
+        void SaveBodyPopulation(XmlWriter xw, IList<NeatSubstrateGenome> bodyGenomeList);
 
         /// <summary>
         ///     Creates the evolution algorithm container using the given factories and genome lists.
@@ -70,8 +71,8 @@ namespace MCC_Domains.BodyBrain
         /// <param name="brainGenomes">The brain genome list.</param>
         /// <param name="bodyGenomes">The body genome list.</param>
         /// <returns>The instantiated MCC algorithm container.</returns>
-        IMCCAlgorithmContainer<NeatGenome, NeatGenome> CreateMCCAlgorithmContainer(
-            IGenomeFactory<NeatGenome> brainGenomeFactory, IGenomeFactory<NeatGenome> bodyGenomeFactory,
-            List<NeatGenome> brainGenomes, List<NeatGenome> bodyGenomes);
+        IMCCAlgorithmContainer<NeatGenome, NeatSubstrateGenome> CreateMCCAlgorithmContainer(
+            IGenomeFactory<NeatGenome> brainGenomeFactory, IGenomeFactory<NeatSubstrateGenome> bodyGenomeFactory,
+            List<NeatGenome> brainGenomes, List<NeatSubstrateGenome> bodyGenomes);
     }
 }

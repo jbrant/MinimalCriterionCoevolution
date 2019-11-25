@@ -2,8 +2,8 @@
 <Config>
     <MaxBodyInitializationRestarts>2</MaxBodyInitializationRestarts>
     <MaxBrainInitializationEvaluations>50</MaxBrainInitializationEvaluations>
-    <BrainPopulationSize>250</BrainPopulationSize>
-    <BodyPopulationSize>50</BodyPopulationSize>
+    <BrainPopulationSize>100</BrainPopulationSize>
+    <BodyPopulationSize>20</BodyPopulationSize>
     <BrainSeedGenomeCount>5</BrainSeedGenomeCount>
     <BodySeedGenomeCount>2</BodySeedGenomeCount>
     <ResourceLimit>5</ResourceLimit>
@@ -23,9 +23,10 @@
     <BehaviorConfig>
         <BehaviorCharacterization>End Point</BehaviorCharacterization>
     </BehaviorConfig>
-    <MinAmbulationDistance>15</MinAmbulationDistance>
-    <BrainOffspringBatchSize>40</BrainOffspringBatchSize>
-    <BodyOffspringBatchSize>10</BodyOffspringBatchSize>
+    <MinAmbulationDistance>0.001</MinAmbulationDistance>
+    <ExpandBodyMutationRate>0.6</ExpandBodyMutationRate>
+    <BrainOffspringBatchSize>10</BrainOffspringBatchSize>
+    <BodyOffspringBatchSize>2</BodyOffspringBatchSize>
     <MaxGenerations>200</MaxGenerations>
     <NumBodiesSolvedCriteria>1</NumBodiesSolvedCriteria>
     <NumBrainsSolvedCriteria>1</NumBrainsSolvedCriteria>
@@ -53,8 +54,8 @@
         <SearchAlgorithm>Novelty Search</SearchAlgorithm>
         <SelectionAlgorithm>Steady State</SelectionAlgorithm>
         <PopulationSize>20</PopulationSize>
-        <SpecieCount>5</SpecieCount>
-        <OffspringBatchSize>5</OffspringBatchSize>
+        <SpecieCount>4</SpecieCount>
+        <OffspringBatchSize>4</OffspringBatchSize>
         <PopulationEvaluationFrequency>30</PopulationEvaluationFrequency>
         <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>
         <ComplexityThreshold>30</ComplexityThreshold>

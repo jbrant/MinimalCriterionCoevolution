@@ -11,6 +11,7 @@ using MCC_Domains.BodyBrain;
 using MCC_Domains.Utils;
 using SharpNeat;
 using SharpNeat.Core;
+using SharpNeat.Genomes.Substrate;
 using SharpNeat.Genomes.HyperNeat;
 using SharpNeat.Genomes.Neat;
 
@@ -75,7 +76,7 @@ namespace MCC_Executor.BodyBrain
         /// <summary>
         ///     MCC algorithm container, encapsulating two population queues.
         /// </summary>
-        private static IMCCAlgorithmContainer<NeatGenome, NeatGenome> _mccEaContainer;
+        private static IMCCAlgorithmContainer<NeatGenome, NeatSubstrateGenome> _mccEaContainer;
 
         /// <summary>
         ///     Console logger for reporting execution status.
@@ -180,7 +181,7 @@ namespace MCC_Executor.BodyBrain
 
             // Read in the seed maze population
             var bodyGenomeList = seedBodyPath != null
-                ? ExperimentUtils.ReadSeedNeatGenomes(seedBodyPath, (CppnGenomeFactory) bodyGenomeFactory)
+                ? ExperimentUtils.ReadSeedCppnGenomes(seedBodyPath, (NeatSubstrateGenomeFactory) bodyGenomeFactory)
                     .Take(experiment.BodySeedGenomeCount).ToList()
                 : null;
 
@@ -218,8 +219,8 @@ namespace MCC_Executor.BodyBrain
         /// <param name="experiment">Reference to the initialized experiment.</param>
         /// <param name="run">The current run being executed.</param>
         private static void RunExperiment(IGenomeFactory<NeatGenome> brainGenomeFactory,
-            IGenomeFactory<NeatGenome> bodyGenomeFactory, List<NeatGenome> brainGenomeList,
-            List<NeatGenome> bodyGenomeList, string experimentName, IBodyBrainExperiment experiment, int run)
+            IGenomeFactory<NeatSubstrateGenome> bodyGenomeFactory, List<NeatGenome> brainGenomeList,
+            List<NeatSubstrateGenome> bodyGenomeList, string experimentName, IBodyBrainExperiment experiment, int run)
         {
             try
             {

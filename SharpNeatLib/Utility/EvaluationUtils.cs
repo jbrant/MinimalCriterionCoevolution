@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.EntityFrameworkCore.ValueGeneration;
 using Redzen.Random;
 using SharpNeat.Core;
 

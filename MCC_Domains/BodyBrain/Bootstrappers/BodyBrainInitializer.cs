@@ -8,6 +8,7 @@ using MCC_Domains.Utils;
 using SharpNeat.Core;
 using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.Genomes.Neat;
+using SharpNeat.Phenomes;
 using SharpNeat.Phenomes.Voxels;
 
 namespace MCC_Domains.BodyBrain
@@ -173,7 +174,7 @@ namespace MCC_Domains.BodyBrain
         /// </param>
         /// <returns>The list of viable brain genomes.</returns>
         public IList<NeatGenome> EvolveViableBrains(IGenomeFactory<NeatGenome> genomeFactory,
-            List<NeatGenome> seedBrainList, IGenomeDecoder<NeatGenome, VoxelBrain> brainGenomeDecoder, VoxelBody body,
+            List<NeatGenome> seedBrainList, IGenomeDecoder<NeatGenome, IBlackBox> brainGenomeDecoder, VoxelBody body,
             ulong maxInitializationEvals, ParallelOptions parallelOptions, int maxBodyRestarts = int.MaxValue)
         {
             List<NeatGenome> viableBrains;
@@ -214,7 +215,7 @@ namespace MCC_Domains.BodyBrain
         ///     (this is used in the case where we're restarting a run because it failed to find a solution in the allotted time).
         /// </param>
         protected abstract void InitializeAlgorithm(ParallelOptions parallelOptions, List<NeatGenome> brainGenomeList,
-            IGenomeFactory<NeatGenome> brainGenomeFactory, IGenomeDecoder<NeatGenome, VoxelBrain> brainGenomeDecoder,
+            IGenomeFactory<NeatGenome> brainGenomeFactory, IGenomeDecoder<NeatGenome, IBlackBox> brainGenomeDecoder,
             VoxelBody body, ulong startingEvaluations);
 
         /// <summary>
