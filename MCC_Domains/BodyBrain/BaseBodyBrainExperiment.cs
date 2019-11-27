@@ -14,6 +14,7 @@ using SharpNeat.Genomes.Substrate;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Phenomes;
 using SharpNeat.Phenomes.Voxels;
+using SharpNeat.Utility;
 
 namespace MCC_Domains.BodyBrain
 {
@@ -71,9 +72,14 @@ namespace MCC_Domains.BodyBrain
         protected NeatGenomeParameters NeatGenomeParameters;
 
         /// <summary>
-        /// The rate at which the body (substrate) will be expanded (analogous to an increase in substrate resolution).
+        /// The substrate-specific mutation probabilities.
         /// </summary>
-        protected double ExpandBodyMutationRate;
+        protected NeatSubstrateGenomeParameters BodyGenomeParameters;
+
+        /// <summary>
+        /// The maximum size of a voxel body along each dimension.
+        /// </summary>
+        protected int MaxBodySize;
         
         /// <summary>
         /// The body decoder converting CPPN genomes to voxel bodies.
@@ -189,8 +195,12 @@ namespace MCC_Domains.BodyBrain
             NeatGenomeParameters = ExperimentUtils.ReadNeatGenomeParameters(xmlConfig);
             NeatGenomeParameters.FeedforwardOnly = _activationScheme.AcyclicNetwork;
             
-            // Set body expand mutation parameter
-            ExpandBodyMutationRate = XmlUtils.GetValueAsDouble(xmlConfig, "ExpandBodyMutationRate");
+            // Set body mutation parameters
+            BodyGenomeParameters =
+                BodyBrainExperimentUtils.ReadBodyGenomeParameters(xmlConfig);
+            
+            // Set max body size
+            MaxBodySize = XmlUtils.GetValueAsInt(xmlConfig, "MaxBodySize");
 
             // Set resource limit parameter
             ResourceLimit = XmlUtils.GetValueAsInt(xmlConfig, "ResourceLimit");

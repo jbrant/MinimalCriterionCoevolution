@@ -23,6 +23,12 @@
     <BehaviorConfig>
         <BehaviorCharacterization>End Point</BehaviorCharacterization>
     </BehaviorConfig>
+    <BodyGenomeConfig>
+        <ModifyBodyProbability>0.01</ModifyBodyProbability>
+        <ExpandBodyProbability>0.8</ExpandBodyProbability>
+        <ShrinkBodyProbability>0.2</ShrinkBodyProbability>
+    </BodyGenomeConfig>
+    <MaxBodySize>15</MaxBodySize>
     <MinAmbulationDistance>15</MinAmbulationDistance>
     <BrainOffspringBatchSize>40</BrainOffspringBatchSize>
     <BodyOffspringBatchSize>10</BodyOffspringBatchSize>

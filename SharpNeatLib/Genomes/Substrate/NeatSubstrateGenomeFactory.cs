@@ -24,17 +24,6 @@ namespace SharpNeat.Genomes.Substrate
 
         #endregion
 
-        #region Properties
-
-        /// <summary>
-        ///     Gets a random number generator associated with the factory.
-        ///     Note. The provided RNG is not thread safe, if concurrent use is required then sync locks
-        ///     are necessary or some other RNG mechanism.
-        /// </summary>
-        public IRandomSource Rng => NeatGenomeFactory.Rng;
-
-        #endregion
-
         /// <summary>
         ///     Create a copy of an existing NeatSubstrateGenomeFactory, substituting in the specified ID and birth generation.
         ///     Overridable method to allow alternative NeatGenome sub-classes to be used.
@@ -92,15 +81,22 @@ namespace SharpNeat.Genomes.Substrate
         #region Public variables
 
         /// <summary>
-        ///     The rate at which to increase the substrate resolution (0 indicates a substrate that remains at a fixed resolution
-        ///     throughout evolution).
-        /// </summary>
-        public readonly double ExpandSubstrateMutationRate;
-
-        /// <summary>
         ///     Reference to the NEAT genome factory which is leveraged for generating NEAT substrate genomes.
         /// </summary>
-        public readonly NeatGenomeFactory NeatGenomeFactory;
+        public NeatGenomeFactory NeatGenomeFactory { get; }
+
+        /// <summary>
+        ///     Gets a random number generator associated with the factory.
+        ///     Note. The provided RNG is not thread safe, if concurrent use is required then sync locks
+        ///     are necessary or some other RNG mechanism.
+        /// </summary>
+        public IRandomSource Rng => NeatGenomeFactory.Rng;
+
+        /// <summary>
+        ///     Encapsulates NEAT genome mutation parameters (assuming that the affected network codes for a CPPN) along with
+        ///     mutation parameters specific to the modification of a substrate queried by that CPPN.
+        /// </summary>
+        public NeatSubstrateGenomeParameters NeatSubstrateGenomeParameters { get; }
 
         /// <summary>
         ///     The default resolution of the substrate along the X dimension.
@@ -117,6 +113,11 @@ namespace SharpNeat.Genomes.Substrate
         /// </summary>
         public int DefaultSubstrateZ { get; }
 
+        /// <summary>
+        ///     The maximum substrate resolution along any dimension.
+        /// </summary>
+        public int MaxSubstrateResolution { get; }
+
         #endregion
 
         #region Constructors
@@ -127,26 +128,22 @@ namespace SharpNeat.Genomes.Substrate
         /// <param name="inputNeuronCount">The number of inputs.</param>
         /// <param name="outputNeuronCount">The number of outputs.</param>
         /// <param name="activationFnLibrary">The activation functions allowed along with their selection probability.</param>
-        /// <param name="expandSubstrateMutationRate">
-        ///     The rate at which the substrate will be expanded (i.e. analogous to a
-        ///     resolution increase).
-        /// </param>
+        /// <param name="neatSubstrateGenomeParameters">The substrate-specific mutation parameters.</param>
         /// <param name="defaultSubstrateX">The default resolution of the substrate along the X dimension.</param>
         /// <param name="defaultSubstrateY">The default resolution of the substrate along the Y dimension.</param>
         /// <param name="defaultSubstrateZ">The default resolution of the substrate along the Z dimension.</param>
+        /// <param name="maxSubstrateResolution">The maximum resolution of the CPPN substrate.</param>
         /// <param name="genomeValidator">
         ///     Reference to the genome validator, which is used to determine whether the generated phenotype is valid.
         /// </param>
         public NeatSubstrateGenomeFactory(int inputNeuronCount, int outputNeuronCount,
-            IActivationFunctionLibrary activationFnLibrary, double expandSubstrateMutationRate, int defaultSubstrateX,
-            int defaultSubstrateY, int defaultSubstrateZ, IGenomeValidator<NeatSubstrateGenome> genomeValidator = null)
+            IActivationFunctionLibrary activationFnLibrary, NeatSubstrateGenomeParameters neatSubstrateGenomeParameters,
+            int defaultSubstrateX, int defaultSubstrateY, int defaultSubstrateZ, int maxSubstrateResolution,
+            IGenomeValidator<NeatSubstrateGenome> genomeValidator = null) : this(
+            new CppnGenomeFactory(inputNeuronCount, outputNeuronCount, activationFnLibrary),
+            neatSubstrateGenomeParameters, defaultSubstrateX, defaultSubstrateY, defaultSubstrateZ,
+            maxSubstrateResolution, genomeValidator)
         {
-            NeatGenomeFactory = new CppnGenomeFactory(inputNeuronCount, outputNeuronCount, activationFnLibrary);
-            ExpandSubstrateMutationRate = expandSubstrateMutationRate;
-            DefaultSubstrateX = defaultSubstrateX;
-            DefaultSubstrateY = defaultSubstrateY;
-            DefaultSubstrateZ = defaultSubstrateZ;
-            _genomeGenomeValidator = genomeValidator;
         }
 
         /// <summary>
@@ -159,29 +156,24 @@ namespace SharpNeat.Genomes.Substrate
         ///     NEAT hyperparameters that control mutation/crossover rates and other properties of
         ///     evolution.
         /// </param>
-        /// <param name="expandSubstrateMutationRate">
-        ///     The rate at which the substrate will be expanded (i.e. analogous to a
-        ///     resolution increase).
-        /// </param>
+        /// <param name="neatSubstrateGenomeParameters">The substrate-specific mutation parameters.</param>
         /// <param name="defaultSubstrateX">The default resolution of the substrate along the X dimension.</param>
         /// <param name="defaultSubstrateY">The default resolution of the substrate along the Y dimension.</param>
         /// <param name="defaultSubstrateZ">The default resolution of the substrate along the Z dimension.</param>
+        /// <param name="maxSubstrateResolution">The maximum resolution of the CPPN substrate.</param>
         /// <param name="genomeValidator">
         ///     Reference to the genome validator, which is used to determine whether the generated phenotype
         ///     is valid.
         /// </param>
         public NeatSubstrateGenomeFactory(int inputNeuronCount, int outputNeuronCount,
             IActivationFunctionLibrary activationFnLibrary, NeatGenomeParameters neatGenomeParams,
-            double expandSubstrateMutationRate, int defaultSubstrateX, int defaultSubstrateY, int defaultSubstrateZ,
-            IGenomeValidator<NeatSubstrateGenome> genomeValidator = null)
+            NeatSubstrateGenomeParameters neatSubstrateGenomeParameters, int defaultSubstrateX, int defaultSubstrateY,
+            int defaultSubstrateZ, int maxSubstrateResolution,
+            IGenomeValidator<NeatSubstrateGenome> genomeValidator = null) : this(
+            new CppnGenomeFactory(inputNeuronCount, outputNeuronCount, activationFnLibrary, neatGenomeParams),
+            neatSubstrateGenomeParameters, defaultSubstrateX, defaultSubstrateY, defaultSubstrateZ,
+            maxSubstrateResolution, genomeValidator)
         {
-            NeatGenomeFactory = new CppnGenomeFactory(inputNeuronCount, outputNeuronCount, activationFnLibrary,
-                neatGenomeParams);
-            ExpandSubstrateMutationRate = expandSubstrateMutationRate;
-            DefaultSubstrateX = defaultSubstrateX;
-            DefaultSubstrateY = defaultSubstrateY;
-            DefaultSubstrateZ = defaultSubstrateZ;
-            _genomeGenomeValidator = genomeValidator;
         }
 
         /// <summary>
@@ -196,13 +188,11 @@ namespace SharpNeat.Genomes.Substrate
         /// </param>
         /// <param name="genomeIdGenerator">Auto-incrementing integer generator for genome IDs.</param>
         /// <param name="innovationIdGenerator">Auto-incrementing integer generator for node/connection innovation IDs.</param>
-        /// <param name="expandSubstrateMutationRate">
-        ///     The rate at which the substrate will be expanded (i.e. analogous to a
-        ///     resolution increase).
-        /// </param>
+        /// <param name="neatSubstrateGenomeParameters">The substrate-specific mutation parameters.</param>
         /// <param name="defaultSubstrateX">The default resolution of the substrate along the X dimension.</param>
         /// <param name="defaultSubstrateY">The default resolution of the substrate along the Y dimension.</param>
         /// <param name="defaultSubstrateZ">The default resolution of the substrate along the Z dimension.</param>
+        /// <param name="maxSubstrateResolution">The maximum resolution of the CPPN substrate.</param>
         /// <param name="genomeValidator">
         ///     Reference to the genome validator, which is used to determine whether the generated phenotype
         ///     is valid.
@@ -210,15 +200,38 @@ namespace SharpNeat.Genomes.Substrate
         public NeatSubstrateGenomeFactory(int inputNeuronCount, int outputNeuronCount,
             IActivationFunctionLibrary activationFnLibrary, NeatGenomeParameters neatGenomeParams,
             UInt32IdGenerator genomeIdGenerator, UInt32IdGenerator innovationIdGenerator,
-            double expandSubstrateMutationRate, int defaultSubstrateX, int defaultSubstrateY, int defaultSubstrateZ,
-            IGenomeValidator<NeatSubstrateGenome> genomeValidator = null)
+            NeatSubstrateGenomeParameters neatSubstrateGenomeParameters, int defaultSubstrateX, int defaultSubstrateY,
+            int defaultSubstrateZ, int maxSubstrateResolution,
+            IGenomeValidator<NeatSubstrateGenome> genomeValidator = null) : this(
+            new CppnGenomeFactory(inputNeuronCount, outputNeuronCount, activationFnLibrary, neatGenomeParams,
+                genomeIdGenerator, innovationIdGenerator), neatSubstrateGenomeParameters, defaultSubstrateX,
+            defaultSubstrateY, defaultSubstrateZ, maxSubstrateResolution, genomeValidator)
         {
-            NeatGenomeFactory = new CppnGenomeFactory(inputNeuronCount, outputNeuronCount, activationFnLibrary,
-                neatGenomeParams, genomeIdGenerator, innovationIdGenerator);
-            ExpandSubstrateMutationRate = expandSubstrateMutationRate;
+        }
+
+        /// <summary>
+        ///     NeatSubstrateGenomeFactory constructor.
+        /// </summary>
+        /// <param name="neatGenomeFactory">The CPPN factory.</param>
+        /// <param name="neatSubstrateGenomeParameters">The substrate-specific mutation parameters.</param>
+        /// <param name="defaultSubstrateX">The default resolution of the substrate along the X dimension.</param>
+        /// <param name="defaultSubstrateY">The default resolution of the substrate along the Y dimension.</param>
+        /// <param name="defaultSubstrateZ">The default resolution of the substrate along the Z dimension.</param>
+        /// <param name="maxSubstrateResolution">The maximum resolution of the CPPN substrate.</param>
+        /// <param name="genomeValidator">
+        ///     Reference to the genome validator, which is used to determine whether the generated phenotype
+        ///     is valid.
+        /// </param>
+        public NeatSubstrateGenomeFactory(CppnGenomeFactory neatGenomeFactory,
+            NeatSubstrateGenomeParameters neatSubstrateGenomeParameters, int defaultSubstrateX, int defaultSubstrateY,
+            int defaultSubstrateZ, int maxSubstrateResolution, IGenomeValidator<NeatSubstrateGenome> genomeValidator)
+        {
+            NeatGenomeFactory = neatGenomeFactory;
+            NeatSubstrateGenomeParameters = neatSubstrateGenomeParameters;
             DefaultSubstrateX = defaultSubstrateX;
             DefaultSubstrateY = defaultSubstrateY;
             DefaultSubstrateZ = defaultSubstrateZ;
+            MaxSubstrateResolution = maxSubstrateResolution;
             _genomeGenomeValidator = genomeValidator;
         }
 
@@ -279,7 +292,7 @@ namespace SharpNeat.Genomes.Substrate
                     // Create new NEAT substrate genome
                     genome = CreateGenome(birthGeneration);
                 } while (!IsGeneratedPhenomeValid(genome));
-                
+
                 genomeList.Add(genome);
             }
 

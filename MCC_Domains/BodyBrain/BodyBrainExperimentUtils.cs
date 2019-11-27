@@ -7,6 +7,7 @@ using MCC_Domains.BodyBrain.MCCExperiment;
 using MCC_Domains.Utils;
 using SharpNeat;
 using SharpNeat.Core;
+using SharpNeat.Genomes.Substrate;
 using SharpNeat.Phenomes.Voxels;
 
 namespace MCC_Domains.BodyBrain
@@ -40,6 +41,28 @@ namespace MCC_Domains.BodyBrain
                 default:
                     return new BodyBrainNoveltySearchInitializer();
             }
+        }
+
+        /// <summary>
+        ///     Reads body genome configuration parameters, including substrate mutation probability.
+        /// </summary>
+        /// <param name="xmlElem">The top-level XML element containing the body genome configuration parameters.</param>
+        /// <returns>
+        ///     A NeatSubstrateGenomeParameters object containing substrate-specific mutation probabilities (which encodes
+        ///     body size/dimensions).
+        /// </returns>
+        public static NeatSubstrateGenomeParameters ReadBodyGenomeParameters(XmlElement xmlElem)
+        {
+            // Get root of the body genome configuration section
+            var nodeList = xmlElem.GetElementsByTagName("BodyGenomeConfig", "");
+
+            // Convert to an XML element
+            var xmlBodyConfig = nodeList[0] as XmlElement;
+
+            // Read body genome parameters and create substrate genome parameters
+            return new NeatSubstrateGenomeParameters(XmlUtils.GetValueAsDouble(xmlBodyConfig, "ModifyBodyProbability"),
+                XmlUtils.GetValueAsDouble(xmlBodyConfig, "ExpandBodyProbability"),
+                XmlUtils.GetValueAsDouble(xmlBodyConfig, "ShrinkBodyProbability"));
         }
 
         /// <summary>
@@ -189,7 +212,8 @@ namespace MCC_Domains.BodyBrain
         /// <param name="bodyGenomeId">The unique ID of the body genome being simulated.</param>
         /// <param name="brainGenomeId">The unique ID of the brain genome being simulated.</param>
         /// <returns></returns>
-        public static string ConstructVoxelyzeFilePath(string fileType, string extension, string outputDirectory, string experimentName,
+        public static string ConstructVoxelyzeFilePath(string fileType, string extension, string outputDirectory,
+            string experimentName,
             int run, uint bodyGenomeId, uint brainGenomeId)
         {
             return string.Join("/", outputDirectory,

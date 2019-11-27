@@ -10,6 +10,9 @@ using SharpNeat.Utility;
 
 namespace SharpNeat.Genomes.Substrate
 {
+    /// <summary>
+    ///     Static class for reading and writing NeatSubstrateGenome(s) to and from XML.
+    /// </summary>
     public static class NeatSubstrateGenomeXmlIO
     {
         #region Public Static Methods [Read from XML]

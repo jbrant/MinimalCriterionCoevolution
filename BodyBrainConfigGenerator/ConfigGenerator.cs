@@ -8,9 +8,12 @@ using ExperimentEntities;
 using ExperimentEntities.entities;
 using MCC_Domains.BodyBrain;
 using SharpNeat.Decoders;
-using SharpNeat.Decoders.Voxel;
+using SharpNeat.Decoders.Neat;
+using SharpNeat.Decoders.Substrate;
 using SharpNeat.Genomes.HyperNeat;
 using SharpNeat.Genomes.Neat;
+using SharpNeat.Genomes.Substrate;
+using SharpNeat.Phenomes;
 using SharpNeat.Phenomes.Voxels;
 using RunPhase = SharpNeat.Core.RunPhase;
 
@@ -47,17 +50,17 @@ namespace BodyBrainConfigGenerator
         /// <summary>
         ///     The body genome decoder.
         /// </summary>
-        private readonly CppnSubstrateDecoder _bodyDecoder;
+        private readonly NeatSubstrateGenomeDecoder _bodyDecoder;
 
         /// <summary>
         ///     The body genome factory.
         /// </summary>
-        private readonly CppnGenomeFactory _bodyGenomeFactory;
+        private readonly NeatSubstrateGenomeFactory _bodyGenomeFactory;
 
         /// <summary>
         ///     The brain genome decoder.
         /// </summary>
-        private readonly VoxelBrainDecoder _brainDecoder;
+        private readonly NeatGenomeDecoder _brainDecoder;
 
         /// <summary>
         ///     The brain genome factory.
@@ -127,6 +130,7 @@ namespace BodyBrainConfigGenerator
                 ? NetworkActivationScheme.CreateCyclicFixedTimestepsScheme(experimentConfig.ActivationIters ?? 0)
                 : NetworkActivationScheme.CreateAcyclicScheme();
 
+            /*
             // Create the body and brain genome factories
             _brainGenomeFactory = new CppnGenomeFactory(BrainCppnInputCount, BrainCppnOutputCount);
             _bodyGenomeFactory = new CppnGenomeFactory(BodyCppnInputCount, BodyCppnOutputCount);
@@ -137,6 +141,7 @@ namespace BodyBrainConfigGenerator
                 experimentConfig.VoxelyzeConfigBrainNetworkConnections);
             _bodyDecoder = new CppnSubstrateDecoder(activationScheme, experimentConfig.VoxelyzeConfigInitialXdimension,
                 experimentConfig.VoxelyzeConfigInitialYdimension, experimentConfig.VoxelyzeConfigInitialZdimension);
+            */
         }
 
         #region Private file I/O methods
@@ -148,14 +153,15 @@ namespace BodyBrainConfigGenerator
         /// <param name="brainGenome">The brain to serialize to the configuration file.</param>
         private void WriteConfigFile(MccexperimentVoxelBodyGenome bodyGenome, MccexperimentVoxelBrainGenome brainGenome)
         {
-            VoxelBody body;
-            VoxelBrain brain;
+            IBlackBoxSubstrate body;
+            IBlackBox brain;
 
+            /*
             // Read in voxel body XML and decode to phenotype
             using (var xmlReader = XmlReader.Create(new StringReader(bodyGenome.GenomeXml)))
             {
                 body = _bodyDecoder.Decode(
-                    NeatGenomeXmlIO.ReadSingleGenomeFromRoot(xmlReader, false, _bodyGenomeFactory));
+                    NeatSubstrateGenomeXmlIO.ReadSingleGenomeFromRoot(xmlReader, false, _bodyGenomeFactory));
             }
 
             // Read in voxel brain XML and decode to phenotype
@@ -172,6 +178,7 @@ namespace BodyBrainConfigGenerator
             // Write the configuration file
             BodyBrainExperimentUtils.WriteVoxelyzeSimulationFile(_configTemplate, outputFile, ".", brain, body,
                 _mcValue);
+            */
         }
 
         #endregion

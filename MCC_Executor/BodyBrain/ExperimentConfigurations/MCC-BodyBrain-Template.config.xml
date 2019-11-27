@@ -24,8 +24,13 @@
     <BehaviorConfig>
         <BehaviorCharacterization></BehaviorCharacterization>
     </BehaviorConfig>
+    <BodyGenomeConfig>
+        <ModifyBodyProbability></ModifyBodyProbability>
+        <ExpandBodyProbability></ExpandBodyProbability>
+        <ShrinkBodyProbability></ShrinkBodyProbability>
+    </BodyGenomeConfig>
+    <MaxBodySize></MaxBodySize>
     <MinAmbulationDistance></MinAmbulationDistance>
-    <ExpandBodyMutationRate></ExpandBodyMutationRate>
     <BrainOffspringBatchSize></BrainOffspringBatchSize>
     <BodyOffspringBatchSize></BodyOffspringBatchSize>
     <MaxGenerations></MaxGenerations>

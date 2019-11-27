@@ -158,9 +158,9 @@ namespace MCC_Domains.BodyBrain
         public override IGenomeFactory<NeatSubstrateGenome> CreateBodyGenomeFactory()
         {
             return new NeatSubstrateGenomeFactory(BodyCppnInputCount, BodyCppnOutputCount,
-                DefaultActivationFunctionLibrary.CreateLibraryCppn(), NeatGenomeParameters, ExpandBodyMutationRate,
+                DefaultActivationFunctionLibrary.CreateLibraryCppn(), NeatGenomeParameters, BodyGenomeParameters,
                 SimulationProperties.InitialXDimension, SimulationProperties.InitialYDimension,
-                SimulationProperties.InitialZDimension,
+                SimulationProperties.InitialZDimension, MaxBodySize,
                 new VoxelBodyGenomeValidator(BodyDecoder, SimulationProperties.MinPercentMaterial,
                     SimulationProperties.MinPercentActive));
         }

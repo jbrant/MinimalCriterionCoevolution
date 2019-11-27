@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Redzen.Numerics.Distributions;
 using SharpNeat.Core;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Loggers;
@@ -6,6 +7,15 @@ using SharpNeat.Network;
 
 namespace SharpNeat.Genomes.Substrate
 {
+    /// <summary>
+    ///     Encodes substrate mutation operation types.
+    /// </summary>
+    internal enum SubstrateMutation
+    {
+        IncreaseResolution = 0,
+        DecreaseResolution
+    }
+
     /// <summary>
     ///     The NEAT substrate genome encapsulates a NEAT genome that decodes to a CPPN, along with the substrate dimensions,
     ///     which are expanded (or the resolution is increased) through a substrate expansion mutation parameter.
@@ -87,40 +97,10 @@ namespace SharpNeat.Genomes.Substrate
         /// </param>
         public NeatSubstrateGenome CreateOffspring(uint birthGeneration)
         {
-            NeatSubstrateGenome offspring;
-
-            if (_neatSubstrateGenomeFactory.Rng.NextDouble() < _neatSubstrateGenomeFactory.ExpandSubstrateMutationRate)
-            {
-                // TODO: Possibly allow expansion along randomly select axes
-
-                // Create a new NEAT genome identical to the original
-                var neatGenomeOffspring = _neatSubstrateGenomeFactory.NeatGenomeFactory.CreateGenomeCopy(_neatGenome,
-                    _neatSubstrateGenomeFactory.GenomeIdGenerator.NextId, birthGeneration);
-
-                // Expand voxel body along all three axes
-                // (the generator copy method is not called here because it would unnecessarily copy
-                // NEAT genome contents twice)
-                offspring = new NeatSubstrateGenome(_neatSubstrateGenomeFactory, neatGenomeOffspring, SubstrateX + 1,
-                    SubstrateY + 1,
-                    SubstrateZ + 1);
-            }
-            else
-            {
-                // TODO: Continue creating/mutating new offspring until one that produces a valid phenotype is created
-                do
-                {
-                    // Create a new NEAT genome and mutate it
-                    var neatGenomeOffspring = _neatGenome.CreateOffspring(birthGeneration);
-
-                    // Create a new voxel body genome wrapping the new NEAT genome
-                    // (the generator copy method is not called here because it would unnecessarily copy
-                    // NEAT genome contents twice)
-                    offspring = new NeatSubstrateGenome(_neatSubstrateGenomeFactory, neatGenomeOffspring, SubstrateX,
-                        SubstrateY, SubstrateZ);
-                } while (!_neatSubstrateGenomeFactory.IsGeneratedPhenomeValid(offspring));
-            }
-
-            return offspring;
+            return _neatSubstrateGenomeFactory.Rng.NextDouble() < _neatSubstrateGenomeFactory
+                       .NeatSubstrateGenomeParameters.ModifySubstrateResolutionProbability
+                ? CreateSubstrateMutatedOffspring(birthGeneration)
+                : CreateNeatMutatedOffspring(birthGeneration);
         }
 
         /// <summary>
@@ -148,6 +128,108 @@ namespace SharpNeat.Genomes.Substrate
             } while (!_neatSubstrateGenomeFactory.IsGeneratedPhenomeValid(offspring));
 
             return offspring;
+        }
+
+        #endregion
+
+        #region Private methods
+
+        /// <summary>
+        ///     Applies a substrate mutation by increasing or decreasing the substrate resolution.
+        /// </summary>
+        /// <param name="birthGeneration">
+        ///     The current evolution algorithm generation. Assigned to the new genome at its birth
+        ///     generation.
+        /// </param>
+        /// <returns>The mutated offspring.</returns>
+        private NeatSubstrateGenome CreateSubstrateMutatedOffspring(uint birthGeneration)
+        {
+            NeatSubstrateGenome offspring;
+
+            // TODO: Possibly allow expansion along randomly select axes
+
+            // Create a new NEAT genome identical to the original
+            var neatGenomeOffspring = _neatSubstrateGenomeFactory.NeatGenomeFactory.CreateGenomeCopy(_neatGenome,
+                _neatSubstrateGenomeFactory.GenomeIdGenerator.NextId, birthGeneration);
+
+            // Randomly pick the substrate mutation to be applied
+            var outcome = (SubstrateMutation) DiscreteDistribution.Sample(_neatSubstrateGenomeFactory.Rng,
+                _neatSubstrateGenomeFactory.NeatSubstrateGenomeParameters.RouletteWheelLayout);
+
+            // Boundary check the substrate and apply relevant mutation overrides
+            outcome = ApplySubstrateMutationOverrides(outcome);
+
+            // Note that the generator copy method is not called because it would unnecessarily copy NEAT genome contents twice
+            switch (outcome)
+            {
+                case SubstrateMutation.IncreaseResolution:
+                    offspring = new NeatSubstrateGenome(_neatSubstrateGenomeFactory, neatGenomeOffspring,
+                        SubstrateX + 1,
+                        SubstrateY + 1,
+                        SubstrateZ + 1);
+                    break;
+                case SubstrateMutation.DecreaseResolution:
+                    offspring = new NeatSubstrateGenome(_neatSubstrateGenomeFactory, neatGenomeOffspring,
+                        SubstrateX - 1,
+                        SubstrateY - 1,
+                        SubstrateZ - 1);
+                    break;
+                default:
+                    throw new SharpNeatException(
+                        $"NeatSubstrateGenome.CreateOffspring(): Unexpected outcome value [{outcome}]");
+            }
+
+            return offspring;
+        }
+
+        /// <summary>
+        ///     Applies a NEAT mutation to produce a new offspring.
+        /// </summary>
+        /// <param name="birthGeneration">
+        ///     The current evolution algorithm generation. Assigned to the new genome at its birth
+        ///     generation.
+        /// </param>
+        /// <returns>The mutated offspring.</returns>
+        private NeatSubstrateGenome CreateNeatMutatedOffspring(uint birthGeneration)
+        {
+            NeatSubstrateGenome offspring;
+
+            // Continue creating/mutating new offspring until one that produces a valid phenotype is created
+            do
+            {
+                // Create a new NEAT genome and mutate it
+                var neatGenomeOffspring = _neatGenome.CreateOffspring(birthGeneration);
+
+                // Create a new voxel body genome wrapping the new NEAT genome
+                // (the generator copy method is not called here because it would unnecessarily copy
+                // NEAT genome contents twice)
+                offspring = new NeatSubstrateGenome(_neatSubstrateGenomeFactory, neatGenomeOffspring, SubstrateX,
+                    SubstrateY, SubstrateZ);
+            } while (!_neatSubstrateGenomeFactory.IsGeneratedPhenomeValid(offspring));
+
+            return offspring;
+        }
+
+        private SubstrateMutation ApplySubstrateMutationOverrides(SubstrateMutation selectedMutation)
+        {
+            switch (selectedMutation)
+            {
+                // If the size of the current genome is already the smallest possible, only allow a resolution increase
+                case SubstrateMutation.DecreaseResolution
+                    when SubstrateX == _neatSubstrateGenomeFactory.DefaultSubstrateX ||
+                         SubstrateY == _neatSubstrateGenomeFactory.DefaultSubstrateY ||
+                         SubstrateZ == _neatSubstrateGenomeFactory.DefaultSubstrateZ:
+                    return SubstrateMutation.IncreaseResolution;
+                // If the substrate has reached maximum size along any of the three dimensions,
+                // only a resolution decrease can be applied
+                case SubstrateMutation.IncreaseResolution
+                    when SubstrateX == _neatSubstrateGenomeFactory.MaxSubstrateResolution ||
+                         SubstrateY == _neatSubstrateGenomeFactory.MaxSubstrateResolution ||
+                         SubstrateZ == _neatSubstrateGenomeFactory.MaxSubstrateResolution:
+                    return SubstrateMutation.DecreaseResolution;
+                default:
+                    return selectedMutation;
+            }
         }
 
         #endregion
