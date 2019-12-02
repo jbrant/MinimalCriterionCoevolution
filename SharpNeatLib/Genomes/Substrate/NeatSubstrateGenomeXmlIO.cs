@@ -303,7 +303,7 @@ namespace SharpNeat.Genomes.Substrate
         #region Public Static Methods [Write to XML]
 
         /// <summary>
-        ///     Writes a list of NeatGenome(s) to XML within a containing 'Root' element and the activation
+        ///     Writes a list of NeatSubstrateGenome(s) to XML within a containing 'Root' element and the activation
         ///     function library that the genomes are associated with.
         /// </summary>
         /// <param name="xw">XmlWriter to write XML to.</param>
@@ -337,6 +337,37 @@ namespace SharpNeat.Genomes.Substrate
                 Debug.Assert(genome.ActivationFnLibrary == activationFnLib);
                 Write(xw, genome, nodeFnIds);
             }
+
+            // </Networks>
+            xw.WriteEndElement();
+
+            // </Root>
+            xw.WriteEndElement();
+        }
+
+        /// <summary>
+        ///     Writes a single NeatSubstrateGenome to XML within a containing 'Root' element and the activation
+        ///     function library that the genome is associated with.
+        /// </summary>
+        /// <param name="xw">XmlWriter to write XML to.</param>
+        /// <param name="genome">Genome to write as XML.</param>
+        /// <param name="nodeFnIds">
+        ///     Indicates if node activation function IDs should be emitted. They are required
+        ///     for HyperNEAT genomes but not for NEAT.
+        /// </param>
+        public static void WriteComplete(XmlWriter xw, NeatSubstrateGenome genome, bool nodeFnIds)
+        {
+            // <Root>
+            xw.WriteStartElement(ElemRoot);
+
+            // Write activation function library.
+            NetworkXmlIO.Write(xw, genome.ActivationFnLibrary);
+
+            // <Networks>
+            xw.WriteStartElement(ElemNetworks);
+
+            // Write single genome.
+            Write(xw, genome, nodeFnIds);
 
             // </Networks>
             xw.WriteEndElement();

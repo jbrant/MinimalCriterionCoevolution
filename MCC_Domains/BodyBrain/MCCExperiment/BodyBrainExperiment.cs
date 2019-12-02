@@ -208,14 +208,14 @@ namespace MCC_Domains.BodyBrain
             };
 
             // Create the NEAT EA for brains
-            AbstractEvolutionAlgorithm<NeatSubstrateGenome> brainEvolutionAlgorithm =
-                new QueueEvolutionAlgorithm<NeatSubstrateGenome>(eaParams, new NeatAlgorithmStats(eaParams), null, null,
+            AbstractEvolutionAlgorithm<NeatGenome> brainEvolutionAlgorithm =
+                new QueueEvolutionAlgorithm<NeatGenome>(eaParams, new NeatAlgorithmStats(eaParams), null, null,
                     BrainBatchSize, RunPhase.Primary, _brainEvolutionDataLogger, _brainLogFieldEnableMap,
                     _brainPopulationDataLogger, _brainGenomeDataLogger, _brainSimulationTrialDataLogger);
 
             // Create the NEAT EA for bodies
-            AbstractEvolutionAlgorithm<NeatGenome> bodyEvolutionAlgorithm =
-                new QueueEvolutionAlgorithm<NeatGenome>(eaParams,
+            AbstractEvolutionAlgorithm<NeatSubstrateGenome> bodyEvolutionAlgorithm =
+                new QueueEvolutionAlgorithm<NeatSubstrateGenome>(eaParams,
                     new VoxelBodyAlgorithmStats(eaParams, BodyDecoder), null, null, BodyBatchSize,
                     RunPhase.Primary, _bodyEvolutionDataLogger, _bodyLogFieldEnableMap, _bodyPopulationDataLogger,
                     _bodyGenomeDataLogger, _bodySimulationTrialDataLogger);
@@ -249,7 +249,7 @@ namespace MCC_Domains.BodyBrain
 
             // Create the MCC container
             IMCCAlgorithmContainer<NeatGenome, NeatSubstrateGenome> mccAlgorithmContainer =
-                new MCCAlgorithmContainer<NeatGenome, NeatSubstrateGenome>(bodyEvolutionAlgorithm, brainEvolutionAlgorithm);
+                new MCCAlgorithmContainer<NeatGenome, NeatSubstrateGenome>(brainEvolutionAlgorithm, bodyEvolutionAlgorithm);
 
             // Initialize the container and component algorithms
             mccAlgorithmContainer.Initialize(brainViabilityEvaluator, brainGenomeFactory, seedBrainPopulation,
