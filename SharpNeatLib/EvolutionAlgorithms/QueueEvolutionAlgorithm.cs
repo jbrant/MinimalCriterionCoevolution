@@ -314,7 +314,7 @@ namespace SharpNeat.EvolutionAlgorithms
         public override void PerformOneGeneration()
         {
             List<TGenome> childGenomes;
-
+            
             if (EaParams.SpecieCount > 0)
             {
                 childGenomes = new List<TGenome>(_batchSize);

@@ -175,13 +175,13 @@ namespace MCC_Executor.BodyBrain
 
             // Read in the seed brain population or generate the initial brain population if no seeds were specified
             var brainGenomeList = seedBrainPath != null
-                ? ExperimentUtils.ReadSeedNeatGenomes(seedBrainPath, (CppnGenomeFactory) brainGenomeFactory)
+                ? ExperimentUtils.ReadSeedNeatGenomes(seedBrainPath, (CppnGenomeFactory) brainGenomeFactory, true)
                     .Take(experiment.BrainSeedGenomeCount).ToList()
                 : null;
 
             // Read in the seed maze population
             var bodyGenomeList = seedBodyPath != null
-                ? ExperimentUtils.ReadSeedCppnGenomes(seedBodyPath, (NeatSubstrateGenomeFactory) bodyGenomeFactory)
+                ? ExperimentUtils.ReadSeedSubstrateGenomes(seedBodyPath, (NeatSubstrateGenomeFactory) bodyGenomeFactory, true)
                     .Take(experiment.BodySeedGenomeCount).ToList()
                 : null;
 

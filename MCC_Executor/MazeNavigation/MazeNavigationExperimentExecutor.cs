@@ -432,7 +432,7 @@ namespace MCC_Executor.MazeNavigation
 
                 // Read in the seed agent population or generate the initial agent population if no seeds were specified
                 var agentGenomeList = seedAgentPath != null
-                    ? ExperimentUtils.ReadSeedNeatGenomes(seedAgentPath, (NeatGenomeFactory) agentGenomeFactory)
+                    ? ExperimentUtils.ReadSeedNeatGenomes(seedAgentPath, (NeatGenomeFactory) agentGenomeFactory, false)
                     : agentGenomeFactory.CreateGenomeList(experiment.AgentInitializationGenomeCount, 0);
 
                 // Read in the seed maze population

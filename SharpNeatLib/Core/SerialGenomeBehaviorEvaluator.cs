@@ -1,7 +1,6 @@
 ﻿#region
 
 using System.Collections.Generic;
-using SharpNeat.Loggers;
 using SharpNeat.NoveltyArchives;
 using SharpNeat.Utility;
 

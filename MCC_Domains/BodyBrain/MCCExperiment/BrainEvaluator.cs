@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using SharpNeat.Core;
+using SharpNeat.Genomes.Neat;
 using SharpNeat.Loggers;
 using SharpNeat.Phenomes;
 using SharpNeat.Phenomes.Voxels;
@@ -167,12 +168,12 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
                 // Construct configuration file path
                 var simConfigFilePath = BodyBrainExperimentUtils.ConstructVoxelyzeFilePath("config_braineval", "vxa",
                     _simulationProperties.SimConfigOutputDirectory, _experimentName, _run, brainCppn.GenomeId,
-                    body.GenomeId);
+                    body.GenomeId, true);
 
                 // Construct output file path
                 var simResultFilePath = BodyBrainExperimentUtils.ConstructVoxelyzeFilePath("result_braineval", "xml",
                     _simulationProperties.SimResultsDirectory, _experimentName, _run, brainCppn.GenomeId,
-                    body.GenomeId);
+                    body.GenomeId, true);
 
                 // Write configuration file
                 BodyBrainExperimentUtils.WriteVoxelyzeSimulationFile(_simulationProperties.SimConfigTemplateFile,
@@ -230,12 +231,12 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
                 // Record simulation trial info
                 behaviorInfo.TrialData.Add(new TrialInfo(isSuccessful, simResults.Distance, simResults.SimulationTime,
                     body.GenomeId, new[] {simResults.Location.X, simResults.Location.Y}));
-
+                
                 // Remove configuration and output files
                 File.Delete(simConfigFilePath);
                 File.Delete(simResultFilePath);
 
-                // Don't attempt to log if the file stream is closed
+                    // Don't attempt to log if the file stream is closed
                 if (!(_evaluationLogger?.IsStreamOpen() ?? false)) continue;
 
                 // Log trial information

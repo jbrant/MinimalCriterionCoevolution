@@ -52,10 +52,7 @@ namespace SharpNeat.Genomes.Substrate
                 // Read Network elements.
                 do
                 {
-                    var neatGenome = NeatGenomeXmlIO.ReadGenome(xrSubtree, nodeFnIds);
-                    genomeList.Add(new NeatSubstrateGenome(substrateGenomeFactory, neatGenome,
-                        substrateGenomeFactory.DefaultSubstrateX, substrateGenomeFactory.DefaultSubstrateY,
-                        substrateGenomeFactory.DefaultSubstrateZ));
+                    genomeList.Add(ReadGenome(xrSubtree, nodeFnIds));
                 } while (xrSubtree.ReadToNextSibling(ElemNetwork));
             }
 
@@ -138,7 +135,7 @@ namespace SharpNeat.Genomes.Substrate
             {
                 genome.NeatSubstrateGenomeFactory = substrateGenomeFactory;
             }
-
+            
             return genomeList;
         }
 

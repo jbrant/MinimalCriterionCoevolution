@@ -110,7 +110,7 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
         /// <summary>
         ///     Runs a brain (neural network controller) through a single body ambulation trial.
         /// </summary>
-        /// <param name="brain">The neural network controller for each voxel cell.</param>
+        /// <param name="brainCppn">The neural network controller for each voxel cell.</param>
         /// <param name="currentGeneration">The current generation or evaluation batch.</param>
         /// <returns>A BehaviorInfo, which encapsulates the distance that the robot traveled.</returns>
         public BehaviorInfo Evaluate(IBlackBox brainCppn, uint currentGeneration)
@@ -123,7 +123,7 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
                 // Increment evaluation count
                 EvaluationCount++;
             }
-            
+
             // Create new voxel brain given the initial substrate dimensions
             var brain = new VoxelBrain(brainCppn, _simulationProperties.InitialXDimension,
                 _simulationProperties.InitialYDimension, _simulationProperties.InitialZDimension,
@@ -131,12 +131,13 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
 
             // Construct configuration file path
             var simConfigFilePath = BodyBrainExperimentUtils.ConstructVoxelyzeFilePath("config_init", "vxa",
-                _simulationProperties.SimConfigOutputDirectory, _experimentName, _run, _voxelBody.GenomeId,
-                brain.GenomeId);
+                _simulationProperties.SimConfigOutputDirectory, _experimentName, _run, brain.GenomeId,
+                _voxelBody.GenomeId, false);
 
             // Construct output file path
             var simResultFilePath = BodyBrainExperimentUtils.ConstructVoxelyzeFilePath("result_init", "xml",
-                _simulationProperties.SimResultsDirectory, _experimentName, _run, _voxelBody.GenomeId, brain.GenomeId);
+                _simulationProperties.SimResultsDirectory, _experimentName, _run, brain.GenomeId, _voxelBody.GenomeId,
+                false);
 
             // Write configuration file
             BodyBrainExperimentUtils.WriteVoxelyzeSimulationFile(_simulationProperties.SimConfigTemplateFile,
@@ -175,10 +176,13 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
                 new LoggableElement(EvaluationFieldElements.StopConditionSatisfied, StopConditionSatisfied),
                 new LoggableElement(EvaluationFieldElements.RunPhase, RunPhase.Initialization)
             }, simResults.GetLoggableElements());
-            
-            // Remove configuration and output files
-            File.Delete(simConfigFilePath);
-            File.Delete(simResultFilePath);
+
+            if (!isSuccessful)
+            {
+                // Remove configuration and output files
+                File.Delete(simConfigFilePath);
+                File.Delete(simResultFilePath);
+            }
 
             return behaviorInfo;
         }

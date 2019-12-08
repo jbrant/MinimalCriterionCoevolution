@@ -469,8 +469,13 @@ namespace MCC_Domains.Utils
         ///     The path of the single NEAT genome or a directory containing multiple XML genome definitions.
         /// </param>
         /// <param name="neatGenomeFactory">The NEAT genome factory to assign to each genome.</param>
+        /// <param name="nodeFnIds">
+        ///     Indicates if node activation function IDs should be read. If false then
+        ///     all node activation function IDs default to 0.
+        /// </param>
         /// <returns>The list of seed NEAT genomes.</returns>
-        public static List<NeatGenome> ReadSeedNeatGenomes(string seedNeatPath, NeatGenomeFactory neatGenomeFactory)
+        public static List<NeatGenome> ReadSeedNeatGenomes(string seedNeatPath, NeatGenomeFactory neatGenomeFactory,
+            bool nodeFnIds)
         {
             var neatGenomes = new List<NeatGenome>();
 
@@ -483,7 +488,7 @@ namespace MCC_Domains.Utils
                 using (var xr = XmlReader.Create(neatGenomeFile))
                 {
                     // Read in the NEAT genomes
-                    var curNeatGenomes = NeatGenomeXmlIO.ReadCompleteGenomeList(xr, false, neatGenomeFactory);
+                    var curNeatGenomes = NeatGenomeXmlIO.ReadCompleteGenomeList(xr, nodeFnIds, neatGenomeFactory);
 
                     // Add the genomes to the overall genome list
                     neatGenomes.AddRange(curNeatGenomes);
@@ -500,8 +505,13 @@ namespace MCC_Domains.Utils
         ///     The path of the single genome or a directory containing multiple XML genome definitions.
         /// </param>
         /// <param name="genomeFactory">The genome factory to assign to each genome.</param>
+        /// <param name="nodeFnIds">
+        ///     Indicates if node activation function IDs should be read. If false then
+        ///     all node activation function IDs default to 0.
+        /// </param>
         /// <returns>The list of seed CPPN genomes.</returns>
-        public static List<NeatSubstrateGenome> ReadSeedCppnGenomes(string seedPath, NeatSubstrateGenomeFactory genomeFactory)
+        public static List<NeatSubstrateGenome> ReadSeedSubstrateGenomes(string seedPath,
+            NeatSubstrateGenomeFactory genomeFactory, bool nodeFnIds)
         {
             var genomes = new List<NeatSubstrateGenome>();
 
@@ -514,7 +524,7 @@ namespace MCC_Domains.Utils
                 using (var xr = XmlReader.Create(genomeFile))
                 {
                     // Read in the genomes
-                    var curGenomes = NeatSubstrateGenomeXmlIO.ReadCompleteGenomeList(xr, false, genomeFactory);
+                    var curGenomes = NeatSubstrateGenomeXmlIO.ReadCompleteGenomeList(xr, nodeFnIds, genomeFactory);
 
                     // Add the genomes to the overall genome list
                     genomes.AddRange(curGenomes);

@@ -141,13 +141,13 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
 
                 // Construct configuration file path
                 var simConfigFilePath = BodyBrainExperimentUtils.ConstructVoxelyzeFilePath("config_bodyeval", "vxa",
-                    _simulationProperties.SimConfigOutputDirectory, _experimentName, _run, bodyCppn.GenomeId,
-                    brain.GenomeId);
+                    _simulationProperties.SimConfigOutputDirectory, _experimentName, _run, brain.GenomeId,
+                    bodyCppn.GenomeId, false);
 
                 // Construct output file path
                 var simResultFilePath = BodyBrainExperimentUtils.ConstructVoxelyzeFilePath("result_bodyeval", "xml",
-                    _simulationProperties.SimResultsDirectory, _experimentName, _run, bodyCppn.GenomeId,
-                    brain.GenomeId);
+                    _simulationProperties.SimResultsDirectory, _experimentName, _run, brain.GenomeId, bodyCppn.GenomeId,
+                    false);
 
                 BodyBrainExperimentUtils.WriteVoxelyzeSimulationFile(_simulationProperties.SimConfigTemplateFile,
                     simConfigFilePath, simResultFilePath, brain, body, _minAmbulationDistance,
@@ -184,7 +184,7 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
                 File.Delete(simConfigFilePath);
                 File.Delete(simResultFilePath);
 
-                // Don't attempt to log if the file stream is closed
+                    // Don't attempt to log if the file stream is closed
                 if (!(_evaluationLogger?.IsStreamOpen() ?? false)) continue;
 
                 // Log trial information

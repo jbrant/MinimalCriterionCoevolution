@@ -38,6 +38,7 @@ namespace SharpNeat.Genomes.Substrate
                 }
 
                 _neatSubstrateGenomeFactory = value;
+                _neatGenome.GenomeFactory = _neatSubstrateGenomeFactory.NeatGenomeFactory;
             }
         }
 

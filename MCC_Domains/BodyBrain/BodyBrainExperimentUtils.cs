@@ -209,15 +209,18 @@ namespace MCC_Domains.BodyBrain
         /// <param name="outputDirectory">The directory into which the file will be written or is located.</param>
         /// <param name="experimentName">The name of the experiment to which the file corresponds.</param>
         /// <param name="run">The run number of the experiment to which the file corresponds.</param>
-        /// <param name="bodyGenomeId">The unique ID of the body genome being simulated.</param>
         /// <param name="brainGenomeId">The unique ID of the brain genome being simulated.</param>
+        /// <param name="bodyGenomeId">The unique ID of the body genome being simulated.</param>
         /// <returns></returns>
         public static string ConstructVoxelyzeFilePath(string fileType, string extension, string outputDirectory,
             string experimentName,
-            int run, uint bodyGenomeId, uint brainGenomeId)
+            int run, uint brainGenomeId, uint bodyGenomeId, bool isBrainEval)
         {
-            return string.Join("/", outputDirectory,
-                $"voxelyze_sim_{fileType}_exp_{experimentName.Replace(" ", "_")}_run_{run}_body_{bodyGenomeId}_brain_{brainGenomeId}.{extension}");
+            return isBrainEval
+                ? string.Join("/", outputDirectory,
+                    $"voxelyze_sim_{fileType}_exp_{experimentName.Replace(" ", "_")}_run_{run}_brain_{brainGenomeId}_body_{bodyGenomeId}.{extension}")
+                : string.Join("/", outputDirectory,
+                    $"voxelyze_sim_{fileType}_exp_{experimentName.Replace(" ", "_")}_run_{run}_body_{bodyGenomeId}_brain_{brainGenomeId}.{extension}");
         }
 
         /// <summary>

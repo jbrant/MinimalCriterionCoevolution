@@ -21,7 +21,6 @@
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using SharpNeat.Loggers;
 using SharpNeat.NoveltyArchives;
 using SharpNeat.Utility;
 

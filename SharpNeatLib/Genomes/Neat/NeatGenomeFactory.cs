@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.Serialization;
 using Redzen.Numerics;
 using Redzen.Numerics.Distributions.Double;
 using Redzen.Random;
@@ -66,7 +67,7 @@ namespace SharpNeat.Genomes.Neat
         protected readonly IActivationFunctionLibrary _activationFnLibrary;
 
         private readonly IGenomeValidator<NeatGenome> _genomeValidator;
-        
+
         #region Constructors [NEAT]
 
         /// <summary>

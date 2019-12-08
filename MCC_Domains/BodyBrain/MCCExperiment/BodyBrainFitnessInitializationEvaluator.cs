@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -13,8 +14,41 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
     /// </summary>
     public class BodyBrainFitnessInitializationEvaluator : IPhenomeEvaluator<IBlackBox, FitnessInfo>
     {
+        #region Constructor
+
+        /// <summary>
+        ///     Body/brain fitness initialization constructor.
+        /// </summary>
+        /// <param name="body">The body on which brains (controllers) are evaluated.</param>
+        /// <param name="simulationProperties">
+        ///     Collection of simulator configuration properties, including result output
+        ///     directories, configuration files and config file parsing information.
+        /// </param>
+        /// <param name="minAmbulationDistance">The minimum distance that the robot must traverse to meet the MC.</param>
+        /// <param name="experimentName">The human-readable name of the experiment configuration being executed.</param>
+        /// <param name="run">The current run number of the experiment being executed.</param>
+        /// <param name="startingEvaluations">
+        ///     The total number of evaluations that have already been performed at the time of
+        ///     initialization.
+        /// </param>
+        /// <param name="evaluationLogger">Per-evaluation data logger (optional).</param>
+        public BodyBrainFitnessInitializationEvaluator(VoxelBody body,
+            SimulationProperties simulationProperties, double minAmbulationDistance, string experimentName, int run,
+            ulong startingEvaluations = 0, IDataLogger evaluationLogger = null)
+        {
+            EvaluationCount = startingEvaluations;
+            _voxelBody = body;
+            _simulationProperties = simulationProperties;
+            _minAmbulationDistance = minAmbulationDistance;
+            _experimentName = experimentName;
+            _run = run;
+            _evaluationLogger = evaluationLogger;
+        }
+
+        #endregion
+
         #region Public properties
-        
+
         /// <inheritdoc />
         /// <summary>
         ///     Gets the total number of evaluations that have been performed.
@@ -27,9 +61,9 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
         ///     should stop.  This property's value can remain false to allow the algorithm to run indefinitely.
         /// </summary>
         public bool StopConditionSatisfied { get; private set; }
-        
+
         #region Instance variables
-        
+
         /// <summary>
         ///     The body on which brains (controllers) are evaluated.
         /// </summary>
@@ -65,44 +99,11 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
         ///     Lock object for synchronizing evaluation counter increments.
         /// </summary>
         private readonly object _evaluationLock = new object();
-        
-        #endregion
-        
-        #endregion
-
-        #region Constructor
-
-        /// <summary>
-        ///     Body/brain fitness initialization constructor.
-        /// </summary>
-        /// <param name="body">The body on which brains (controllers) are evaluated.</param>
-        /// <param name="simulationProperties">
-        ///     Collection of simulator configuration properties, including result output
-        ///     directories, configuration files and config file parsing information.
-        /// </param>
-        /// <param name="minAmbulationDistance">The minimum distance that the robot must traverse to meet the MC.</param>
-        /// <param name="experimentName">The human-readable name of the experiment configuration being executed.</param>
-        /// <param name="run">The current run number of the experiment being executed.</param>
-        /// <param name="startingEvaluations">
-        ///     The total number of evaluations that have already been performed at the time of
-        ///     initialization.
-        /// </param>
-        /// <param name="evaluationLogger">Per-evaluation data logger (optional).</param>
-        public BodyBrainFitnessInitializationEvaluator(VoxelBody body,
-            SimulationProperties simulationProperties, double minAmbulationDistance, string experimentName, int run,
-            ulong startingEvaluations = 0, IDataLogger evaluationLogger = null)
-        {
-            EvaluationCount = startingEvaluations;
-            _voxelBody = body;
-            _simulationProperties = simulationProperties;
-            _minAmbulationDistance = minAmbulationDistance;
-            _experimentName = experimentName;
-            _run = run;
-            _evaluationLogger = evaluationLogger;
-        }
 
         #endregion
-        
+
+        #endregion
+
         #region Interface methods
 
         /// <summary>
@@ -118,20 +119,21 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
                 // Increment evaluation count
                 EvaluationCount++;
             }
-            
+
             // Create new voxel brain given the initial substrate dimensions
             var brain = new VoxelBrain(brainCppn, _simulationProperties.InitialXDimension,
                 _simulationProperties.InitialYDimension, _simulationProperties.InitialZDimension,
                 _simulationProperties.NumBrainConnections);
-            
+
             // Construct configuration file path
             var simConfigFilePath = BodyBrainExperimentUtils.ConstructVoxelyzeFilePath("config_init", "vxa",
-                _simulationProperties.SimConfigOutputDirectory, _experimentName, _run, _voxelBody.GenomeId,
-                brain.GenomeId);
-            
+                _simulationProperties.SimConfigOutputDirectory, _experimentName, _run, brain.GenomeId,
+                _voxelBody.GenomeId, false);
+
             // Construct output file path
             var simResultFilePath = BodyBrainExperimentUtils.ConstructVoxelyzeFilePath("result_init", "xml",
-                _simulationProperties.SimResultsDirectory, _experimentName, _run, _voxelBody.GenomeId, brain.GenomeId);
+                _simulationProperties.SimResultsDirectory, _experimentName, _run, brain.GenomeId, _voxelBody.GenomeId,
+                false);
 
             // Write configuration file
             BodyBrainExperimentUtils.WriteVoxelyzeSimulationFile(_simulationProperties.SimConfigTemplateFile,
@@ -150,13 +152,13 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
 
             // Read distance traversed from the results file
             var simResults = BodyBrainExperimentUtils.ReadSimulationResults(simResultFilePath);
-            
+
             // Set the stop condition flag if the ambulation MC has been met
             if (simResults.Distance >= _minAmbulationDistance)
             {
                 StopConditionSatisfied = true;
             }
-            
+
             // Log trial information
             _evaluationLogger?.LogRow(new List<LoggableElement>
             {
@@ -165,11 +167,11 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
                 new LoggableElement(EvaluationFieldElements.StopConditionSatisfied, StopConditionSatisfied),
                 new LoggableElement(EvaluationFieldElements.RunPhase, RunPhase.Initialization)
             }, simResults.GetLoggableElements());
-            
+
             // Remove configuration and output files
             File.Delete(simConfigFilePath);
             File.Delete(simResultFilePath);
-            
+
             // Return fitness as distance traversed
             return new FitnessInfo(simResults.Distance, simResults.Distance);
         }
@@ -201,7 +203,7 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
         /// <param name="lastGeneration">The generation or evaluation batch that was just executed.</param>
         public void UpdateEvaluatorPhenotypes(IEnumerable<object> evaluatorPhenomes, uint lastGeneration)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -220,7 +222,7 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
         public void Reset()
         {
         }
-        
+
         #endregion
     }
 }

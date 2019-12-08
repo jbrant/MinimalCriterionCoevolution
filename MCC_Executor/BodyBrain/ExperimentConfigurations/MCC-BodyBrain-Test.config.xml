@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Config>
-    <MaxBodyInitializationRestarts>2</MaxBodyInitializationRestarts>
-    <MaxBrainInitializationEvaluations>50</MaxBrainInitializationEvaluations>
+    <MaxBodyInitializationRestarts>1</MaxBodyInitializationRestarts>
+    <MaxBrainInitializationEvaluations>15000</MaxBrainInitializationEvaluations>
     <BrainPopulationSize>100</BrainPopulationSize>
     <BodyPopulationSize>20</BodyPopulationSize>
-    <BrainSeedGenomeCount>5</BrainSeedGenomeCount>
-    <BodySeedGenomeCount>2</BodySeedGenomeCount>
+    <BrainSeedGenomeCount>20</BrainSeedGenomeCount>
+    <BodySeedGenomeCount>10</BodySeedGenomeCount>
     <ResourceLimit>5</ResourceLimit>
     <Activation>
         <Scheme>Acyclic</Scheme>
@@ -29,10 +29,10 @@
         <ShrinkBodyProbability>0.2</ShrinkBodyProbability>
     </BodyGenomeConfig>
     <MaxBodySize>15</MaxBodySize>
-    <MinAmbulationDistance>0.001</MinAmbulationDistance>
+    <MinAmbulationDistance>5</MinAmbulationDistance>
     <BrainOffspringBatchSize>10</BrainOffspringBatchSize>
     <BodyOffspringBatchSize>2</BodyOffspringBatchSize>
-    <MaxGenerations>200</MaxGenerations>
+    <MaxGenerations>1</MaxGenerations>
     <NumBodiesSolvedCriteria>1</NumBodiesSolvedCriteria>
     <NumBrainsSolvedCriteria>1</NumBrainsSolvedCriteria>
     <VoxelyzeConfig>
