@@ -13,6 +13,7 @@ using SharpNeat.Behaviors;
 using SharpNeat.Core;
 using SharpNeat.Genomes.Maze;
 using SharpNeat.Phenomes.Mazes;
+using SharpNeat.Utility;
 
 #endregion
 
@@ -61,6 +62,84 @@ namespace MazeExperimentSupportLib
 
             // Set the trajectory of the agent
             evaluationUnit.AgentTrajectory = trialBehavior;
+        }
+
+        /// <summary>
+        ///     Computes the number of "deceptive" turns in the maze by finding juncture locations where there is more than one
+        ///     possible direction to turn, leading to a potentially deceptive trap.
+        /// </summary>
+        /// <param name="curChunkMazes">The collection of mazes being evaluated during the current chunk.</param>
+        /// <returns>The collection of maze genome IDs along with the number of deceptive turns in their solution path.</returns>
+        public static IEnumerable<Tuple<uint, int>> CalculateDeceptiveTurnCount(IEnumerable<MazeStructure> curChunkMazes)
+        {
+            var mazeDeceptiveTurns = new ConcurrentBag<Tuple<uint, int>>();
+
+            // Loop through each solution path and tally the number of deceptive turns
+            Parallel.ForEach(curChunkMazes, mazeStructure =>
+            {
+                var mazeGrid = mazeStructure.MazeGrid.Grid;
+
+                // Initialize deceptive turns to 0
+                var numDeceptiveTurns = 0;
+
+                // Initialize the previous cell to the start location and the current cell to the the second location
+                var prevCell = mazeStructure.UnscaledStartLocation;
+                var curCell = mazeStructure.GetNextPathCell(prevCell);
+
+                do
+                {
+                    // Check to see if there are deceptive offshoots for the current turn 
+                    if (mazeGrid[curCell.Y, curCell.X].IsJuncture)
+                    {
+                        switch (mazeGrid[curCell.Y, curCell.X].PathDirection)
+                        {
+                            case PathDirection.North when prevCell.X <= curCell.X && MazeUtils.IsEastOpening(curCell,
+                                                              mazeStructure.UnscaledMazeWidth, mazeGrid) ||
+                                                          // South opening
+                                                          prevCell.Y <= curCell.Y && MazeUtils.IsSouthOpening(curCell,
+                                                              mazeStructure.UnscaledMazeHeight, mazeGrid) ||
+                                                          // West opening
+                                                          prevCell.X >= curCell.X &&
+                                                          MazeUtils.IsWestOpening(curCell, mazeGrid):
+                            case PathDirection.East
+                                when prevCell.Y >= curCell.Y && MazeUtils.IsNorthOpening(curCell, mazeGrid) ||
+                                     // South opening
+                                     prevCell.Y <= curCell.Y && MazeUtils.IsSouthOpening(curCell,
+                                         mazeStructure.UnscaledMazeHeight, mazeGrid) ||
+                                     // West opening
+                                     prevCell.X >= curCell.X && MazeUtils.IsWestOpening(curCell, mazeGrid):
+                            case PathDirection.South
+                                when prevCell.Y >= curCell.Y && MazeUtils.IsNorthOpening(curCell, mazeGrid) ||
+                                     // East opening
+                                     prevCell.X <= curCell.X && MazeUtils.IsEastOpening(curCell,
+                                         mazeStructure.UnscaledMazeWidth, mazeGrid) ||
+                                     // West opening
+                                     prevCell.X >= curCell.X && MazeUtils.IsWestOpening(curCell, mazeGrid):
+                            case PathDirection.West
+                                when prevCell.Y >= curCell.Y && MazeUtils.IsNorthOpening(curCell, mazeGrid) ||
+                                     // East opening
+                                     prevCell.X <= curCell.X && MazeUtils.IsEastOpening(curCell,
+                                         mazeStructure.UnscaledMazeWidth, mazeGrid) ||
+                                     // South opening
+                                     prevCell.Y <= curCell.Y && MazeUtils.IsSouthOpening(curCell,
+                                         mazeStructure.UnscaledMazeHeight, mazeGrid):
+                                numDeceptiveTurns++;
+                                break;
+                            case PathDirection.None:
+                                break;
+                        }
+                    }
+
+                    // Walk the path to the next cell
+                    prevCell = curCell;
+                    curCell = mazeStructure.GetNextPathCell(curCell);
+                } while (curCell != mazeStructure.UnscaledTargetLocation);
+
+                // Add the current maze genome ID and the corresponding number of deceptive turns
+                mazeDeceptiveTurns.Add(new Tuple<uint, int>(mazeStructure.GenomeId, numDeceptiveTurns));
+            });
+
+            return mazeDeceptiveTurns;
         }
 
         /// <summary>
@@ -531,7 +610,7 @@ namespace MazeExperimentSupportLib
                 var curObsClusterAssignment = clusterAssignments[observationIdx];
 
                 // Only add observation silhouette width if it is NOT the sole member of its assigned cluster
-                if (clusterAssignments.Count(ca => ca == curObsClusterAssignment) > 1)
+                if (Enumerable.Count(clusterAssignments, ca => ca == curObsClusterAssignment) > 1)
                 {
                     // Setup list to hold average distance from current observation to every other neighboring cluster
                     var neighboringClusterDistances = new List<double>(clusters.Count);
@@ -580,13 +659,15 @@ namespace MazeExperimentSupportLib
                             // Compute the average intercluster dissimilarity for the current neighboring 
                             // cluster and add to the list of average neighboring cluster distances
                             neighboringClusterDistances.Add(curObsNeighboringClusterDissimilarity /
-                                                            clusterAssignments.Count(ca => ca == clusterIdx));
+                                                            Enumerable.Count(clusterAssignments,
+                                                                ca => ca == clusterIdx));
                         }
                     }
 
                     // Compute the average intracluster dissimilarity (local variance)
                     obsIntraclusterDissimilarity = obsIntraclusterDissimilarity /
-                                                   clusterAssignments.Count(ca => ca == curObsClusterAssignment);
+                                                   Enumerable.Count(clusterAssignments,
+                                                       ca => ca == curObsClusterAssignment);
 
                     // Get the minimum intercluster dissimilarity (0 if there are no centroid differences)
                     var obsInterClusterDissimilarity = neighboringClusterDistances.Any()

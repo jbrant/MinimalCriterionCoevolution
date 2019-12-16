@@ -144,6 +144,16 @@ namespace SharpNeat.Phenomes.Mazes
         public int ScaledMazeWidth { get; }
 
         /// <summary>
+        ///     The unscaled height of the maze.
+        /// </summary>
+        public int UnscaledMazeHeight => MazeGrid.Grid.GetLength(0);
+
+        /// <summary>
+        ///     The unscaled width of the maze.
+        /// </summary>
+        public int UnscaledMazeWidth => MazeGrid.Grid.GetLength(1);
+
+        /// <summary>
         ///     The unscaled maze cell matrix.
         /// </summary>
         public MazeStructureGrid MazeGrid { get; private set; }

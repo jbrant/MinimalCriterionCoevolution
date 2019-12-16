@@ -169,6 +169,30 @@ namespace MazeExperimentSupportLib
         }
 
         /// <summary>
+        ///     Writes the given maze deceptive turn counts to the experiment database or to a flat file.
+        /// </summary>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <param name="mazeDeceptiveTurns">The maze genome IDs and corresponding deceptive turn tally to persist.</param>
+        /// <param name="writeToDatabase">
+        ///     Indicates whether evaluation results should be written directly to the database or to a
+        ///     flat file.
+        /// </param>
+        public static void WriteMazeDeceptiveTurnCount(int experimentId, int run,
+            IEnumerable<Tuple<uint, int>> mazeDeceptiveTurns, bool writeToDatabase)
+        {
+            // Write results to the database if the option has been specified
+            if (writeToDatabase)
+            {
+                throw new NotImplementedException(
+                    "Direct write to database for maze deceptive turn count not yet implemented!");
+            }
+
+            // Otherwise, write to the flat file output
+            WriteMazeDeceptiveTurnCountToFile(experimentId, run, mazeDeceptiveTurns);
+        }
+
+        /// <summary>
         ///     Writes the cluster diversity results to the experiment database or to a flat file.
         /// </summary>
         /// <param name="experimentId">The experiment that was executed.</param>
@@ -1768,6 +1792,36 @@ namespace MazeExperimentSupportLib
 
             // Immediately flush to the output file
             FileWriters[OutputFileType.MazeDiversityData].Flush();
+        }
+
+        /// <summary>
+        ///     Writes the maze deceptive turn tally to a flat file.
+        /// </summary>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <param name="mazeDeceptiveTurns">The maze genome IDs and corresponding deceptive turn tally to persist.</param>
+        private static void WriteMazeDeceptiveTurnCountToFile(int experimentId, int run,
+            IEnumerable<Tuple<uint, int>> mazeDeceptiveTurns)
+        {
+            // Make sure the file writer actually exists before attempting to write to it
+            if (FileWriters.ContainsKey(OutputFileType.DeceptiveTurnData) == false)
+            {
+                throw new Exception(
+                    $"Cannot write to output stream as no file writer of type {OutputFileType.DeceptiveTurnData} has been created.");
+            }
+
+            // Loop through maze genome IDs and corresponding deceptive turn counts and write each row
+            foreach (var mazeDeceptiveTurn in mazeDeceptiveTurns)
+            {
+                FileWriters[OutputFileType.DeceptiveTurnData].WriteLine(string.Join(FileDelimiter,
+                    new List<string>
+                    {
+                        experimentId.ToString(),
+                        run.ToString(),
+                        mazeDeceptiveTurn.Item1.ToString(), // Maze Genome ID
+                        mazeDeceptiveTurn.Item2.ToString() // Tally of deceptive turns
+                    }));
+            }
         }
 
         /// <summary>

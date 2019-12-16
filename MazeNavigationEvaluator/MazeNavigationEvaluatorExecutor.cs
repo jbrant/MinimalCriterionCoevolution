@@ -107,6 +107,11 @@ namespace MazeNavigationEvaluator
                 _executionConfiguration.ContainsKey(ExecutionParameter.GenerateMazeDiversityScores) &&
                 bool.Parse(_executionConfiguration[ExecutionParameter.GenerateMazeDiversityScores]);
 
+            // Get boolean indicator dictating whether to write out deceptive turn counts (default is false)
+            var generateDeceptiveTurnCounts =
+                _executionConfiguration.ContainsKey(ExecutionParameter.GenerateDeceptiveTurnCounts) &&
+                bool.Parse(_executionConfiguration[ExecutionParameter.GenerateDeceptiveTurnCounts]);
+
             // Get boolean indicator dictating whether to write out natural agent trajectory clusters (default is false)
             var generateAgentTrajectoryClusters =
                 _executionConfiguration.ContainsKey(ExecutionParameter.GenerateAgentTrajectoryClusters) &&
@@ -258,6 +263,16 @@ namespace MazeNavigationEvaluator
                             OutputFileType.MazeDiversityData);
                     }
 
+                    // If maze deceptive turn count generation is enabled and we're not writing to
+                    // the database, open the deceptive turn file writer
+                    if (generateDeceptiveTurnCounts && writeResultsToDatabase == false)
+                    {
+                        ExperimentDataHandler.OpenFileWriter(
+                            Path.Combine(_executionConfiguration[ExecutionParameter.DataFileOutputDirectory],
+                                $"{experimentName} - DeceptiveTurns - {analysisScope} - Run{curRun}.csv"),
+                            OutputFileType.DeceptiveTurnData);
+                    }
+
                     if (generateAgentTrajectoryClusters && writeResultsToDatabase == false)
                     {
                         ExperimentDataHandler.OpenFileWriter(
@@ -324,10 +339,15 @@ namespace MazeNavigationEvaluator
                                 curExperimentConfiguration, baseImageOutputDirectory, generateMazeBitmaps,
                                 generateTrajectoryBitmaps, chunkSize);
                         }
-                        // Like images, maze diversity scores are computed over the entire run 
+                        // Maze diversity scores are computed over the entire run 
                         else if (generateMazeDiversityScores)
                         {
                             WriteMazeDiversityScores(curExperimentConfiguration, curRun);
+                        }
+                        // Deceptive turn counts are computed over the entire run
+                        else if (generateDeceptiveTurnCounts)
+                        {
+                            WriteDeceptiveTurnCounts(curExperimentConfiguration, curRun);
                         }
                         // Begin primary phase results processing
                         else
@@ -402,6 +422,14 @@ namespace MazeNavigationEvaluator
                                 $"{experimentName} - MazeDiversity - {analysisScope}"), curRun);
                     }
 
+                    if (generateDeceptiveTurnCounts && writeResultsToDatabase == false)
+                    {
+                        ExperimentDataHandler.CloseFileWriter(OutputFileType.DeceptiveTurnData);
+                        ExperimentDataHandler.WriteSentinelFile(
+                            Path.Combine(_executionConfiguration[ExecutionParameter.DataFileOutputDirectory],
+                                $"{experimentName} - DeceptiveTurns - {analysisScope}"), curRun);
+                    }
+
                     // If we're not writing to the database, close the natural clustering file writer
                     // and write the sentinel file for the run
                     if (generateAgentTrajectoryClusters && writeResultsToDatabase == false)
@@ -467,7 +495,7 @@ namespace MazeNavigationEvaluator
             for (var curChunk = 0; curChunk < mazeGenomeIds.Count; curChunk += chunkSize)
             {
                 List<Tuple<MccexperimentMazeGenome, MccexperimentNavigatorGenome>> successfulGenomeCombos = null;
-                
+
                 // Create the maze/navigator map
                 var mapEvaluator = new MapEvaluator(experimentParameters, inputNeuronCount, outputNeuronCount);
 
@@ -525,23 +553,9 @@ namespace MazeNavigationEvaluator
         private static void WriteMazeDiversityScores(ExperimentDictionary experimentConfiguration, int run,
             int chunkSize = 100)
         {
-            var mazeStructuresBag = new ConcurrentBag<MazeStructure>();
-
-            // Get XML-serialized genomes for the current experiment/run
-            var serializedMazeGenomes =
-                ExperimentDataHandler.GetMazeGenomeXml(experimentConfiguration.ExperimentDictionaryId, run);
-
-            // Initialize maze decoder for converting maze genomes to phenomes (structures)
-            var mazeDecoder = new MazeDecoder(experimentConfiguration.Primary_Maze_MazeScaleMultiplier ?? 32);
-
-            // Convert serialized maze XML strings to maze genomes
-            var mazeGenomes = MazeGenomeXmlIO.ReadMazeGenomesFromXml(serializedMazeGenomes, new MazeGenomeFactory());
-
-            // Decode each maze genome to construct the solution path
-            Parallel.ForEach(mazeGenomes, mazeGenome => { mazeStructuresBag.Add(mazeDecoder.Decode(mazeGenome)); });
-
-            // Convert to list to avoid multiple enumeration during parallel comparison
-            var allMazes = mazeStructuresBag.ToList();
+            // Extract maze genomes and decode to maze structure phenotype
+            var allMazes = GetAndDecodeMazes(experimentConfiguration.ExperimentDictionaryId, run,
+                experimentConfiguration.Primary_Maze_MazeScaleMultiplier);
 
             // Get the total number of mazes
             var numMazes = allMazes.Count;
@@ -558,6 +572,68 @@ namespace MazeNavigationEvaluator
                 ExperimentDataHandler.WriteMazeDiversityData(experimentConfiguration.ExperimentDictionaryId, run,
                     EvaluationHandler.CalculateMazeDiversity(curMazes, allMazes), false);
             }
+        }
+
+        /// <summary>
+        ///     Computes the number of deceptive turns for each maze in the population and writes out the deceptive turn tallies.
+        /// </summary>
+        /// <param name="experimentConfiguration">The experiment configuration parameters</param>
+        /// <param name="run">The run number.</param>
+        /// <param name="chunkSize">The number of maze genomes to process at one time (optional).</param>
+        private static void WriteDeceptiveTurnCounts(ExperimentDictionary experimentConfiguration, int run,
+            int chunkSize = 100)
+        {
+            // Extract maze genomes and decode to maze structure phenotype
+            var mazes = GetAndDecodeMazes(experimentConfiguration.ExperimentDictionaryId, run,
+                experimentConfiguration.Primary_Maze_MazeScaleMultiplier);
+
+            // Get the total number of mazes
+            var numMazes = mazes.Count;
+
+            for (var curChunk = 0; curChunk < numMazes; curChunk += chunkSize)
+            {
+                _executionLogger.Info(
+                    $"Evaluating mazes [{curChunk}] through [{chunkSize + curChunk}] of [{numMazes}]");
+
+                // Get mazes for the current chunk
+                var curMazes = mazes.Skip(curChunk).Take(chunkSize).ToList();
+
+                // Tally the number of deceptive turns and persist
+                ExperimentDataHandler.WriteMazeDeceptiveTurnCount(experimentConfiguration.ExperimentDictionaryId, run,
+                    EvaluationHandler.CalculateDeceptiveTurnCount(curMazes), false);
+            }
+        }
+
+        /// <summary>
+        ///     Queries database to get maze genomes corresponding to the given experiment and run, and decodes them to maze
+        ///     structure phenotypes.
+        /// </summary>
+        /// <param name="experimentId">The unique ID of the current experiment.</param>
+        /// <param name="run">The current run number.</param>
+        /// <param name="mazeScaleMultiplier">
+        ///     The amount by which to scale the maze encoding to produce the desired phenotype
+        ///     dimensions.
+        /// </param>
+        /// <returns>List of decoded maze structure phenomes.</returns>
+        private static IList<MazeStructure> GetAndDecodeMazes(int experimentId, int run, int? mazeScaleMultiplier)
+        {
+            var mazeStructuresBag = new ConcurrentBag<MazeStructure>();
+
+            // Get XML-serialized genomes for the current experiment/run
+            var serializedMazeGenomes =
+                ExperimentDataHandler.GetMazeGenomeXml(experimentId, run);
+
+            // Initialize maze decoder for converting maze genomes to phenomes (structures)
+            var mazeDecoder = new MazeDecoder(mazeScaleMultiplier ?? 32);
+
+            // Convert serialized maze XML strings to maze genomes
+            var mazeGenomes = MazeGenomeXmlIO.ReadMazeGenomesFromXml(serializedMazeGenomes, new MazeGenomeFactory());
+
+            // Decode each maze genome to construct the solution path
+            Parallel.ForEach(mazeGenomes, mazeGenome => { mazeStructuresBag.Add(mazeDecoder.Decode(mazeGenome)); });
+
+            // Convert to list to avoid multiple enumeration during parallel comparison
+            return mazeStructuresBag.ToList();
         }
 
         /// <summary>
@@ -934,6 +1010,7 @@ namespace MazeNavigationEvaluator
                         case ExecutionParameter.GenerateAgentTrajectoryBitmaps:
                         case ExecutionParameter.GenerateAgentDiversityScores:
                         case ExecutionParameter.GenerateMazeDiversityScores:
+                        case ExecutionParameter.GenerateDeceptiveTurnCounts:
                         case ExecutionParameter.GenerateAgentTrajectoryClusters:
                         case ExecutionParameter.GenerateMazeClusters:
                         case ExecutionParameter.GeneratePopulationEntropy:
@@ -1075,37 +1152,25 @@ namespace MazeNavigationEvaluator
 
             // Log the boiler plate instructions when an invalid configuration is encountered
             _executionLogger.Error("The experiment executor invocation must take the following form:");
-            _executionLogger.Error(
-                string.Format(
-                    "NavigatorMazeMapEvaluator.exe \n\t" +
-                    "Required: {0}=[{23}] {1}=[{24}] \n\t" +
-                    "Optional: {2}=[{30}] \n\t" +
-                    "Optional: {3}=[{25}] {4}=[{25}] (Required: {5}=[{26}]) \n\t" +
-                    "Optional: {6}=[{24}] (Required: {9}=[{26}]) \n\t" +
-                    "Optional: {7}=[{25}] (Required: {9}=[{26}]) \n\t" +
-                    "Optional: {8}=[{25}] (Required: {20}=[{25}] {21}=[{31}] {17}=[{29}] {22}=[{25}] {18}=[{25}] {5}=[{26}]) \n\t" +
-                    "Optional: {19}=[{25}] (Required: {20}=[{25}] {21}=[{31}] {18}=[{25}] {5}=[{26}]) \n\t" +
-                    "Optional: {11}=[{25}] (Required: {5}=[{26}] {5}=[{26}]) \n\t" +
-                    "Optional: {12}=[{25}] (Required: {17}=[{27}] {5}=[{26}]) \n\t" +
-                    "Optional: {13}=[{25}] (Required: {5}=[{26}]) \n\t" +
-                    "Optional: {14}=[{28}] \n\t" +
-                    "Optional: {15}=[{25}] \n\t" +
-                    "Optional: {16}=[{25}] \n\t" +
-                    "Required: {10}=[{27}]",
-                    ExecutionParameter.AgentNeuronInputCount, ExecutionParameter.AgentNeuronOutputCount,
-                    ExecutionParameter.AnalysisScope, ExecutionParameter.GenerateSimulationResults,
-                    ExecutionParameter.WriteResultsToDatabase, ExecutionParameter.DataFileOutputDirectory,
-                    ExecutionParameter.GenerateMazeBitmaps, ExecutionParameter.GenerateAgentTrajectoryBitmaps,
-                    ExecutionParameter.GenerateAgentTrajectoryClusters, ExecutionParameter.BitmapOutputBaseDirectory,
-                    ExecutionParameter.ExperimentNames, ExecutionParameter.GenerateAgentDiversityScores,
-                    ExecutionParameter.GenerateTrajectoryData, ExecutionParameter.GeneratePopulationEntropy,
-                    ExecutionParameter.StartFromRun, ExecutionParameter.ExecuteInitializationTrials,
-                    ExecutionParameter.IsDistributedExecution, ExecutionParameter.SampleSize,
-                    ExecutionParameter.SampleFromSpecies, ExecutionParameter.GenerateMazeClusters,
-                    ExecutionParameter.UseGreedySilhouetteCalculation, ExecutionParameter.ClusterRange,
-                    ExecutionParameter.UseEvenMazeTrajectoryDistribution,
-                    "# Input Neurons", "# Output Neurons", "true|false", "directory", "experiment,experiment,...",
-                    "starting run #", "sample #", "Full, Aggregate, Last", "cluster range #"));
+            _executionLogger.Error(string.Format(
+                "NavigatorMazeMapEvaluator.exe \n\t" +
+                $"Required: {ExecutionParameter.AgentNeuronInputCount}=[# Input Neurons] {ExecutionParameter.AgentNeuronOutputCount}=[# Output Neurons] \n\t" +
+                $"Optional: {ExecutionParameter.AnalysisScope}=[Full, Aggregate, Last] \n\t" +
+                $"Optional: {ExecutionParameter.GenerateSimulationResults}=[{{0}}] {ExecutionParameter.WriteResultsToDatabase}=[{{0}}] (Required: {ExecutionParameter.DataFileOutputDirectory}=[{{1}}]) \n\t" +
+                $"Optional: {ExecutionParameter.GenerateMazeBitmaps}=[{{0}}] (Required: {ExecutionParameter.BitmapOutputBaseDirectory}=[{{1}}]) \n\t" +
+                $"Optional: {ExecutionParameter.GenerateAgentTrajectoryBitmaps}=[{{0}}] (Required: {ExecutionParameter.BitmapOutputBaseDirectory}=[{{1}}]) \n\t" +
+                $"Optional: {ExecutionParameter.GenerateAgentTrajectoryClusters}=[{{0}}] (Required: {ExecutionParameter.UseGreedySilhouetteCalculation}=[{{0}}] {ExecutionParameter.ClusterRange}=[{{2}}] {ExecutionParameter.SampleSize}=[{{3}}] {ExecutionParameter.UseEvenMazeTrajectoryDistribution}=[{{0}}] {ExecutionParameter.SampleFromSpecies}=[{{0}}] {ExecutionParameter.DataFileOutputDirectory}=[{{1}}]) \n\t" +
+                $"Optional: {ExecutionParameter.GenerateMazeClusters}=[{{0}}] (Required: {ExecutionParameter.UseGreedySilhouetteCalculation}=[{{0}}] {ExecutionParameter.ClusterRange}=[{{2}}] {ExecutionParameter.SampleFromSpecies}=[{{0}}] {ExecutionParameter.DataFileOutputDirectory}=[{{1}}]) \n\t" +
+                $"Optional: {ExecutionParameter.GenerateAgentDiversityScores}=[{{0}}] (Required: {ExecutionParameter.DataFileOutputDirectory}=[{{1}}]) \n\t" +
+                $"Optional: {ExecutionParameter.GenerateMazeDiversityScores}=[{{0}}] (Required: {ExecutionParameter.DataFileOutputDirectory}=[{{1}}]) \n\t" +
+                $"Optional: {ExecutionParameter.GenerateTrajectoryData}=[{{0}}] (Required: {ExecutionParameter.SampleSize}=[{{3}}] {ExecutionParameter.DataFileOutputDirectory}=[{{1}}]) \n\t" +
+                $"Optional: {ExecutionParameter.GeneratePopulationEntropy}=[{{0}}] (Required: {ExecutionParameter.DataFileOutputDirectory}=[{{1}}]) \n\t" +
+                $"Optional: {ExecutionParameter.StartFromRun}=[starting run #] \n\t" +
+                $"Optional: {ExecutionParameter.ExecuteInitializationTrials}=[{{0}}] \n\t" +
+                $"Optional: {ExecutionParameter.IsDistributedExecution}=[{{0}}] \n\t" +
+                $"Required: {ExecutionParameter.ExperimentNames}=[experiment,experiment,...]",
+                "true|false", "directory", "cluster range #", "sample #")
+            );
 
             return false;
         }
