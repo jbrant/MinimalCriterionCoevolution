@@ -135,8 +135,24 @@ namespace SharpNeat.Genomes.Substrate
             {
                 genome.NeatSubstrateGenomeFactory = substrateGenomeFactory;
             }
-            
+
             return genomeList;
+        }
+
+        /// <summary>
+        ///     Reads a single genome from a population from the given XML file.  This is typically used in cases where a
+        ///     population file is being read in, but it only contains one genome.
+        /// </summary>
+        /// <param name="xr">The XmlReader to read from.</param>
+        /// <param name="nodeFnIds">
+        ///     Indicates if node activation function IDs should be read. If false then
+        ///     all node activation function IDs default to 0.
+        /// </param>
+        /// <param name="substrateGenomeFactory">A NeatSubstrateGenomeFactory object to construct genomes against.</param>
+        public static NeatSubstrateGenome ReadSingleGenomeFromRoot(XmlReader xr, bool nodeFnIds,
+            NeatSubstrateGenomeFactory substrateGenomeFactory)
+        {
+            return ReadCompleteGenomeList(xr, nodeFnIds, substrateGenomeFactory)[0];
         }
 
         /// <summary>

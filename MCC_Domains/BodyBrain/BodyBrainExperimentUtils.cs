@@ -211,10 +211,10 @@ namespace MCC_Domains.BodyBrain
         /// <param name="run">The run number of the experiment to which the file corresponds.</param>
         /// <param name="brainGenomeId">The unique ID of the brain genome being simulated.</param>
         /// <param name="bodyGenomeId">The unique ID of the body genome being simulated.</param>
+        /// <param name="isBrainEval">Indicates whether the configuration file reference is for a voxel brain evaluation.</param>
         /// <returns></returns>
         public static string ConstructVoxelyzeFilePath(string fileType, string extension, string outputDirectory,
-            string experimentName,
-            int run, uint brainGenomeId, uint bodyGenomeId, bool isBrainEval)
+            string experimentName, int run, uint brainGenomeId, uint bodyGenomeId, bool isBrainEval)
         {
             return isBrainEval
                 ? string.Join("/", outputDirectory,

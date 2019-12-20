@@ -13,6 +13,7 @@ using SharpNeat.Decoders.Substrate;
 using SharpNeat.Genomes.HyperNeat;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Genomes.Substrate;
+using SharpNeat.Network;
 using SharpNeat.Phenomes;
 using SharpNeat.Phenomes.Voxels;
 using RunPhase = SharpNeat.Core.RunPhase;
@@ -98,18 +99,25 @@ namespace BodyBrainConfigGenerator
         private readonly int _run;
 
         /// <summary>
+        /// The number of connections in the voxel brain CPPN.
+        /// </summary>
+        private readonly int _numBrainConnections;
+
+        /// <summary>
         ///     ConfigGenerator constructor.
         /// </summary>
         /// <param name="experimentConfig">Object containing experiment configuration parameters.</param>
         /// <param name="run">The current experiment run number.</param>
         /// <param name="configTemplate">The simulation configuration template including simulation parameter defaults.</param>
         /// <param name="outputDirectory">The output directory into which to write generated configuration files.</param>
+        /// <param name="numBrainConnections">The number of connections in the voxel brain CPPN.</param>
         private ConfigGenerator(ExperimentDictionaryBodyBrain experimentConfig, int run, string configTemplate,
-            string outputDirectory)
+            string outputDirectory, int numBrainConnections)
         {
             _experimentId = experimentConfig.ExperimentDictionaryId;
             _experimentName = experimentConfig.ExperimentName;
             _run = run;
+            _numBrainConnections = numBrainConnections;
             _configTemplate = configTemplate;
             _mcValue = experimentConfig.MinimalCriteriaValue;
 
@@ -129,19 +137,17 @@ namespace BodyBrainConfigGenerator
             var activationScheme = experimentConfig.ActivationIters != null
                 ? NetworkActivationScheme.CreateCyclicFixedTimestepsScheme(experimentConfig.ActivationIters ?? 0)
                 : NetworkActivationScheme.CreateAcyclicScheme();
-
-            /*
+            
             // Create the body and brain genome factories
             _brainGenomeFactory = new CppnGenomeFactory(BrainCppnInputCount, BrainCppnOutputCount);
-            _bodyGenomeFactory = new CppnGenomeFactory(BodyCppnInputCount, BodyCppnOutputCount);
+            _bodyGenomeFactory = new NeatSubstrateGenomeFactory(BodyCppnInputCount, BodyCppnOutputCount,
+                DefaultActivationFunctionLibrary.CreateLibraryCppn(), new NeatSubstrateGenomeParameters(),
+                experimentConfig.VoxelyzeConfigInitialXdimension, experimentConfig.VoxelyzeConfigInitialYdimension,
+                experimentConfig.VoxelyzeConfigInitialZdimension, experimentConfig.MaxBodySize);
 
             // Create the body and brain genome decoders
-            _brainDecoder = new VoxelBrainDecoder(activationScheme, experimentConfig.VoxelyzeConfigInitialXdimension,
-                experimentConfig.VoxelyzeConfigInitialYdimension, experimentConfig.VoxelyzeConfigInitialZdimension,
-                experimentConfig.VoxelyzeConfigBrainNetworkConnections);
-            _bodyDecoder = new CppnSubstrateDecoder(activationScheme, experimentConfig.VoxelyzeConfigInitialXdimension,
-                experimentConfig.VoxelyzeConfigInitialYdimension, experimentConfig.VoxelyzeConfigInitialZdimension);
-            */
+            _brainDecoder = new NeatGenomeDecoder(activationScheme);
+            _bodyDecoder = new NeatSubstrateGenomeDecoder(activationScheme);
         }
 
         #region Private file I/O methods
@@ -153,32 +159,32 @@ namespace BodyBrainConfigGenerator
         /// <param name="brainGenome">The brain to serialize to the configuration file.</param>
         private void WriteConfigFile(MccexperimentVoxelBodyGenome bodyGenome, MccexperimentVoxelBrainGenome brainGenome)
         {
-            IBlackBoxSubstrate body;
-            IBlackBox brain;
-
-            /*
+            VoxelBody body;
+            VoxelBrain brain;
+            
             // Read in voxel body XML and decode to phenotype
             using (var xmlReader = XmlReader.Create(new StringReader(bodyGenome.GenomeXml)))
             {
-                body = _bodyDecoder.Decode(
-                    NeatSubstrateGenomeXmlIO.ReadSingleGenomeFromRoot(xmlReader, false, _bodyGenomeFactory));
+                body = new VoxelBody(_bodyDecoder.Decode(
+                    NeatSubstrateGenomeXmlIO.ReadSingleGenomeFromRoot(xmlReader, false, _bodyGenomeFactory)));
             }
 
             // Read in voxel brain XML and decode to phenotype
             using (var xmlReader = XmlReader.Create(new StringReader(brainGenome.GenomeXml)))
             {
-                brain = _brainDecoder.Decode(
-                    NeatGenomeXmlIO.ReadSingleGenomeFromRoot(xmlReader, false, _brainGenomeFactory));
+                brain = new VoxelBrain(
+                    _brainDecoder.Decode(
+                        NeatGenomeXmlIO.ReadSingleGenomeFromRoot(xmlReader, false, _brainGenomeFactory)), body.LengthX,
+                    body.LengthY, body.LengthZ, _numBrainConnections);
             }
-
+            
             // Construct the output file path and name
             var outputFile = BodyBrainExperimentUtils.ConstructVoxelyzeFilePath("config", "vxa",
-                _outputDirectory, _experimentName, _run, body.GenomeId, brain.GenomeId);
+                _outputDirectory, _experimentName, _run, brain.GenomeId, body.GenomeId, false);
 
             // Write the configuration file
             BodyBrainExperimentUtils.WriteVoxelyzeSimulationFile(_configTemplate, outputFile, ".", brain, body,
                 _mcValue);
-            */
         }
 
         #endregion
@@ -196,7 +202,8 @@ namespace BodyBrainConfigGenerator
         public static void GenerateSimulationConfigs(ExperimentDictionaryBodyBrain experimentConfig, int run,
             string configTemplate, string outputDirectory, int chunkSize = 10)
         {
-            var instance = new ConfigGenerator(experimentConfig, run, configTemplate, outputDirectory);
+            var instance = new ConfigGenerator(experimentConfig, run, configTemplate, outputDirectory,
+                experimentConfig.VoxelyzeConfigBrainNetworkConnections);
 
             // Get all viable bodies
             var bodyGenomeIds = instance.GetBodyGenomeIds();

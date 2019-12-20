@@ -22,6 +22,7 @@ namespace ExperimentEntities.entities
         public int MinimalCriteriaValue { get; set; }
         public int NumBodiesSolvedCriteria { get; set; }
         public int NumBrainsSolvedCriteria { get; set; }
+        public int MaxBodySize { get; set; }
         public string InitializationSearchAlgorithm { get; set; }
         public string InitializationSelectionAlgorithm { get; set; }
         public int InitializationPopulationSize { get; set; }

@@ -158,6 +158,9 @@ namespace MazeExperimentSupportLib
             {
                 Parallel.ForEach(allMazes, cmprMazeStructure =>
                 {
+                    // Path cell counter
+                    int pathCellCount = 0;
+                    
                     // Distance accumulator for the current maze
                     var pathDistance = 0.0;
 
@@ -178,18 +181,21 @@ namespace MazeExperimentSupportLib
                             // Increment to the next cell of both mazes
                             curCell = mazeStructure.GetNextPathCell(curCell);
                             curCmprCell = cmprMazeStructure.GetNextPathCell(curCmprCell);
+                            
+                            // Increment the path cell count
+                            pathCellCount++;
                         }
                         catch (Exception e)
                         {
                             Console.WriteLine(e);
                             throw;
                         }
-                    } while (curCell != mazeStructure.UnscaledTargetLocation &&
+                    } while (curCell != mazeStructure.UnscaledTargetLocation ||
                              curCmprCell != cmprMazeStructure.UnscaledTargetLocation);
 
                     // Record the distance between the two maze solution paths
                     mazeDiversityUnits.Add(new MazeDiversityUnit(mazeStructure.GenomeId, cmprMazeStructure.GenomeId,
-                        pathDistance));
+                        pathDistance/pathCellCount));
                 });
             }
 
