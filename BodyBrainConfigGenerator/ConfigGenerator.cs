@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -14,7 +15,6 @@ using SharpNeat.Genomes.HyperNeat;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Genomes.Substrate;
 using SharpNeat.Network;
-using SharpNeat.Phenomes;
 using SharpNeat.Phenomes.Voxels;
 using RunPhase = SharpNeat.Core.RunPhase;
 
@@ -47,6 +47,12 @@ namespace BodyBrainConfigGenerator
         ///     The number of body CPPN outputs (material presence and type).
         /// </summary>
         private const int BodyCppnOutputCount = 2;
+
+        /// <summary>
+        ///     The base output directory into which to write generated configuration files (further subdirectories will be created
+        ///     based on body size and voxel composition).
+        /// </summary>
+        private readonly string _baseOutputDirectory;
 
         /// <summary>
         ///     The body genome decoder.
@@ -89,19 +95,14 @@ namespace BodyBrainConfigGenerator
         private readonly double _mcValue;
 
         /// <summary>
-        ///     The output directory into which to write generated configuration files.
+        ///     The number of connections in the voxel brain CPPN.
         /// </summary>
-        private readonly string _outputDirectory;
+        private readonly int _numBrainConnections;
 
         /// <summary>
         ///     The run number of the given experiment.
         /// </summary>
         private readonly int _run;
-
-        /// <summary>
-        /// The number of connections in the voxel brain CPPN.
-        /// </summary>
-        private readonly int _numBrainConnections;
 
         /// <summary>
         ///     ConfigGenerator constructor.
@@ -121,23 +122,23 @@ namespace BodyBrainConfigGenerator
             _configTemplate = configTemplate;
             _mcValue = experimentConfig.MinimalCriteriaValue;
 
-            // Construct output directory
-            _outputDirectory = Path.Combine(outputDirectory, experimentConfig.ExperimentName, $"Run{run}");
+            // Construct base output directory
+            _baseOutputDirectory = Path.Combine(outputDirectory, experimentConfig.ExperimentName, $"Run{run}");
 
             // Delete directory if it already exists
-            if (Directory.Exists(_outputDirectory))
+            if (Directory.Exists(_baseOutputDirectory))
             {
-                Directory.Delete(_outputDirectory, true);
+                Directory.Delete(_baseOutputDirectory, true);
             }
 
             // Create the target directory
-            Directory.CreateDirectory(_outputDirectory);
+            Directory.CreateDirectory(_baseOutputDirectory);
 
             // Set the appropriate activation scheme
             var activationScheme = experimentConfig.ActivationIters != null
                 ? NetworkActivationScheme.CreateCyclicFixedTimestepsScheme(experimentConfig.ActivationIters ?? 0)
                 : NetworkActivationScheme.CreateAcyclicScheme();
-            
+
             // Create the body and brain genome factories
             _brainGenomeFactory = new CppnGenomeFactory(BrainCppnInputCount, BrainCppnOutputCount);
             _bodyGenomeFactory = new NeatSubstrateGenomeFactory(BodyCppnInputCount, BodyCppnOutputCount,
@@ -161,7 +162,7 @@ namespace BodyBrainConfigGenerator
         {
             VoxelBody body;
             VoxelBrain brain;
-            
+
             // Read in voxel body XML and decode to phenotype
             using (var xmlReader = XmlReader.Create(new StringReader(bodyGenome.GenomeXml)))
             {
@@ -177,10 +178,19 @@ namespace BodyBrainConfigGenerator
                         NeatGenomeXmlIO.ReadSingleGenomeFromRoot(xmlReader, false, _brainGenomeFactory)), body.LengthX,
                     body.LengthY, body.LengthZ, _numBrainConnections);
             }
-            
+
+            // Further subdivide directory structure based on voxel body size and voxel composition
+            var directory = Path.Combine(_baseOutputDirectory, $"Size {body.LengthX}x{body.LengthY}x{body.LengthZ}",
+                $"Proportion {Math.Round(body.FullProportion, 1).ToString(CultureInfo.InvariantCulture)}");
+
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
             // Construct the output file path and name
             var outputFile = BodyBrainExperimentUtils.ConstructVoxelyzeFilePath("config", "vxa",
-                _outputDirectory, _experimentName, _run, brain.GenomeId, body.GenomeId, false);
+                directory, _experimentName, _run, brain.GenomeId, body.GenomeId, false);
 
             // Write the configuration file
             BodyBrainExperimentUtils.WriteVoxelyzeSimulationFile(_configTemplate, outputFile, ".", brain, body,
