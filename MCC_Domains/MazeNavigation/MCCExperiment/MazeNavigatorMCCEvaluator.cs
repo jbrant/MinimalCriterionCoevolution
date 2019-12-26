@@ -1,6 +1,8 @@
 ﻿#region
 
 using System.Collections.Generic;
+using System.Linq;
+using Redzen.Random;
 using SharpNeat.Core;
 using SharpNeat.Loggers;
 using SharpNeat.Phenomes;
@@ -99,6 +101,11 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         /// </summary>
         private readonly bool _isResourceLimited;
 
+        /// <summary>
+        ///     Random number generator that controls evaluation selection order.
+        /// </summary>
+        private readonly IRandomSource _rng = RandomDefaults.CreateRandomSource();
+
         #endregion
 
         #region Public Properties
@@ -132,7 +139,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             var curSuccesses = 0;
             var behaviorInfo = new BehaviorInfo();
 
-            for (var cnt = 0; cnt < _multiMazeWorldFactory.NumMazes && curSuccesses < _agentNumSuccessesCriteria; cnt++)
+            foreach (var cnt in Enumerable.Range(0, _multiMazeWorldFactory.NumMazes).OrderBy(x => _rng.Next()))
             {
                 var isSuccessful = false;
                 ulong threadLocalEvaluationCount;
@@ -200,13 +207,14 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
                 // Add simulation trial info
                 behaviorInfo.TrialData.Add(new TrialInfo(isSuccessful, objectiveDistance,
                     world.GetSimulationTimesteps(), _multiMazeWorldFactory.GetMazeGenomeId(cnt), trialBehavior));
-            }
 
-            // If the number of successful maze navigations was equivalent to the minimum required,
-            // then the minimal criteria has been satisfied
-            if (curSuccesses >= _agentNumSuccessesCriteria)
-            {
+                // Terminate the evaluation loop if the MC has been satisfied
+                if (curSuccesses < _agentNumSuccessesCriteria) continue;
+
+                // If the number of successful maze navigations is equivalent to the minimum required,
+                // then the minimal criteria has been satisfied so terminate the evaluation loop
                 behaviorInfo.DoesBehaviorSatisfyMinimalCriteria = true;
+                break;
             }
 
             return behaviorInfo;
@@ -272,13 +280,13 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
                     }
                 }
             }
-            
+
             // Cast to maze genomes/phenomes
             var mazePhenomes = (IList<MazeStructure>) evaluatorPhenomes;
 
             // Set the new maze configurations on the factory
             _multiMazeWorldFactory.SetMazeConfigurations(mazePhenomes);
-            
+
             // Increment resource usage count as appropriate
             _multiMazeWorldFactory.UpdateMazePhenomeUsage(mazePhenomes);
         }

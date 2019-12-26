@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using Redzen.Random;
 using SharpNeat.Core;
 using SharpNeat.Loggers;
 using SharpNeat.Phenomes;
@@ -90,6 +92,11 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
         /// </summary>
         private readonly object _evaluationLock = new object();
 
+        /// <summary>
+        ///     Random number generator that controls evaluation selection order.
+        /// </summary>
+        private readonly IRandomSource _rng = RandomDefaults.CreateRandomSource();
+
         #endregion
 
         #region Public properties
@@ -122,7 +129,7 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
             var curSuccesses = 0;
             var behaviorInfo = new BehaviorInfo();
 
-            for (var cnt = 0; cnt < _voxelBrainFactory.NumBrains && curSuccesses < _numBrainsSolvedCriteria; cnt++)
+            foreach (var cnt in Enumerable.Range(0, _voxelBrainFactory.NumBrains).OrderBy(x => _rng.Next()))
             {
                 var isSuccessful = false;
                 ulong threadLocalEvaluationCount;
@@ -184,24 +191,26 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
                 File.Delete(simConfigFilePath);
                 File.Delete(simResultFilePath);
 
-                    // Don't attempt to log if the file stream is closed
-                if (!(_evaluationLogger?.IsStreamOpen() ?? false)) continue;
-
-                // Log trial information
-                _evaluationLogger?.LogRow(new List<LoggableElement>
+                // Only attempt to log if the file stream is open
+                if (_evaluationLogger?.IsStreamOpen() ?? false)
                 {
-                    new LoggableElement(EvaluationFieldElements.Generation, currentGeneration),
-                    new LoggableElement(EvaluationFieldElements.EvaluationCount, threadLocalEvaluationCount),
-                    new LoggableElement(EvaluationFieldElements.StopConditionSatisfied, StopConditionSatisfied),
-                    new LoggableElement(EvaluationFieldElements.RunPhase, RunPhase.Initialization)
-                }, simResults.GetLoggableElements());
-            }
+                    // Log trial information
+                    _evaluationLogger?.LogRow(new List<LoggableElement>
+                    {
+                        new LoggableElement(EvaluationFieldElements.Generation, currentGeneration),
+                        new LoggableElement(EvaluationFieldElements.EvaluationCount, threadLocalEvaluationCount),
+                        new LoggableElement(EvaluationFieldElements.StopConditionSatisfied, StopConditionSatisfied),
+                        new LoggableElement(EvaluationFieldElements.RunPhase, RunPhase.Initialization)
+                    }, simResults.GetLoggableElements());
+                }
 
-            // If the number of successful ambulations is greater than the minimum required, then the minimal criteria
-            // has been satisfied
-            if (curSuccesses >= _numBrainsSolvedCriteria)
-            {
+                // Continue to the next iteration if the MC has still not yet been satisfied
+                if (curSuccesses < _numBrainsSolvedCriteria) continue;
+
+                // If the number of successful ambulations is greater than the minimum required, then the minimal criteria
+                // has been satisfied, so terminate the evaluation loop
                 behaviorInfo.DoesBehaviorSatisfyMinimalCriteria = true;
+                break;
             }
 
             return behaviorInfo;

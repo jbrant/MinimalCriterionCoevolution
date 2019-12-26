@@ -1,6 +1,8 @@
 ﻿#region
 
 using System.Collections.Generic;
+using System.Linq;
+using Redzen.Random;
 using SharpNeat.Core;
 using SharpNeat.Loggers;
 using SharpNeat.Phenomes;
@@ -84,6 +86,11 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         /// </summary>
         private readonly IDataLogger _evaluationLogger;
 
+        /// <summary>
+        ///     Random number generator that controls evaluation selection order.
+        /// </summary>
+        private readonly IRandomSource _rng = RandomDefaults.CreateRandomSource();
+
         #endregion
 
         #region Public Properties
@@ -121,10 +128,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             var curFailures = 0;
             var behaviorInfo = new BehaviorInfo();
 
-            for (var cnt = 0;
-                cnt < _agentControllers.Count &&
-                (curSuccesses < _numAgentsSolvedCriteria || curFailures < _numAgentsFailedCriteria);
-                cnt++)
+            foreach (var cnt in Enumerable.Range(0, _agentControllers.Count).OrderBy(x => _rng.Next()))
             {
                 var isSuccessful = false;
                 ulong threadLocalEvaluationCount;
@@ -170,13 +174,14 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
                 // Add simulation trial info
                 behaviorInfo.TrialData.Add(new TrialInfo(isSuccessful, objectiveDistance,
                     world.GetSimulationTimesteps(), _agentControllers[cnt].GenomeId, trialBehavior));
-            }
 
-            // If the number of successful maze navigations and failed maze navigations were both equivalent to their
-            // respective minimums, then the minimal criteria has been satisfied
-            if (curSuccesses >= _numAgentsSolvedCriteria && curFailures >= _numAgentsFailedCriteria)
-            {
+                // Continue to the next iteration if the MC has still not yet been satisfied
+                if (curSuccesses < _numAgentsSolvedCriteria || curFailures < _numAgentsFailedCriteria) continue;
+
+                // If the number of successful maze navigations and failed maze navigations are both equivalent to their
+                // respective minimums, then the minimal criteria has been satisfied so terminate the evaluation loop
                 behaviorInfo.DoesBehaviorSatisfyMinimalCriteria = true;
+                break;
             }
 
             return behaviorInfo;
