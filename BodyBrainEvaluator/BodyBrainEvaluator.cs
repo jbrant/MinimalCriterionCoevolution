@@ -1,19 +1,15 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 using System.Xml;
 using BodyBrainSupportLib;
 using ExperimentEntities.entities;
 using log4net;
 using log4net.Config;
-using MCC_Domains.BodyBrain;
 using SharpNeat.Decoders.Neat;
 using SharpNeat.Decoders.Substrate;
 using SharpNeat.Genomes.HyperNeat;
@@ -61,7 +57,7 @@ namespace BodyBrainConfigGenerator
 
             // Get boolean indicator dictating whether to generate simulation log
             var generateSimLog = ExecutionConfiguration.ContainsKey(ExecutionParameter.GenerateSimLogData) &&
-                                    bool.Parse(ExecutionConfiguration[ExecutionParameter.GenerateSimLogData]);
+                                 bool.Parse(ExecutionConfiguration[ExecutionParameter.GenerateSimLogData]);
 
             // Lookup the current experiment configuration
             var curExperimentConfiguration = DataHandler.LookupExperimentConfiguration(experimentName);
@@ -77,7 +73,7 @@ namespace BodyBrainConfigGenerator
             _executionLogger.Info(
                 $"Preparing to execute configuration file generation for experiment [{curExperimentConfiguration.ExperimentName}] run [{run}]");
 
-            // If simulation log generation is enabled, open the file writer
+            // Run simulation log file generation
             if (generateSimLog)
             {
                 DataHandler.OpenFileWriter(
@@ -85,15 +81,21 @@ namespace BodyBrainConfigGenerator
                         $"{experimentName} - SimulationLog - Run{run}.csv"), OutputFileType.SimulationLogData);
 
                 ProcessResultChunks(curExperimentConfiguration, run, GenerateSimulationLogData);
+
+                // Close the output file and write the sentinel file
+                DataHandler.CloseFileWriter(OutputFileType.SimulationLogData);
+                DataHandler.WriteSentinelFile(
+                    Path.Combine(ExecutionConfiguration[ExecutionParameter.DataOutputDirectory],
+                        $"{experimentName} - SimulationLog"), run);
             }
 
+            // Run simulation configuration file generation
             if (generateSimConfigs)
             {
                 ProcessResultChunks(curExperimentConfiguration, run, GenerateSimulationConfigs);
-
-                _executionLogger.Info(
-                    $"Simulation configuration file generation for experiment [{curExperimentConfiguration.ExperimentName}] and run [{run}] complete");
             }
+
+            _executionLogger.Info($"Result processing for experiment [{experimentName}] and run [{run}] complete");
         }
 
         /// <summary>
@@ -171,12 +173,19 @@ namespace BodyBrainConfigGenerator
                 });
         }
 
+        /// <summary>
+        ///     Generates detailed, per-timestep log data for the body/brain simulation.
+        /// </summary>
+        /// <param name="viableBodyBrainCombos">Successful combinations of bodies and brains.</param>
+        /// <param name="experimentConfig">The parameters of the experiment being executed.</param>
+        /// <param name="run">The run being executed.</param>
+        /// <param name="voxelPack">The voxel factory/decoder instances.</param>
         private static void GenerateSimulationLogData(
             IEnumerable<Tuple<MccexperimentVoxelBodyGenome, MccexperimentVoxelBrainGenome>> viableBodyBrainCombos,
             ExperimentDictionaryBodyBrain experimentConfig, int run, VoxelFactoryDecoderPack voxelPack)
         {
             var bodyBrainSimulationUnits = new ConcurrentBag<BodyBrainSimulationUnit>();
-            
+
             var experimentId = experimentConfig.ExperimentDictionaryId;
             var experimentName = experimentConfig.ExperimentName;
             var numBrainConnections = experimentConfig.VoxelyzeConfigBrainNetworkConnections;
@@ -215,7 +224,7 @@ namespace BodyBrainConfigGenerator
                     bodyBrainSimulationUnits.Add(
                         SimulationHandler.ReadSimulationLog(brain.GenomeId, body.GenomeId, simLogFilePath));
                 });
-            
+
             // Write simulation log data from body/brain combinations
             DataHandler.WriteSimulationLogDataToFile(experimentId, run, bodyBrainSimulationUnits);
         }
@@ -372,7 +381,7 @@ namespace BodyBrainConfigGenerator
                     (ExecutionConfiguration.ContainsKey(ExecutionParameter.SimulationTimesteps) == false ||
                      ExecutionConfiguration.ContainsKey(ExecutionParameter.ConfigTemplateFilePath) == false ||
                      ExecutionConfiguration.ContainsKey(ExecutionParameter.SimExecutablePath) == false ||
-                     ExecutionConfiguration.ContainsKey(ExecutionParameter.ConfigOutputDirectory) == false || 
+                     ExecutionConfiguration.ContainsKey(ExecutionParameter.ConfigOutputDirectory) == false ||
                      ExecutionConfiguration.ContainsKey(ExecutionParameter.SimLogOutputDirectory) == false ||
                      ExecutionConfiguration.ContainsKey(ExecutionParameter.DataOutputDirectory) == false))
                 {

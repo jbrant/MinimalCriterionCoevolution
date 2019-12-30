@@ -8,6 +8,8 @@ using SharpNeat.Loggers;
 using SharpNeat.Phenomes;
 using SharpNeat.Phenomes.Mazes;
 
+// ReSharper disable InconsistentlySynchronizedField
+
 #endregion
 
 namespace MCC_Domains.MazeNavigation.MCCExperiment
@@ -308,7 +310,6 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
                         {
                             new LoggableElement(ResourceUsageFieldElements.Generation, lastGeneration),
                             new LoggableElement(ResourceUsageFieldElements.GenomeId, agentGenomeId),
-                            // ReSharper disable once InconsistentlySynchronizedField
                             new LoggableElement(ResourceUsageFieldElements.UsageCount, _agentUsageMap[agentGenomeId])
                         });
                     }
@@ -332,12 +333,10 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
                 }
 
                 // Remove agents that have aged out of the population
-                foreach (var agentGenomeId in _agentUsageMap.Keys)
+                foreach (var agentGenomeId in _agentUsageMap.Keys.ToList()
+                    .Where(agentGenomeId => !agentGenomeIds.Contains(agentGenomeId)))
                 {
-                    if (!agentGenomeIds.Contains(agentGenomeId))
-                    {
-                        _agentUsageMap.Remove(agentGenomeId);
-                    }
+                    _agentUsageMap.Remove(agentGenomeId);
                 }
             }
         }
