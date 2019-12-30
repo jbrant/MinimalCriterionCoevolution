@@ -36,6 +36,8 @@
         <GA>
             <WriteFitnessFile>1</WriteFitnessFile>
             <FitnessFileName></FitnessFileName>
+            <WriteSimLogFile>0</WriteSimLogFile>
+            <SimLogFileName></SimLogFileName>
         </GA>
     </Simulator>
     <Environment>

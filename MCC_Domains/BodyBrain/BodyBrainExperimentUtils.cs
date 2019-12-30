@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Xml;
@@ -148,7 +149,7 @@ namespace MCC_Domains.BodyBrain
         ///     defaults.
         /// </param>
         /// <param name="outputPath">The directory into which the generated Voxelyze simulation configuration file is written.</param>
-        /// <param name="simResultsFilePath">The directory into which to write simulation results.</param>
+        /// <param name="simResultsFilePath">The path of the file into which to write simulation results.</param>
         /// <param name="brain">The voxel brain object containing per-voxel network weights.</param>
         /// <param name="body">The voxel body object containing voxel material specifications.</param>
         /// <param name="mcDistance">The distance traveled minimal criterion.</param>
@@ -164,13 +165,81 @@ namespace MCC_Domains.BodyBrain
             var simDoc = new XmlDocument();
             simDoc.Load(vxaTemplatePath);
 
-            // Set the results output file name and path
+            // Enable fitness file logging and set the results output file name and path
+            simDoc.SelectSingleNode(string.Join("/", vxaSimGaXPath, "WriteFitnessFile")).InnerText = "1";
             simDoc.SelectSingleNode(string.Join("/", vxaSimGaXPath, "FitnessFileName")).InnerText = simResultsFilePath;
+            
+            // Disable simulation logging
+            simDoc.SelectSingleNode(string.Join("/", vxaSimGaXPath, "WriteSimLogFile")).InnerText = "0";
 
             // Set the distance minimal criterion
             simDoc.SelectSingleNode(string.Join("/", vxaMcXPath, "Distance")).InnerText =
                 mcDistance.ToString(CultureInfo.InvariantCulture);
 
+            // Set body/brain voxel structure properties
+            SetVoxelBodyBrainProperties(simDoc, brain, body, vxaStructureXPath);
+
+            simDoc.Save(outputPath);
+        }
+
+        /// <summary>
+        ///     Writes the simulation configuration file that dynamically configures the voxelyze simulator. This disables writing
+        ///     the fitness file
+        /// </summary>
+        /// <param name="vxaTemplatePath">
+        ///     The path to the simulation configuration template file, containing simulation parameter
+        ///     defaults.
+        /// </param>
+        /// <param name="outputPath">The directory into which the generated Voxelyze simulation configuration file is written.</param>
+        /// <param name="simLogFilePath">The path of the file into which to write the simulation log data.</param>
+        /// <param name="stopCondition">
+        ///     The condition under which the simulation should terminate (typically a time limit for
+        ///     post-hoc analysis).
+        /// </param>
+        /// <param name="stopConditionValue">The numeric value/threshold for the stop condition.</param>
+        /// <param name="brain">The voxel brain object containing per-voxel network weights.</param>
+        /// <param name="body">The voxel body object containing voxel material specifications.</param>
+        /// <param name="vxaSimStopConditionXPath">The XPath location containing the StopCondition properties (optional).</param>
+        /// <param name="vxaSimGaXPath">The XPath location containing GA simulation parameters (optional).</param>
+        /// <param name="vxaStructureXPath">The XPath location containing voxel structure configuration properties (optional).</param>
+        public static void WriteVoxelyzeSimulationFile(string vxaTemplatePath, string outputPath, string simLogFilePath,
+            int stopCondition, double stopConditionValue, VoxelBrain brain, VoxelBody body,
+            string vxaSimStopConditionXPath = "/VXA/Simulator/StopCondition",
+            string vxaSimGaXPath = "/VXA/Simulator/GA", string vxaStructureXPath = "/VXA/VXC/Structure")
+        {
+            // Instantiate XML reader for VXA template file
+            var simDoc = new XmlDocument();
+            simDoc.Load(vxaTemplatePath);
+
+            // Enable simulation logging and set the simulation log file name and path
+            simDoc.SelectSingleNode(string.Join("/", vxaSimGaXPath, "WriteSimLogFile")).InnerText = "1";
+            simDoc.SelectSingleNode(string.Join("/", vxaSimGaXPath, "SimLogFileName")).InnerText = simLogFilePath;
+            
+            // Disable fitness logging
+            simDoc.SelectSingleNode(string.Join("/", vxaSimGaXPath, "WriteFitnessFile")).InnerText = "0";
+
+            // Set the stop condition type and value
+            simDoc.SelectSingleNode(string.Join("/", vxaSimStopConditionXPath, "StopConditionType")).InnerText =
+                stopCondition.ToString();
+            simDoc.SelectSingleNode(string.Join("/", vxaSimStopConditionXPath, "StopConditionValue")).InnerText =
+                stopConditionValue.ToString(CultureInfo.InvariantCulture);
+
+            // Set body/brain voxel structure properties
+            SetVoxelBodyBrainProperties(simDoc, brain, body, vxaStructureXPath);
+
+            simDoc.Save(outputPath);
+        }
+
+        /// <summary>
+        ///     Sets the voxel body size and material properties and brain synpase weights.
+        /// </summary>
+        /// <param name="simDoc">Reference to VXA template file.</param>
+        /// <param name="brain">The voxel brain object containing per-voxel network weights.</param>
+        /// <param name="body">The voxel body object containing voxel material specifications.</param>
+        /// <param name="vxaStructureXPath">The XPath location containing voxel structure configuration properties.</param>
+        private static void SetVoxelBodyBrainProperties(XmlDocument simDoc, VoxelBrain brain, VoxelBody body,
+            string vxaStructureXPath)
+        {
             // Get reference to structure definition section
             var structureElem = simDoc.SelectSingleNode(vxaStructureXPath);
 
@@ -197,8 +266,6 @@ namespace MCC_Domains.BodyBrain
                 structureElem.SelectSingleNode("Data").AppendChild(bodyLayerElem);
                 structureElem.SelectSingleNode("SynapseWeights").AppendChild(connLayerElem);
             }
-
-            simDoc.Save(outputPath);
         }
 
         /// <summary>
