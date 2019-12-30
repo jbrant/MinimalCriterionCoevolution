@@ -146,6 +146,9 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
 
                 lock (_evaluationLock)
                 {
+                    // If the maze is already at resource limit, short-circuit the current evaluation
+                    if (!_multiMazeWorldFactory.IsMazeUnderResourceLimit(cnt, _resourceLimit)) continue;
+                    
                     // Increment evaluation count
                     threadLocalEvaluationCount = EvaluationCount++;
                 }

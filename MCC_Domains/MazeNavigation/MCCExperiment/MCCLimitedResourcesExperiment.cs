@@ -89,6 +89,11 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         private IDataLogger _navigatorSimulationTrialDataLogger;
 
         /// <summary>
+        /// Logs the navigator resource usage over the course of a run.
+        /// </summary>
+        private IDataLogger _navigatorResourceUsageLogger;
+
+        /// <summary>
         ///     Logs statistics about the maze populations for every batch.
         /// </summary>
         private IDataLogger _mazeEvolutionDataLogger;
@@ -153,6 +158,8 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
                 new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - NavigatorGenomes.csv");
             _navigatorSimulationTrialDataLogger =
                 new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - NavigatorTrials.csv");
+            _navigatorResourceUsageLogger =
+                new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - NavigatorResourceUsage.csv");
             _mazeEvolutionDataLogger =
                 new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - MazeEvolution.csv");
             _mazePopulationDataLogger =
@@ -161,7 +168,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             _mazeSimulationTrialDataLogger =
                 new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - MazeTrials.csv");
             _mazeResourceUsageLogger =
-                new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - ResourceUsage.csv");
+                new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - MazeResourceUsage.csv");
 
             // Create new evolution field elements map with all fields enabled
             _navigatorLogFieldEnableMap = EvolutionFieldElements.PopulateEvolutionFieldElementsEnableMap();
@@ -367,7 +374,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             // Create the maze phenome evaluator
             IPhenomeEvaluator<MazeStructure, BehaviorInfo> mazeEvaluator =
                 new MazeEnvironmentMCCEvaluator(MinSuccessDistance, BehaviorCharacterizationFactory,
-                    NumAgentSuccessCriteria, 0);
+                    NumAgentSuccessCriteria, 0, _resourceLimit, resourceUsageLogger: _navigatorResourceUsageLogger);
 
             // Create navigator phenome evaluator
             IPhenomeEvaluator<IBlackBox, BehaviorInfo> navigatorEvaluator =

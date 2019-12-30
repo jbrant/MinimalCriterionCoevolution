@@ -33,18 +33,38 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         ///     The number of failed attempts at maze navigation in order to satisfy the minimal
         ///     criterion.
         /// </param>
+        /// <param name="resourceLimit">
+        ///     The number of times an agent can be used for successful navigations that contribute to
+        ///     meeting a maze's MC.
+        /// </param>
         /// <param name="evaluationLogger">Per-evaluation data logger (optional).</param>
+        /// <param name="resourceUsageLogger">
+        ///     Resource usage logger that records number of times agent has been used to satisfy
+        ///     maze MC (optional).
+        /// </param>
         public MazeEnvironmentMCCEvaluator(int minSuccessDistance,
             IBehaviorCharacterizationFactory behaviorCharacterizationFactory, int numAgentsSolvedCriteria,
-            int numAgentsFailedCriteria, IDataLogger evaluationLogger = null)
+            int numAgentsFailedCriteria, int resourceLimit = 0, IDataLogger evaluationLogger = null,
+            IDataLogger resourceUsageLogger = null)
         {
             _behaviorCharacterizationFactory = behaviorCharacterizationFactory;
             _numAgentsSolvedCriteria = numAgentsSolvedCriteria;
             _numAgentsFailedCriteria = numAgentsFailedCriteria;
+            _resourceUsageLogger = resourceUsageLogger;
+            _resourceLimit = resourceLimit;
             _evaluationLogger = evaluationLogger;
+
+            // Set resource limited flag based on value of resource limit
+            _isResourceLimited = resourceLimit > 0;
 
             // Create factory for maze world generation
             _multiMazeWorldFactory = new MultiMazeNavigationWorldFactory(minSuccessDistance);
+
+            // Create dictionary to store per-agent resource usage if resource limitation is enabled
+            if (_isResourceLimited)
+            {
+                _agentUsageMap = new Dictionary<uint, int>();
+            }
         }
 
         #endregion
@@ -85,6 +105,27 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         ///     Per-evaluation data logger (generates one row per maze trial).
         /// </summary>
         private readonly IDataLogger _evaluationLogger;
+
+        /// <summary>
+        ///     Resource usage logger that records number of times agent has been used to satisfy maze MC.
+        /// </summary>
+        private readonly IDataLogger _resourceUsageLogger;
+
+        /// <summary>
+        ///     The number of times an agent can be used for successful navigations that contribute to meeting a maze's MC.
+        /// </summary>
+        private readonly int _resourceLimit;
+
+        /// <summary>
+        ///     Flag indicating whether agents have an upper limit regarding the number of times they can be used for satisfying a
+        ///     maze MC (i.e. limited resources).
+        /// </summary>
+        private readonly bool _isResourceLimited;
+
+        /// <summary>
+        ///     Stores usage per agent genome ID.
+        /// </summary>
+        private readonly IDictionary<uint, int> _agentUsageMap;
 
         /// <summary>
         ///     Random number generator that controls evaluation selection order.
@@ -133,8 +174,14 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
                 var isSuccessful = false;
                 ulong threadLocalEvaluationCount;
 
+                // Extract agent genome ID
+                var agentGenomeId = _agentControllers[cnt].GenomeId;
+
                 lock (_evaluationLock)
                 {
+                    // If agent is already at resource limit, short-circuit the current evaluation
+                    if (_agentUsageMap[agentGenomeId] >= _resourceLimit) continue;
+
                     // Increment evaluation count
                     threadLocalEvaluationCount = EvaluationCount++;
                 }
@@ -164,8 +211,29 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
                 // If the navigator reached the goal, increment the running count of successes
                 if (goalReached)
                 {
-                    curSuccesses++;
-                    isSuccessful = true;
+                    if (_isResourceLimited)
+                    {
+                        lock (_evaluationLock)
+                        {
+                            // Successful navigation is discounted if maze is at or above resource limit
+                            if (_agentUsageMap[agentGenomeId] >= _resourceLimit) continue;
+
+                            // Only increment successes if solved maze is below resource limit
+                            _agentUsageMap[agentGenomeId]++;
+                            curSuccesses++;
+
+                            // Set success flag
+                            isSuccessful = true;
+                        }
+                    }
+                    else
+                    {
+                        // Increment successes
+                        curSuccesses++;
+
+                        // Set success flag
+                        isSuccessful = true;
+                    }
                 }
                 // Otherwise, increment the number of failures
                 else
@@ -173,7 +241,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
 
                 // Add simulation trial info
                 behaviorInfo.TrialData.Add(new TrialInfo(isSuccessful, objectiveDistance,
-                    world.GetSimulationTimesteps(), _agentControllers[cnt].GenomeId, trialBehavior));
+                    world.GetSimulationTimesteps(), agentGenomeId, trialBehavior));
 
                 // Continue to the next iteration if the MC has still not yet been satisfied
                 if (curSuccesses < _numAgentsSolvedCriteria || curFailures < _numAgentsFailedCriteria) continue;
@@ -193,6 +261,10 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         /// </summary>
         public void Initialize()
         {
+            // Open loggers
+            _evaluationLogger?.Open();
+            _resourceUsageLogger?.Open();
+
             // Set the run phase
             _evaluationLogger?.UpdateRunPhase(RunPhase.Primary);
 
@@ -205,6 +277,14 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
                 new LoggableElement(EvaluationFieldElements.RunPhase, RunPhase.Initialization),
                 new LoggableElement(EvaluationFieldElements.IsViable, false)
             }, _multiMazeWorldFactory.CreateMazeNavigationWorld(new MazeStructure(0, 0, 1), null).GetLoggableElements());
+
+            // Log the usage logger header
+            _resourceUsageLogger?.LogHeader(new List<LoggableElement>
+            {
+                new LoggableElement(ResourceUsageFieldElements.Generation, 0),
+                new LoggableElement(ResourceUsageFieldElements.GenomeId, null),
+                new LoggableElement(ResourceUsageFieldElements.UsageCount, 0)
+            });
         }
 
         /// <inheritdoc />
@@ -215,7 +295,51 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         /// <param name="lastGeneration">The generation that was just executed.</param>
         public void UpdateEvaluatorPhenotypes(IEnumerable<object> evaluatorPhenomes, uint lastGeneration)
         {
+            // Log resource usage stats if enabled
+            if (_isResourceLimited)
+            {
+                // Don't attempt to log if the file stream is closed
+                if (_resourceUsageLogger?.IsStreamOpen() ?? false)
+                {
+                    // Log resource usages per genome ID
+                    foreach (var agentGenomeId in _agentUsageMap.Keys)
+                    {
+                        _resourceUsageLogger?.LogRow(new List<LoggableElement>
+                        {
+                            new LoggableElement(ResourceUsageFieldElements.Generation, lastGeneration),
+                            new LoggableElement(ResourceUsageFieldElements.GenomeId, agentGenomeId),
+                            // ReSharper disable once InconsistentlySynchronizedField
+                            new LoggableElement(ResourceUsageFieldElements.UsageCount, _agentUsageMap[agentGenomeId])
+                        });
+                    }
+                }
+            }
+
+            // Update with new agent population
             _agentControllers = (IList<IBlackBox>) evaluatorPhenomes;
+
+            // Update resource usage if enabled
+            if (_isResourceLimited)
+            {
+                // Get list of agent controller genome IDs
+                var agentGenomeIds = _agentControllers.Select(x => x.GenomeId).ToList();
+
+                // Add new agents and initialize their resource usage to 0
+                foreach (var agentGenomeId in agentGenomeIds.Where(agentGenomeId =>
+                    !_agentUsageMap.ContainsKey(agentGenomeId)))
+                {
+                    _agentUsageMap.Add(agentGenomeId, 0);
+                }
+
+                // Remove agents that have aged out of the population
+                foreach (var agentGenomeId in _agentUsageMap.Keys)
+                {
+                    if (!agentGenomeIds.Contains(agentGenomeId))
+                    {
+                        _agentUsageMap.Remove(agentGenomeId);
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -225,6 +349,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         public void Cleanup()
         {
             _evaluationLogger?.Close();
+            _resourceUsageLogger?.Close();
         }
 
         /// <inheritdoc />
