@@ -167,6 +167,9 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
 
                 lock (_evaluationLock)
                 {
+                    // If the body is already at resource limit, short-circuit the current evaluation
+                    if (_isResourceLimited && !_voxelBodyFactory.IsBodyUnderResourceLimit(cnt)) continue;
+
                     // Increment evaluation count
                     threadLocalEvaluationCount = EvaluationCount++;
                 }
