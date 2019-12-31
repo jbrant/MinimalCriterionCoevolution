@@ -18,12 +18,6 @@
       <None Update="log4net.config">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
-      <None Update="BodyBrain\SeedBodies\Test_GeneratedBodies_2_Genomes_10_Size.xml">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
-      <None Update="BodyBrain\SeedBodies\Test_GeneratedBodies_5_Genomes_10_Size.xml">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
     </ItemGroup>
 
 </Project>

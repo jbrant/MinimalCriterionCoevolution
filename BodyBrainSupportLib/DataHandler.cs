@@ -407,6 +407,7 @@ namespace BodyBrainSupportLib
                         simulationUnit.BodyId.ToString(),
                         simulationUnit.BrainId.ToString(),
                         timestepUnit.Timestep.ToString(),
+                        timestepUnit.Time.ToString(CultureInfo.InvariantCulture),
                         timestepUnit.Position.X.ToString(CultureInfo.InvariantCulture),
                         timestepUnit.Position.Y.ToString(CultureInfo.InvariantCulture),
                         timestepUnit.Position.Z.ToString(CultureInfo.InvariantCulture),
@@ -419,6 +420,40 @@ namespace BodyBrainSupportLib
                         timestepUnit.Displacement.Z.ToString(CultureInfo.InvariantCulture)
                     }));
                 }
+            }
+        }
+
+        /// <summary>
+        ///     Writes upscale results to a flat file.
+        /// </summary>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <param name="upscaleResultUnits">
+        ///     The body/brain CPPN resolution increase (upscale) results that contains the maximum
+        ///     resolution (size) at which the body is solvable by the paired brain.
+        /// </param>
+        public static void WriteUpscaleResultDataToFile(int experimentId, int run,
+            IEnumerable<UpscaleResultUnit> upscaleResultUnits)
+        {
+            // Make sure the file writer actually exists before attempting to write to it
+            if (FileWriters.ContainsKey(OutputFileType.UpscaleResultData) == false)
+            {
+                throw new Exception(
+                    $"Cannot write to output stream as no file writer of type {OutputFileType.SimulationLogData} has been created.");
+            }
+
+            // Write each upscale result as a separate entry
+            foreach (var upscaleResultUnit in upscaleResultUnits)
+            {
+                FileWriters[OutputFileType.UpscaleResultData].WriteLine(string.Join(FileDelimiter, new List<string>
+                {
+                    experimentId.ToString(),
+                    run.ToString(),
+                    upscaleResultUnit.BodyId.ToString(),
+                    upscaleResultUnit.BrainId.ToString(),
+                    upscaleResultUnit.BaseSize.ToString(),
+                    upscaleResultUnit.MaxSize.ToString()
+                }));
             }
         }
 

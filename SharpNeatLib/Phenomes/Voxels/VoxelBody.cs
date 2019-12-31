@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using SharpNeat.Phenomes;
 using SharpNeat.Utility;
 
 namespace SharpNeat.Phenomes.Voxels
@@ -49,15 +48,16 @@ namespace SharpNeat.Phenomes.Voxels
         ///     VoxelBody constructor.
         /// </summary>
         /// <param name="cppn">The CPPN with substrate dimensions coding for the voxel body.</param>
-        public VoxelBody(IBlackBoxSubstrate cppn)
+        /// <param name="substrateResUpscale">The amount by which to increase the preset resolution.</param>
+        public VoxelBody(IBlackBoxSubstrate cppn, int substrateResUpscale = 0)
         {
             // Activate CPPN for all positions on the substrate to get the voxel materials
-            _voxelMaterials = ExtractVoxelMaterials(cppn);
+            _voxelMaterials = ExtractVoxelMaterials(cppn, substrateResUpscale);
 
             // Copy off voxel dimensions
-            LengthX = cppn.CppnSubstrateResolution.X;
-            LengthY = cppn.CppnSubstrateResolution.Y;
-            LengthZ = cppn.CppnSubstrateResolution.Z;
+            LengthX = cppn.CppnSubstrateResolution.X + substrateResUpscale;
+            LengthY = cppn.CppnSubstrateResolution.Y + substrateResUpscale;
+            LengthZ = cppn.CppnSubstrateResolution.Z + substrateResUpscale;
 
             // Calculate the number of active and passive voxels and total voxels
             NumActiveVoxels = _voxelMaterials.SelectMany(x => x).Count(x => x == VoxelMaterial.ActiveTissue);
@@ -83,10 +83,15 @@ namespace SharpNeat.Phenomes.Voxels
         ///     for each voxel.
         /// </summary>
         /// <param name="cppn">The CPPN with substrate dimensions coding for the voxel body.</param>
+        /// <param name="substrateResUpscale">The amount by which to increase the preset resolution.</param>
         /// <returns>The layer-wise material for each voxel</returns>
-        private IList<IList<VoxelMaterial>> ExtractVoxelMaterials(IBlackBoxSubstrate cppn)
+        private IList<IList<VoxelMaterial>> ExtractVoxelMaterials(IBlackBoxSubstrate cppn, int substrateResUpscale)
         {
-            var substrateRes = cppn.CppnSubstrateResolution;
+            var substrateRes = substrateResUpscale > 0
+                ? new SubstrateResolution(cppn.CppnSubstrateResolution.X + substrateResUpscale,
+                    cppn.CppnSubstrateResolution.Y + substrateResUpscale,
+                    cppn.CppnSubstrateResolution.Y + substrateResUpscale)
+                : cppn.CppnSubstrateResolution;
 
             IList<IList<VoxelMaterial>> layerwiseVoxelMaterial = new List<IList<VoxelMaterial>>(substrateRes.Z);
 

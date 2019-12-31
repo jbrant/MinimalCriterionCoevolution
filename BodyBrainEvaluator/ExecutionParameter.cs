@@ -26,9 +26,19 @@
         GenerateSimLogData,
 
         /// <summary>
+        ///     Flag indicating whether to evaluate ability of brain CPPN to scale to incrementally larger bodies.
+        /// </summary>
+        GenerateIncrementalUpscaleResults,
+
+        /// <summary>
         ///     The number of time steps for which to execute a simulation replay (if creating trial data).
         /// </summary>
         SimulationTimesteps,
+
+        /// <summary>
+        ///     The maximum body size to evaluate (used for brain CPPN incremental upscale test).
+        /// </summary>
+        MaxBodySize,
 
         /// <summary>
         ///     The path to the simulator executable file.
@@ -44,6 +54,11 @@
         ///     The directory of the output configuration files.
         /// </summary>
         ConfigOutputDirectory,
+
+        /// <summary>
+        ///     The directory of the simulation results.
+        /// </summary>
+        ResultsOutputDirectory,
 
         /// <summary>
         ///     The directory of the simulation log files.

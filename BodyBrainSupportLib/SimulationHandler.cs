@@ -106,6 +106,59 @@ namespace BodyBrainSupportLib
         }
 
         /// <summary>
+        ///     Constructs the simulation result file path.
+        /// </summary>
+        /// <param name="simResultDirectory">The directory into which to write the simulation result file.</param>
+        /// <param name="experimentName">The name of the experiment that was executed.</param>
+        /// <param name="run">The run number of the experiment that was executed.</param>
+        /// <param name="brainGenomeId">The genome ID of the brain controller.</param>
+        /// <param name="bodyGenomeId">The genome ID of the voxel body.</param>
+        /// <returns>The fully-qualified simulation result file path.</returns>
+        public static string GetSimResultFilePath(string simResultDirectory, string experimentName, int run,
+            uint brainGenomeId, uint bodyGenomeId)
+        {
+            return BodyBrainExperimentUtils.ConstructVoxelyzeFilePath("result", "xml", simResultDirectory,
+                experimentName,
+                run, brainGenomeId, bodyGenomeId, false);
+        }
+
+        /// <summary>
+        ///     Writes the body-brain simulation configuration file and executes the simulation until the brain has ambulated the
+        ///     body a minimum distance (equivalent to the MC) or a preset simulation time has elapsed..
+        /// </summary>
+        /// <param name="configTemplate">The path to the simulation configuration template file.</param>
+        /// <param name="configFilePath">The path of the generated simulation configuration file.</param>
+        /// <param name="simExecutablePath">The path of the simulation executor.</param>
+        /// <param name="simResultsFilePath">The path of the generated simulation results file.</param>
+        /// <param name="distance">The minimum distance the body must travel to be considered successful.</param>
+        /// <param name="brain">The voxel brain controller.</param>
+        /// <param name="body">The voxel body.</param>
+        /// <param name="deleteConfigFile">
+        ///     Controls whether to delete the simulation configuration file after the simulation has
+        ///     executed (default is true).
+        /// </param>
+        public static void ExecuteDistanceBoundedBodyBrainSimulation(string configTemplate, string configFilePath,
+            string simExecutablePath, string simResultsFilePath, int distance, VoxelBrain brain, VoxelBody body,
+            bool deleteConfigFile = true)
+        {
+            // Write simulation file that stops based on distance traveled (MC) or preset evaluation time
+            BodyBrainExperimentUtils.WriteVoxelyzeSimulationFile(configTemplate, configFilePath, simResultsFilePath,
+                brain, body, distance);
+
+            // Configure the simulation, execute and wait for completion
+            using (var process =
+                Process.Start(
+                    BodyBrainExperimentUtils.ConfigureSimulationExecution(simExecutablePath, configFilePath)))
+            {
+                process?.WaitForExit();
+            }
+
+            // Delete the simulation configuration file
+            if (deleteConfigFile)
+                File.Delete(configFilePath);
+        }
+
+        /// <summary>
         ///     Writes the body-brain simulation configuration file and executes the simulation for a specified period of time.
         /// </summary>
         /// <param name="configTemplate">The path to the simulation configuration template file.</param>
@@ -126,6 +179,7 @@ namespace BodyBrainSupportLib
             // Stop condition of 2 causes the simulation to run for a specified amount of time
             const int stopConditionType = 2;
 
+            // Write simulation file that stops when the specified time has elapsed and enables simulation logging
             BodyBrainExperimentUtils.WriteVoxelyzeSimulationFile(configTemplate, configFilePath, simLogFilePath,
                 stopConditionType, simulationTime, brain, body);
 
@@ -200,6 +254,27 @@ namespace BodyBrainSupportLib
                 File.Delete(simLogFilePath);
 
             return simulationUnit;
+        }
+
+        /// <summary>
+        ///     Parses the simulation results file and extracts the distance traveled.
+        /// </summary>
+        /// <param name="simResultFilePath">The path of the generated simulation results file.</param>
+        /// <param name="deleteSimResultFile">
+        ///     Controls whether to delete the simulation results file after parsing it (default is
+        ///     true).
+        /// </param>
+        /// <returns>The distance traveled by the body.</returns>
+        public static double ReadSimulationDistance(string simResultFilePath, bool deleteSimResultFile = true)
+        {
+            // Read the simulation results
+            var results = BodyBrainExperimentUtils.ReadSimulationResults(simResultFilePath);
+
+            // Delete the simulation results file
+            if (deleteSimResultFile)
+                File.Delete(simResultFilePath);
+
+            return results.Distance;
         }
 
         #endregion

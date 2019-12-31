@@ -8,6 +8,11 @@ namespace BodyBrainSupportLib
         /// <summary>
         ///     Verbose body/brain simulation log data.
         /// </summary>
-        SimulationLogData
+        SimulationLogData,
+
+        /// <summary>
+        ///     CPPN upscale upscale result data.
+        /// </summary>
+        UpscaleResultData
     }
 }

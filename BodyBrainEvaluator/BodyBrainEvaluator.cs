@@ -1,19 +1,15 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 using System.Xml;
 using BodyBrainSupportLib;
 using ExperimentEntities.entities;
 using log4net;
 using log4net.Config;
-using MCC_Domains.BodyBrain;
 using SharpNeat.Decoders.Neat;
 using SharpNeat.Decoders.Substrate;
 using SharpNeat.Genomes.HyperNeat;
@@ -61,7 +57,12 @@ namespace BodyBrainConfigGenerator
 
             // Get boolean indicator dictating whether to generate simulation log
             var generateSimLog = ExecutionConfiguration.ContainsKey(ExecutionParameter.GenerateSimLogData) &&
-                                    bool.Parse(ExecutionConfiguration[ExecutionParameter.GenerateSimLogData]);
+                                 bool.Parse(ExecutionConfiguration[ExecutionParameter.GenerateSimLogData]);
+
+            // Get boolean indicator dictating whether to run CPPN incremental upscale evaluation
+            var generateUpscaleResults =
+                ExecutionConfiguration.ContainsKey(ExecutionParameter.GenerateIncrementalUpscaleResults) &&
+                bool.Parse(ExecutionConfiguration[ExecutionParameter.GenerateIncrementalUpscaleResults]);
 
             // Lookup the current experiment configuration
             var curExperimentConfiguration = DataHandler.LookupExperimentConfiguration(experimentName);
@@ -77,7 +78,7 @@ namespace BodyBrainConfigGenerator
             _executionLogger.Info(
                 $"Preparing to execute configuration file generation for experiment [{curExperimentConfiguration.ExperimentName}] run [{run}]");
 
-            // If simulation log generation is enabled, open the file writer
+            // Run simulation log file generation
             if (generateSimLog)
             {
                 DataHandler.OpenFileWriter(
@@ -85,15 +86,37 @@ namespace BodyBrainConfigGenerator
                         $"{experimentName} - SimulationLog - Run{run}.csv"), OutputFileType.SimulationLogData);
 
                 ProcessResultChunks(curExperimentConfiguration, run, GenerateSimulationLogData);
+
+                // Close the output file and write the sentinel file
+                DataHandler.CloseFileWriter(OutputFileType.SimulationLogData);
+                DataHandler.WriteSentinelFile(
+                    Path.Combine(ExecutionConfiguration[ExecutionParameter.DataOutputDirectory],
+                        $"{experimentName} - SimulationLog"), run);
             }
 
+            // Run simulation configuration file generation
             if (generateSimConfigs)
             {
                 ProcessResultChunks(curExperimentConfiguration, run, GenerateSimulationConfigs);
-
-                _executionLogger.Info(
-                    $"Simulation configuration file generation for experiment [{curExperimentConfiguration.ExperimentName}] and run [{run}] complete");
             }
+
+            // Run incremental upscale evaluation
+            if (generateUpscaleResults)
+            {
+                DataHandler.OpenFileWriter(
+                    Path.Combine(ExecutionConfiguration[ExecutionParameter.DataOutputDirectory],
+                        $"{experimentName} - UpscaleResults - Run{run}.csv"), OutputFileType.UpscaleResultData);
+
+                ProcessResultChunks(curExperimentConfiguration, run, GenerateUpscaleResultData);
+
+                // Close the output file and write the sentinel file
+                DataHandler.CloseFileWriter(OutputFileType.UpscaleResultData);
+                DataHandler.WriteSentinelFile(
+                    Path.Combine(ExecutionConfiguration[ExecutionParameter.DataOutputDirectory],
+                        $"{experimentName} - UpscaleResults"), run);
+            }
+
+            _executionLogger.Info($"Result processing for experiment [{experimentName}] and run [{run}] complete");
         }
 
         /// <summary>
@@ -171,12 +194,19 @@ namespace BodyBrainConfigGenerator
                 });
         }
 
+        /// <summary>
+        ///     Generates detailed, per-timestep log data for the body/brain simulation.
+        /// </summary>
+        /// <param name="viableBodyBrainCombos">Successful combinations of bodies and brains.</param>
+        /// <param name="experimentConfig">The parameters of the experiment being executed.</param>
+        /// <param name="run">The run being executed.</param>
+        /// <param name="voxelPack">The voxel factory/decoder instances.</param>
         private static void GenerateSimulationLogData(
             IEnumerable<Tuple<MccexperimentVoxelBodyGenome, MccexperimentVoxelBrainGenome>> viableBodyBrainCombos,
             ExperimentDictionaryBodyBrain experimentConfig, int run, VoxelFactoryDecoderPack voxelPack)
         {
             var bodyBrainSimulationUnits = new ConcurrentBag<BodyBrainSimulationUnit>();
-            
+
             var experimentId = experimentConfig.ExperimentDictionaryId;
             var experimentName = experimentConfig.ExperimentName;
             var numBrainConnections = experimentConfig.VoxelyzeConfigBrainNetworkConnections;
@@ -215,9 +245,86 @@ namespace BodyBrainConfigGenerator
                     bodyBrainSimulationUnits.Add(
                         SimulationHandler.ReadSimulationLog(brain.GenomeId, body.GenomeId, simLogFilePath));
                 });
-            
+
             // Write simulation log data from body/brain combinations
             DataHandler.WriteSimulationLogDataToFile(experimentId, run, bodyBrainSimulationUnits);
+        }
+
+        /// <summary>
+        ///     For each successful body/brain combination, upscales the body phenotype (i.e. querying the CPPN at a higher
+        ///     resolution) in increments of one unit per dimension, and evaluates the brains ability to control the body and still
+        ///     meet the MC. This continues until the body reaches a size where the brain fails to ambulate the body the minimum
+        ///     required distance, or the maximum allowable body size is reached.
+        /// </summary>
+        /// <param name="viableBodyBrainCombos">Successful combinations of bodies and brains.</param>
+        /// <param name="experimentConfig">The parameters of the experiment being executed.</param>
+        /// <param name="run">The run being executed.</param>
+        /// <param name="voxelPack">The voxel factory/decoder instances.</param>
+        private static void GenerateUpscaleResultData(
+            IEnumerable<Tuple<MccexperimentVoxelBodyGenome, MccexperimentVoxelBrainGenome>> viableBodyBrainCombos,
+            ExperimentDictionaryBodyBrain experimentConfig, int run, VoxelFactoryDecoderPack voxelPack)
+        {
+            var upscaleResultUnits = new ConcurrentBag<UpscaleResultUnit>();
+
+            var experimentId = experimentConfig.ExperimentDictionaryId;
+            var experimentName = experimentConfig.ExperimentName;
+            var numBrainConnections = experimentConfig.VoxelyzeConfigBrainNetworkConnections;
+            var minDistance = experimentConfig.MinimalCriteriaValue;
+            var maxBodySize = int.Parse(ExecutionConfiguration[ExecutionParameter.MaxBodySize]);
+            var simExecutablePath = ExecutionConfiguration[ExecutionParameter.SimExecutablePath];
+            var configTemplate = ExecutionConfiguration[ExecutionParameter.ConfigTemplateFilePath];
+            var configDirectory = ExecutionConfiguration[ExecutionParameter.ConfigOutputDirectory];
+            var simResultDirectory = ExecutionConfiguration[ExecutionParameter.ResultsOutputDirectory];
+
+            Parallel.ForEach(viableBodyBrainCombos,
+                delegate(Tuple<MccexperimentVoxelBodyGenome, MccexperimentVoxelBrainGenome> genomeCombo)
+                {
+                    var curResolutionIncrease = 0;
+                    bool isSuccessful;
+
+                    // Copy off the body/brain genome IDs
+                    var bodyGenomeId = (uint) genomeCombo.Item1.GenomeId;
+                    var brainGenomeId = (uint) genomeCombo.Item2.GenomeId;
+
+                    // Get starting size
+                    var evolvedSize = DecodeBodyGenome(genomeCombo.Item1, voxelPack.BodyDecoder,
+                        voxelPack.BodyGenomeFactory).LengthX;
+
+                    // Construct the simulation configuration file path
+                    var configFilePath = SimulationHandler.GetConfigFilePath(configDirectory, experimentName, run,
+                        brainGenomeId, bodyGenomeId);
+
+                    // Construct the simulation result file path
+                    var simResultFilePath = SimulationHandler.GetSimResultFilePath(simResultDirectory, experimentName,
+                        run,
+                        brainGenomeId, bodyGenomeId);
+
+                    do
+                    {
+                        // Read in voxel body XML and decode to phenotype
+                        var body = DecodeBodyGenome(genomeCombo.Item1, voxelPack.BodyDecoder,
+                            voxelPack.BodyGenomeFactory, curResolutionIncrease);
+
+                        // Read in voxel brain XML and decode to phenotype
+                        var brain = DecodeBrainGenome(genomeCombo.Item2, voxelPack.BrainDecoder,
+                            voxelPack.BrainGenomeFactory,
+                            body, numBrainConnections);
+
+                        // Run the simulation
+                        SimulationHandler.ExecuteDistanceBoundedBodyBrainSimulation(configTemplate, configFilePath,
+                            simExecutablePath, simResultFilePath, minDistance, brain, body);
+
+                        // Extract the simulation results
+                        isSuccessful = SimulationHandler.ReadSimulationDistance(simResultFilePath) >= minDistance;
+                    } while (isSuccessful && maxBodySize >= evolvedSize + ++curResolutionIncrease);
+
+                    // Record the max resolution at which the body was solvable
+                    upscaleResultUnits.Add(new UpscaleResultUnit(brainGenomeId, bodyGenomeId, evolvedSize,
+                        evolvedSize + Math.Max(curResolutionIncrease - 1, 0)));
+                });
+
+            // Write results of upscale analysis
+            DataHandler.WriteUpscaleResultDataToFile(experimentId, run, upscaleResultUnits);
         }
 
         /// <summary>
@@ -226,16 +333,22 @@ namespace BodyBrainConfigGenerator
         /// <param name="bodyGenome">The body genome to convert into its corresponding phenotype.</param>
         /// <param name="bodyDecoder">The body genome decoder.</param>
         /// <param name="bodyGenomeFactory">The body genome factory.</param>
+        /// <param name="substrateResIncrease">
+        ///     The amount by which to increase the resolution from that at which the body was
+        ///     evolved.
+        /// </param>
         /// <returns>The decoded voxel body.</returns>
         private static VoxelBody DecodeBodyGenome(MccexperimentVoxelBodyGenome bodyGenome,
-            NeatSubstrateGenomeDecoder bodyDecoder, NeatSubstrateGenomeFactory bodyGenomeFactory)
+            NeatSubstrateGenomeDecoder bodyDecoder, NeatSubstrateGenomeFactory bodyGenomeFactory,
+            int substrateResIncrease = 0)
         {
             VoxelBody body;
 
             using (var xmlReader = XmlReader.Create(new StringReader(bodyGenome.GenomeXml)))
             {
                 body = new VoxelBody(bodyDecoder.Decode(
-                    NeatSubstrateGenomeXmlIO.ReadSingleGenomeFromRoot(xmlReader, false, bodyGenomeFactory)));
+                        NeatSubstrateGenomeXmlIO.ReadSingleGenomeFromRoot(xmlReader, false, bodyGenomeFactory)),
+                    substrateResIncrease);
             }
 
             return body;
@@ -307,6 +420,7 @@ namespace BodyBrainConfigGenerator
                         // Ensure valid run number was specified
                         case ExecutionParameter.Run:
                         case ExecutionParameter.SimulationTimesteps:
+                        case ExecutionParameter.MaxBodySize:
                             if (int.TryParse(parameterValuePair[1], out _) == false)
                             {
                                 _executionLogger.Error($"The value for parameter [{curParameter}] must be an integer.");
@@ -318,6 +432,7 @@ namespace BodyBrainConfigGenerator
                         // Ensure that valid boolean values were given
                         case ExecutionParameter.GenerateSimulationConfigs:
                         case ExecutionParameter.GenerateSimLogData:
+                        case ExecutionParameter.GenerateIncrementalUpscaleResults:
                             if (bool.TryParse(parameterValuePair[1], out _) == false)
                             {
                                 _executionLogger.Error($"The value for parameter [{curParameter}] must be a boolean.");
@@ -366,18 +481,35 @@ namespace BodyBrainConfigGenerator
                     isConfigurationValid = false;
                 }
 
-                // Number of simulation timesteps, config directory and file, simulation log directory and data directory must be specified if simulation log data is being generated
+                // Number of simulation timesteps, config directory and file, simulation executable, simulation
+                // log directory and data directory must be specified if simulation log data is being generated
                 if (ExecutionConfiguration.ContainsKey(ExecutionParameter.GenerateSimLogData) &&
                     Convert.ToBoolean(ExecutionConfiguration[ExecutionParameter.GenerateSimLogData]) &&
                     (ExecutionConfiguration.ContainsKey(ExecutionParameter.SimulationTimesteps) == false ||
                      ExecutionConfiguration.ContainsKey(ExecutionParameter.ConfigTemplateFilePath) == false ||
                      ExecutionConfiguration.ContainsKey(ExecutionParameter.SimExecutablePath) == false ||
-                     ExecutionConfiguration.ContainsKey(ExecutionParameter.ConfigOutputDirectory) == false || 
+                     ExecutionConfiguration.ContainsKey(ExecutionParameter.ConfigOutputDirectory) == false ||
                      ExecutionConfiguration.ContainsKey(ExecutionParameter.SimLogOutputDirectory) == false ||
                      ExecutionConfiguration.ContainsKey(ExecutionParameter.DataOutputDirectory) == false))
                 {
                     _executionLogger.Error(
-                        $"Parameters [{ExecutionParameter.SimulationTimesteps}], [{ExecutionParameter.ConfigTemplateFilePath}], [{ExecutionParameter.SimExecutablePath}], [{ExecutionParameter.ConfigOutputDirectory}], [{ExecutionParameter.SimLogOutputDirectory}] and [{ExecutionParameter.DataOutputDirectory}] must be specified if verbose simulation trial data is being generated.");
+                        $"Parameters [{ExecutionParameter.SimulationTimesteps}], [{ExecutionParameter.ConfigTemplateFilePath}], [{ExecutionParameter.SimExecutablePath}], [{ExecutionParameter.ConfigOutputDirectory}], [{ExecutionParameter.SimLogOutputDirectory}] and [{ExecutionParameter.DataOutputDirectory}] must be specified if verbose simulation log data is being generated.");
+                    isConfigurationValid = false;
+                }
+
+                // Max body size, config directory and file, simulation executable, results directory and
+                // data directory must be specified if incremental upscale evaluation is being executed
+                if (ExecutionConfiguration.ContainsKey(ExecutionParameter.GenerateIncrementalUpscaleResults) &&
+                    Convert.ToBoolean(ExecutionConfiguration[ExecutionParameter.GenerateIncrementalUpscaleResults]) &&
+                    (ExecutionConfiguration.ContainsKey(ExecutionParameter.MaxBodySize) == false ||
+                     ExecutionConfiguration.ContainsKey(ExecutionParameter.ConfigTemplateFilePath) == false ||
+                     ExecutionConfiguration.ContainsKey(ExecutionParameter.SimExecutablePath) == false ||
+                     ExecutionConfiguration.ContainsKey(ExecutionParameter.ConfigOutputDirectory) == false ||
+                     ExecutionConfiguration.ContainsKey(ExecutionParameter.ResultsOutputDirectory) == false ||
+                     ExecutionConfiguration.ContainsKey(ExecutionParameter.DataOutputDirectory) == false))
+                {
+                    _executionLogger.Error(
+                        $"Parameters [{ExecutionParameter.MaxBodySize}], [{ExecutionParameter.ConfigTemplateFilePath}], [{ExecutionParameter.SimExecutablePath}], [{ExecutionParameter.ConfigOutputDirectory}], [{ExecutionParameter.ResultsOutputDirectory}] and [{ExecutionParameter.DataOutputDirectory}] must be specified if incremental upscale results are being generated.");
                     isConfigurationValid = false;
                 }
             }
@@ -392,7 +524,8 @@ namespace BodyBrainConfigGenerator
                 "BodyBrainEvaluator.exe \n\t" +
                 $"Required: {ExecutionParameter.ExperimentName}=experiment {ExecutionParameter.Run}=run \n\t" +
                 $"Optional: {ExecutionParameter.GenerateSimulationConfigs} (Required: {ExecutionParameter.ConfigTemplateFilePath}=file {ExecutionParameter.ConfigOutputDirectory}=directory) \n\t" +
-                $"Optional: {ExecutionParameter.GenerateSimLogData} (Required: {ExecutionParameter.SimulationTimesteps}=timesteps {ExecutionParameter.ConfigTemplateFilePath}=file {ExecutionParameter.SimExecutablePath}=file {ExecutionParameter.ConfigOutputDirectory}=directory {ExecutionParameter.SimLogOutputDirectory}=directory {ExecutionParameter.DataOutputDirectory}=directory)");
+                $"Optional: {ExecutionParameter.GenerateSimLogData} (Required: {ExecutionParameter.SimulationTimesteps}=timesteps {ExecutionParameter.ConfigTemplateFilePath}=file {ExecutionParameter.SimExecutablePath}=file {ExecutionParameter.ConfigOutputDirectory}=directory {ExecutionParameter.SimLogOutputDirectory}=directory {ExecutionParameter.DataOutputDirectory}=directory) \n\t" +
+                $"Optional: {ExecutionParameter.GenerateIncrementalUpscaleResults} (Required: {ExecutionParameter.MaxBodySize}=integer {ExecutionParameter.ConfigTemplateFilePath}=file {ExecutionParameter.SimExecutablePath}=file {ExecutionParameter.ConfigOutputDirectory}=directory {ExecutionParameter.ResultsOutputDirectory}=directory {ExecutionParameter.DataOutputDirectory}=directory)");
 
             return false;
         }

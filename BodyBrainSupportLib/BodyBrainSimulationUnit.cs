@@ -88,7 +88,6 @@ namespace BodyBrainSupportLib
         /// </summary>
         /// <param name="brainId">The voxel brain genome ID.</param>
         /// <param name="bodyId">The voxel body genome ID.</param>
-        /// <param name="bodyBrainSimulationTimestepUnit"></param>
         public BodyBrainSimulationUnit(uint brainId, uint bodyId)
         {
             BrainId = brainId;
