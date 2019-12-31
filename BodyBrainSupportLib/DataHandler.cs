@@ -32,6 +32,56 @@ namespace BodyBrainSupportLib
         private static readonly Dictionary<OutputFileType, StreamWriter> FileWriters =
             new Dictionary<OutputFileType, StreamWriter>();
 
+        #region Private database methods
+
+        /// <summary>
+        ///     For each body, retrieves the first brain that solved within the given experiment and run.
+        /// </summary>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <param name="bodyGenomeIds">The list of body genome IDs by which to filter the brain results.</param>
+        /// <returns>The list of distinct body ambulation trials that were successful for the given experiment and run.</returns>
+        private static IList<MccexperimentVoxelBodyTrials> GetSuccessfulBrainTrialPerBody(int experimentId, int run,
+            IList<int> bodyGenomeIds)
+        {
+            IList<MccexperimentVoxelBodyTrials> bodyTrials = null;
+            var querySuccess = false;
+            var retryCnt = 0;
+
+            while (querySuccess == false && retryCnt <= MaxQueryRetryCnt)
+            {
+                try
+                {
+                    using (var context = new ExperimentDataContext())
+                    {
+                        // Get single maze trial for each of the specified maze IDs over the entirety of the run
+                        bodyTrials = context.MccexperimentVoxelBodyTrials.Where(
+                                nav =>
+                                    experimentId == nav.ExperimentDictionaryId && run == nav.Run &&
+                                    nav.IsBodySolved && bodyGenomeIds.Contains(nav.BodyGenomeId))
+                            .GroupBy(nav => nav.BodyGenomeId)
+                            .Select(m => m.OrderBy(x => x.BodyGenomeId).FirstOrDefault())
+                            .ToList();
+                    }
+
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
+                    }
+
+                    querySuccess = true;
+                }
+                catch (Exception e)
+                {
+                    HandleQueryException(MethodBase.GetCurrentMethod().ToString(), retryCnt++, e);
+                }
+            }
+
+            return bodyTrials;
+        }
+
+        #endregion
+
         #region Public database read methods
 
         /// <summary>
@@ -149,89 +199,6 @@ namespace BodyBrainSupportLib
             return successfulGenomeCombos;
         }
 
-        #endregion
-
-        #region Private static methods
-
-        /// <summary>
-        ///     Handles logging of query success state after one or more failed attempts.
-        /// </summary>
-        /// <param name="methodName">The name of the method executing the query.</param>
-        /// <param name="retryCnt">The number of times the query has been retried.</param>
-        private static void LogFailedQuerySuccess(string methodName, int retryCnt)
-        {
-            Console.Error.WriteLine("Successfully executed {0}.{1} query on batch retry {2}",
-                typeof(DataHandler).FullName, methodName, retryCnt);
-        }
-
-        /// <summary>
-        ///     Handles logging and retry boundary checking for exceptions that are thrown during query execution.
-        /// </summary>
-        /// <param name="methodName">The name of the method executing the query.</param>
-        /// <param name="retryCnt">The number of times the query has been retried.</param>
-        /// <param name="e">The exception object that was thrown.</param>
-        private static void HandleQueryException(string methodName, int retryCnt, Exception e)
-        {
-            Console.Error.WriteLine("{0}.{1} failed to execute query on retry {2}",
-                typeof(DataHandler).FullName, methodName, retryCnt);
-
-            // Throw exception if we've no exceeded the retry count
-            if (retryCnt + 1 > MaxQueryRetryCnt)
-            {
-                throw e;
-            }
-        }
-
-        #endregion
-
-        #region Private database methods
-
-        /// <summary>
-        ///     For each body, retrieves the first brain that solved within the given experiment and run.
-        /// </summary>
-        /// <param name="experimentId">The experiment that was executed.</param>
-        /// <param name="run">The run number of the given experiment.</param>
-        /// <param name="bodyGenomeIds">The list of body genome IDs by which to filter the brain results.</param>
-        /// <returns>The list of distinct body ambulation trials that were successful for the given experiment and run.</returns>
-        private static IList<MccexperimentVoxelBodyTrials> GetSuccessfulBrainTrialPerBody(int experimentId, int run,
-            IList<int> bodyGenomeIds)
-        {
-            IList<MccexperimentVoxelBodyTrials> bodyTrials = null;
-            var querySuccess = false;
-            var retryCnt = 0;
-
-            while (querySuccess == false && retryCnt <= MaxQueryRetryCnt)
-            {
-                try
-                {
-                    using (var context = new ExperimentDataContext())
-                    {
-                        // Get single maze trial for each of the specified maze IDs over the entirety of the run
-                        bodyTrials = context.MccexperimentVoxelBodyTrials.Where(
-                                nav =>
-                                    experimentId == nav.ExperimentDictionaryId && run == nav.Run &&
-                                    nav.IsBodySolved && bodyGenomeIds.Contains(nav.BodyGenomeId))
-                            .GroupBy(nav => nav.BodyGenomeId)
-                            .Select(m => m.OrderBy(x => x.BodyGenomeId).FirstOrDefault())
-                            .ToList();
-                    }
-
-                    if (retryCnt > 0)
-                    {
-                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
-                    }
-
-                    querySuccess = true;
-                }
-                catch (Exception e)
-                {
-                    HandleQueryException(MethodBase.GetCurrentMethod().ToString(), retryCnt++, e);
-                }
-            }
-
-            return bodyTrials;
-        }
-
         /// <summary>
         ///     Retrieves the body genome data (i.e. evaluation statistics and XML) for the entirety of a given run/experiment,
         ///     constrained by the specified genome IDs.
@@ -240,7 +207,7 @@ namespace BodyBrainSupportLib
         /// <param name="run">The run number of the given experiment.</param>
         /// <param name="bodyGenomeIds">The body genome IDs by which to constrain.</param>
         /// <returns>The body genome data.</returns>
-        private static IList<MccexperimentVoxelBodyGenome> GetBodyGenomeData(int experimentId, int run,
+        public static IList<MccexperimentVoxelBodyGenome> GetBodyGenomeData(int experimentId, int run,
             IList<int> bodyGenomeIds)
         {
             IList<MccexperimentVoxelBodyGenome> bodyGenomes = null;
@@ -279,6 +246,93 @@ namespace BodyBrainSupportLib
         }
 
         /// <summary>
+        ///     Retrieves the body genome XML data (i.e. evaluation statistics and XML) for the entirety of a given run/experiment.
+        /// </summary>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <returns>The body genome XML data.</returns>
+        public static IList<string> GetBodyGenomeXml(int experimentId, int run)
+        {
+            IList<string> bodyGenomesXml = null;
+            var querySuccess = false;
+            var retryCnt = 0;
+
+            while (querySuccess == false && retryCnt <= MaxQueryRetryCnt)
+            {
+                try
+                {
+                    // Query for the body genomes XML
+                    using (var context = new ExperimentDataContext())
+                    {
+                        bodyGenomesXml = context.MccexperimentVoxelBodyGenomes
+                            .Where(expData => expData.ExperimentDictionaryId == experimentId && expData.Run == run)
+                            .Select(x => x.GenomeXml).ToList();
+                    }
+
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
+                    }
+
+                    querySuccess = true;
+                }
+                catch (Exception e)
+                {
+                    HandleQueryException(MethodBase.GetCurrentMethod().ToString(), retryCnt++, e);
+                }
+            }
+
+            return bodyGenomesXml;
+        }
+
+        /// <summary>
+        ///     Retrieves the body genome XML data (i.e. evaluation statistics and XML) for the population extant during the
+        ///     current batch of a given run/experiment.
+        /// </summary>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <param name="batch">The batch for which to get the extant population.</param>
+        /// <returns>The body genome XML data.</returns>
+        public static IList<string> GetBodyGenomeXml(int experimentId, int run, int batch)
+        {
+            IList<string> bodyGenomesXml = null;
+            var querySuccess = false;
+            var retryCnt = 0;
+
+            while (querySuccess == false && retryCnt <= MaxQueryRetryCnt)
+            {
+                try
+                {
+                    // Query for the body genomes XML
+                    using (var context = new ExperimentDataContext())
+                    {
+                        bodyGenomesXml = context.MccexperimentExtantVoxelBodyPopulation
+                            .Where(popData =>
+                                popData.ExperimentDictionaryId == experimentId && popData.Run == run &&
+                                popData.Generation == batch).Join(context.MccexperimentVoxelBodyGenomes,
+                                popData => new {popData.ExperimentDictionaryId, popData.Run, popData.GenomeId},
+                                expData => new {expData.ExperimentDictionaryId, expData.Run, expData.GenomeId},
+                                (popData, expData) => new {popData, expData}).Select(data => data.expData.GenomeXml)
+                            .ToList();
+                    }
+
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
+                    }
+
+                    querySuccess = true;
+                }
+                catch (Exception e)
+                {
+                    HandleQueryException(MethodBase.GetCurrentMethod().ToString(), retryCnt++, e);
+                }
+            }
+
+            return bodyGenomesXml;
+        }
+
+        /// <summary>
         ///     Retrieves the brain genome data (i.e. evaluation statistics and XML) for the entirety of a given
         ///     run/experiment, constrained by the specified genome IDs.
         /// </summary>
@@ -289,7 +343,7 @@ namespace BodyBrainSupportLib
         /// </param>
         /// <param name="brainGenomeIds">The brain genome IDs by which to constrain.</param>
         /// <returns>The navigator genome data.</returns>
-        private static IList<MccexperimentVoxelBrainGenome> GetBrainGenomeData(int experimentId, int run,
+        public static IList<MccexperimentVoxelBrainGenome> GetBrainGenomeData(int experimentId, int run,
             RunPhase runPhase, IList<int> brainGenomeIds)
         {
             IList<MccexperimentVoxelBrainGenome> brainGenomes = null;
@@ -325,6 +379,39 @@ namespace BodyBrainSupportLib
             }
 
             return brainGenomes;
+        }
+
+        #endregion
+
+        #region Private static methods
+
+        /// <summary>
+        ///     Handles logging of query success state after one or more failed attempts.
+        /// </summary>
+        /// <param name="methodName">The name of the method executing the query.</param>
+        /// <param name="retryCnt">The number of times the query has been retried.</param>
+        private static void LogFailedQuerySuccess(string methodName, int retryCnt)
+        {
+            Console.Error.WriteLine("Successfully executed {0}.{1} query on batch retry {2}",
+                typeof(DataHandler).FullName, methodName, retryCnt);
+        }
+
+        /// <summary>
+        ///     Handles logging and retry boundary checking for exceptions that are thrown during query execution.
+        /// </summary>
+        /// <param name="methodName">The name of the method executing the query.</param>
+        /// <param name="retryCnt">The number of times the query has been retried.</param>
+        /// <param name="e">The exception object that was thrown.</param>
+        private static void HandleQueryException(string methodName, int retryCnt, Exception e)
+        {
+            Console.Error.WriteLine("{0}.{1} failed to execute query on retry {2}",
+                typeof(DataHandler).FullName, methodName, retryCnt);
+
+            // Throw exception if we've no exceeded the retry count
+            if (retryCnt + 1 > MaxQueryRetryCnt)
+            {
+                throw e;
+            }
         }
 
         #endregion
@@ -453,6 +540,76 @@ namespace BodyBrainSupportLib
                     upscaleResultUnit.BrainId.ToString(),
                     upscaleResultUnit.BaseSize.ToString(),
                     upscaleResultUnit.MaxSize.ToString()
+                }));
+            }
+        }
+
+        /// <summary>
+        ///     Writes body diversity results to a flat file.
+        /// </summary>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <param name="bodyDiversityUnits">
+        ///     The diversity of each body compared to the rest of the population in terms of its voxel placement.
+        /// </param>
+        public static void WriteRunBodyDiversityDataToFile(int experimentId, int run,
+            IEnumerable<BodyDiversityUnit> bodyDiversityUnits)
+        {
+            // Make sure the file writer actually exists before attempting to write to it
+            if (FileWriters.ContainsKey(OutputFileType.RunBodyDiversityData) == false)
+            {
+                throw new Exception(
+                    $"Cannot write to output stream as no file writer of type {OutputFileType.RunBodyDiversityData} has been created.");
+            }
+
+            // Write each run body diversity unit as a separate entry
+            foreach (var bodyDiversityUnit in bodyDiversityUnits)
+            {
+                FileWriters[OutputFileType.RunBodyDiversityData].WriteLine(string.Join(FileDelimiter, new List<string>
+                {
+                    experimentId.ToString(),
+                    run.ToString(),
+                    bodyDiversityUnit.BodyId.ToString(),
+                    bodyDiversityUnit.AvgVoxelDiff.ToString(CultureInfo.InvariantCulture),
+                    bodyDiversityUnit.AvgVoxelMaterialDiff.ToString(CultureInfo.InvariantCulture),
+                    bodyDiversityUnit.AvgVoxelActiveMaterialDiff.ToString(CultureInfo.InvariantCulture),
+                    bodyDiversityUnit.AvgVoxelPassiveMaterialDiff.ToString(CultureInfo.InvariantCulture)
+                }));
+            }
+        }
+
+        /// <summary>
+        ///     Writes body diversity results to a flat file.
+        /// </summary>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <param name="bodyDiversityUnits">
+        ///     The diversity of each body compared to the rest of the population (extant at the current batch) in terms of its
+        ///     voxel placement.
+        /// </param>
+        public static void WriteBatchBodyDiversityDataToFile(int experimentId, int run, int batch,
+            IEnumerable<BodyDiversityUnit> bodyDiversityUnits)
+        {
+            // Make sure the file writer actually exists before attempting to write to it
+            if (FileWriters.ContainsKey(OutputFileType.BatchBodyDiversityData) == false)
+            {
+                throw new Exception(
+                    $"Cannot write to output stream as no file writer of type {OutputFileType.BatchBodyDiversityData} has been created.");
+            }
+
+            // Write each batch body diversity unit as a separate entry
+            foreach (var bodyDiversityUnit in bodyDiversityUnits)
+            {
+                FileWriters[OutputFileType.BatchBodyDiversityData].WriteLine(string.Join(FileDelimiter, new List<string>
+                {
+                    experimentId.ToString(),
+                    run.ToString(),
+                    batch.ToString(),
+                    bodyDiversityUnit.BodyId.ToString(),
+                    bodyDiversityUnit.AvgVoxelDiff.ToString(CultureInfo.InvariantCulture),
+                    bodyDiversityUnit.AvgVoxelMaterialDiff.ToString(CultureInfo.InvariantCulture),
+                    bodyDiversityUnit.AvgVoxelActiveMaterialDiff.ToString(CultureInfo.InvariantCulture),
+                    bodyDiversityUnit.AvgVoxelPassiveMaterialDiff.ToString(CultureInfo.InvariantCulture)
                 }));
             }
         }

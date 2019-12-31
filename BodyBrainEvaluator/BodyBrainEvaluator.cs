@@ -5,16 +5,10 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using System.Xml;
 using BodyBrainSupportLib;
 using ExperimentEntities.entities;
 using log4net;
 using log4net.Config;
-using SharpNeat.Decoders.Neat;
-using SharpNeat.Decoders.Substrate;
-using SharpNeat.Genomes.HyperNeat;
-using SharpNeat.Genomes.Neat;
-using SharpNeat.Genomes.Substrate;
 using SharpNeat.Phenomes.Voxels;
 
 namespace BodyBrainConfigGenerator
@@ -64,6 +58,16 @@ namespace BodyBrainConfigGenerator
                 ExecutionConfiguration.ContainsKey(ExecutionParameter.GenerateIncrementalUpscaleResults) &&
                 bool.Parse(ExecutionConfiguration[ExecutionParameter.GenerateIncrementalUpscaleResults]);
 
+            // Get boolean indicator dictating whether to generate run body diversity data
+            var generateRunBodyDiversity =
+                ExecutionConfiguration.ContainsKey(ExecutionParameter.GenerateRunBodyDiversityData) &&
+                bool.Parse(ExecutionConfiguration[ExecutionParameter.GenerateRunBodyDiversityData]);
+
+            // Get boolean indicator dictating whether to generate batch body diversity data
+            var generateBatchBodyDiversity =
+                ExecutionConfiguration.ContainsKey(ExecutionParameter.GenerateBatchBodyDiversityData) &&
+                bool.Parse(ExecutionConfiguration[ExecutionParameter.GenerateBatchBodyDiversityData]);
+
             // Lookup the current experiment configuration
             var curExperimentConfiguration = DataHandler.LookupExperimentConfiguration(experimentName);
 
@@ -85,9 +89,9 @@ namespace BodyBrainConfigGenerator
                     Path.Combine(ExecutionConfiguration[ExecutionParameter.DataOutputDirectory],
                         $"{experimentName} - SimulationLog - Run{run}.csv"), OutputFileType.SimulationLogData);
 
-                ProcessResultChunks(curExperimentConfiguration, run, GenerateSimulationLogData);
+                ProcessIndependentResultChunks(curExperimentConfiguration, run,
+                    EvaluationHandler.GenerateSimulationLogData);
 
-                // Close the output file and write the sentinel file
                 DataHandler.CloseFileWriter(OutputFileType.SimulationLogData);
                 DataHandler.WriteSentinelFile(
                     Path.Combine(ExecutionConfiguration[ExecutionParameter.DataOutputDirectory],
@@ -97,7 +101,8 @@ namespace BodyBrainConfigGenerator
             // Run simulation configuration file generation
             if (generateSimConfigs)
             {
-                ProcessResultChunks(curExperimentConfiguration, run, GenerateSimulationConfigs);
+                ProcessIndependentResultChunks(curExperimentConfiguration, run,
+                    EvaluationHandler.GenerateSimulationConfigs);
             }
 
             // Run incremental upscale evaluation
@@ -107,16 +112,128 @@ namespace BodyBrainConfigGenerator
                     Path.Combine(ExecutionConfiguration[ExecutionParameter.DataOutputDirectory],
                         $"{experimentName} - UpscaleResults - Run{run}.csv"), OutputFileType.UpscaleResultData);
 
-                ProcessResultChunks(curExperimentConfiguration, run, GenerateUpscaleResultData);
+                ProcessIndependentResultChunks(curExperimentConfiguration, run,
+                    EvaluationHandler.GenerateUpscaleResultData);
 
-                // Close the output file and write the sentinel file
                 DataHandler.CloseFileWriter(OutputFileType.UpscaleResultData);
                 DataHandler.WriteSentinelFile(
                     Path.Combine(ExecutionConfiguration[ExecutionParameter.DataOutputDirectory],
                         $"{experimentName} - UpscaleResults"), run);
             }
 
+            // Run body diversity analysis across the entire run
+            if (generateRunBodyDiversity)
+            {
+                DataHandler.OpenFileWriter(
+                    Path.Combine(ExecutionConfiguration[ExecutionParameter.DataOutputDirectory],
+                        $"{experimentName} - RunBodyDiversity - Run{run}.csv"), OutputFileType.RunBodyDiversityData);
+
+                ProcessComparativeBodyResultChunks(curExperimentConfiguration, run,
+                    EvaluationHandler.GenerateRunBodyDiversityData);
+
+                DataHandler.CloseFileWriter(OutputFileType.RunBodyDiversityData);
+                DataHandler.WriteSentinelFile(
+                    Path.Combine(ExecutionConfiguration[ExecutionParameter.DataOutputDirectory],
+                        $"{experimentName} - RunBodyDiversity"), run);
+            }
+
+            // Run per-batch body diversity analysis
+            if (generateBatchBodyDiversity)
+            {
+                DataHandler.OpenFileWriter(
+                    Path.Combine(ExecutionConfiguration[ExecutionParameter.DataOutputDirectory],
+                        $"{experimentName} - BatchBodyDiversity - Run{run}.csv"),
+                    OutputFileType.BatchBodyDiversityData);
+
+                ProcessComparativePerBatchBodyResultChunks(curExperimentConfiguration, run,
+                    EvaluationHandler.GenerateBatchBodyDiversityData);
+
+                DataHandler.CloseFileWriter(OutputFileType.BatchBodyDiversityData);
+                DataHandler.WriteSentinelFile(
+                    Path.Combine(ExecutionConfiguration[ExecutionParameter.DataOutputDirectory],
+                        $"{experimentName} - BatchBodyDiversity"), run);
+            }
+
             _executionLogger.Info($"Result processing for experiment [{experimentName}] and run [{run}] complete");
+        }
+
+        /// <summary>
+        ///     Iterate through discrete result chunks and evaluate each against the full population of bodies evolved in the given
+        ///     run.
+        /// </summary>
+        /// <param name="experimentConfig">The parameters of the experiment being executed.</param>
+        /// <param name="run">The run being executed.</param>
+        /// <param name="comparativeBodyEvalMethod">The evaluation method to apply to each chunk against the full population.</param>
+        /// <param name="chunkSize">The number of body/brain combinations to process at one time (optional).</param>
+        private static void ProcessComparativeBodyResultChunks(ExperimentDictionaryBodyBrain experimentConfig, int run,
+            ComparativeBodyEvalMethod comparativeBodyEvalMethod, int chunkSize = 100)
+        {
+            var allBodiesBag = new ConcurrentBag<VoxelBody>();
+            var experimentId = experimentConfig.ExperimentDictionaryId;
+
+            // Create container object for body/brain factories and decoders
+            var voxelPack = new VoxelFactoryDecoderPack(experimentConfig.VoxelyzeConfigInitialXdimension,
+                experimentConfig.VoxelyzeConfigInitialYdimension, experimentConfig.VoxelyzeConfigInitialZdimension,
+                experimentConfig.MaxBodySize, experimentConfig.ActivationIters);
+
+            // Read all body genome XMLs
+            var serializedBodyGenomes = DataHandler.GetBodyGenomeXml(experimentId, run);
+
+            // Decode each serialized body genome XML strings to voxel body objects
+            Parallel.ForEach(serializedBodyGenomes,
+                bodyXml =>
+                {
+                    allBodiesBag.Add(DecodeHandler.DecodeBodyGenome(bodyXml, voxelPack.BodyDecoder,
+                        voxelPack.BodyGenomeFactory));
+                });
+
+            // Convert bodies bag to list so it can be enumerated below
+            var allBodies = allBodiesBag.ToList();
+
+            for (var curChunk = 0; curChunk < allBodies.Count; curChunk += chunkSize)
+            {
+                _executionLogger.Info(
+                    $"Evaluating bodies [{curChunk}] through [{chunkSize + curChunk}] of [{allBodies.Count}]");
+
+                // Get voxel bodies for the current chunk
+                var curBodies = allBodiesBag.Skip(curChunk).Take(chunkSize).ToList();
+
+                // Invoke the given evaluation method
+                comparativeBodyEvalMethod(curBodies, allBodies, experimentConfig, run, voxelPack);
+            }
+        }
+
+        private static void ProcessComparativePerBatchBodyResultChunks(ExperimentDictionaryBodyBrain experimentConfig,
+            int run, ComparativePerBatchBodyEvalMethod comparativePerBatchBodyEvalMethod)
+        {
+            var experimentId = experimentConfig.ExperimentDictionaryId;
+            var numBatches = experimentConfig.MaxBatches;
+
+            // Create container object for body/brain factories and decoders
+            var voxelPack = new VoxelFactoryDecoderPack(experimentConfig.VoxelyzeConfigInitialXdimension,
+                experimentConfig.VoxelyzeConfigInitialYdimension, experimentConfig.VoxelyzeConfigInitialZdimension,
+                experimentConfig.MaxBodySize, experimentConfig.ActivationIters);
+
+            for (var batch = 0; batch < numBatches; batch++)
+            {
+                _executionLogger.Info($"Evaluating bodies for batch [{batch}] of [{numBatches}]");
+
+                var allBatchBodiesBag = new ConcurrentBag<VoxelBody>();
+
+                // Read all body genome XMLs for the current batch
+                var serializedBodyGenomes = DataHandler.GetBodyGenomeXml(experimentId, run, batch);
+
+                // Decode each serialized body genome XML string to voxel body objects
+                Parallel.ForEach(serializedBodyGenomes,
+                    bodyXml =>
+                    {
+                        allBatchBodiesBag.Add(DecodeHandler.DecodeBodyGenome(bodyXml, voxelPack.BodyDecoder,
+                            voxelPack.BodyGenomeFactory));
+                    });
+
+                // Invoke the given evaluation method
+                comparativePerBatchBodyEvalMethod(allBatchBodiesBag.ToList(), experimentConfig, run, batch, voxelPack);
+            }
         }
 
         /// <summary>
@@ -124,10 +241,10 @@ namespace BodyBrainConfigGenerator
         /// </summary>
         /// <param name="experimentConfig">The parameters of the experiment being executed.</param>
         /// <param name="run">The run being executed.</param>
-        /// <param name="evalMethod">The evaluation method to apply to each chunk.</param>
+        /// <param name="independentEvalMethod">The evaluation method to apply to each chunk.</param>
         /// <param name="chunkSize">The number of body/brain combinations to process at one time (optional).</param>
-        private static void ProcessResultChunks(ExperimentDictionaryBodyBrain experimentConfig, int run,
-            EvalMethod evalMethod, int chunkSize = 100)
+        private static void ProcessIndependentResultChunks(ExperimentDictionaryBodyBrain experimentConfig, int run,
+            IndependentEvalMethod independentEvalMethod, int chunkSize = 100)
         {
             var experimentId = experimentConfig.ExperimentDictionaryId;
 
@@ -152,231 +269,8 @@ namespace BodyBrainConfigGenerator
                     DataHandler.GetSuccessfulGenomeCombosFromBodyTrials(experimentId, run, curBodyGenomeIds);
 
                 // Invoke the given evaluation method
-                evalMethod(successfulGenomeCombos, experimentConfig, run, voxelPack);
+                independentEvalMethod(successfulGenomeCombos, experimentConfig, run, ExecutionConfiguration, voxelPack);
             }
-        }
-
-        /// <summary>
-        ///     Generates configuration files for body/brain simulation.
-        /// </summary>
-        /// <param name="viableBodyBrainCombos">Successful combinations of bodies and brains.</param>
-        /// <param name="experimentConfig">The parameters of the experiment being executed.</param>
-        /// <param name="run">The run being executed.</param>
-        /// <param name="voxelPack">The voxel factory/decoder instances.</param>
-        private static void GenerateSimulationConfigs(
-            IEnumerable<Tuple<MccexperimentVoxelBodyGenome, MccexperimentVoxelBrainGenome>> viableBodyBrainCombos,
-            ExperimentDictionaryBodyBrain experimentConfig, int run, VoxelFactoryDecoderPack voxelPack)
-        {
-            var experimentName = experimentConfig.ExperimentName;
-            var numBrainConnections = experimentConfig.VoxelyzeConfigBrainNetworkConnections;
-            var configTemplate = ExecutionConfiguration[ExecutionParameter.ConfigTemplateFilePath];
-            var configDirectory = ExecutionConfiguration[ExecutionParameter.ConfigOutputDirectory];
-
-            Parallel.ForEach(viableBodyBrainCombos,
-                delegate(Tuple<MccexperimentVoxelBodyGenome, MccexperimentVoxelBrainGenome> genomeCombo)
-                {
-                    // Read in voxel body XML and decode to phenotype
-                    var body = DecodeBodyGenome(genomeCombo.Item1, voxelPack.BodyDecoder,
-                        voxelPack.BodyGenomeFactory);
-
-                    // Read in voxel brain XML and decode to phenotype
-                    var brain = DecodeBrainGenome(genomeCombo.Item2, voxelPack.BrainDecoder,
-                        voxelPack.BrainGenomeFactory,
-                        body, numBrainConnections);
-
-                    // Construct the output directory
-                    var configOutputDirectory =
-                        SimulationHandler.GetConfigOutputDirectory(configDirectory, experimentName, run, body);
-
-                    // Generate configuration file for the given body/brain combo
-                    SimulationHandler.WriteConfigFile(body, brain, configOutputDirectory, experimentName, run,
-                        configTemplate, experimentConfig.MinimalCriteriaValue);
-                });
-        }
-
-        /// <summary>
-        ///     Generates detailed, per-timestep log data for the body/brain simulation.
-        /// </summary>
-        /// <param name="viableBodyBrainCombos">Successful combinations of bodies and brains.</param>
-        /// <param name="experimentConfig">The parameters of the experiment being executed.</param>
-        /// <param name="run">The run being executed.</param>
-        /// <param name="voxelPack">The voxel factory/decoder instances.</param>
-        private static void GenerateSimulationLogData(
-            IEnumerable<Tuple<MccexperimentVoxelBodyGenome, MccexperimentVoxelBrainGenome>> viableBodyBrainCombos,
-            ExperimentDictionaryBodyBrain experimentConfig, int run, VoxelFactoryDecoderPack voxelPack)
-        {
-            var bodyBrainSimulationUnits = new ConcurrentBag<BodyBrainSimulationUnit>();
-
-            var experimentId = experimentConfig.ExperimentDictionaryId;
-            var experimentName = experimentConfig.ExperimentName;
-            var numBrainConnections = experimentConfig.VoxelyzeConfigBrainNetworkConnections;
-            var simulationTime = double.Parse(ExecutionConfiguration[ExecutionParameter.SimulationTimesteps]);
-            var simExecutablePath = ExecutionConfiguration[ExecutionParameter.SimExecutablePath];
-            var configTemplate = ExecutionConfiguration[ExecutionParameter.ConfigTemplateFilePath];
-            var configDirectory = ExecutionConfiguration[ExecutionParameter.ConfigOutputDirectory];
-            var simLogDirectory = ExecutionConfiguration[ExecutionParameter.SimLogOutputDirectory];
-
-            Parallel.ForEach(viableBodyBrainCombos,
-                delegate(Tuple<MccexperimentVoxelBodyGenome, MccexperimentVoxelBrainGenome> genomeCombo)
-                {
-                    // Read in voxel body XML and decode to phenotype
-                    var body = DecodeBodyGenome(genomeCombo.Item1, voxelPack.BodyDecoder,
-                        voxelPack.BodyGenomeFactory);
-
-                    // Read in voxel brain XML and decode to phenotype
-                    var brain = DecodeBrainGenome(genomeCombo.Item2, voxelPack.BrainDecoder,
-                        voxelPack.BrainGenomeFactory,
-                        body, numBrainConnections);
-
-                    // Construct the simulation configuration file path
-                    var configFilePath = SimulationHandler.GetConfigFilePath(configDirectory, experimentName, run,
-                        brain.GenomeId, body.GenomeId);
-
-                    // Construct the simulation log file path
-                    var simLogFilePath = SimulationHandler.GetSimLogFilePath(simLogDirectory, experimentName, run,
-                        brain.GenomeId, body.GenomeId);
-
-                    // Run the simulation
-                    SimulationHandler.ExecuteTimeboundBodyBrainSimulation(configTemplate, configFilePath,
-                        simExecutablePath,
-                        simLogFilePath, simulationTime, brain, body);
-
-                    // Extract simulation log data
-                    bodyBrainSimulationUnits.Add(
-                        SimulationHandler.ReadSimulationLog(brain.GenomeId, body.GenomeId, simLogFilePath));
-                });
-
-            // Write simulation log data from body/brain combinations
-            DataHandler.WriteSimulationLogDataToFile(experimentId, run, bodyBrainSimulationUnits);
-        }
-
-        /// <summary>
-        ///     For each successful body/brain combination, upscales the body phenotype (i.e. querying the CPPN at a higher
-        ///     resolution) in increments of one unit per dimension, and evaluates the brains ability to control the body and still
-        ///     meet the MC. This continues until the body reaches a size where the brain fails to ambulate the body the minimum
-        ///     required distance, or the maximum allowable body size is reached.
-        /// </summary>
-        /// <param name="viableBodyBrainCombos">Successful combinations of bodies and brains.</param>
-        /// <param name="experimentConfig">The parameters of the experiment being executed.</param>
-        /// <param name="run">The run being executed.</param>
-        /// <param name="voxelPack">The voxel factory/decoder instances.</param>
-        private static void GenerateUpscaleResultData(
-            IEnumerable<Tuple<MccexperimentVoxelBodyGenome, MccexperimentVoxelBrainGenome>> viableBodyBrainCombos,
-            ExperimentDictionaryBodyBrain experimentConfig, int run, VoxelFactoryDecoderPack voxelPack)
-        {
-            var upscaleResultUnits = new ConcurrentBag<UpscaleResultUnit>();
-
-            var experimentId = experimentConfig.ExperimentDictionaryId;
-            var experimentName = experimentConfig.ExperimentName;
-            var numBrainConnections = experimentConfig.VoxelyzeConfigBrainNetworkConnections;
-            var minDistance = experimentConfig.MinimalCriteriaValue;
-            var maxBodySize = int.Parse(ExecutionConfiguration[ExecutionParameter.MaxBodySize]);
-            var simExecutablePath = ExecutionConfiguration[ExecutionParameter.SimExecutablePath];
-            var configTemplate = ExecutionConfiguration[ExecutionParameter.ConfigTemplateFilePath];
-            var configDirectory = ExecutionConfiguration[ExecutionParameter.ConfigOutputDirectory];
-            var simResultDirectory = ExecutionConfiguration[ExecutionParameter.ResultsOutputDirectory];
-
-            Parallel.ForEach(viableBodyBrainCombos,
-                delegate(Tuple<MccexperimentVoxelBodyGenome, MccexperimentVoxelBrainGenome> genomeCombo)
-                {
-                    var curResolutionIncrease = 0;
-                    bool isSuccessful;
-
-                    // Copy off the body/brain genome IDs
-                    var bodyGenomeId = (uint) genomeCombo.Item1.GenomeId;
-                    var brainGenomeId = (uint) genomeCombo.Item2.GenomeId;
-
-                    // Get starting size
-                    var evolvedSize = DecodeBodyGenome(genomeCombo.Item1, voxelPack.BodyDecoder,
-                        voxelPack.BodyGenomeFactory).LengthX;
-
-                    // Construct the simulation configuration file path
-                    var configFilePath = SimulationHandler.GetConfigFilePath(configDirectory, experimentName, run,
-                        brainGenomeId, bodyGenomeId);
-
-                    // Construct the simulation result file path
-                    var simResultFilePath = SimulationHandler.GetSimResultFilePath(simResultDirectory, experimentName,
-                        run,
-                        brainGenomeId, bodyGenomeId);
-
-                    do
-                    {
-                        // Read in voxel body XML and decode to phenotype
-                        var body = DecodeBodyGenome(genomeCombo.Item1, voxelPack.BodyDecoder,
-                            voxelPack.BodyGenomeFactory, curResolutionIncrease);
-
-                        // Read in voxel brain XML and decode to phenotype
-                        var brain = DecodeBrainGenome(genomeCombo.Item2, voxelPack.BrainDecoder,
-                            voxelPack.BrainGenomeFactory,
-                            body, numBrainConnections);
-
-                        // Run the simulation
-                        SimulationHandler.ExecuteDistanceBoundedBodyBrainSimulation(configTemplate, configFilePath,
-                            simExecutablePath, simResultFilePath, minDistance, brain, body);
-
-                        // Extract the simulation results
-                        isSuccessful = SimulationHandler.ReadSimulationDistance(simResultFilePath) >= minDistance;
-                    } while (isSuccessful && maxBodySize >= evolvedSize + ++curResolutionIncrease);
-
-                    // Record the max resolution at which the body was solvable
-                    upscaleResultUnits.Add(new UpscaleResultUnit(brainGenomeId, bodyGenomeId, evolvedSize,
-                        evolvedSize + Math.Max(curResolutionIncrease - 1, 0)));
-                });
-
-            // Write results of upscale analysis
-            DataHandler.WriteUpscaleResultDataToFile(experimentId, run, upscaleResultUnits);
-        }
-
-        /// <summary>
-        ///     Reads the body genome XML and decodes into its voxel body phenotype.
-        /// </summary>
-        /// <param name="bodyGenome">The body genome to convert into its corresponding phenotype.</param>
-        /// <param name="bodyDecoder">The body genome decoder.</param>
-        /// <param name="bodyGenomeFactory">The body genome factory.</param>
-        /// <param name="substrateResIncrease">
-        ///     The amount by which to increase the resolution from that at which the body was
-        ///     evolved.
-        /// </param>
-        /// <returns>The decoded voxel body.</returns>
-        private static VoxelBody DecodeBodyGenome(MccexperimentVoxelBodyGenome bodyGenome,
-            NeatSubstrateGenomeDecoder bodyDecoder, NeatSubstrateGenomeFactory bodyGenomeFactory,
-            int substrateResIncrease = 0)
-        {
-            VoxelBody body;
-
-            using (var xmlReader = XmlReader.Create(new StringReader(bodyGenome.GenomeXml)))
-            {
-                body = new VoxelBody(bodyDecoder.Decode(
-                        NeatSubstrateGenomeXmlIO.ReadSingleGenomeFromRoot(xmlReader, false, bodyGenomeFactory)),
-                    substrateResIncrease);
-            }
-
-            return body;
-        }
-
-        /// <summary>
-        ///     Reads the brain genome XML and decodes into its voxel brain phenotype.
-        /// </summary>
-        /// <param name="brainGenome">The brain genome to convert into its corresponding phenotype.</param>
-        /// <param name="brainDecoder">The brain genome decoder.</param>
-        /// <param name="brainGenomeFactory">The brain genome factory.</param>
-        /// <param name="body">The voxel body to which the brain is scaled.</param>
-        /// <param name="numConnections">The number of connections in the brain controller network.</param>
-        /// <returns>The decoded voxel brain.</returns>
-        private static VoxelBrain DecodeBrainGenome(MccexperimentVoxelBrainGenome brainGenome,
-            NeatGenomeDecoder brainDecoder, CppnGenomeFactory brainGenomeFactory, VoxelBody body, int numConnections)
-        {
-            VoxelBrain brain;
-
-            using (var xmlReader = XmlReader.Create(new StringReader(brainGenome.GenomeXml)))
-            {
-                brain = new VoxelBrain(
-                    brainDecoder.Decode(
-                        NeatGenomeXmlIO.ReadSingleGenomeFromRoot(xmlReader, false, brainGenomeFactory)), body.LengthX,
-                    body.LengthY, body.LengthZ, numConnections);
-            }
-
-            return brain;
         }
 
         /// <summary>
@@ -512,6 +406,26 @@ namespace BodyBrainConfigGenerator
                         $"Parameters [{ExecutionParameter.MaxBodySize}], [{ExecutionParameter.ConfigTemplateFilePath}], [{ExecutionParameter.SimExecutablePath}], [{ExecutionParameter.ConfigOutputDirectory}], [{ExecutionParameter.ResultsOutputDirectory}] and [{ExecutionParameter.DataOutputDirectory}] must be specified if incremental upscale results are being generated.");
                     isConfigurationValid = false;
                 }
+
+                // Data output directory must be specified if run body diversity data is being generated
+                if (ExecutionConfiguration.ContainsKey(ExecutionParameter.GenerateRunBodyDiversityData) &&
+                    Convert.ToBoolean(ExecutionConfiguration[ExecutionParameter.GenerateRunBodyDiversityData]) &&
+                    ExecutionConfiguration.ContainsKey(ExecutionParameter.DataOutputDirectory) == false)
+                {
+                    _executionLogger.Error(
+                        $"Parameter [{ExecutionParameter.DataOutputDirectory}] must be specified if run body diversity data is being generated.");
+                    isConfigurationValid = false;
+                }
+
+                // Data output directory must be specified if run batch diversity data is being generated
+                if (ExecutionConfiguration.ContainsKey(ExecutionParameter.GenerateBatchBodyDiversityData) &&
+                    Convert.ToBoolean(ExecutionConfiguration[ExecutionParameter.GenerateBatchBodyDiversityData]) &&
+                    ExecutionConfiguration.ContainsKey(ExecutionParameter.DataOutputDirectory) == false)
+                {
+                    _executionLogger.Error(
+                        $"Parameter [{ExecutionParameter.DataOutputDirectory}] must be specified if batch body diversity data is being generated.");
+                    isConfigurationValid = false;
+                }
             }
 
             // If there's still no problem with the configuration, go ahead and return valid
@@ -525,20 +439,46 @@ namespace BodyBrainConfigGenerator
                 $"Required: {ExecutionParameter.ExperimentName}=experiment {ExecutionParameter.Run}=run \n\t" +
                 $"Optional: {ExecutionParameter.GenerateSimulationConfigs} (Required: {ExecutionParameter.ConfigTemplateFilePath}=file {ExecutionParameter.ConfigOutputDirectory}=directory) \n\t" +
                 $"Optional: {ExecutionParameter.GenerateSimLogData} (Required: {ExecutionParameter.SimulationTimesteps}=timesteps {ExecutionParameter.ConfigTemplateFilePath}=file {ExecutionParameter.SimExecutablePath}=file {ExecutionParameter.ConfigOutputDirectory}=directory {ExecutionParameter.SimLogOutputDirectory}=directory {ExecutionParameter.DataOutputDirectory}=directory) \n\t" +
-                $"Optional: {ExecutionParameter.GenerateIncrementalUpscaleResults} (Required: {ExecutionParameter.MaxBodySize}=integer {ExecutionParameter.ConfigTemplateFilePath}=file {ExecutionParameter.SimExecutablePath}=file {ExecutionParameter.ConfigOutputDirectory}=directory {ExecutionParameter.ResultsOutputDirectory}=directory {ExecutionParameter.DataOutputDirectory}=directory)");
+                $"Optional: {ExecutionParameter.GenerateIncrementalUpscaleResults} (Required: {ExecutionParameter.MaxBodySize}=integer {ExecutionParameter.ConfigTemplateFilePath}=file {ExecutionParameter.SimExecutablePath}=file {ExecutionParameter.ConfigOutputDirectory}=directory {ExecutionParameter.ResultsOutputDirectory}=directory {ExecutionParameter.DataOutputDirectory}=directory) \n\t" +
+                $"Optional: {ExecutionParameter.GenerateRunBodyDiversityData} (Required: {ExecutionParameter.DataOutputDirectory}=directory) \n\t" +
+                $"Optional: {ExecutionParameter.GenerateBatchBodyDiversityData} (Required: {ExecutionParameter.DataOutputDirectory}=directory)");
 
             return false;
         }
 
         /// <summary>
-        ///     Evaluation delegate.
+        ///     Independent evaluation delegate.
         /// </summary>
         /// <param name="viableBodyBrainCombos">Successful combinations of bodies and brains.</param>
         /// <param name="experimentConfig">The parameters of the experiment being executed.</param>
         /// <param name="run">The run being executed.</param>
+        /// <param name="executionConfiguration">Encapsulates configuration parameters specified at runtime.</param>
         /// <param name="voxelPack">The voxel factory/decoder instances.</param>
-        private delegate void EvalMethod(
+        private delegate void IndependentEvalMethod(
             List<Tuple<MccexperimentVoxelBodyGenome, MccexperimentVoxelBrainGenome>> viableBodyBrainCombos,
+            ExperimentDictionaryBodyBrain experimentConfig, int run,
+            Dictionary<ExecutionParameter, string> executionConfiguration, VoxelFactoryDecoderPack voxelPack);
+
+        /// <summary>
+        ///     Comparative body evaluation delegate.
+        /// </summary>
+        /// <param name="bodies1">The first list of bodies to compare to the second.</param>
+        /// <param name="bodies2">The second list of bodies to compare to the first.</param>
+        /// <param name="experimentConfig">The parameters of the experiment being executed.</param>
+        /// <param name="run">The run being executed.</param>
+        /// <param name="voxelPack">The voxel factory/decoder instances.</param>
+        private delegate void ComparativeBodyEvalMethod(List<VoxelBody> bodies1, List<VoxelBody> bodies2,
             ExperimentDictionaryBodyBrain experimentConfig, int run, VoxelFactoryDecoderPack voxelPack);
+
+        /// <summary>
+        ///     Comparative per-batch body evaluation delegate.
+        /// </summary>
+        /// <param name="bodies1">The list of bodies to compare with each other.</param>
+        /// <param name="experimentConfig">The parameters of the experiment being executed.</param>
+        /// <param name="run">The run being executed.</param>
+        /// <param name="batch">The current batch.</param>
+        /// <param name="voxelPack">The voxel factory/decoder instances.</param>
+        private delegate void ComparativePerBatchBodyEvalMethod(List<VoxelBody> bodies,
+            ExperimentDictionaryBodyBrain experimentConfig, int run, int batch, VoxelFactoryDecoderPack voxelPack);
     }
 }

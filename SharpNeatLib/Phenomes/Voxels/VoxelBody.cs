@@ -33,15 +33,6 @@ namespace SharpNeat.Phenomes.Voxels
     /// </summary>
     public class VoxelBody
     {
-        #region Instance variables
-
-        /// <summary>
-        ///     The layer-wise voxel materials in the voxel structure.
-        /// </summary>
-        private readonly IList<IList<VoxelMaterial>> _voxelMaterials;
-
-        #endregion
-
         #region Constructor
 
         /// <summary>
@@ -72,6 +63,19 @@ namespace SharpNeat.Phenomes.Voxels
 
             // Carry through the genome ID from the generate genome
             GenomeId = cppn.GenomeId;
+
+            // Build voxel material lookup
+            _voxelMaterialLookup = new VoxelMaterial[LengthX, LengthY, LengthZ];
+            for (var z = 0; z < LengthZ; z++)
+            {
+                for (var y = 0; y < LengthY; y++)
+                {
+                    for (var x = 0; x < LengthX; x++)
+                    {
+                        _voxelMaterialLookup[x, y, z] = _voxelMaterials[z][y * LengthX + x];
+                    }
+                }
+            }
         }
 
         #endregion
@@ -139,6 +143,20 @@ namespace SharpNeat.Phenomes.Voxels
 
         #endregion
 
+        #region Instance variables
+
+        /// <summary>
+        ///     The layer-wise voxel materials in the voxel structure.
+        /// </summary>
+        private readonly IList<IList<VoxelMaterial>> _voxelMaterials;
+
+        /// <summary>
+        ///     The 3D voxel array for rapid lookup.
+        /// </summary>
+        private readonly VoxelMaterial[,,] _voxelMaterialLookup;
+
+        #endregion
+
         #region Public methods
 
         /// <summary>
@@ -149,6 +167,18 @@ namespace SharpNeat.Phenomes.Voxels
         public string GetLayerMaterialCodes(int layer)
         {
             return string.Join("", _voxelMaterials[layer].Select(x => (int) x));
+        }
+
+        /// <summary>
+        ///     Returns the material code (muscle, tissue or none) at the specified location.
+        /// </summary>
+        /// <param name="x">The x-location.</param>
+        /// <param name="y">The y-location.</param>
+        /// <param name="z">The z-location.</param>
+        /// <returns>The material code at the 3D intersection.</returns>
+        public VoxelMaterial GetMaterialAtLocation(int x, int y, int z)
+        {
+            return x < LengthX && y < LengthY && z < LengthZ ? _voxelMaterialLookup[x, y, z] : VoxelMaterial.None;
         }
 
         #endregion

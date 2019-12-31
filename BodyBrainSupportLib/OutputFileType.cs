@@ -13,6 +13,16 @@ namespace BodyBrainSupportLib
         /// <summary>
         ///     CPPN upscale upscale result data.
         /// </summary>
-        UpscaleResultData
+        UpscaleResultData,
+
+        /// <summary>
+        ///     Body similarity measurements averaged over full run.
+        /// </summary>
+        RunBodyDiversityData,
+
+        /// <summary>
+        ///     Body similarity measurements averaged over extant bodies in each batch.
+        /// </summary>
+        BatchBodyDiversityData
     }
 }

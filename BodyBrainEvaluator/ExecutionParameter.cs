@@ -31,6 +31,17 @@
         GenerateIncrementalUpscaleResults,
 
         /// <summary>
+        ///     Flag indicating whether to compute voxel body similarity between each pair of bodies averaged over full run.
+        /// </summary>
+        GenerateRunBodyDiversityData,
+
+        /// <summary>
+        ///     Flag indicating whether to compute voxel body similarity between each pair of bodies averaged over extant
+        ///     population at each batch.
+        /// </summary>
+        GenerateBatchBodyDiversityData,
+
+        /// <summary>
         ///     The number of time steps for which to execute a simulation replay (if creating trial data).
         /// </summary>
         SimulationTimesteps,
