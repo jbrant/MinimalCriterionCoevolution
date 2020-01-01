@@ -9,6 +9,7 @@ using BodyBrainSupportLib;
 using ExperimentEntities.entities;
 using log4net;
 using log4net.Config;
+using Microsoft.EntityFrameworkCore.Internal;
 using SharpNeat.Phenomes.Voxels;
 
 namespace BodyBrainConfigGenerator
@@ -67,6 +68,16 @@ namespace BodyBrainConfigGenerator
             var generateBatchBodyDiversity =
                 ExecutionConfiguration.ContainsKey(ExecutionParameter.GenerateBatchBodyDiversityData) &&
                 bool.Parse(ExecutionConfiguration[ExecutionParameter.GenerateBatchBodyDiversityData]);
+
+            // Get boolean indicator dictating whether to generate run trajectory diversity data
+            var generateRunTrajectoryDiversity =
+                ExecutionConfiguration.ContainsKey(ExecutionParameter.GenerateRunTrajectoryDiversityData) &&
+                bool.Parse(ExecutionConfiguration[ExecutionParameter.GenerateRunTrajectoryDiversityData]);
+
+            // Get boolean indicator dictating whether to generate batch trajectory diversity data
+            var generateBatchTrajectoryDiversity =
+                ExecutionConfiguration.ContainsKey(ExecutionParameter.GenerateBatchTrajectoryDiversityData) &&
+                bool.Parse(ExecutionConfiguration[ExecutionParameter.GenerateBatchTrajectoryDiversityData]);
 
             // Lookup the current experiment configuration
             var curExperimentConfiguration = DataHandler.LookupExperimentConfiguration(experimentName);
@@ -154,7 +165,133 @@ namespace BodyBrainConfigGenerator
                         $"{experimentName} - BatchBodyDiversity"), run);
             }
 
+            // Run trajectory diversity analysis across the entire run
+            if (generateRunTrajectoryDiversity)
+            {
+                DataHandler.OpenFileWriter(
+                    Path.Combine(ExecutionConfiguration[ExecutionParameter.DataOutputDirectory],
+                        $"{experimentName} - RunTrajectoryDiversity - Run{run}.csv"),
+                    OutputFileType.RunTrajectoryDiversityData);
+
+                ProcessComparativeSimulationChunks(curExperimentConfiguration, run,
+                    EvaluationHandler.GenerateRunTrajectoryDiversityData);
+
+                DataHandler.CloseFileWriter(OutputFileType.RunTrajectoryDiversityData);
+                DataHandler.WriteSentinelFile(
+                    Path.Combine(ExecutionConfiguration[ExecutionParameter.DataOutputDirectory],
+                        $"{experimentName} - RunTrajectoryDiversity"), run);
+            }
+
+            // Run per-batch trajectory diversity analysis
+            if (generateBatchTrajectoryDiversity)
+            {
+                DataHandler.OpenFileWriter(
+                    Path.Combine(ExecutionConfiguration[ExecutionParameter.DataOutputDirectory],
+                        $"{experimentName} - BatchTrajectoryDiversity - Run{run}.csv"),
+                    OutputFileType.BatchTrajectoryDiversityData);
+
+                ProcessComparativePerBatchSimulationChunks(curExperimentConfiguration, run,
+                    EvaluationHandler.GenerateBatchTrajectoryDiversityData);
+
+                DataHandler.CloseFileWriter(OutputFileType.BatchTrajectoryDiversityData);
+                DataHandler.WriteSentinelFile(
+                    Path.Combine(ExecutionConfiguration[ExecutionParameter.DataOutputDirectory],
+                        $"{experimentName} - BatchTrajectoryDiversity"), run);
+            }
+
             _executionLogger.Info($"Result processing for experiment [{experimentName}] and run [{run}] complete");
+        }
+
+        /// <summary>
+        ///     Iterate through discrete result chunks and evaluate each against the full population of simulation units in the
+        ///     given run.
+        /// </summary>
+        /// <param name="experimentConfig">The parameters of the experiment being executed.</param>
+        /// <param name="run">The run being executed.</param>
+        /// <param name="comparativeSimulationEvalMethod">
+        ///     The evaluation method to apply to each chunk against all of the
+        ///     simulation units.
+        /// </param>
+        /// <param name="chunkSize">The number of body/brain combinations to process at one time (optional).</param>
+        private static void ProcessComparativeSimulationChunks(ExperimentDictionaryBodyBrain experimentConfig, int run,
+            ComparativeSimulationEvalMethod comparativeSimulationEvalMethod, int chunkSize = 100)
+        {
+            var allSimUnitBag = new ConcurrentBag<BodyBrainSimulationUnit>();
+            var experimentId = experimentConfig.ExperimentDictionaryId;
+
+            // Create container object for body/brain factories and decoders
+            var voxelPack = new VoxelFactoryDecoderPack(experimentConfig.VoxelyzeConfigInitialXdimension,
+                experimentConfig.VoxelyzeConfigInitialYdimension, experimentConfig.VoxelyzeConfigInitialZdimension,
+                experimentConfig.MaxBodySize, experimentConfig.ActivationIters);
+
+            // Get simulation logs for the entire run and construct simulation units
+            var simLogs = DataHandler.GetSimulationLogs(experimentId, run);
+
+            // Construct simulation unit for each distinct body ID
+            Parallel.ForEach(simLogs.Select(x => x.BodyGenomeId).Distinct(),
+                bodyGenomeId =>
+                {
+                    allSimUnitBag.Add(
+                        new BodyBrainSimulationUnit(simLogs.Where(x => x.BodyGenomeId == bodyGenomeId).ToList()));
+                });
+
+            // Convert simulation units bag to list so it can be enumerated below
+            var allSimUnits = allSimUnitBag.ToList();
+
+            for (var curChunk = 0; curChunk < allSimUnits.Count; curChunk += chunkSize)
+            {
+                _executionLogger.Info(
+                    $"Evaluating simulation units [{curChunk}] through [{chunkSize + curChunk}] of [{allSimUnits.Count}]");
+
+                // Get simulation units for the current chunk
+                var curSimUnits = allSimUnits.Skip(curChunk).Take(chunkSize).ToList();
+
+                // Invoke the given evaluation method
+                comparativeSimulationEvalMethod(curSimUnits, allSimUnits, experimentConfig, run, voxelPack);
+            }
+        }
+
+        /// <summary>
+        ///     Evaluate the simulation units for every individual extant at each batch.
+        /// </summary>
+        /// <param name="experimentConfig">The parameters of the experiment being executed.</param>
+        /// <param name="run">The run being executed.</param>
+        /// <param name="comparativePerBatchSimulationEvalMethod">The evaluation method to apply to each batch.</param>
+        private static void ProcessComparativePerBatchSimulationChunks(ExperimentDictionaryBodyBrain experimentConfig,
+            int run, ComparativePerBatchSimulationEvalMethod comparativePerBatchSimulationEvalMethod)
+        {
+            var experimentId = experimentConfig.ExperimentDictionaryId;
+            var numBatches = experimentConfig.MaxBatches;
+
+            // Create container object for body/brain factories and decoders
+            var voxelPack = new VoxelFactoryDecoderPack(experimentConfig.VoxelyzeConfigInitialXdimension,
+                experimentConfig.VoxelyzeConfigInitialYdimension, experimentConfig.VoxelyzeConfigInitialZdimension,
+                experimentConfig.MaxBodySize, experimentConfig.ActivationIters);
+
+            for (var batch = 0; batch < numBatches; batch++)
+            {
+                _executionLogger.Info($"Evaluating simulation units for batch [{batch}] of [{numBatches}]");
+
+                var allBatchSimUnitBag = new ConcurrentBag<BodyBrainSimulationUnit>();
+
+                // Get simulation logs for the entire run and construct simulation units
+                var simLogs = DataHandler.GetSimulationLogs(experimentId, run, batch);
+
+                // Construct simulation unit for each distinct body ID in the current batch
+                Parallel.ForEach(DataHandler.GetBodyGenomeIds(experimentId, run, batch),
+                    bodyGenomeId =>
+                    {
+                        // Skip if there is no simulation log for the current body genome ID
+                        if (simLogs.All(x => x.BodyGenomeId != bodyGenomeId)) return;
+                        
+                        allBatchSimUnitBag.Add(
+                            new BodyBrainSimulationUnit(simLogs.Where(x => x.BodyGenomeId == bodyGenomeId).ToList()));
+                    });
+
+                // Invoke the given evaluation method
+                comparativePerBatchSimulationEvalMethod(allBatchSimUnitBag.ToList(), experimentConfig, run, batch,
+                    voxelPack);
+            }
         }
 
         /// <summary>
@@ -196,13 +333,19 @@ namespace BodyBrainConfigGenerator
                     $"Evaluating bodies [{curChunk}] through [{chunkSize + curChunk}] of [{allBodies.Count}]");
 
                 // Get voxel bodies for the current chunk
-                var curBodies = allBodiesBag.Skip(curChunk).Take(chunkSize).ToList();
+                var curBodies = allBodies.Skip(curChunk).Take(chunkSize).ToList();
 
                 // Invoke the given evaluation method
                 comparativeBodyEvalMethod(curBodies, allBodies, experimentConfig, run, voxelPack);
             }
         }
 
+        /// <summary>
+        ///     Evaluate the population of bodies extant at each batch.
+        /// </summary>
+        /// <param name="experimentConfig">The parameters of the experiment being executed.</param>
+        /// <param name="run">The run being executed.</param>
+        /// <param name="comparativePerBatchBodyEvalMethod">The evaluation method to apply to each batch.</param>
         private static void ProcessComparativePerBatchBodyResultChunks(ExperimentDictionaryBodyBrain experimentConfig,
             int run, ComparativePerBatchBodyEvalMethod comparativePerBatchBodyEvalMethod)
         {
@@ -329,6 +472,8 @@ namespace BodyBrainConfigGenerator
                         case ExecutionParameter.GenerateIncrementalUpscaleResults:
                         case ExecutionParameter.GenerateRunBodyDiversityData:
                         case ExecutionParameter.GenerateBatchBodyDiversityData:
+                        case ExecutionParameter.GenerateRunTrajectoryDiversityData:
+                        case ExecutionParameter.GenerateBatchTrajectoryDiversityData:
                             if (bool.TryParse(parameterValuePair[1], out _) == false)
                             {
                                 _executionLogger.Error($"The value for parameter [{curParameter}] must be a boolean.");
@@ -409,23 +554,27 @@ namespace BodyBrainConfigGenerator
                     isConfigurationValid = false;
                 }
 
-                // Data output directory must be specified if run body diversity data is being generated
-                if (ExecutionConfiguration.ContainsKey(ExecutionParameter.GenerateRunBodyDiversityData) &&
-                    Convert.ToBoolean(ExecutionConfiguration[ExecutionParameter.GenerateRunBodyDiversityData]) &&
+                // Data output directory must be specified if body diversity data is being generated
+                if ((ExecutionConfiguration.ContainsKey(ExecutionParameter.GenerateRunBodyDiversityData) &&
+                     Convert.ToBoolean(ExecutionConfiguration[ExecutionParameter.GenerateRunBodyDiversityData]) ||
+                     ExecutionConfiguration.ContainsKey(ExecutionParameter.GenerateBatchBodyDiversityData) &&
+                     Convert.ToBoolean(ExecutionConfiguration[ExecutionParameter.GenerateBatchBodyDiversityData])) &&
                     ExecutionConfiguration.ContainsKey(ExecutionParameter.DataOutputDirectory) == false)
                 {
                     _executionLogger.Error(
-                        $"Parameter [{ExecutionParameter.DataOutputDirectory}] must be specified if run body diversity data is being generated.");
+                        $"Parameter [{ExecutionParameter.DataOutputDirectory}] must be specified if body diversity data is being generated.");
                     isConfigurationValid = false;
                 }
 
                 // Data output directory must be specified if run batch diversity data is being generated
-                if (ExecutionConfiguration.ContainsKey(ExecutionParameter.GenerateBatchBodyDiversityData) &&
-                    Convert.ToBoolean(ExecutionConfiguration[ExecutionParameter.GenerateBatchBodyDiversityData]) &&
-                    ExecutionConfiguration.ContainsKey(ExecutionParameter.DataOutputDirectory) == false)
+                if ((ExecutionConfiguration.ContainsKey(ExecutionParameter.GenerateRunTrajectoryDiversityData) &&
+                     Convert.ToBoolean(ExecutionConfiguration[ExecutionParameter.GenerateRunTrajectoryDiversityData]) ||
+                     ExecutionConfiguration.ContainsKey(ExecutionParameter.GenerateBatchTrajectoryDiversityData) &&
+                     Convert.ToBoolean(ExecutionConfiguration[ExecutionParameter.GenerateBatchTrajectoryDiversityData])
+                    ) && ExecutionConfiguration.ContainsKey(ExecutionParameter.DataOutputDirectory) == false)
                 {
                     _executionLogger.Error(
-                        $"Parameter [{ExecutionParameter.DataOutputDirectory}] must be specified if batch body diversity data is being generated.");
+                        $"Parameter [{ExecutionParameter.DataOutputDirectory}] must be specified if trajectory diversity data is being generated.");
                     isConfigurationValid = false;
                 }
             }
@@ -443,7 +592,9 @@ namespace BodyBrainConfigGenerator
                 $"Optional: {ExecutionParameter.GenerateSimLogData} (Required: {ExecutionParameter.SimulationTimesteps}=timesteps {ExecutionParameter.ConfigTemplateFilePath}=file {ExecutionParameter.SimExecutablePath}=file {ExecutionParameter.ConfigOutputDirectory}=directory {ExecutionParameter.SimLogOutputDirectory}=directory {ExecutionParameter.DataOutputDirectory}=directory) \n\t" +
                 $"Optional: {ExecutionParameter.GenerateIncrementalUpscaleResults} (Required: {ExecutionParameter.MaxBodySize}=integer {ExecutionParameter.ConfigTemplateFilePath}=file {ExecutionParameter.SimExecutablePath}=file {ExecutionParameter.ConfigOutputDirectory}=directory {ExecutionParameter.ResultsOutputDirectory}=directory {ExecutionParameter.DataOutputDirectory}=directory) \n\t" +
                 $"Optional: {ExecutionParameter.GenerateRunBodyDiversityData} (Required: {ExecutionParameter.DataOutputDirectory}=directory) \n\t" +
-                $"Optional: {ExecutionParameter.GenerateBatchBodyDiversityData} (Required: {ExecutionParameter.DataOutputDirectory}=directory)");
+                $"Optional: {ExecutionParameter.GenerateBatchBodyDiversityData} (Required: {ExecutionParameter.DataOutputDirectory}=directory) \n\t" +
+                $"Optional: {ExecutionParameter.GenerateRunTrajectoryDiversityData} (Required: {ExecutionParameter.DataOutputDirectory}=directory) \n\t" +
+                $"Optional: {ExecutionParameter.GenerateBatchTrajectoryDiversityData} (Required: {ExecutionParameter.DataOutputDirectory}=directory)");
 
             return false;
         }
@@ -457,7 +608,7 @@ namespace BodyBrainConfigGenerator
         /// <param name="executionConfiguration">Encapsulates configuration parameters specified at runtime.</param>
         /// <param name="voxelPack">The voxel factory/decoder instances.</param>
         private delegate void IndependentEvalMethod(
-            List<Tuple<MccexperimentVoxelBodyGenome, MccexperimentVoxelBrainGenome>> viableBodyBrainCombos,
+            IList<Tuple<MccexperimentVoxelBodyGenome, MccexperimentVoxelBrainGenome>> viableBodyBrainCombos,
             ExperimentDictionaryBodyBrain experimentConfig, int run,
             Dictionary<ExecutionParameter, string> executionConfiguration, VoxelFactoryDecoderPack voxelPack);
 
@@ -469,18 +620,41 @@ namespace BodyBrainConfigGenerator
         /// <param name="experimentConfig">The parameters of the experiment being executed.</param>
         /// <param name="run">The run being executed.</param>
         /// <param name="voxelPack">The voxel factory/decoder instances.</param>
-        private delegate void ComparativeBodyEvalMethod(List<VoxelBody> bodies1, List<VoxelBody> bodies2,
+        private delegate void ComparativeBodyEvalMethod(IList<VoxelBody> bodies1, IList<VoxelBody> bodies2,
             ExperimentDictionaryBodyBrain experimentConfig, int run, VoxelFactoryDecoderPack voxelPack);
 
         /// <summary>
         ///     Comparative per-batch body evaluation delegate.
         /// </summary>
-        /// <param name="bodies1">The list of bodies to compare with each other.</param>
+        /// <param name="bodies">The list of bodies to compare with each other.</param>
         /// <param name="experimentConfig">The parameters of the experiment being executed.</param>
         /// <param name="run">The run being executed.</param>
         /// <param name="batch">The current batch.</param>
         /// <param name="voxelPack">The voxel factory/decoder instances.</param>
-        private delegate void ComparativePerBatchBodyEvalMethod(List<VoxelBody> bodies,
+        private delegate void ComparativePerBatchBodyEvalMethod(IList<VoxelBody> bodies,
+            ExperimentDictionaryBodyBrain experimentConfig, int run, int batch, VoxelFactoryDecoderPack voxelPack);
+
+        /// <summary>
+        ///     Comparative simulation evaluation delegate.
+        /// </summary>
+        /// <param name="simLog1">The first list of simulation unit entries to compare to the second.</param>
+        /// <param name="simLog2">The second list of simulation unit entries to compare to the first.</param>
+        /// <param name="experimentConfig">The parameters of the experiment being executed.</param>
+        /// <param name="run">The run being executed.</param>
+        /// <param name="voxelPack">The voxel factory/decoder instances.</param>
+        private delegate void ComparativeSimulationEvalMethod(IList<BodyBrainSimulationUnit> simLog1,
+            IList<BodyBrainSimulationUnit> simLog2, ExperimentDictionaryBodyBrain experimentConfig, int run,
+            VoxelFactoryDecoderPack voxelPack);
+
+        /// <summary>
+        ///     Comparative per-batch simulation evaluation delegate.
+        /// </summary>
+        /// <param name="simLog">The list of simulation unit entries to compare with each other.</param>
+        /// <param name="experimentConfig">The parameters of the experiment being executed.</param>
+        /// <param name="run">The run being executed.</param>
+        /// <param name="batch">The current batch.</param>
+        /// <param name="voxelPack">The voxel factory/decoder instances.</param>
+        private delegate void ComparativePerBatchSimulationEvalMethod(IList<BodyBrainSimulationUnit> simLog,
             ExperimentDictionaryBodyBrain experimentConfig, int run, int batch, VoxelFactoryDecoderPack voxelPack);
     }
 }

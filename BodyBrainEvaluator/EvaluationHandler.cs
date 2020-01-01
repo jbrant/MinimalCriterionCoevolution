@@ -15,6 +15,8 @@ namespace BodyBrainSupportLib
     /// </summary>
     public static class EvaluationHandler
     {
+        #region Public evaluation methods
+
         /// <summary>
         ///     Generates configuration files for body/brain simulation.
         /// </summary>
@@ -201,7 +203,8 @@ namespace BodyBrainSupportLib
         /// <param name="experimentConfig">The parameters of the experiment being executed.</param>
         /// <param name="run">The run being executed.</param>
         /// <param name="voxelPack">The voxel factory/decoder instances.</param>
-        public static void GenerateRunBodyDiversityData(List<VoxelBody> curChunkBodies, List<VoxelBody> bodyPopulation,
+        public static void GenerateRunBodyDiversityData(IList<VoxelBody> curChunkBodies,
+            IList<VoxelBody> bodyPopulation,
             ExperimentDictionaryBodyBrain experimentConfig, int run, VoxelFactoryDecoderPack voxelPack)
         {
             // Compute diversity of each body in the current chunk vs. the population over the full run
@@ -222,7 +225,7 @@ namespace BodyBrainSupportLib
         /// <param name="run">The run being executed.</param>
         /// <param name="batch">The batch during which extant body diversity is being computed.</param>
         /// <param name="voxelPack">The voxel factory/decoder instances.</param>
-        public static void GenerateBatchBodyDiversityData(List<VoxelBody> bodies,
+        public static void GenerateBatchBodyDiversityData(IList<VoxelBody> bodies,
             ExperimentDictionaryBodyBrain experimentConfig, int run, int batch, VoxelFactoryDecoderPack voxelPack)
         {
             // Compute diversity of each body compared to all other bodies in the current batch
@@ -234,12 +237,129 @@ namespace BodyBrainSupportLib
         }
 
         /// <summary>
+        ///     Computes the diversity between population ambulation trajectories.
+        /// </summary>
+        /// <param name="curChunkSimulationUnits">The simulation units in the current chunk undergoing diversity evaluation.</param>
+        /// <param name="populationSimulationUnits">
+        ///     The simulation units resulting from trials produced by all members of the
+        ///     population.
+        /// </param>
+        /// <param name="experimentConfig">The parameters of the experiment being executed.</param>
+        /// <param name="run">The run being executed.</param>
+        /// <param name="voxelPack">The voxel factory/decoder instances.</param>
+        public static void GenerateRunTrajectoryDiversityData(IList<BodyBrainSimulationUnit> curChunkSimulationUnits,
+            IList<BodyBrainSimulationUnit> populationSimulationUnits, ExperimentDictionaryBodyBrain experimentConfig,
+            int run, VoxelFactoryDecoderPack voxelPack)
+        {
+            // Default lattice dimensionality used in Voxelyze simulations
+            var latticeDim = 0.01;
+            
+            // Compute trajectory diversity between the current trajectory and all others in the current chunk
+            var trajectoryDiversityUnits = curChunkSimulationUnits.Select(chunkSimUnit =>
+                ComputeTrajectoryDiversity(chunkSimUnit, populationSimulationUnits, latticeDim));
+
+            // Write the results of trajectory diversity analysis for the current chunk
+            DataHandler.WriteRunTrajectoryDiversityDataToFile(experimentConfig.ExperimentDictionaryId, run,
+                trajectoryDiversityUnits);
+        }
+
+        /// <summary>
+        ///     Computes the diversity between population ambulation trajectories.
+        /// </summary>
+        /// <param name="simulationUnits">
+        ///     The simulation units resulting from trials produced by all members of the population
+        ///     during the current batch.
+        /// </param>
+        /// <param name="experimentConfig">The parameters of the experiment being executed.</param>
+        /// <param name="run">The run being executed.</param>
+        /// <param name="batch">The batch during which trajectory diversity is being computed.</param>
+        /// <param name="voxelPack">The voxel factory/decoder instances.</param>
+        public static void GenerateBatchTrajectoryDiversityData(IList<BodyBrainSimulationUnit> simulationUnits,
+            ExperimentDictionaryBodyBrain experimentConfig, int run, int batch, VoxelFactoryDecoderPack voxelPack)
+        {
+            // Default lattice dimensionality used in Voxelyze simulations
+            var latticeDim = 0.01;
+            
+            // Compute trajectory diversity between all in the current batch
+            var trajectoryDiversityUnits =
+                simulationUnits.Select(simUnit => ComputeTrajectoryDiversity(simUnit, simulationUnits, latticeDim));
+
+            // Write the results of trajectory diversity analysis for the current batch
+            DataHandler.WriteBatchTrajectoryDiversityDataToFile(experimentConfig.ExperimentDictionaryId, run, batch,
+                trajectoryDiversityUnits);
+        }
+
+        #endregion
+
+        #region Private evaluation helper methods
+
+        /// <summary>
+        ///     Computes the euclidean distance between each trajectory point and averages over the number and over the number of
+        ///     trajectories for which distance is being assessed. Also computes the average euclidean distance between trajectory
+        ///     end points.
+        /// </summary>
+        /// <param name="simulationUnit">Simulation unit that is the subject of evaluation.</param>
+        /// <param name="popSimulationUnits">Simulation units for the rest of the population, including trajectory positions.</param>
+        /// <param name="latticeDim">
+        ///     The dimensionality of a single voxel within the voxel lattice - used to scale distance
+        ///     measurements.
+        /// </param>
+        /// <returns></returns>
+        private static TrajectoryDiversityUnit ComputeTrajectoryDiversity(BodyBrainSimulationUnit simulationUnit,
+            IList<BodyBrainSimulationUnit> popSimulationUnits, double latticeDim)
+        {
+            var incrementLock = new object();
+            var totalTrajectoryDistance = 0.0;
+            var totalEndPointDistance = 0.0;
+            var posMeasurementCount = simulationUnit.BodyBrainSimulationTimestepUnits.Count;
+            var timestepUnits = simulationUnit.BodyBrainSimulationTimestepUnits;
+
+            Parallel.ForEach(popSimulationUnits, popSimulationUnit =>
+            {
+                var totalTrajectoryPointDistance = 0.0;
+                var curTimestepUnits = popSimulationUnit.BodyBrainSimulationTimestepUnits;
+
+                // Sum distance between each corresponding trajectory point
+                for (var i = 0; i < posMeasurementCount; i++)
+                {
+                    totalTrajectoryPointDistance +=
+                        Math.Sqrt(Math.Pow(timestepUnits[i].Position.X - curTimestepUnits[i].Position.X, 2) +
+                                  Math.Pow(timestepUnits[i].Position.Y - curTimestepUnits[i].Position.Y, 2)) /
+                        latticeDim;
+                }
+
+                // Compute current trajectory distance
+                var curTrajectoryDistance = totalTrajectoryPointDistance / posMeasurementCount;
+
+                // Compute end-point distance
+                var curEndPointDistance =
+                    Math.Sqrt(
+                        Math.Pow(
+                            timestepUnits[posMeasurementCount - 1].Position.X -
+                            curTimestepUnits[posMeasurementCount - 1].Position.X, 2) +
+                        Math.Pow(
+                            timestepUnits[posMeasurementCount - 1].Position.Y -
+                            curTimestepUnits[posMeasurementCount - 1].Position.Y, 2)) / latticeDim;
+
+                // Lock for thread-safe increment
+                lock (incrementLock)
+                {
+                    totalTrajectoryDistance += curTrajectoryDistance;
+                    totalEndPointDistance += curEndPointDistance;
+                }
+            });
+
+            return new TrajectoryDiversityUnit(simulationUnit.BrainId, simulationUnit.BodyId,
+                totalTrajectoryDistance / popSimulationUnits.Count, totalEndPointDistance / popSimulationUnits.Count);
+        }
+
+        /// <summary>
         ///     Computes the voxel-wise difference of the given body compared to the other bodies in the given population.
         /// </summary>
         /// <param name="body">The body for which to compute voxel-wise difference.</param>
         /// <param name="bodyPopulation">All of the bodies in the population.</param>
         /// <returns>BodyDiversityUnit encapsulating voxel-wise body difference.</returns>
-        private static BodyDiversityUnit ComputeBodyDiversity(VoxelBody body, List<VoxelBody> bodyPopulation)
+        private static BodyDiversityUnit ComputeBodyDiversity(VoxelBody body, IList<VoxelBody> bodyPopulation)
         {
             var numOverallDiff = 0;
             var numMaterialTypeDiff = 0;
@@ -291,5 +411,7 @@ namespace BodyBrainSupportLib
                 (double) numMaterialTypeDiff / bodyPopulation.Count, (double) numActiveDiff / bodyPopulation.Count,
                 (double) numPassiveDiff / bodyPopulation.Count);
         }
+
+        #endregion
     }
 }

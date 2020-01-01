@@ -124,48 +124,6 @@ namespace BodyBrainSupportLib
         }
 
         /// <summary>
-        ///     Retrieves the body genome IDs for a particular run/experiment.
-        /// </summary>
-        /// <param name="experimentId">The experiment that was executed.</param>
-        /// <param name="run">The run number of the given experiment.</param>
-        /// <returns>The body genome IDs.</returns>
-        public static IList<int> GetBodyGenomeIds(int experimentId, int run)
-        {
-            IList<int> bodyGenomeIds = null;
-            var querySuccess = false;
-            var retryCnt = 0;
-
-            while (querySuccess == false && retryCnt <= MaxQueryRetryCnt)
-            {
-                try
-                {
-                    // Query for the distinct body genome IDs logged during the run
-                    using (var context = new ExperimentDataContext())
-                    {
-                        bodyGenomeIds =
-                            context.MccexperimentVoxelBodyGenomes.Where(
-                                    expData => expData.ExperimentDictionaryId == experimentId && expData.Run == run)
-                                .Select(m => m.GenomeId)
-                                .ToList();
-                    }
-
-                    if (retryCnt > 0)
-                    {
-                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
-                    }
-
-                    querySuccess = true;
-                }
-                catch (Exception e)
-                {
-                    HandleQueryException(MethodBase.GetCurrentMethod().ToString(), retryCnt++, e);
-                }
-            }
-
-            return bodyGenomeIds;
-        }
-
-        /// <summary>
         ///     Extracts successful body and brain genome pairs from experiment body trials.
         /// </summary>
         /// <param name="experimentId">The experiment that was executed.</param>
@@ -333,6 +291,88 @@ namespace BodyBrainSupportLib
         }
 
         /// <summary>
+        ///     Retrieves the body genome IDs (i.e. evaluation statistics and XML) for the entirety of a given run/experiment.
+        /// </summary>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <returns>The body genome ID data.</returns>
+        public static IList<int> GetBodyGenomeIds(int experimentId, int run)
+        {
+            IList<int> bodyGenomeIds = null;
+            var querySuccess = false;
+            var retryCnt = 0;
+
+            while (querySuccess == false && retryCnt <= MaxQueryRetryCnt)
+            {
+                try
+                {
+                    // Query for the body genome IDs
+                    using (var context = new ExperimentDataContext())
+                    {
+                        bodyGenomeIds = context.MccexperimentVoxelBodyGenomes
+                            .Where(expData => expData.ExperimentDictionaryId == experimentId && expData.Run == run)
+                            .Select(x => x.GenomeId).ToList();
+                    }
+
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
+                    }
+
+                    querySuccess = true;
+                }
+                catch (Exception e)
+                {
+                    HandleQueryException(MethodBase.GetCurrentMethod().ToString(), retryCnt++, e);
+                }
+            }
+
+            return bodyGenomeIds;
+        }
+
+        /// <summary>
+        ///     Retrieves the body genome IDs for the population extant during the current batch of a given run/experiment.
+        /// </summary>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <param name="batch">The batch for which to get the extant population.</param>
+        /// <returns>The body genome ID data.</returns>
+        public static IList<int> GetBodyGenomeIds(int experimentId, int run, int batch)
+        {
+            IList<int> bodyGenomeIds = null;
+            var querySuccess = false;
+            var retryCnt = 0;
+
+            while (querySuccess == false && retryCnt <= MaxQueryRetryCnt)
+            {
+                try
+                {
+                    // Query for the body genome IDs
+                    using (var context = new ExperimentDataContext())
+                    {
+                        bodyGenomeIds = context.MccexperimentExtantVoxelBodyPopulation
+                            .Where(expData =>
+                                expData.ExperimentDictionaryId == experimentId && expData.Run == run &&
+                                expData.Generation == batch).Select(x => x.GenomeId).ToList();
+                    }
+
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
+                    }
+
+                    querySuccess = true;
+                }
+                catch (Exception e)
+                {
+                    HandleQueryException(MethodBase.GetCurrentMethod().ToString(), retryCnt++, e);
+                }
+            }
+
+            return bodyGenomeIds;
+        }
+
+        /// <summary>
         ///     Retrieves the brain genome data (i.e. evaluation statistics and XML) for the entirety of a given
         ///     run/experiment, constrained by the specified genome IDs.
         /// </summary>
@@ -379,6 +419,93 @@ namespace BodyBrainSupportLib
             }
 
             return brainGenomes;
+        }
+
+        /// <summary>
+        ///     Retrieves all of the simulation log entries for the given experiment and run.
+        /// </summary>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <returns>The list of body-brain simulation logs.</returns>
+        public static IList<MccbodyBrainSimLog> GetSimulationLogs(int experimentId, int run)
+        {
+            IList<MccbodyBrainSimLog> simLogs = null;
+            var querySuccess = false;
+            var retryCnt = 0;
+
+            while (querySuccess == false && retryCnt <= MaxQueryRetryCnt)
+            {
+                try
+                {
+                    using (var context = new ExperimentDataContext())
+                    {
+                        // Get simulation logs for the given experiment and run
+                        simLogs = context.MccbodyBrainSimLog.Where(sim =>
+                            sim.ExperimentDictionaryId == experimentId && sim.Run == run).ToList();
+                    }
+
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
+                    }
+
+                    querySuccess = true;
+                }
+                catch (Exception e)
+                {
+                    HandleQueryException(MethodBase.GetCurrentMethod().ToString(), retryCnt++, e);
+                }
+            }
+
+            return simLogs;
+        }
+
+        /// <summary>
+        ///     Retrieves all of the simulation log entries for the given experiment, run and batch.
+        /// </summary>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <param name="batch">The batch for which to get the extant population.</param>
+        /// <returns>The list of body-brain simulation logs.</returns>
+        public static IList<MccbodyBrainSimLog> GetSimulationLogs(int experimentId, int run, int batch)
+        {
+            IList<MccbodyBrainSimLog> simLogs = null;
+            var querySuccess = false;
+            var retryCnt = 0;
+
+            while (querySuccess == false && retryCnt <= MaxQueryRetryCnt)
+            {
+                try
+                {
+                    using (var context = new ExperimentDataContext())
+                    {
+                        // Get simulation logs for the given experiment, run and batch
+                        simLogs = context.MccexperimentExtantVoxelBodyPopulation
+                            .Where(popData =>
+                                popData.ExperimentDictionaryId == experimentId && popData.Run == run &&
+                                popData.Generation == batch)
+                            .Join(
+                                context.MccbodyBrainSimLog,
+                                popData => new {popData.ExperimentDictionaryId, popData.Run, popData.GenomeId},
+                                expData => new
+                                    {expData.ExperimentDictionaryId, expData.Run, GenomeId = expData.BodyGenomeId},
+                                (popData, expData) => new {popData, expData}).Select(x => x.expData).ToList();
+                    }
+
+                    if (retryCnt > 0)
+                    {
+                        LogFailedQuerySuccess(MethodBase.GetCurrentMethod().ToString(), retryCnt);
+                    }
+
+                    querySuccess = true;
+                }
+                catch (Exception e)
+                {
+                    HandleQueryException(MethodBase.GetCurrentMethod().ToString(), retryCnt++, e);
+                }
+            }
+
+            return simLogs;
         }
 
         #endregion
@@ -583,6 +710,7 @@ namespace BodyBrainSupportLib
         /// </summary>
         /// <param name="experimentId">The experiment that was executed.</param>
         /// <param name="run">The run number of the given experiment.</param>
+        /// <param name="batch">The current batch in evolution.</param>
         /// <param name="bodyDiversityUnits">
         ///     The diversity of each body compared to the rest of the population (extant at the current batch) in terms of its
         ///     voxel placement.
@@ -611,6 +739,76 @@ namespace BodyBrainSupportLib
                     bodyDiversityUnit.AvgVoxelActiveMaterialDiff.ToString(CultureInfo.InvariantCulture),
                     bodyDiversityUnit.AvgVoxelPassiveMaterialDiff.ToString(CultureInfo.InvariantCulture)
                 }));
+            }
+        }
+
+        /// <summary>
+        ///     Writes trajectory diversity results to a flat file.
+        /// </summary>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <param name="trajectoryDiversityUnits">
+        ///     The average trajectory distance compared to the rest of the population.
+        /// </param>
+        public static void WriteRunTrajectoryDiversityDataToFile(int experimentId, int run,
+            IEnumerable<TrajectoryDiversityUnit> trajectoryDiversityUnits)
+        {
+            // Make sure the file writer actually exists before attempting to write to it
+            if (FileWriters.ContainsKey(OutputFileType.RunTrajectoryDiversityData) == false)
+            {
+                throw new Exception(
+                    $"Cannot write to output stream as no file writer of type {OutputFileType.RunTrajectoryDiversityData} has been created.");
+            }
+
+            // Write each run trajectory diversity unit as a separate entry
+            foreach (var trajectoryDiversityUnit in trajectoryDiversityUnits)
+            {
+                FileWriters[OutputFileType.RunTrajectoryDiversityData].WriteLine(string.Join(FileDelimiter,
+                    new List<string>
+                    {
+                        experimentId.ToString(),
+                        run.ToString(),
+                        trajectoryDiversityUnit.BodyId.ToString(),
+                        trajectoryDiversityUnit.BrainId.ToString(),
+                        trajectoryDiversityUnit.TrajectoryDiversity.ToString(CultureInfo.InvariantCulture),
+                        trajectoryDiversityUnit.EndPointDiversity.ToString(CultureInfo.InvariantCulture)
+                    }));
+            }
+        }
+
+        /// <summary>
+        ///     Writes trajectory diversity results to a flat file.
+        /// </summary>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <param name="batch">The current batch in evolution.</param>
+        /// <param name="trajectoryDiversityUnits">
+        ///     The average trajectory distance compared to the rest of the  population (extant at the current batch).
+        /// </param>
+        public static void WriteBatchTrajectoryDiversityDataToFile(int experimentId, int run, int batch,
+            IEnumerable<TrajectoryDiversityUnit> trajectoryDiversityUnits)
+        {
+            // Make sure the file writer actually exists before attempting to write to it
+            if (FileWriters.ContainsKey(OutputFileType.BatchTrajectoryDiversityData) == false)
+            {
+                throw new Exception(
+                    $"Cannot write to output stream as no file writer of type {OutputFileType.BatchTrajectoryDiversityData} has been created.");
+            }
+
+            // Write each batch trajectory diversity unit as a separate entry
+            foreach (var trajectoryDiversityUnit in trajectoryDiversityUnits)
+            {
+                FileWriters[OutputFileType.BatchTrajectoryDiversityData].WriteLine(string.Join(FileDelimiter,
+                    new List<string>
+                    {
+                        experimentId.ToString(),
+                        run.ToString(),
+                        batch.ToString(),
+                        trajectoryDiversityUnit.BodyId.ToString(),
+                        trajectoryDiversityUnit.BrainId.ToString(),
+                        trajectoryDiversityUnit.TrajectoryDiversity.ToString(CultureInfo.InvariantCulture),
+                        trajectoryDiversityUnit.EndPointDiversity.ToString(CultureInfo.InvariantCulture)
+                    }));
             }
         }
 

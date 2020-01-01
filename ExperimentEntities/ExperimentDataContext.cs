@@ -17,6 +17,7 @@ namespace ExperimentEntities
         
         public virtual DbSet<ExperimentDictionary> ExperimentDictionary { get; set; }
         public virtual DbSet<ExperimentDictionaryBodyBrain> ExperimentDictionaryBodyBrain { get; set; }
+        public virtual DbSet<MccbodyBrainSimLog> MccbodyBrainSimLog { get; set; }
         public virtual DbSet<MccexperimentExtantMazePopulation> MccexperimentExtantMazePopulation { get; set; }
         public virtual DbSet<MccexperimentExtantNavigatorPopulation> MccexperimentExtantNavigatorPopulation { get; set; }
         public virtual DbSet<MccexperimentMazeEvaluationData> MccexperimentMazeEvaluationData { get; set; }
@@ -58,6 +59,19 @@ namespace ExperimentEntities
         {
             modelBuilder.HasAnnotation("ProductVersion", "2.2.6-servicing-10079");
 
+            modelBuilder.Entity<MccbodyBrainSimLog>(entity =>
+            {
+                entity.HasKey(e => new { e.ExperimentDictionaryId, e.Run, e.BodyGenomeId, e.BrainGenomeId, e.TimeStep });
+
+                entity.ToTable("MCCBodyBrainSimLog");
+
+                entity.Property(e => e.ExperimentDictionaryId).HasColumnName("ExperimentDictionaryID");
+
+                entity.Property(e => e.BodyGenomeId).HasColumnName("BodyGenomeID");
+
+                entity.Property(e => e.BrainGenomeId).HasColumnName("BrainGenomeID");
+            });
+            
             modelBuilder.Entity<MccexperimentExtantMazePopulation>(entity =>
             {
                 entity.HasKey(e => new { e.ExperimentDictionaryId, e.Run, e.Generation, e.GenomeId });

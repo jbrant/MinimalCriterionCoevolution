@@ -42,6 +42,17 @@
         GenerateBatchBodyDiversityData,
 
         /// <summary>
+        ///     Flag indicating whether to compute trajectory similarity between each pair of trajectories averaged over full run.
+        /// </summary>
+        GenerateRunTrajectoryDiversityData,
+
+        /// <summary>
+        ///     Flag indicating whether to compute trajectory similarity between each pair of trajectories averaged over extant
+        ///     population at each batch.
+        /// </summary>
+        GenerateBatchTrajectoryDiversityData,
+
+        /// <summary>
         ///     The number of time steps for which to execute a simulation replay (if creating trial data).
         /// </summary>
         SimulationTimesteps,

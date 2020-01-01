@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Linq;
+using ExperimentEntities.entities;
 using SharpNeat.Utility;
 
 namespace BodyBrainSupportLib
@@ -93,6 +95,25 @@ namespace BodyBrainSupportLib
             BrainId = brainId;
             BodyId = bodyId;
             BodyBrainSimulationTimestepUnits = new List<BodyBrainSimulationTimestepUnit>();
+        }
+
+        /// <summary>
+        ///     The BodyBrainSimulationUnit constructor, which creates a new simulation unit from serialized simulation logs.
+        /// </summary>
+        /// <param name="simLogs"></param>
+        public BodyBrainSimulationUnit(IList<MccbodyBrainSimLog> simLogs)
+        {
+            BodyBrainSimulationTimestepUnits = new List<BodyBrainSimulationTimestepUnit>(simLogs.Count);
+
+            BrainId = (uint) simLogs.First().BrainGenomeId;
+            BodyId = (uint) simLogs.First().BodyGenomeId;
+
+            foreach (var simLog in simLogs)
+            {
+                AddTimestepInfo(simLog.TimeStep, simLog.Time, simLog.PositionX, simLog.PositionY, simLog.PositionZ,
+                    simLog.Distance, simLog.VoxelsTouchingFloor, simLog.MaxVoxelVelocity, simLog.MaxVoxelDisplacement,
+                    simLog.DisplacementX, simLog.DisplacementY, simLog.DisplacementZ);
+            }
         }
 
         /// <summary>
