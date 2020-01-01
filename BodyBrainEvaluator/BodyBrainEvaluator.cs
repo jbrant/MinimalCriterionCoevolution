@@ -327,6 +327,8 @@ namespace BodyBrainConfigGenerator
                         case ExecutionParameter.GenerateSimulationConfigs:
                         case ExecutionParameter.GenerateSimLogData:
                         case ExecutionParameter.GenerateIncrementalUpscaleResults:
+                        case ExecutionParameter.GenerateRunBodyDiversityData:
+                        case ExecutionParameter.GenerateBatchBodyDiversityData:
                             if (bool.TryParse(parameterValuePair[1], out _) == false)
                             {
                                 _executionLogger.Error($"The value for parameter [{curParameter}] must be a boolean.");
