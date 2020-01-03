@@ -35,7 +35,7 @@ namespace BodyBrainSupportLib
             using (var xmlReader = XmlReader.Create(new StringReader(bodyGenome.GenomeXml)))
             {
                 body = new VoxelBody(bodyDecoder.Decode(
-                        NeatSubstrateGenomeXmlIO.ReadSingleGenomeFromRoot(xmlReader, false, bodyGenomeFactory)),
+                        NeatSubstrateGenomeXmlIO.ReadSingleGenomeFromRoot(xmlReader, true, bodyGenomeFactory)),
                     substrateResIncrease);
             }
 
@@ -59,7 +59,7 @@ namespace BodyBrainSupportLib
             using (var xmlReader = XmlReader.Create(new StringReader(brainGenome.GenomeXml)))
             {
                 brain = new VoxelBrain(
-                    brainDecoder.Decode(NeatGenomeXmlIO.ReadSingleGenomeFromRoot(xmlReader, false, brainGenomeFactory)),
+                    brainDecoder.Decode(NeatGenomeXmlIO.ReadSingleGenomeFromRoot(xmlReader, true, brainGenomeFactory)),
                     body.LengthX, body.LengthY, body.LengthZ, numConnections);
             }
 
@@ -86,7 +86,7 @@ namespace BodyBrainSupportLib
             using (var xmlReader = XmlReader.Create(new StringReader(bodyGenomeXml)))
             {
                 body = new VoxelBody(bodyDecoder.Decode(
-                        NeatSubstrateGenomeXmlIO.ReadSingleGenomeFromRoot(xmlReader, false, bodyGenomeFactory)),
+                        NeatSubstrateGenomeXmlIO.ReadSingleGenomeFromRoot(xmlReader, true, bodyGenomeFactory)),
                     substrateResIncrease);
             }
 
