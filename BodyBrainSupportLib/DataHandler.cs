@@ -626,9 +626,11 @@ namespace BodyBrainSupportLib
                         timestepUnit.Position.Y.ToString(CultureInfo.InvariantCulture),
                         timestepUnit.Position.Z.ToString(CultureInfo.InvariantCulture),
                         timestepUnit.Distance.ToString(CultureInfo.InvariantCulture),
+                        timestepUnit.TotalDistance.ToString(CultureInfo.InvariantCulture),
                         timestepUnit.VoxelsTouchingFloor.ToString(),
                         timestepUnit.MaxVoxelVelocity.ToString(CultureInfo.InvariantCulture),
                         timestepUnit.MaxVoxelDisplacement.ToString(CultureInfo.InvariantCulture),
+                        timestepUnit.MaxTrialDisplacement.ToString(CultureInfo.InvariantCulture),
                         timestepUnit.Displacement.X.ToString(CultureInfo.InvariantCulture),
                         timestepUnit.Displacement.Y.ToString(CultureInfo.InvariantCulture),
                         timestepUnit.Displacement.Z.ToString(CultureInfo.InvariantCulture)

@@ -40,7 +40,7 @@ namespace BodyBrainConfigGenerator
             if (ParseAndValidateConfiguration(args) == false)
                 Environment.Exit(0);
 
-            _executionLogger.Info("Invocation parameters validated - continuing with configuration file generation.");
+            _executionLogger.Info("Invocation parameters validated - continuing with evaluation.");
 
             // Extract experiment name and run number
             var experimentName = ExecutionConfiguration[ExecutionParameter.ExperimentName];
@@ -91,7 +91,7 @@ namespace BodyBrainConfigGenerator
             }
 
             _executionLogger.Info(
-                $"Preparing to execute configuration file generation for experiment [{curExperimentConfiguration.ExperimentName}] run [{run}]");
+                $"Preparing to execute evaluation for experiment [{curExperimentConfiguration.ExperimentName}] run [{run}]");
 
             // Run simulation log file generation
             if (generateSimLog)

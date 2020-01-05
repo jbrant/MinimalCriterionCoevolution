@@ -31,6 +31,12 @@ namespace BodyBrainSupportLib
         public double Distance { get; }
 
         /// <summary>
+        ///     The total distance that the body has traveled, measured from the center-of-mass between start and end locations at
+        ///     each time step.
+        /// </summary>
+        public double TotalDistance { get; }
+
+        /// <summary>
         ///     The number of voxels in contact with the environment floor.
         /// </summary>
         public int VoxelsTouchingFloor { get; }
@@ -46,6 +52,12 @@ namespace BodyBrainSupportLib
         public double MaxVoxelDisplacement { get; }
 
         /// <summary>
+        ///     The maximum distance (as measured from the center-of-mass) the body has traversed from the starting location at any
+        ///     point during the trial.
+        /// </summary>
+        public double MaxTrialDisplacement { get; }
+
+        /// <summary>
         ///     The displacement vector of the voxel body (as measured from the center-of-mass).
         /// </summary>
         public Point3DDouble Displacement { get; }
@@ -59,23 +71,31 @@ namespace BodyBrainSupportLib
         /// <param name="yPosition">The Y-component of the voxel body position vector.</param>
         /// <param name="zPosition">The Z-component of the voxel body position vector.</param>
         /// <param name="distance">The euclidean distance the voxel has traveled (measured from the center-of-mass).</param>
+        /// <param name="totalDistance">
+        ///     The total distance that the body has traveled, measured from the center-of-mass between
+        ///     start and end locations at each time step.
+        /// </param>
         /// <param name="voxelsTouchingFloor">The number of voxels in contact with the environment floor.</param>
         /// <param name="maxVoxelVelocity">The velocity of the voxel with highest velocity.</param>
         /// <param name="maxVoxelDisplacement">The displacement of the voxel with highest displacement.</param>
+        /// <param name="maxTrialDisplacement">The displacement vector of the voxel body (as measured from the center-of-mass).</param>
         /// <param name="xDisplacement">The X-component of the voxel body displacement vector.</param>
         /// <param name="yDisplacement">The Y-component of the voxel body displacement vector.</param>
         /// <param name="zDisplacement">The Z-component of the voxel body displacement vector.</param>
-        public BodyBrainSimulationTimestepUnit(int timestep, double time, double xPosition,
-            double yPosition, double zPosition, double distance, int voxelsTouchingFloor, double maxVoxelVelocity,
-            double maxVoxelDisplacement, double xDisplacement, double yDisplacement, double zDisplacement)
+        public BodyBrainSimulationTimestepUnit(int timestep, double time, double xPosition, double yPosition,
+            double zPosition, double distance, double totalDistance, int voxelsTouchingFloor, double maxVoxelVelocity,
+            double maxVoxelDisplacement, double maxTrialDisplacement, double xDisplacement, double yDisplacement,
+            double zDisplacement)
         {
             Timestep = timestep;
             Time = time;
             Position = new Point3DDouble(xPosition, yPosition, zPosition);
             Distance = distance;
+            TotalDistance = totalDistance;
             VoxelsTouchingFloor = voxelsTouchingFloor;
             MaxVoxelVelocity = maxVoxelVelocity;
             MaxVoxelDisplacement = maxVoxelDisplacement;
+            MaxTrialDisplacement = maxTrialDisplacement;
             Displacement = new Point3DDouble(xDisplacement, yDisplacement, zDisplacement);
         }
     }
@@ -111,8 +131,9 @@ namespace BodyBrainSupportLib
             foreach (var simLog in simLogs)
             {
                 AddTimestepInfo(simLog.TimeStep, simLog.Time, simLog.PositionX, simLog.PositionY, simLog.PositionZ,
-                    simLog.Distance, simLog.VoxelsTouchingFloor, simLog.MaxVoxelVelocity, simLog.MaxVoxelDisplacement,
-                    simLog.DisplacementX, simLog.DisplacementY, simLog.DisplacementZ);
+                    simLog.Distance, simLog.TotalDistance, simLog.VoxelsTouchingFloor, simLog.MaxVoxelVelocity,
+                    simLog.MaxVoxelDisplacement, simLog.MaxTrialDisplacement, simLog.DisplacementX,
+                    simLog.DisplacementY, simLog.DisplacementZ);
             }
         }
 
@@ -140,19 +161,25 @@ namespace BodyBrainSupportLib
         /// <param name="yPosition">The Y-component of the voxel body position vector.</param>
         /// <param name="zPosition">The Z-component of the voxel body position vector.</param>
         /// <param name="distance">The euclidean distance the voxel has traveled (measured from the center-of-mass).</param>
+        /// <param name="totalDistance">
+        ///     The total distance that the body has traveled, measured from the center-of-mass between
+        ///     start and end locations at each time step.
+        /// </param>
         /// <param name="voxelsTouchingFloor">The number of voxels in contact with the environment floor.</param>
         /// <param name="maxVoxelVelocity">The velocity of the voxel with highest velocity.</param>
         /// <param name="maxVoxelDisplacement">The displacement of the voxel with highest displacement.</param>
+        /// <param name="maxTrialDisplacement">The displacement vector of the voxel body (as measured from the center-of-mass).</param>
         /// <param name="xDisplacement">The X-component of the voxel body displacement vector.</param>
         /// <param name="yDisplacement">The Y-component of the voxel body displacement vector.</param>
         /// <param name="zDisplacement">The Z-component of the voxel body displacement vector.</param>
-        public void AddTimestepInfo(int timestep, double time, double xPosition,
-            double yPosition, double zPosition, double distance, int voxelsTouchingFloor, double maxVoxelVelocity,
-            double maxVoxelDisplacement, double xDisplacement, double yDisplacement, double zDisplacement)
+        public void AddTimestepInfo(int timestep, double time, double xPosition, double yPosition, double zPosition,
+            double distance, double totalDistance, int voxelsTouchingFloor, double maxVoxelVelocity,
+            double maxTrialDisplacement, double maxVoxelDisplacement, double xDisplacement, double yDisplacement,
+            double zDisplacement)
         {
             BodyBrainSimulationTimestepUnits.Add(new BodyBrainSimulationTimestepUnit(timestep, time, xPosition,
-                yPosition, zPosition, distance, voxelsTouchingFloor, maxVoxelVelocity, maxVoxelDisplacement,
-                xDisplacement, yDisplacement, zDisplacement));
+                yPosition, zPosition, distance, totalDistance, voxelsTouchingFloor, maxVoxelVelocity,
+                maxVoxelDisplacement, maxTrialDisplacement, xDisplacement, yDisplacement, zDisplacement));
         }
     }
 }

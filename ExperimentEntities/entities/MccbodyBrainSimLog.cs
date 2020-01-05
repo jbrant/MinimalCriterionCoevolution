@@ -15,9 +15,11 @@ namespace ExperimentEntities.entities
         public double PositionY { get; set; }
         public double PositionZ { get; set; }
         public double Distance { get; set; }
+        public double TotalDistance { get; set; }
         public int VoxelsTouchingFloor { get; set; }
         public double MaxVoxelVelocity { get; set; }
         public double MaxVoxelDisplacement { get; set; }
+        public double MaxTrialDisplacement { get; set; }
         public double DisplacementX { get; set; }
         public double DisplacementY { get; set; }
         public double DisplacementZ { get; set; }

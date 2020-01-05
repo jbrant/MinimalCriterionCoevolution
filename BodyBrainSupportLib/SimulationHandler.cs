@@ -7,10 +7,6 @@ using System.Xml;
 using MCC_Domains.BodyBrain;
 using MCC_Domains.Utils;
 using SharpNeat;
-using SharpNeat.Decoders;
-using SharpNeat.Genomes.HyperNeat;
-using SharpNeat.Genomes.Substrate;
-using SharpNeat.Network;
 using SharpNeat.Phenomes.Voxels;
 
 namespace BodyBrainSupportLib
@@ -238,15 +234,17 @@ namespace BodyBrainSupportLib
                 var yPos = XmlUtils.GetValueAsDouble(simEntryElem, "yPos");
                 var zPos = XmlUtils.GetValueAsDouble(simEntryElem, "zPos");
                 var distance = XmlUtils.GetValueAsDouble(simEntryElem, "Distance");
+                var totalDistance = XmlUtils.GetValueAsDouble(simEntryElem, "TotalDistance");
                 var voxelsTouchingFloor = XmlUtils.GetValueAsInt(simEntryElem, "VoxelsTouchingFloor");
                 var maxVoxelVel = XmlUtils.GetValueAsDouble(simEntryElem, "MaxVoxelVelocity");
                 var maxVoxelDisp = XmlUtils.GetValueAsDouble(simEntryElem, "MaxVoxelDisplacement");
+                var maxTrialDisp = XmlUtils.GetValueAsDouble(simEntryElem, "MaxTrialDisplacement");
                 var xDisp = XmlUtils.GetValueAsDouble(simEntryElem, "xDisplacement");
                 var yDisp = XmlUtils.GetValueAsDouble(simEntryElem, "yDisplacement");
                 var zDisp = XmlUtils.GetValueAsDouble(simEntryElem, "zDisplacement");
 
-                simulationUnit.AddTimestepInfo(timestep, simTime, xPos, yPos, zPos, distance, voxelsTouchingFloor,
-                    maxVoxelVel, maxVoxelDisp, xDisp, yDisp, zDisp);
+                simulationUnit.AddTimestepInfo(timestep, simTime, xPos, yPos, zPos, distance, totalDistance,
+                    voxelsTouchingFloor, maxVoxelVel, maxVoxelDisp, maxTrialDisp, xDisp, yDisp, zDisp);
             }
 
             // Delete the simulation log file
