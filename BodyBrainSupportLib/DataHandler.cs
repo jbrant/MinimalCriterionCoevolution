@@ -4,8 +4,16 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Xml;
 using ExperimentEntities;
 using ExperimentEntities.entities;
+using MCC_Domains.BodyBrain;
+using SharpNeat.Decoders;
+using SharpNeat.Decoders.Substrate;
+using SharpNeat.Genomes.HyperNeat;
+using SharpNeat.Genomes.Substrate;
+using SharpNeat.Network;
+using SharpNeat.Phenomes.Voxels;
 using RunPhase = SharpNeat.Core.RunPhase;
 
 namespace BodyBrainSupportLib
@@ -32,6 +40,44 @@ namespace BodyBrainSupportLib
         private static readonly Dictionary<OutputFileType, StreamWriter> FileWriters =
             new Dictionary<OutputFileType, StreamWriter>();
 
+        #region Public XML read methods
+
+        /// <summary>
+        /// Builds a lookup table between body genome IDs and their voxel grid length (which is consistent across dimensions).
+        /// </summary>
+        /// <param name="experimentConfig">The experiment configuration.</param>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <returns>A lookup table between body genome IDs and their voxel grid length (which is consistent across dimensions).</returns>
+        public static IDictionary<uint, int> GetBodyIdSizeMap(ExperimentDictionaryBodyBrain experimentConfig,
+            int experimentId, int run)
+        {
+            var bodySizeMap = new Dictionary<uint, int>();
+            
+            // Create voxel body factory and decoder to extract size properties from XML
+            var bodyGenomeFactory = new NeatSubstrateGenomeFactory(
+                new CppnGenomeFactory(5, 2, DefaultActivationFunctionLibrary.CreateLibraryCppn()),
+                new NeatSubstrateGenomeParameters(), experimentConfig.VoxelyzeConfigInitialXdimension,
+                experimentConfig.VoxelyzeConfigInitialYdimension, experimentConfig.VoxelyzeConfigInitialZdimension,
+                experimentConfig.MaxBodySize, new VoxelBodyGenomeValidator());
+            var bodyGenomeDecoder = new NeatSubstrateGenomeDecoder(NetworkActivationScheme.CreateAcyclicScheme());
+            
+            // Build association between body genome ID and its size
+            foreach (var bodyXml in DataHandler.GetBodyGenomeXml(experimentId, run))
+            {
+                using (var xr = XmlReader.Create(new StringReader(bodyXml)))
+                {
+                    var body = new VoxelBody(bodyGenomeDecoder.Decode(
+                        NeatSubstrateGenomeXmlIO.ReadSingleGenomeFromRoot(xr, true, bodyGenomeFactory)));
+                    bodySizeMap.Add(body.GenomeId, body.LengthX);
+                }
+            }
+
+            return bodySizeMap;
+        }
+
+        #endregion
+        
         #region Private database methods
 
         /// <summary>
@@ -743,6 +789,40 @@ namespace BodyBrainSupportLib
                 }));
             }
         }
+        
+        /// <summary>
+        ///     Writes body diversity results among bodies of a specific size to a flat file.
+        /// </summary>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <param name="bodyDiversityUnits">
+        ///     The diversity of each body compared to the rest of the population in terms of its voxel placement.
+        /// </param>
+        public static void WriteRunSizeBodyDiversityDataToFile(int experimentId, int run, IEnumerable<BodyDiversityUnit> bodyDiversityUnits)
+        {
+            // Make sure the file writer actually exists before attempting to write to it
+            if (FileWriters.ContainsKey(OutputFileType.RunSizeBodyDiversityData) == false)
+            {
+                throw new Exception(
+                    $"Cannot write to output stream as no file writer of type {OutputFileType.RunSizeBodyDiversityData} has been created.");
+            }
+
+            // Write each run size body diversity unit as a separate entry
+            foreach (var bodyDiversityUnit in bodyDiversityUnits)
+            {
+                FileWriters[OutputFileType.RunSizeBodyDiversityData].WriteLine(string.Join(FileDelimiter, new List<string>
+                {
+                    experimentId.ToString(),
+                    run.ToString(),
+                    bodyDiversityUnit.BodySize.ToString(),
+                    bodyDiversityUnit.BodyId.ToString(),
+                    bodyDiversityUnit.AvgVoxelDiff.ToString(CultureInfo.InvariantCulture),
+                    bodyDiversityUnit.AvgVoxelMaterialDiff.ToString(CultureInfo.InvariantCulture),
+                    bodyDiversityUnit.AvgVoxelActiveMaterialDiff.ToString(CultureInfo.InvariantCulture),
+                    bodyDiversityUnit.AvgVoxelPassiveMaterialDiff.ToString(CultureInfo.InvariantCulture)
+                }));
+            }
+        }
 
         /// <summary>
         ///     Writes trajectory diversity results to a flat file.
@@ -806,6 +886,40 @@ namespace BodyBrainSupportLib
                         experimentId.ToString(),
                         run.ToString(),
                         batch.ToString(),
+                        trajectoryDiversityUnit.BodyId.ToString(),
+                        trajectoryDiversityUnit.BrainId.ToString(),
+                        trajectoryDiversityUnit.TrajectoryDiversity.ToString(CultureInfo.InvariantCulture),
+                        trajectoryDiversityUnit.EndPointDiversity.ToString(CultureInfo.InvariantCulture)
+                    }));
+            }
+        }
+        
+        /// <summary>
+        ///     Writes trajectory diversity results among bodies of a specific size to a flat file.
+        /// </summary>
+        /// <param name="experimentId">The experiment that was executed.</param>
+        /// <param name="run">The run number of the given experiment.</param>
+        /// <param name="trajectoryDiversityUnits">
+        ///     The average trajectory distance compared to the rest of the population.
+        /// </param>
+        public static void WriteRunSizeTrajectoryDiversityDataToFile(int experimentId, int run, IEnumerable<TrajectoryDiversityUnit> trajectoryDiversityUnits)
+        {
+            // Make sure the file writer actually exists before attempting to write to it
+            if (FileWriters.ContainsKey(OutputFileType.RunSizeTrajectoryDiversityData) == false)
+            {
+                throw new Exception(
+                    $"Cannot write to output stream as no file writer of type {OutputFileType.RunSizeTrajectoryDiversityData} has been created.");
+            }
+
+            // Write each run trajectory diversity unit as a separate entry
+            foreach (var trajectoryDiversityUnit in trajectoryDiversityUnits)
+            {
+                FileWriters[OutputFileType.RunSizeTrajectoryDiversityData].WriteLine(string.Join(FileDelimiter,
+                    new List<string>
+                    {
+                        experimentId.ToString(),
+                        run.ToString(),
+                        trajectoryDiversityUnit.BodySize.ToString(),
                         trajectoryDiversityUnit.BodyId.ToString(),
                         trajectoryDiversityUnit.BrainId.ToString(),
                         trajectoryDiversityUnit.TrajectoryDiversity.ToString(CultureInfo.InvariantCulture),

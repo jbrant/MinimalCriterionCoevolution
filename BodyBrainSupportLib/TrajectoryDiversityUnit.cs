@@ -17,6 +17,11 @@ namespace BodyBrainSupportLib
         public uint BodyId { get; }
 
         /// <summary>
+        ///     The size of the voxel body.
+        /// </summary>
+        public int BodySize { get; }
+
+        /// <summary>
         ///     The average distance of the full trajectory compared to that of other body/brains in the population.
         /// </summary>
         public double TrajectoryDiversity { get; }
@@ -31,6 +36,7 @@ namespace BodyBrainSupportLib
         /// </summary>
         /// <param name="brainId">The voxel brain genome ID.</param>
         /// <param name="bodyId">The voxel body genome ID.</param>
+        /// <param name="bodySize">The size of the voxel body grid.</param>
         /// <param name="trajectoryDiversity">
         ///     The average distance of the full trajectory compared to that of other body/brains in
         ///     the population.
@@ -39,10 +45,12 @@ namespace BodyBrainSupportLib
         ///     The average distance between the end point and that of other body/brains in the
         ///     population.
         /// </param>
-        public TrajectoryDiversityUnit(uint brainId, uint bodyId, double trajectoryDiversity, double endPointDiversity)
+        public TrajectoryDiversityUnit(uint brainId, uint bodyId, int bodySize, double trajectoryDiversity,
+            double endPointDiversity)
         {
             BrainId = brainId;
             BodyId = bodyId;
+            BodySize = bodySize;
             TrajectoryDiversity = trajectoryDiversity;
             EndPointDiversity = endPointDiversity;
         }

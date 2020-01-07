@@ -5,11 +5,18 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Xml;
 using BodyBrainSupportLib;
 using ExperimentEntities.entities;
 using log4net;
 using log4net.Config;
+using MCC_Domains.BodyBrain;
 using Microsoft.EntityFrameworkCore.Internal;
+using SharpNeat.Decoders;
+using SharpNeat.Decoders.Substrate;
+using SharpNeat.Genomes.HyperNeat;
+using SharpNeat.Genomes.Substrate;
+using SharpNeat.Network;
 using SharpNeat.Phenomes.Voxels;
 
 namespace BodyBrainConfigGenerator
@@ -64,6 +71,10 @@ namespace BodyBrainConfigGenerator
                 ExecutionConfiguration.ContainsKey(ExecutionParameter.GenerateRunBodyDiversityData) &&
                 bool.Parse(ExecutionConfiguration[ExecutionParameter.GenerateRunBodyDiversityData]);
 
+            // Get boolean indicator dictating whether to generate run body diversity data between bodies of the same size
+            var generateRunSizeBodyDiversity = ExecutionConfiguration.ContainsKey(ExecutionParameter.GenerateRunSizeBodyDiversityData) &&
+                                               bool.Parse(ExecutionConfiguration[ExecutionParameter.GenerateRunSizeBodyDiversityData]);
+            
             // Get boolean indicator dictating whether to generate batch body diversity data
             var generateBatchBodyDiversity =
                 ExecutionConfiguration.ContainsKey(ExecutionParameter.GenerateBatchBodyDiversityData) &&
@@ -73,6 +84,10 @@ namespace BodyBrainConfigGenerator
             var generateRunTrajectoryDiversity =
                 ExecutionConfiguration.ContainsKey(ExecutionParameter.GenerateRunTrajectoryDiversityData) &&
                 bool.Parse(ExecutionConfiguration[ExecutionParameter.GenerateRunTrajectoryDiversityData]);
+            
+            // Get boolean indicator dictating whether to generate run trajectory diversity data between bodies of the same size
+            var generateRunSizeTrajectoryDiversity = ExecutionConfiguration.ContainsKey(ExecutionParameter.GenerateRunSizeTrajectoryDiversityData) &&
+                                                     bool.Parse(ExecutionConfiguration[ExecutionParameter.GenerateRunSizeTrajectoryDiversityData]);
 
             // Get boolean indicator dictating whether to generate batch trajectory diversity data
             var generateBatchTrajectoryDiversity =
@@ -133,21 +148,26 @@ namespace BodyBrainConfigGenerator
             }
 
             // Run body diversity analysis across the entire run
-            if (generateRunBodyDiversity)
+            if (generateRunBodyDiversity || generateRunSizeBodyDiversity)
             {
+                var fileName = generateRunSizeBodyDiversity ? "RunSizeBodyDiversity" : "RunBodyDiversity";
+                var outputFileType = generateRunSizeBodyDiversity
+                    ? OutputFileType.RunSizeBodyDiversityData
+                    : OutputFileType.RunBodyDiversityData;
+                
                 DataHandler.OpenFileWriter(
                     Path.Combine(ExecutionConfiguration[ExecutionParameter.DataOutputDirectory],
-                        $"{experimentName} - RunBodyDiversity - Run{run}.csv"), OutputFileType.RunBodyDiversityData);
+                        $"{experimentName} - {fileName} - Run{run}.csv"), outputFileType);
 
                 ProcessComparativeBodyResultChunks(curExperimentConfiguration, run,
-                    EvaluationHandler.GenerateRunBodyDiversityData);
+                    EvaluationHandler.GenerateRunBodyDiversityData, generateRunSizeBodyDiversity);
 
-                DataHandler.CloseFileWriter(OutputFileType.RunBodyDiversityData);
+                DataHandler.CloseFileWriter(outputFileType);
                 DataHandler.WriteSentinelFile(
                     Path.Combine(ExecutionConfiguration[ExecutionParameter.DataOutputDirectory],
-                        $"{experimentName} - RunBodyDiversity"), run);
+                        $"{experimentName} - {fileName}"), run);
             }
-
+            
             // Run per-batch body diversity analysis
             if (generateBatchBodyDiversity)
             {
@@ -166,20 +186,26 @@ namespace BodyBrainConfigGenerator
             }
 
             // Run trajectory diversity analysis across the entire run
-            if (generateRunTrajectoryDiversity)
+            if (generateRunTrajectoryDiversity || generateRunSizeTrajectoryDiversity)
             {
+                var fileName = generateRunSizeTrajectoryDiversity
+                    ? "RunSizeTrajectoryDiversity"
+                    : "RunTrajectoryDiversity";
+                var outputFileType = generateRunSizeTrajectoryDiversity
+                    ? OutputFileType.RunSizeTrajectoryDiversityData
+                    : OutputFileType.RunTrajectoryDiversityData;
+
                 DataHandler.OpenFileWriter(
                     Path.Combine(ExecutionConfiguration[ExecutionParameter.DataOutputDirectory],
-                        $"{experimentName} - RunTrajectoryDiversity - Run{run}.csv"),
-                    OutputFileType.RunTrajectoryDiversityData);
+                        $"{experimentName} - {fileName} - Run{run}.csv"), outputFileType);
 
                 ProcessComparativeSimulationChunks(curExperimentConfiguration, run,
-                    EvaluationHandler.GenerateRunTrajectoryDiversityData);
+                    EvaluationHandler.GenerateRunTrajectoryDiversityData, generateRunSizeTrajectoryDiversity);
 
-                DataHandler.CloseFileWriter(OutputFileType.RunTrajectoryDiversityData);
+                DataHandler.CloseFileWriter(outputFileType);
                 DataHandler.WriteSentinelFile(
                     Path.Combine(ExecutionConfiguration[ExecutionParameter.DataOutputDirectory],
-                        $"{experimentName} - RunTrajectoryDiversity"), run);
+                        $"{experimentName} - {fileName}"), run);
             }
 
             // Run per-batch trajectory diversity analysis
@@ -212,9 +238,10 @@ namespace BodyBrainConfigGenerator
         ///     The evaluation method to apply to each chunk against all of the
         ///     simulation units.
         /// </param>
+        /// <param name="constrainToSize">Indicates whether bodies in run should be compared only to other bodies that are of equivalent dimensionality or to the entire population regardless of size.</param>
         /// <param name="chunkSize">The number of body/brain combinations to process at one time (optional).</param>
         private static void ProcessComparativeSimulationChunks(ExperimentDictionaryBodyBrain experimentConfig, int run,
-            ComparativeSimulationEvalMethod comparativeSimulationEvalMethod, int chunkSize = 100)
+            ComparativeSimulationEvalMethod comparativeSimulationEvalMethod, bool constrainToSize, int chunkSize = 100)
         {
             var allSimUnitBag = new ConcurrentBag<BodyBrainSimulationUnit>();
             var experimentId = experimentConfig.ExperimentDictionaryId;
@@ -226,6 +253,9 @@ namespace BodyBrainConfigGenerator
 
             // Get simulation logs for the entire run and construct simulation units
             var simLogs = DataHandler.GetSimulationLogs(experimentId, run);
+
+            // Get the mapping between body genome IDs and their phenotype size
+            var bodySizeMap = DataHandler.GetBodyIdSizeMap(experimentConfig, experimentId, run);
 
             // Construct simulation unit for each distinct body ID
             Parallel.ForEach(simLogs.Select(x => x.BodyGenomeId).Distinct(),
@@ -247,7 +277,7 @@ namespace BodyBrainConfigGenerator
                 var curSimUnits = allSimUnits.Skip(curChunk).Take(chunkSize).ToList();
 
                 // Invoke the given evaluation method
-                comparativeSimulationEvalMethod(curSimUnits, allSimUnits, experimentConfig, run, voxelPack);
+                comparativeSimulationEvalMethod(curSimUnits, allSimUnits, bodySizeMap, experimentConfig, run, voxelPack, constrainToSize);
             }
         }
 
@@ -267,6 +297,9 @@ namespace BodyBrainConfigGenerator
             var voxelPack = new VoxelFactoryDecoderPack(experimentConfig.VoxelyzeConfigInitialXdimension,
                 experimentConfig.VoxelyzeConfigInitialYdimension, experimentConfig.VoxelyzeConfigInitialZdimension,
                 experimentConfig.MaxBodySize, experimentConfig.ActivationIters);
+            
+            // Get the mapping between body genome IDs and their phenotype size
+            var bodySizeMap = DataHandler.GetBodyIdSizeMap(experimentConfig, experimentId, run);
 
             for (var batch = 0; batch < numBatches; batch++)
             {
@@ -289,8 +322,8 @@ namespace BodyBrainConfigGenerator
                     });
 
                 // Invoke the given evaluation method
-                comparativePerBatchSimulationEvalMethod(allBatchSimUnitBag.ToList(), experimentConfig, run, batch,
-                    voxelPack);
+                comparativePerBatchSimulationEvalMethod(allBatchSimUnitBag.ToList(), bodySizeMap, experimentConfig, run,
+                    batch, voxelPack);
             }
         }
 
@@ -301,9 +334,10 @@ namespace BodyBrainConfigGenerator
         /// <param name="experimentConfig">The parameters of the experiment being executed.</param>
         /// <param name="run">The run being executed.</param>
         /// <param name="comparativeBodyEvalMethod">The evaluation method to apply to each chunk against the full population.</param>
+        /// <param name="constrainToSize">Indicates whether bodies in run should be compared only to other bodies that are of equivalent dimensionality or to the entire population regardless of size.</param>
         /// <param name="chunkSize">The number of body/brain combinations to process at one time (optional).</param>
         private static void ProcessComparativeBodyResultChunks(ExperimentDictionaryBodyBrain experimentConfig, int run,
-            ComparativeBodyEvalMethod comparativeBodyEvalMethod, int chunkSize = 100)
+            ComparativeBodyEvalMethod comparativeBodyEvalMethod, bool constrainToSize, int chunkSize = 100)
         {
             var allBodiesBag = new ConcurrentBag<VoxelBody>();
             var experimentId = experimentConfig.ExperimentDictionaryId;
@@ -323,7 +357,7 @@ namespace BodyBrainConfigGenerator
                     allBodiesBag.Add(DecodeHandler.DecodeBodyGenome(bodyXml, voxelPack.BodyDecoder,
                         voxelPack.BodyGenomeFactory));
                 });
-
+            
             // Convert bodies bag to list so it can be enumerated below
             var allBodies = allBodiesBag.ToList();
 
@@ -336,7 +370,7 @@ namespace BodyBrainConfigGenerator
                 var curBodies = allBodies.Skip(curChunk).Take(chunkSize).ToList();
 
                 // Invoke the given evaluation method
-                comparativeBodyEvalMethod(curBodies, allBodies, experimentConfig, run, voxelPack);
+                comparativeBodyEvalMethod(curBodies, allBodies, experimentConfig, run, voxelPack, constrainToSize);
             }
         }
 
@@ -471,8 +505,10 @@ namespace BodyBrainConfigGenerator
                         case ExecutionParameter.GenerateSimLogData:
                         case ExecutionParameter.GenerateIncrementalUpscaleResults:
                         case ExecutionParameter.GenerateRunBodyDiversityData:
+                        case ExecutionParameter.GenerateRunSizeBodyDiversityData:
                         case ExecutionParameter.GenerateBatchBodyDiversityData:
                         case ExecutionParameter.GenerateRunTrajectoryDiversityData:
+                        case ExecutionParameter.GenerateRunSizeTrajectoryDiversityData:
                         case ExecutionParameter.GenerateBatchTrajectoryDiversityData:
                             if (bool.TryParse(parameterValuePair[1], out _) == false)
                             {
@@ -557,6 +593,8 @@ namespace BodyBrainConfigGenerator
                 // Data output directory must be specified if body diversity data is being generated
                 if ((ExecutionConfiguration.ContainsKey(ExecutionParameter.GenerateRunBodyDiversityData) &&
                      Convert.ToBoolean(ExecutionConfiguration[ExecutionParameter.GenerateRunBodyDiversityData]) ||
+                     ExecutionConfiguration.ContainsKey(ExecutionParameter.GenerateRunSizeBodyDiversityData) &&
+                     Convert.ToBoolean(ExecutionConfiguration[ExecutionParameter.GenerateRunSizeBodyDiversityData]) ||
                      ExecutionConfiguration.ContainsKey(ExecutionParameter.GenerateBatchBodyDiversityData) &&
                      Convert.ToBoolean(ExecutionConfiguration[ExecutionParameter.GenerateBatchBodyDiversityData])) &&
                     ExecutionConfiguration.ContainsKey(ExecutionParameter.DataOutputDirectory) == false)
@@ -569,6 +607,8 @@ namespace BodyBrainConfigGenerator
                 // Data output directory must be specified if run batch diversity data is being generated
                 if ((ExecutionConfiguration.ContainsKey(ExecutionParameter.GenerateRunTrajectoryDiversityData) &&
                      Convert.ToBoolean(ExecutionConfiguration[ExecutionParameter.GenerateRunTrajectoryDiversityData]) ||
+                     ExecutionConfiguration.ContainsKey(ExecutionParameter.GenerateRunSizeTrajectoryDiversityData) &&
+                     Convert.ToBoolean(ExecutionConfiguration[ExecutionParameter.GenerateRunSizeTrajectoryDiversityData]) ||
                      ExecutionConfiguration.ContainsKey(ExecutionParameter.GenerateBatchTrajectoryDiversityData) &&
                      Convert.ToBoolean(ExecutionConfiguration[ExecutionParameter.GenerateBatchTrajectoryDiversityData])
                     ) && ExecutionConfiguration.ContainsKey(ExecutionParameter.DataOutputDirectory) == false)
@@ -620,8 +660,9 @@ namespace BodyBrainConfigGenerator
         /// <param name="experimentConfig">The parameters of the experiment being executed.</param>
         /// <param name="run">The run being executed.</param>
         /// <param name="voxelPack">The voxel factory/decoder instances.</param>
+        /// <param name="constrainToSize">Indicates whether bodies in run should be compared only to other bodies that are of equivalent dimensionality or to the entire population regardless of size.</param>
         private delegate void ComparativeBodyEvalMethod(IList<VoxelBody> bodies1, IList<VoxelBody> bodies2,
-            ExperimentDictionaryBodyBrain experimentConfig, int run, VoxelFactoryDecoderPack voxelPack);
+            ExperimentDictionaryBodyBrain experimentConfig, int run, VoxelFactoryDecoderPack voxelPack, bool constrainToSize);
 
         /// <summary>
         ///     Comparative per-batch body evaluation delegate.
@@ -639,22 +680,27 @@ namespace BodyBrainConfigGenerator
         /// </summary>
         /// <param name="simLog1">The first list of simulation unit entries to compare to the second.</param>
         /// <param name="simLog2">The second list of simulation unit entries to compare to the first.</param>
+        /// <param name="bodySizeMap">Association between body genome ID and its size.</param>
         /// <param name="experimentConfig">The parameters of the experiment being executed.</param>
         /// <param name="run">The run being executed.</param>
         /// <param name="voxelPack">The voxel factory/decoder instances.</param>
+        /// <param name="constrainToSize">Indicates whether bodies in run should be compared only to other bodies that are of equivalent dimensionality or to the entire population regardless of size.</param>
         private delegate void ComparativeSimulationEvalMethod(IList<BodyBrainSimulationUnit> simLog1,
-            IList<BodyBrainSimulationUnit> simLog2, ExperimentDictionaryBodyBrain experimentConfig, int run,
-            VoxelFactoryDecoderPack voxelPack);
+            IList<BodyBrainSimulationUnit> simLog2, IDictionary<uint, int> bodySizeMap,
+            ExperimentDictionaryBodyBrain experimentConfig, int run, VoxelFactoryDecoderPack voxelPack,
+            bool constrainToSize);
 
         /// <summary>
         ///     Comparative per-batch simulation evaluation delegate.
         /// </summary>
         /// <param name="simLog">The list of simulation unit entries to compare with each other.</param>
+        /// <param name="bodySizeMap">Association between body genome ID and its size.</param>
         /// <param name="experimentConfig">The parameters of the experiment being executed.</param>
         /// <param name="run">The run being executed.</param>
         /// <param name="batch">The current batch.</param>
         /// <param name="voxelPack">The voxel factory/decoder instances.</param>
         private delegate void ComparativePerBatchSimulationEvalMethod(IList<BodyBrainSimulationUnit> simLog,
-            ExperimentDictionaryBodyBrain experimentConfig, int run, int batch, VoxelFactoryDecoderPack voxelPack);
+            IDictionary<uint, int> bodySizeMap, ExperimentDictionaryBodyBrain experimentConfig, int run, int batch,
+            VoxelFactoryDecoderPack voxelPack);
     }
 }

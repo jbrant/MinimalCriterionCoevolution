@@ -10,6 +10,7 @@ namespace BodyBrainSupportLib
         ///     BodyDiversityUnit constructor.
         /// </summary>
         /// <param name="bodyId">The voxel body genome ID.</param>
+        /// <param name="bodySize">The size of the voxel body grid.</param>
         /// <param name="avgVoxelDiff">
         ///     The average number of overall voxel mismatches (including empty voxels) compared to other
         ///     bodies in the population.
@@ -26,10 +27,11 @@ namespace BodyBrainSupportLib
         ///     The average number of passive voxel mismatches compared to other bodies in
         ///     the population.
         /// </param>
-        public BodyDiversityUnit(uint bodyId, double avgVoxelDiff, double avgVoxelMaterialDiff,
+        public BodyDiversityUnit(uint bodyId, int bodySize, double avgVoxelDiff, double avgVoxelMaterialDiff,
             double avgVoxelActiveMaterialDiff, double avgVoxelPassiveMaterialDiff)
         {
             BodyId = bodyId;
+            BodySize = bodySize;
             AvgVoxelDiff = avgVoxelDiff;
             AvgVoxelMaterialDiff = avgVoxelMaterialDiff;
             AvgVoxelActiveMaterialDiff = avgVoxelActiveMaterialDiff;
@@ -40,6 +42,11 @@ namespace BodyBrainSupportLib
         ///     The voxel body genome ID.
         /// </summary>
         public uint BodyId { get; }
+
+        /// <summary>
+        ///     The size of the voxel body.
+        /// </summary>
+        public int BodySize { get; }
 
         /// <summary>
         ///     The average number of overall voxel mismatches (including empty voxels) compared to other bodies in the population.

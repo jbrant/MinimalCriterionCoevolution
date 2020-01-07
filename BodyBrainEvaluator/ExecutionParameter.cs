@@ -36,6 +36,12 @@
         GenerateRunBodyDiversityData,
 
         /// <summary>
+        ///     Flag indicating whether to compute voxel body similarity between each pair of bodies of the same dimensions and
+        ///     averaged over full run.
+        /// </summary>
+        GenerateRunSizeBodyDiversityData,
+
+        /// <summary>
         ///     Flag indicating whether to compute voxel body similarity between each pair of bodies averaged over extant
         ///     population at each batch.
         /// </summary>
@@ -45,6 +51,12 @@
         ///     Flag indicating whether to compute trajectory similarity between each pair of trajectories averaged over full run.
         /// </summary>
         GenerateRunTrajectoryDiversityData,
+
+        /// <summary>
+        ///     Flag indicating whether to compute trajectory similarity between each pair of trajectories between bodies of the
+        ///     same dimensions and averaged over full run.
+        /// </summary>
+        GenerateRunSizeTrajectoryDiversityData,
 
         /// <summary>
         ///     Flag indicating whether to compute trajectory similarity between each pair of trajectories averaged over extant

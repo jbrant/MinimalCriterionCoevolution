@@ -21,6 +21,11 @@ namespace BodyBrainSupportLib
         RunBodyDiversityData,
 
         /// <summary>
+        ///     Body similarity measurements of bodies with equivalent size averaged over full run.
+        /// </summary>
+        RunSizeBodyDiversityData,
+
+        /// <summary>
         ///     Body similarity measurements averaged over extant bodies in each batch.
         /// </summary>
         BatchBodyDiversityData,
@@ -29,6 +34,11 @@ namespace BodyBrainSupportLib
         ///     Trajectory similarity measurements averaged over full run.
         /// </summary>
         RunTrajectoryDiversityData,
+
+        /// <summary>
+        ///     Trajectory similarity measurements for bodies with equivalent size averaged over full run.
+        /// </summary>
+        RunSizeTrajectoryDiversityData,
 
         /// <summary>
         ///     Trajectory similarity measurements averaged over resulting trajectories in each batch.
