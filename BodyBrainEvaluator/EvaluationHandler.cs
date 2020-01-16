@@ -81,17 +81,36 @@ namespace BodyBrainSupportLib
             var configDirectory = executionConfiguration[ExecutionParameter.ConfigOutputDirectory];
             var simLogDirectory = executionConfiguration[ExecutionParameter.SimLogOutputDirectory];
 
-            Parallel.ForEach(viableBodyBrainCombos,
+            Parallel.ForEach(viableBodyBrainCombos, new ParallelOptions {MaxDegreeOfParallelism = 1},
                 delegate(Tuple<MccexperimentVoxelBodyGenome, MccexperimentVoxelBrainGenome> genomeCombo)
                 {
-                    // Read in voxel body XML and decode to phenotype
-                    var body = DecodeHandler.DecodeBodyGenome(genomeCombo.Item1, voxelPack.BodyDecoder,
-                        voxelPack.BodyGenomeFactory);
+                    VoxelBody body;
+                    VoxelBrain brain;
 
-                    // Read in voxel brain XML and decode to phenotype
-                    var brain = DecodeHandler.DecodeBrainGenome(genomeCombo.Item2, voxelPack.BrainDecoder,
-                        voxelPack.BrainGenomeFactory,
-                        body, numBrainConnections);
+                    try
+                    {
+                        // Read in voxel body XML and decode to phenotype
+                        body = DecodeHandler.DecodeBodyGenome(genomeCombo.Item1, voxelPack.BodyDecoder,
+                            voxelPack.BodyGenomeFactory);
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine($"Error on body ID {genomeCombo.Item1.GenomeId}");
+                        return;
+                    }
+
+                    try
+                    {
+                        // Read in voxel brain XML and decode to phenotype
+                        brain = DecodeHandler.DecodeBrainGenome(genomeCombo.Item2, voxelPack.BrainDecoder,
+                            voxelPack.BrainGenomeFactory,
+                            body, numBrainConnections);
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine($"Error on brain ID {genomeCombo.Item2.GenomeId}");
+                        return;
+                    }
 
                     // Construct the simulation configuration file path
                     var configFilePath = SimulationHandler.GetConfigFilePath(configDirectory, experimentName, run,
@@ -203,10 +222,14 @@ namespace BodyBrainSupportLib
         /// <param name="experimentConfig">The parameters of the experiment being executed.</param>
         /// <param name="run">The run being executed.</param>
         /// <param name="voxelPack">The voxel factory/decoder instances.</param>
-        /// <param name="constrainToSize">Indicates whether bodies in run should be compared only to other bodies that are of equivalent dimensionality or to the entire population regardless of size.</param>
+        /// <param name="constrainToSize">
+        ///     Indicates whether bodies in run should be compared only to other bodies that are of
+        ///     equivalent dimensionality or to the entire population regardless of size.
+        /// </param>
         public static void GenerateRunBodyDiversityData(IList<VoxelBody> curChunkBodies,
             IList<VoxelBody> bodyPopulation,
-            ExperimentDictionaryBodyBrain experimentConfig, int run, VoxelFactoryDecoderPack voxelPack, bool constrainToSize)
+            ExperimentDictionaryBodyBrain experimentConfig, int run, VoxelFactoryDecoderPack voxelPack,
+            bool constrainToSize)
         {
             // Compute diversity of each body in the current chunk vs. the population over the full run
             var bodyDiversityUnits = curChunkBodies.Select(chunkBody => ComputeBodyDiversity(chunkBody,
@@ -217,7 +240,8 @@ namespace BodyBrainSupportLib
 
             // Write the results of the run body diversity analysis for the current chunk
             if (constrainToSize)
-                DataHandler.WriteRunSizeBodyDiversityDataToFile(experimentConfig.ExperimentDictionaryId, run, bodyDiversityUnits);
+                DataHandler.WriteRunSizeBodyDiversityDataToFile(experimentConfig.ExperimentDictionaryId, run,
+                    bodyDiversityUnits);
             else
                 DataHandler.WriteRunBodyDiversityDataToFile(experimentConfig.ExperimentDictionaryId, run,
                     bodyDiversityUnits);
@@ -255,14 +279,18 @@ namespace BodyBrainSupportLib
         /// <param name="experimentConfig">The parameters of the experiment being executed.</param>
         /// <param name="run">The run being executed.</param>
         /// <param name="voxelPack">The voxel factory/decoder instances.</param>
-        /// <param name="constrainToSize">Indicates whether bodies in run should be compared only to other bodies that are of equivalent dimensionality or to the entire population regardless of size.</param>
+        /// <param name="constrainToSize">
+        ///     Indicates whether bodies in run should be compared only to other bodies that are of
+        ///     equivalent dimensionality or to the entire population regardless of size.
+        /// </param>
         public static void GenerateRunTrajectoryDiversityData(IList<BodyBrainSimulationUnit> curChunkSimulationUnits,
-            IList<BodyBrainSimulationUnit> populationSimulationUnits, IDictionary<uint, int> bodySizeMap, ExperimentDictionaryBodyBrain experimentConfig,
+            IList<BodyBrainSimulationUnit> populationSimulationUnits, IDictionary<uint, int> bodySizeMap,
+            ExperimentDictionaryBodyBrain experimentConfig,
             int run, VoxelFactoryDecoderPack voxelPack, bool constrainToSize)
         {
             // Default lattice dimensionality used in Voxelyze simulations
             var latticeDim = 0.01;
-            
+
             // Compute trajectory diversity between the current trajectory and all others in the current chunk
             var trajectoryDiversityUnits = curChunkSimulationUnits.Select(chunkSimUnit =>
                 ComputeTrajectoryDiversity(chunkSimUnit,
@@ -297,7 +325,7 @@ namespace BodyBrainSupportLib
         {
             // Default lattice dimensionality used in Voxelyze simulations
             var latticeDim = 0.01;
-            
+
             // Compute trajectory diversity between all in the current batch
             var trajectoryDiversityUnits = simulationUnits.Select(simUnit =>
                 ComputeTrajectoryDiversity(simUnit, simulationUnits, bodySizeMap, latticeDim));
