@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Config>
-  <ExperimentClass>Speciation</ExperimentClass>
+  <ExperimentClass>Control</ExperimentClass>
   <SearchAlgorithm>Minimal Criteria Search</SearchAlgorithm>
   <SelectionAlgorithm>Multiple Queueing</SelectionAlgorithm>
   <MaxInitializationEvaluations>100000</MaxInitializationEvaluations>
@@ -8,8 +8,8 @@
   <MazePopulationSize>50</MazePopulationSize>
   <AgentSeedGenomeCount>20</AgentSeedGenomeCount>
   <MazeSeedGenomeCount>10</MazeSeedGenomeCount>
-  <AgentNumSpecies>20</AgentNumSpecies>
-  <MazeNumSpecies>10</MazeNumSpecies>
+  <AgentNumSpecies>0</AgentNumSpecies>
+  <MazeNumSpecies>0</MazeNumSpecies>
   <AgentSpecieSizeFixed>True</AgentSpecieSizeFixed>
   <MazeSpecieSizeFixed>True</MazeSpecieSizeFixed>
   <Activation>
