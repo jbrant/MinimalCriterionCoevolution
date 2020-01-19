@@ -16,6 +16,11 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
         public readonly string SimResultsDirectory;
 
         /// <summary>
+        ///     The type of brain controller (e.g. neural network or phase offset controller).
+        /// </summary>
+        public readonly BrainType BrainType;
+
+        /// <summary>
         ///     The simulation configuration template file which is dynamically modified based on the configuration of the body and
         ///     brain undergoing evaluation.
         /// </summary>
@@ -112,6 +117,7 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
         /// </summary>
         /// <param name="simConfigOutputDirectory">The output directory for generated simulation configuration files.</param>
         /// <param name="simResultsDirectory">The output directory for simulation results.</param>
+        /// <param name="brainType">The type of brain controller (e.g. neural network or phase offset controller).</param>
         /// <param name="simConfigTemplateFile">
         ///     The simulation configuration template file which is dynamically modified based on
         ///     the configuration of the body and brain undergoing evaluation.
@@ -156,16 +162,16 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
         ///     The XPath to the location in the simulation configuration file containing the
         ///     minimal criterion properties.
         /// </param>
-        public SimulationProperties(string simConfigOutputDirectory, string simResultsDirectory,
+        public SimulationProperties(string simConfigOutputDirectory, string simResultsDirectory, BrainType brainType,
             string simConfigTemplateFile, string simExecutableFile, double minPercentMaterial, double minPercentActive,
             int initialXDimension, int initialYDimension, int initialZDimension, int numBrainConnections,
-            double simulationSeconds,
-            double initializationSeconds, int actuationsPerSecond, double floorSlope, string simOutputXPath,
-            string simStopConditionXPath, string envThermalXPath, string envGravityXPath,
+            double simulationSeconds, double initializationSeconds, int actuationsPerSecond, double floorSlope,
+            string simOutputXPath, string simStopConditionXPath, string envThermalXPath, string envGravityXPath,
             string structurePropertiesXPath, string minimalCriterionXPath)
         {
             SimConfigOutputDirectory = simConfigOutputDirectory;
             SimResultsDirectory = simResultsDirectory;
+            BrainType = brainType;
             SimConfigTemplateFile = simConfigTemplateFile;
             SimExecutableFile = simExecutableFile;
             MinPercentMaterial = minPercentMaterial;

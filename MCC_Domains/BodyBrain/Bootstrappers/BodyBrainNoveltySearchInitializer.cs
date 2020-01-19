@@ -25,6 +25,33 @@ namespace MCC_Domains.BodyBrain.Bootstrappers
 {
     public class BodyBrainNoveltySearchInitializer : BodyBrainInitializer
     {
+        #region Constructor
+
+        /// <summary>
+        ///     BodyBrainNoveltySearchInitializer constructor.
+        /// </summary>
+        /// <param name="brainType">The type of brain controller (e.g. neural network or phase offset controller).</param>
+        public BodyBrainNoveltySearchInitializer(BrainType brainType) : base(brainType)
+        {
+        }
+
+        #endregion
+
+        #region Private methods
+
+        /// <summary>
+        ///     Print update event at every generation.
+        /// </summary>
+        /// <param name="sender">Sender</param>
+        /// <param name="e">Event arguments</param>
+        private void UpdateEvent(object sender, EventArgs e)
+        {
+            _executionLogger.Info(
+                $"(Init) Batch={InitializationEa.CurrentGeneration:N0} Evaluations={InitializationEa.CurrentEvaluations:N0} BestBehavioralDistance={InitializationEa.CurrentChampGenome.EvaluationInfo.Fitness:N6} BestDistanceTraveled={InitializationEa.GenomeList.Max(x => x.EvaluationInfo.TrialData[0].ObjectiveDistance):N6}");
+        }
+
+        #endregion
+
         #region Instance variables
 
         /// <summary>
@@ -68,7 +95,7 @@ namespace MCC_Domains.BodyBrain.Bootstrappers
         ///     The complexity regulation strategy used by the EA.
         /// </summary>
         private IComplexityRegulationStrategy _complexityRegulationStrategy;
-        
+
         /// <summary>
         ///     Console logger for reporting execution status.
         /// </summary>
@@ -124,7 +151,7 @@ namespace MCC_Domains.BodyBrain.Bootstrappers
 
             // Instantiate the execution logger
             _executionLogger = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
-            
+
             // Create distance metric. Mismatched genes have a fixed distance of 10; for matched genes the distance
             // is their weight difference.
             IDistanceMetric distanceMetric = new ManhattanDistanceMetric(1.0, 0.0, 10.0);
@@ -152,7 +179,7 @@ namespace MCC_Domains.BodyBrain.Bootstrappers
 
             // Create the brain novelty search initialization evaluator
             var brainEvaluator = new BodyBrainNoveltySearchInitializationEvaluator(body, SimulationProperties,
-                MinAmbulationDistance, ExperimentName, Run, startingEvaluations);
+                MinAmbulationDistance, ExperimentName, Run, BrainType, startingEvaluations);
 
             // Create a novelty archive
             AbstractNoveltyArchive<NeatGenome> archive =
@@ -163,7 +190,7 @@ namespace MCC_Domains.BodyBrain.Bootstrappers
             // Create the brain genome evaluator
             IGenomeEvaluator<NeatGenome> behaviorEvaluator =
                 new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(brainGenomeDecoder, brainEvaluator,
-                    SearchType.NoveltySearch, _nearestNeighbors);
+                    SearchType.NoveltySearch, _nearestNeighbors, parallelOptions);
 
             // Only pull the number of genomes from the list equivalent to the initialization algorithm population size
             brainGenomeList = brainGenomeList.Take(PopulationSize).ToList();
@@ -229,30 +256,15 @@ namespace MCC_Domains.BodyBrain.Bootstrappers
                 // Add all of the genomes that have solved the maze
                 viableGenomes.AddRange(
                     InitializationEa.GenomeList.Where(
-                            genome =>
-                                genome.EvaluationInfo != null &&
-                                genome.EvaluationInfo.TrialData[0].ObjectiveDistance >= MinAmbulationDistance));
+                        genome =>
+                            genome.EvaluationInfo != null &&
+                            genome.EvaluationInfo.TrialData[0].ObjectiveDistance >= MinAmbulationDistance));
 
                 Console.Out.WriteLine(
                     $"Extracted [{viableGenomes.Count}] of [{MinSuccessfulBrainCount}] required viable genomes in [{InitializationEa.CurrentEvaluations}] evaluations");
             } while (viableGenomes.Count < MinSuccessfulBrainCount);
 
             return viableGenomes;
-        }
-
-        #endregion
-
-        #region Private methods
-
-        /// <summary>
-        ///     Print update event at every generation.
-        /// </summary>
-        /// <param name="sender">Sender</param>
-        /// <param name="e">Event arguments</param>
-        private void UpdateEvent(object sender, EventArgs e)
-        {
-            _executionLogger.Info(
-                $"(Init) Batch={InitializationEa.CurrentGeneration:N0} Evaluations={InitializationEa.CurrentEvaluations:N0} BestBehavioralDistance={InitializationEa.CurrentChampGenome.EvaluationInfo.Fitness:N6} BestDistanceTraveled={InitializationEa.GenomeList.Max(x => x.EvaluationInfo.TrialData[0].ObjectiveDistance):N6}");
         }
 
         #endregion

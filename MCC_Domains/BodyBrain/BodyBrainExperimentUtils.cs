@@ -1,5 +1,4 @@
 using System;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Xml;
@@ -20,8 +19,9 @@ namespace MCC_Domains.BodyBrain
         ///     type.
         /// </summary>
         /// <param name="xmlConfig">XML initialization configuration.</param>
+        /// <param name="brainType">The brain type with which to configure the initializer.</param>
         /// <returns>The instantiated initializer.</returns>
-        public static BodyBrainInitializer DetermineMCCBodyBrainInitializer(XmlElement xmlConfig)
+        public static BodyBrainInitializer DetermineMCCBodyBrainInitializer(XmlElement xmlConfig, BrainType brainType)
         {
             // Make sure that the XML configuration exists
             if (xmlConfig == null)
@@ -38,9 +38,9 @@ namespace MCC_Domains.BodyBrain
             {
                 // TODO: Implement fitness initializer
                 case SearchType.Fitness:
-                    return new BodyBrainFitnessInitializer();
+                    return new BodyBrainFitnessInitializer(brainType);
                 default:
-                    return new BodyBrainNoveltySearchInitializer();
+                    return new BodyBrainNoveltySearchInitializer(brainType);
             }
         }
 
@@ -88,8 +88,12 @@ namespace MCC_Domains.BodyBrain
             // Convert to an XML element
             var xmlSimProps = nodeList[0] as XmlElement;
 
+            // Read brain type
+            var brainType = XmlUtils.GetValueAsString(xmlSimProps, "BrainType");
+
             // Read all of the applicable parameters in and create the simulation properties object
             return new SimulationProperties(simConfigDirectory, simResultsDirectory,
+                brainType == BrainType.NeuralNet.ToString() ? BrainType.NeuralNet : BrainType.PhaseOffset,
                 XmlUtils.GetValueAsString(xmlSimProps, "VxaTemplateFile"), simExecutableFile,
                 XmlUtils.GetValueAsDouble(xmlSimProps, "MinPercentMaterial"),
                 XmlUtils.GetValueAsDouble(xmlSimProps, "MinPercentActiveMaterial"),
@@ -150,16 +154,26 @@ namespace MCC_Domains.BodyBrain
         /// </param>
         /// <param name="outputPath">The directory into which the generated Voxelyze simulation configuration file is written.</param>
         /// <param name="simResultsFilePath">The path of the file into which to write simulation results.</param>
-        /// <param name="brain">The voxel brain object containing per-voxel network weights.</param>
+        /// <param name="brain">The voxel brain object containing per-voxel parameters.</param>
         /// <param name="body">The voxel body object containing voxel material specifications.</param>
         /// <param name="mcDistance">The distance traveled minimal criterion.</param>
+        /// <param name="evalCycles">The number of cycles that should elapse between evaluations (default is 20).</param>
+        /// <param name="evalInitTime">
+        ///     The amount of time alloted for thermal initialization before actuation is applied (default
+        ///     is 0.3 seconds).
+        /// </param>
         /// <param name="vxaSimGaXPath">The XPath location containing GA simulation parameters (optional).</param>
         /// <param name="vxaStructureXPath">The XPath location containing voxel structure configuration properties (optional).</param>
         /// <param name="vxaMcXPath">The XPath location containing the minimal criterion configuration (optional).</param>
+        /// <param name="vxaSimStopConditionXPath">The XPath location containing the StopCondition properties (optional).</param>
+        /// <param name="vxaThermalPath">The XPath location containing the thermal properties (optional).</param>
         public static void WriteVoxelyzeSimulationFile(string vxaTemplatePath, string outputPath,
-            string simResultsFilePath, VoxelBrain brain, VoxelBody body, double mcDistance,
+            string simResultsFilePath, IVoxelBrain brain, VoxelBody body, double mcDistance, int evalCycles = 20,
+            double evalInitTime = 0.3,
             string vxaSimGaXPath = "/VXA/Simulator/GA", string vxaStructureXPath = "/VXA/VXC/Structure",
-            string vxaMcXPath = "/VXA/Environment/MinimalCriterion")
+            string vxaMcXPath = "/VXA/Environment/MinimalCriterion",
+            string vxaSimStopConditionXPath = "/VXA/Simulator/StopCondition",
+            string vxaThermalPath = "/VXA/Environment/Thermal")
         {
             // Instantiate XML reader for VXA template file
             var simDoc = new XmlDocument();
@@ -168,13 +182,26 @@ namespace MCC_Domains.BodyBrain
             // Enable fitness file logging and set the results output file name and path
             simDoc.SelectSingleNode(string.Join("/", vxaSimGaXPath, "WriteFitnessFile")).InnerText = "1";
             simDoc.SelectSingleNode(string.Join("/", vxaSimGaXPath, "FitnessFileName")).InnerText = simResultsFilePath;
-            
+
             // Disable simulation logging
             simDoc.SelectSingleNode(string.Join("/", vxaSimGaXPath, "WriteSimLogFile")).InnerText = "0";
 
             // Set the distance minimal criterion
             simDoc.SelectSingleNode(string.Join("/", vxaMcXPath, "Distance")).InnerText =
                 mcDistance.ToString(CultureInfo.InvariantCulture);
+
+            // If this is a phase offset brain, also set period and simulation time
+            if (brain is VoxelPhaseOffsetBrain poBrain)
+            {
+                // Set the stop condition value
+                simDoc.SelectSingleNode(string.Join("/", vxaSimStopConditionXPath, "StopConditionValue")).InnerText =
+                    CalculateStopTime(evalCycles, poBrain.Frequency, evalInitTime)
+                        .ToString(CultureInfo.InvariantCulture);
+
+                // Set the period value 
+                simDoc.SelectSingleNode(string.Join("/", vxaThermalPath, "TempPeriod")).InnerText =
+                    (1 / poBrain.Frequency).ToString(CultureInfo.InvariantCulture);
+            }
 
             // Set body/brain voxel structure properties
             SetVoxelBodyBrainProperties(simDoc, brain, body, vxaStructureXPath);
@@ -202,10 +229,12 @@ namespace MCC_Domains.BodyBrain
         /// <param name="vxaSimStopConditionXPath">The XPath location containing the StopCondition properties (optional).</param>
         /// <param name="vxaSimGaXPath">The XPath location containing GA simulation parameters (optional).</param>
         /// <param name="vxaStructureXPath">The XPath location containing voxel structure configuration properties (optional).</param>
+        /// <param name="vxaThermalPath">The XPath location containing the thermal properties (optional).</param>
         public static void WriteVoxelyzeSimulationFile(string vxaTemplatePath, string outputPath, string simLogFilePath,
-            int stopCondition, double stopConditionValue, VoxelBrain brain, VoxelBody body,
+            int stopCondition, double stopConditionValue, IVoxelBrain brain, VoxelBody body,
             string vxaSimStopConditionXPath = "/VXA/Simulator/StopCondition",
-            string vxaSimGaXPath = "/VXA/Simulator/GA", string vxaStructureXPath = "/VXA/VXC/Structure")
+            string vxaSimGaXPath = "/VXA/Simulator/GA", string vxaStructureXPath = "/VXA/VXC/Structure",
+            string vxaThermalPath = "/VXA/Environment/Thermal")
         {
             // Instantiate XML reader for VXA template file
             var simDoc = new XmlDocument();
@@ -214,7 +243,7 @@ namespace MCC_Domains.BodyBrain
             // Enable simulation logging and set the simulation log file name and path
             simDoc.SelectSingleNode(string.Join("/", vxaSimGaXPath, "WriteSimLogFile")).InnerText = "1";
             simDoc.SelectSingleNode(string.Join("/", vxaSimGaXPath, "SimLogFileName")).InnerText = simLogFilePath;
-            
+
             // Disable fitness logging
             simDoc.SelectSingleNode(string.Join("/", vxaSimGaXPath, "WriteFitnessFile")).InnerText = "0";
 
@@ -224,6 +253,13 @@ namespace MCC_Domains.BodyBrain
             simDoc.SelectSingleNode(string.Join("/", vxaSimStopConditionXPath, "StopConditionValue")).InnerText =
                 stopConditionValue.ToString(CultureInfo.InvariantCulture);
 
+            // If this is a phase offset brain, also set the period
+            if (brain is VoxelPhaseOffsetBrain poBrain)
+            {
+                simDoc.SelectSingleNode(string.Join("/", vxaThermalPath, "TempPeriod")).InnerText =
+                    (1 / poBrain.Frequency).ToString(CultureInfo.InvariantCulture);
+            }
+
             // Set body/brain voxel structure properties
             SetVoxelBodyBrainProperties(simDoc, brain, body, vxaStructureXPath);
 
@@ -231,13 +267,25 @@ namespace MCC_Domains.BodyBrain
         }
 
         /// <summary>
+        ///     Calculates the stop time for phase offset controller experiments.
+        /// </summary>
+        /// <param name="evalCycles">The number of cycles that should elapse between evaluations.</param>
+        /// <param name="frequency">The voxel oscillation frequency.</param>
+        /// <param name="evalInitTime">The amount of time alloted for thermal initialization before actuation is applied.</param>
+        /// <returns>The stop time.</returns>
+        private static double CalculateStopTime(double evalCycles, double frequency, double evalInitTime)
+        {
+            return evalCycles / frequency + evalInitTime;
+        }
+
+        /// <summary>
         ///     Sets the voxel body size and material properties and brain synpase weights.
         /// </summary>
         /// <param name="simDoc">Reference to VXA template file.</param>
-        /// <param name="brain">The voxel brain object containing per-voxel network weights.</param>
+        /// <param name="brain">The voxel brain object containing per-voxel parameters.</param>
         /// <param name="body">The voxel body object containing voxel material specifications.</param>
         /// <param name="vxaStructureXPath">The XPath location containing voxel structure configuration properties.</param>
-        private static void SetVoxelBodyBrainProperties(XmlDocument simDoc, VoxelBrain brain, VoxelBody body,
+        private static void SetVoxelBodyBrainProperties(XmlDocument simDoc, IVoxelBrain brain, VoxelBody body,
             string vxaStructureXPath)
         {
             // Get reference to structure definition section
@@ -248,23 +296,51 @@ namespace MCC_Domains.BodyBrain
             structureElem.SelectSingleNode("Y_Voxels").InnerText = body.LengthY.ToString();
             structureElem.SelectSingleNode("Z_Voxels").InnerText = body.LengthZ.ToString();
 
-            // Set number of brain connections
-            structureElem.SelectSingleNode("numSynapses").InnerText = brain.NumConnections.ToString();
-
-            // Set layer-wise material and connection weights
-            for (var layerIdx = 0; layerIdx < body.LengthZ; layerIdx++)
+            switch (brain)
             {
-                // Create a new layer XML element for body materials and connections
-                var bodyLayerElem = simDoc.CreateElement("Layer");
-                var connLayerElem = simDoc.CreateElement("Layer");
+                case VoxelAnnBrain annBrain:
+                {
+                    // Set number of brain connections
+                    structureElem.SelectSingleNode("numSynapses").InnerText = annBrain.NumConnections.ToString();
 
-                // Wrap layer material codes and connection weights in a CDATA and add to each layer XML
-                bodyLayerElem.AppendChild(simDoc.CreateCDataSection(body.GetLayerMaterialCodes(layerIdx)));
-                connLayerElem.AppendChild(simDoc.CreateCDataSection(brain.GetLayerSynapseWeights(layerIdx)));
+                    // Set layer-wise material and connection weights
+                    for (var layerIdx = 0; layerIdx < body.LengthZ; layerIdx++)
+                    {
+                        // Create a new layer XML element for body materials and connections
+                        var bodyLayerElem = simDoc.CreateElement("Layer");
+                        var connLayerElem = simDoc.CreateElement("Layer");
 
-                // Append layers to XML document
-                structureElem.SelectSingleNode("Data").AppendChild(bodyLayerElem);
-                structureElem.SelectSingleNode("SynapseWeights").AppendChild(connLayerElem);
+                        // Wrap layer material codes and connection weights in a CDATA and add to each layer XML
+                        bodyLayerElem.AppendChild(simDoc.CreateCDataSection(body.GetLayerMaterialCodes(layerIdx)));
+                        connLayerElem.AppendChild(simDoc.CreateCDataSection(annBrain.GetFlattenedLayerData(layerIdx)));
+
+                        // Append layers to XML document
+                        structureElem.SelectSingleNode("Data").AppendChild(bodyLayerElem);
+                        structureElem.SelectSingleNode("SynapseWeights").AppendChild(connLayerElem);
+                    }
+
+                    break;
+                }
+                case VoxelPhaseOffsetBrain poBrain:
+                {
+                    // Set layer-wise material and phase offsets
+                    for (var layerIdx = 0; layerIdx < body.LengthZ; layerIdx++)
+                    {
+                        // Create a new layer XML element for body materials and connections
+                        var bodyLayerElem = simDoc.CreateElement("Layer");
+                        var poLayerElem = simDoc.CreateElement("Layer");
+
+                        // Wrap layer material codes and phase offset values in a CDATA and add to each layer XML
+                        bodyLayerElem.AppendChild(simDoc.CreateCDataSection(body.GetLayerMaterialCodes(layerIdx)));
+                        poLayerElem.AppendChild(simDoc.CreateCDataSection(poBrain.GetFlattenedLayerData(layerIdx)));
+
+                        // Append layers to XML document
+                        structureElem.SelectSingleNode("Data").AppendChild(bodyLayerElem);
+                        structureElem.SelectSingleNode("PhaseOffset").AppendChild(poLayerElem);
+                    }
+
+                    break;
+                }
             }
         }
 

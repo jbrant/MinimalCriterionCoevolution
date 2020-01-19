@@ -111,12 +111,13 @@ namespace SharpNeat.Core
         /// <param name="phenomeEvaluator">The phenome evaluator.</param>
         /// <param name="searchType">The search algorithm type.</param>
         /// <param name="nearestNeighbors">The number of nearest neighbors to use in behavior distance calculations.</param>
+        /// <param name="parallelOptions">Controls the number of parallel evaluations.</param>
         /// <param name="archive">A reference to the elite archive (optional).</param>
         public ParallelGenomeBehaviorEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
             IPhenomeEvaluator<TPhenome, BehaviorInfo> phenomeEvaluator,
-            SearchType searchType, int nearestNeighbors, AbstractNoveltyArchive<TGenome> archive = null)
+            SearchType searchType, int nearestNeighbors, ParallelOptions parallelOptions, AbstractNoveltyArchive<TGenome> archive = null)
             : this(
-                genomeDecoder, phenomeEvaluator, searchType, new ParallelOptions(), true,
+                genomeDecoder, phenomeEvaluator, searchType, parallelOptions, true,
                 nearestNeighbors, archive)
         {
         }

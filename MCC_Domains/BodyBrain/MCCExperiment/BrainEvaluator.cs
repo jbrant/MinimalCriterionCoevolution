@@ -162,7 +162,7 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
                 var body = _voxelBodyFactory.GetVoxelBody(cnt);
 
                 // Create new voxel brain based on the dimensions of the current voxel body
-                var brain = new VoxelBrain(brainCppn, body.LengthX, body.LengthY, body.LengthZ,
+                var brain = new VoxelAnnBrain(brainCppn, body.LengthX, body.LengthY, body.LengthZ,
                     _simulationProperties.NumBrainConnections);
 
                 lock (_evaluationLock)
@@ -187,8 +187,9 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
                 // Write configuration file
                 BodyBrainExperimentUtils.WriteVoxelyzeSimulationFile(_simulationProperties.SimConfigTemplateFile,
                     simConfigFilePath, simResultFilePath, brain, body, _minAmbulationDistance,
-                    _simulationProperties.SimOutputXPath, _simulationProperties.StructurePropertiesXPath,
-                    _simulationProperties.MinimalCriterionXPath);
+                    vxaSimGaXPath: _simulationProperties.SimOutputXPath,
+                    vxaStructureXPath: _simulationProperties.StructurePropertiesXPath,
+                    vxaMcXPath: _simulationProperties.MinimalCriterionXPath);
 
                 // Configure the simulation, execute and wait for completion
                 using (var process =

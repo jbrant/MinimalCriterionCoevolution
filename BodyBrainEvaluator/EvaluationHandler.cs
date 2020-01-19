@@ -85,7 +85,7 @@ namespace BodyBrainSupportLib
                 delegate(Tuple<MccexperimentVoxelBodyGenome, MccexperimentVoxelBrainGenome> genomeCombo)
                 {
                     VoxelBody body;
-                    VoxelBrain brain;
+                    VoxelAnnBrain brain;
 
                     try
                     {

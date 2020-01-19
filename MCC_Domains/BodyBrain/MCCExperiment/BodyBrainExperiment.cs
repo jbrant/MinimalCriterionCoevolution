@@ -14,7 +14,7 @@ using SharpNeat.Phenomes;
 
 namespace MCC_Domains.BodyBrain
 {
-    public class BodyBrainExperiment : BaseBodyBrainExperiment
+    public class BodyBrainAnnExperiment : BaseBodyBrainExperiment
     {
         #region Public Methods
 
@@ -23,6 +23,10 @@ namespace MCC_Domains.BodyBrain
         {
             // Initialize boiler-plate parameters
             base.Initialize(name, run, simConfigDirectory, simResultsDirectory, simExecutableFile, xmlConfig);
+            
+            // Set brain output count based on whether experiment uses phase offset controller (2 outputs)
+            // or ANN controller (32 outputs).
+            BrainCppnOutputCount = SimulationProperties.BrainType == BrainType.NeuralNet ? 32 : 2;
 
             // Initialize the data loggers for the given experiment/run
             _brainEvolutionDataLogger =
@@ -261,22 +265,22 @@ namespace MCC_Domains.BodyBrain
 
         #endregion
 
-        #region Constants
+        #region CPPN Configurations
 
         /// <summary>
-        ///     The number of brain CPPN inputs (x/y/z location, distance and bias).
+        ///     The number of brain CPPN inputs (x/y/z location and distance).
         /// </summary>
-        private const int BrainCppnInputCount = 5;
+        private const int BrainCppnInputCount = 4;
 
         /// <summary>
-        ///     The number of brain CPPN outputs (presence/weights of controller connections).
+        ///     The number of brain CPPN outputs (presence/weights of controller connections). This varies based on the type of controller being used (phase offset vs. neural network).
         /// </summary>
-        private const int BrainCppnOutputCount = 32;
+        private int BrainCppnOutputCount;
 
         /// <summary>
-        ///     The number of body CPPN inputs (x/y/z location, distance and bias).
+        ///     The number of body CPPN inputs (x/y/z location and distance).
         /// </summary>
-        private const int BodyCppnInputCount = 5;
+        private const int BodyCppnInputCount = 4;
 
         /// <summary>
         ///     The number of body CPPN outputs (material presence and type).

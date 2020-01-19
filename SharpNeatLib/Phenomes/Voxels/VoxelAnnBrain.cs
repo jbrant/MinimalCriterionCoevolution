@@ -8,19 +8,19 @@ namespace SharpNeat.Phenomes.Voxels
     /// <summary>
     ///     Encapsulates neural network weights for voxel brains corresponding to each voxel in a voxel body.
     /// </summary>
-    public class VoxelBrain
+    public class VoxelAnnBrain : IVoxelBrain
     {
         #region Constructor
 
         /// <summary>
-        ///     VoxelBrain constructor.
+        ///     VoxelBrain constructor for ANN-based brain.
         /// </summary>
         /// <param name="cppn">The CPPN coding for the voxel brain.</param>
         /// <param name="substrateX">The substrate resolution along the X dimension.</param>
         /// <param name="substrateY">The substrate resolution along the Y dimension.</param>
         /// <param name="substrateZ">The substrate resolution along the Z dimension.</param>
         /// <param name="numConnections">The number of connections in the voxel-specific neurocontrollers.</param>
-        public VoxelBrain(IBlackBox cppn, int substrateX, int substrateY, int substrateZ, int numConnections)
+        public VoxelAnnBrain(IBlackBox cppn, int substrateX, int substrateY, int substrateZ, int numConnections)
         {
             // Activate CPPN for all positions on the substrate to get the per-voxel controller weights
             _voxelCellNetworkWeights =
@@ -54,6 +54,11 @@ namespace SharpNeat.Phenomes.Voxels
 
             // Compute distance to centroid for each voxel in the body
             var distanceMatrix = VoxelUtils.ComputeVoxelDistanceMatrix(substrateX, substrateY, substrateZ);
+            
+            // Normalize each position along each of three axes
+            var xAxisNorm = VoxelUtils.NormalizeAxis(substrateX);
+            var yAxisNorm = VoxelUtils.NormalizeAxis(substrateY);
+            var zAxisNorm = VoxelUtils.NormalizeAxis(substrateZ);
 
             // Activate the CPPN for each voxel in the substrate
             // (the z dimension is first because this defines the layers of the voxel structure -
@@ -71,9 +76,9 @@ namespace SharpNeat.Phenomes.Voxels
                         var outputSignalArr = cppn.OutputSignalArray;
 
                         // Set the input values at the current voxel
-                        inputSignalArr[0] = x; // X coordinate
-                        inputSignalArr[1] = y; // Y coordinate
-                        inputSignalArr[2] = z; // Z coordinate
+                        inputSignalArr[0] = xAxisNorm[x]; // X coordinate
+                        inputSignalArr[1] = yAxisNorm[y]; // Y coordinate
+                        inputSignalArr[2] = zAxisNorm[z]; // Z coordinate
                         inputSignalArr[3] = distanceMatrix[x, y, z]; // distance
 
                         // Reset from prior network activations
@@ -114,7 +119,7 @@ namespace SharpNeat.Phenomes.Voxels
         #endregion
 
         #region Public methods
-
+        
         /// <summary>
         ///     Returns the layer connection (synapse) weights for the specified layer.
         /// </summary>
@@ -123,7 +128,7 @@ namespace SharpNeat.Phenomes.Voxels
         ///     The comma-delimited string of connection (synapse) weights for all voxel-specific controllers in the given
         ///     layer.
         /// </returns>
-        public string GetLayerSynapseWeights(int layer)
+        public string GetFlattenedLayerData(int layer)
         {
             return string.Join(",", _voxelCellNetworkWeights[layer].Select(x => x));
         }
@@ -150,6 +155,7 @@ namespace SharpNeat.Phenomes.Voxels
         ///     The unique identifier of the genome from which the phenotype was generated.
         /// </summary>
         public uint GenomeId { get; }
+
         
         /// <summary>
         ///     The number of connections in a given voxel-specific controller.

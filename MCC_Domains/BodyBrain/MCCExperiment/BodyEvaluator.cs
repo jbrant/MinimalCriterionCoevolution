@@ -33,8 +33,7 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
         /// <param name="run">The current run number of the experiment being executed.</param>
         /// <param name="evaluationLogger">Per-evaluation data logger (optional).</param>
         public BodyEvaluator(SimulationProperties simulationProperties, double minAmbulationDistance,
-            int numBrainsSolvedCriteria, string experimentName, int run,
-            IDataLogger evaluationLogger = null)
+            int numBrainsSolvedCriteria, string experimentName, int run, IDataLogger evaluationLogger = null)
         {
             _simulationProperties = simulationProperties;
             _minAmbulationDistance = minAmbulationDistance;
@@ -138,7 +137,8 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
                 var body = new VoxelBody(bodyCppn);
 
                 // Get the current brain under evaluation and scale to the voxel body size
-                var brain = _voxelBrainFactory.GetVoxelBrain(cnt, body.LengthX, body.LengthY, body.LengthZ);
+                var brain = _voxelBrainFactory.GetVoxelBrain(cnt, body.LengthX, body.LengthY, body.LengthZ,
+                    _simulationProperties.BrainType);
 
                 lock (_evaluationLock)
                 {
@@ -158,8 +158,8 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
 
                 BodyBrainExperimentUtils.WriteVoxelyzeSimulationFile(_simulationProperties.SimConfigTemplateFile,
                     simConfigFilePath, simResultFilePath, brain, body, _minAmbulationDistance,
-                    _simulationProperties.SimOutputXPath, _simulationProperties.StructurePropertiesXPath,
-                    _simulationProperties.MinimalCriterionXPath);
+                    vxaSimGaXPath: _simulationProperties.SimOutputXPath, vxaStructureXPath: _simulationProperties.StructurePropertiesXPath,
+                    vxaMcXPath: _simulationProperties.MinimalCriterionXPath);
 
                 // Configure the simulation, execute and wait for completion
                 using (var process =

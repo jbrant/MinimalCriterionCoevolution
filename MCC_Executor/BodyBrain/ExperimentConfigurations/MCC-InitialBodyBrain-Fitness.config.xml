@@ -30,7 +30,8 @@
     <NumBodiesSolvedCriteria>1</NumBodiesSolvedCriteria>
     <NumBrainsSolvedCriteria>1</NumBrainsSolvedCriteria>
     <VoxelyzeConfig>
-        <VxaTemplateFile>BodyBrain/VoxCad/VoxCadSimulationTemplate.xml</VxaTemplateFile>
+        <BrainType>NeuralNet</BrainType>
+        <VxaTemplateFile>BodyBrain/VoxCad/VoxCadAnnSimulationTemplate.xml</VxaTemplateFile>
         <InitialXDimension>10</InitialXDimension>
         <InitialYDimension>10</InitialYDimension>
         <InitialZDimension>10</InitialZDimension>

@@ -109,7 +109,7 @@ namespace MCC_Domains.MazeNavigation.Bootstrappers
             // Create the genome evaluator
             IGenomeEvaluator<NeatGenome> fitnessEvaluator =
                 new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigatorEvaluator,
-                    SearchType.NoveltySearch, _nearestNeighbors);
+                    SearchType.NoveltySearch, _nearestNeighbors, parallelOptions);
 
             // Only pull the number of genomes from the list equivalent to the initialization algorithm population size
             // (this is to handle the case where the list was created in accordance with the primary algorithm 

@@ -31,7 +31,7 @@ namespace BodyBrainSupportLib
         /// <param name="run">The run number of the experiment that was executed.</param>
         /// <param name="configTemplate">The simulation configuration template including simulation parameter defaults.</param>
         /// <param name="mcValue">The minimal criterion value.</param>
-        public static void WriteConfigFile(VoxelBody body, VoxelBrain brain, string directory,
+        public static void WriteConfigFile(VoxelBody body, VoxelAnnBrain brain, string directory,
             string experimentName, int run, string configTemplate, double mcValue)
         {
             // Construct the output file path and name
@@ -134,7 +134,7 @@ namespace BodyBrainSupportLib
         ///     executed (default is true).
         /// </param>
         public static void ExecuteDistanceBoundedBodyBrainSimulation(string configTemplate, string configFilePath,
-            string simExecutablePath, string simResultsFilePath, int distance, VoxelBrain brain, VoxelBody body,
+            string simExecutablePath, string simResultsFilePath, int distance, VoxelAnnBrain brain, VoxelBody body,
             bool deleteConfigFile = true)
         {
             // Write simulation file that stops based on distance traveled (MC) or preset evaluation time
@@ -169,7 +169,7 @@ namespace BodyBrainSupportLib
         ///     executed (default is true).
         /// </param>
         public static void ExecuteTimeboundBodyBrainSimulation(string configTemplate, string configFilePath,
-            string simExecutablePath, string simLogFilePath, double simulationTime, VoxelBrain brain, VoxelBody body,
+            string simExecutablePath, string simLogFilePath, double simulationTime, IVoxelBrain brain, VoxelBody body,
             bool deleteConfigFile = true)
         {
             // Stop condition of 2 causes the simulation to run for a specified amount of time

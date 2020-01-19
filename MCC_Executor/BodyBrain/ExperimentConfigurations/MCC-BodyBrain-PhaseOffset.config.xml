@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Config>
+    <MaxDegreeOfParallelism>1</MaxDegreeOfParallelism>
     <MaxBodyInitializationRestarts>1</MaxBodyInitializationRestarts>
     <MaxBrainInitializationEvaluations>15000</MaxBrainInitializationEvaluations>
-    <BrainPopulationSize>100</BrainPopulationSize>
-    <BodyPopulationSize>20</BodyPopulationSize>
+    <BrainPopulationSize>150</BrainPopulationSize>
+    <BodyPopulationSize>30</BodyPopulationSize>
     <BrainSeedGenomeCount>20</BrainSeedGenomeCount>
     <BodySeedGenomeCount>10</BodySeedGenomeCount>
     <ResourceLimit>5</ResourceLimit>
     <Activation>
         <Scheme>Acyclic</Scheme>
+        <Iters>
+        </Iters>
     </Activation>
     <GenomeConfig>
         <InitialConnectionProportion>1</InitialConnectionProportion>
@@ -29,26 +32,25 @@
         <ShrinkBodyProbability>0.2</ShrinkBodyProbability>
     </BodyGenomeConfig>
     <MaxBodySize>15</MaxBodySize>
-    <MinAmbulationDistance>5</MinAmbulationDistance>
-    <BrainOffspringBatchSize>10</BrainOffspringBatchSize>
-    <BodyOffspringBatchSize>2</BodyOffspringBatchSize>
-    <MaxGenerations>1</MaxGenerations>
+    <MinAmbulationDistance>15</MinAmbulationDistance>
+    <BrainOffspringBatchSize>30</BrainOffspringBatchSize>
+    <BodyOffspringBatchSize>6</BodyOffspringBatchSize>
+    <MaxGenerations>2000</MaxGenerations>
     <NumBodiesSolvedCriteria>1</NumBodiesSolvedCriteria>
     <NumBrainsSolvedCriteria>1</NumBrainsSolvedCriteria>
     <VoxelyzeConfig>
-        <BrainType>NeuralNet</BrainType>
-        <VxaTemplateFile>BodyBrain/VoxCad/VoxCadAnnSimulationTemplate.xml</VxaTemplateFile>
+        <BrainType>PhaseOffset</BrainType>
+        <VxaTemplateFile>BodyBrain/VoxCad/VoxCadPhaseOffsetSimulationTemplate.xml</VxaTemplateFile>
         <InitialXDimension>5</InitialXDimension>
         <InitialYDimension>5</InitialYDimension>
         <InitialZDimension>5</InitialZDimension>
         <BrainNetworkConnections>16</BrainNetworkConnections>
-        <MinPercentMaterial>0.10</MinPercentMaterial>
+        <MinPercentMaterial>0.1</MinPercentMaterial>
         <MinPercentActiveMaterial>0.05</MinPercentActiveMaterial>
         <SimulatedSeconds>2</SimulatedSeconds>
         <InitializationSeconds>0.5</InitializationSeconds>
         <ActuationsPerSecond>10</ActuationsPerSecond>
-        <FloorSlope>0.0</FloorSlope>
-        <!--<ElasticityOffset>5</ElasticityOffset>-->
+        <FloorSlope>0</FloorSlope>
         <VxaSimStopConditionXPath>/VXA/Simulator/StopCondition</VxaSimStopConditionXPath>
         <VxaSimOutputXPath>/VXA/Simulator/GA</VxaSimOutputXPath>
         <VxaEnvThermalXPath>/VXA/Environment/Thermal</VxaEnvThermalXPath>
@@ -57,11 +59,12 @@
         <VxaMinimalCriterionXPath>/VXA/Environment/MinimalCriterion</VxaMinimalCriterionXPath>
     </VoxelyzeConfig>
     <InitializationAlgorithmConfig>
+        <MaxDegreeOfParallelism>1</MaxDegreeOfParallelism>
         <SearchAlgorithm>Novelty Search</SearchAlgorithm>
         <SelectionAlgorithm>Steady State</SelectionAlgorithm>
-        <PopulationSize>20</PopulationSize>
-        <SpecieCount>4</SpecieCount>
-        <OffspringBatchSize>4</OffspringBatchSize>
+        <PopulationSize>100</PopulationSize>
+        <SpecieCount>10</SpecieCount>
+        <OffspringBatchSize>10</OffspringBatchSize>
         <PopulationEvaluationFrequency>30</PopulationEvaluationFrequency>
         <ComplexityRegulationStrategy>Relative</ComplexityRegulationStrategy>
         <ComplexityThreshold>30</ComplexityThreshold>
@@ -71,9 +74,9 @@
         <InterspeciesMatingProbability>0.001</InterspeciesMatingProbability>
         <GenomeConfig>
             <InitialConnectionProportion>1</InitialConnectionProportion>
-            <WeightMutationProbability>0.9</WeightMutationProbability>
+            <WeightMutationProbability>0.7</WeightMutationProbability>
             <AddConnnectionProbability>0.05</AddConnnectionProbability>
-            <AddNodeProbability>0.005</AddNodeProbability>
+            <AddNodeProbability>0.01</AddNodeProbability>
             <DeleteConnectionProbability>0.001</DeleteConnectionProbability>
             <ConnectionWeightRange>5</ConnectionWeightRange>
         </GenomeConfig>

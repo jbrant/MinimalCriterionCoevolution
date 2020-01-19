@@ -102,6 +102,11 @@ namespace SharpNeat.Phenomes.Voxels
             // Compute distance to centroid for each voxel in the body
             var distanceMatrix = VoxelUtils.ComputeVoxelDistanceMatrix(substrateRes.X, substrateRes.Y, substrateRes.Z);
 
+            // Normalize each position along each of three axes
+            var xAxisNorm = VoxelUtils.NormalizeAxis(substrateRes.X);
+            var yAxisNorm = VoxelUtils.NormalizeAxis(substrateRes.Y);
+            var zAxisNorm = VoxelUtils.NormalizeAxis(substrateRes.Z);
+            
             // Activate the CPPN for each voxel in the substrate
             for (var z = 0; z < substrateRes.Z; z++)
             {
@@ -116,9 +121,9 @@ namespace SharpNeat.Phenomes.Voxels
                         var outputSignalArr = cppn.OutputSignalArray;
 
                         // Set the input values at the current voxel
-                        inputSignalArr[0] = x; // X coordinate
-                        inputSignalArr[1] = y; // Y coordinate
-                        inputSignalArr[2] = z; // Z coordinate
+                        inputSignalArr[0] = xAxisNorm[x]; // X coordinate
+                        inputSignalArr[1] = yAxisNorm[y]; // Y coordinate
+                        inputSignalArr[2] = zAxisNorm[z]; // Z coordinate
                         inputSignalArr[3] = distanceMatrix[x, y, z]; // distance
 
                         // Reset from prior network activations

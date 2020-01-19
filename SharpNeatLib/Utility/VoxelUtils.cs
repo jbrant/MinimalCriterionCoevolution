@@ -8,6 +8,49 @@ namespace SharpNeat.Utility
     /// </summary>
     public static class VoxelUtils
     {
+        #region Internal helper methods
+
+        /// <summary>
+        ///     Normalizes the voxel distance matrix by scaling each distance value by the min/max distance boundaries.
+        /// </summary>
+        /// <param name="matrix">The voxel distance matrix to normalize.</param>
+        /// <returns>The normalized (i.e. scaled by min/max boundaries) voxel distance matrix.</returns>
+        private static double[,,] NormalizeMatrix(double[,,] matrix)
+        {
+            // Instantiate new normalized matrix of equivalent dimensionality
+            var normMatrix = new double[matrix.GetLength(0), matrix.GetLength(1), matrix.GetLength(2)];
+
+            // Get the single minimum and maximum values across all dimensions and compute the diff
+            var min = matrix.Cast<double>().Min();
+            var max = matrix.Cast<double>().Max();
+            var diff = max - min;
+
+            // Normalize each matrix dimension, scaling by the range of values in the matrix
+            for (var x = 0; x < matrix.GetLength(0); x++)
+            {
+                for (var y = 0; y < matrix.GetLength(1); y++)
+                {
+                    for (var z = 0; z < matrix.GetLength(2); z++)
+                    {
+                        // Only scale by range of values if all values are NOT in the same range
+                        if (diff > 0)
+                        {
+                            normMatrix[x, y, z] = 2 * (matrix[x, y, z] - min) / diff - 1;
+                        }
+                        // If there is no variation in range of values, avoid division by zero
+                        else
+                        {
+                            normMatrix[x, y, z] = 2 * (matrix[x, y, z] - min) - 1;
+                        }
+                    }
+                }
+            }
+
+            return normMatrix;
+        }
+
+        #endregion
+
         #region Helper methods
 
         /// <summary>
@@ -67,47 +110,21 @@ namespace SharpNeat.Utility
             return voxelDistanceMatrix;
         }
 
-        #endregion
-
-        #region Internal helper methods
-
         /// <summary>
-        ///     Normalizes the voxel distance matrix by scaling each distance value by the min/max distance boundaries.
+        ///     Normalizes each position along the given voxel body axis.
         /// </summary>
-        /// <param name="matrix">The voxel distance matrix to normalize.</param>
-        /// <returns>The normalized (i.e. scaled by min/max boundaries) voxel distance matrix.</returns>
-        private static double[,,] NormalizeMatrix(double[,,] matrix)
+        /// <param name="axisLength">The length of the voxel axis.</param>
+        /// <returns>The axis with each position normalized.</returns>
+        public static double[] NormalizeAxis(int axisLength)
         {
-            // Instantiate new normalized matrix of equivalent dimensionality
-            var normMatrix = new double[matrix.GetLength(0), matrix.GetLength(1), matrix.GetLength(2)];
+            var axisNorm = new double[axisLength];
 
-            // Get the single minimum and maximum values across all dimensions and compute the diff
-            var min = matrix.Cast<double>().Min();
-            var max = matrix.Cast<double>().Max();
-            var diff = max - min;
-
-            // Normalize each matrix dimension, scaling by the range of values in the matrix
-            for (var x = 0; x < matrix.GetLength(0); x++)
+            for (var i = 0; i < axisLength; i++)
             {
-                for (var y = 0; y < matrix.GetLength(1); y++)
-                {
-                    for (var z = 0; z < matrix.GetLength(2); z++)
-                    {
-                        // Only scale by range of values if all values are NOT in the same range
-                        if (diff > 0)
-                        {
-                            normMatrix[x, y, z] = 2 * (matrix[x, y, z] - min) / diff - 1;
-                        }
-                        // If there is no variation in range of values, avoid division by zero
-                        else
-                        {
-                            normMatrix[x, y, z] = 2 * (matrix[x, y, z] - min) - 1;
-                        }
-                    }
-                }
+                axisNorm[i] = (double) i / axisLength * 2 - 1;
             }
 
-            return normMatrix;
+            return axisNorm;
         }
 
         #endregion

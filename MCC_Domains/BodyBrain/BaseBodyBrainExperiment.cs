@@ -212,7 +212,7 @@ namespace MCC_Domains.BodyBrain
             BodySeedGenomeCount = XmlUtils.GetValueAsInt(xmlConfig, "BodySeedGenomeCount");
             BrainBatchSize = XmlUtils.GetValueAsInt(xmlConfig, "BrainOffspringBatchSize");
             BodyBatchSize = XmlUtils.GetValueAsInt(xmlConfig, "BodyOffspringBatchSize");
-
+            
             // Set run-time bounding parameters
             MaxBatches = XmlUtils.TryGetValueAsInt(xmlConfig, "MaxGenerations");
 
@@ -231,9 +231,9 @@ namespace MCC_Domains.BodyBrain
                 XmlUtils.GetValueAsULong(xmlConfig, "MaxBrainInitializationEvaluations");
 
             // Initialize the initialization algorithm
-            _bodyBrainInitializer =
-                BodyBrainExperimentUtils.DetermineMCCBodyBrainInitializer(
-                    xmlConfig.GetElementsByTagName("InitializationAlgorithmConfig", "")[0] as XmlElement);
+            _bodyBrainInitializer = BodyBrainExperimentUtils.DetermineMCCBodyBrainInitializer(
+                xmlConfig.GetElementsByTagName("InitializationAlgorithmConfig", "")[0] as XmlElement,
+                SimulationProperties.BrainType);
 
             // Setup initialization algorithm
             _bodyBrainInitializer.SetAlgorithmParameters(

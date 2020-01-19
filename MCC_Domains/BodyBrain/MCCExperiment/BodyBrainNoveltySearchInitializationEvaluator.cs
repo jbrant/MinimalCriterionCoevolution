@@ -28,6 +28,7 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
         /// <param name="minAmbulationDistance">The minimum distance that the robot must traverse to meet the MC.</param>
         /// <param name="experimentName">The human-readable name of the experiment configuration being executed.</param>
         /// <param name="run">The current run number of the experiment being executed.</param>
+        /// <param name="brainType">The type of brain controller (e.g. neural network or phase offset controller).</param>
         /// <param name="startingEvaluations">
         ///     The total number of evaluations that have already been performed at the time of
         ///     initialization.
@@ -35,7 +36,7 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
         /// <param name="evaluationLogger">Per-evaluation data logger (optional).</param>
         public BodyBrainNoveltySearchInitializationEvaluator(VoxelBody body,
             SimulationProperties simulationProperties, double minAmbulationDistance, string experimentName, int run,
-            ulong startingEvaluations = 0, IDataLogger evaluationLogger = null)
+            BrainType brainType, ulong startingEvaluations = 0, IDataLogger evaluationLogger = null)
         {
             EvaluationCount = startingEvaluations;
             _voxelBody = body;
@@ -43,6 +44,7 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
             _minAmbulationDistance = minAmbulationDistance;
             _experimentName = experimentName;
             _run = run;
+            _brainType = brainType;
             _evaluationLogger = evaluationLogger;
         }
 
@@ -94,6 +96,11 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
         private readonly int _run;
 
         /// <summary>
+        ///     The type of brain controller (e.g. neural network or phase offset controller).
+        /// </summary>
+        private readonly BrainType _brainType;
+
+        /// <summary>
         ///     Per-evaluation data logger (generates one row per trial).
         /// </summary>
         private readonly IDataLogger _evaluationLogger;
@@ -115,6 +122,7 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
         /// <returns>A BehaviorInfo, which encapsulates the distance that the robot traveled.</returns>
         public BehaviorInfo Evaluate(IBlackBox brainCppn, uint currentGeneration)
         {
+            IVoxelBrain brain = null;
             var behaviorInfo = new BehaviorInfo();
             var isSuccessful = false;
 
@@ -125,9 +133,18 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
             }
 
             // Create new voxel brain given the initial substrate dimensions
-            var brain = new VoxelBrain(brainCppn, _simulationProperties.InitialXDimension,
-                _simulationProperties.InitialYDimension, _simulationProperties.InitialZDimension,
-                _simulationProperties.NumBrainConnections);
+            switch (_brainType)
+            {
+                case BrainType.NeuralNet:
+                    brain = new VoxelAnnBrain(brainCppn, _simulationProperties.InitialXDimension,
+                        _simulationProperties.InitialYDimension, _simulationProperties.InitialZDimension,
+                        _simulationProperties.NumBrainConnections);
+                    break;
+                case BrainType.PhaseOffset:
+                    brain = new VoxelPhaseOffsetBrain(brainCppn, _simulationProperties.InitialXDimension,
+                        _simulationProperties.InitialYDimension, _simulationProperties.InitialZDimension);
+                    break;
+            }
 
             // Construct configuration file path
             var simConfigFilePath = BodyBrainExperimentUtils.ConstructVoxelyzeFilePath("config_init", "vxa",
@@ -142,8 +159,9 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
             // Write configuration file
             BodyBrainExperimentUtils.WriteVoxelyzeSimulationFile(_simulationProperties.SimConfigTemplateFile,
                 simConfigFilePath, simResultFilePath, brain, _voxelBody, _minAmbulationDistance,
-                _simulationProperties.SimOutputXPath, _simulationProperties.StructurePropertiesXPath,
-                _simulationProperties.MinimalCriterionXPath);
+                vxaSimGaXPath: _simulationProperties.SimOutputXPath,
+                vxaStructureXPath: _simulationProperties.StructurePropertiesXPath,
+                vxaMcXPath: _simulationProperties.MinimalCriterionXPath);
 
             // Configure the simulation, execute and wait for completion
             using (var process =

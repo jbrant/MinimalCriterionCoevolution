@@ -26,6 +26,15 @@ namespace MCC_Domains.BodyBrain
 
         #region Constructors
 
+        /// <summary>
+        ///     BodyBrainInitializer constructor.
+        /// </summary>
+        /// <param name="brainType">The type of brain controller (e.g. neural network or phase offset controller).</param>
+        protected BodyBrainInitializer(BrainType brainType)
+        {
+            BrainType = brainType;
+        }
+
         #endregion
 
         #region Protected members
@@ -99,6 +108,11 @@ namespace MCC_Domains.BodyBrain
         ///     config file parsing information.
         /// </summary>
         protected SimulationProperties SimulationProperties;
+
+        /// <summary>
+        ///     The type of brain controller (e.g. neural network or phase offset controller).
+        /// </summary>
+        protected BrainType BrainType;
 
         #endregion
 

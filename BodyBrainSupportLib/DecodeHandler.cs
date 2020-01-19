@@ -51,14 +51,14 @@ namespace BodyBrainSupportLib
         /// <param name="body">The voxel body to which the brain is scaled.</param>
         /// <param name="numConnections">The number of connections in the brain controller network.</param>
         /// <returns>The decoded voxel brain.</returns>
-        public static VoxelBrain DecodeBrainGenome(MccexperimentVoxelBrainGenome brainGenome,
+        public static VoxelAnnBrain DecodeBrainGenome(MccexperimentVoxelBrainGenome brainGenome,
             NeatGenomeDecoder brainDecoder, CppnGenomeFactory brainGenomeFactory, VoxelBody body, int numConnections)
         {
-            VoxelBrain brain;
+            VoxelAnnBrain brain;
 
             using (var xmlReader = XmlReader.Create(new StringReader(brainGenome.GenomeXml)))
             {
-                brain = new VoxelBrain(
+                brain = new VoxelAnnBrain(
                     brainDecoder.Decode(NeatGenomeXmlIO.ReadSingleGenomeFromRoot(xmlReader, true, brainGenomeFactory)),
                     body.LengthX, body.LengthY, body.LengthZ, numConnections);
             }

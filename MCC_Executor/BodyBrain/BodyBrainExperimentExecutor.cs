@@ -161,7 +161,7 @@ namespace MCC_Executor.BodyBrain
             xmlConfig.Load(experimentConfiguration);
 
             // TODO: When there are other experiment types, this should come back as a base experiment
-            var experiment = new BodyBrainExperiment();
+            var experiment = new BodyBrainAnnExperiment();
 
             // Initialize new experiment
             experiment.Initialize(experimentName, run, simConfigDirectory, simResultsDirectory, simExecutable,

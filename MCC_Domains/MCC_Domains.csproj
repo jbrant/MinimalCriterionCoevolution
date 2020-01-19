@@ -12,7 +12,10 @@
       <None Update="BodyBrain\VoxCadSimulation\VoxCadSimulationTemplate.xml">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
-      <None Update="BodyBrain\VoxCad\VoxCadSimulationTemplate.xml">
+      <None Update="BodyBrain\VoxCad\VoxCadAnnSimulationTemplate.xml">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="BodyBrain\VoxCad\VoxCadPhaseOffsetSimulationTemplate.xml">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
     </ItemGroup>

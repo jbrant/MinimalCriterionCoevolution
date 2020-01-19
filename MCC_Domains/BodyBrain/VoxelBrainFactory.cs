@@ -19,7 +19,7 @@ namespace MCC_Domains.BodyBrain
         public VoxelBrainContainer(IBlackBox brainCppn)
         {
             BrainCppn = brainCppn;
-            ScaledBrains = new Dictionary<SubstrateResolution, VoxelBrain>();
+            ScaledBrains = new Dictionary<SubstrateResolution, IVoxelBrain>();
         }
 
         /// <summary>
@@ -30,7 +30,7 @@ namespace MCC_Domains.BodyBrain
         /// <summary>
         ///     The map of brains scaled to a given substrate resolution.
         /// </summary>
-        public IDictionary<SubstrateResolution, VoxelBrain> ScaledBrains { get; }
+        public IDictionary<SubstrateResolution, IVoxelBrain> ScaledBrains { get; }
     }
 
     /// <summary>
@@ -38,11 +38,20 @@ namespace MCC_Domains.BodyBrain
     /// </summary>
     public class VoxelBrainFactory
     {
+        #region Properties
+
+        /// <summary>
+        ///     The number of voxel brains that the factory can produce.
+        /// </summary>
+        public int NumBrains { get; private set; }
+
+        #endregion
+
         #region Constructor
 
         /// <summary>
         ///     VoxelBrainFactory constructor, which set the number of network connections in voxel controllers and initializes a
-        ///     collection of voxel brains.
+        ///     collection of neural network voxel brains.
         /// </summary>
         /// <param name="numConnections">The number of connections in a given voxel-specific controller.</param>
         public VoxelBrainFactory(int numConnections)
@@ -53,14 +62,14 @@ namespace MCC_Domains.BodyBrain
             _voxelBrainCppns = new ConcurrentDictionary<uint, VoxelBrainContainer>();
         }
 
-        #endregion
-
-        #region Properties
-
         /// <summary>
-        ///     The number of voxel brains that the factory can produce.
+        ///     VoxelBrainFactory constructor, which initializes a collection of phase offset voxel brains.
         /// </summary>
-        public int NumBrains { get; private set; }
+        public VoxelBrainFactory()
+        {
+            // Initialize the internal collection of voxel bodies and voxel brain CPPNs
+            _voxelBrainCppns = new ConcurrentDictionary<uint, VoxelBrainContainer>();
+        }
 
         #endregion
 
@@ -128,10 +137,11 @@ namespace MCC_Domains.BodyBrain
         /// <param name="x">The size of the substrate along the X dimension.</param>
         /// <param name="y">The size of the substrate along the Y dimension.</param>
         /// <param name="z">The size of the substrate along the Z dimension.</param>
+        /// <param name="brainType">The type of brain controller (e.g. neural network or phase offset controller).</param>
         /// <returns>The scaled voxel brain.</returns>
-        public VoxelBrain GetVoxelBrain(int genomeIdx, int x, int y, int z)
+        public IVoxelBrain GetVoxelBrain(int genomeIdx, int x, int y, int z, BrainType brainType)
         {
-            VoxelBrain voxelBrain;
+            IVoxelBrain voxelBrain;
 
             // Get voxel brain container entry at the given index
             var brainEntry = _voxelBrainCppns[_currentKeys[genomeIdx]];
@@ -147,8 +157,12 @@ namespace MCC_Domains.BodyBrain
                 }
 
                 // Create new voxel brain with a resolution matching that of the body
-                voxelBrain = new VoxelBrain(brainEntry.BrainCppn, resolution.X, resolution.Y, resolution.Z,
-                    _numConnections);
+                if (brainType == BrainType.NeuralNet)
+                    voxelBrain = new VoxelAnnBrain(brainEntry.BrainCppn, resolution.X, resolution.Y, resolution.Z,
+                        _numConnections);
+                else
+                    voxelBrain =
+                        new VoxelPhaseOffsetBrain(brainEntry.BrainCppn, resolution.X, resolution.Y, resolution.Z);
 
                 // Cache voxel brain
                 brainEntry.ScaledBrains.Add(resolution, voxelBrain);

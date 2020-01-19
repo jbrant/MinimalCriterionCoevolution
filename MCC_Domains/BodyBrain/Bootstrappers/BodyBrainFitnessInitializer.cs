@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -10,7 +9,6 @@ using log4net;
 using log4net.Config;
 using MCC_Domains.BodyBrain.MCCExperiment;
 using MCC_Domains.Utils;
-using Microsoft.EntityFrameworkCore;
 using SharpNeat.Core;
 using SharpNeat.DistanceMetrics;
 using SharpNeat.EvolutionAlgorithms;
@@ -25,6 +23,33 @@ namespace MCC_Domains.BodyBrain.Bootstrappers
 {
     public class BodyBrainFitnessInitializer : BodyBrainInitializer
     {
+        #region Constructor
+
+        /// <summary>
+        ///     BodyBrainFitnessInitializer constructor.
+        /// </summary>
+        /// <param name="brainType">The type of brain controller (e.g. neural network or phase offset controller).</param>
+        public BodyBrainFitnessInitializer(BrainType brainType) : base(brainType)
+        {
+        }
+
+        #endregion
+
+        #region Private methods
+
+        /// <summary>
+        ///     Print update event at every generation.
+        /// </summary>
+        /// <param name="sender">Sender</param>
+        /// <param name="e">Event arguments</param>
+        private void UpdateEvent(object sender, EventArgs e)
+        {
+            _executionLogger.Info(
+                $"(Init) Generation={InitializationEa.CurrentGeneration:N0} Evaluations={InitializationEa.CurrentEvaluations:N0} BestDistanceTraveled={InitializationEa.CurrentChampGenome.EvaluationInfo.Fitness:N6}");
+        }
+
+        #endregion
+
         #region Instance variables
 
         /// <summary>
@@ -36,14 +61,14 @@ namespace MCC_Domains.BodyBrain.Bootstrappers
         ///     The complexity regulation strategy used by the EA.
         /// </summary>
         private IComplexityRegulationStrategy _complexityRegulationStrategy;
-        
+
         /// <summary>
         ///     Console logger for reporting execution status.
         /// </summary>
         private static ILog _executionLogger;
 
         #endregion
-        
+
         #region Method overrides
 
         /// <summary>
@@ -58,7 +83,8 @@ namespace MCC_Domains.BodyBrain.Bootstrappers
         ///     The number of evaluations that preceeded this from which this process will pick up
         ///     (this is used in the case where we're restarting a run because it failed to find a solution in the allotted time).
         /// </param>
-        protected override void InitializeAlgorithm(ParallelOptions parallelOptions, List<NeatGenome> brainGenomeList, IGenomeFactory<NeatGenome> brainGenomeFactory,
+        protected override void InitializeAlgorithm(ParallelOptions parallelOptions, List<NeatGenome> brainGenomeList,
+            IGenomeFactory<NeatGenome> brainGenomeFactory,
             IGenomeDecoder<NeatGenome, IBlackBox> brainGenomeDecoder, VoxelBody body, ulong startingEvaluations)
         {
             // Initialise log4net (log to console and file).
@@ -67,7 +93,7 @@ namespace MCC_Domains.BodyBrain.Bootstrappers
 
             // Instantiate the execution logger
             _executionLogger = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
-            
+
             // Create distance metric. Mismatched genes have a fixed distance of 10; for matched genes the distance
             // is their weight difference.
             IDistanceMetric distanceMetric = new ManhattanDistanceMetric(1.0, 0.0, 10.0);
@@ -77,7 +103,7 @@ namespace MCC_Domains.BodyBrain.Bootstrappers
             _complexityRegulationStrategy =
                 ExperimentUtils.CreateComplexityRegulationStrategy(ComplexityRegulationStrategyDefinition,
                     ComplexityThreshold);
-            
+
             // Create the initialization evolution algorithm
             if (IsGenerational)
             {
@@ -95,18 +121,18 @@ namespace MCC_Domains.BodyBrain.Bootstrappers
 
             // Create the brain fitness initialization evaluator
             var brainEvaluator = new BodyBrainFitnessInitializationEvaluator(body, SimulationProperties,
-                MinAmbulationDistance, ExperimentName, Run, startingEvaluations);
-            
+                MinAmbulationDistance, ExperimentName, Run, BrainType, startingEvaluations);
+
             // Create the brain genome evaluator
             IGenomeEvaluator<NeatGenome> fitnessEvaluator =
                 new ParallelGenomeFitnessEvaluator<NeatGenome, IBlackBox>(brainGenomeDecoder, brainEvaluator);
-            
+
             // Only pull the number of genomes from the list equivalent to the initialization algorithm population size
             brainGenomeList = brainGenomeList.Take(PopulationSize).ToList();
-            
+
             // Replace genome factory primary NEAT parameters with initialization parameters
             ((CppnGenomeFactory) brainGenomeFactory).ResetNeatGenomeParameters(NeatGenomeParameters);
-            
+
             // Initialize the evolution algorithm
             InitializationEa.Initialize(fitnessEvaluator, brainGenomeFactory, brainGenomeList, null, null);
         }
@@ -166,30 +192,15 @@ namespace MCC_Domains.BodyBrain.Bootstrappers
                 // (fitness, in this case, is set to distance)
                 viableGenomes.AddRange(
                     InitializationEa.GenomeList.Where(
-                            genome =>
-                                genome.EvaluationInfo != null &&
-                                genome.EvaluationInfo.Fitness >= MinAmbulationDistance));
+                        genome =>
+                            genome.EvaluationInfo != null &&
+                            genome.EvaluationInfo.Fitness >= MinAmbulationDistance));
 
                 Console.Out.WriteLine(
                     $"Extracted [{viableGenomes.Count}] of [{MinSuccessfulBrainCount}] required viable genomes in [{InitializationEa.CurrentEvaluations}] evaluations");
             } while (viableGenomes.Count < MinSuccessfulBrainCount);
 
             return viableGenomes;
-        }
-        
-        #endregion
-
-        #region Private methods
-
-        /// <summary>
-        ///     Print update event at every generation.
-        /// </summary>
-        /// <param name="sender">Sender</param>
-        /// <param name="e">Event arguments</param>
-        private void UpdateEvent(object sender, EventArgs e)
-        {
-            _executionLogger.Info(
-                $"(Init) Generation={InitializationEa.CurrentGeneration:N0} Evaluations={InitializationEa.CurrentEvaluations:N0} BestDistanceTraveled={InitializationEa.CurrentChampGenome.EvaluationInfo.Fitness:N6}");
         }
 
         #endregion
