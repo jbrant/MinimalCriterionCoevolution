@@ -78,7 +78,8 @@ namespace BodyBrainConfigGenerator
         private static CppnGenomeFactory CreateBrainGenomeFactory(int brainCppnInputCount = 5,
             int brainCppnOutputCount = 32)
         {
-            return new CppnGenomeFactory(brainCppnInputCount, brainCppnOutputCount);
+            return new CppnGenomeFactory(brainCppnInputCount, brainCppnOutputCount,
+                DefaultActivationFunctionLibrary.CreateLibraryCppnBipolarSigmoidDefault());
         }
 
         /// <summary>
@@ -95,8 +96,8 @@ namespace BodyBrainConfigGenerator
             int bodyCppnInputCount = 5, int bodyCppnOutputCount = 2)
         {
             return new NeatSubstrateGenomeFactory(bodyCppnInputCount, bodyCppnOutputCount,
-                DefaultActivationFunctionLibrary.CreateLibraryCppn(), new NeatSubstrateGenomeParameters(), xDim, yDim,
-                zDim, maxSize);
+                DefaultActivationFunctionLibrary.CreateLibraryCppnBipolarSigmoidDefault(),
+                new NeatSubstrateGenomeParameters(), xDim, yDim, zDim, maxSize);
         }
     }
 }

@@ -21,7 +21,7 @@
         <DeleteConnectionProbability>0.005</DeleteConnectionProbability>
         <IncreaseResolutionProbability>0.1</IncreaseResolutionProbability>
         <DecreaseResolutionProbability>0.01</DecreaseResolutionProbability>
-        <ConnectionWeightRange>5</ConnectionWeightRange>
+        <ConnectionWeightRange>1</ConnectionWeightRange>
     </GenomeConfig>
     <BehaviorConfig>
         <BehaviorCharacterization>End Point</BehaviorCharacterization>
@@ -78,7 +78,7 @@
             <AddConnnectionProbability>0.05</AddConnnectionProbability>
             <AddNodeProbability>0.01</AddNodeProbability>
             <DeleteConnectionProbability>0.001</DeleteConnectionProbability>
-            <ConnectionWeightRange>5</ConnectionWeightRange>
+            <ConnectionWeightRange>1</ConnectionWeightRange>
         </GenomeConfig>
         <InitBehaviorConfig>
             <BehaviorCharacterization>End Point</BehaviorCharacterization>

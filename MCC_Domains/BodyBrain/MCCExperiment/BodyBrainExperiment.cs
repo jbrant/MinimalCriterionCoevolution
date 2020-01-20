@@ -151,7 +151,7 @@ namespace MCC_Domains.BodyBrain
         public override IGenomeFactory<NeatGenome> CreateBrainGenomeFactory()
         {
             return new CppnGenomeFactory(BrainCppnInputCount, BrainCppnOutputCount,
-                DefaultActivationFunctionLibrary.CreateLibraryCppn(), NeatGenomeParameters);
+                DefaultActivationFunctionLibrary.CreateLibraryCppnBipolarSigmoidDefault(), NeatGenomeParameters);
         }
 
         /// <inheritdoc />
@@ -162,8 +162,8 @@ namespace MCC_Domains.BodyBrain
         public override IGenomeFactory<NeatSubstrateGenome> CreateBodyGenomeFactory()
         {
             return new NeatSubstrateGenomeFactory(BodyCppnInputCount, BodyCppnOutputCount,
-                DefaultActivationFunctionLibrary.CreateLibraryCppn(), NeatGenomeParameters, BodyGenomeParameters,
-                SimulationProperties.InitialXDimension, SimulationProperties.InitialYDimension,
+                DefaultActivationFunctionLibrary.CreateLibraryCppnBipolarSigmoidDefault(), NeatGenomeParameters,
+                BodyGenomeParameters, SimulationProperties.InitialXDimension, SimulationProperties.InitialYDimension,
                 SimulationProperties.InitialZDimension, MaxBodySize,
                 new VoxelBodyGenomeValidator(BodyDecoder, SimulationProperties.MinPercentMaterial,
                     SimulationProperties.MinPercentActive));
