@@ -79,6 +79,13 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
                 _navigatorLogFieldEnableMap.Add(genomeLoggingPair.Key, genomeLoggingPair.Value);
             }
             
+            // Add default trial logging configuration
+            foreach (var trialLoggingPair in
+                SimulationTrialFieldElements.PopulateSimulationTrialFieldElementsEnableMap())
+            {
+                _navigatorLogFieldEnableMap.Add(trialLoggingPair.Key, trialLoggingPair.Value);
+            }
+            
             // Disable logging fields not relevant to agent evolution in MCC experiment
             _navigatorLogFieldEnableMap[EvolutionFieldElements.SpecieCount] = false;
             _navigatorLogFieldEnableMap[EvolutionFieldElements.AsexualOffspringCount] = false;
