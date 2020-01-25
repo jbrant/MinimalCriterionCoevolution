@@ -25,73 +25,26 @@ using SharpNeat.Utility;
 namespace SharpNeat.Genomes.HyperNeat
 {
     /// <summary>
-    /// A sub-class of NeatGenomeFactory for creating CPPN genomes.
+    ///     A sub-class of NeatGenomeFactory for creating CPPN genomes.
     /// </summary>
     public class CppnGenomeFactory : NeatGenomeFactory
     {
-        #region Constructors
-
-        /// <summary>
-        /// Constructs with default NeatGenomeParameters, ID generators initialized to zero, a default
-        /// IActivationFunctionLibrary and genome validator.
-        /// </summary>
-        public CppnGenomeFactory(int inputNeuronCount, int outputNeuronCount,
-            IGenomeValidator<NeatGenome> genomeValidator = null)
-            : base(inputNeuronCount, outputNeuronCount, DefaultActivationFunctionLibrary.CreateLibraryCppn(),
-                genomeValidator)
-        {
-        }
-
-        /// <summary>
-        /// Constructs with default NeatGenomeParameters, ID generators initialized to zero, the provided
-        /// IActivationFunctionLibrary and the genome validator.
-        /// </summary>
-        public CppnGenomeFactory(int inputNeuronCount, int outputNeuronCount,
-            IActivationFunctionLibrary activationFnLibrary, IGenomeValidator<NeatGenome> genomeValidator = null) 
-            : base(inputNeuronCount, outputNeuronCount, activationFnLibrary, genomeValidator)
-        {
-        }
-
-        /// <summary>
-        /// Constructs with the provided IActivationFunctionLibrary, NeatGenomeParameters and genome validator.
-        /// </summary>
-        public CppnGenomeFactory(int inputNeuronCount, int outputNeuronCount,
-            IActivationFunctionLibrary activationFnLibrary, NeatGenomeParameters neatGenomeParams,
-            IGenomeValidator<NeatGenome> genomeValidator = null)
-            : base(inputNeuronCount, outputNeuronCount, activationFnLibrary, neatGenomeParams, genomeValidator)
-        {
-        }
-
-        /// <summary>
-        /// Constructs with the provided IActivationFunctionLibrary, NeatGenomeParameters, ID generators
-        /// and genome validator.
-        /// </summary>
-        public CppnGenomeFactory(int inputNeuronCount, int outputNeuronCount,
-            IActivationFunctionLibrary activationFnLibrary, NeatGenomeParameters neatGenomeParams,
-            UInt32IdGenerator genomeIdGenerator, UInt32IdGenerator innovationIdGenerator,
-            IGenomeValidator<NeatGenome> genomeValidator = null)
-            : base(inputNeuronCount, outputNeuronCount, activationFnLibrary, neatGenomeParams, genomeIdGenerator,
-                innovationIdGenerator, genomeValidator)
-        {
-        }
-
-        #endregion
-
         #region Public Methods [NeatGenome Specific / CPPN Overrides]
 
         /// <summary>
-        /// Override that randomly assigns activation functions to neuron's from an activation function library
-        /// based on each library item's selection probability.
+        ///     Override that randomly assigns activation functions to neuron's from an activation function library
+        ///     based on each library item's selection probability.
         /// </summary>
         public override NeuronGene CreateNeuronGene(uint innovationId, NodeType neuronType)
         {
             int activationFnId;
-            switch(neuronType)
+            switch (neuronType)
             {
                 case NodeType.Bias:
                 case NodeType.Input:
                 case NodeType.Output:
-                {   // Use the ID of the first function. By convention this will be the Linear function but in actual 
+                {
+                    // Use the ID of the first function. By convention this will be the Linear function but in actual 
                     // fact bias and input neurons don't use their activation function.
                     activationFnId = _activationFnLibrary.GetFunctionList()[0].Id;
                     break;
@@ -104,6 +57,63 @@ namespace SharpNeat.Genomes.HyperNeat
             }
 
             return new NeuronGene(innovationId, neuronType, activationFnId);
+        }
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        ///     Constructs with default NeatGenomeParameters, ID generators initialized to zero, a default
+        ///     IActivationFunctionLibrary and genome validator.
+        /// </summary>
+        public CppnGenomeFactory(int inputNeuronCount, int outputNeuronCount,
+            IGenomeValidator<NeatGenome> genomeValidator = null)
+            : base(inputNeuronCount, outputNeuronCount, DefaultActivationFunctionLibrary.CreateLibraryCppn(),
+                genomeValidator)
+        {
+        }
+
+        /// <summary>
+        ///     Constructs with default NeatGenomeParameters, ID generators initialized to zero, the provided
+        ///     IActivationFunctionLibrary and the genome validator.
+        /// </summary>
+        public CppnGenomeFactory(int inputNeuronCount, int outputNeuronCount,
+            IActivationFunctionLibrary activationFnLibrary, IGenomeValidator<NeatGenome> genomeValidator = null)
+            : base(inputNeuronCount, outputNeuronCount, activationFnLibrary, genomeValidator)
+        {
+        }
+
+        /// <summary>
+        ///     Constructs with the provided IActivationFunctionLibrary, NeatGenomeParameters and genome validator.
+        /// </summary>
+        public CppnGenomeFactory(int inputNeuronCount, int outputNeuronCount,
+            IActivationFunctionLibrary activationFnLibrary, NeatGenomeParameters neatGenomeParams,
+            IGenomeValidator<NeatGenome> genomeValidator = null)
+            : base(inputNeuronCount, outputNeuronCount, activationFnLibrary, neatGenomeParams, genomeValidator)
+        {
+        }
+
+        /// <summary>
+        ///     Constructs with the provided IActivationFunctionLibrary, NeatGenomeParameters, ID generators
+        ///     and genome validator.
+        /// </summary>
+        public CppnGenomeFactory(int inputNeuronCount, int outputNeuronCount,
+            IActivationFunctionLibrary activationFnLibrary, NeatGenomeParameters neatGenomeParams,
+            UInt32IdGenerator genomeIdGenerator, UInt32IdGenerator innovationIdGenerator,
+            IGenomeValidator<NeatGenome> genomeValidator = null)
+            : base(inputNeuronCount, outputNeuronCount, activationFnLibrary, neatGenomeParams, genomeIdGenerator,
+                innovationIdGenerator, genomeValidator)
+        {
+        }
+
+        /// <summary>
+        ///     CppnGenomeFactory copy constructor.
+        /// </summary>
+        public CppnGenomeFactory(CppnGenomeFactory factory) : this(factory.InputNeuronCount, factory.OutputNeuronCount,
+            factory.ActivationFnLibrary, factory.NeatGenomeParameters, factory.GenomeIdGenerator,
+            factory.InnovationIdGenerator)
+        {
         }
 
         #endregion

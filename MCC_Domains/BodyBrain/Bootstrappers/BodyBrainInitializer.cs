@@ -7,6 +7,7 @@ using MCC_Domains.BodyBrain.MCCExperiment;
 using MCC_Domains.Utils;
 using SharpNeat.Core;
 using SharpNeat.EvolutionAlgorithms;
+using SharpNeat.Genomes.HyperNeat;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Phenomes;
 using SharpNeat.Phenomes.Voxels;
@@ -196,6 +197,9 @@ namespace MCC_Domains.BodyBrain
 
             do
             {
+                // Reset the genome factory from previous runs (so we don't accumulate innovations across multiple restarts)
+                genomeFactory = new CppnGenomeFactory(genomeFactory as CppnGenomeFactory);
+                
                 // Instantiate the internal initialization algorithm
                 InitializeAlgorithm(parallelOptions, seedBrainList.ToList(), genomeFactory, brainGenomeDecoder, body,
                     0);
