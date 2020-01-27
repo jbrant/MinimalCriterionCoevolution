@@ -3,14 +3,9 @@ namespace MazeExperimentSupportLib
     public struct MazeDiversityUnit
     {
         /// <summary>
-        ///     The unique identifier of the first maze (which is the source maze being compared).
+        ///     The unique identifier of the maze whose solution path diversity is calculated.
         /// </summary>
-        public uint MazeId1 { get; }
-
-        /// <summary>
-        ///     The unique identifier of the second maze (the maze to which the first is being compared).
-        /// </summary>
-        public uint MazeId2 { get; }
+        public uint MazeId { get; }
 
         /// <summary>
         ///     The diversity score of maze 1 compared to maze 2 in terms of the distance between solution paths.
@@ -20,16 +15,13 @@ namespace MazeExperimentSupportLib
         /// <summary>
         ///     Maze diversity unit constructor.
         /// </summary>
-        /// <param name="mazeId1">The unique identifier of the first maze (which is the source maze being compared).</param>
-        /// <param name="mazeId2">The unique identifier of the second maze (the maze to which the first is being compared).</param>
+        /// <param name="mazeId">The unique identifier of the maze whose solution path diversity is calculated.</param>
         /// <param name="mazeDiversityScore">
-        ///     The diversity score of maze 1 compared to maze 2 in terms of the distance between
-        ///     solution paths.
+        ///     The diversity score of the given maze compared to the solution paths of all other mazes in the population.
         /// </param>
-        public MazeDiversityUnit(uint mazeId1, uint mazeId2, double mazeDiversityScore)
+        public MazeDiversityUnit(uint mazeId, double mazeDiversityScore)
         {
-            MazeId1 = mazeId1;
-            MazeId2 = mazeId2;
+            MazeId = mazeId;
             MazeDiversityScore = mazeDiversityScore;
         }
     }

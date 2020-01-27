@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using SharpNeat.Utility;
 
@@ -25,10 +26,11 @@ namespace SharpNeat.Phenomes.Voxels
         {
             // Activate CPPN for all positions on the substrate to get the oscillation frequency and
             // per-voxel phase offset values
-            var freqPhaseOffsetTuple = ExtractVoxelFrequencyPhaseOffsets(cppn, substrateX, substrateY, substrateZ);
+            ExtractVoxelFrequencyPhaseOffsets(cppn, substrateX, substrateY, substrateZ, out var frequency,
+                out var phaseOffsets);
 
-            Frequency = freqPhaseOffsetTuple.Item1;
-            _voxelCellPhaseOffsets = freqPhaseOffsetTuple.Item2;
+            Frequency = frequency;
+            _voxelCellPhaseOffsets = phaseOffsets;
 
             // Carry through the genome ID from the generate genome
             GenomeId = cppn.GenomeId;
@@ -62,16 +64,17 @@ namespace SharpNeat.Phenomes.Voxels
         /// <param name="substrateY">The substrate resolution along the Y dimension.</param>
         /// <param name="substrateZ">The substrate resolution along the Z dimension.</param>
         /// <returns>The layer-wise phase offset values for each voxel.</returns>
-        private Tuple<double, IList<IList<double>>> ExtractVoxelFrequencyPhaseOffsets(IBlackBox cppn, int substrateX,
+        private void ExtractVoxelFrequencyPhaseOffsets(IBlackBox cppn,
+            int substrateX,
             int substrateY,
-            int substrateZ)
+            int substrateZ, out double frequency, out IList<IList<double>> phaseOffsets)
         {
             IList<IList<double>> layerwisePhaseOffsets = new List<IList<double>>(substrateZ);
-            var freqAccumulator = 0.0;
+            var frequencies = new List<double>(substrateX * substrateY * substrateZ);
 
             // Compute distance to centroid for each voxel in the body
             var distanceMatrix = VoxelUtils.ComputeVoxelDistanceMatrix(substrateX, substrateY, substrateZ);
-            
+
             // Normalize each position along each of three axes
             var xAxisNorm = VoxelUtils.NormalizeAxis(substrateX);
             var yAxisNorm = VoxelUtils.NormalizeAxis(substrateY);
@@ -87,7 +90,7 @@ namespace SharpNeat.Phenomes.Voxels
                 for (var y = 0; y < substrateY; y++)
                 {
                     for (var x = 0; x < substrateX; x++)
-                    {                        
+                    {
                         // Get references to CPPN input and output
                         var inputSignalArr = cppn.InputSignalArray;
                         var outputSignalArr = cppn.OutputSignalArray;
@@ -108,7 +111,7 @@ namespace SharpNeat.Phenomes.Voxels
                         layerPhaseOffsets.Add(outputSignalArr[0]);
 
                         // Add frequency
-                        freqAccumulator += outputSignalArr[1];
+                        frequencies.Add(outputSignalArr[1]);
                     }
                 }
 
@@ -117,10 +120,10 @@ namespace SharpNeat.Phenomes.Voxels
             }
 
             // Compute overall oscillation frequency
-            var frequency = 7.5 + 5.0 * Math.Max(-0.5,
-                                Math.Min(0.5, freqAccumulator / (substrateX * substrateY * substrateZ)));
+            frequency = 7.5 + 5.0 * Math.Max(-0.5, Math.Min(0.5, frequencies.Average()));
 
-            return new Tuple<double, IList<IList<double>>>(frequency, layerwisePhaseOffsets);
+            // Set the phase offsets output parameter
+            phaseOffsets = layerwisePhaseOffsets;
         }
 
         #endregion

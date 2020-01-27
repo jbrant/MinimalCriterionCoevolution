@@ -70,7 +70,8 @@ namespace MazeExperimentSupportLib
         /// </summary>
         /// <param name="curChunkMazes">The collection of mazes being evaluated during the current chunk.</param>
         /// <returns>The collection of maze genome IDs along with the number of deceptive turns in their solution path.</returns>
-        public static IEnumerable<Tuple<uint, int>> CalculateDeceptiveTurnCount(IEnumerable<MazeStructure> curChunkMazes)
+        public static IEnumerable<Tuple<uint, int>> CalculateDeceptiveTurnCount(
+            IEnumerable<MazeStructure> curChunkMazes)
         {
             var mazeDeceptiveTurns = new ConcurrentBag<Tuple<uint, int>>();
 
@@ -151,25 +152,28 @@ namespace MazeExperimentSupportLib
         public static IEnumerable<MazeDiversityUnit> CalculateMazeDiversity(IEnumerable<MazeStructure> curChunkMazes,
             IList<MazeStructure> allMazes)
         {
-            var mazeDiversityUnits = new ConcurrentBag<MazeDiversityUnit>();
+            var mazeDiversityUnits = new List<MazeDiversityUnit>();
 
-            // Loop through each solution path and compute cell-wise, manhattan distance between each pair
-            foreach (var mazeStructure in curChunkMazes)
+            // Loop through every maze in the population, comparing its solution path
+            foreach (var curMaze in curChunkMazes)
             {
-                Parallel.ForEach(allMazes, cmprMazeStructure =>
+                var curMazeDiversityScores = new ConcurrentBag<double>();
+
+                // Compute the solution path diversity for all mazes in the current chunk against the entire population
+                Parallel.ForEach(allMazes, comparisonMaze =>
                 {
                     // Path cell counter
-                    int pathCellCount = 0;
-                    
+                    var pathCellCount = 0;
+
                     // Distance accumulator for the current maze
                     var pathDistance = 0.0;
 
                     // Don't compare the current maze to itself
-                    if (mazeStructure == cmprMazeStructure) return;
+                    if (curMaze == comparisonMaze) return;
 
                     // Initialize current cells to one location beyond the maze start location
-                    var curCell = mazeStructure.GetNextPathCell(mazeStructure.UnscaledStartLocation);
-                    var curCmprCell = cmprMazeStructure.GetNextPathCell(cmprMazeStructure.UnscaledStartLocation);
+                    var curCell = curMaze.GetNextPathCell(curMaze.UnscaledStartLocation);
+                    var curCmprCell = comparisonMaze.GetNextPathCell(comparisonMaze.UnscaledStartLocation);
 
                     do
                     {
@@ -179,9 +183,9 @@ namespace MazeExperimentSupportLib
                         try
                         {
                             // Increment to the next cell of both mazes
-                            curCell = mazeStructure.GetNextPathCell(curCell);
-                            curCmprCell = cmprMazeStructure.GetNextPathCell(curCmprCell);
-                            
+                            curCell = curMaze.GetNextPathCell(curCell);
+                            curCmprCell = comparisonMaze.GetNextPathCell(curCmprCell);
+
                             // Increment the path cell count
                             pathCellCount++;
                         }
@@ -190,13 +194,15 @@ namespace MazeExperimentSupportLib
                             Console.WriteLine(e);
                             throw;
                         }
-                    } while (curCell != mazeStructure.UnscaledTargetLocation ||
-                             curCmprCell != cmprMazeStructure.UnscaledTargetLocation);
+                    } while (curCell != curMaze.UnscaledTargetLocation ||
+                             curCmprCell != comparisonMaze.UnscaledTargetLocation);
 
                     // Record the distance between the two maze solution paths
-                    mazeDiversityUnits.Add(new MazeDiversityUnit(mazeStructure.GenomeId, cmprMazeStructure.GenomeId,
-                        pathDistance/pathCellCount));
+                    curMazeDiversityScores.Add(pathDistance / pathCellCount);
                 });
+
+                // Compute overall solution path diversity for the current maze
+                mazeDiversityUnits.Add(new MazeDiversityUnit(curMaze.GenomeId, curMazeDiversityScores.Average()));
             }
 
             return mazeDiversityUnits;
@@ -616,7 +622,7 @@ namespace MazeExperimentSupportLib
                 var curObsClusterAssignment = clusterAssignments[observationIdx];
 
                 // Only add observation silhouette width if it is NOT the sole member of its assigned cluster
-                if (Enumerable.Count(clusterAssignments, ca => ca == curObsClusterAssignment) > 1)
+                if (clusterAssignments.Count(ca => ca == curObsClusterAssignment) > 1)
                 {
                     // Setup list to hold average distance from current observation to every other neighboring cluster
                     var neighboringClusterDistances = new List<double>(clusters.Count);
@@ -665,15 +671,13 @@ namespace MazeExperimentSupportLib
                             // Compute the average intercluster dissimilarity for the current neighboring 
                             // cluster and add to the list of average neighboring cluster distances
                             neighboringClusterDistances.Add(curObsNeighboringClusterDissimilarity /
-                                                            Enumerable.Count(clusterAssignments,
-                                                                ca => ca == clusterIdx));
+                                                            clusterAssignments.Count(ca => ca == clusterIdx));
                         }
                     }
 
                     // Compute the average intracluster dissimilarity (local variance)
                     obsIntraclusterDissimilarity = obsIntraclusterDissimilarity /
-                                                   Enumerable.Count(clusterAssignments,
-                                                       ca => ca == curObsClusterAssignment);
+                                                   clusterAssignments.Count(ca => ca == curObsClusterAssignment);
 
                     // Get the minimum intercluster dissimilarity (0 if there are no centroid differences)
                     var obsInterClusterDissimilarity = neighboringClusterDistances.Any()

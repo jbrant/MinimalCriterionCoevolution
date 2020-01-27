@@ -10,8 +10,6 @@
     <ResourceLimit>5</ResourceLimit>
     <Activation>
         <Scheme>Acyclic</Scheme>
-        <Iters>
-        </Iters>
     </Activation>
     <GenomeConfig>
         <InitialConnectionProportion>1</InitialConnectionProportion>

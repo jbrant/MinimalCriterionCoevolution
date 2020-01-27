@@ -157,13 +157,21 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
             {
                 var isSuccessful = false;
                 ulong threadLocalEvaluationCount;
+                IVoxelBrain brain;
 
                 // Get the current body under evaluation
                 var body = _voxelBodyFactory.GetVoxelBody(cnt);
 
                 // Create new voxel brain based on the dimensions of the current voxel body
-                var brain = new VoxelAnnBrain(brainCppn, body.LengthX, body.LengthY, body.LengthZ,
-                    _simulationProperties.NumBrainConnections);
+                if (_simulationProperties.BrainType == BrainType.NeuralNet)
+                {
+                    brain = new VoxelAnnBrain(brainCppn, body.LengthX, body.LengthY, body.LengthZ,
+                        _simulationProperties.NumBrainConnections);
+                }
+                else
+                {
+                    brain = new VoxelPhaseOffsetBrain(brainCppn, body.LengthX, body.LengthY, body.LengthZ);
+                }
 
                 lock (_evaluationLock)
                 {

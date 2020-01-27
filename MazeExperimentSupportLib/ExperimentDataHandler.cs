@@ -1784,8 +1784,7 @@ namespace MazeExperimentSupportLib
                     {
                         experimentId.ToString(),
                         run.ToString(),
-                        diversityUnit.MazeId1.ToString(),
-                        diversityUnit.MazeId2.ToString(),
+                        diversityUnit.MazeId.ToString(),
                         diversityUnit.MazeDiversityScore.ToString(CultureInfo.InvariantCulture)
                     }));
             }

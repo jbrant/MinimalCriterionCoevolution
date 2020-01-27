@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.IO.IsolatedStorage;
 using SharpNeat.Core;
 using SharpNeat.Loggers;
 using SharpNeat.Phenomes;
@@ -162,7 +163,7 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
                 vxaSimGaXPath: _simulationProperties.SimOutputXPath,
                 vxaStructureXPath: _simulationProperties.StructurePropertiesXPath,
                 vxaMcXPath: _simulationProperties.MinimalCriterionXPath);
-
+            
             // Configure the simulation, execute and wait for completion
             using (var process =
                 Process.Start(
@@ -171,21 +172,22 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
             {
                 process?.WaitForExit();
             }
-
+            
             // Read distance traversed from the results file
             var simResults = BodyBrainExperimentUtils.ReadSimulationResults(simResultFilePath);
-
+            
             // Set the stop condition flag if the ambulation MC has been met
             if (simResults.Distance >= _minAmbulationDistance)
             {
                 StopConditionSatisfied = true;
                 isSuccessful = true;
             }
-
+            
             // Record simulation trial info
             behaviorInfo.TrialData.Add(new TrialInfo(isSuccessful, simResults.Distance, simResults.SimulationTime,
                 _voxelBody.GenomeId, new[] {simResults.Location.X, simResults.Location.Y}));
-
+            
+            /*
             // Log trial information
             _evaluationLogger?.LogRow(new List<LoggableElement>
             {
@@ -194,6 +196,7 @@ namespace MCC_Domains.BodyBrain.MCCExperiment
                 new LoggableElement(EvaluationFieldElements.StopConditionSatisfied, StopConditionSatisfied),
                 new LoggableElement(EvaluationFieldElements.RunPhase, RunPhase.Initialization)
             }, simResults.GetLoggableElements());
+            */
 
             if (!isSuccessful)
             {
