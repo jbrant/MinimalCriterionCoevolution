@@ -10,6 +10,7 @@
   <MazeSeedGenomeCount>10</MazeSeedGenomeCount>
   <AgentNumSpecies>20</AgentNumSpecies>
   <MazeNumSpecies>10</MazeNumSpecies>
+  <RespeciateInterval>20</RespeciateInterval>
   <AgentSpecieSizeFixed>True</AgentSpecieSizeFixed>
   <MazeSpecieSizeFixed>True</MazeSpecieSizeFixed>
   <Activation>

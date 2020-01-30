@@ -84,6 +84,11 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
         private int _mazeNumSpecies;
 
         /// <summary>
+        ///     The batch interval at which the population is to be respeciated.
+        /// </summary>
+        private int _respeciateInterval;
+
+        /// <summary>
         ///     Logs statistics about the navigator populations for every batch.
         /// </summary>
         private IDataLogger _navigatorEvolutionDataLogger;
@@ -155,6 +160,9 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             _agentNumSpecies = XmlUtils.GetValueAsInt(xmlConfig, "AgentNumSpecies");
             _mazeNumSpecies = XmlUtils.GetValueAsInt(xmlConfig, "MazeNumSpecies");
 
+            // Read respeciate interval
+            _respeciateInterval = XmlUtils.GetValueAsInt(xmlConfig, "RespeciateInterval");
+
             // Initialize the data loggers for the given experiment/run
             _navigatorEvolutionDataLogger =
                 new FileDataLogger($"{logFileDirectory}\\{name} - Run{runIdx} - NavigatorEvolution.csv");
@@ -174,7 +182,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
 
             // Create new evolution field elements map with all fields enabled
             _navigatorLogFieldEnableMap = EvolutionFieldElements.PopulateEvolutionFieldElementsEnableMap();
-            
+
             // Add default evolution logging configuration specific to maze navigation experiment
             foreach (var evolutionLoggingPair in
                 MazeNavEvolutionFieldElements.PopulateEvolutionFieldElementsEnableMap())
@@ -193,7 +201,7 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             {
                 _navigatorLogFieldEnableMap.Add(genomeLoggingPair.Key, genomeLoggingPair.Value);
             }
-            
+
             // Add default trial logging configuration
             foreach (var trialLoggingPair in
                 SimulationTrialFieldElements.PopulateSimulationTrialFieldElementsEnableMap())
@@ -361,16 +369,16 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
             AbstractEvolutionAlgorithm<NeatGenome> neatEvolutionAlgorithm = new QueueEvolutionAlgorithm<NeatGenome>(
                 neatEaParams, new NeatAlgorithmStats(neatEaParams),
                 new ParallelKMeansClusteringStrategy<NeatGenome>(new ManhattanDistanceMetric(1.0, 0.0, 10.0),
-                    ParallelOptions), null, NavigatorBatchSize, RunPhase.Primary, _navigatorEvolutionDataLogger,
-                _navigatorLogFieldEnableMap, _navigatorPopulationDataLogger, _navigatorGenomeDataLogger,
-                _navigatorSimulationTrialDataLogger);
+                    ParallelOptions), _respeciateInterval, null, NavigatorBatchSize / _agentNumSpecies,
+                RunPhase.Primary, _navigatorEvolutionDataLogger, _navigatorLogFieldEnableMap,
+                _navigatorPopulationDataLogger, _navigatorGenomeDataLogger, _navigatorSimulationTrialDataLogger);
 
             // Create the maze queueing evolution algorithm
             AbstractEvolutionAlgorithm<MazeGenome> mazeEvolutionAlgorithm = new QueueEvolutionAlgorithm<MazeGenome>(
                 mazeEaParams, new MazeAlgorithmStats(mazeEaParams),
                 new ParallelKMeansClusteringStrategy<MazeGenome>(new ManhattanDistanceMetric(1.0, 0.0, 10.0),
-                    ParallelOptions), null, MazeBatchSize, RunPhase.Primary, _mazeEvolutionDataLogger,
-                _mazeLogFieldEnableMap, _mazePopulationDataLogger, _mazeGenomeDataLogger,
+                    ParallelOptions), _respeciateInterval, null, MazeBatchSize / _mazeNumSpecies, RunPhase.Primary,
+                _mazeEvolutionDataLogger, _mazeLogFieldEnableMap, _mazePopulationDataLogger, _mazeGenomeDataLogger,
                 _mazeSimulationTrialDataLogger);
 
             // Create the maze phenome evaluator

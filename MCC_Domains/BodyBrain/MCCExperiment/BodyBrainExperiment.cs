@@ -212,17 +212,17 @@ namespace MCC_Domains.BodyBrain
             };
 
             // Create the NEAT EA for brains
-            AbstractEvolutionAlgorithm<NeatGenome> brainEvolutionAlgorithm =
-                new QueueEvolutionAlgorithm<NeatGenome>(eaParams, new NeatAlgorithmStats(eaParams), null, null,
-                    BrainBatchSize, RunPhase.Primary, _brainEvolutionDataLogger, _brainLogFieldEnableMap,
-                    _brainPopulationDataLogger, _brainGenomeDataLogger, _brainSimulationTrialDataLogger);
+            AbstractEvolutionAlgorithm<NeatGenome> brainEvolutionAlgorithm = new QueueEvolutionAlgorithm<NeatGenome>(
+                eaParams, new NeatAlgorithmStats(eaParams), null, BrainBatchSize, RunPhase.Primary,
+                _brainEvolutionDataLogger, _brainLogFieldEnableMap, _brainPopulationDataLogger, _brainGenomeDataLogger,
+                _brainSimulationTrialDataLogger);
 
             // Create the NEAT EA for bodies
             AbstractEvolutionAlgorithm<NeatSubstrateGenome> bodyEvolutionAlgorithm =
                 new QueueEvolutionAlgorithm<NeatSubstrateGenome>(eaParams,
-                    new VoxelBodyAlgorithmStats(eaParams, BodyDecoder), null, null, BodyBatchSize,
-                    RunPhase.Primary, _bodyEvolutionDataLogger, _bodyLogFieldEnableMap, _bodyPopulationDataLogger,
-                    _bodyGenomeDataLogger, _bodySimulationTrialDataLogger);
+                    new VoxelBodyAlgorithmStats(eaParams, BodyDecoder), null, BodyBatchSize, RunPhase.Primary,
+                    _bodyEvolutionDataLogger, _bodyLogFieldEnableMap, _bodyPopulationDataLogger, _bodyGenomeDataLogger,
+                    _bodySimulationTrialDataLogger);
 
 
             // Create the brain phenome evaluator

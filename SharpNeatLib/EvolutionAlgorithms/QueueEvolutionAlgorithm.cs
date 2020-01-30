@@ -41,6 +41,7 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <param name="eaParams">The NEAT algorithm parameters.c</param>
         /// <param name="stats">The evolution algorithm statistics container.</param>
         /// <param name="speciationStrategy">The speciation strategy.</param>
+        /// <param name="respeciateInterval">The batch interval at which the population should be respeciated.</param>
         /// <param name="complexityRegulationStrategy">The complexity regulation strategy.</param>
         /// <param name="batchSize">The batch size of offspring to produce, evaluate, and remove.</param>
         /// <param name="runPhase">
@@ -53,7 +54,8 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <param name="simulationTrialLogger">The simulation trial data logger (optional).</param>
         /// <param name="genomeLogger">The genome data logger (optional).</param>
         public QueueEvolutionAlgorithm(EvolutionAlgorithmParameters eaParams, IEvolutionAlgorithmStats stats,
-            ISpeciationStrategy<TGenome> speciationStrategy, IComplexityRegulationStrategy complexityRegulationStrategy,
+            ISpeciationStrategy<TGenome> speciationStrategy, int respeciateInterval,
+            IComplexityRegulationStrategy complexityRegulationStrategy,
             int batchSize, RunPhase runPhase = RunPhase.Primary, IDataLogger evolutionLogger = null,
             IDictionary<FieldElement, bool> logFieldEnabledMap = null, IDataLogger populationLogger = null,
             IDataLogger genomeLogger = null, IDataLogger simulationTrialLogger = null) : base(eaParams, stats)
@@ -89,7 +91,7 @@ namespace SharpNeat.EvolutionAlgorithms
             IComplexityRegulationStrategy complexityRegulationStrategy,
             int batchSize, RunPhase runPhase = RunPhase.Primary, IDataLogger evolutionLogger = null,
             IDictionary<FieldElement, bool> logFieldEnabledMap = null, IDataLogger populationLogger = null,
-            IDataLogger genomeLogger = null, IDataLogger simulationTrialLogger = null) : this(eaParams, stats, null,
+            IDataLogger genomeLogger = null, IDataLogger simulationTrialLogger = null) : this(eaParams, stats, null, 0,
             complexityRegulationStrategy, batchSize, runPhase, evolutionLogger, logFieldEnabledMap, populationLogger,
             genomeLogger, simulationTrialLogger)
         {
@@ -314,7 +316,7 @@ namespace SharpNeat.EvolutionAlgorithms
         public override void PerformOneGeneration()
         {
             List<TGenome> childGenomes;
-            
+
             if (EaParams.SpecieCount > 0)
             {
                 childGenomes = new List<TGenome>(_batchSize);
@@ -352,6 +354,13 @@ namespace SharpNeat.EvolutionAlgorithms
                 // Recompute centroids and assign child genomes to species with closest genetic 
                 // similarity (but don't respeciate)
                 SpeciationStrategy.SpeciateOffspring(childGenomes, SpecieList, false);
+
+                // Respeciate after elapsed number of batches
+                if (CurrentGeneration % 20 == 0)
+                {
+                    ClearAllSpecies();
+                    SpeciationStrategy.SpeciateGenomes(GenomeList, SpecieList);
+                }
 
                 // Perform per-species removals based on whether the cap for that species has been exceeded
                 RemoveOldestFromOverfullSpecies();

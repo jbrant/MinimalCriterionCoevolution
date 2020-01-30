@@ -350,18 +350,14 @@ namespace MCC_Domains.MazeNavigation.MCCExperiment
 
             // Create the NEAT (i.e. navigator) queueing evolution algorithm
             AbstractEvolutionAlgorithm<NeatGenome> neatEvolutionAlgorithm = new QueueEvolutionAlgorithm<NeatGenome>(
-                neatEaParams, new NeatAlgorithmStats(neatEaParams),
-                new ParallelKMeansClusteringStrategy<NeatGenome>(new ManhattanDistanceMetric(1.0, 0.0, 10.0),
-                    ParallelOptions), null, NavigatorBatchSize, RunPhase.Primary, _navigatorEvolutionDataLogger,
-                _navigatorLogFieldEnableMap, _navigatorPopulationDataLogger, _navigatorGenomeDataLogger,
-                _navigatorSimulationTrialDataLogger);
+                neatEaParams, new NeatAlgorithmStats(neatEaParams), null, NavigatorBatchSize, RunPhase.Primary,
+                _navigatorEvolutionDataLogger, _navigatorLogFieldEnableMap, _navigatorPopulationDataLogger,
+                _navigatorGenomeDataLogger, _navigatorSimulationTrialDataLogger);
 
             // Create the maze queueing evolution algorithm
             AbstractEvolutionAlgorithm<MazeGenome> mazeEvolutionAlgorithm = new QueueEvolutionAlgorithm<MazeGenome>(
-                mazeEaParams, new MazeAlgorithmStats(mazeEaParams),
-                new ParallelKMeansClusteringStrategy<MazeGenome>(new ManhattanDistanceMetric(1.0, 0.0, 10.0),
-                    ParallelOptions), null, MazeBatchSize, RunPhase.Primary, _mazeEvolutionDataLogger,
-                _mazeLogFieldEnableMap, _mazePopulationDataLogger, _mazeGenomeDataLogger,
+                mazeEaParams, new MazeAlgorithmStats(mazeEaParams), null, MazeBatchSize, RunPhase.Primary,
+                _mazeEvolutionDataLogger, _mazeLogFieldEnableMap, _mazePopulationDataLogger, _mazeGenomeDataLogger,
                 _mazeSimulationTrialDataLogger);
 
             // Create the maze phenome evaluator
