@@ -30,6 +30,11 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </summary>
         private readonly int _batchSize;
 
+        /// <summary>
+        ///     The interval at which genomes in the population are respeciated.
+        /// </summary>
+        private readonly int _respeciateInterval;
+
         #endregion
 
         #region Constructors
@@ -63,6 +68,7 @@ namespace SharpNeat.EvolutionAlgorithms
             SpeciationStrategy = speciationStrategy;
             ComplexityRegulationStrategy = complexityRegulationStrategy;
             _batchSize = batchSize;
+            _respeciateInterval = respeciateInterval;
             EvolutionLogger = evolutionLogger;
             PopulationLogger = populationLogger;
             GenomeLogger = genomeLogger;
@@ -87,6 +93,7 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <param name="logFieldEnabledMap">Dictionary of logging fields that can be dynamically enabled or disabled.</param>
         /// <param name="populationLogger">The population data logger (optional).</param>
         /// <param name="genomeLogger">The genome data logger (optional).</param>
+        /// <param name="simulationTrialLogger">The trial data logger (optional).</param>
         public QueueEvolutionAlgorithm(EvolutionAlgorithmParameters eaParams, IEvolutionAlgorithmStats stats,
             IComplexityRegulationStrategy complexityRegulationStrategy,
             int batchSize, RunPhase runPhase = RunPhase.Primary, IDataLogger evolutionLogger = null,
@@ -356,7 +363,7 @@ namespace SharpNeat.EvolutionAlgorithms
                 SpeciationStrategy.SpeciateOffspring(childGenomes, SpecieList, false);
 
                 // Respeciate after elapsed number of batches
-                if (CurrentGeneration % 20 == 0)
+                if (CurrentGeneration % _respeciateInterval == 0)
                 {
                     ClearAllSpecies();
                     SpeciationStrategy.SpeciateGenomes(GenomeList, SpecieList);
