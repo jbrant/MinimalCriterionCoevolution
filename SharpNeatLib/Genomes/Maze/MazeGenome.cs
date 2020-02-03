@@ -282,12 +282,13 @@ namespace SharpNeat.Genomes.Maze
 
                 for (var i = 0; i < PathGeneList.Count; i++)
                 {
-                    var xPosition = PathGeneList[i].Waypoint.X;
-                    var yPosition = PathGeneList[i].Waypoint.Y;
+                    var xPosition = (double) PathGeneList[i].Waypoint.X;
+                    var yPosition = (double) PathGeneList[i].Waypoint.Y;
 
                     // Calculate cantor pairing of X and Y coordinates
-                    double compositeGeneCoordinate = (xPosition + yPosition) *
-                                                     (xPosition + yPosition + 1) / 2 + yPosition;
+                    var compositeGeneCoordinate =
+                        ((xPosition + yPosition) * (xPosition + yPosition + 1) / 2 + yPosition) /
+                        (MazeBoundaryHeight * MazeBoundaryWidth);
 
                     // Add gene coordinate to array
                     coordElemArray[i] = new KeyValuePair<ulong, double>(PathGeneList[i].InnovationId,
