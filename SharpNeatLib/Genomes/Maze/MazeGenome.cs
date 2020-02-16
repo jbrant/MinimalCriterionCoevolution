@@ -278,21 +278,16 @@ namespace SharpNeat.Genomes.Maze
 
                 // Create array of key/value pairs to hold innovation IDs and their corresponding 
                 // "position" in the genetic encoding space                    
-                var coordElemArray = new KeyValuePair<ulong, double>[pathWaypointCount];
+                var coordElemArray = new KeyValuePair<ulong, double>[pathWaypointCount * 2];
 
-                for (var i = 0; i < PathGeneList.Count; i++)
+                for (var (pathIdx, coordIdx) = (0, 0); pathIdx < PathGeneList.Count; pathIdx++, coordIdx += 2)
                 {
-                    var xPosition = (double) PathGeneList[i].Waypoint.X;
-                    var yPosition = (double) PathGeneList[i].Waypoint.Y;
+                    var xPosition = (double) PathGeneList[pathIdx].Waypoint.X;
+                    var yPosition = (double) PathGeneList[pathIdx].Waypoint.Y;
 
-                    // Calculate cantor pairing of X and Y coordinates
-                    var compositeGeneCoordinate =
-                        ((xPosition + yPosition) * (xPosition + yPosition + 1) / 2 + yPosition) /
-                        (MazeBoundaryHeight * MazeBoundaryWidth);
-
-                    // Add gene coordinate to array
-                    coordElemArray[i] = new KeyValuePair<ulong, double>(PathGeneList[i].InnovationId,
-                        compositeGeneCoordinate);
+                    // Add gene coordinates to array
+                    coordElemArray[coordIdx] = new KeyValuePair<ulong, double>((ulong) coordIdx, xPosition);
+                    coordElemArray[coordIdx + 1] = new KeyValuePair<ulong, double>((ulong) coordIdx + 1, yPosition);
                 }
 
                 // Note that walls are omitted from genome position definition because their placement
