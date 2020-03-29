@@ -400,7 +400,7 @@ namespace SharpNeat.Genomes.Maze
                         MutateAddWall();
                         break;
                     case 3:
-                        MutateDeleteWall();
+                        isMutationSuccessful = MutateDeleteWall();
                         break;
                     case 4:
                         MutateExpandMaze();
@@ -544,12 +544,12 @@ namespace SharpNeat.Genomes.Maze
         /// <summary>
         ///     Probabilistically deletes a random wall.  This is equivalent to deleting a gene from the genome.
         /// </summary>
-        private void MutateDeleteWall()
+        private bool MutateDeleteWall()
         {
             // Don't attempt to delete a wall if only one exists
             if (WallGeneList.Count < 2)
             {
-                return;
+                return false;
             }
 
             // Select a random wall to be deleted
@@ -557,6 +557,8 @@ namespace SharpNeat.Genomes.Maze
 
             // Delete the wall
             WallGeneList.RemoveAt(wallIdx);
+
+            return true;
         }
 
         /// <summary>
