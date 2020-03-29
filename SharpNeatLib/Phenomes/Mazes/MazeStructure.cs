@@ -23,8 +23,10 @@ namespace SharpNeat.Phenomes.Mazes
         /// <param name="mazeWidth">The width of the maze.</param>
         /// <param name="mazeHeight">The height of the maze.</param>
         /// <param name="scaleMultiplier">The multiplier dictating the increase (or decrease) in maze size.</param>
-        public MazeStructure(int mazeWidth, int mazeHeight, int scaleMultiplier)
+        /// <param name="genomeId">The unique identifier of the genome from which the phenotype was generated (optional).</param>
+        public MazeStructure(int mazeWidth, int mazeHeight, int scaleMultiplier, uint genomeId = uint.MaxValue)
         {
+            GenomeId = genomeId;
             Walls = new List<MazeStructureWall>();
             _mazeWidth = mazeWidth;
             _mazeHeight = mazeHeight;
@@ -64,9 +66,42 @@ namespace SharpNeat.Phenomes.Mazes
             CalculateMaxTimesteps();
         }
 
+        /// <summary>
+        ///     Gets the next (unscaled) location on the maze solution path.
+        /// </summary>
+        /// <param name="curPathCell">The current (unscaled) location on the maze solution path.</param>
+        /// <returns>The next (unscaled) location on the maze solution path.</returns>
+        public MazeStructurePoint GetNextPathCell(MazeStructurePoint curPathCell)
+        {
+            // If the current point is already at the target location, just return that location
+            // as there's nowhere else to move
+            if (MazeGrid.Grid[curPathCell.Y, curPathCell.X].IsEndCell)
+            {
+                return UnscaledTargetLocation;
+            }
+            
+            // Otherwise, traverse the path in the specified cardinal direction
+            switch (MazeGrid.Grid[curPathCell.Y, curPathCell.X].PathDirection)
+            {
+                case PathDirection.North:
+                    return new MazeStructurePoint(curPathCell.X, curPathCell.Y - 1);
+                case PathDirection.East:
+                    return new MazeStructurePoint(curPathCell.X + 1, curPathCell.Y);
+                case PathDirection.South:
+                    return new MazeStructurePoint(curPathCell.X, curPathCell.Y + 1);
+                default:
+                    return new MazeStructurePoint(curPathCell.X - 1, curPathCell.Y);
+            }
+        }
+
         #endregion
 
         #region Properties
+
+        /// <summary>
+        ///     The unique identifier of the genome from which the phenotype was generated.
+        /// </summary>
+        public uint GenomeId { get; }
 
         /// <summary>
         ///     The list of walls in the maze.
@@ -76,12 +111,22 @@ namespace SharpNeat.Phenomes.Mazes
         /// <summary>
         ///     The starting location of a maze navigator.
         /// </summary>
-        public MazeStructurePoint StartLocation { get; private set; }
+        public MazeStructurePoint ScaledStartLocation { get; private set; }
 
         /// <summary>
         ///     The target/goal of a maze navigator.
         /// </summary>
-        public MazeStructurePoint TargetLocation { get; private set; }
+        public MazeStructurePoint ScaledTargetLocation { get; private set; }
+
+        /// <summary>
+        ///     The unscaled starting location in the top-left corner of the maze.
+        /// </summary>
+        public MazeStructurePoint UnscaledStartLocation => new MazeStructurePoint(0, 0);
+
+        /// <summary>
+        ///     The unscaled target location in the bottom-right corner of the maze.
+        /// </summary>
+        public MazeStructurePoint UnscaledTargetLocation => new MazeStructurePoint(_mazeWidth - 1, _mazeHeight - 1);
 
         /// <summary>
         ///     The amount by which to scale up the size of the maze.
@@ -99,6 +144,16 @@ namespace SharpNeat.Phenomes.Mazes
         public int ScaledMazeWidth { get; }
 
         /// <summary>
+        ///     The unscaled height of the maze.
+        /// </summary>
+        public int UnscaledMazeHeight => MazeGrid.Grid.GetLength(0);
+
+        /// <summary>
+        ///     The unscaled width of the maze.
+        /// </summary>
+        public int UnscaledMazeWidth => MazeGrid.Grid.GetLength(1);
+
+        /// <summary>
         ///     The unscaled maze cell matrix.
         /// </summary>
         public MazeStructureGrid MazeGrid { get; private set; }
@@ -109,10 +164,10 @@ namespace SharpNeat.Phenomes.Mazes
         public int MaxTimesteps { get; private set; }
 
         /// <summary>
-        ///     The number of partitions bisecting maze sub-spaces. A partition could be either one or two walls (depending on
-        ///     whether the passage is adjacent to a maze bounding wall.
+        ///     The number of times an agent has used the maze for satisfying their MC (which is required to be considered viable
+        ///     for persistence and reproduction). This is persisted on and carried through from the maze genotype.
         /// </summary>
-        public int NumPartitions { get; set; }
+        public int ViabilityUsageCount { get; set; }
 
         #endregion
 
@@ -143,11 +198,11 @@ namespace SharpNeat.Phenomes.Mazes
         {
             // Set the starting location to be in the top left corner of the maze, half the scale multiplier
             // (this guarantees there will be no intersecting walls)
-            StartLocation = new MazeStructurePoint(ScaleMultiplier / 2, ScaleMultiplier / 2);
+            ScaledStartLocation = new MazeStructurePoint(ScaleMultiplier / 2, ScaleMultiplier / 2);
 
             // Set the target location to be in the bottom right corner of the maze
-            TargetLocation = new MazeStructurePoint(ScaledMazeWidth - (ScaleMultiplier / 2),
-                ScaledMazeHeight - (ScaleMultiplier / 2));
+            ScaledTargetLocation = new MazeStructurePoint(ScaledMazeWidth - ScaleMultiplier / 2,
+                ScaledMazeHeight - ScaleMultiplier / 2);
         }
 
         /// <summary>
@@ -162,7 +217,7 @@ namespace SharpNeat.Phenomes.Mazes
             // Compute the maximum time steps by distributing the unscaled distance evenly across both dimensions 
             // (i.e. halving it) and multiplying by the scale multiplier for both dimensions
             // TODO: Need to experiment with polynomial timestep increase here
-            MaxTimesteps = 2 * (ScaleMultiplier * (unscaledDistance / 2));
+            MaxTimesteps = 2 * ScaleMultiplier * (unscaledDistance / 2);
         }
 
         /// <summary>

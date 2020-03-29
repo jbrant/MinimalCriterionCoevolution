@@ -58,7 +58,8 @@ namespace SharpNeat.Genomes.RbfNeat
                                  IActivationFunctionLibrary activationFnLibrary,
                                  NeatGenomeParameters neatGenomeParams,
                                  UInt32IdGenerator genomeIdGenerator, UInt32IdGenerator innovationIdGenerator)
-            : base(inputNeuronCount, outputNeuronCount, activationFnLibrary, neatGenomeParams, genomeIdGenerator, innovationIdGenerator)
+            : base(inputNeuronCount, outputNeuronCount, activationFnLibrary, neatGenomeParams, genomeIdGenerator, 
+                innovationIdGenerator, null)
         {
         }
 

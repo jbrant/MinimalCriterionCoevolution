@@ -25,6 +25,7 @@ using System.Text;
 using System.Xml;
 using SharpNeat.Genomes.Maze;
 using SharpNeat.Genomes.Neat;
+using SharpNeat.Genomes.Substrate;
 
 #endregion
 
@@ -45,27 +46,41 @@ namespace SharpNeat.Utility
         public static string GetGenomeXml(object genome)
         {
             // Create a new string writer into which to write the genome XML
-            StringWriter genomeStringWriter = new StringWriter();
+            var genomeStringWriter = new StringWriter();
 
-            // If this is a NEAT genome, serialize it into the string writer
-            NeatGenome neatGenome = genome as NeatGenome;
-            if (neatGenome != null)
+            switch (genome)
             {
-                using (XmlTextWriter genomeTextWriter = new XmlTextWriter(genomeStringWriter))
+                // Serialize NeatGenome
+                case NeatGenome neatGenome:
                 {
-                    NeatGenomeXmlIO.WriteComplete(genomeTextWriter, neatGenome, false);
+                    using (var genomeTextWriter = new XmlTextWriter(genomeStringWriter))
+                    {
+                        NeatGenomeXmlIO.WriteComplete(genomeTextWriter, neatGenome,
+                            neatGenome.ActivationFnLibrary.GetFunctionList().Count > 1);
+                    }
+
+                    break;
                 }
-            }
-            // Otherwise, treat this as a maze genome and serialize into the string writer
-            else
-            {
-                MazeGenome mazeGenome = genome as MazeGenome;
-                if (mazeGenome != null)
+                // Serialize NeatSubstrateGenome
+                case NeatSubstrateGenome neatSubstrateGenome:
                 {
-                    using (XmlTextWriter genomeTextWriter = new XmlTextWriter(genomeStringWriter))
+                    using (var genomeTextWriter = new XmlTextWriter(genomeStringWriter))
+                    {
+                        NeatSubstrateGenomeXmlIO.WriteComplete(genomeTextWriter, neatSubstrateGenome,
+                            neatSubstrateGenome.ActivationFnLibrary.GetFunctionList().Count > 1);
+                    }
+
+                    break;
+                }
+                // Serialize MazeGenome
+                case MazeGenome mazeGenome:
+                {
+                    using (var genomeTextWriter = new XmlTextWriter(genomeStringWriter))
                     {
                         MazeGenomeXmlIO.WriteComplete(genomeTextWriter, mazeGenome);
                     }
+
+                    break;
                 }
             }
 
@@ -83,7 +98,7 @@ namespace SharpNeat.Utility
         /// </summary>
         public static void MoveToElement(XmlReader xr, bool skipCurrent, string elemName)
         {
-            string localName = MoveToElement(xr, skipCurrent);
+            var localName = MoveToElement(xr, skipCurrent);
             if (localName != elemName)
             {
                 // No element or unexpected element.
@@ -127,7 +142,7 @@ namespace SharpNeat.Utility
         /// </summary>
         public static bool ReadAttributeAsBool(XmlReader xr, string attrName)
         {
-            string valStr = xr.GetAttribute(attrName);
+            var valStr = xr.GetAttribute(attrName);
             return bool.Parse(valStr);
         }
 
@@ -136,7 +151,7 @@ namespace SharpNeat.Utility
         /// </summary>
         public static int ReadAttributeAsInt(XmlReader xr, string attrName)
         {
-            string valStr = xr.GetAttribute(attrName);
+            var valStr = xr.GetAttribute(attrName);
             return int.Parse(valStr, NumberFormatInfo.InvariantInfo);
         }
 
@@ -145,7 +160,7 @@ namespace SharpNeat.Utility
         /// </summary>
         public static uint ReadAttributeAsUInt(XmlReader xr, string attrName)
         {
-            string valStr = xr.GetAttribute(attrName);
+            var valStr = xr.GetAttribute(attrName);
             return uint.Parse(valStr, NumberFormatInfo.InvariantInfo);
         }
 
@@ -154,7 +169,7 @@ namespace SharpNeat.Utility
         /// </summary>
         public static double ReadAttributeAsDouble(XmlReader xr, string attrName)
         {
-            string valStr = xr.GetAttribute(attrName);
+            var valStr = xr.GetAttribute(attrName);
             return double.Parse(valStr, NumberFormatInfo.InvariantInfo);
         }
 
@@ -163,19 +178,20 @@ namespace SharpNeat.Utility
         /// </summary>
         public static double[] ReadAttributeAsDoubleArray(XmlReader xr, string attrName)
         {
-            string valStr = xr.GetAttribute(attrName);
+            var valStr = xr.GetAttribute(attrName);
             if (string.IsNullOrEmpty(valStr))
             {
                 return null;
             }
 
             // Parse comma separated values.
-            string[] strArr = valStr.Split(',');
-            double[] dblArr = new double[strArr.Length];
-            for (int i = 0; i < strArr.Length; i++)
+            var strArr = valStr.Split(',');
+            var dblArr = new double[strArr.Length];
+            for (var i = 0; i < strArr.Length; i++)
             {
                 dblArr[i] = double.Parse(strArr[i], NumberFormatInfo.InvariantInfo);
             }
+
             return dblArr;
         }
 
@@ -200,13 +216,14 @@ namespace SharpNeat.Utility
                 return;
             }
 
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             sb.Append(arr[0].ToString("R", NumberFormatInfo.InvariantInfo));
-            for (int i = 1; i < arr.Length; i++)
+            for (var i = 1; i < arr.Length; i++)
             {
                 sb.Append(',');
                 sb.Append(arr[i].ToString("R", NumberFormatInfo.InvariantInfo));
             }
+
             xw.WriteAttributeString(attrName, sb.ToString());
         }
 

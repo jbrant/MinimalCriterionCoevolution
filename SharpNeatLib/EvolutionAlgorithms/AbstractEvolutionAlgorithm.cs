@@ -59,9 +59,9 @@ namespace SharpNeat.EvolutionAlgorithms
         protected IDataLogger PopulationLogger;
 
         /// <summary>
-        ///     The interval for logging the contents of the extant population.
+        /// Logs the results of individual simulation trials within single genome evaluations.
         /// </summary>
-        protected int? PopulationLoggingInterval;
+        protected IDataLogger SimulationTrialLogger;
 
         /// <summary>
         ///     The last generation during which the display/logging was updated.
@@ -309,6 +309,7 @@ namespace SharpNeat.EvolutionAlgorithms
             EvolutionLogger?.Close();
             PopulationLogger?.Close();
             GenomeLogger?.Close();
+            SimulationTrialLogger?.Close();
 
             // Cleanup genome evaluator
             GenomeEvaluator.Cleanup();
@@ -469,6 +470,7 @@ namespace SharpNeat.EvolutionAlgorithms
                     EvolutionLogger?.Close();
                     PopulationLogger?.Close();
                     GenomeLogger?.Close();
+                    SimulationTrialLogger?.Close();
 
                     // Cleanup genome evaluator
                     GenomeEvaluator.Cleanup();
@@ -493,7 +495,8 @@ namespace SharpNeat.EvolutionAlgorithms
             // Close the loggers
             EvolutionLogger?.Close();
             PopulationLogger?.Close();
-            GenomeLogger.Close();
+            GenomeLogger?.Close();
+            SimulationTrialLogger?.Close();
         }
 
         #endregion

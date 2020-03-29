@@ -30,6 +30,11 @@ namespace SharpNeat.EvolutionAlgorithms
         /// </summary>
         private readonly int _batchSize;
 
+        /// <summary>
+        ///     The interval at which genomes in the population are respeciated.
+        /// </summary>
+        private readonly int _respeciateInterval;
+
         #endregion
 
         #region Constructors
@@ -41,6 +46,7 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <param name="eaParams">The NEAT algorithm parameters.c</param>
         /// <param name="stats">The evolution algorithm statistics container.</param>
         /// <param name="speciationStrategy">The speciation strategy.</param>
+        /// <param name="respeciateInterval">The batch interval at which the population should be respeciated.</param>
         /// <param name="complexityRegulationStrategy">The complexity regulation strategy.</param>
         /// <param name="batchSize">The batch size of offspring to produce, evaluate, and remove.</param>
         /// <param name="runPhase">
@@ -50,21 +56,23 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <param name="evolutionLogger">The evolution data logger (optional).</param>
         /// <param name="logFieldEnabledMap">Dictionary of logging fields that can be dynamically enabled or disabled.</param>
         /// <param name="populationLogger">The population data logger (optional).</param>
+        /// <param name="simulationTrialLogger">The simulation trial data logger (optional).</param>
         /// <param name="genomeLogger">The genome data logger (optional).</param>
-        /// <param name="populationLoggingInterval">The interval at which the population is logged.</param>
         public QueueEvolutionAlgorithm(EvolutionAlgorithmParameters eaParams, IEvolutionAlgorithmStats stats,
-            ISpeciationStrategy<TGenome> speciationStrategy, IComplexityRegulationStrategy complexityRegulationStrategy,
+            ISpeciationStrategy<TGenome> speciationStrategy, int respeciateInterval,
+            IComplexityRegulationStrategy complexityRegulationStrategy,
             int batchSize, RunPhase runPhase = RunPhase.Primary, IDataLogger evolutionLogger = null,
             IDictionary<FieldElement, bool> logFieldEnabledMap = null, IDataLogger populationLogger = null,
-            IDataLogger genomeLogger = null, int? populationLoggingInterval = null) : base(eaParams, stats)
+            IDataLogger genomeLogger = null, IDataLogger simulationTrialLogger = null) : base(eaParams, stats)
         {
             SpeciationStrategy = speciationStrategy;
             ComplexityRegulationStrategy = complexityRegulationStrategy;
             _batchSize = batchSize;
+            _respeciateInterval = respeciateInterval;
             EvolutionLogger = evolutionLogger;
             PopulationLogger = populationLogger;
             GenomeLogger = genomeLogger;
-            PopulationLoggingInterval = populationLoggingInterval;
+            SimulationTrialLogger = simulationTrialLogger;
             RunPhase = runPhase;
             _logFieldEnabledMap = logFieldEnabledMap;
         }
@@ -85,14 +93,14 @@ namespace SharpNeat.EvolutionAlgorithms
         /// <param name="logFieldEnabledMap">Dictionary of logging fields that can be dynamically enabled or disabled.</param>
         /// <param name="populationLogger">The population data logger (optional).</param>
         /// <param name="genomeLogger">The genome data logger (optional).</param>
-        /// <param name="populationLoggingInterval">The interval at which the population is logged.</param>
+        /// <param name="simulationTrialLogger">The trial data logger (optional).</param>
         public QueueEvolutionAlgorithm(EvolutionAlgorithmParameters eaParams, IEvolutionAlgorithmStats stats,
             IComplexityRegulationStrategy complexityRegulationStrategy,
             int batchSize, RunPhase runPhase = RunPhase.Primary, IDataLogger evolutionLogger = null,
             IDictionary<FieldElement, bool> logFieldEnabledMap = null, IDataLogger populationLogger = null,
-            IDataLogger genomeLogger = null, int? populationLoggingInterval = null) : this(eaParams, stats, null,
+            IDataLogger genomeLogger = null, IDataLogger simulationTrialLogger = null) : this(eaParams, stats, null, 0,
             complexityRegulationStrategy, batchSize, runPhase, evolutionLogger, logFieldEnabledMap, populationLogger,
-            genomeLogger, populationLoggingInterval)
+            genomeLogger, simulationTrialLogger)
         {
         }
 
@@ -217,16 +225,17 @@ namespace SharpNeat.EvolutionAlgorithms
             EvolutionLogger?.Open();
             PopulationLogger?.Open();
             GenomeLogger?.Open();
+            SimulationTrialLogger?.Open();
 
             // Update the run phase on the loggers
             EvolutionLogger?.UpdateRunPhase(RunPhase);
             PopulationLogger?.UpdateRunPhase(RunPhase);
             GenomeLogger?.UpdateRunPhase(RunPhase);
+            SimulationTrialLogger?.UpdateRunPhase(RunPhase);
 
             // Write out the headers for all loggers
             EvolutionLogger?.LogHeader(GetLoggableElements(_logFieldEnabledMap),
                 Statistics.GetLoggableElements(_logFieldEnabledMap),
-                GenomeEvaluator.GetLoggableElements(_logFieldEnabledMap),
                 (GenomeList[0] as NeatGenome)?.GetLoggableElements(_logFieldEnabledMap));
             PopulationLogger?.LogHeader(new List<LoggableElement>
             {
@@ -244,6 +253,33 @@ namespace SharpNeat.EvolutionAlgorithms
                     : null,
                 _logFieldEnabledMap[PopulationFieldElements.SpecieId]
                     ? new LoggableElement(PopulationFieldElements.SpecieId, null)
+                    : null
+            });
+            SimulationTrialLogger?.LogHeader(new List<LoggableElement>
+            {
+                _logFieldEnabledMap.ContainsKey(SimulationTrialFieldElements.Generation) &&
+                _logFieldEnabledMap[SimulationTrialFieldElements.Generation]
+                    ? new LoggableElement(SimulationTrialFieldElements.Generation, null)
+                    : null,
+                _logFieldEnabledMap.ContainsKey(SimulationTrialFieldElements.GenomeId) &&
+                _logFieldEnabledMap[SimulationTrialFieldElements.GenomeId]
+                    ? new LoggableElement(SimulationTrialFieldElements.GenomeId, null)
+                    : null,
+                _logFieldEnabledMap.ContainsKey(SimulationTrialFieldElements.IsSuccessful) &&
+                _logFieldEnabledMap[SimulationTrialFieldElements.IsSuccessful]
+                    ? new LoggableElement(SimulationTrialFieldElements.IsSuccessful, null)
+                    : null,
+                _logFieldEnabledMap.ContainsKey(SimulationTrialFieldElements.NumTimesteps) &&
+                _logFieldEnabledMap[SimulationTrialFieldElements.NumTimesteps]
+                    ? new LoggableElement(SimulationTrialFieldElements.NumTimesteps, null)
+                    : null,
+                _logFieldEnabledMap.ContainsKey(SimulationTrialFieldElements.Distance) &&
+                _logFieldEnabledMap[SimulationTrialFieldElements.Distance]
+                    ? new LoggableElement(SimulationTrialFieldElements.Distance, null)
+                    : null,
+                _logFieldEnabledMap.ContainsKey(SimulationTrialFieldElements.PairedGenomeId) &&
+                _logFieldEnabledMap[SimulationTrialFieldElements.PairedGenomeId]
+                    ? new LoggableElement(SimulationTrialFieldElements.PairedGenomeId, null)
                     : null
             });
             GenomeLogger?.LogHeader(new List<LoggableElement>
@@ -290,7 +326,7 @@ namespace SharpNeat.EvolutionAlgorithms
 
             if (EaParams.SpecieCount > 0)
             {
-                childGenomes = new List<TGenome>(_batchSize * SpecieList.Count);
+                childGenomes = new List<TGenome>(_batchSize);
 
                 // Iterate through each species and asexually reproduce offspring
                 foreach (var specie in SpecieList)
@@ -326,6 +362,13 @@ namespace SharpNeat.EvolutionAlgorithms
                 // similarity (but don't respeciate)
                 SpeciationStrategy.SpeciateOffspring(childGenomes, SpecieList, false);
 
+                // Respeciate after elapsed number of batches
+                if (CurrentGeneration % _respeciateInterval == 0)
+                {
+                    ClearAllSpecies();
+                    SpeciationStrategy.SpeciateGenomes(GenomeList, SpecieList);
+                }
+
                 // Perform per-species removals based on whether the cap for that species has been exceeded
                 RemoveOldestFromOverfullSpecies();
 
@@ -354,7 +397,6 @@ namespace SharpNeat.EvolutionAlgorithms
 
             // If there is a logger defined, log the generation stats
             EvolutionLogger?.LogRow(GetLoggableElements(_logFieldEnabledMap),
-                GenomeEvaluator.GetLoggableElements(_logFieldEnabledMap),
                 Statistics.GetLoggableElements(_logFieldEnabledMap),
                 (CurrentChampGenome as NeatGenome)?.GetLoggableElements(_logFieldEnabledMap));
 
@@ -380,6 +422,42 @@ namespace SharpNeat.EvolutionAlgorithms
                             genome.SpecieIdx)
                         : null
                 });
+            }
+
+            // Log simulation trial results for child genomes
+            foreach (var genome in childGenomes)
+            {
+                foreach (var trial in genome.EvaluationInfo.TrialData)
+                {
+                    SimulationTrialLogger?.LogRow(new List<LoggableElement>
+                    {
+                        _logFieldEnabledMap.ContainsKey(SimulationTrialFieldElements.Generation) &&
+                        _logFieldEnabledMap[SimulationTrialFieldElements.Generation]
+                            ? new LoggableElement(SimulationTrialFieldElements.Generation, CurrentGeneration)
+                            : null,
+                        _logFieldEnabledMap.ContainsKey(SimulationTrialFieldElements.GenomeId) &&
+                        _logFieldEnabledMap[SimulationTrialFieldElements.GenomeId]
+                            ? new LoggableElement(SimulationTrialFieldElements.GenomeId, genome.Id)
+                            : null,
+                        _logFieldEnabledMap.ContainsKey(SimulationTrialFieldElements.IsSuccessful) &&
+                        _logFieldEnabledMap[SimulationTrialFieldElements.IsSuccessful]
+                            ? new LoggableElement(SimulationTrialFieldElements.IsSuccessful, trial.IsSuccessful)
+                            : null,
+                        _logFieldEnabledMap.ContainsKey(SimulationTrialFieldElements.NumTimesteps) &&
+                        _logFieldEnabledMap[SimulationTrialFieldElements.NumTimesteps]
+                            ? new LoggableElement(SimulationTrialFieldElements.NumTimesteps, trial.NumTimesteps)
+                            : null,
+                        _logFieldEnabledMap.ContainsKey(SimulationTrialFieldElements.Distance) &&
+                        _logFieldEnabledMap[SimulationTrialFieldElements.Distance]
+                            ? new LoggableElement(SimulationTrialFieldElements.Distance,
+                                trial.ObjectiveDistance)
+                            : null,
+                        _logFieldEnabledMap.ContainsKey(SimulationTrialFieldElements.PairedGenomeId) &&
+                        _logFieldEnabledMap[SimulationTrialFieldElements.PairedGenomeId]
+                            ? new LoggableElement(SimulationTrialFieldElements.PairedGenomeId, trial.PairedGenomeId)
+                            : null
+                    });
+                }
             }
 
             // Dump genome definitions for entire population if this is the first batch

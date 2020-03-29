@@ -89,7 +89,8 @@ namespace SharpNeat.Phenomes.NeuralNets.FastCyclicNetwork
                                  int neuronCount,
                                  int inputNeuronCount,
                                  int outputNeuronCount,
-                                 int timestepsPerActivation)
+                                 int timestepsPerActivation,
+                                 uint genomeId)
         {
             _connectionArray = connectionArray;
             _neuronActivationFnArray = neuronActivationFnArray;
@@ -114,12 +115,20 @@ namespace SharpNeat.Phenomes.NeuralNets.FastCyclicNetwork
 
             // Initialise the bias neuron's fixed output value.
             _postActivationArray[0] = 1.0;
+            
+            // Set genome ID
+            GenomeId = genomeId;
         }
 
         #endregion
 
         #region IBlackBox Members
 
+        /// <summary>
+        ///     The unique identifier of the genome from which the phenotype was generated.
+        /// </summary>
+        public uint GenomeId { get; }
+        
         /// <summary>
         /// Gets the number of inputs.
         /// </summary>
@@ -214,7 +223,8 @@ namespace SharpNeat.Phenomes.NeuralNets.FastCyclicNetwork
         public IBlackBox Clone()
         {
             return new FastCyclicNetwork(_connectionArray, _neuronActivationFnArray, _neuronAuxArgsArray,
-                _preActivationArray.Length, _inputNeuronCount, _outputNeuronCount, _timestepsPerActivation);
+                _preActivationArray.Length, _inputNeuronCount, _outputNeuronCount, _timestepsPerActivation, 
+                GenomeId);
         }
 
         #endregion

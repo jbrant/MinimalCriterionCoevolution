@@ -8,13 +8,13 @@ using SharpNeat.Genomes.Neat;
 
 #endregion
 
-namespace MCC_Domains
+namespace MCC_Domains.MazeNavigation
 {
     /// <summary>
-    ///     Interface for classes implementing MCC experiments; specifically, those coevolving mazes with NEAT-based
-    ///     controllers.
+    ///     Interface for classes implementing MCC maze experiments; specifically, those coevolving mazes with
+    ///     NEAT-based controllers.
     /// </summary>
-    public interface IMCCExperiment
+    public interface IMCCMazeExperiment
     {
         /// <summary>
         ///     Gets the name of the experiment.
@@ -71,22 +71,6 @@ namespace MCC_Domains
         /// <param name="xw">Reference to the XML writer.</param>
         /// <param name="mazeGenomeList">The list of maze genomes to write.</param>
         void SaveMazePopulation(XmlWriter xw, IList<MazeGenome> mazeGenomeList);
-
-        /// <summary>
-        ///     Initialize the experiment with some optional XML configutation data.
-        /// </summary>
-        /// <param name="name">The name of the experiment.</param>
-        /// <param name="xmlConfig">The experiment XML configuration file.</param>
-        /// <param name="population1EvolutionLogger">The population 1 evolution logger.</param>
-        /// <param name="population1PopulationLogger">The population 1 population logger.</param>
-        /// <param name="population1GenomeLogger">The population 1 genome logger.</param>
-        /// <param name="population2EvolutionLogger">The population 2 evolution logger.</param>
-        /// <param name="population2PopulationLogger">The population 2 population logger.</param>
-        /// <param name="population2GenomeLogger">The population 2 genome logger.</param>
-        void Initialize(string name, XmlElement xmlConfig,
-            IDataLogger population1EvolutionLogger = null, IDataLogger population1PopulationLogger = null,
-            IDataLogger population1GenomeLogger = null, IDataLogger population2EvolutionLogger = null,
-            IDataLogger population2PopulationLogger = null, IDataLogger population2GenomeLogger = null);
 
         /// <summary>
         ///     Creates and returns a MCC algorithm container, which encapsulates two evolutionary algorithms.  This

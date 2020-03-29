@@ -29,7 +29,7 @@ namespace SharpNeat.Core
     ///     Generic interface for agent evaluation classes.
     ///     Evaluates and assigns a fitness to individual TPhenome's.
     /// </summary>
-    public interface IPhenomeEvaluator<in TPhenome, out TTrialInfo> : ILoggable
+    public interface IPhenomeEvaluator<in TPhenome, out TPhenomeEvaluationInfo>
     {
         /// <summary>
         ///     Gets the total number of individual genome evaluations that have been performed by this evaluator.
@@ -46,27 +46,25 @@ namespace SharpNeat.Core
         /// <summary>
         ///     EvaluateFitness the provided agent and return its fitness score.
         /// </summary>
-        TTrialInfo Evaluate(TPhenome agent, uint currentGeneration,
-            IDataLogger evaluationLogger);
+        TPhenomeEvaluationInfo Evaluate(TPhenome agent, uint currentGeneration);
 
         /// <summary>
-        ///     Initializes state variables in the agent evaluator.
+        ///     Initializes state variables in the evaluator.
         /// </summary>
-        void Initialize(IDataLogger evaluationLogger);
-
-        /// <summary>
-        ///     Update the evaluator based on some characteristic of the given population.
-        /// </summary>
-        /// <typeparam name="TGenome">The genome type parameter.</typeparam>
-        /// <param name="population">The current population.</param>
-        void Update<TGenome>(List<TGenome> population) where TGenome : class, IGenome<TGenome>;
+        void Initialize();
 
         /// <summary>
         ///     Updates the environment or other evaluation criteria against which the phenomes under evaluation are being
-        ///     compared.  This is typically used in a MCC context.
+        ///     compared.
         /// </summary>
         /// <param name="evaluatorPhenomes">The new phenomes to compare against.</param>
-        void UpdateEvaluatorPhenotypes(IEnumerable<object> evaluatorPhenomes);
+        /// <param name="lastGeneration">The generation that was just executed.</param>
+        void UpdateEvaluatorPhenotypes(IEnumerable<object> evaluatorPhenomes, uint lastGeneration);
+
+        /// <summary>
+        ///     Cleans up and gracefully closes or deallocates instance variables in the evaluator.
+        /// </summary>
+        void Cleanup();
 
         /// <summary>
         ///     Reset the internal state of the evaluation scheme if any exists.

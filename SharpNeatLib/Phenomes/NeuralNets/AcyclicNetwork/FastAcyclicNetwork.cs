@@ -105,6 +105,7 @@ namespace SharpNeat.Phenomes.NeuralNets.AcyclicNetwork
         /// <param name="nodeCount">Number of nodes in the network.</param>
         /// <param name="inputNodeCount">Number of input nodes in the network.</param>
         /// <param name="outputNodeCount">Number of output nodes in the network.</param>
+        /// <param name="genomeId">The unique identifier of the genome from which the phenotype was generated.</param>
         public FastAcyclicNetwork(IActivationFunction[] nodeActivationFnArr,
                                   double[][] nodeAuxArgsArr,
                                   FastConnection[] connectionArr,
@@ -112,7 +113,8 @@ namespace SharpNeat.Phenomes.NeuralNets.AcyclicNetwork
                                   int[] outputNodeIdxArr,
                                   int nodeCount,
                                   int inputNodeCount,
-                                  int outputNodeCount)
+                                  int outputNodeCount, 
+                                  uint genomeId)
         {
             // Store refs to network structure data.
             _nodeActivationFnArr = nodeActivationFnArr;
@@ -141,12 +143,20 @@ namespace SharpNeat.Phenomes.NeuralNets.AcyclicNetwork
 
             // Initialise the bias neuron's fixed output value.
             _activationArr[0] = 1.0;
+
+            // Carry forward unique ID of underlying genome
+            GenomeId = genomeId;
         }
 
         #endregion
 
         #region IBlackBox Members
 
+        /// <summary>
+        ///     The unique identifier of the genome from which the phenotype was generated.
+        /// </summary>
+        public uint GenomeId { get; }
+        
         /// <summary>
         /// Gets the number of inputs.
         /// </summary>
@@ -235,7 +245,8 @@ namespace SharpNeat.Phenomes.NeuralNets.AcyclicNetwork
         public IBlackBox Clone()
         {
             return new FastAcyclicNetwork(_nodeActivationFnArr, _nodeAuxArgsArr, _connectionArr, _layerInfoArr,
-                _outputNodeIdxArr, _activationArr.Length, _inputNodeCount, _outputNodeCount);
+                _outputNodeIdxArr, _activationArr.Length, _inputNodeCount, _outputNodeCount, 
+                GenomeId);
         }
     }
 }

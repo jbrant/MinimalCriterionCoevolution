@@ -199,16 +199,16 @@ namespace SharpNeat.Utility
             }
 
             // Set starting waypoint as juncture if incoming and outgoing path segments were perpendicular
-            if ((grid[startPoint.Y, startPoint.X].PathOrientation == PathOrientation.Horizontal &&
-                 ((startPoint.Y - 1 >= 0 &&
-                   grid[startPoint.Y - 1, startPoint.X].PathOrientation == PathOrientation.Vertical) ||
-                  (startPoint.Y + 1 < grid.GetLength(0) &&
-                   grid[startPoint.Y + 1, startPoint.X].PathOrientation == PathOrientation.Vertical))) ||
-                (grid[startPoint.Y, startPoint.X].PathOrientation == PathOrientation.Vertical &&
-                 ((startPoint.X - 1 >= 0 &&
-                   grid[startPoint.Y, startPoint.X - 1].PathOrientation == PathOrientation.Horizontal) ||
-                  (startPoint.X + 1 < grid.GetLength(1) &&
-                   grid[startPoint.Y, startPoint.X + 1].PathOrientation == PathOrientation.Horizontal))))
+            if (grid[startPoint.Y, startPoint.X].PathOrientation == PathOrientation.Horizontal &&
+                (startPoint.Y - 1 >= 0 &&
+                 grid[startPoint.Y - 1, startPoint.X].PathOrientation == PathOrientation.Vertical ||
+                 startPoint.Y + 1 < grid.GetLength(0) &&
+                 grid[startPoint.Y + 1, startPoint.X].PathOrientation == PathOrientation.Vertical) ||
+                grid[startPoint.Y, startPoint.X].PathOrientation == PathOrientation.Vertical &&
+                (startPoint.X - 1 >= 0 &&
+                 grid[startPoint.Y, startPoint.X - 1].PathOrientation == PathOrientation.Horizontal ||
+                 startPoint.X + 1 < grid.GetLength(1) &&
+                 grid[startPoint.Y, startPoint.X + 1].PathOrientation == PathOrientation.Horizontal))
             {
                 grid[startPoint.Y, startPoint.X].IsJuncture = true;
             }
@@ -259,10 +259,10 @@ namespace SharpNeat.Utility
                     while (obstructionLocated == false && roomEndY + 1 < mazeHeight)
                     {
                         // Check if the trajectory has changed shape (expanded eastward or westward) and close off the room if so
-                        if ((roomEndX + 1 < mazeWidth &&
-                             grid[roomEndY + 1, roomEndX + 1].PathDirection == PathDirection.None) ||
-                            (roomStartX - 1 > 0 &&
-                             grid[roomEndY + 1, roomStartX - 1].PathDirection == PathDirection.None))
+                        if (roomEndX + 1 < mazeWidth &&
+                            grid[roomEndY + 1, roomEndX + 1].PathDirection == PathDirection.None ||
+                            roomStartX - 1 > 0 &&
+                            grid[roomEndY + 1, roomStartX - 1].PathDirection == PathDirection.None)
                         {
                             obstructionLocated = true;
                         }
@@ -727,7 +727,7 @@ namespace SharpNeat.Utility
         /// <returns>Distance from starting location to the ending location.</returns>
         public static int ComputeDistanceToTarget(MazeStructureGrid mazeGrid, int mazeHeight, int mazeWidth)
         {
-            int distance = 0;
+            var distance = 0;
 
             // Get target point with links back to origin
             var targetLinkedPoint = FloodFillToTarget(mazeGrid, mazeHeight, mazeWidth);
@@ -841,31 +841,25 @@ namespace SharpNeat.Utility
             do
             {
                 // Check for opening to the north
-                if (curCell.Y > 0 && mazeGrid[curCell.Y - 1, curCell.X].PathOrientation == PathOrientation.None &&
-                    mazeGrid[curCell.Y - 1, curCell.X].SouthWall == false)
+                if (IsNorthOpening(curCell, mazeGrid))
                 {
                     numPathFacingOpenings++;
                 }
 
                 // Check for opening to the south
-                if (curCell.Y < genome.MazeBoundaryHeight - 1 &&
-                    mazeGrid[curCell.Y + 1, curCell.X].PathOrientation == PathOrientation.None &&
-                    mazeGrid[curCell.Y, curCell.X].SouthWall == false)
+                if (IsSouthOpening(curCell, genome.MazeBoundaryHeight, mazeGrid))
                 {
                     numPathFacingOpenings++;
                 }
 
                 // Check for opening to the west
-                if (curCell.X > 0 && mazeGrid[curCell.Y, curCell.X - 1].PathOrientation == PathOrientation.None &&
-                    mazeGrid[curCell.Y, curCell.X - 1].EastWall == false)
+                if (IsWestOpening(curCell, mazeGrid))
                 {
                     numPathFacingOpenings++;
                 }
 
                 // Check for opening to the east
-                if (curCell.X < genome.MazeBoundaryWidth - 1 &&
-                    mazeGrid[curCell.Y, curCell.X + 1].PathOrientation == PathOrientation.None &&
-                    mazeGrid[curCell.Y, curCell.X].EastWall == false)
+                if (IsEastOpening(curCell, genome.MazeBoundaryWidth, mazeGrid))
                 {
                     numPathFacingOpenings++;
                 }
@@ -886,6 +880,144 @@ namespace SharpNeat.Utility
             } while (curCell != endCell);
 
             return numPathFacingOpenings;
+        }
+
+        /// <summary>
+        ///     Determine if there is an opening to the north of the current location.
+        /// </summary>
+        /// <param name="cell">The current maze grid cell.</param>
+        /// <param name="grid">The maze grid.</param>
+        /// <returns>Whether there is an opening to the north of the current location.</returns>
+        public static bool IsNorthOpening(MazeStructureGridCell cell, MazeStructureGridCell[,] grid)
+        {
+            return IsNorthOpening(cell.X, cell.Y, grid);
+        }
+
+        /// <summary>
+        ///     Determine if there is an opening to the north of the current location.
+        /// </summary>
+        /// <param name="point">The current maze point.</param>
+        /// <param name="grid">The maze grid.</param>
+        /// <returns>Whether there is an opening to the north of the current location.</returns>
+        public static bool IsNorthOpening(MazeStructurePoint point, MazeStructureGridCell[,] grid)
+        {
+            return IsNorthOpening(point.X, point.Y, grid);
+        }
+
+        /// <summary>
+        ///     Determine if there is an opening to the east of the current location.
+        /// </summary>
+        /// <param name="cell">The current maze grid cell.</param>
+        /// <param name="grid">The maze grid.</param>
+        /// <returns>Whether there is an opening to the east of the current location.</returns>
+        public static bool IsEastOpening(MazeStructureGridCell cell, int mazeWidth, MazeStructureGridCell[,] grid)
+        {
+            return IsEastOpening(cell.X, cell.Y, mazeWidth, grid);
+        }
+
+        /// <summary>
+        ///     Determine if there is an opening to the east of the current location.
+        /// </summary>
+        /// <param name="point">The current maze point.</param>
+        /// <param name="grid">The maze grid.</param>
+        /// <returns>Whether there is an opening to the east of the current location.</returns>
+        public static bool IsEastOpening(MazeStructurePoint point, int mazeWidth, MazeStructureGridCell[,] grid)
+        {
+            return IsEastOpening(point.X, point.Y, mazeWidth, grid);
+        }
+
+        /// <summary>
+        ///     Determine if there is an opening to the south of the current location.
+        /// </summary>
+        /// <param name="cell">The current maze grid cell.</param>
+        /// <param name="grid">The maze grid.</param>
+        /// <returns>Whether there is an opening to the south of the current location.</returns>
+        public static bool IsSouthOpening(MazeStructureGridCell cell, int mazeHeight, MazeStructureGridCell[,] grid)
+        {
+            return IsSouthOpening(cell.X, cell.Y, mazeHeight, grid);
+        }
+
+        /// <summary>
+        ///     Determine if there is an opening to the south of the current location.
+        /// </summary>
+        /// <param name="point">The current maze point.</param>
+        /// <param name="grid">The maze grid.</param>
+        /// <returns>Whether there is an opening to the south of the current location.</returns>
+        public static bool IsSouthOpening(MazeStructurePoint point, int mazeHeight, MazeStructureGridCell[,] grid)
+        {
+            return IsSouthOpening(point.X, point.Y, mazeHeight, grid);
+        }
+
+        /// <summary>
+        ///     Determine if there is an opening to the west of the current location.
+        /// </summary>
+        /// <param name="cell">The current maze grid cell.</param>
+        /// <param name="grid">The maze grid.</param>
+        /// <returns>Whether there is an opening to the west of the current location.</returns>
+        public static bool IsWestOpening(MazeStructureGridCell cell, MazeStructureGridCell[,] grid)
+        {
+            return IsWestOpening(cell.X, cell.Y, grid);
+        }
+
+        /// <summary>
+        ///     Determine if there is an opening to the west of the current location.
+        /// </summary>
+        /// <param name="point">The current maze point.</param>
+        /// <param name="grid">The maze grid.</param>
+        /// <returns>Whether there is an opening to the west of the current location.</returns>
+        public static bool IsWestOpening(MazeStructurePoint point, MazeStructureGridCell[,] grid)
+        {
+            return IsWestOpening(point.X, point.Y, grid);
+        }
+
+        /// <summary>
+        ///     Determine if there is an opening to the north of the current location.
+        /// </summary>
+        /// <param name="x">The current maze horizontal location.</param>
+        /// <param name="y">The current maze vertical location.</param>
+        /// <param name="grid">The maze grid.</param>
+        /// <returns>Whether there is an opening to the north of the current location.</returns>
+        private static bool IsNorthOpening(int x, int y, MazeStructureGridCell[,] grid)
+        {
+            return y > 0 && grid[y - 1, x].PathOrientation == PathOrientation.None && grid[y - 1, x].SouthWall == false;
+        }
+
+        /// <summary>
+        ///     Determine if there is an opening to the east of the current location.
+        /// </summary>
+        /// <param name="x">The current maze horizontal location.</param>
+        /// <param name="y">The current maze vertical location.</param>
+        /// <param name="grid">The maze grid.</param>
+        /// <returns>Whether there is an opening to the east of the current location.</returns>
+        private static bool IsEastOpening(int x, int y, int mazeWidth, MazeStructureGridCell[,] grid)
+        {
+            return x < mazeWidth - 1 && grid[y, x + 1].PathOrientation == PathOrientation.None &&
+                   grid[y, x].EastWall == false;
+        }
+
+        /// <summary>
+        ///     Determine if there is an opening to the south of the current location.
+        /// </summary>
+        /// <param name="x">The current maze horizontal location.</param>
+        /// <param name="y">The current maze vertical location.</param>
+        /// <param name="grid">The maze grid.</param>
+        /// <returns>Whether there is an opening to the south of the current location.</returns>
+        private static bool IsSouthOpening(int x, int y, int mazeHeight, MazeStructureGridCell[,] grid)
+        {
+            return y < mazeHeight - 1 && grid[y + 1, x].PathOrientation == PathOrientation.None &&
+                   grid[y, x].SouthWall == false;
+        }
+
+        /// <summary>
+        ///     Determine if there is an opening to the west of the current location.
+        /// </summary>
+        /// <param name="x">The current maze horizontal location.</param>
+        /// <param name="y">The current maze vertical location.</param>
+        /// <param name="grid">The maze grid.</param>
+        /// <returns>Whether there is an opening to the west of the current location.</returns>
+        private static bool IsWestOpening(int x, int y, MazeStructureGridCell[,] grid)
+        {
+            return x > 0 && grid[y, x - 1].PathOrientation == PathOrientation.None && grid[y, x - 1].EastWall == false;
         }
 
         /// <summary>
@@ -952,11 +1084,10 @@ namespace SharpNeat.Utility
                 // Check that waypoints that were added earlier are still at least two units above or to the left of mutated waypoint. 
                 // This is because waypoints are connected in the order in which they're added to the genome, and to 
                 // avoid overlaps, waypoints are only added below or to the right of pre-existing waypoints.
-                (prevPathGenes.Count == 0 ||
-                 ((prevPathGenes.Any(g => g.Waypoint.X + 1 >= waypointLocation.X) == false &&
-                   (prevPathGenes.First().Waypoint.Y == waypointLocation.Y == false)) ||
-                  (prevPathGenes.Any(g => g.Waypoint.Y + 1 >= waypointLocation.Y) == false &&
-                   (prevPathGenes.First().Waypoint.X == waypointLocation.X == false)))
+                (prevPathGenes.Count == 0 || prevPathGenes.Any(g => g.Waypoint.X + 1 >= waypointLocation.X) == false &&
+                 prevPathGenes.First().Waypoint.Y == waypointLocation.Y == false ||
+                 prevPathGenes.Any(g => g.Waypoint.Y + 1 >= waypointLocation.Y) == false &&
+                 prevPathGenes.First().Waypoint.X == waypointLocation.X == false
                 ) &&
 
                 // Check that new waypoint does not induce a trajectory overlap nor does it cause other waypoints to not be visited

@@ -1,6 +1,7 @@
 ﻿#region
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,6 +12,8 @@ using MCC_Domains.MazeNavigation;
 using SharpNeat.Behaviors;
 using SharpNeat.Core;
 using SharpNeat.Genomes.Maze;
+using SharpNeat.Phenomes.Mazes;
+using SharpNeat.Utility;
 
 #endregion
 
@@ -35,31 +38,174 @@ namespace MazeExperimentSupportLib
             // Build maze configuration
             var mazeConfiguration =
                 new MazeConfiguration(DataManipulationUtil.ExtractMazeWalls(evaluationUnit.MazePhenome.Walls),
-                    DataManipulationUtil.ExtractStartEndPoint(evaluationUnit.MazePhenome.StartLocation),
-                    DataManipulationUtil.ExtractStartEndPoint(evaluationUnit.MazePhenome.TargetLocation),
+                    DataManipulationUtil.ExtractStartEndPoint(evaluationUnit.MazePhenome.ScaledStartLocation),
+                    DataManipulationUtil.ExtractStartEndPoint(evaluationUnit.MazePhenome.ScaledTargetLocation),
                     evaluationUnit.MazePhenome.MaxTimesteps);
 
             // Create trajectory behavior characterization (in order to capture full trajectory of navigator)
             IBehaviorCharacterization behaviorCharacterization = new TrajectoryBehaviorCharacterization();
 
             // Create the maze navigation world
-            var world = new MazeNavigationWorld<BehaviorInfo>(mazeConfiguration.Walls,
+            var world = new MazeNavigationWorld(mazeConfiguration.Walls,
                 mazeConfiguration.NavigatorLocation, mazeConfiguration.GoalLocation,
                 experimentParameters.MinSuccessDistance, mazeConfiguration.MaxSimulationTimesteps,
                 behaviorCharacterization);
 
             // Run a single trial
-            var trialInfo = world.RunTrial(evaluationUnit.AgentPhenome, SearchType.MinimalCriteriaSearch,
-                out var isGoalReached);
+            var trialBehavior = world.RunBehaviorTrial(evaluationUnit.AgentPhenome, out var isGoalReached);
 
             // Set maze solved status
             evaluationUnit.IsMazeSolved = isGoalReached;
 
             // The number of time steps is effectively the number of 2-dimensional points in the behaviors array
-            evaluationUnit.NumTimesteps = trialInfo.Behaviors.Count() / 2;
+            evaluationUnit.NumTimesteps = world.GetSimulationTimesteps();
 
             // Set the trajectory of the agent
-            evaluationUnit.AgentTrajectory = trialInfo.Behaviors;
+            evaluationUnit.AgentTrajectory = trialBehavior;
+        }
+
+        /// <summary>
+        ///     Computes the number of "deceptive" turns in the maze by finding juncture locations where there is more than one
+        ///     possible direction to turn, leading to a potentially deceptive trap.
+        /// </summary>
+        /// <param name="curChunkMazes">The collection of mazes being evaluated during the current chunk.</param>
+        /// <returns>The collection of maze genome IDs along with the number of deceptive turns in their solution path.</returns>
+        public static IEnumerable<Tuple<uint, int>> CalculateDeceptiveTurnCount(
+            IEnumerable<MazeStructure> curChunkMazes)
+        {
+            var mazeDeceptiveTurns = new ConcurrentBag<Tuple<uint, int>>();
+
+            // Loop through each solution path and tally the number of deceptive turns
+            Parallel.ForEach(curChunkMazes, mazeStructure =>
+            {
+                var mazeGrid = mazeStructure.MazeGrid.Grid;
+
+                // Initialize deceptive turns to 0
+                var numDeceptiveTurns = 0;
+
+                // Initialize the previous cell to the start location and the current cell to the the second location
+                var prevCell = mazeStructure.UnscaledStartLocation;
+                var curCell = mazeStructure.GetNextPathCell(prevCell);
+
+                do
+                {
+                    // Check to see if there are deceptive offshoots for the current turn 
+                    if (mazeGrid[curCell.Y, curCell.X].IsJuncture)
+                    {
+                        switch (mazeGrid[curCell.Y, curCell.X].PathDirection)
+                        {
+                            case PathDirection.North when prevCell.X <= curCell.X && MazeUtils.IsEastOpening(curCell,
+                                                              mazeStructure.UnscaledMazeWidth, mazeGrid) ||
+                                                          // South opening
+                                                          prevCell.Y <= curCell.Y && MazeUtils.IsSouthOpening(curCell,
+                                                              mazeStructure.UnscaledMazeHeight, mazeGrid) ||
+                                                          // West opening
+                                                          prevCell.X >= curCell.X &&
+                                                          MazeUtils.IsWestOpening(curCell, mazeGrid):
+                            case PathDirection.East
+                                when prevCell.Y >= curCell.Y && MazeUtils.IsNorthOpening(curCell, mazeGrid) ||
+                                     // South opening
+                                     prevCell.Y <= curCell.Y && MazeUtils.IsSouthOpening(curCell,
+                                         mazeStructure.UnscaledMazeHeight, mazeGrid) ||
+                                     // West opening
+                                     prevCell.X >= curCell.X && MazeUtils.IsWestOpening(curCell, mazeGrid):
+                            case PathDirection.South
+                                when prevCell.Y >= curCell.Y && MazeUtils.IsNorthOpening(curCell, mazeGrid) ||
+                                     // East opening
+                                     prevCell.X <= curCell.X && MazeUtils.IsEastOpening(curCell,
+                                         mazeStructure.UnscaledMazeWidth, mazeGrid) ||
+                                     // West opening
+                                     prevCell.X >= curCell.X && MazeUtils.IsWestOpening(curCell, mazeGrid):
+                            case PathDirection.West
+                                when prevCell.Y >= curCell.Y && MazeUtils.IsNorthOpening(curCell, mazeGrid) ||
+                                     // East opening
+                                     prevCell.X <= curCell.X && MazeUtils.IsEastOpening(curCell,
+                                         mazeStructure.UnscaledMazeWidth, mazeGrid) ||
+                                     // South opening
+                                     prevCell.Y <= curCell.Y && MazeUtils.IsSouthOpening(curCell,
+                                         mazeStructure.UnscaledMazeHeight, mazeGrid):
+                                numDeceptiveTurns++;
+                                break;
+                            case PathDirection.None:
+                                break;
+                        }
+                    }
+
+                    // Walk the path to the next cell
+                    prevCell = curCell;
+                    curCell = mazeStructure.GetNextPathCell(curCell);
+                } while (curCell != mazeStructure.UnscaledTargetLocation);
+
+                // Add the current maze genome ID and the corresponding number of deceptive turns
+                mazeDeceptiveTurns.Add(new Tuple<uint, int>(mazeStructure.GenomeId, numDeceptiveTurns));
+            });
+
+            return mazeDeceptiveTurns;
+        }
+
+        /// <summary>
+        ///     Computes the maze diversity by computing the manhattan distance between points on the solution paths.
+        /// </summary>
+        /// <param name="curChunkMazes">The collection of mazes being evaluated during the current chunk.</param>
+        /// <param name="allMazes">The list of all maze structures undergoing evaluation/comparison.</param>
+        /// <returns>The collection of maze diversity units recording the solution path distances between mazes.</returns>
+        public static IEnumerable<MazeDiversityUnit> CalculateMazeDiversity(IEnumerable<MazeStructure> curChunkMazes,
+            IList<MazeStructure> allMazes)
+        {
+            var mazeDiversityUnits = new List<MazeDiversityUnit>();
+
+            // Loop through every maze in the population, comparing its solution path
+            foreach (var curMaze in curChunkMazes)
+            {
+                var curMazeDiversityScores = new ConcurrentBag<double>();
+
+                // Compute the solution path diversity for all mazes in the current chunk against the entire population
+                Parallel.ForEach(allMazes, comparisonMaze =>
+                {
+                    // Path cell counter
+                    var pathCellCount = 0;
+
+                    // Distance accumulator for the current maze
+                    var pathDistance = 0.0;
+
+                    // Don't compare the current maze to itself
+                    if (curMaze == comparisonMaze) return;
+
+                    // Initialize current cells to one location beyond the maze start location
+                    var curCell = curMaze.GetNextPathCell(curMaze.UnscaledStartLocation);
+                    var curCmprCell = comparisonMaze.GetNextPathCell(comparisonMaze.UnscaledStartLocation);
+
+                    do
+                    {
+                        // Calculate manhattan distance between cells of the two mazes
+                        pathDistance += Math.Abs(curCell.X - curCmprCell.X) + Math.Abs(curCell.Y - curCmprCell.Y);
+
+                        try
+                        {
+                            // Increment to the next cell of both mazes
+                            curCell = curMaze.GetNextPathCell(curCell);
+                            curCmprCell = comparisonMaze.GetNextPathCell(curCmprCell);
+
+                            // Increment the path cell count
+                            pathCellCount++;
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e);
+                            throw;
+                        }
+                    } while (curCell != curMaze.UnscaledTargetLocation ||
+                             curCmprCell != comparisonMaze.UnscaledTargetLocation);
+
+                    // Record the distance between the two maze solution paths
+                    curMazeDiversityScores.Add(pathDistance / pathCellCount);
+                });
+
+                // Compute overall solution path diversity for the current maze
+                mazeDiversityUnits.Add(new MazeDiversityUnit(curMaze.GenomeId, curMazeDiversityScores.Average()));
+            }
+
+            return mazeDiversityUnits;
         }
 
         /// <summary>
@@ -72,7 +218,7 @@ namespace MazeExperimentSupportLib
         {
             IList<TrajectoryDiversityUnit> trajectoryDiversityUnits = new List<TrajectoryDiversityUnit>();
 
-            foreach (MazeNavigatorEvaluationUnit evaluationUnit in evaluationUnits.Where(u => u.IsMazeSolved))
+            foreach (var evaluationUnit in evaluationUnits.Where(u => u.IsMazeSolved))
             {
                 double intraMazeTotalTrajectoryDifference = 0;
                 double interMazeTotalTrajectoryDifference = 0;
@@ -87,7 +233,7 @@ namespace MazeExperimentSupportLib
                     if (otherEvaluationUnit.Equals(evaluationUnitCopy))
                         return;
 
-                    // Caculate trajectory difference for same maze
+                    // Calculate trajectory difference for same maze
                     if (otherEvaluationUnit.MazeId.Equals(evaluationUnitCopy.MazeId))
                     {
                         intraMazeTotalTrajectoryDifference +=
@@ -623,33 +769,33 @@ namespace MazeExperimentSupportLib
                 {
                     trajectoryDistance += Math.Sqrt(
                         Math.Pow(
-                            (trajectory2[idx] - trajectory1[trajectory1.Count - 2]),
+                            trajectory2[idx] - trajectory1[trajectory1.Count - 2],
                             2) +
                         Math.Pow(
-                            (trajectory2[idx + 1] -
-                             trajectory1[trajectory1.Count - 1]), 2));
+                            trajectory2[idx + 1] -
+                            trajectory1[trajectory1.Count - 1], 2));
                 }
                 // Handle the case where the second trajectory has ended
                 else if (idx >= trajectory2.Count)
                 {
                     trajectoryDistance += Math.Sqrt(
                         Math.Pow(
-                            (trajectory2[trajectory2.Count - 2] - trajectory1[idx]),
+                            trajectory2[trajectory2.Count - 2] - trajectory1[idx],
                             2) +
                         Math.Pow(
-                            (trajectory2[trajectory2.Count - 1] -
-                             trajectory1[idx + 1]), 2));
+                            trajectory2[trajectory2.Count - 1] -
+                            trajectory1[idx + 1], 2));
                 }
                 // Otherwise, we're still in the simulation time frame for both trajectories
                 else
                 {
                     trajectoryDistance += Math.Sqrt(
                         Math.Pow(
-                            (trajectory2[idx] - trajectory1[idx]),
+                            trajectory2[idx] - trajectory1[idx],
                             2) +
                         Math.Pow(
-                            (trajectory2[idx + 1] -
-                             trajectory1[idx + 1]), 2));
+                            trajectory2[idx + 1] -
+                            trajectory1[idx + 1], 2));
                 }
             }
 

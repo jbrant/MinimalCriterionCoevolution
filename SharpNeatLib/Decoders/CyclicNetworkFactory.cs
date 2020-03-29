@@ -48,14 +48,16 @@ namespace SharpNeat.Decoders
                                                  networkDef.InputNodeCount,
                                                  networkDef.OutputNodeCount,
                                                  activationScheme.MaxTimesteps,
-                                                 activationScheme.SignalDeltaThreshold);
+                                                 activationScheme.SignalDeltaThreshold,
+                                                 networkDef.Id);
             }
 
             return new CyclicNetwork(neuronList,
                                      connectionList,
                                      networkDef.InputNodeCount,
                                      networkDef.OutputNodeCount,
-                                     activationScheme.TimestepsPerActivation);
+                                     activationScheme.TimestepsPerActivation,
+                                     networkDef.Id);
         }
 
         #endregion

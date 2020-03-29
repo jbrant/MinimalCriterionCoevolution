@@ -1,8 +1,6 @@
 ﻿#region
 
-using System.Collections.Generic;
 using SharpNeat.Core;
-using SharpNeat.Loggers;
 
 #endregion
 
@@ -14,70 +12,12 @@ namespace SharpNeat.Behaviors
     public class EndPointBehaviorCharacterizationFactory : IBehaviorCharacterizationFactory
     {
         /// <summary>
-        ///     The minimal criteria to set on the constructed behavior characterizations (optional).
-        /// </summary>
-        private readonly IMinimalCriteria _minimalCriteria;
-
-        /// <summary>
-        ///     Constructor for end-point behavior characterization factory.
-        /// </summary>
-        /// <param name="minimalCriteria">The minimal criteria to set on the constructed end-point behavior characterizations.</param>
-        public EndPointBehaviorCharacterizationFactory(IMinimalCriteria minimalCriteria)
-        {
-            _minimalCriteria = minimalCriteria;
-        }
-
-        /// <summary>
-        ///     Constructs a new end-point behavior characterization with the minimal criteria held by the factory (if applicable).
+        ///     Constructs a new end-point behavior characterization.
         /// </summary>
         /// <returns>Constructed end-point behavior characterization.</returns>
         public IBehaviorCharacterization CreateBehaviorCharacterization()
         {
-            return new EndPointBehaviorCharacterization(_minimalCriteria, false);
-        }
-
-        /// <summary>
-        ///     Constructs a new end-point behavior characterization with the specified minimal criteria.
-        /// </summary>
-        /// <param name="minimalCriteria">The custom minimal criteria to set on the behavior characterization.</param>
-        /// <returns>Constructed end-point behavior characterization with the custom minimal criteria.</returns>
-        public IBehaviorCharacterization CreateBehaviorCharacterization(IMinimalCriteria minimalCriteria)
-        {
-            return new EndPointBehaviorCharacterization(minimalCriteria, false);
-        }
-
-        /// <summary>
-        ///     Calls the update procedure on the minimal criteria stored within the behavior characterization factory.
-        /// </summary>
-        /// <typeparam name="TGenome">Genome type parameter.</typeparam>
-        /// <param name="population">The current population.</param>
-        public void UpdateBehaviorCharacterizationMinimalCriteria<TGenome>(List<TGenome> population)
-            where TGenome : class, IGenome<TGenome>
-        {
-            _minimalCriteria.UpdateMinimalCriteria(population);
-        }
-
-        /// <summary>
-        ///     Returns EndPointBehaviorCharacterizationFactory loggable elements.
-        /// </summary>
-        /// <param name="logFieldEnableMap">
-        ///     Dictionary of logging fields that can be enabled or disabled based on the specification
-        ///     of the calling routine.
-        /// </param>
-        /// <returns>The loggable elements for EndPointBehaviorCharacterizationFactory.</returns>
-        public List<LoggableElement> GetLoggableElements(IDictionary<FieldElement, bool> logFieldEnableMap = null)
-        {
-            return _minimalCriteria?.GetLoggableElements(logFieldEnableMap);
-        }
-
-        /// <summary>
-        ///     Constructs a new end-point behavior characterization with the minimal criteria held by the factory (if applicable)
-        ///     and a flag indicating whether the minimal criteria is permitted to be reversed when determining viability.
-        /// </summary>
-        /// <returns>Constructed end-point behavior characterization.</returns>
-        public IBehaviorCharacterization CreateBehaviorCharacterization(bool allowReverseCriteria)
-        {
-            return new EndPointBehaviorCharacterization(_minimalCriteria, allowReverseCriteria);
+            return new EndPointBehaviorCharacterization();
         }
     }
 }

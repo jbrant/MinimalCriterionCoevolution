@@ -146,17 +146,16 @@ namespace MCC_Domains.Utils
         ///     String representation of the behavior charcterization type for which to create a new behavior characterization
         ///     factory.
         /// </param>
-        /// <param name="minimalCriteria">The minimal criteria to impose upon generated behavior characterizations.</param>
         /// <returns>An instantiated behavior characterization factory.</returns>
         public static IBehaviorCharacterizationFactory GenerateBehaviorCharacterizationFactory(
-            String strBehaviorCharacterization, IMinimalCriteria minimalCriteria)
+            String strBehaviorCharacterization)
         {
             switch (ConvertStringToBehavioralCharacterization(strBehaviorCharacterization))
             {
                 case BehaviorCharacterizationType.EndPoint:
-                    return new EndPointBehaviorCharacterizationFactory(minimalCriteria);
+                    return new EndPointBehaviorCharacterizationFactory();
                 default:
-                    return new TrajectoryBehaviorCharacterizationFactory(minimalCriteria);
+                    return new TrajectoryBehaviorCharacterizationFactory();
             }
         }
 
@@ -167,17 +166,16 @@ namespace MCC_Domains.Utils
         ///     The behavior charcterization type for which to create a new behavior
         ///     characterization factory.
         /// </param>
-        /// <param name="minimalCriteria">The minimal criteria to impose upon generated behavior characterizations.</param>
         /// <returns>An instantiated behavior characterization factory.</returns>
         public static IBehaviorCharacterizationFactory GenerateBehaviorCharacterizationFactory(
-            BehaviorCharacterizationType behaviorCharacterizationType, IMinimalCriteria minimalCriteria)
+            BehaviorCharacterizationType behaviorCharacterizationType)
         {
             switch (behaviorCharacterizationType)
             {
                 case BehaviorCharacterizationType.EndPoint:
-                    return new EndPointBehaviorCharacterizationFactory(minimalCriteria);
+                    return new EndPointBehaviorCharacterizationFactory();
                 default:
-                    return new TrajectoryBehaviorCharacterizationFactory(minimalCriteria);
+                    return new TrajectoryBehaviorCharacterizationFactory();
             }
         }
     }

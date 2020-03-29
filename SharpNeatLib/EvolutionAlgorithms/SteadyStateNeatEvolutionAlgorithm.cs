@@ -90,7 +90,6 @@ namespace SharpNeat.EvolutionAlgorithms
 
             // If there is a logger defined, log the generation stats
             EvolutionLogger?.LogRow(GetLoggableElements(_logFieldEnabledMap),
-                GenomeEvaluator.GetLoggableElements(_logFieldEnabledMap),
                 Statistics.GetLoggableElements(_logFieldEnabledMap),
                 (CurrentChampGenome as NeatGenome)?.GetLoggableElements(_logFieldEnabledMap));
 
@@ -264,7 +263,6 @@ namespace SharpNeat.EvolutionAlgorithms
             EvolutionLogger = logger;
             _logFieldEnabledMap = logFieldEnabledMap;
             PopulationLogger = populationLogger;
-            PopulationLoggingInterval = populationLoggingInterval;
         }
 
         #endregion

@@ -31,6 +31,11 @@ namespace SharpNeat.Network
     public interface INetworkDefinition
     {
         /// <summary>
+        ///     The unique identifier of the genome from which the phenotype was generated.
+        /// </summary>
+        uint Id { get; }
+        
+        /// <summary>
         /// Gets the number of input nodes. This does not include the bias node which is always present.
         /// </summary>
         int InputNodeCount { get; }

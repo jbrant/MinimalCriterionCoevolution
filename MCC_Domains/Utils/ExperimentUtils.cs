@@ -26,16 +26,13 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Xml;
 using ExperimentEntities.entities;
-using MCC_Domains.MazeNavigation.Bootstrappers;
-using Redzen.Random;
 using SharpNeat.Core;
 using SharpNeat.Decoders;
 using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.EvolutionAlgorithms.ComplexityRegulation;
-using SharpNeat.Genomes.Maze;
+using SharpNeat.Genomes.Substrate;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Loggers;
-using SharpNeat.MinimalCriterias;
 
 #endregion
 
@@ -174,123 +171,33 @@ namespace MCC_Domains.Utils
                 // Set each if it's specified in the configuration (otherwise, accept the default)
                 if (initialConnectionProportion != null)
                 {
-                    genomeParameters.InitialInterconnectionsProportion = initialConnectionProportion ?? default(double);
+                    genomeParameters.InitialInterconnectionsProportion = initialConnectionProportion ?? default;
                 }
 
                 if (weightMutationProbability != null)
                 {
-                    genomeParameters.ConnectionWeightMutationProbability = weightMutationProbability ?? default(double);
+                    genomeParameters.ConnectionWeightMutationProbability = weightMutationProbability ?? default;
                 }
 
                 if (addConnectionProbability != null)
                 {
-                    genomeParameters.AddConnectionMutationProbability = addConnectionProbability ?? default(double);
+                    genomeParameters.AddConnectionMutationProbability = addConnectionProbability ?? default;
                 }
 
                 if (addNodeProbability != null)
                 {
-                    genomeParameters.AddNodeMutationProbability = addNodeProbability ?? default(double);
+                    genomeParameters.AddNodeMutationProbability = addNodeProbability ?? default;
                 }
 
                 if (deleteConnectionProbability != null)
                 {
                     genomeParameters.DeleteConnectionMutationProbability = deleteConnectionProbability ??
-                                                                           default(double);
+                                                                           default;
                 }
 
                 if (connectionWeightRange != null)
                 {
-                    genomeParameters.ConnectionWeightRange = connectionWeightRange ?? default(double);
-                }
-            }
-
-            return genomeParameters;
-        }
-
-        /// <summary>
-        ///     Read maze genome parameter settings from the configuration file.
-        /// </summary>
-        /// <param name="xmlConfig">The reference to the XML configuration file.</param>
-        /// <returns>An initialized maze genome parameters object.</returns>
-        public static MazeGenomeParameters ReadMazeGenomeParameters(XmlElement xmlConfig)
-        {
-            // Create new NEAT genome parameters with default values
-            var genomeParameters = new MazeGenomeParameters();
-
-            // Get root of neat genome configuration section
-            var nodeList = xmlConfig.GetElementsByTagName("MazeGenomeConfig", "");
-
-            // Note that if there are multiple defined (such as would be the case with an experiment that uses multiple EAs), 
-            // the first one is used here, which will accurately correspond to the current algorithm under consideration
-            if (nodeList.Count >= 1)
-            {
-                // Convert to an XML element
-                var xmlMazeGenomeConfig = nodeList[0] as XmlElement;
-
-                // Read all of the applicable parameters in
-                var wallStartMutationProbability = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
-                    "MutateWallStartLocationProbability");
-                var passageStartMutationProbability = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
-                    "MutatePassageStartLocationProbability");
-                var addWallProbability = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
-                    "MutateAddWallProbability");
-                var deleteWallProbability = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
-                    "MutateDeleteWallProbability");
-                var pathWaypointLocationMutationProbability = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
-                    "MutatePathWaypointLocationProbability");
-                var addPathWaypointMutationProbability = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
-                    "MutateAddPathWaypointProbability");
-                var expandMazeProbability = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
-                    "MutateExpandMazeProbability");
-                var perturbanceMagnitude = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig,
-                    "PerturbanceMagnitude");
-                var verticalWallBias = XmlUtils.TryGetValueAsDouble(xmlMazeGenomeConfig, "VerticalWallBias");
-
-                // Set each if it's specified in the configuration (otherwise, accept the default)
-                if (wallStartMutationProbability != null)
-                {
-                    genomeParameters.MutateWallStartLocationProbability = (double) wallStartMutationProbability;
-                }
-
-                if (passageStartMutationProbability != null)
-                {
-                    genomeParameters.MutatePassageStartLocationProbability = (double) passageStartMutationProbability;
-                }
-
-                if (addWallProbability != null)
-                {
-                    genomeParameters.MutateAddWallProbability = (double) addWallProbability;
-                }
-
-                if (deleteWallProbability != null)
-                {
-                    genomeParameters.MutateDeleteWallProbability = (double) deleteWallProbability;
-                }
-
-                if (pathWaypointLocationMutationProbability != null)
-                {
-                    genomeParameters.MutatePathWaypointLocationProbability =
-                        (double) pathWaypointLocationMutationProbability;
-                }
-
-                if (addPathWaypointMutationProbability != null)
-                {
-                    genomeParameters.MutateAddPathWaypointProbability = (double) addPathWaypointMutationProbability;
-                }
-
-                if (expandMazeProbability != null)
-                {
-                    genomeParameters.MutateExpandMazeProbability = (double) expandMazeProbability;
-                }
-
-                if (perturbanceMagnitude != null)
-                {
-                    genomeParameters.PerturbanceMagnitude = (double) perturbanceMagnitude;
-                }
-
-                if (verticalWallBias != null)
-                {
-                    genomeParameters.VerticalWallBias = (double) verticalWallBias;
+                    genomeParameters.ConnectionWeightRange = connectionWeightRange ?? default;
                 }
             }
 
@@ -306,7 +213,7 @@ namespace MCC_Domains.Utils
         public static NeatGenomeParameters ReadNeatGenomeParameters(ExperimentDictionary experimentDictionary,
             bool isPrimary)
         {
-            return (isPrimary
+            return isPrimary
                 ? new NeatGenomeParameters
                 {
                     InitialInterconnectionsProportion = experimentDictionary.Primary_ConnectionProportion,
@@ -321,17 +228,17 @@ namespace MCC_Domains.Utils
                 : new NeatGenomeParameters
                 {
                     InitialInterconnectionsProportion =
-                        experimentDictionary.Initialization_ConnectionProportion ?? default(double),
+                        experimentDictionary.Initialization_ConnectionProportion ?? default,
                     ConnectionWeightMutationProbability =
-                        experimentDictionary.Initialization_MutateConnectionWeightsProbability ?? default(double),
+                        experimentDictionary.Initialization_MutateConnectionWeightsProbability ?? default,
                     AddConnectionMutationProbability =
-                        experimentDictionary.Initialization_MutateAddConnectionProbability ?? default(double),
+                        experimentDictionary.Initialization_MutateAddConnectionProbability ?? default,
                     AddNodeMutationProbability =
-                        experimentDictionary.Initialization_MutateAddNeuronProbability ?? default(double),
+                        experimentDictionary.Initialization_MutateAddNeuronProbability ?? default,
                     DeleteConnectionMutationProbability =
-                        experimentDictionary.Initialization_MutateDeleteConnectionProbability ?? default(double),
+                        experimentDictionary.Initialization_MutateDeleteConnectionProbability ?? default,
                     ConnectionWeightRange = experimentDictionary.Initialization_ConnectionWeightRange ?? default(double)
-                });
+                };
         }
 
         /// <summary>
@@ -344,15 +251,15 @@ namespace MCC_Domains.Utils
             // Create new NEAT EA parameters with default values
             return new EvolutionAlgorithmParameters
             {
-                SpecieCount = XmlUtils.TryGetValueAsInt(xmlConfig, "SpecieCount") ?? default(int),
-                ElitismProportion = XmlUtils.TryGetValueAsDouble(xmlConfig, "ElitismProportion") ?? default(double),
-                SelectionProportion = XmlUtils.TryGetValueAsDouble(xmlConfig, "SelectionProportion") ?? default(double),
+                SpecieCount = XmlUtils.TryGetValueAsInt(xmlConfig, "SpecieCount") ?? default,
+                ElitismProportion = XmlUtils.TryGetValueAsDouble(xmlConfig, "ElitismProportion") ?? default,
+                SelectionProportion = XmlUtils.TryGetValueAsDouble(xmlConfig, "SelectionProportion") ?? default,
                 OffspringAsexualProportion =
-                    XmlUtils.TryGetValueAsDouble(xmlConfig, "OffspringAsexualProbability") ?? default(double),
+                    XmlUtils.TryGetValueAsDouble(xmlConfig, "OffspringAsexualProbability") ?? default,
                 OffspringSexualProportion =
-                    XmlUtils.TryGetValueAsDouble(xmlConfig, "OffspringSexualProbability") ?? default(double),
+                    XmlUtils.TryGetValueAsDouble(xmlConfig, "OffspringSexualProbability") ?? default,
                 InterspeciesMatingProportion =
-                    XmlUtils.TryGetValueAsDouble(xmlConfig, "InterspeciesMatingProbability") ?? default(double)
+                    XmlUtils.TryGetValueAsDouble(xmlConfig, "InterspeciesMatingProbability") ?? default
             };
         }
 
@@ -366,7 +273,7 @@ namespace MCC_Domains.Utils
             ExperimentDictionary experimentDictionary,
             bool isPrimary)
         {
-            return (isPrimary
+            return isPrimary
                 ? new EvolutionAlgorithmParameters
                 {
                     SpecieCount = experimentDictionary.Primary_NumSpecies,
@@ -378,16 +285,16 @@ namespace MCC_Domains.Utils
                 }
                 : new EvolutionAlgorithmParameters
                 {
-                    SpecieCount = experimentDictionary.Initialization_NumSpecies ?? default(int),
+                    SpecieCount = experimentDictionary.Initialization_NumSpecies ?? default,
                     InterspeciesMatingProportion =
-                        experimentDictionary.Initialization_InterspeciesMatingProbability ?? default(double),
-                    ElitismProportion = experimentDictionary.Initialization_ElitismProportion ?? default(double),
-                    SelectionProportion = experimentDictionary.Initialization_SelectionProportion ?? default(double),
+                        experimentDictionary.Initialization_InterspeciesMatingProbability ?? default,
+                    ElitismProportion = experimentDictionary.Initialization_ElitismProportion ?? default,
+                    SelectionProportion = experimentDictionary.Initialization_SelectionProportion ?? default,
                     OffspringAsexualProportion =
-                        experimentDictionary.Initialization_AsexualProbability ?? default(double),
+                        experimentDictionary.Initialization_AsexualProbability ?? default,
                     OffspringSexualProportion =
-                        experimentDictionary.Initialization_CrossoverProbability ?? default(double)
-                });
+                        experimentDictionary.Initialization_CrossoverProbability ?? default
+                };
         }
 
         /// <summary>
@@ -487,91 +394,11 @@ namespace MCC_Domains.Utils
             }
 
             var xmlBehaviorConfig = behaviorNodeList[0] as XmlElement;
-            IMinimalCriteria minimalCriteria = null;
-
-            // Try to get the child minimal criteria configuration
-            var minimalCriteriaNodeList = xmlBehaviorConfig.GetElementsByTagName("MinimalCriteriaConfig", "");
-
-            // If a minimal criteria is specified, read in its configuration and add it to the behavior characterization
-            if (minimalCriteriaNodeList.Count == 1)
-            {
-                var xmlMinimalCriteriaConfig = minimalCriteriaNodeList[0] as XmlElement;
-
-                // Extract the minimal criteria constraint name
-                var minimalCriteriaConstraint = XmlUtils.TryGetValueAsString(xmlMinimalCriteriaConfig,
-                    "MinimalCriteriaConstraint");
-
-                // Get the appropriate minimal criteria type
-                var mcType = BehaviorCharacterizationUtil.ConvertStringToMinimalCriteria(minimalCriteriaConstraint);
-
-                // Starting location used in most criterias
-                double xStart, yStart;
-
-                switch (mcType)
-                {
-                    case MinimalCriteriaType.EuclideanLocation:
-
-                        // Read in the min/max location bounds
-                        var xMin = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "XMin");
-                        var xMax = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "XMax");
-                        var yMin = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "YMin");
-                        var yMax = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "YMax");
-
-                        // Set the euclidean location minimal criteria on the behavior characterization
-                        minimalCriteria = new EuclideanLocationCriteria(xMin, xMax, yMin, yMax);
-
-                        break;
-
-                    case MinimalCriteriaType.FixedPointEuclideanDistance:
-
-                        // Read in the starting coordinates and the minimum required distance traveled
-                        xStart = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "XStart");
-                        yStart = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "YStart");
-                        var minimumDistanceTraveled = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig,
-                            "MinimumRequiredDistance");
-                        double? maxDistanceUpdateCyclesWithoutChange =
-                            XmlUtils.TryGetValueAsInt(xmlMinimalCriteriaConfig,
-                                "MaxUpdateCyclesWithoutChange");
-
-                        // Set the fixed point euclidean distance minimal criteria on the behavior characterization
-                        minimalCriteria = new FixedPointEuclideanDistanceCriteria(xStart, yStart,
-                            minimumDistanceTraveled, maxDistanceUpdateCyclesWithoutChange);
-
-                        break;
-
-                    case MinimalCriteriaType.PopulationCentroidEuclideanDistance:
-
-                        // Read in the starting minimum required distance (if applicable)
-                        var minimuCentroidDistance = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig,
-                            "MinimumRequiredDistance");
-
-                        // Set the population centroid euclidean distance criteria on the behavior characterization
-                        minimalCriteria = new PopulationCentroidEuclideanDistanceCriteria(minimuCentroidDistance);
-
-                        break;
-
-                    case MinimalCriteriaType.Mileage:
-
-                        // Read in the starting coordinates and minimum required total distance traveled (mileage)
-                        xStart = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "XStart");
-                        yStart = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "YStart");
-                        var minimumMileage = XmlUtils.GetValueAsDouble(xmlMinimalCriteriaConfig, "MinimumMileage");
-                        double? maxMileageUpdateCyclesWithoutChange = XmlUtils.TryGetValueAsInt(
-                            xmlMinimalCriteriaConfig,
-                            "MaxUpdateCyclesWithoutChange");
-
-                        // Set the mileage minimal criteria on the behavior characterization
-                        minimalCriteria = new MileageCriteria(xStart, yStart, minimumMileage,
-                            maxMileageUpdateCyclesWithoutChange);
-
-                        break;
-                }
-            }
 
             // Parse and generate the appropriate behavior characterization factory
             var behaviorCharacterizationFactory =
                 BehaviorCharacterizationUtil.GenerateBehaviorCharacterizationFactory(
-                    XmlUtils.TryGetValueAsString(xmlBehaviorConfig, "BehaviorCharacterization"), minimalCriteria);
+                    XmlUtils.TryGetValueAsString(xmlBehaviorConfig, "BehaviorCharacterization"));
 
             return behaviorCharacterizationFactory;
         }
@@ -600,66 +427,9 @@ namespace MCC_Domains.Utils
                 throw new ArgumentException("Missing or invalid BehaviorConfig settings.");
             }
 
-            IMinimalCriteria minimalCriteria = null;
-
-            // Get the appropriate minimal criteria type
-            var mcType = BehaviorCharacterizationUtil.ConvertStringToMinimalCriteria(isPrimary
-                ? experiment.Primary_MCS_MinimalCriteriaName
-                : experiment.Initialization_MCS_MinimalCriteriaName);
-
-            // Starting location used in most criterias
-            double xStart, yStart;
-
-            switch (mcType)
-            {
-                case MinimalCriteriaType.EuclideanLocation:
-
-                    // TODO: Not implemented at the database layer yet
-
-                    break;
-
-                case MinimalCriteriaType.FixedPointEuclideanDistance:
-
-                    // Read in the starting coordinates and the minimum required distance traveled
-                    xStart = isPrimary
-                        ? experiment.Primary_MCS_MinimalCriteriaStartX ?? default(double)
-                        : experiment.Initialization_MCS_MinimalCriteriaStartX ?? default(double);
-                    yStart = isPrimary
-                        ? experiment.Primary_MCS_MinimalCriteriaStartY ?? default(double)
-                        : experiment.Initialization_MCS_MinimalCriteriaStartY ?? default(double);
-                    var minimumDistanceTraveled = isPrimary
-                        ? experiment.Primary_MCS_MinimalCriteriaThreshold ?? default(double)
-                        : experiment.Initialization_MCS_MinimalCriteriaThreshold ?? default(double);
-
-                    // Set the euclidean distance minimal criteria on the behavior characterization
-                    minimalCriteria = new FixedPointEuclideanDistanceCriteria(xStart, yStart,
-                        minimumDistanceTraveled);
-
-                    break;
-
-                case MinimalCriteriaType.Mileage:
-
-                    // Read in the starting coordinates and minimum required total distance traveled (mileage)
-                    xStart = isPrimary
-                        ? experiment.Primary_MCS_MinimalCriteriaStartX ?? default(double)
-                        : experiment.Initialization_MCS_MinimalCriteriaStartX ?? default(double);
-                    yStart = isPrimary
-                        ? experiment.Primary_MCS_MinimalCriteriaStartY ?? default(double)
-                        : experiment.Initialization_MCS_MinimalCriteriaStartY ?? default(double);
-                    var minimumMileage = isPrimary
-                        ? experiment.Primary_MCS_MinimalCriteriaThreshold ?? default(double)
-                        : experiment.Initialization_MCS_MinimalCriteriaThreshold ?? default(double);
-
-                    // Set the mileage minimal criteria on the behavior characterization
-                    minimalCriteria = new MileageCriteria(xStart, yStart, minimumMileage);
-
-                    break;
-            }
-
             // Parse and generate the appropriate behavior characterization factory
             var behaviorCharacterizationFactory =
-                BehaviorCharacterizationUtil.GenerateBehaviorCharacterizationFactory(behaviorCharacterizationName,
-                    minimalCriteria);
+                BehaviorCharacterizationUtil.GenerateBehaviorCharacterizationFactory(behaviorCharacterizationName);
 
             return behaviorCharacterizationFactory;
         }
@@ -699,8 +469,13 @@ namespace MCC_Domains.Utils
         ///     The path of the single NEAT genome or a directory containing multiple XML genome definitions.
         /// </param>
         /// <param name="neatGenomeFactory">The NEAT genome factory to assign to each genome.</param>
+        /// <param name="nodeFnIds">
+        ///     Indicates if node activation function IDs should be read. If false then
+        ///     all node activation function IDs default to 0.
+        /// </param>
         /// <returns>The list of seed NEAT genomes.</returns>
-        public static List<NeatGenome> ReadSeedNeatGenomes(string seedNeatPath, NeatGenomeFactory neatGenomeFactory)
+        public static List<NeatGenome> ReadSeedNeatGenomes(string seedNeatPath, NeatGenomeFactory neatGenomeFactory,
+            bool nodeFnIds)
         {
             var neatGenomes = new List<NeatGenome>();
 
@@ -713,7 +488,7 @@ namespace MCC_Domains.Utils
                 using (var xr = XmlReader.Create(neatGenomeFile))
                 {
                     // Read in the NEAT genomes
-                    var curNeatGenomes = NeatGenomeXmlIO.ReadCompleteGenomeList(xr, false, neatGenomeFactory);
+                    var curNeatGenomes = NeatGenomeXmlIO.ReadCompleteGenomeList(xr, nodeFnIds, neatGenomeFactory);
 
                     // Add the genomes to the overall genome list
                     neatGenomes.AddRange(curNeatGenomes);
@@ -724,99 +499,39 @@ namespace MCC_Domains.Utils
         }
 
         /// <summary>
-        ///     Reads in seed maze genomes used to bootstrap MCC experiments.
+        ///     Reads in seed CPPN genomes used to bootstrap MCC experiments.
         /// </summary>
-        /// <param name="seedMazePath">
-        ///     The path of the single maze genome or a directory containing multiple XML genome
-        ///     definitions.
+        /// <param name="seedPath">
+        ///     The path of the single genome or a directory containing multiple XML genome definitions.
         /// </param>
-        /// <param name="mazeGenomeFactory">The maze genome factory to assign to each genome.</param>
-        /// <returns>The list of seed maze genomes.</returns>
-        public static IEnumerable<MazeGenome> ReadSeedMazeGenomes(string seedMazePath,
-            MazeGenomeFactory mazeGenomeFactory)
+        /// <param name="genomeFactory">The genome factory to assign to each genome.</param>
+        /// <param name="nodeFnIds">
+        ///     Indicates if node activation function IDs should be read. If false then
+        ///     all node activation function IDs default to 0.
+        /// </param>
+        /// <returns>The list of seed CPPN genomes.</returns>
+        public static List<NeatSubstrateGenome> ReadSeedSubstrateGenomes(string seedPath,
+            NeatSubstrateGenomeFactory genomeFactory, bool nodeFnIds)
         {
-            var mazeGenomes = new List<MazeGenome>();
+            var genomes = new List<NeatSubstrateGenome>();
 
-            // Get the maze genome files in the given path
-            var mazeGenomeFiles = GetGenomeFiles(seedMazePath);
+            // Get the genome files in the given path
+            var genomeFiles = GetGenomeFiles(seedPath);
 
-            // Read in all maze genomes and add them to the list
-            foreach (var mazeGenomeFile in mazeGenomeFiles)
+            // Read in all genomes and add them to the list
+            foreach (var genomeFile in genomeFiles)
             {
-                using (var xr = XmlReader.Create(mazeGenomeFile))
+                using (var xr = XmlReader.Create(genomeFile))
                 {
-                    // Read in the maze genomes
-                    var curMazeGenomes = MazeGenomeXmlIO.ReadCompleteGenomeList(xr, mazeGenomeFactory);
+                    // Read in the genomes
+                    var curGenomes = NeatSubstrateGenomeXmlIO.ReadCompleteGenomeList(xr, nodeFnIds, genomeFactory);
 
                     // Add the genomes to the overall genome list
-                    mazeGenomes.AddRange(curMazeGenomes);
+                    genomes.AddRange(curGenomes);
                 }
             }
 
-            return mazeGenomes;
-        }
-
-        /// <summary>
-        ///     Generates the specified number of maze genomes with the specified complexity (i.e. number of interior partitions).
-        /// </summary>
-        /// <param name="numMazeGenomes">The number of maze genomes to generate.</param>
-        /// <param name="numPartitions">The number of initial partitions (the starting complexity of the genome).</param>
-        /// <param name="mazeGenomeFactory">Reference to the maze genome factory.</param>
-        /// <returns></returns>
-        public static List<MazeGenome> GenerateMazeGenomes(int numMazeGenomes, int numPartitions,
-            MazeGenomeFactory mazeGenomeFactory)
-        {
-            var mazeGenomes = new List<MazeGenome>(numMazeGenomes);
-            var rand = RandomDefaults.CreateRandomSource();
-
-            for (var curMazeCnt = 0; curMazeCnt < numMazeGenomes; curMazeCnt++)
-            {
-                // Reset innovation IDs
-                mazeGenomeFactory.InnovationIdGenerator.Reset();
-
-                // Create a new genome and pass in the requisite factory
-                var mazeGenome = new MazeGenome(mazeGenomeFactory, 0, 0);
-
-                // Create the specified number of interior partitions (i.e. maze genes)
-                for (var cnt = 0; cnt < numPartitions; cnt++)
-                {
-                    // Create new maze gene and add to genome
-                    mazeGenome.WallGeneList.Add(new WallGene(mazeGenomeFactory.InnovationIdGenerator.NextId,
-                        rand.NextDouble(), rand.NextDouble(), rand.NextDouble() < 0.5));
-                }
-
-                mazeGenomes.Add(mazeGenome);
-            }
-
-            return mazeGenomes;
-        }
-
-        /// <summary>
-        ///     Determines which MCC initializer to instantiate and return based on the initialization algorithm search
-        ///     type.
-        /// </summary>
-        /// <param name="xmlConfig">XML initialization configuration.</param>
-        /// <returns>The instantiated initializer.</returns>
-        public static MCCMazeNavigationInitializer DetermineMCCInitializer(XmlElement xmlConfig)
-        {
-            // Make sure that the XML configuration exists
-            if (xmlConfig == null)
-            {
-                throw new ArgumentException("Missing or invalid MCC initialization configuration.");
-            }
-
-            // Extract the corresponding search and selection algorithm domain types
-            var searchType =
-                AlgorithmTypeUtil.ConvertStringToSearchType(XmlUtils.TryGetValueAsString(xmlConfig, "SearchAlgorithm"));
-
-            // There's currently just two MCC initializers: fitness and novelty search
-            switch (searchType)
-            {
-                case SearchType.Fitness:
-                    return new FitnessMCCMazeNavigationInitializer();
-                default:
-                    return new NoveltySearchMCCMazeNavigationInitializer();
-            }
+            return genomes;
         }
     }
 }

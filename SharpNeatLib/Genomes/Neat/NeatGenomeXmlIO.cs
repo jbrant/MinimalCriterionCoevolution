@@ -24,8 +24,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Xml;
+using SharpNeat.Core;
+using SharpNeat.Genomes.Substrate;
+using SharpNeat.Genomes.Maze;
 using SharpNeat.Network;
 using SharpNeat.Network.ActivationFunctions;
 using SharpNeat.Utility;
@@ -165,7 +169,7 @@ namespace SharpNeat.Genomes.Neat
         #endregion
 
         #region Public Static Methods [Write to XML]
-
+        
         /// <summary>
         ///     Writes a list of NeatGenome(s) to XML within a containing 'Root' element and the activation
         ///     function library that the genomes are associated with.
@@ -570,7 +574,7 @@ namespace SharpNeat.Genomes.Neat
             // Construct and return loaded NeatGenome.
             return new NeatGenome(null, genomeId, birthGen, nGeneList, cGeneList, inputNodeCount, outputNodeCount, true);
         }
-
+        
         #endregion
     }
 }

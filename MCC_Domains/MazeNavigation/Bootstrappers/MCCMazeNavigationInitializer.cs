@@ -105,6 +105,9 @@ namespace MCC_Domains.MazeNavigation.Bootstrappers
 
             do
             {
+                // Reset the genome factory from previous runs (so we don't accumulate innovations across multiple restarts)
+                genomeFactory = new NeatGenomeFactory(genomeFactory as NeatGenomeFactory);
+                
                 // Instantiate the internal initialization algorithm
                 InitializeAlgorithm(parallelOptions, seedAgentList.ToList(), genomeFactory,
                     mazeStructure, new NeatGenomeDecoder(activationScheme), 0);

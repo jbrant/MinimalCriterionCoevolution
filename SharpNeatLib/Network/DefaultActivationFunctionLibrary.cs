@@ -18,40 +18,40 @@
  */
 
 using System.Collections.Generic;
-using Redzen.Numerics;
 using Redzen.Numerics.Distributions;
 using Redzen.Random;
 using SharpNeat.Network.ActivationFunctions;
 using SharpNeat.Network.ActivationFunctions.Bipolar;
 using SharpNeat.Network.ActivationFunctions.RadialBasis;
 using SharpNeat.Network.ActivationFunctions.Unipolar;
-using SharpNeat.Utility;
 
 namespace SharpNeat.Network
 {
     /// <summary>
-    /// Default implementation of an IActivationFunctionLibrary. 
-    /// Also provides static factory methods to create libraries with commonly used activation functions.
+    ///     Default implementation of an IActivationFunctionLibrary.
+    ///     Also provides static factory methods to create libraries with commonly used activation functions.
     /// </summary>
     public class DefaultActivationFunctionLibrary : IActivationFunctionLibrary
     {
-        readonly IList<ActivationFunctionInfo> _functionList;
-        readonly Dictionary<int,IActivationFunction> _functionDict;
-        readonly DiscreteDistribution _rwl;
+        private readonly Dictionary<int, IActivationFunction> _functionDict;
+        private readonly IList<ActivationFunctionInfo> _functionList;
+        private readonly DiscreteDistribution _rwl;
 
         #region Constructor
 
         /// <summary>
-        /// Constructs an activation function library with the provided list of activation functions.
+        ///     Constructs an activation function library with the provided list of activation functions.
         /// </summary>
         public DefaultActivationFunctionLibrary(IList<ActivationFunctionInfo> fnList)
         {
             // Build a RouletteWheelLayout based on the selection probability on each item.
-            int count = fnList.Count;
-            double[] probabilities = new double[count];
-            for(int i=0; i<count; i++) {
+            var count = fnList.Count;
+            var probabilities = new double[count];
+            for (var i = 0; i < count; i++)
+            {
                 probabilities[i] = fnList[i].SelectionProbability;
             }
+
             _rwl = new DiscreteDistribution(probabilities);
             _functionList = fnList;
 
@@ -61,10 +61,26 @@ namespace SharpNeat.Network
 
         #endregion
 
+        #region Private Methods
+
+        private static Dictionary<int, IActivationFunction> CreateFunctionDictionary(
+            IList<ActivationFunctionInfo> fnList)
+        {
+            var dict = new Dictionary<int, IActivationFunction>(fnList.Count);
+            foreach (var fnInfo in fnList)
+            {
+                dict.Add(fnInfo.Id, fnInfo.ActivationFunction);
+            }
+
+            return dict;
+        }
+
+        #endregion
+
         #region IActivationFunctionLibrary Members
 
         /// <summary>
-        /// Gets the function with the specified integer ID.
+        ///     Gets the function with the specified integer ID.
         /// </summary>
         public IActivationFunction GetFunction(int id)
         {
@@ -72,7 +88,7 @@ namespace SharpNeat.Network
         }
 
         /// <summary>
-        /// Randomly select a function based on each function's selection probability.
+        ///     Randomly select a function based on each function's selection probability.
         /// </summary>
         public ActivationFunctionInfo GetRandomFunction(IRandomSource rng)
         {
@@ -80,7 +96,7 @@ namespace SharpNeat.Network
         }
 
         /// <summary>
-        /// Gets a list of all functions in the library.
+        ///     Gets a list of all functions in the library.
         /// </summary>
         public IList<ActivationFunctionInfo> GetFunctionList()
         {
@@ -89,39 +105,26 @@ namespace SharpNeat.Network
 
         #endregion
 
-        #region Private Methods
-
-        private static Dictionary<int,IActivationFunction> CreateFunctionDictionary(IList<ActivationFunctionInfo> fnList)
-        {
-            Dictionary<int,IActivationFunction> dict = new Dictionary<int,IActivationFunction>(fnList.Count);
-            foreach(ActivationFunctionInfo fnInfo in fnList) {
-                dict.Add(fnInfo.Id, fnInfo.ActivationFunction);
-            }
-            return dict;
-        }
-
-        #endregion
-
         #region Public Static Factory Methods
 
         /// <summary>
-        /// Create an IActivationFunctionLibrary for use with NEAT.
-        /// NEAT uses the same activation function for all neurons/nodes therefore this factory method
-        /// creates an IActivationFunction containing only the single provided IActivationFunction.
+        ///     Create an IActivationFunctionLibrary for use with NEAT.
+        ///     NEAT uses the same activation function for all neurons/nodes therefore this factory method
+        ///     creates an IActivationFunction containing only the single provided IActivationFunction.
         /// </summary>
         public static IActivationFunctionLibrary CreateLibraryNeat(IActivationFunction activationFn)
         {
-            List<ActivationFunctionInfo> fnList = new List<ActivationFunctionInfo>(1);
+            var fnList = new List<ActivationFunctionInfo>(1);
             fnList.Add(new ActivationFunctionInfo(0, 1.0, activationFn));
             return new DefaultActivationFunctionLibrary(fnList);
         }
 
         /// <summary>
-        /// Create an IActivationFunctionLibrary for use with CPPNs.
+        ///     Create an IActivationFunctionLibrary for use with CPPNs.
         /// </summary>
         public static IActivationFunctionLibrary CreateLibraryCppn()
         {
-            List<ActivationFunctionInfo> fnList = new List<ActivationFunctionInfo>(4);
+            var fnList = new List<ActivationFunctionInfo>(4);
             fnList.Add(new ActivationFunctionInfo(0, 0.25, Linear.__DefaultInstance));
             fnList.Add(new ActivationFunctionInfo(1, 0.25, BipolarSigmoid.__DefaultInstance));
             fnList.Add(new ActivationFunctionInfo(2, 0.25, Gaussian.__DefaultInstance));
@@ -130,13 +133,28 @@ namespace SharpNeat.Network
         }
 
         /// <summary>
-        /// Create an IActivationFunctionLibrary for use with Radial Basis Function NEAT.
+        ///     Create an IActivationFunctionLibrary for use with CPPNs that uses Bipolar Sigmoid activation function by default.
         /// </summary>
-        public static IActivationFunctionLibrary CreateLibraryRbf(IActivationFunction activationFn, double auxArgsMutationSigmaCenter, double auxArgsMutationSigmaRadius)
+        public static IActivationFunctionLibrary CreateLibraryCppnBipolarSigmoidDefault()
         {
-            List<ActivationFunctionInfo> fnList = new List<ActivationFunctionInfo>(2);
+            var fnList = new List<ActivationFunctionInfo>(4);
+            fnList.Add(new ActivationFunctionInfo(0, 0.25, BipolarSigmoid.__DefaultInstance));
+            fnList.Add(new ActivationFunctionInfo(1, 0.25, Linear.__DefaultInstance));
+            fnList.Add(new ActivationFunctionInfo(2, 0.25, Gaussian.__DefaultInstance));
+            fnList.Add(new ActivationFunctionInfo(3, 0.25, Sine.__DefaultInstance));
+            return new DefaultActivationFunctionLibrary(fnList);
+        }
+
+        /// <summary>
+        ///     Create an IActivationFunctionLibrary for use with Radial Basis Function NEAT.
+        /// </summary>
+        public static IActivationFunctionLibrary CreateLibraryRbf(IActivationFunction activationFn,
+            double auxArgsMutationSigmaCenter, double auxArgsMutationSigmaRadius)
+        {
+            var fnList = new List<ActivationFunctionInfo>(2);
             fnList.Add(new ActivationFunctionInfo(0, 0.8, activationFn));
-            fnList.Add(new ActivationFunctionInfo(1, 0.2, new RbfGaussian(auxArgsMutationSigmaCenter, auxArgsMutationSigmaRadius)));
+            fnList.Add(new ActivationFunctionInfo(1, 0.2,
+                new RbfGaussian(auxArgsMutationSigmaCenter, auxArgsMutationSigmaRadius)));
             return new DefaultActivationFunctionLibrary(fnList);
         }
 

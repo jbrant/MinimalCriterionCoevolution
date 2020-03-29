@@ -56,7 +56,17 @@
         /// <summary>
         ///     Whether or not to compute agent trajectory diversity scores.
         /// </summary>
-        GenerateDiversityScores,
+        GenerateAgentDiversityScores,
+        
+        /// <summary>
+        ///     Whether or not to compute maze solution path diversity scores.
+        /// </summary>
+        GenerateMazeDiversityScores,
+        
+        /// <summary>
+        /// Whether or not to compute deceptive turns along each maze solution path.
+        /// </summary>
+        GenerateDeceptiveTurnCounts,
 
         /// <summary>
         ///     Whether or not to analyze natural clustering of agent trajectories.

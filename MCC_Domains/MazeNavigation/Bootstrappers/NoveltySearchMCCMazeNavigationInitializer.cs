@@ -109,7 +109,7 @@ namespace MCC_Domains.MazeNavigation.Bootstrappers
             // Create the genome evaluator
             IGenomeEvaluator<NeatGenome> fitnessEvaluator =
                 new ParallelGenomeBehaviorEvaluator<NeatGenome, IBlackBox>(genomeDecoder, mazeNavigatorEvaluator,
-                    SearchType.NoveltySearch, _nearestNeighbors);
+                    SearchType.NoveltySearch, _nearestNeighbors, parallelOptions);
 
             // Only pull the number of genomes from the list equivalent to the initialization algorithm population size
             // (this is to handle the case where the list was created in accordance with the primary algorithm 
@@ -184,7 +184,7 @@ namespace MCC_Domains.MazeNavigation.Bootstrappers
                     InitializationEa.GenomeList.Where(
                             genome =>
                                 genome.EvaluationInfo != null &&
-                                genome.EvaluationInfo.ObjectiveDistance < MinSuccessDistance)
+                                genome.EvaluationInfo.TrialData[0].ObjectiveDistance < MinSuccessDistance)
                         .Take(MinSuccessfulAgentCount));
 
                 Console.Out.WriteLine("Extracted [{0}] of [{1}] viable genomes in [{2}] evaluations",
@@ -197,11 +197,12 @@ namespace MCC_Domains.MazeNavigation.Bootstrappers
                 InitializationEa.GenomeList.Where(
                         genome =>
                             genome.EvaluationInfo != null &&
-                            genome.EvaluationInfo.ObjectiveDistance > MinSuccessDistance)
+                            genome.EvaluationInfo.TrialData[0].ObjectiveDistance > MinSuccessDistance)
                     .Take(MinUnsuccessfulAgentCount));
 
             // Ensure that the above statement was able to get the required number of unsuccessful agent genomes
-            if (viableGenomes.Count(genome => genome.EvaluationInfo.ObjectiveDistance > MinSuccessDistance) <
+            if (viableGenomes.Count(genome =>
+                    genome.EvaluationInfo.TrialData[0].ObjectiveDistance > MinSuccessDistance) <
                 MinUnsuccessfulAgentCount)
             {
                 throw new SharpNeatException(

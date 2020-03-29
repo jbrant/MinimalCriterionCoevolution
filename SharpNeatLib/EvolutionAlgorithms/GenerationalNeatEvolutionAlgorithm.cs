@@ -524,10 +524,15 @@ namespace SharpNeat.EvolutionAlgorithms
                 // Array of probabilities for specie selection. Note that some of these probabilites can be zero, but at least one of them won't be.
                 SpecieStats inst = specieStatsArr[i];
                 specieFitnessArr[i] = inst.SelectionSize;
-                if (0 != inst.SelectionSize)
+                
+                if(0 == inst.SelectionSize)
                 {
-                    nonZeroSpecieCount++;
+                    // Skip building a DiscreteDistribution for species that won't be selected from.
+                    distArr[i] = null;
+                    continue;
                 }
+
+                nonZeroSpecieCount++;
 
                 // For each specie we build a DiscreteDistribution for genome selection within 
                 // that specie. Fitter genomes have higher probability of selection.

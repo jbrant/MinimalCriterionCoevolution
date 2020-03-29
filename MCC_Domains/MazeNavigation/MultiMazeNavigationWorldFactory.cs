@@ -16,9 +16,7 @@ namespace MCC_Domains.MazeNavigation
     ///     The multi maze navigation world factory facilitates generating maze navigation worlds based on evolved maze
     ///     structures.
     /// </summary>
-    /// <typeparam name="TTrialInfo">Defines the type of trial information returned by the generated maze world.</typeparam>
-    public class MultiMazeNavigationWorldFactory<TTrialInfo>
-        where TTrialInfo : class, ITrialInfo
+    public class MultiMazeNavigationWorldFactory
     {
         #region Properties
 
@@ -42,7 +40,7 @@ namespace MCC_Domains.MazeNavigation
             _maxDistanceToTarget = maxDistanceToTarget;
 
             // Initialize the internal collection of maze configurations
-            _mazeConfigurations = new ConcurrentDictionary<int, MazeConfiguration>();
+            _mazeConfigurations = new ConcurrentDictionary<uint, MazeConfiguration>();
         }
 
         /// <inheritdoc />
@@ -70,20 +68,20 @@ namespace MCC_Domains.MazeNavigation
             foreach (
                 var mazeStructure in
                 mazeStructures.Where(
-                        mazeStructure => _mazeConfigurations.ContainsKey(mazeStructure.GetHashCode()) == false)
+                        mazeStructure => _mazeConfigurations.ContainsKey(mazeStructure.GenomeId) == false)
                     .AsParallel())
             {
-                _mazeConfigurations.Add(mazeStructure.GetHashCode(),
+                _mazeConfigurations.Add(mazeStructure.GenomeId,
                     new MazeConfiguration(ExtractMazeWalls(mazeStructure.Walls),
-                        ExtractStartEndPoint(mazeStructure.StartLocation),
-                        ExtractStartEndPoint(mazeStructure.TargetLocation), mazeStructure.MaxTimesteps));
+                        ExtractStartEndPoint(mazeStructure.ScaledStartLocation),
+                        ExtractStartEndPoint(mazeStructure.ScaledTargetLocation), mazeStructure.MaxTimesteps));
             }
 
-            // Build the list of current maze hashes
-            var curHashCodes = mazeStructures.Select(mazeStructure => mazeStructure.GetHashCode());
+            // Build the list of current maze genome IDs
+            var curIds = mazeStructures.Select(mazeStructure => mazeStructure.GenomeId);
 
             // Remove mazes that are no longer in the current population of mazes
-            foreach (var key in _mazeConfigurations.Keys.Where(key => curHashCodes.Contains(key) == false).AsParallel())
+            foreach (var key in _mazeConfigurations.Keys.Where(key => curIds.Contains(key) == false).AsParallel())
             {
                 _mazeConfigurations.Remove(key);
             }
@@ -92,26 +90,85 @@ namespace MCC_Domains.MazeNavigation
             NumMazes = _mazeConfigurations.Count;
 
             // Store off keys so we have a static mapping between list indexes and dictionary keys
-            _currentHashKeys = _mazeConfigurations.Keys.ToList();
+            _currentKeys = _mazeConfigurations.Keys.ToList();
+        }
+
+        /// <summary>
+        ///     Sets the viability usage count on maze structure phenomes based on the corresponding successful navigation count of
+        ///     corresponding maze configurations.
+        /// </summary>
+        /// <param name="mazeStructures">The maze structure phenomes.</param>
+        public void UpdateMazePhenomeUsage(IList<MazeStructure> mazeStructures)
+        {
+            foreach (var mazeStructure in mazeStructures)
+            {
+                mazeStructure.ViabilityUsageCount =
+                    _mazeConfigurations[mazeStructure.GenomeId].SuccessfulNavigationCount;
+            }
+        }
+
+        /// <summary>
+        ///     Indicates whether the maze corresponding to the given genome index is under its resource limit (an upper bound on
+        ///     the
+        ///     number of times successful navigations of a maze can be attributable toward satisfying an agent MC).
+        /// </summary>
+        /// <param name="genomeIdx">The index of the genome corresponding to the maze configuration navigated.</param>
+        /// <param name="resourceLimit">
+        ///     The number of times a maze can be used for successful navigations that contribute to
+        ///     meeting an agent's MC.
+        /// </param>
+        /// <returns>Boolean flag indicating whether the maze has reached its resource limit.</returns>
+        public bool IsMazeUnderResourceLimit(int genomeIdx, int resourceLimit)
+        {
+            return _mazeConfigurations[_currentKeys[genomeIdx]].SuccessfulNavigationCount < resourceLimit;
+        }
+
+        /// <summary>
+        ///     Increments the number of times the given maze configuration has been successfully evaluated by an agent.
+        /// </summary>
+        /// <param name="genomeIdx">The index of the genome corresponding to the maze configuration navigated.</param>
+        public void IncrementSuccessfulMazeNavigationCount(int genomeIdx)
+        {
+            _mazeConfigurations[_currentKeys[genomeIdx]].IncrementSuccessfulNavigation();
+        }
+
+        /// <summary>
+        ///     Looks up and returns the maze genome ID at the given index.
+        /// </summary>
+        /// <param name="genomeIdx">The index of the genome ID.</param>
+        /// <returns>The genome ID at the given index.</returns>
+        public uint GetMazeGenomeId(int genomeIdx)
+        {
+            return _currentKeys[genomeIdx];
+        }
+        
+        /// <summary>
+        /// Looks up the number of successful navigations that have been executed against the maze for satisfying the MC.
+        /// </summary>
+        /// <param name="genomeIdx">The index of the genome ID.</param>
+        /// <returns>The number of successful navigations counting toward MC satisfaction.</returns>
+        public int GetViabilityUsageCount(int genomeIdx)
+        {
+            return _mazeConfigurations[_currentKeys[genomeIdx]].SuccessfulNavigationCount;
         }
 
         /// <summary>
         ///     Constructs a new maze navigation world using the maze at the specified index and a given behavior characterization.
         /// </summary>
-        /// <param name="hashCodeIndex">The index of the maze configuration to use in the maze navigation world.</param>
+        /// <param name="genomeIdx">The genome index of the maze configuration to use in the maze navigation world.</param>
         /// <param name="behaviorCharacterization">
         ///     The way in which an agents behavior is characterized (i.e. end point,
         ///     trajectory, etc.).
         /// </param>
         /// <returns>A constructed maze navigation world ready for evaluation.</returns>
-        public MazeNavigationWorld<TTrialInfo> CreateMazeNavigationWorld(int hashCodeIndex,
+        public MazeNavigationWorld CreateMazeNavigationWorld(int genomeIdx,
             IBehaviorCharacterization behaviorCharacterization)
         {
-            // Get the maze configuration corresponding to the hash code at the given hash index
-            MazeConfiguration mazeConfig = _mazeConfigurations[_currentHashKeys[hashCodeIndex]];
+            // Get the maze configuration corresponding to the genome ID at the given index
+            var mazeConfig = _mazeConfigurations[_currentKeys[genomeIdx]];
 
             // Create maze navigation world and return
-            return new MazeNavigationWorld<TTrialInfo>(mazeConfig.Walls, mazeConfig.NavigatorLocation,
+            return new MazeNavigationWorld(mazeConfig.Walls, mazeConfig.NavigatorLocation,
                 mazeConfig.GoalLocation, _minSuccessDistance, _maxDistanceToTarget, mazeConfig.MaxSimulationTimesteps,
                 behaviorCharacterization);
         }
@@ -125,16 +182,16 @@ namespace MCC_Domains.MazeNavigation
         ///     trajectory, etc.).
         /// </param>
         /// <returns>A constructed maze navigation world ready for evaluation.</returns>
-        public MazeNavigationWorld<TTrialInfo> CreateMazeNavigationWorld(MazeStructure mazeStructure,
+        public MazeNavigationWorld CreateMazeNavigationWorld(MazeStructure mazeStructure,
             IBehaviorCharacterization behaviorCharacterization)
         {
             // Build the single maze configuration
             var mazeConfig = new MazeConfiguration(ExtractMazeWalls(mazeStructure.Walls),
-                ExtractStartEndPoint(mazeStructure.StartLocation), ExtractStartEndPoint(mazeStructure.TargetLocation),
+                ExtractStartEndPoint(mazeStructure.ScaledStartLocation), ExtractStartEndPoint(mazeStructure.ScaledTargetLocation),
                 mazeStructure.MaxTimesteps);
 
             // Create maze navigation world and return
-            return new MazeNavigationWorld<TTrialInfo>(mazeConfig.Walls, mazeConfig.NavigatorLocation,
+            return new MazeNavigationWorld(mazeConfig.Walls, mazeConfig.NavigatorLocation,
                 mazeConfig.GoalLocation, _minSuccessDistance, _maxDistanceToTarget, mazeConfig.MaxSimulationTimesteps,
                 behaviorCharacterization);
         }
@@ -148,13 +205,13 @@ namespace MCC_Domains.MazeNavigation
         ///     trajectory, etc.).
         /// </param>
         /// <returns>A constructed maze navigation world ready for evaluation.</returns>
-        public MazeNavigationWorld<TTrialInfo> CreateMazeNavigationWorld(
+        public MazeNavigationWorld CreateMazeNavigationWorld(
             IBehaviorCharacterization behaviorCharacterization = null)
         {
-            return new MazeNavigationWorld<TTrialInfo>(_mazeConfigurations[_currentHashKeys[0]].Walls,
-                _mazeConfigurations[_currentHashKeys[0]].NavigatorLocation,
-                _mazeConfigurations[_currentHashKeys[0]].GoalLocation, _minSuccessDistance, _maxDistanceToTarget,
-                _mazeConfigurations[_currentHashKeys[0]].MaxSimulationTimesteps, behaviorCharacterization);
+            return new MazeNavigationWorld(_mazeConfigurations[_currentKeys[0]].Walls,
+                _mazeConfigurations[_currentKeys[0]].NavigatorLocation,
+                _mazeConfigurations[_currentKeys[0]].GoalLocation, _minSuccessDistance, _maxDistanceToTarget,
+                _mazeConfigurations[_currentKeys[0]].MaxSimulationTimesteps, behaviorCharacterization);
         }
 
         #endregion
@@ -208,17 +265,17 @@ namespace MCC_Domains.MazeNavigation
         private readonly int _maxDistanceToTarget;
 
         /// <summary>
-        ///     Stores collection of maze configurations, indexed by an integer hash code which corresponds to the hash of their
-        ///     phenotype originator.  This allows quick lookup to determine whether a maze needs to be converted or if that
-        ///     operation has already been performed.
+        ///     Stores collection of maze configurations, indexed by the originating phenotype's corresponding genotype ID.  This
+        ///     allows quick lookup to determine whether a maze needs to be converted or if that operation has already been
+        ///     performed.
         /// </summary>
-        private readonly IDictionary<int, MazeConfiguration> _mazeConfigurations;
+        private readonly IDictionary<uint, MazeConfiguration> _mazeConfigurations;
 
         /// <summary>
-        ///     List of hash keys for the maze configuration dictionary.  This permits an ordering on the keys without having to
+        ///     List of keys for the maze configuration dictionary.  This permits an ordering on the keys without having to
         ///     build a concurrent, sorted dictionary.
         /// </summary>
-        private IList<int> _currentHashKeys;
+        private IList<uint> _currentKeys;
 
         #endregion
     }

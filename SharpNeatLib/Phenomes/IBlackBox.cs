@@ -39,6 +39,11 @@ namespace SharpNeat.Phenomes
     public interface IBlackBox
     {
         /// <summary>
+        ///     The unique identifier of the genome from which the phenotype was generated.
+        /// </summary>
+        uint GenomeId { get; }
+        
+        /// <summary>
         /// Gets the number of inputs to the blackbox. This is assumed to be fixed for the lifetime of the IBlackBox.
         /// </summary>
         int InputCount { get; }

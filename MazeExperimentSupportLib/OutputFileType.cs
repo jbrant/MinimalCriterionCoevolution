@@ -21,6 +21,16 @@
         TrajectoryDiversityData,
 
         /// <summary>
+        ///     Maze diversity score data.
+        /// </summary>
+        MazeDiversityData,
+
+        /// <summary>
+        ///     Deceptive turn data.
+        /// </summary>
+        DeceptiveTurnData,
+
+        /// <summary>
         ///     Natural clustering of population data.
         /// </summary>
         NaturalClusterData,

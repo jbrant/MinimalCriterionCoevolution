@@ -32,13 +32,19 @@ namespace SharpNeat.Loggers
         Genome,
 
         /// <summary>
+        ///     A logger that records environment resource usage over the course of a run.
+        /// </summary>
+        ResourceUsage,
+
+        /// <summary>
         ///     A "null" logger (doesn't log anything).
         /// </summary>
         None
     }
 
     /// <summary>
-    ///     Captures the destinations to which logs can be written. Currently, a flat file is the only destination, but others could be added (e.g. database, message queue, etc).
+    ///     Captures the destinations to which logs can be written. Currently, a flat file is the only destination, but others
+    ///     could be added (e.g. database, message queue, etc).
     /// </summary>
     public enum LoggingDestination
     {
@@ -85,6 +91,13 @@ namespace SharpNeat.Loggers
                 .Equals(strLoggingType, StringComparison.InvariantCultureIgnoreCase))
             {
                 return LoggingType.Genome;
+            }
+
+            // Check if this is resource usage logging
+            if (LoggingType.ResourceUsage.ToString()
+                .Equals(strLoggingType, StringComparison.InvariantCultureIgnoreCase))
+            {
+                return LoggingType.ResourceUsage;
             }
 
             // Otherwise, it's null (no logging)

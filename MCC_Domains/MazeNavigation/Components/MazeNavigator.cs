@@ -106,13 +106,7 @@ namespace MCC_Domains.MazeNavigation.Components
         /// </summary>
         /// <param name="walls">The list of walls in the environment.</param>
         /// <param name="targetLocation">The location of the target (goal).</param>
-        /// <param name="applyBridging">Whether or not to apply bridging "help".</param>
-        /// <param name="curBridgingApplications">
-        ///     The current number of times bridging been applied.  This value
-        ///     will be incremented and the updated value used by the calling routine.
-        /// </param>
-        public void Move(List<Wall> walls, DoublePoint targetLocation, bool applyBridging,
-            ref int curBridgingApplications)
+        public void Move(List<Wall> walls, DoublePoint targetLocation)
         {
             // Compute angular velocity components
             var angularVelocityX = Math.Cos(MathUtils.ToRadians(_heading)) * _speed;
@@ -143,14 +137,6 @@ namespace MCC_Domains.MazeNavigation.Components
             if (IsCollision(newLocation, walls, out var collidingWall) == false)
             {
                 Location = new DoublePoint(newLocation.X, newLocation.Y);
-            }
-            // Otherwise, if there was a collision and the bridging indicator is set, calculate an 
-            // adjusted heading based on the properties of the wall with which the navigator collided 
-            // and the side of that wall that it hit
-            else if (applyBridging)
-            {
-                _heading = collidingWall.CalculateAdjustedHeading(_heading, Location);
-                curBridgingApplications++;
             }
 
             // Update range finders and radar array

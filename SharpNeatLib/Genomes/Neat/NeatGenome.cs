@@ -92,29 +92,11 @@ namespace SharpNeat.Genomes.Neat
                     ? new LoggableElement(EvolutionFieldElements.ChampGenomeEvaluationCount,
                         EvaluationInfo.EvaluationCount)
                     : null,
-                (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.ChampGenomeDistanceToTarget) == true &&
-                 logFieldEnableMap[EvolutionFieldElements.ChampGenomeDistanceToTarget])
-                    ? new LoggableElement(EvolutionFieldElements.ChampGenomeDistanceToTarget,
-                        EvaluationInfo.ObjectiveDistance)
-                    : null,
                 (logFieldEnableMap?.ContainsKey(EvolutionFieldElements.ChampGenomeFitness) == true &&
                  logFieldEnableMap[EvolutionFieldElements.ChampGenomeFitness])
                     ? new LoggableElement(EvolutionFieldElements.ChampGenomeFitness, EvaluationInfo.Fitness)
                     : null
             };
-
-            // Add all behavior characteriazation elements as a separate column
-            if (EvaluationInfo.BehaviorCharacterization != null)
-            {
-                if ((logFieldEnableMap?.ContainsKey(EvolutionFieldElements.ChampGenomeBehaviorX) == true &&
-                     logFieldEnableMap[EvolutionFieldElements.ChampGenomeBehaviorX]))
-                    loggableElements.Add(new LoggableElement(EvolutionFieldElements.ChampGenomeBehaviorX,
-                        EvaluationInfo.BehaviorCharacterization[0]));
-                if ((logFieldEnableMap?.ContainsKey(EvolutionFieldElements.ChampGenomeBehaviorY) == true &&
-                     logFieldEnableMap[EvolutionFieldElements.ChampGenomeBehaviorY]))
-                    loggableElements.Add(new LoggableElement(EvolutionFieldElements.ChampGenomeBehaviorY,
-                        EvaluationInfo.BehaviorCharacterization[1]));
-            }
 
             // Only log champ genome XML if explicitly specified
             if (logFieldEnableMap != null && logFieldEnableMap.ContainsKey(EvolutionFieldElements.ChampGenomeXml) &&
@@ -256,7 +238,7 @@ namespace SharpNeat.Genomes.Neat
         ///     Performs an integrity check on the genome's internal data.
         ///     Returns true if OK.
         /// </summary>
-        public bool PerformIntegrityCheck()
+        private bool PerformIntegrityCheck()
         {
             // Check genome class type (can only do this if we have a genome factory).
             if (null != _genomeFactory && !_genomeFactory.CheckGenomeType(this))
@@ -510,7 +492,7 @@ namespace SharpNeat.Genomes.Neat
 
         private NeatGenomeFactory _genomeFactory;
         private CoordinateVector _position;
-
+        
         // We ensure that the connectionGenes are sorted by innovation ID at all times. This allows significant optimisations
         // to be made in crossover and decoding routines.
         // Neuron genes must also be arranged according to the following layout plan.
@@ -681,13 +663,16 @@ namespace SharpNeat.Genomes.Neat
         ///     The current evolution algorithm generation.
         ///     Assigned to the new genome at its birth generation.
         /// </param>
-        public NeatGenome CreateOffspring(uint birthGeneration)
+        public virtual NeatGenome CreateOffspring(uint birthGeneration)
         {
-            // Make a new genome that is a copy of this one but with a new genome ID.
-            NeatGenome offspring = _genomeFactory.CreateGenomeCopy(this, _genomeFactory.NextGenomeId(), birthGeneration);
+            NeatGenome offspring;
 
+            // Make a new genome that is a copy of this one but with a new genome ID.
+            offspring = _genomeFactory.CreateGenomeCopy(this, _genomeFactory.NextGenomeId(), birthGeneration);
+            
             // Mutate the new genome.
             offspring.Mutate();
+
             return offspring;
         }
 
@@ -701,8 +686,8 @@ namespace SharpNeat.Genomes.Neat
         /// </param>
         public NeatGenome CreateOffspring(NeatGenome parent, uint birthGeneration)
         {
-            // NOTE: Feed-forward only networks. Due to how this crossover method works the resulting offsprign will never have recurrent
-            // conenctions if the two parents are feed-forward only, this is because we do not actually mix the connectivity of the two
+            // NOTE: Feed-forward only networks. Due to how this crossover method works the resulting offspring will never have recurrent
+            // connections if the two parents are feed-forward only, this is because we do not actually mix the connectivity of the two
             // parents (only the connection weights were there is a match). Therefore any changes to this method must take feed-forward 
             // networks into account.
 
@@ -713,9 +698,10 @@ namespace SharpNeat.Genomes.Neat
             // Construct a ConnectionGeneListBuilder with its capacity set the the maximum number of connections that
             // could be added to it (all connection genes from both parents). This eliminates the possiblity of having to
             // re-allocate list memory, improving performance at the cost of a little additional allocated memory on average.
-            ConnectionGeneListBuilder connectionListBuilder = new ConnectionGeneListBuilder(ConnectionGeneList.Count +
-                                                                                            parent.ConnectionGeneList
-                                                                                                .Count);
+            ConnectionGeneListBuilder connectionListBuilder = new ConnectionGeneListBuilder(
+                ConnectionGeneList.Count +
+                parent.ConnectionGeneList
+                    .Count);
 
             // Pre-register all of the fixed neurons (bias, inputs and outputs) with the ConnectionGeneListBuilder's
             // neuron ID dictionary. We do this so that we can use the dictionary later on as a complete list of
@@ -798,6 +784,7 @@ namespace SharpNeat.Genomes.Neat
                         // Put to one side for processing later.
                         disjointExcessGeneList.Add(correlItem);
                     }
+
                     // Skip to next gene.
                     continue;
                 }
@@ -862,7 +849,7 @@ namespace SharpNeat.Genomes.Neat
             {
                 neuronGeneList.Add(neuronGene);
             }
-
+        
             // Note that connectionListBuilder.ConnectionGeneList is already sorted by connection gene innovation ID 
             // because it was generated by passing over the correlation items generated by CorrelateConnectionGeneLists()
             // - which returns correlation items in order.
@@ -927,7 +914,7 @@ namespace SharpNeat.Genomes.Neat
         /// </summary>
         public int InputBiasOutputNeuronCount
         {
-            get { return InputAndBiasNeuronCount; }
+            get { return _inputBiasOutputNeuronCount; }
         }
 
         #endregion
