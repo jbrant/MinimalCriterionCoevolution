@@ -10,7 +10,6 @@
   <MazeSeedGenomeCount>10</MazeSeedGenomeCount>
   <AgentNumSpecies>20</AgentNumSpecies>
   <MazeNumSpecies>10</MazeNumSpecies>
-  <RespeciateInterval>20</RespeciateInterval>
   <AgentSpecieSizeFixed>True</AgentSpecieSizeFixed>
   <MazeSpecieSizeFixed>True</MazeSpecieSizeFixed>
   <Activation>
@@ -29,9 +28,9 @@
     <MutatePassageStartLocationProbability>0.05</MutatePassageStartLocationProbability>
     <MutateAddWallProbability>0.1</MutateAddWallProbability>
     <MutateDeleteWallProbability>0.005</MutateDeleteWallProbability>
-    <MutatePathWaypointLocationProbability>0.5</MutatePathWaypointLocationProbability>
-    <MutateAddPathWaypointProbability>0.7</MutateAddPathWaypointProbability>
-    <MutateExpandMazeProbability>0.4</MutateExpandMazeProbability>
+    <MutatePathWaypointLocationProbability>0.05</MutatePathWaypointLocationProbability>
+    <MutateAddPathWaypointProbability>0.1</MutateAddPathWaypointProbability>
+    <MutateExpandMazeProbability>0.1</MutateExpandMazeProbability>
     <PerturbanceMagnitude>0.1</PerturbanceMagnitude>
     <VerticalWallBias>0.6</VerticalWallBias>
   </MazeGenomeConfig>
